@@ -1,0 +1,54 @@
+/**
+ * GooTextarea - Multi-line text input
+ */
+
+.goo-textarea {
+	display: inline-block;
+	min-width: 200px;
+}
+
+.goo-textarea__input {
+	background: var(
+		--goo-theme-surface-sunken,
+		color-mix(in srgb, var(--goo-theme-fg, #fff) 10%, transparent)
+	);
+	border: 1px solid var(--goo-theme-border, rgba(128, 128, 128, 0.2));
+	border-radius: var(--goo-theme-radius-md, 6px);
+	color: var(--goo-theme-fg, #fff);
+	font-family: inherit;
+	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
+	line-height: 1.5;
+	padding: var(--goo-theme-control-padding-lg, 0.5rem 0.75rem);
+	resize: vertical;
+	min-height: calc(var(--goo-theme-control-height-lg, 2.5rem) * 2);
+	width: 100%;
+	box-sizing: border-box;
+	transition:
+		border-color 0.15s,
+		box-shadow 0.15s;
+}
+
+.goo-textarea__input:focus {
+	outline: none;
+}
+
+.goo-textarea__input:focus-visible {
+	outline: none;
+	border-color: var(--goo-theme-accent, #3b82f6);
+	box-shadow: 0 0 0 2px var(--goo-theme-focus-ring, rgba(59, 130, 246, 0.25));
+}
+
+.goo-textarea__input::placeholder {
+	color: var(--goo-theme-muted, #666);
+}
+
+.goo-textarea__input:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+/* Disabled state */
+.goo-textarea.goo-textarea--disabled {
+	opacity: 0.5;
+	pointer-events: none;
+}

@@ -1,0 +1,151 @@
+/**
+ * GooFolder - Collapsible folder/section component
+ * BEM: .goo-folder, goo-folder__header, goo-folder__title, goo-folder__content
+ */
+
+.goo-folder {
+	/* Customizable via CSS custom properties */
+	--goo-folder-bg: var(--goo-theme-surface, transparent);
+	--goo-folder-header-bg: var(
+		--goo-theme-surface-raised,
+		color-mix(in srgb, var(--goo-theme-fg, #fff) 5%, transparent)
+	);
+	--goo-folder-header-bg-hover: var(
+		--goo-theme-bg-hover,
+		color-mix(in srgb, var(--goo-theme-fg, #fff) 8%, transparent)
+	);
+	--goo-folder-border: var(--goo-theme-border, rgba(128, 128, 128, 0.2));
+	--goo-folder-fg: var(--goo-theme-fg, inherit);
+	--goo-folder-radius: var(--goo-theme-radius-md, 4px);
+	--goo-folder-transition: var(--goo-theme-transition-normal, 0.2s ease);
+	--goo-folder-indent: 0px;
+
+	display: block;
+	position: relative;
+	background: var(--goo-folder-bg);
+	border-radius: var(--goo-folder-radius);
+	margin-left: var(--goo-folder-indent);
+}
+
+/* Nested folders get indentation */
+.goo-folder .goo-folder {
+	--goo-folder-indent: 0;
+	margin-left: 8px;
+	border-left: 2px solid var(--goo-folder-border);
+	border-radius: 0;
+}
+
+/* Header - clickable toggle (native <button> reset to match the prior div) */
+.goo-folder__header {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	width: 100%;
+	margin: 0;
+	padding: var(--goo-theme-control-row-padding, 0.5rem 0.75rem);
+	background: var(--goo-folder-header-bg);
+	border: none;
+	border-radius: var(--goo-folder-radius) var(--goo-folder-radius) 0 0;
+	font: inherit;
+	color: inherit;
+	text-align: left;
+	appearance: none;
+	cursor: pointer;
+	user-select: none;
+	transition: background var(--goo-folder-transition);
+	outline: none;
+}
+
+.goo-folder__header:hover {
+	background: var(--goo-folder-header-bg-hover);
+}
+
+.goo-folder__header:focus-visible {
+	outline: 2px solid var(--goo-theme-focus-ring, #007bff);
+	outline-offset: -2px;
+}
+
+/* Closed folder - round all corners on header */
+.goo-folder:not(.goo-folder--open) .goo-folder__header {
+	border-radius: var(--goo-folder-radius);
+}
+
+/* Chevron indicator */
+.goo-folder__chevron {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 16px;
+	height: 16px;
+	flex-shrink: 0;
+	transition: transform var(--goo-folder-transition);
+}
+
+.goo-folder__chevron-icon {
+	display: block;
+}
+
+/* Rotate chevron when open - use direct child selectors for proper nesting */
+.goo-folder.goo-folder--open > .goo-folder__header > .goo-folder__chevron {
+	transform: rotate(90deg);
+}
+
+/* Title */
+.goo-folder__title {
+	flex: 1;
+	font-size: var(--goo-theme-control-label-size, 0.8125rem);
+	font-weight: var(--goo-theme-control-label-weight, 600);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	color: var(--goo-theme-control-label-color, var(--goo-folder-fg));
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* Content container */
+.goo-folder__content {
+	display: none;
+	flex-direction: column;
+	gap: 2px;
+	padding: 4px;
+	background: var(--goo-folder-bg);
+	border-radius: 0 0 var(--goo-folder-radius) var(--goo-folder-radius);
+}
+
+/* Show content when open - use direct child selector for proper nesting */
+.goo-folder.goo-folder--open > .goo-folder__content {
+	display: flex;
+}
+
+/* Disabled state */
+.goo-folder.goo-folder--disabled {
+	opacity: 0.5;
+	pointer-events: none;
+}
+
+.goo-folder.goo-folder--disabled .goo-folder__header {
+	cursor: not-allowed;
+}
+
+/* Animation for smooth open/close (optional enhancement) */
+@media (prefers-reduced-motion: no-preference) {
+	.goo-folder__content {
+		overflow: hidden;
+	}
+
+	.goo-folder.goo-folder--open > .goo-folder__content {
+		animation: goo-folder-expand 0.2s ease-out;
+	}
+}
+
+@keyframes goo-folder-expand {
+	from {
+		opacity: 0;
+		transform: translateY(-4px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}

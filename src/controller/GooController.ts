@@ -1,0 +1,933 @@
+/**
+ * @fileoverview GooController - Property binding controller wrapper.
+ * Provides object-property binding for Goo controls.
+ * @module goobits/controller/GooController
+ */
+
+import './GooController.css'
+
+import type { GooSelectMenuOptions } from '../select/types.js'
+import { log } from '../shared/logger.js'
+import { createSliderField } from '../slider/_createSliderField.js'
+import { emitter } from '../utils/emitter.js'
+import { createControlFromRegistry } from './controlFactory.js'
+import { type ControlTypeRegistry, resolveControlTypeConfig } from './controlRegistry.js'
+import {
+	buildControlOptions,
+	buildDualRangeOptions,
+	detectControlType,
+	type DualRangeEventData,
+	type DualRangeMinMax,
+	getAllOptions,
+	handleDualRangeUpdate,
+	humanizePropertyName,
+	type StoredOptions
+} from './controlSetup.js'
+
+// ============================================================================
+// Internal Types
+// ============================================================================
+
+/**
+ * Interface for control elements created by the controller.
+ * Controls may implement some or all of these methods.
+ */
+interface GooControlElement extends HTMLElement {
+	getValue?: () => unknown
+	setValue?: (value: unknown, options?: { silent?: boolean }) => void
+	setOptions?: (options: Record<string, unknown>) => void
+	disable?: () => void
+	enable?: () => void
+	value?: unknown
+}
+
+// ============================================================================
+// Types
+// ============================================================================
+
+/**
+ * State interface for GooController.
+ */
+export interface GooControllerState {
+	disabled?: boolean
+
+	// GooController doesn't add any additional state properties beyond disabled
+	// All other properties are stored as private instance variables
+}
+
+/** Individual option in a select/button-group control */
+export interface ControllerOption {
+	id?: string
+	value?: string | number
+	label?: string
+	icon?: string
+	key?: string
+}
+
+/** Valid option types for select/button-group controls */
+export type ControllerOptionValue = string | ControllerOption
+
+/**
+ * Options for creating a GooController instance.
+ */
+export interface GooControllerOptions {
+	object?: Record<string, unknown>
+	property?: string
+	min?: number
+	max?: number
+	step?: number
+	options?: ControllerOptionValue[]
+	type?: string
+	onchange?: (value: unknown) => void
+	oninput?: (value: unknown) => void
+	$parent?: HTMLElement
+	label?: string
+	inputId?: string
+	name?: string
+	unit?: string
+	preset?: string
+	presetColor?: string
+	presetHue?: number
+	menu?: GooSelectMenuOptions
+	shape?: string
+	coverage?: boolean
+	showCoverage?: boolean
+	disabled?: boolean
+	className?: string
+
+	/** Layout mode: 'inline' (default) or 'stacked' (label row + control row) */
+	layout?: 'inline' | 'stacked'
+
+	/** Optional control type registry override */
+	controlTypes?: ControlTypeRegistry
+}
+
+/**
+ * @typedef {Object} GooControllerOptions
+ * @property {Object} object - The object containing the property
+ * @property {string} property - The property name to bind
+ * @property {number} [min] - Minimum value (for number controls)
+ * @property {number} [max] - Maximum value (for number controls)
+ * @property {number} [step] - Step increment (for number controls)
+ * @property {Array} [options] - Options array (for select controls)
+ * @property {string} [type] - Force control type: 'number', 'range'/'slider', 'checkbox', 'select', 'color', 'button', 'text', 'angle', 'button-group'
+ * @property {Function} [onchange] - Called when value changes
+ * @property {HTMLElement} [$parent] - Parent element to append to
+ */
+
+// ============================================================================
+// GooController Controller
+// ============================================================================
+
+/**
+ * Controller that binds a UI control to an object property.
+ * Provides a chainable object-binding API.
+ */
+export interface GooController extends HTMLElement {
+	$widget: HTMLElement | null
+	state: GooControllerState
+	_callbacks: {
+		onchange?: GooControllerOptions['onchange']
+		oninput?: GooControllerOptions['oninput']
+	}
+	_buttonLabel: string
+	_object: Record<string, unknown> | undefined
+	_property: string | undefined
+	_controlType: string
+	_control: GooControlElement | null
+	_controlToken: number
+	_controlPromise: Promise<void> | null
+	_listening: boolean
+	_listenInterval: ReturnType<typeof setInterval> | null
+	_lastValue: unknown
+	_min: number | undefined
+	_max: number | undefined
+	_step: number | undefined
+	_selectOptions: ControllerOptionValue[] | undefined
+	_inputId: string | undefined
+	_name: string | undefined
+	_unit: string | undefined
+	_preset: string | undefined
+	_presetColor: string | undefined
+	_presetHue: number | undefined
+	_menu: GooSelectMenuOptions | undefined
+	_showCoverage: boolean | undefined
+	_shape: string | undefined
+	_layout: 'inline' | 'stacked' | undefined
+	_dualRangeIsMinMax: boolean | undefined
+	_controlTypes: ControlTypeRegistry | undefined
+	emit: (event: string, data?: unknown) => void
+	on: (event: string, handler: (...args: unknown[]) => void) => () => void
+}
+
+export class GooController {
+	/**
+	 * Controllers don't participate in forms directly.
+	 * @type {boolean}
+	 */
+	static formAssociated = false
+
+	/**
+	 * State type definitions for property reflection.
+	 * @type {Object}
+	 */
+	static stateTypes = {
+		disabled: 'boolean' as const
+	}
+
+	/**
+	 * Create a GooController instance.
+	 * @param {GooControllerOptions} options
+	 */
+	constructor(options: GooControllerOptions = {}) {
+		return createControllerElement(options)
+	}
+
+	// --------------------------------------------------------------------------
+	// Lifecycle
+	// --------------------------------------------------------------------------
+
+	_getExistingControl() {
+		if (!this.$widget) return null
+		const control = this.$widget.children[0] as HTMLElement | undefined
+		if (!control) return null
+		if (this.$widget.children.length > 1) {
+			this.$widget.replaceChildren(control)
+		}
+		this._control = control
+		return control
+	}
+
+	_attachControl(control: HTMLElement) {
+		if (!this.$widget) return
+		this._control = control
+		if (this.$widget.children.length !== 1 || this.$widget.children[0] !== control) {
+			this.$widget.replaceChildren(control)
+		}
+	}
+
+	/**
+	 * Build the controller's internal DOM structure.
+	 * @protected
+	 */
+	_createElement() {
+		const { disabled } = this.state
+
+		// Apply classes
+		this.classList.add(`goo-controller--${ this._controlType }`)
+		if (disabled) this.classList.add('goo-controller--disabled')
+		if (this._layout === 'stacked') this.classList.add('goo-controller--stacked')
+
+		// Set label attribute (displayed via CSS ::before for inline mode)
+		const labelText = this._buttonLabel || this._property || ''
+		const humanizedLabel = humanizePropertyName(labelText)
+		this.setAttribute('data-label', humanizedLabel)
+
+		// Create structure based on layout mode
+		if (this._layout === 'stacked') {
+			// Stacked layout: header row + widget row
+			this.innerHTML = `
+				<div class="goo-controller__header">
+					<span class="goo-label">${ humanizedLabel }</span>
+				</div>
+				<div class="goo-controller__widget"></div>
+			`
+		} else {
+			// Inline layout: label via CSS ::before + widget
+			this.innerHTML = '<div class="goo-controller__widget"></div>'
+		}
+
+		// Adopt elements
+		this.$widget = this.querySelector('.goo-controller__widget')
+
+		// Create the appropriate control
+		this._createControl()
+	}
+
+	/**
+	 * Create the inner control based on type.
+	 * Uses the control type registry for dynamic loading.
+	 * @private
+	 */
+	async _createControl() {
+		if (this._controlPromise) return this._controlPromise
+
+		const promise = this._createControlInner()
+
+		this._controlPromise = promise
+		try {
+			await promise
+		} finally {
+			if (this._controlPromise === promise) {
+				this._controlPromise = null
+			}
+		}
+	}
+
+	async _createControlInner() {
+		const value = this._property ? this._object?.[this._property] : undefined
+
+		// Avoid duplicate creation if a control already exists
+		if (this._control && this.$widget?.contains(this._control)) return
+		if (this._getExistingControl()) return
+
+		// Special handling for dual-range (uses range control with array value)
+		if (this._controlType === 'range-dual') {
+			await this._createDualRange(value)
+			return
+		}
+
+		const token = ++this._controlToken
+
+		// Create from registry using factory
+		const result = await createControlFromRegistry(this._controlType, {
+			value,
+			controllerOptions: this._getAllOptions(),
+			onchange: v => this._handleChange(v),
+			oninput: v => this._handleInput(v),
+			buildOptions: (val, Control) => this._buildDefaultOptions(val, Control),
+			controlTypes: this._controlTypes
+		})
+
+		// Check if component was destroyed during async creation
+		if (!this.$widget) return
+
+		// Ignore stale async results
+		if (token !== this._controlToken) return
+
+		if (this._getExistingControl()) return
+
+		if (result.status === 'created') {
+			this._attachControl(result.control)
+		} else if (result.status === 'not_found') {
+			log.warn(`Unknown control type: ${ this._controlType }`)
+		}
+	}
+
+	/**
+	 * Get stored options as a structured object.
+	 * @private
+	 */
+	_getStoredOptions(): StoredOptions {
+		return {
+			min: this._min,
+			max: this._max,
+			step: this._step,
+			selectOptions: this._selectOptions,
+			inputId: this._inputId,
+			name: this._name,
+			unit: this._unit,
+			preset: this._preset,
+			presetColor: this._presetColor,
+			presetHue: this._presetHue,
+			menu: this._menu,
+			showCoverage: this._showCoverage,
+			buttonLabel: this._buttonLabel,
+			shape: this._shape,
+			layout: this._layout
+		}
+	}
+
+	/**
+	 * Build default options for a control based on stored options.
+	 * @private
+	 */
+	_buildDefaultOptions(value: unknown, _Control: unknown) {
+		return buildControlOptions(value, this._controlType, this._getStoredOptions(), {
+			onchange: v => this._handleChange(v),
+			oninput: v => this._handleInput(v),
+			onButtonClick: () => {
+				if (typeof value === 'function') {
+					value.call(this._object)
+				}
+			}
+		})
+	}
+
+	/**
+	 * Get all stored options for passing to custom buildOptions.
+	 * @private
+	 */
+	_getAllOptions() {
+		return getAllOptions(this._getStoredOptions())
+	}
+
+	/**
+	 * Create dual-thumb range slider for min/max pairs.
+	 * @private
+	 */
+	async _createDualRange(value: unknown) {
+		// Type guard to ensure value is a valid dual range format
+		const isDualRangeValue = (v: unknown): v is number[] | DualRangeMinMax => {
+			if (Array.isArray(v) && v.length === 2 && typeof v[0] === 'number' && typeof v[1] === 'number') {
+				return true
+			}
+			if (v && typeof v === 'object' && 'min' in v && 'max' in v) {
+				const obj = v as { min: unknown; max: unknown }
+				return typeof obj.min === 'number' && typeof obj.max === 'number'
+			}
+			return false
+		}
+
+		if (!isDualRangeValue(value)) {
+			return
+		}
+
+		const dualValue = value as number[] | DualRangeMinMax
+
+		if (!this.$widget) return
+
+		const { sliderOptions, isMinMaxFormat } = buildDualRangeOptions(
+			dualValue,
+			this._getStoredOptions(),
+			{
+				onchange: eventData => this._handleDualChange(eventData),
+				oninput: eventData => this._handleDualInput(eventData)
+			}
+		)
+
+		// Store format for handlers
+		this._dualRangeIsMinMax = isMinMaxFormat
+
+		this._control = createSliderField(sliderOptions) as GooControlElement
+		this.$widget.appendChild(this._control)
+	}
+
+	/**
+	 * Handle value change from dual-thumb range.
+	 * @private
+	 */
+	_handleDualChange(eventData: DualRangeEventData) {
+		const target = this._property ? this._object?.[this._property] : undefined
+		const dualTarget = target as number[] | DualRangeMinMax | null | undefined
+		const emitValue = handleDualRangeUpdate(eventData, dualTarget, this._dualRangeIsMinMax!)
+		this._emitChange(emitValue)
+	}
+
+	/**
+	 * Handle input from dual-thumb range.
+	 * @private
+	 */
+	_handleDualInput(eventData: DualRangeEventData) {
+		const target = this._property ? this._object?.[this._property] : undefined
+		const dualTarget = target as number[] | DualRangeMinMax | null | undefined
+		const emitValue = handleDualRangeUpdate(eventData, dualTarget, this._dualRangeIsMinMax!)
+		this._emitInput(emitValue)
+	}
+
+	/**
+	 * Clean up when element is removed from DOM.
+	 * @protected
+	 */
+	_destroyElement() {
+		this._stopListening()
+		this.$widget = null
+		this._control = null
+		this._controlToken += 1
+		this._controlPromise = null
+	}
+
+	// --------------------------------------------------------------------------
+	// Event Handling
+	// --------------------------------------------------------------------------
+
+	/**
+	 * Handle value change (committed value).
+	 * @param value - The new value
+	 * @private
+	 */
+	_handleChange(value: unknown) {
+		if (this._object && this._property) {
+			this._object[this._property] = value
+		}
+		this._emitChange(value)
+	}
+
+	/**
+	 * Handle input (value changing, not yet committed).
+	 * @param value - The new value
+	 * @private
+	 */
+	_handleInput(value: unknown) {
+		if (this._object && this._property) {
+			this._object[this._property] = value
+		}
+		this._emitInput(value)
+	}
+
+	_emitChange(value: unknown, oldValue?: unknown) {
+		const detail = { value, oldValue, target: this }
+		this.dispatchEvent(new CustomEvent('change', { detail, bubbles: true }))
+		this.emit('change', detail)
+		this._callbacks.onchange?.(value)
+	}
+
+	_emitInput(value: unknown) {
+		const detail = { value, target: this }
+		this.dispatchEvent(new CustomEvent('input', { detail, bubbles: true }))
+		this.emit('input', detail)
+		this._callbacks.oninput?.(value)
+	}
+
+	// --------------------------------------------------------------------------
+	// Public API (Chainable)
+	// --------------------------------------------------------------------------
+
+	/**
+	 * Current value.
+	 * @type {*}
+	 */
+	get value() {
+		return this._property ? this._object?.[this._property] : undefined
+	}
+
+	set value(val) {
+		if (this._object && this._property) {
+			this._object[this._property] = val
+		}
+		this.updateDisplay()
+	}
+
+	/**
+	 * The bound object.
+	 * @type {Object}
+	 */
+	get object() {
+		return this._object
+	}
+
+	/**
+	 * The bound property name.
+	 * @type {string}
+	 */
+	get property() {
+		return this._property
+	}
+
+	/**
+	 * The inner control element.
+	 * @type {HTMLElement}
+	 */
+	get control() {
+		return this._control
+	}
+
+	/**
+	 * Set the display label for this controller.
+	 * @param label - New label text
+	 * @returns this (for chaining)
+	 */
+	name(label: string) {
+		this._buttonLabel = label
+
+		// Update the data-label attribute (displayed via CSS ::before)
+		this.setAttribute('data-label', label)
+
+		// For button controls, also update the button text
+		if (this._controlType === 'button' && this._control) {
+			this._control.setValue?.(label)
+		}
+		return this
+	}
+
+	/**
+	 * Set the step increment.
+	 * @param step - Step value
+	 * @returns this (for chaining)
+	 */
+	step(step: number) {
+		this._step = step
+		if (this._control?.setOptions) {
+			this._control.setOptions({ step })
+		}
+		return this
+	}
+
+	/**
+	 * Set min value.
+	 * @param min - Minimum value
+	 * @returns this (for chaining)
+	 */
+	min(min: number) {
+		this._min = min
+		if (this._control?.setOptions) {
+			this._control.setOptions({ min })
+		}
+		return this
+	}
+
+	/**
+	 * Set max value.
+	 * @param max - Maximum value
+	 * @returns this (for chaining)
+	 */
+	max(max: number) {
+		this._max = max
+		if (this._control?.setOptions) {
+			this._control.setOptions({ max })
+		}
+		return this
+	}
+
+	/**
+	 * Enable listening mode - polls object property and updates display.
+	 * @param {number} [interval=100] - Poll interval in ms
+	 * @returns {GooController} this (for chaining)
+	 */
+	listen(interval = 100) {
+		if (this._listening) return this
+
+		this._listening = true
+		this._lastValue = this.value
+
+		this._listenInterval = setInterval(() => {
+			const currentValue = this._property ? this._object?.[this._property] : undefined
+			if (currentValue !== this._lastValue) {
+				this._lastValue = currentValue
+				this.updateDisplay()
+			}
+		}, interval)
+
+		return this
+	}
+
+	/**
+	 * Stop listening for external changes.
+	 * @returns {GooController} this (for chaining)
+	 */
+	stopListening() {
+		this._stopListening()
+		return this
+	}
+
+	/**
+	 * Internal stop listening.
+	 * @private
+	 */
+	_stopListening() {
+		if (this._listenInterval) {
+			clearInterval(this._listenInterval)
+			this._listenInterval = null
+		}
+		this._listening = false
+	}
+
+	/**
+	 * Update the control's display to match the object property.
+	 * @returns {GooController} this (for chaining)
+	 */
+	updateDisplay() {
+		const value = this._property ? this._object?.[this._property] : undefined
+
+		if (this._control) {
+			const hasReadableValue = typeof this._control.getValue === 'function' || 'value' in this._control
+			const displayedValue = typeof this._control.getValue === 'function'
+				? this._control.getValue()
+				: this._control.value
+			if (hasReadableValue && Object.is(displayedValue, value)) return this
+
+			if (this._control.setValue) {
+				this._control.setValue(value, { silent: true })
+			} else if ('value' in this._control) {
+				this._control.value = value
+			}
+		}
+
+		return this
+	}
+
+	/**
+	 * Disable the controller.
+	 * @returns {GooController} this (for chaining)
+	 */
+	disable() {
+		this.state.disabled = true
+		this.classList.add('goo-controller--disabled')
+		this.setAttribute('aria-disabled', 'true')
+		if (this._control?.disable) {
+			this._control.disable()
+		}
+		return this
+	}
+
+	/**
+	 * Enable the controller.
+	 * @returns {GooController} this (for chaining)
+	 */
+	enable() {
+		this.state.disabled = false
+		this.classList.remove('goo-controller--disabled')
+		this.removeAttribute('aria-disabled')
+		if (this._control?.enable) {
+			this._control.enable()
+		}
+		return this
+	}
+
+	/**
+	 * Update controller options without replacing the controller element.
+	 * Rebuilds the inner control only when the bound identity or control type changes.
+	 * @param options - Next controller options
+	 * @returns this (for chaining)
+	 */
+	updateOptions(options: GooControllerOptions) {
+		const { object, property } = options
+		const nextValue = object?.[property]
+		const nextControlType = detectControlType(nextValue, options)
+		const nextLayout = resolveControllerLayout(nextControlType, options)
+		const controlIdentityChanged = nextControlType !== this._controlType
+			|| object !== this._object
+			|| property !== this._property
+			|| options.controlTypes !== this._controlTypes
+			|| nextLayout !== this._layout
+
+		if (controlIdentityChanged) {
+			this._destroyElement()
+			this.className = 'goo-controller'
+			initializeController(this, options)
+			this._createElement()
+			return this
+		}
+
+		this._callbacks.onchange = options.onchange
+		this._callbacks.oninput = options.oninput
+		this._object = object
+		this._property = property
+		this._min = options.min
+		this._max = options.max
+		this._step = options.step
+		this._selectOptions = options.options
+		this._inputId = options.inputId
+		this._name = options.name
+		this._unit = options.unit
+		this._preset = options.preset
+		this._presetColor = options.presetColor
+		this._presetHue = options.presetHue
+		this._menu = options.menu
+		this._showCoverage = options.coverage ?? options.showCoverage
+		this._shape = options.shape
+
+		if (Array.isArray(options.min)) {
+			this._selectOptions = options.min
+			this._min = undefined
+		}
+
+		const label = options.label ?? property ?? ''
+		if (label !== this._buttonLabel) {
+			this.name(label)
+		}
+
+		if (options.disabled) {
+			this.disable()
+		} else {
+			this.enable()
+		}
+
+		this._control?.setOptions?.(this._getAllOptions())
+		this.updateDisplay()
+		return this
+	}
+
+	/**
+	 * Set value programmatically.
+	 * @param value - New value
+	 * @returns this (for chaining)
+	 */
+	setValue(value: unknown) {
+		if (this._object && this._property) {
+			this._object[this._property] = value
+		}
+		this.updateDisplay()
+		return this
+	}
+
+	/**
+	 * Get current value.
+	 * @returns The current value
+	 */
+	getValue(): unknown {
+		return this._property ? this._object?.[this._property] : undefined
+	}
+
+	/**
+	 * Add this controller to a parent element.
+	 * @param parent - Parent element (GooFolder, GooPanel, etc.)
+	 * @returns this (for chaining)
+	 */
+	addTo(parent: HTMLElement & { add?: (child: HTMLElement) => void }) {
+		if (parent) {
+			// Use add() method if available (GooPanel/GooFolder)
+			if (typeof parent.add === 'function') {
+				parent.add(this)
+			} else if (parent.appendChild) {
+				parent.appendChild(this)
+			}
+		}
+		return this
+	}
+
+	destroy() {
+		this._destroyElement()
+		this.remove()
+	}
+
+	// --------------------------------------------------------------------------
+	// SSR Support
+	// --------------------------------------------------------------------------
+
+	/**
+	 * Generate SSR-safe HTML template.
+	 * Note: Controllers are typically created client-side, but this enables SSR.
+	 * @param {Object} [options={}]
+	 * @returns {string} HTML string
+	 * @static
+	 */
+	static ssrTemplate({ type = 'text', className = '' } = {}) {
+		const classes = [ 'goo-controller', `goo-controller--${ type }` ]
+		if (className) classes.push(...className.split(' ').filter(Boolean))
+
+		return `<div class="${ classes.join(' ') }" data-ssr>
+			<div class="goo-controller__widget"></div>
+		</div>`
+	}
+
+	/**
+	 * Hydrate from pre-rendered SSR DOM.
+	 * @protected
+	 */
+	_hydrateFromDOM() {
+		this.$widget = this.querySelector('.goo-controller__widget')
+
+		// Remove SSR marker
+		this.removeAttribute('data-ssr')
+
+		// Reconnect: reuse existing control if present to avoid duplicates
+		if (this.$widget?.children?.length) {
+			this._controlToken += 1
+			this._getExistingControl()
+			return
+		}
+
+		// Create control (SSR or empty widget)
+		this._createControl()
+	}
+}
+
+// ============================================================================
+// Factory & Export
+// ============================================================================
+
+function initializeController(element: GooController, options: GooControllerOptions): void {
+	const { object, property } = options
+	const initialValue = object?.[property]
+	const controlType = detectControlType(initialValue, options)
+	const layout = resolveControllerLayout(controlType, options)
+
+	element.state = { disabled: !!options.disabled }
+	element._callbacks = {
+		onchange: options.onchange,
+		oninput: options.oninput
+	}
+	element._buttonLabel = options.label ?? property ?? ''
+	element._object = object
+	element._property = property
+	element._controlType = controlType
+	element._control = null
+	element._controlToken = 0
+	element._controlPromise = null
+	element._listening = false
+	element._listenInterval = null
+	element._min = options.min
+	element._max = options.max
+	element._step = options.step
+	element._selectOptions = options.options
+	element._inputId = options.inputId
+	element._name = options.name
+	element._unit = options.unit
+	element._preset = options.preset
+	element._presetColor = options.presetColor
+	element._presetHue = options.presetHue
+	element._menu = options.menu
+	element._showCoverage = options.coverage ?? options.showCoverage
+	element._shape = options.shape
+	element._layout = layout
+	element._controlTypes = options.controlTypes
+
+	if (Array.isArray(options.min)) {
+		element._selectOptions = options.min
+		element._min = undefined
+	}
+	if (options.className) {
+		element.classList.add(...options.className.split(' ').filter(Boolean))
+	}
+}
+
+function resolveControllerLayout(controlType: string, options: GooControllerOptions): 'inline' | 'stacked' | undefined {
+	return options.layout ?? resolveControlTypeConfig(controlType, options.controlTypes)?.layout
+}
+
+function attachControllerMethods(element: GooController): void {
+	const nativePrototype = Object.getPrototypeOf(element)
+	if (Object.getPrototypeOf(GooController.prototype) !== nativePrototype) {
+		Object.setPrototypeOf(GooController.prototype, nativePrototype)
+	}
+	Object.setPrototypeOf(element, GooController.prototype)
+	emitter(element)
+}
+
+function createControllerElement(options: GooControllerOptions = {}): GooController {
+	const element = document.createElement('div') as unknown as GooController
+	element.className = 'goo-controller'
+	element.$widget = null
+	attachControllerMethods(element)
+	initializeController(element, options)
+	element._createElement()
+	if (options.$parent) {
+		options.$parent.appendChild(element)
+	}
+	return element
+}
+
+/**
+ * Add a controller to an object property.
+ * Supports multiple calling conventions:
+ *   createGooController(object, 'property')
+ *   createGooController(object, 'property', { min, max, step })
+ *   createGooController(object, 'property', { options: [...] })
+ *   createGooController(object, 'property', { type: 'color' })
+ *   createGooController({ object, property, ... })
+ *
+ * @param objectOrOptions - Object to bind, or options object
+ * @param property - Property name (if first arg is object)
+ * @param options - Additional options (min, max, step, options, type)
+ * @returns The created controller instance
+ */
+export function createGooController(
+	objectOrOptions: Record<string, unknown> | GooControllerOptions,
+	property?: string,
+	options: Partial<GooControllerOptions> = {}
+): GooController {
+	// If called with options object directly
+	if (property === undefined && typeof objectOrOptions === 'object' && 'property' in objectOrOptions) {
+		return createControllerElement(objectOrOptions as GooControllerOptions)
+	}
+
+	// Called with (object, property, options)
+	const mergedOptions: GooControllerOptions = {
+		object: objectOrOptions as Record<string, unknown>,
+		property,
+		...options
+	}
+
+	return createControllerElement(mergedOptions)
+}
+
+/**
+ * Add a color controller.
+ * @param object - The object to bind
+ * @param property - The property name
+ * @returns The created controller instance
+ */
+export function addColor(object: Record<string, unknown>, property: string): GooController {
+	return createControllerElement({ object, property, type: 'color' })
+}

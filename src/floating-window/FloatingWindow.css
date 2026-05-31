@@ -1,0 +1,7 @@
+.goo-floating-window {
+	position: absolute;
+}
+
+.goo-floating-window--dragging {
+	user-select: none;
+}

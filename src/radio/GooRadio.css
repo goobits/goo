@@ -1,0 +1,79 @@
+/**
+ * GooRadio - Radio button
+ */
+
+.goo-radio {
+	--goo-radio-size: var(--goo-theme-control-height-sm, 1.5rem);
+	--goo-radio-dot-size: calc(var(--goo-theme-control-height-sm, 1.5rem) - 14px);
+	--goo-radio-border-color: var(--goo-theme-border, rgba(128, 128, 128, 0.3));
+	--goo-radio-border-color-checked: var(--goo-theme-accent, #3b82f6);
+	--goo-radio-dot-color: var(--goo-theme-accent, #3b82f6);
+	--goo-radio-transition: var(--goo-theme-transition-fast, 0.15s ease);
+
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	background: transparent;
+	border: 0;
+	color: inherit;
+	cursor: pointer;
+	font: inherit;
+	padding: 0;
+	user-select: none;
+	outline: none;
+}
+
+.goo-radio:focus-visible .goo-radio__circle {
+	box-shadow: 0 0 0 2px var(--goo-theme-focus-ring, rgba(59, 130, 246, 0.4));
+}
+
+/* Circle (outer ring) */
+.goo-radio__circle {
+	position: relative;
+	width: var(--goo-radio-size);
+	height: var(--goo-radio-size);
+	border: 2px solid var(--goo-radio-border-color);
+	border-radius: 50%;
+	transition: border-color var(--goo-radio-transition);
+	flex-shrink: 0;
+}
+
+/* Inner dot */
+.goo-radio__dot {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: var(--goo-radio-dot-size);
+	height: var(--goo-radio-dot-size);
+	background: var(--goo-radio-dot-color);
+	border-radius: 50%;
+	transform: translate(-50%, -50%) scale(0);
+	transition: transform var(--goo-radio-transition);
+}
+
+/* Label */
+.goo-radio__label {
+	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
+	color: var(--goo-theme-fg, inherit);
+}
+
+/* Checked state */
+.goo-radio.goo-radio--checked .goo-radio__circle {
+	border-color: var(--goo-radio-border-color-checked);
+}
+
+.goo-radio.goo-radio--checked .goo-radio__dot {
+	transform: translate(-50%, -50%) scale(1);
+}
+
+/* Disabled state */
+.goo-radio.goo-radio--disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+	pointer-events: none;
+}
+
+/* Hover state */
+.goo-radio:not(.goo-radio--disabled):hover .goo-radio__circle {
+	border-color: var(--goo-radio-border-color-checked);
+}

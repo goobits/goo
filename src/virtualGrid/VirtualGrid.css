@@ -1,0 +1,10 @@
+.goo-virtual-grid {
+	display: grid;
+	gap: var(--goo-virtual-grid-gap, var(--goo-theme-space-md, 1rem));
+	grid-template-columns: var(--goo-virtual-grid-columns, repeat(auto-fill, minmax(120px, 1fr)));
+}
+
+.goo-virtual-grid-spacer {
+	grid-column: 1 / -1;
+	pointer-events: none;
+}

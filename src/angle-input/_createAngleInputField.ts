@@ -1,0 +1,86 @@
+import { mount, unmount } from 'svelte'
+
+import GooAngleInput from './GooAngleInput.svelte'
+import type { GooAngleInputEventData, GooAngleInputUnit } from './types.js'
+
+export type AngleInputFieldOptions = {
+	class?: string
+	className?: string
+	disabled?: boolean
+	id?: string
+	name?: string
+	onchange?: (data: GooAngleInputEventData) => void
+	oninput?: (data: GooAngleInputEventData) => void
+	style?: string
+	tabIndex?: number
+	title?: string
+	unit?: GooAngleInputUnit
+	value?: number | string
+}
+
+type MountedControl = ReturnType<typeof mount>
+
+export type AngleInputFieldElement = HTMLDivElement & {
+	getValue(): number
+	setValue(value: number | string): void
+	value: number
+}
+
+export function createAngleInputField(options: AngleInputFieldOptions = {}): AngleInputFieldElement {
+	const field = document.createElement('div') as AngleInputFieldElement
+	field.className = 'goo-angle-input-field'
+	let currentValue = parseAngleValue(options.value)
+	let instance: MountedControl | null = null
+
+	function render(): void {
+		if (instance) {
+			unmount(instance)
+			instance = null
+			field.replaceChildren()
+		}
+
+		instance = mount(GooAngleInput, {
+			target: field,
+			props: {
+				value: currentValue,
+				unit: options.unit,
+				name: options.name,
+				id: options.id,
+				title: options.title,
+				disabled: options.disabled,
+				class: options.class ?? options.className,
+				style: options.style,
+				tabIndex: options.tabIndex,
+				oninput: (value, data) => {
+					currentValue = value
+					options.oninput?.(data)
+				},
+				onchange: (value, data) => {
+					currentValue = value
+					options.onchange?.(data)
+				}
+			}
+		})
+	}
+
+	Object.defineProperty(field, 'value', {
+		configurable: true,
+		get: () => currentValue,
+		set: (value: number | string) => {
+			field.setValue(value)
+		}
+	})
+	field.getValue = () => currentValue
+	field.setValue = value => {
+		currentValue = parseAngleValue(value)
+		render()
+	}
+
+	render()
+	return field
+}
+
+function parseAngleValue(value: number | string | undefined): number {
+	const parsed = Number.parseFloat(String(value ?? 0))
+	return Number.isFinite(parsed) ? parsed : 0
+}

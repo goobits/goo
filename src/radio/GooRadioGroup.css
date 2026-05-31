@@ -1,0 +1,38 @@
+/**
+ * GooRadioGroup - Radio button group container
+ */
+
+.goo-radio-group {
+	display: flex;
+	flex-direction: column;
+	gap: var(--goo-theme-space-sm, 0.5rem);
+	outline: none;
+	width: 100%;
+}
+
+.goo-radio-group:focus-visible {
+	outline: 2px solid var(--goo-theme-focus-ring, #3b82f6);
+	outline-offset: 2px;
+	border-radius: 4px;
+}
+
+/* Options container */
+.goo-radio-group__options {
+	display: flex;
+	flex-direction: column;
+	gap: var(--goo-theme-space-sm, 0.5rem);
+	width: 100%;
+}
+
+/* Horizontal layout variant */
+.goo-radio-group[data-layout='horizontal'] .goo-radio-group__options {
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: var(--goo-theme-space-md, 0.75rem);
+}
+
+/* Disabled state */
+.goo-radio-group.goo-radio-group--disabled {
+	opacity: 0.5;
+	pointer-events: none;
+}

@@ -1,0 +1,315 @@
+<script module lang="ts">
+import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.js'
+
+/** GooController binding metadata for the Svelte button-group component. */
+export const controlSchema: SvelteControlSchema = {
+	valueKey: 'value',
+	changeKey: 'onchange',
+	propMapping: {
+		allowMultiple: 'allowMultiple',
+		allowToggle: 'allowToggle',
+		layout: 'layout',
+		options: 'options',
+		size: 'size'
+	}
+}
+</script>
+
+<script lang="ts">
+import '../button/GooButton.css'
+import './GooButtonGroup.css'
+
+import {
+	normalizeButtonGroupOptions,
+	normalizeButtonGroupValue,
+	readButtonGroupValue
+} from './_model.js'
+import type { GooButtonGroupProps, NormalizedButtonGroupOption } from './types.js'
+
+let groupElement: HTMLDivElement | undefined = $state()
+let selectedKeys = $state<Set<string>>(new Set())
+let focusedKey = $state<string | null>(null)
+
+let {
+	options,
+	value,
+	allowMultiple = false,
+	allowToggle: allowToggleProp,
+	layout = 'horizontal',
+	disabled = false,
+	size,
+	label,
+	class: className = '',
+	style,
+	tabIndex = 0,
+	children,
+	onchange,
+	...rest
+}: GooButtonGroupProps = $props()
+
+const allowToggle = $derived(allowToggleProp ?? allowMultiple)
+const normalizedOptions = $derived(normalizeButtonGroupOptions(options))
+
+const classes = $derived.by(() => {
+	const values = [ 'goo-button-group' ]
+	if (!allowMultiple && normalizedOptions.length > 0) values.push('goo-button-group--single-select')
+	if (disabled) values.push('goo-button-group--disabled')
+	if (className) values.push(className)
+	return values.filter(Boolean).join(' ')
+})
+
+const selectedIndex = $derived.by(() => {
+	const index = normalizedOptions.findIndex(option => selectedKeys.has(option.key))
+	return Math.max(0, index)
+})
+
+const rootStyle = $derived.by(() => {
+	const declarations = [ style ].filter(Boolean) as string[]
+	if (normalizedOptions.length > 0) {
+		declarations.push(`--goo-button-group-option-count: ${ normalizedOptions.length }`)
+		declarations.push(`--goo-button-group-selected-index: ${ selectedIndex }`)
+	}
+	return declarations.join('; ')
+})
+
+// Custom host attributes (CSS / external-query hooks) spread so svelte-check
+// does not reject them as unknown attributes on a <div>.
+const hostAttributes = $derived<Record<string, string | undefined>>({
+	'allow-multiple': allowMultiple ? 'true' : undefined,
+	'allow-toggle': allowToggle ? 'true' : undefined,
+	disabled: disabled ? '' : undefined,
+	size
+})
+
+$effect(() => {
+	const nextSelectedKeys = normalizeButtonGroupValue(value)
+	selectedKeys = nextSelectedKeys
+	focusedKey = getPreferredFocusKey(nextSelectedKeys)
+})
+
+$effect(() => {
+	normalizedOptions
+	selectedKeys
+	disabled
+	focusedKey
+	void Promise.resolve().then(syncChildButtons)
+})
+
+export function setValue(nextValue: string | string[] | null): void {
+	selectedKeys = normalizeButtonGroupValue(nextValue)
+	focusedKey = getPreferredFocusKey(selectedKeys)
+}
+
+export function getValue(): string | string[] | null {
+	return readButtonGroupValue(selectedKeys, allowMultiple)
+}
+
+function handleGroupClick(event: MouseEvent): void {
+	if (disabled) return
+
+	const button = getEventButton(event)
+	if (!button) return
+
+	selectKey(readButtonKey(button), { emit: true })
+}
+
+function handleGroupKeydown(event: KeyboardEvent): void {
+	if (disabled) return
+
+	switch (event.key) {
+		case 'ArrowLeft':
+			if (layout !== 'vertical') {
+				event.preventDefault()
+				navigateButton(-1)
+			}
+			break
+		case 'ArrowRight':
+			if (layout !== 'vertical') {
+				event.preventDefault()
+				navigateButton(1)
+			}
+			break
+		case 'ArrowUp':
+			if (layout === 'vertical') {
+				event.preventDefault()
+				navigateButton(-1)
+			}
+			break
+		case 'ArrowDown':
+			if (layout === 'vertical') {
+				event.preventDefault()
+				navigateButton(1)
+			}
+			break
+		case 'Enter':
+		case ' ':
+			if (event.key === ' ') event.preventDefault()
+			if (focusedKey) {
+				selectKey(focusedKey, { emit: true })
+			}
+			break
+	}
+}
+
+function navigateButton(direction: number): void {
+	const keys = getSelectableKeys()
+	if (keys.length === 0) return
+
+	const currentIndex = Math.max(0, keys.indexOf(focusedKey ?? keys[0]))
+	const nextKey = keys[currentIndex + direction]
+	if (!nextKey) return
+
+	focusedKey = nextKey
+	if (!allowMultiple) {
+		selectKey(nextKey, { emit: true })
+	}
+}
+
+function selectKey(key: string, { emit }: { emit: boolean }): void {
+	const nextSelected = new Set(selectedKeys)
+	const isSelected = nextSelected.has(key)
+	if (isSelected && !allowToggle) return
+
+	if (!allowMultiple) {
+		nextSelected.clear()
+	}
+
+	if (isSelected) {
+		nextSelected.delete(key)
+	} else {
+		nextSelected.add(key)
+	}
+
+	selectedKeys = nextSelected
+	focusedKey = key
+
+	if (emit) {
+		const keySelected = nextSelected.has(key)
+		const nextValue = readButtonGroupValue(nextSelected, allowMultiple)
+		onchange?.(nextValue)
+		groupElement?.dispatchEvent(new CustomEvent('change', {
+			bubbles: true,
+			detail: { key, selected: keySelected, value: nextValue, target: groupElement }
+		}))
+	}
+}
+
+function isSelected(key: string): boolean {
+	return selectedKeys.has(key)
+}
+
+function getOptionButtonClass(option: NormalizedButtonGroupOption): string {
+	const values = [ 'goo-button' ]
+	if (isSelected(option.key)) values.push('goo-button--selected')
+	if (focusedKey === option.key) values.push('goo-button--focused')
+	if (disabled) values.push('goo-button--disabled')
+	if (option.className) values.push(...option.className.split(' ').filter(Boolean))
+	return values.join(' ')
+}
+
+function getPreferredFocusKey(nextSelected: Set<string>): string | null {
+	const keys = getSelectableKeys()
+	return [ ...nextSelected ].find(key => keys.includes(key)) ?? keys[0] ?? null
+}
+
+function getSelectableKeys(): string[] {
+	if (normalizedOptions.length > 0) {
+		return normalizedOptions.map(option => option.key)
+	}
+
+	return getChildButtons().map(readButtonKey)
+}
+
+function syncChildButtons(): void {
+	if (!groupElement || normalizedOptions.length > 0) return
+
+	for (const button of getChildButtons()) {
+		const key = readButtonKey(button)
+		button.dataset.key = key
+		button.tabIndex = -1
+		button.disabled = disabled
+		button.setAttribute('aria-pressed', String(isSelected(key)))
+		button.classList.toggle('goo-button--selected', isSelected(key))
+		button.classList.toggle('goo-button--focused', focusedKey === key)
+		button.classList.toggle('goo-button--disabled', disabled)
+	}
+}
+
+function getChildButtons(): HTMLButtonElement[] {
+	return Array.from(groupElement?.querySelectorAll<HTMLButtonElement>(':scope > .goo-button') ?? [])
+}
+
+function getEventButton(event: MouseEvent): HTMLButtonElement | null {
+	const target = event.target
+	if (!(target instanceof Element)) return null
+
+	const button = target.closest<HTMLButtonElement>('.goo-button')
+	if (!button || button.parentElement !== groupElement || button.disabled) return null
+	return button
+}
+
+function readButtonKey(button: HTMLButtonElement): string {
+	return button.dataset.key || button.dataset.value || button.textContent?.trim() || ''
+}
+
+function mountIcon(node: HTMLSpanElement, iconFactory: () => Element) {
+	let iconElement: Element | null = null
+
+	function update(factory: () => Element): void {
+		iconElement?.remove()
+		iconElement = factory()
+		if (iconElement) {
+			node.appendChild(iconElement)
+		}
+	}
+
+	update(iconFactory)
+
+	return {
+		update,
+		destroy() {
+			iconElement?.remove()
+		}
+	}
+}
+</script>
+
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+<div
+	{...rest}
+	bind:this={groupElement}
+	class={classes}
+	role="group"
+	aria-label={label || undefined}
+	tabindex={tabIndex}
+	data-layout={layout === 'vertical' ? 'vertical' : undefined}
+	{...hostAttributes}
+	aria-disabled={disabled ? 'true' : undefined}
+	style={rootStyle || undefined}
+	onclick={handleGroupClick}
+	onkeydown={handleGroupKeydown}
+>
+	{#if normalizedOptions.length > 0}
+		{#each normalizedOptions as option (option.key)}
+			<button
+				type="button"
+				class={getOptionButtonClass(option)}
+				data-key={option.key}
+				tabindex="-1"
+				disabled={disabled ? true : undefined}
+				aria-disabled={disabled ? 'true' : undefined}
+				aria-pressed={isSelected(option.key)}
+				title={option.tooltip || undefined}
+			>
+				{#if typeof option.icon === 'string'}
+					<span class={`goo-button__icon ${ option.icon }`} aria-hidden="true"></span>
+				{:else if typeof option.icon === 'function'}
+					<span class="goo-button__icon" aria-hidden="true" use:mountIcon={option.icon}></span>
+				{/if}
+				<span class="goo-button__title" data-translate>{option.value}</span>
+			</button>
+		{/each}
+	{:else if children}
+		{@render children()}
+	{/if}
+</div>

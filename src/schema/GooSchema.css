@@ -1,0 +1,68 @@
+/**
+ * GooSchema - Schema-driven UI container
+ * Minimal styles - delegates to child goo components
+ */
+
+.goo-schema {
+	display: contents;
+}
+
+/* Bare mode - controls without panel wrapper */
+.goo-schema__bare {
+	display: flex;
+	flex-direction: column;
+}
+
+/* Add dividers and consistent row padding between controls in bare mode */
+.goo-schema__bare > .goo-controller {
+	--goo-controller-padding: var(--goo-theme-control-row-padding, 0.5rem 0.75rem);
+	border-bottom: 1px solid var(--goo-theme-control-divider, rgba(128, 128, 128, 0.1));
+}
+
+.goo-schema__bare > .goo-svelte-control,
+.goo-schema__bare > .goo-native-control {
+	padding: var(--goo-theme-control-row-padding, 0.5rem 0.75rem);
+	border-bottom: 1px solid var(--goo-theme-control-divider, rgba(128, 128, 128, 0.1));
+}
+
+.goo-schema__bare > .goo-svelte-control {
+	padding-inline: 0;
+}
+
+.goo-schema__bare > .goo-controller:last-child,
+.goo-schema__bare > .goo-svelte-control:last-child,
+.goo-schema__bare > .goo-native-control:last-child {
+	border-bottom: none;
+}
+
+/* Native control wrapper */
+.goo-native-control {
+	padding: var(--goo-theme-control-row-padding, 0.5rem 0.75rem);
+}
+
+/* Folder content: keep row separation consistent inside groups */
+.goo-schema .goo-folder .goo-folder__content {
+	gap: 0;
+	padding: 0;
+}
+
+.goo-schema .goo-folder .goo-folder__content > .goo-controller {
+	--goo-controller-padding: var(--goo-theme-control-row-padding, 0.5rem 0.75rem);
+	border-bottom: 1px solid var(--goo-theme-control-divider, rgba(128, 128, 128, 0.1));
+}
+
+.goo-schema .goo-folder .goo-folder__content > .goo-svelte-control,
+.goo-schema .goo-folder .goo-folder__content > .goo-native-control {
+	padding: var(--goo-theme-control-row-padding, 0.5rem 0.75rem);
+	border-bottom: 1px solid var(--goo-theme-control-divider, rgba(128, 128, 128, 0.1));
+}
+
+.goo-schema .goo-folder .goo-folder__content > .goo-svelte-control {
+	padding-inline: 0;
+}
+
+.goo-schema .goo-folder .goo-folder__content > .goo-controller:last-child,
+.goo-schema .goo-folder .goo-folder__content > .goo-svelte-control:last-child,
+.goo-schema .goo-folder .goo-folder__content > .goo-native-control:last-child {
+	border-bottom: none;
+}

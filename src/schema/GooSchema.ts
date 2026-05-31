@@ -1,0 +1,511 @@
+/**
+ * @fileoverview GooSchema - JSON Schema-driven UI generator for @goobits/goo
+ * @module goobits/schema/GooSchema
+ */
+
+import './GooSchema.css'
+
+import { type ControlTypeRegistry, resolveControlTypeConfig } from '../controller/controlRegistry.js'
+import { createGooController } from '../controller/GooController.js'
+import { createSvelteControlHost, type SvelteComponentType, type SvelteControlSchema } from '../controller/SvelteControl.svelte.js'
+import { createFolder, type GooFolderElement } from '../folder/_createFolder.js'
+import { createPanel } from '../panel/_createPanel.js'
+import { schemaLog as log } from '../shared/logger.js'
+import { getByPath, resolvePath } from './pathUtils.js'
+import { buildControllerOptions, type ControllerOptions } from './schemaFieldBuilder.js'
+import type {
+	GooSchemaField,
+	GooSchemaFolder,
+	GooSchemaNode,
+	GooSchemaState,
+	GooSchemaType
+} from './types.js'
+
+export type {
+	GooSchemaControlType,
+	GooSchemaField,
+	GooSchemaFolder,
+	GooSchemaNode,
+	GooSchemaPanel,
+	GooSchemaState,
+	GooSchemaType
+} from './types.js'
+
+// ============================================================================
+// GooSchema Web Component
+// ============================================================================
+
+/**
+ * Schema-driven UI generator
+ *
+ * @fires {CustomEvent} change - Fired when any field value changes
+ *        detail: { path: string, value: unknown, data: Record<string, unknown> }
+ * @fires {CustomEvent} input - Fired continuously during interaction
+ *        detail: { path: string, value: unknown, data: Record<string, unknown> }
+ *
+ * @example
+ * const panel = createGooSchema({
+ *   schema: { type: 'panel', title: 'Settings', children: [...] },
+ *   data: myObject,
+ *   onchange: (path, value) => console.log(`${path} changed to ${value}`)
+ * })
+ *
+ * // Or listen via DOM events
+ * panel.addEventListener('change', (e) => {
+ *   console.log(`${e.detail.path} = ${e.detail.value}`)
+ * })
+ */
+export interface GooSchemaOptions {
+	schema?: GooSchemaType
+	data?: Record<string, unknown>
+	onchange?: (path: string, value: unknown) => void
+	bare?: boolean
+	showPanelHeader?: boolean
+	controlTypes?: ControlTypeRegistry
+}
+
+export interface GooSchema extends HTMLElement {
+	state: GooSchemaState
+	_data: Record<string, unknown>
+	_root: HTMLElement | null
+	_changeHandler: ((path: string, value: unknown) => void) | null
+	_controllers: Map<string, unknown>
+	_rebuildToken: number
+	_rebuildPending: boolean
+}
+
+export class GooSchema {
+	static formAssociated = false
+
+	static stateTypes = {
+		disabled: 'boolean' as const,
+		schema: 'object' as const,
+		bare: 'boolean' as const,
+		showPanelHeader: 'boolean' as const,
+		controlTypes: 'object' as const
+	}
+
+	constructor(options: GooSchemaOptions = {}) {
+		return createGooSchemaElement(options)
+	}
+
+	// ─────────────────────────────────────────────────────────────────
+	// Public API
+	// ─────────────────────────────────────────────────────────────────
+
+	/** Bind data object and rebuild UI */
+	setData(data: Record<string, unknown>): void {
+		this._data = data
+		this._rebuild()
+	}
+
+	/** Get bound data object */
+	getData(): Record<string, unknown> {
+		return this._data
+	}
+
+	/** Update schema and rebuild UI */
+	setSchema(schema: GooSchemaType): void {
+		this.state.schema = schema
+		this._rebuild()
+	}
+
+	/** Get current schema */
+	getSchema(): GooSchemaType {
+		return this.state.schema
+	}
+
+	/** Set the programmatic change handler. */
+	setChangeHandler(handler: (path: string, value: unknown) => void): void {
+		this._changeHandler = handler
+	}
+
+	/** Get controller for a specific path */
+	getController(path: string): unknown {
+		return this._controllers.get(path)
+	}
+
+	/** Update display for all controllers (call after external data changes) */
+	updateDisplay(): void {
+		for (const [ , controller ] of this._controllers) {
+			(controller as { updateDisplay?: () => void }).updateDisplay?.()
+		}
+	}
+
+	/**
+   * Re-evaluate conditional visibility and rebuild if needed
+   * Call this when data changes that might affect if/unless conditions
+   * Note: This rebuilds the entire UI - for performance, consider
+   * using static conditions or managing visibility manually
+   */
+	reevaluateConditions(): void {
+		this._rebuild()
+	}
+
+	// ─────────────────────────────────────────────────────────────────
+	// Property accessors for framework compatibility (Svelte, etc.)
+	// These bypass the attribute system which stringifies objects
+	// ─────────────────────────────────────────────────────────────────
+
+	/**
+   * Schedule a rebuild on next microtask (debounces multiple property sets)
+   */
+	_scheduleRebuild(): void {
+		if (this._rebuildPending) return
+		this._rebuildPending = true
+		queueMicrotask(() => {
+			this._rebuildPending = false
+			this._rebuild()
+		})
+	}
+
+	/**
+   * Set schema via property (used by Svelte: schema={brushSchema})
+   */
+	set schema(value: GooSchemaType) {
+		if (value && typeof value === 'object') {
+			if (value === this.state.schema) return
+			this.state.schema = value
+			this._scheduleRebuild()
+		}
+	}
+
+	get schema(): GooSchemaType {
+		return this.state.schema
+	}
+
+	/**
+   * Set data via property (used by Svelte: data={layer.brush})
+   */
+	set data(value: Record<string, unknown>) {
+		if (value && typeof value === 'object') {
+			if (value === this._data) return
+			this._data = value
+			this._scheduleRebuild()
+		}
+	}
+
+	get data(): Record<string, unknown> {
+		return this._data
+	}
+
+	/**
+   * Set controlTypes via property (used by Svelte: controlTypes={demoRegistry})
+   */
+	set controlTypes(value: ControlTypeRegistry | undefined) {
+		if (value && typeof value === 'object') {
+			if (value === this.state.controlTypes) return
+			this.state.controlTypes = value
+			this._scheduleRebuild()
+		}
+	}
+
+	get controlTypes(): ControlTypeRegistry | undefined {
+		return this.state.controlTypes
+	}
+
+	/**
+   * Set bare mode via property (used by Svelte: bare={true})
+   * Bare mode renders controls directly without panel wrapper
+   */
+	set bare(value: boolean) {
+		if (this.state.bare !== value) {
+			this.state.bare = value
+			this._scheduleRebuild()
+		}
+	}
+
+	get bare(): boolean {
+		return this.state.bare ?? false
+	}
+
+	/** Set whether generated panels render their header. */
+	set showPanelHeader(value: boolean) {
+		if (this.state.showPanelHeader !== value) {
+			this.state.showPanelHeader = value
+			this._scheduleRebuild()
+		}
+	}
+
+	get showPanelHeader(): boolean {
+		return this.state.showPanelHeader ?? true
+	}
+
+	// ─────────────────────────────────────────────────────────────────
+	// Lifecycle
+	// ─────────────────────────────────────────────────────────────────
+
+	_createElement(): void {
+		this._rebuild()
+	}
+
+	_destroyElement(): void {
+		this._root = null
+		this._controllers.clear()
+	}
+
+	// ─────────────────────────────────────────────────────────────────
+	// Build Methods
+	// ─────────────────────────────────────────────────────────────────
+
+	async _rebuild(): Promise<void> {
+		const token = ++this._rebuildToken
+
+		// Clear existing
+		this.innerHTML = ''
+		this._root = null
+		this._controllers.clear()
+
+		const schema = this.state.schema
+		if (!schema || !this._data) return
+
+		// Bare mode: render controls directly without panel wrapper
+		if (this.state.bare) {
+			this._root = document.createElement('div')
+			this._root.className = 'goo-schema__bare'
+			const nodes = Array.isArray(schema) ? schema : schema.children
+			await this._buildNodes(nodes, this._root, token)
+		}
+
+		// Build from schema with panel wrapper
+		else if (Array.isArray(schema)) {
+			// Array of nodes - wrap in docked panel
+			this._root = createPanel({
+				docked: true,
+				title: 'Settings',
+				collapsible: false,
+				showHeader: this.state.showPanelHeader ?? true
+			}) as HTMLElement
+			await this._buildNodes(schema, this._root, token)
+		} else if (schema.type === 'panel') {
+			this._root = createPanel({
+				title: schema.title || 'Settings',
+				docked: schema.docked ?? true,
+				width: schema.width,
+				collapsible: true,
+				showHeader: schema.showHeader ?? this.state.showPanelHeader ?? true
+			}) as HTMLElement
+			await this._buildNodes(schema.children, this._root, token)
+		}
+
+		if (token !== this._rebuildToken) return
+
+		if (this._root) {
+			this.appendChild(this._root)
+		}
+	}
+
+	async _buildNodes(nodes: GooSchemaNode[], parent: HTMLElement, token: number): Promise<void> {
+		for (const node of nodes) {
+			if (token !== this._rebuildToken) return
+
+			// Check conditional visibility (static - evaluated once at build time)
+			if (!this._checkCondition(node)) continue
+
+			if ('type' in node && node.type === 'folder') {
+				await this._buildFolder(node as GooSchemaFolder, parent, token)
+			} else if ('path' in node) {
+				await this._buildField(node as GooSchemaField, parent, token)
+			}
+		}
+	}
+
+	async _buildFolder(node: GooSchemaFolder, parent: HTMLElement, token: number): Promise<void> {
+		if (token !== this._rebuildToken) return
+		const folder: GooFolderElement = createFolder({
+			title: node.title,
+			open: node.open ?? false
+		})
+
+		await this._buildNodes(node.children, folder, token)
+
+		const parentContainer = parent as HTMLElement & { add?: (el: HTMLElement) => void }
+		if (typeof parentContainer.add === 'function') {
+			parentContainer.add(folder)
+		} else {
+			parent.appendChild(folder)
+		}
+	}
+
+	async _buildField(node: GooSchemaField, parent: HTMLElement, token: number): Promise<void> {
+		if (token !== this._rebuildToken) return
+		const resolved = resolvePath(this._data, node.path)
+
+		if (resolved === null) {
+			log.warn(`Path "${ node.path }" could not be resolved`)
+			return
+		}
+
+		const { object, property } = resolved
+
+		const controlTypes = this.state.controlTypes
+
+		// Build controller options using extracted builder
+		const controllerOptions = buildControllerOptions(node, object, property, object[property])
+		if (controlTypes) {
+			controllerOptions.controlTypes = controlTypes
+		}
+
+		// Check if this is a selfContained Svelte control
+		if (node.type) {
+			const controlConfig = resolveControlTypeConfig(node.type, controlTypes)
+			if (controlConfig?.svelte) {
+				const module = await controlConfig.load() as { default: SvelteComponentType; controlSchema?: SvelteControlSchema }
+				if (token !== this._rebuildToken) return
+				if (module.controlSchema?.selfContained) {
+					// Render selfContained control directly without goo-controller wrapper
+					await this._buildSelfContainedField(
+						node,
+						object,
+						property,
+						controllerOptions,
+						module,
+						parent,
+						token
+					)
+					return
+				}
+			}
+		}
+
+		controllerOptions.onchange = (value: unknown) => {
+			const detail = { path: node.path, value, data: this._data }
+
+			// Dispatch DOM event for framework integrations
+			this.dispatchEvent(new CustomEvent('change', { detail, bubbles: true }))
+
+			// Call callback for programmatic usage
+			this._changeHandler?.(node.path, value)
+		}
+
+		// Also wire up input events for continuous feedback
+		controllerOptions.oninput = (value: unknown) => {
+			const detail = { path: node.path, value, data: this._data }
+			this.dispatchEvent(new CustomEvent('input', { detail, bubbles: true }))
+		}
+
+		const controller = createGooController(controllerOptions)
+
+		// Set label
+		controller.name(controllerOptions.label)
+
+		// Track controller by path
+		this._controllers.set(node.path, controller)
+
+		// Add to parent
+		controller.addTo(parent)
+	}
+
+	/**
+   * Build a selfContained field - renders Svelte control directly without goo-controller wrapper.
+   * Used for visual editors that have their own complete UI (header, controls, canvas).
+   */
+	async _buildSelfContainedField(
+		node: GooSchemaField,
+		object: Record<string, unknown>,
+		property: string,
+		controllerOptions: ControllerOptions,
+		module: { default: SvelteComponentType; controlSchema?: SvelteControlSchema },
+		parent: HTMLElement,
+		token: number
+	): Promise<void> {
+		if (token !== this._rebuildToken) return
+		const handleChange = (value: unknown) => {
+			object[property] = value
+			const detail = { path: node.path, value, data: this._data }
+			this.dispatchEvent(new CustomEvent('change', { detail, bubbles: true }))
+			this._changeHandler?.(node.path, value)
+		}
+
+		// For selfContained controls, only pass label if explicitly specified in schema.
+		// This allows the component to use its own default label.
+		const options = { ...controllerOptions }
+		if (!node.label) {
+			delete options.label
+		}
+
+		const host = createSvelteControlHost({
+			component: module.default,
+			schema: module.controlSchema,
+			value: object[property],
+			options,
+			onchange: handleChange,
+			object,
+			property
+		})
+
+		const element = host.create()
+		if (token !== this._rebuildToken) return
+
+		this._controllers.set(node.path, host)
+
+		// Add directly to parent
+		const parentContainer = parent as HTMLElement & { add?: (el: HTMLElement) => void }
+		if (typeof parentContainer.add === 'function') {
+			parentContainer.add(element)
+		} else {
+			parent.appendChild(element)
+		}
+	}
+
+	/**
+   * Check conditional visibility (static - evaluated once at build time)
+   * Note: Conditions are NOT reactive. To update visibility after data changes,
+   * call reevaluateConditions() which rebuilds the entire UI.
+   */
+	_checkCondition(node: GooSchemaNode): boolean {
+		if ('if' in node && node.if) {
+			return !!getByPath(this._data, node.if)
+		}
+		if ('unless' in node && node.unless) {
+			return !getByPath(this._data, node.unless)
+		}
+		return true
+	}
+}
+
+// ============================================================================
+// Factory & Export
+// ============================================================================
+
+function initializeSchema(element: GooSchema, options: GooSchemaOptions): void {
+	element.state = {
+		disabled: false,
+		schema: options.schema || [],
+		bare: options.bare ?? false,
+		showPanelHeader: options.showPanelHeader ?? true,
+		controlTypes: options.controlTypes
+	}
+	element._data = options.data || {}
+	element._changeHandler = options.onchange || null
+	element._controllers = new Map()
+	element._rebuildToken = 0
+	element._rebuildPending = false
+}
+
+function attachSchemaMethods(element: GooSchema): void {
+	const nativePrototype = Object.getPrototypeOf(element)
+	if (Object.getPrototypeOf(GooSchema.prototype) !== nativePrototype) {
+		Object.setPrototypeOf(GooSchema.prototype, nativePrototype)
+	}
+	Object.setPrototypeOf(element, GooSchema.prototype)
+}
+
+function createGooSchemaElement(options: GooSchemaOptions = {}): GooSchema {
+	const element = document.createElement('div') as unknown as GooSchema
+	element.className = 'goo-schema'
+	attachSchemaMethods(element)
+	initializeSchema(element, options)
+	element._createElement()
+	return element
+}
+
+/**
+ * Factory function for creating GooSchema instances
+ */
+export function createGooSchema(options: GooSchemaOptions & {
+	schema: GooSchemaType
+	data: Record<string, unknown>
+}): GooSchema {
+	return createGooSchemaElement(options)
+}

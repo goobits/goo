@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Goo Component Test Harness</title>
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+		body {
+			margin: 0;
+			padding: 20px;
+			font-family: system-ui, sans-serif;
+			background: #1a1a1a;
+			color: #fff;
+		}
+		#test-container {
+			min-height: 200px;
+		}
+	</style>
+</head>
+<body>
+	<div id="test-container"></div>
+
+	<script type="module">
+		// Import all goo components for testing
+		import '@goobits/goo/controller'
+		import '@goobits/goo/input'
+		import '@goobits/goo/button'
+		import '@goobits/goo/schema'
+
+		// Export factories to window for Playwright access
+		import { createFolder } from '../../folder/_createFolder.ts'
+		import { createPanel } from '../../panel/_createPanel.ts'
+		import { createCheckboxField } from '../../checkbox/_createCheckboxField.ts'
+		import { createColorField } from '../../color/_createColorField.ts'
+		import { createInputField } from '../../input/_createInputField.ts'
+		import { createSliderField } from '../../slider/_createSliderField.ts'
+		import { createGooController } from '@goobits/goo/controller'
+		import { createGooSchema, detectFieldType } from '@goobits/goo/schema'
+
+		window.goo = {
+			createPanel,
+			createFolder,
+			createCheckbox: createCheckboxField,
+			createColor: createColorField,
+			createInput: createInputField,
+			createSlider: createSliderField,
+			createGooController,
+			createGooSchema,
+			detectFieldType
+		}
+
+		// Signal that components are ready
+		window.gooReady = true
+		window.dispatchEvent(new Event('goo-ready'))
+	</script>
+</body>
+</html>

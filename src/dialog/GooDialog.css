@@ -1,0 +1,351 @@
+/**
+ * GooDialog - Modal dialog component
+ */
+
+/* Backdrop */
+.goo-dialog-backdrop {
+	position: fixed;
+	inset: 0;
+	background: var(--goo-dialog-backdrop, rgba(0, 0, 0, 0.7));
+	z-index: var(--goo-dialog-z-index, 99999);
+	opacity: 0;
+	transition: opacity var(--goo-dialog-transition-duration, 150ms) ease-out;
+}
+
+.goo-dialog-backdrop--visible {
+	opacity: 1;
+}
+
+.goo-dialog-backdrop--hiding {
+	opacity: 0;
+}
+
+/* Dialog */
+.goo-dialog {
+	position: fixed;
+	inset: 0;
+	margin: auto;
+	display: flex;
+	flex-direction: column;
+	background: var(--goo-dialog-bg, var(--goo-theme-surface, #1a1a2e));
+	border: none;
+	border-radius: var(--goo-dialog-border-radius, var(--goo-theme-radius-lg, 8px));
+	box-shadow: var(--goo-dialog-shadow, 2px 2px 5px rgba(0, 0, 0, 0.33));
+	color: var(--goo-dialog-fg, var(--goo-theme-fg, #fff));
+	max-width: min(600px, 90vw);
+	max-height: 80vh;
+	width: fit-content;
+	height: fit-content;
+	padding: 0;
+	outline: none;
+	z-index: calc(var(--goo-dialog-z-index, 99999) + 1);
+	opacity: 0;
+	transition: opacity var(--goo-dialog-transition-duration, 150ms) ease-out;
+}
+
+.goo-dialog[open] {
+	opacity: 1;
+}
+
+.goo-dialog.goo-dialog--hiding {
+	opacity: 0;
+}
+
+/* Header */
+.goo-dialog__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 20px;
+	background: var(
+		--goo-dialog-header-bg,
+		var(
+			--goo-theme-surface-raised,
+			color-mix(in srgb, var(--goo-theme-fg, #fff) 5%, transparent)
+		)
+	);
+	border-radius: var(--goo-dialog-border-radius, 8px) var(--goo-dialog-border-radius, 8px) 0 0;
+	border-bottom: 1px solid var(--goo-theme-border, rgba(128, 128, 128, 0.2));
+}
+
+.goo-dialog__title {
+	margin: 0;
+	font-size: var(--goo-theme-font-size-xl, 1.1875rem);
+	font-weight: 600;
+	color: var(--goo-dialog-fg, var(--goo-theme-fg, #fff));
+}
+
+.goo-dialog__close {
+	appearance: none;
+	background: transparent;
+	border: none;
+	color: var(--goo-theme-muted, #888);
+	cursor: pointer;
+	padding: 4px;
+	border-radius: 4px;
+	transition:
+		background 0.15s,
+		color 0.15s;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.goo-dialog__close svg {
+	width: 16px;
+	height: 16px;
+}
+
+.goo-dialog__close:hover {
+	background: color-mix(in srgb, var(--goo-theme-fg, #fff) 10%, transparent);
+	color: var(--goo-theme-fg, #fff);
+}
+
+/* Content */
+.goo-dialog__content {
+	flex: 1;
+	padding: 20px;
+	overflow: auto;
+	line-height: 1.6;
+}
+
+/* Fields container for prompts */
+.goo-dialog__fields {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	margin-top: 16px;
+}
+
+.goo-dialog__field {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.goo-dialog__field-label {
+	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
+	font-weight: 500;
+	color: var(--goo-theme-muted, #888);
+}
+
+/* Footer */
+.goo-dialog__footer {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 16px 20px;
+	background: var(
+		--goo-dialog-footer-bg,
+		var(
+			--goo-theme-surface-raised,
+			color-mix(in srgb, var(--goo-theme-fg, #fff) 5%, transparent)
+		)
+	);
+	border-radius: 0 0 var(--goo-dialog-border-radius, 8px) var(--goo-dialog-border-radius, 8px);
+	border-top: 1px solid var(--goo-theme-border, rgba(128, 128, 128, 0.2));
+}
+
+/* Apply to all checkbox */
+.goo-dialog__apply-all {
+	margin-right: auto;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
+	color: var(--goo-theme-muted, #888);
+}
+
+/* OK button - attention styling */
+.goo-dialog__ok-btn {
+	--goo-button-bg: var(--goo-theme-accent, #3b82f6);
+	--goo-button-fg: var(--goo-theme-accent-fg, #fff);
+	--goo-button-hover-bg: color-mix(
+		in srgb,
+		var(--goo-theme-accent, #2563eb) 88%,
+		var(--goo-theme-fg, white)
+	);
+}
+
+/* Focus trap sentinel */
+.goo-dialog__focus-trap {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	border: 0;
+}
+
+/* Alert type - simple message with close */
+.goo-dialog.goo-dialog--alert .goo-dialog__close-badge {
+	position: absolute;
+	top: -10px;
+	right: -10px;
+	width: 24px;
+	height: 24px;
+	background: var(--goo-theme-accent, #3b82f6);
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--goo-theme-accent-fg, #fff);
+	font-size: var(--goo-theme-font-size-md, 0.9375rem);
+	cursor: pointer;
+	box-shadow: var(--goo-theme-shadow-md, 0 2px 8px rgba(0, 0, 0, 0.3));
+	transition: transform 0.15s;
+}
+
+.goo-dialog.goo-dialog--alert .goo-dialog__close-badge:hover {
+	transform: scale(1.1);
+}
+
+/* Notify type - top banner */
+.goo-dialog.goo-dialog--notify {
+	top: 0;
+	bottom: auto;
+	left: 0;
+	right: 0;
+	margin: 0;
+	max-width: 100%;
+	width: 100%;
+	border-radius: 0;
+	transform: translateY(-100%);
+	background: var(--goo-theme-accent, #3b82f6);
+	color: var(--goo-theme-accent-fg, #fff);
+}
+
+.goo-dialog.goo-dialog--notify[open] {
+	transform: translateY(0);
+}
+
+.goo-dialog.goo-dialog--notify.goo-dialog--hiding {
+	transform: translateY(-100%);
+}
+
+.goo-dialog.goo-dialog--notify .goo-dialog__content {
+	padding: 12px 20px;
+	text-align: center;
+	font-weight: 500;
+}
+
+.goo-dialog.goo-dialog--notify .goo-dialog__close {
+	position: absolute;
+	right: 12px;
+	top: 50%;
+	transform: translateY(-50%);
+	color: color-mix(in srgb, var(--goo-theme-accent-fg, #fff) 80%, transparent);
+}
+
+.goo-dialog.goo-dialog--notify .goo-dialog__close:hover {
+	color: var(--goo-theme-accent-fg, #fff);
+	background: color-mix(in srgb, var(--goo-theme-accent-fg, #fff) 20%, transparent);
+}
+
+/* Overlay type - full screen */
+.goo-dialog.goo-dialog--overlay {
+	/* Allow left offset for toolbar/sidebar - set --goo-dialog-overlay-left in app CSS */
+	left: var(--goo-dialog-overlay-left, 0);
+	right: 0;
+	top: 0;
+	bottom: 0;
+	max-width: none;
+	max-height: none;
+	width: auto;
+	height: auto;
+	border-radius: 0;
+}
+
+[dir='rtl'] .goo-dialog.goo-dialog--overlay {
+	left: 0;
+	right: var(--goo-dialog-overlay-left, 0);
+}
+
+.goo-dialog.goo-dialog--overlay .goo-dialog__content {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	padding: 0;
+	overflow: auto;
+}
+
+/* Overlay iframe support */
+.goo-dialog.goo-dialog--overlay iframe {
+	width: 100%;
+	height: 100%;
+	border: 0;
+	background: transparent;
+	display: block;
+	flex: 1;
+}
+
+/* Overlay header - gradient background matching old Alertify */
+.goo-dialog.goo-dialog--overlay .goo-dialog__header {
+	background: linear-gradient(
+		0deg,
+		color-mix(in srgb, var(--goo-theme-fg, #fff) 2%, transparent),
+		color-mix(in srgb, var(--goo-theme-fg, #fff) 5%, transparent)
+	);
+	border-bottom: 1px solid color-mix(in srgb, var(--goo-theme-fg, #fff) 3%, transparent);
+	height: 40px;
+	min-height: 40px;
+	padding: 0 1em;
+	border-radius: 0;
+}
+
+.goo-dialog.goo-dialog--overlay .goo-dialog__title {
+	font-size: var(--goo-theme-font-size-xl, 1.25em);
+	line-height: 40px;
+}
+
+/* Overlay close button - circular badge styling matching old Alertify */
+.goo-dialog.goo-dialog--overlay .goo-dialog__close {
+	position: absolute;
+	top: 12px;
+	right: 12px;
+	z-index: 10;
+	width: 1.5rem;
+	height: 1.5rem;
+	padding: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--goo-theme-accent, #f59e0b);
+	color: var(--goo-theme-accent-fg, #fff);
+	border-radius: 50%;
+	font-size: var(--goo-theme-icon-md, 1em);
+	line-height: 1;
+	box-shadow:
+		0 0 0 3px var(--goo-theme-accent, #f59e0b),
+		0 0 0 4px color-mix(in srgb, var(--goo-theme-accent, #f59e0b) 50%, transparent);
+	transition:
+		transform 0.15s,
+		box-shadow 0.15s;
+}
+
+.goo-dialog.goo-dialog--overlay .goo-dialog__close:hover {
+	background: color-mix(
+		in srgb,
+		var(--goo-theme-accent, #d97706) 88%,
+		var(--goo-theme-fg, white)
+	);
+	transform: scale(1.1);
+	box-shadow:
+		0 0 0 3px
+			color-mix(in srgb, var(--goo-theme-accent, #d97706) 88%, var(--goo-theme-fg, white)),
+		0 0 0 4px
+			color-mix(
+				in srgb,
+				color-mix(in srgb, var(--goo-theme-accent, #d97706) 88%, var(--goo-theme-fg, white))
+					50%,
+				transparent
+			);
+}
+
+[dir='rtl'] .goo-dialog.goo-dialog--overlay .goo-dialog__close {
+	right: auto;
+	left: 12px;
+}

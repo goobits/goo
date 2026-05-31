@@ -1,0 +1,265 @@
+/**
+ * GooPopout - Floating panel styles
+ * Uses CSS custom properties for theming consistency with GooInput/GooSelect
+ */
+
+.goo-popout {
+	/* Theme variables - uses --goo-theme-* tokens */
+	--goo-popout-bg: var(--goo-theme-surface, rgba(45, 45, 50, 0.98));
+	--goo-popout-fg: var(--goo-theme-fg, rgba(255, 255, 255, 0.9));
+	--goo-popout-border: var(--goo-theme-border, rgba(128, 128, 128, 0.2));
+	--goo-popout-arrow-border: color-mix(
+		in srgb,
+		var(--goo-theme-fg, #fff) 15%,
+		var(--goo-theme-bg, #2d2d32)
+	);
+	--goo-popout-shadow: drop-shadow(0 0 0.5px var(--goo-popout-border))
+		drop-shadow(0 1px 4px rgba(0, 0, 0, 0.25)) drop-shadow(0 8px 16px rgba(0, 0, 0, 0.25));
+	--goo-popout-radius: var(--goo-theme-radius-md, 0.375rem);
+	--goo-popout-arrow-size: 8px;
+
+	position: fixed;
+	z-index: 100000;
+	display: block;
+	background: var(--goo-popout-bg);
+	border-radius: var(--goo-popout-radius);
+	filter: var(--goo-popout-shadow);
+	color: var(--goo-popout-fg);
+	outline: none;
+}
+
+.goo-popout:focus-visible {
+	outline: 2px solid var(--goo-theme-accent, #3b82f6);
+	outline-offset: 2px;
+}
+
+/* =============================================================================
+   Content Container
+   ============================================================================= */
+
+.goo-popout__content {
+	display: block;
+	width: 100%;
+	height: 100%;
+	max-height: calc(100vh - 30px);
+	overflow-y: auto;
+	overflow-x: hidden;
+	overscroll-behavior: contain;
+	background: transparent;
+	border-radius: inherit;
+}
+
+/* Scrollbar styling */
+.goo-popout__content::-webkit-scrollbar {
+	width: 6px;
+}
+
+.goo-popout__content::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.goo-popout__content::-webkit-scrollbar-thumb {
+	background: var(--goo-theme-muted, rgba(128, 128, 128, 0.3));
+	border-radius: 3px;
+}
+
+.goo-popout__content::-webkit-scrollbar-thumb:hover {
+	background: var(--goo-theme-fg, rgba(255, 255, 255, 0.5));
+}
+
+/* =============================================================================
+   Backdrop
+   ============================================================================= */
+
+.goo-popout__backdrop {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, 0.3);
+	pointer-events: none;
+	z-index: -1;
+}
+
+/* =============================================================================
+   Arrow - Two-layer approach: element for border, ::after for fill (on top)
+   ============================================================================= */
+
+.goo-popout__arrow {
+	position: absolute;
+	width: 0;
+	height: 0;
+	border: calc(var(--goo-popout-arrow-size) + 1px) solid transparent;
+	pointer-events: none;
+	z-index: 1;
+}
+
+/* Fill arrow (on top of border) */
+.goo-popout__arrow::after {
+	content: '';
+	position: absolute;
+	width: 0;
+	height: 0;
+	border: var(--goo-popout-arrow-size) solid transparent;
+	pointer-events: none;
+}
+
+/* Arrow pointing left (popout is to the right of target) */
+.goo-popout__arrow.left {
+	left: calc((var(--goo-popout-arrow-size) + 1px) * -2);
+	border-right-color: var(--goo-popout-arrow-border);
+}
+
+.goo-popout__arrow.left::after {
+	top: calc(var(--goo-popout-arrow-size) * -1);
+	left: 1px;
+	border-right-color: var(--goo-popout-bg);
+}
+
+/* Arrow pointing right (popout is to the left of target) */
+.goo-popout__arrow.right {
+	right: calc((var(--goo-popout-arrow-size) + 1px) * -2);
+	left: auto;
+	border-left-color: var(--goo-popout-arrow-border);
+}
+
+.goo-popout__arrow.right::after {
+	top: calc(var(--goo-popout-arrow-size) * -1);
+	right: 1px;
+	border-left-color: var(--goo-popout-bg);
+}
+
+/* Arrow pointing up (popout is below target) */
+.goo-popout__arrow.top {
+	top: calc((var(--goo-popout-arrow-size) + 1px) * -2);
+	border-bottom-color: var(--goo-popout-arrow-border);
+}
+
+.goo-popout__arrow.top::after {
+	top: 1px;
+	left: calc(var(--goo-popout-arrow-size) * -1);
+	border-bottom-color: var(--goo-popout-bg);
+}
+
+/* Arrow pointing down (popout is above target) */
+.goo-popout__arrow.bottom {
+	bottom: calc((var(--goo-popout-arrow-size) + 1px) * -2);
+	top: auto;
+	border-top-color: var(--goo-popout-arrow-border);
+}
+
+.goo-popout__arrow.bottom::after {
+	bottom: 1px;
+	left: calc(var(--goo-popout-arrow-size) * -1);
+	border-top-color: var(--goo-popout-bg);
+}
+
+/* Hidden arrow (e.g., when dragged) */
+.goo-popout__arrow--hidden {
+	opacity: 0;
+	transition: opacity 150ms ease;
+}
+
+/* =============================================================================
+   Full-Screen Mode (mobile-friendly)
+   ============================================================================= */
+
+.goo-popout--fullscreen {
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	max-width: 100%;
+	max-height: 100%;
+	border-radius: 0;
+	box-shadow: none;
+}
+
+.goo-popout--fullscreen .goo-popout__content {
+	max-height: 100%;
+	height: 100%;
+	border-radius: 0;
+}
+
+.goo-popout--fullscreen .goo-popout__arrow {
+	display: none;
+}
+
+/* =============================================================================
+   Chromeless Mode — content supplies its own frame
+   ============================================================================= */
+
+.goo-popout--chromeless {
+	background: transparent;
+	border-radius: 0;
+	filter: none;
+}
+
+.goo-popout--chromeless .goo-popout__content {
+	border-radius: inherit;
+}
+
+/* =============================================================================
+   Application-Specific Styles
+   ============================================================================= */
+
+/* Style popouts for toolbar tool configuration */
+.goo-popout.sketch-style-popout {
+	min-width: 226px;
+}
+
+/* =============================================================================
+   Animation Classes
+   ============================================================================= */
+
+@keyframes goo-popout-fade-in {
+	from {
+		opacity: 0;
+		transform: translateY(-4px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes goo-popout-fade-out {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
+}
+
+/* =============================================================================
+   RTL Support
+   ============================================================================= */
+
+[dir='rtl'] .goo-popout__arrow.left {
+	left: auto;
+	right: calc((var(--goo-popout-arrow-size) + 1px) * -2);
+	border-left-color: var(--goo-popout-arrow-border);
+	border-right-color: transparent;
+}
+
+[dir='rtl'] .goo-popout__arrow.left::after {
+	left: auto;
+	right: 1px;
+	border-left-color: var(--goo-popout-bg);
+	border-right-color: transparent;
+}
+
+[dir='rtl'] .goo-popout__arrow.right {
+	right: auto;
+	left: calc((var(--goo-popout-arrow-size) + 1px) * -2);
+	border-right-color: var(--goo-popout-arrow-border);
+	border-left-color: transparent;
+}
+
+[dir='rtl'] .goo-popout__arrow.right::after {
+	right: auto;
+	left: 1px;
+	border-right-color: var(--goo-popout-bg);
+	border-left-color: transparent;
+}

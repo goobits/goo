@@ -1,0 +1,103 @@
+/**
+ * GooSpinner - theme-aware indeterminate loading indicator.
+ */
+
+.goo-spinner {
+	--goo-spinner-size: 24px;
+	--goo-spinner-stroke: 2px;
+	--goo-spinner-ring-mask: radial-gradient(
+		farthest-side,
+		transparent calc(100% - var(--goo-spinner-stroke)),
+		#000 calc(100% - var(--goo-spinner-stroke))
+	);
+	--goo-spinner-track: color-mix(in srgb, currentColor 22%, transparent);
+
+	box-sizing: border-box;
+	color: var(--goo-theme-accent, #3b82f6);
+	display: inline-grid;
+	flex: 0 0 auto;
+	height: var(--goo-spinner-size);
+	place-items: center;
+	position: relative;
+	vertical-align: middle;
+	width: var(--goo-spinner-size);
+
+	&[size='sm'] {
+		--goo-spinner-size: 16px;
+	}
+
+	&[size='md'] {
+		--goo-spinner-size: 24px;
+	}
+
+	&[size='lg'] {
+		--goo-spinner-size: 64px;
+	}
+
+	&::before {
+		animation: goo-spinner-rotate 0.8s linear infinite;
+		border: var(--goo-spinner-stroke) solid var(--goo-spinner-track);
+		border-radius: 999px;
+		border-top-color: currentColor;
+		box-sizing: border-box;
+		content: '';
+		display: block;
+		height: 100%;
+		width: 100%;
+	}
+
+	&[variant='rainbow']::before {
+		background: conic-gradient(
+			from 0deg,
+			rgb(255 49 88 / 35%),
+			rgb(255 159 28 / 35%),
+			rgb(255 228 94 / 35%),
+			rgb(55 214 122 / 35%),
+			rgb(46 196 255 / 35%),
+			rgb(139 92 246 / 35%),
+			rgb(255 79 216 / 35%),
+			rgb(255 49 88 / 35%)
+		);
+		animation: none;
+		border: 0;
+		-webkit-mask: var(--goo-spinner-ring-mask);
+		mask: var(--goo-spinner-ring-mask);
+	}
+
+	&[variant='rainbow']::after {
+		animation: goo-spinner-rotate 0.8s linear infinite;
+		background: conic-gradient(
+			from -20deg,
+			#ff3158 0deg,
+			#ff9f1c 32deg,
+			#ffe45e 64deg,
+			#37d67a 96deg,
+			#2ec4ff 128deg,
+			transparent 130deg,
+			transparent 360deg
+		);
+		border-radius: 999px;
+		box-sizing: border-box;
+		content: '';
+		display: block;
+		height: 100%;
+		inset: 0;
+		-webkit-mask: var(--goo-spinner-ring-mask);
+		mask: var(--goo-spinner-ring-mask);
+		position: absolute;
+		width: 100%;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.goo-spinner::before,
+	.goo-spinner[variant='rainbow']::after {
+		animation-duration: 1.6s;
+	}
+}
+
+@keyframes goo-spinner-rotate {
+	to {
+		transform: rotate(1turn);
+	}
+}

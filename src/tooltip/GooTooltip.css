@@ -1,0 +1,101 @@
+/**
+ * GooTooltip - Tooltip-specific styles
+ *
+ * Overrides GooPopout defaults for tooltip appearance.
+ * Inherits arrow styles, positioning, and animations from popout.
+ */
+
+/* =============================================================================
+   Tooltip Container (extends .goo-popout)
+   ============================================================================= */
+
+.goo-popout.goo-tooltip {
+	/* Override popout variables for tooltip appearance */
+	--goo-popout-bg: var(--goo-tooltip-bg, var(--goo-theme-surface, rgba(30, 30, 35, 0.95)));
+	--goo-popout-fg: var(--goo-tooltip-fg, var(--goo-theme-fg, rgba(255, 255, 255, 0.9)));
+	--goo-popout-border: var(
+		--goo-tooltip-border,
+		var(--goo-theme-border, rgba(255, 255, 255, 0.1))
+	);
+	--goo-popout-shadow: var(--goo-tooltip-shadow, drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3)));
+	--goo-popout-radius: var(--goo-tooltip-radius, var(--goo-theme-radius-sm, 4px));
+	--goo-popout-arrow-size: var(--goo-tooltip-arrow-size, 6px);
+	/* Arrow's outer triangle is the border ring; track the tip's border colour so
+	   it forms one continuous 1px outline around body + arrow. */
+	--goo-popout-arrow-border: var(--goo-popout-border);
+
+	/* 1px outline outside the body via box-shadow spread (no layout impact, follows
+	   the radius). The arrow's outer-triangle border (1px in the same colour)
+	   continues this line on its diagonal edges; the arrow's back merges with the
+	   body in bg colour, so no border line crosses the seam. */
+	box-shadow: 0 0 0 1px var(--goo-popout-border);
+
+	/* Tooltip-specific sizing */
+	max-width: var(--goo-tooltip-max-width, 250px);
+	padding: var(--goo-tooltip-padding, 6px 10px);
+
+	/* Typography */
+	font-size: var(--goo-tooltip-font-size, var(--goo-theme-font-size-sm, 0.8125rem));
+	line-height: var(--goo-tooltip-line-height, 1.4);
+	text-align: left;
+
+	/* Non-interactive by default */
+	pointer-events: none;
+}
+
+/* Interactive tooltips can receive pointer events */
+.goo-popout.goo-tooltip[data-interactive='true'] {
+	pointer-events: auto;
+}
+
+/* =============================================================================
+   Content - Remove popout's default padding/scroll behavior
+   ============================================================================= */
+
+.goo-popout.goo-tooltip .goo-popout__content {
+	padding: 0;
+	max-height: none;
+	overflow: visible;
+	background: transparent;
+}
+
+/* Text content wrapper */
+.goo-tooltip__text {
+	display: block;
+	word-wrap: break-word;
+	white-space: normal;
+}
+
+/* =============================================================================
+   Variants (optional)
+   ============================================================================= */
+
+/* Error tooltip */
+.goo-popout.goo-tooltip--error {
+	--goo-popout-bg: var(--goo-theme-negative, #ef4444);
+	--goo-popout-fg: var(--goo-theme-negative-fg, #fff);
+	--goo-popout-border: transparent;
+}
+
+/* Warning tooltip */
+.goo-popout.goo-tooltip--warning {
+	--goo-popout-bg: var(--goo-theme-warning, #f59e0b);
+	--goo-popout-fg: var(--goo-theme-warning-fg, #000);
+	--goo-popout-border: transparent;
+}
+
+/* Success tooltip */
+.goo-popout.goo-tooltip--success {
+	--goo-popout-bg: var(--goo-theme-positive, #22c55e);
+	--goo-popout-fg: var(--goo-theme-positive-fg, #fff);
+	--goo-popout-border: transparent;
+}
+
+/* =============================================================================
+   Dark/Light mode adjustments
+   ============================================================================= */
+
+[data-theme-mode='light'] .goo-popout.goo-tooltip {
+	--goo-popout-bg: var(--goo-tooltip-bg, rgba(50, 50, 55, 0.95));
+	--goo-popout-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}

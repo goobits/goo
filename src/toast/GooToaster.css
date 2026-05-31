@@ -1,0 +1,48 @@
+/**
+ * GooToaster - fixed-position container that mounts the toast queue.
+ * BEM: .goo-toaster, .goo-toaster--<position>
+ */
+
+.goo-toaster {
+	--goo-toaster-width: min(100vw - 2rem, 24rem);
+	--goo-toaster-gap: 0.75rem;
+	--goo-toaster-z-index: 999;
+	--goo-toaster-edge: 1rem;
+
+	position: fixed;
+	display: flex;
+	flex-direction: column;
+	gap: var(--goo-toaster-gap);
+	width: var(--goo-toaster-width);
+	z-index: var(--goo-toaster-z-index);
+	pointer-events: none;
+}
+
+.goo-toaster--top-left,
+.goo-toaster--top-center,
+.goo-toaster--top-right {
+	top: var(--goo-toaster-edge);
+}
+
+.goo-toaster--bottom-left,
+.goo-toaster--bottom-center,
+.goo-toaster--bottom-right {
+	bottom: var(--goo-toaster-edge);
+	flex-direction: column-reverse;
+}
+
+.goo-toaster--top-left,
+.goo-toaster--bottom-left {
+	left: var(--goo-toaster-edge);
+}
+
+.goo-toaster--top-right,
+.goo-toaster--bottom-right {
+	right: var(--goo-toaster-edge);
+}
+
+.goo-toaster--top-center,
+.goo-toaster--bottom-center {
+	left: 50%;
+	transform: translateX(-50%);
+}

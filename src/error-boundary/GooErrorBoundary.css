@@ -1,0 +1,70 @@
+/**
+ * GooErrorBoundary - default fallback styles
+ * BEM: .goo-error-boundary, .goo-error-boundary__title, .goo-error-boundary__message, .goo-error-boundary__retry
+ */
+
+.goo-error-boundary {
+	/* Customizable via CSS custom properties */
+	--goo-error-boundary-bg: var(--goo-theme-bg-elevated, #1f1f1f);
+	--goo-error-boundary-border: var(--goo-theme-negative, #ef4444);
+	--goo-error-boundary-fg: var(--goo-theme-fg, rgba(255, 255, 255, 0.9));
+	--goo-error-boundary-muted: var(--goo-theme-muted, rgba(255, 255, 255, 0.5));
+	--goo-error-boundary-radius: var(--goo-theme-radius-md, 0.375rem);
+	--goo-error-boundary-padding: var(--goo-theme-space-lg, 2rem);
+	--goo-error-boundary-accent: var(--goo-theme-accent, #3b82f6);
+	--goo-error-boundary-accent-fg: var(--goo-theme-accent-fg, #ffffff);
+
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 12rem;
+	padding: var(--goo-error-boundary-padding);
+	background: var(--goo-error-boundary-bg);
+	border: 1px solid var(--goo-error-boundary-border);
+	border-radius: var(--goo-error-boundary-radius);
+}
+
+.goo-error-boundary__content {
+	max-width: 32rem;
+	text-align: center;
+	color: var(--goo-error-boundary-fg);
+}
+
+.goo-error-boundary__title {
+	margin: 0 0 0.75rem;
+	font-size: var(--goo-theme-font-size-lg, 1.125rem);
+	font-weight: 600;
+	color: var(--goo-error-boundary-border);
+}
+
+.goo-error-boundary__message {
+	margin: 0 0 1.25rem;
+	font-family: var(--goo-theme-font-mono, ui-monospace, monospace);
+	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
+	color: var(--goo-error-boundary-muted);
+	word-break: break-word;
+}
+
+.goo-error-boundary__retry {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.5rem 1.25rem;
+	font: inherit;
+	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
+	color: var(--goo-error-boundary-accent-fg);
+	background: var(--goo-error-boundary-accent);
+	border: 1px solid transparent;
+	border-radius: var(--goo-theme-radius-sm, 0.25rem);
+	cursor: pointer;
+	transition: filter 0.15s;
+
+	&:hover {
+		filter: brightness(1.1);
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--goo-error-boundary-accent);
+		outline-offset: 2px;
+	}
+}

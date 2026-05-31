@@ -1,0 +1,178 @@
+/**
+ * GooInput - Modern text input component
+ * Supports single-line and multiline (textarea) modes
+ */
+
+.goo-input {
+	/* Customizable via CSS custom properties */
+	--goo-input-bg: var(
+		--goo-theme-surface-sunken,
+		color-mix(in srgb, var(--goo-theme-bg, #000) 30%, transparent)
+	);
+	--goo-input-bg-focus: var(
+		--goo-theme-surface,
+		color-mix(in srgb, var(--goo-theme-fg, #fff) 5%, transparent)
+	);
+	--goo-input-border: var(--goo-theme-border, rgba(128, 128, 128, 0.2));
+	--goo-input-border-focus: var(--goo-theme-accent, #3b82f6);
+	--goo-input-focus-ring: color-mix(in srgb, var(--goo-input-border-focus) 32%, transparent);
+	--goo-input-change-pulse: color-mix(in srgb, var(--goo-input-border-focus) 18%, transparent);
+	--goo-input-fg: var(--goo-theme-fg, rgba(255, 255, 255, 0.9));
+	--goo-input-fg-placeholder: var(--goo-theme-muted, rgba(128, 128, 128, 0.5));
+	--goo-input-radius: var(--goo-theme-radius-sm, 0.25rem);
+	--goo-input-height: var(--goo-theme-control-height-md, 2rem);
+	--goo-input-padding: var(--goo-theme-control-padding-md, 0 0.5rem);
+	--goo-input-motion-fast: var(--goo-theme-transition-fast, 0.15s ease);
+	--goo-input-motion-normal: var(--goo-theme-transition-normal, 0.2s ease);
+
+	display: inline-block;
+	position: relative;
+	background: var(--goo-input-bg);
+	border-radius: var(--goo-input-radius);
+	box-shadow: 0 0 0 1px var(--goo-input-border);
+	color: var(--goo-input-fg);
+	cursor: text;
+	font-weight: normal;
+	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
+	height: var(--goo-input-height);
+	line-height: var(--goo-input-height);
+	width: 200px;
+	transition:
+		background-color var(--goo-input-motion-fast),
+		box-shadow var(--goo-input-motion-normal),
+		color var(--goo-input-motion-fast);
+}
+
+.goo-input::after {
+	content: '';
+	position: absolute;
+	inset: -3px;
+	border: 2px solid var(--goo-input-change-pulse);
+	border-radius: calc(var(--goo-input-radius) + 3px);
+	opacity: 0;
+	pointer-events: none;
+}
+
+/* Focus state */
+.goo-input.goo-input--focused,
+.goo-input:focus-within {
+	background: var(--goo-input-bg-focus);
+	box-shadow:
+		0 0 0 1px var(--goo-input-border-focus),
+		0 0 0 3px var(--goo-input-focus-ring);
+	z-index: 2;
+}
+
+.goo-input.goo-input--changed::after {
+	animation: goo-input-value-pulse 260ms ease-out;
+}
+
+/* Disabled state */
+.goo-input.goo-input--disabled {
+	opacity: 0.5;
+	pointer-events: none;
+	cursor: not-allowed;
+}
+
+/* Content element - single line */
+.goo-input__content {
+	position: relative;
+	z-index: 1;
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+	border: 0;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	border-radius: inherit;
+	outline: none;
+	padding: var(--goo-input-padding);
+	overflow: hidden;
+	white-space: nowrap;
+	opacity: 0.85;
+	min-height: 100%;
+	line-height: inherit;
+
+	&:focus {
+		opacity: 1;
+	}
+
+	&::placeholder {
+		color: var(--goo-input-fg-placeholder);
+	}
+}
+
+@keyframes goo-input-value-pulse {
+	0% {
+		opacity: 0;
+	}
+
+	25% {
+		opacity: 1;
+	}
+
+	100% {
+		opacity: 0;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.goo-input,
+	.goo-input::after {
+		transition-duration: 0.01ms;
+		animation-duration: 0.01ms;
+	}
+}
+
+/* Multiline mode */
+.goo-input.goo-input--multiline {
+	display: inline-block;
+	height: auto;
+	width: auto;
+	min-height: var(--goo-input-height);
+	min-width: 200px;
+	line-height: 1.5em;
+}
+
+.goo-input.goo-input--multiline textarea.goo-input__content {
+	display: block;
+	min-width: 200px;
+	min-height: 4em;
+	padding: 0.5em;
+	border: none;
+	border-radius: inherit;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	line-height: inherit;
+	resize: both;
+	outline: none;
+	opacity: 0.85;
+
+	&:focus {
+		opacity: 1;
+	}
+
+	&::placeholder {
+		color: var(--goo-input-fg-placeholder);
+	}
+}
+
+/* RTL support */
+[dir='rtl'] .goo-input {
+	text-align: right;
+
+	.goo-input__content {
+		padding: 0 0.5em 0 0;
+	}
+}
+
+/* Compact size variant - for dense UIs like editors */
+.goo-input[size='compact'] {
+	--goo-input-height: var(--goo-theme-control-height-sm, 1.5rem);
+	--goo-input-padding: var(--goo-theme-control-padding-sm, 0 0.5rem);
+	font-size: var(--goo-theme-font-size-xs, 0.75rem);
+	width: auto;
+	min-width: 80px;
+}

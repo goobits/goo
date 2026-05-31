@@ -1,0 +1,129 @@
+/* Submenu arrow */
+.goo-select__submenu-arrow {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	width: var(--goo-select-item-box-size, 1.25rem);
+	height: var(--goo-select-item-box-size, 1.25rem);
+	margin-left: auto;
+	font-size: var(--goo-theme-icon-xs, 0.75rem);
+	color: var(--goo-select-fg-muted);
+}
+
+.goo-select__submenu-arrow svg {
+	display: block;
+	height: 1rem;
+	width: 1rem;
+}
+
+/* Submenu content inside GooPopout */
+.goo-select__submenu-frame {
+	box-sizing: border-box;
+	min-width: 10rem;
+	max-height: 20rem;
+	background: var(--goo-popout-bg);
+	border-radius: inherit;
+	overflow: hidden;
+	will-change: width, height, transform;
+}
+
+.goo-select__submenu-viewport {
+	box-sizing: border-box;
+	max-height: 20rem;
+	padding: var(--goo-select-padding);
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	position: relative;
+	scrollbar-color: var(--goo-select-scrollbar-thumb) transparent;
+	scrollbar-width: thin;
+}
+
+.goo-select__submenu {
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
+	width: max-content;
+	min-width: 100%;
+}
+
+.goo-select-submenu-popout--morph .goo-select__submenu-frame {
+	transition:
+		width 240ms ease,
+		height 240ms ease,
+		transform 240ms ease;
+}
+
+.goo-select__submenu-frame--morph {
+	overflow: hidden;
+}
+
+.goo-select__submenu-frame--morph .goo-select__submenu-viewport {
+	overflow: hidden;
+}
+
+.goo-select__submenu--measure,
+.goo-select__submenu--entering,
+.goo-select__submenu--leaving {
+	left: 0;
+	position: absolute;
+	top: 0;
+	width: max-content;
+}
+
+.goo-select__submenu--measure {
+	pointer-events: none;
+	visibility: hidden;
+}
+
+.goo-select__submenu--entering {
+	opacity: 0;
+}
+
+.goo-select__submenu--entering-active {
+	opacity: 1;
+	transition: opacity 220ms ease;
+}
+
+.goo-select__submenu--leaving {
+	opacity: 1;
+}
+
+.goo-select__submenu--leaving-active {
+	opacity: 0;
+	transition: opacity 220ms ease;
+}
+
+[dir='rtl'] .goo-select__submenu-arrow svg {
+	transform: scaleX(-1);
+}
+
+.goo-select__submenu-viewport::-webkit-scrollbar {
+	height: var(--goo-select-scrollbar-size);
+	width: var(--goo-select-scrollbar-size);
+}
+
+.goo-select__submenu-viewport::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.goo-select__submenu-viewport::-webkit-scrollbar-thumb {
+	background: var(--goo-select-scrollbar-thumb);
+	background-clip: padding-box;
+	border: 2px solid transparent;
+	border-radius: 999px;
+}
+
+.goo-select__submenu-viewport::-webkit-scrollbar-thumb:hover {
+	background: var(--goo-select-scrollbar-thumb-hover);
+	background-clip: padding-box;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.goo-select-submenu-popout--morph .goo-select__submenu-frame,
+	.goo-select__submenu--entering,
+	.goo-select__submenu--leaving {
+		transition: none;
+	}
+}

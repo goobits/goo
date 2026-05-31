@@ -1,0 +1,13 @@
+/**
+ * GooTurnstileField - wrapper around Cloudflare Turnstile widget
+ * BEM: .goo-turnstile-field
+ *
+ * Note: Cloudflare's widget paints its own UI. The wrapper here only owns
+ * layout/spacing concerns, not visual appearance.
+ */
+
+.goo-turnstile-field {
+	--goo-turnstile-margin: 0;
+	display: inline-block;
+	margin: var(--goo-turnstile-margin);
+}

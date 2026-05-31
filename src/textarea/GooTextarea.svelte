@@ -1,0 +1,149 @@
+<script module lang="ts">
+import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.js'
+
+/** GooController binding metadata for the Svelte textarea component. */
+export const controlSchema: SvelteControlSchema = {
+	propMapping: {
+		cols: 'cols',
+		maxLength: 'maxLength',
+		minLength: 'minLength',
+		name: 'name',
+		placeholder: 'placeholder',
+		readonly: 'readonly',
+		required: 'required',
+		rows: 'rows',
+		title: 'title'
+	}
+}
+</script>
+
+<script lang="ts">
+import './GooTextarea.css'
+
+import type { GooTextareaProps } from './types.js'
+
+let textareaElement: HTMLDivElement | undefined = $state()
+let inputElement: HTMLTextAreaElement | undefined = $state()
+let currentValue = $state('')
+let lastCommittedValue = $state('')
+
+let {
+	value = '',
+	placeholder = '',
+	name = '',
+	inputId,
+	rows = 3,
+	cols,
+	minLength,
+	maxLength,
+	disabled = false,
+	readonly = false,
+	required = false,
+	class: className = '',
+	style,
+	tabIndex,
+	children,
+	oninput,
+	onchange,
+	...rest
+}: GooTextareaProps = $props()
+
+$effect(() => {
+	currentValue = String(value ?? '')
+	lastCommittedValue = currentValue
+})
+
+const classes = $derived.by(() => {
+	const values = [ 'goo-textarea' ]
+	if (disabled) values.push('goo-textarea--disabled')
+	if (className) values.push(className)
+	return values.filter(Boolean).join(' ')
+})
+
+// `disabled` is a CSS styling hook on the host <div>; spread so svelte-check
+// does not reject it as an unknown attribute.
+const hostAttributes = $derived<Record<string, string | undefined>>({
+	disabled: disabled ? '' : undefined
+})
+
+export function setValue(nextValue: string, { silent = true }: { silent?: boolean } = {}): void {
+	const oldValue = currentValue
+	currentValue = String(nextValue)
+	if (!silent && oldValue !== currentValue) {
+		emitChange(oldValue)
+	}
+}
+
+export function getValue(): string {
+	return currentValue
+}
+
+export function focus(): void {
+	inputElement?.focus()
+}
+
+export function blur(): void {
+	inputElement?.blur()
+}
+
+export function select(): void {
+	inputElement?.select()
+}
+
+function handleInput(event: Event): void {
+	event.stopPropagation()
+	const oldValue = currentValue
+	currentValue = inputElement?.value ?? ''
+	if (oldValue !== currentValue) {
+		const detail = { value: currentValue, oldValue, target: textareaElement }
+		oninput?.(currentValue, oldValue)
+		textareaElement?.dispatchEvent(new CustomEvent('input', { bubbles: true, detail }))
+	}
+}
+
+function handleChange(event: Event): void {
+	event.stopPropagation()
+	const oldValue = lastCommittedValue
+	currentValue = inputElement?.value ?? ''
+	if (oldValue !== currentValue) {
+		lastCommittedValue = currentValue
+		emitChange(oldValue)
+	}
+}
+
+function emitChange(oldValue: string): void {
+	const detail = { value: currentValue, oldValue, target: textareaElement }
+	onchange?.(currentValue, oldValue)
+	textareaElement?.dispatchEvent(new CustomEvent('change', { bubbles: true, detail }))
+}
+</script>
+
+<div
+	{...rest}
+	bind:this={textareaElement}
+	class={classes}
+	{style}
+	{...hostAttributes}
+>
+	<textarea
+		bind:this={inputElement}
+		class="goo-textarea__input"
+		id={inputId}
+		{name}
+		{placeholder}
+		{rows}
+		{cols}
+		minlength={minLength}
+		maxlength={maxLength}
+		{disabled}
+		readonly={readonly}
+		{required}
+		tabindex={tabIndex}
+		value={currentValue}
+		oninput={handleInput}
+		onchange={handleChange}
+	></textarea>
+	{#if children}
+		{@render children()}
+	{/if}
+</div>

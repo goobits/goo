@@ -1,0 +1,228 @@
+/**
+ * GooPanel - Floating panel container
+ * BEM: .goo-panel, goo-panel__header, goo-panel__title, goo-panel__content
+ */
+
+.goo-panel {
+	/* Customizable via CSS custom properties */
+	--goo-panel-width: 280px;
+	--goo-panel-max-height: 90vh;
+	--goo-panel-bg: var(--goo-theme-surface, #1a1a2e);
+	--goo-panel-header-bg: var(--goo-theme-surface-raised, #16162a);
+	--goo-panel-border: var(--goo-theme-border, rgba(128, 128, 128, 0.2));
+	--goo-panel-fg: var(--goo-theme-fg, #e8e8e8);
+	--goo-panel-radius: var(--goo-theme-radius-lg, 6px);
+	--goo-panel-shadow: var(--goo-theme-shadow-lg, 0 4px 20px rgba(0, 0, 0, 0.4));
+	--goo-panel-z-index: 9999;
+	--goo-panel-margin: 10px;
+
+	display: block;
+	position: fixed;
+	width: var(--goo-panel-width);
+	max-height: var(--goo-panel-max-height);
+	background: var(--goo-panel-bg);
+	border: 1px solid var(--goo-panel-border);
+	border-radius: var(--goo-panel-radius);
+	box-shadow: var(--goo-panel-shadow);
+	color: var(--goo-panel-fg);
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
+	z-index: var(--goo-panel-z-index);
+	overflow: hidden;
+}
+
+/* Position presets */
+.goo-panel.goo-panel--top-right {
+	top: var(--goo-panel-margin);
+	right: var(--goo-panel-margin);
+}
+
+.goo-panel.goo-panel--top-left {
+	top: var(--goo-panel-margin);
+	left: var(--goo-panel-margin);
+}
+
+.goo-panel.goo-panel--bottom-right {
+	bottom: var(--goo-panel-margin);
+	right: var(--goo-panel-margin);
+}
+
+.goo-panel.goo-panel--bottom-left {
+	bottom: var(--goo-panel-margin);
+	left: var(--goo-panel-margin);
+}
+
+/* Header */
+.goo-panel__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 8px 12px;
+	background: var(--goo-panel-header-bg);
+	border-bottom: 1px solid var(--goo-panel-border);
+	cursor: grab;
+	user-select: none;
+}
+
+.goo-panel.goo-panel--dragging .goo-panel__header {
+	cursor: grabbing;
+}
+
+/* Title */
+.goo-panel__title {
+	font-size: var(--goo-theme-control-label-size, 0.8125rem);
+	font-weight: var(--goo-theme-control-label-weight, 600);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	color: var(--goo-theme-control-label-color, var(--goo-panel-fg));
+}
+
+/* Toggle button */
+.goo-panel__toggle {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 20px;
+	height: 20px;
+	padding: 0;
+	background: transparent;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	color: var(--goo-panel-fg);
+	opacity: 0.6;
+	transition:
+		opacity 0.15s,
+		background 0.15s,
+		transform 0.2s;
+}
+
+.goo-panel__toggle:hover {
+	opacity: 1;
+	background: color-mix(in srgb, var(--goo-theme-fg, #fff) 10%, transparent);
+}
+
+.goo-panel__toggle:focus-visible {
+	outline: 2px solid var(--goo-theme-focus-ring, #007bff);
+	outline-offset: 1px;
+}
+
+.goo-panel__toggle-icon {
+	display: block;
+	transition: transform 0.2s ease;
+}
+
+/* Rotate icon when closed */
+.goo-panel:not(.goo-panel--open) .goo-panel__toggle-icon {
+	transform: rotate(180deg);
+}
+
+/* Content container */
+.goo-panel__content {
+	display: none;
+	flex-direction: column;
+	max-height: calc(var(--goo-panel-max-height) - 45px);
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+/* Show content when open */
+.goo-panel.goo-panel--open .goo-panel__content {
+	display: flex;
+}
+
+/* Scrollbar styling */
+.goo-panel__content::-webkit-scrollbar {
+	width: 6px;
+}
+
+.goo-panel__content::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.goo-panel__content::-webkit-scrollbar-thumb {
+	background: color-mix(in srgb, var(--goo-theme-fg, #fff) 20%, transparent);
+	border-radius: 3px;
+}
+
+.goo-panel__content::-webkit-scrollbar-thumb:hover {
+	background: color-mix(in srgb, var(--goo-theme-fg, #fff) 30%, transparent);
+}
+
+/* Dragging state */
+.goo-panel.goo-panel--dragging {
+	opacity: 0.9;
+	transition: none;
+}
+
+/* Disabled state */
+.goo-panel.goo-panel--disabled {
+	opacity: 0.5;
+	pointer-events: none;
+}
+
+/* Collapsed state (when not open) */
+.goo-panel:not(.goo-panel--open) {
+	max-height: none;
+}
+
+.goo-panel:not(.goo-panel--open) .goo-panel__header {
+	border-bottom: none;
+}
+
+/* Animation for smooth open/close */
+@media (prefers-reduced-motion: no-preference) {
+	.goo-panel__content {
+		animation: goo-panel-expand 0.2s ease-out;
+	}
+}
+
+@keyframes goo-panel-expand {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+/* Nested folders in panel get proper styling */
+.goo-panel > .goo-panel__content > .goo-folder {
+	border-radius: 0;
+}
+
+.goo-panel > .goo-panel__content > .goo-folder:first-child .goo-folder__header {
+	border-radius: 0;
+}
+
+.goo-panel > .goo-panel__content > .goo-folder:last-child {
+	border-radius: 0 0 var(--goo-panel-radius) var(--goo-panel-radius);
+}
+
+/* ==========================================================================
+   Docked Mode - Panel takes up layout space instead of floating
+   ========================================================================== */
+
+.goo-panel.goo-panel--docked {
+	position: relative;
+	top: auto;
+	right: auto;
+	bottom: auto;
+	left: auto;
+	height: 100%;
+	max-height: 100%;
+	border-radius: 0;
+	box-shadow: none;
+	border: none;
+	border-left: 1px solid var(--goo-panel-border);
+	flex-shrink: 0;
+}
+
+.goo-panel.goo-panel--docked .goo-panel__header {
+	cursor: default;
+}
+
+.goo-panel.goo-panel--docked .goo-panel__content {
+	max-height: calc(100% - 45px);
+	height: calc(100% - 45px);
+}

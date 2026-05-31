@@ -1,0 +1,111 @@
+/**
+ * GooAngleInput - Angle input with circular dial and number input
+ * Replicates the exact look of sketch-AngleInput
+ * The dial sits INSIDE the input on the left, overlapping it
+ */
+
+.goo-angle-input {
+	--goo-angle-bg: var(
+		--goo-theme-border,
+		color-mix(in srgb, var(--goo-theme-fg, #fff) 10%, transparent)
+	);
+	--goo-angle-fg: var(--goo-theme-fg, rgba(255, 255, 255, 0.9));
+	--goo-angle-input-bg: var(
+		--goo-theme-surface-sunken,
+		color-mix(in srgb, var(--goo-theme-fg, #fff) 5%, transparent)
+	);
+	--goo-angle-border: var(--goo-theme-border, rgba(128, 128, 128, 0.3));
+	--goo-angle-track-size: var(--goo-angle-input-size, var(--goo-theme-control-height-md, 2rem));
+
+	align-items: center;
+	display: flex;
+	justify-content: flex-start;
+	position: relative;
+	width: 200px;
+}
+
+/* Circular dial/track - positioned absolutely inside the input */
+.goo-angle-input__track {
+	background: var(--goo-angle-bg);
+	border-radius: 50%;
+	border: 0;
+	border-right: 1px solid var(--goo-angle-border);
+	cursor: grab;
+	display: block;
+	height: var(--goo-angle-track-size);
+	width: var(--goo-angle-track-size);
+	position: absolute;
+	left: 0;
+	padding: 0;
+	z-index: 10; /* Higher than number input to ensure track receives clicks */
+}
+
+.goo-angle-input__track:active {
+	cursor: grabbing;
+}
+
+/* Center dot */
+.goo-angle-input__track::after {
+	content: '';
+	background: var(--goo-angle-fg);
+	border-radius: 50%;
+	height: 5px;
+	width: 5px;
+	position: absolute;
+	left: calc(50% - 2.5px);
+	top: calc(50% - 2.5px);
+	z-index: 2;
+}
+
+/* Handle that rotates. Animate transform when not actively dragging so taps and
+   programmatic value changes ease into place instead of jumping. The
+   `is-dragging` class on the track disables the transition for 1:1 drag feel. */
+.goo-angle-input__handle {
+	display: block;
+	width: 1px;
+	height: 16px;
+	background: var(--goo-angle-fg);
+	position: absolute;
+	left: calc(50% - 0.5px);
+	top: 50%;
+	transform: rotate(180deg);
+	transform-origin: 0.5px 0;
+	transition: transform var(--goo-theme-transition-normal, 0.2s ease);
+}
+
+.goo-angle-input__track.is-dragging .goo-angle-input__handle {
+	transition: none;
+}
+
+/* Number input wrapper - rounded left edge wraps around dial */
+.goo-angle-input .goo-number {
+	box-shadow: inset 0 0 0 1px var(--goo-angle-border);
+	background: var(--goo-angle-input-bg);
+	width: 100%;
+	padding-left: var(--goo-angle-track-size);
+	position: relative; /* Required for z-index to work */
+	z-index: 0;
+	border-top-left-radius: calc(var(--goo-angle-track-size) / 2);
+	border-bottom-left-radius: calc(var(--goo-angle-track-size) / 2);
+}
+
+/* Hide default arrows on number inputs when inside angle input */
+.goo-angle-input .goo-number .goo-number__arrows {
+	display: none;
+}
+
+/* Content area */
+.goo-angle-input .goo-number .goo-number__content {
+	text-align: left;
+	z-index: -1;
+}
+
+/* Disabled state */
+.goo-angle-input.goo-angle-input--disabled {
+	opacity: 0.5;
+	pointer-events: none;
+}
+
+.goo-angle-input.goo-angle-input--disabled .goo-angle-input__track {
+	cursor: not-allowed;
+}

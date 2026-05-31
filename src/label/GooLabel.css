@@ -1,0 +1,39 @@
+/**
+ * GooLabel Styles
+ * BEM: goo-label, goo-label--required
+ */
+
+.goo-label {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--goo-theme-space-xs);
+	font-family: var(--goo-theme-font-sans);
+	font-size: var(--goo-theme-font-size-sm);
+	font-weight: 500;
+	color: var(--goo-theme-fg);
+	line-height: 1.4;
+	cursor: default;
+	user-select: none;
+}
+
+/* Required indicator */
+.goo-label__required {
+	content: '*';
+	color: var(--goo-theme-negative);
+	font-weight: 600;
+}
+
+/* Disabled state */
+.goo-label[data-disabled='true'] {
+	opacity: 0.5;
+	pointer-events: none;
+}
+
+/* Clickable when linked to input */
+.goo-label[for] {
+	cursor: pointer;
+}
+
+.goo-label[for]:hover {
+	color: var(--goo-theme-accent);
+}
