@@ -102,6 +102,9 @@ export type ToastService = {
 	/** Show a toast with explicit options. */
 	show: (title: string, options?: ToastOptions) => string
 
+	/** Update an existing toast title/options by id. */
+	update: (id: string, title: string, options?: ToastOptions) => void
+
 	/** Dismiss a toast by id. */
 	dismiss: (id: string) => void
 

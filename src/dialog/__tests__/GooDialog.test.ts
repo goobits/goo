@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { createGooDialog, GooConfirm } from '../index.js'
+import { createGooDialog, GooConfirm } from '../index.ts'
 
 const nextFrame = () => new Promise(resolve => requestAnimationFrame(resolve))
 
@@ -36,5 +36,34 @@ describe('GooDialog', () => {
 		dialog?.querySelector<HTMLElement>('.goo-dialog__ok-btn')?.click()
 
 		await expect(resultPromise).resolves.toMatchObject({ ok: true })
+	})
+
+	it('treats string content as text instead of HTML', async() => {
+		const dialog = createGooDialog({
+			type: 'alert',
+			content: '<img src=x onerror=alert(1)>'
+		})
+
+		const resultPromise = dialog.open()
+		await nextFrame()
+
+		const content = document.querySelector<HTMLElement>('.goo-dialog__content')
+		expect(content?.textContent).toBe('<img src=x onerror=alert(1)>')
+		expect(content?.querySelector('img')).toBeNull()
+
+		await dialog.close()
+		await expect(resultPromise).resolves.toEqual({ cancel: true })
+	})
+
+	it('treats updated string content as text instead of HTML', () => {
+		const dialog = createGooDialog({
+			type: 'alert',
+			content: 'Initial'
+		})
+
+		dialog.setContent('<button onclick=alert(1)>Run</button>')
+
+		expect(dialog.$content?.textContent).toBe('<button onclick=alert(1)>Run</button>')
+		expect(dialog.$content?.querySelector('button')).toBeNull()
 	})
 })

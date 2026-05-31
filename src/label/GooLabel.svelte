@@ -1,6 +1,6 @@
 <script lang="ts">
 import './GooLabel.css'
-import type { GooLabelProps } from './types.js'
+import type { GooLabelProps } from './types.ts'
 
 let {
 	for: forId = '',

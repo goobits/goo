@@ -1,6 +1,6 @@
 # @goobits/goo
 
-Svelte 5 UI components and small browser utilities for Goobits and SketchAPI interfaces. Goo is built around package subpath imports, CSS custom property theming, and controls that can be used from Svelte or imperative DOM code where the export supports it.
+Reusable Svelte 5 UI components and small browser utilities. Goo is built around package subpath imports, CSS custom property theming, and controls that can be used from Svelte or imperative DOM code where the export supports it.
 
 ## TL;DR
 
@@ -57,48 +57,48 @@ Prefer subpath imports in apps when you only need one surface.
 
 ## Public Subpaths
 
-| Subpath | Main exports | Purpose |
-| --- | --- | --- |
-| `@goobits/goo` | root barrel | Most component and utility exports |
-| `@goobits/goo/angle-input` | `GooAngleInput` | Angle entry field |
-| `@goobits/goo/button` | `GooButton` | Button component |
-| `@goobits/goo/button/styles.css` | CSS | Button-only stylesheet |
-| `@goobits/goo/button-group` | `GooButtonGroup` | Segmented button group |
-| `@goobits/goo/button-group/styles.css` | CSS | Button-group-only stylesheet |
-| `@goobits/goo/checkbox` | `GooCheckbox` | Checkbox component |
-| `@goobits/goo/color` | `GooColor` | Color field component |
-| `@goobits/goo/components/diff` | `DiffCanvas`, `compare`, `renderBinary`, `renderGradient` | Image comparison UI and helpers |
-| `@goobits/goo/context-menu` | `createGooContextMenu` | Imperative context menu |
-| `@goobits/goo/controller` | `createGooController`, registry helpers | Object-bound control creation |
-| `@goobits/goo/data-grid` | `GooDataGrid` | Sortable tabular/grid UI |
-| `@goobits/goo/dialog` | dialog helpers, `GooDialog` surface | Alert, confirm, prompt, and field dialogs |
-| `@goobits/goo/error-boundary` | `GooErrorBoundary` | Svelte error boundary wrapper |
-| `@goobits/goo/floating-window` | `createGooFloatingWindow`, `hideFocusedGooFloatingWindow` | Floating window manager |
-| `@goobits/goo/folder` | `GooFolder` | Collapsible folder controls |
-| `@goobits/goo/i18n` | `setLocale`, `translate`, `isRTL`, `onLocaleChange` | Locale adapter utilities |
-| `@goobits/goo/icon` | `GooIcon`, `iconRegistry`, render helpers | Registry-backed icons |
-| `@goobits/goo/icon/registry` | `iconRegistry` | Icon registry singleton |
-| `@goobits/goo/input` | `GooInput`, `GooNumber` | Text and number inputs |
-| `@goobits/goo/input/styles.css` | CSS | Input-only stylesheet |
-| `@goobits/goo/label` | `GooLabel` | Label component |
-| `@goobits/goo/number` | `formatNumber`, `clamp`, `toPercent`, `fromPercent`, `roundNumber` | Number utilities |
-| `@goobits/goo/panel` | `GooPanel` | Inspector panel shell |
-| `@goobits/goo/popout` | `GooPopout`, `createGooPopout`, popout registry helpers | Popout positioning and lifecycle |
-| `@goobits/goo/positioning` | `positionElementAt`, `calculatePosition`, positioning types | Shared positioning math |
-| `@goobits/goo/progress-ring` | `GooProgressRing`, `createGooProgressRingTimer` | Progress ring and timer overlay |
-| `@goobits/goo/radio` | `GooRadio`, `GooRadioGroup` | Radio controls |
-| `@goobits/goo/schema` | `GooSchema`, `GooSchemaComponent`, schema builders | Schema-driven control generation |
-| `@goobits/goo/select` | `GooSelect` | Select/menu component with submenu support |
-| `@goobits/goo/select/styles.css` | CSS | Select-only stylesheet |
-| `@goobits/goo/slider` | `GooSlider` | Single and multi-thumb sliders |
-| `@goobits/goo/spinner` | `GooSpinner`, `renderGooSpinnerHtml` | Spinner component and HTML renderer |
-| `@goobits/goo/table` | `GooTable` | Data-grid-backed table component |
-| `@goobits/goo/textarea` | `GooTextarea` | Textarea component |
-| `@goobits/goo/toast` | `GooToast`, `GooToaster`, `toast`, `toastStore` | Toast notification UI and store |
-| `@goobits/goo/tooltip` | `GooTooltip`, `tooltip`, `createGooTooltip` | Tooltip component and action/helper |
-| `@goobits/goo/turnstile` | `GooTurnstileField` | Cloudflare Turnstile field wrapper |
-| `@goobits/goo/virtualGrid` | `VirtualGrid`, selection/windowing helpers | Virtualized grid primitive |
-| `@goobits/goo/vortex` | `GooVortex`, `createGooVortex` | Temporary positioned activity indicators |
+| Subpath                                | Main exports                                                       | Purpose                                    |
+| -------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------ |
+| `@goobits/goo`                         | root barrel                                                        | Most component and utility exports         |
+| `@goobits/goo/angle-input`             | `GooAngleInput`                                                    | Angle entry field                          |
+| `@goobits/goo/button`                  | `GooButton`                                                        | Button component                           |
+| `@goobits/goo/button/styles.css`       | CSS                                                                | Button-only stylesheet                     |
+| `@goobits/goo/button-group`            | `GooButtonGroup`                                                   | Segmented button group                     |
+| `@goobits/goo/button-group/styles.css` | CSS                                                                | Button-group-only stylesheet               |
+| `@goobits/goo/checkbox`                | `GooCheckbox`                                                      | Checkbox component                         |
+| `@goobits/goo/color`                   | `GooColor`                                                         | Color field component                      |
+| `@goobits/goo/diff`                    | `DiffCanvas`, `compare`, `renderBinary`, `renderGradient`          | Image comparison UI and helpers            |
+| `@goobits/goo/context-menu`            | `createGooContextMenu`                                             | Imperative context menu                    |
+| `@goobits/goo/controller`              | `createGooController`, registry helpers                            | Object-bound control creation              |
+| `@goobits/goo/data-grid`               | `GooDataGrid`                                                      | Sortable tabular/grid UI                   |
+| `@goobits/goo/dialog`                  | dialog helpers, `GooDialog` surface                                | Alert, confirm, prompt, and field dialogs  |
+| `@goobits/goo/error-boundary`          | `GooErrorBoundary`                                                 | Svelte error boundary wrapper              |
+| `@goobits/goo/floating-window`         | `createGooFloatingWindow`, `hideFocusedGooFloatingWindow`          | Floating window manager                    |
+| `@goobits/goo/folder`                  | `GooFolder`                                                        | Collapsible folder controls                |
+| `@goobits/goo/i18n`                    | `setLocale`, `translate`, `isRTL`, `onLocaleChange`                | Locale adapter utilities                   |
+| `@goobits/goo/icon`                    | `GooIcon`, `iconRegistry`, render helpers                          | Registry-backed icons                      |
+| `@goobits/goo/icon/registry`           | `iconRegistry`                                                     | Icon registry singleton                    |
+| `@goobits/goo/input`                   | `GooInput`, `GooNumber`                                            | Text and number inputs                     |
+| `@goobits/goo/input/styles.css`        | CSS                                                                | Input-only stylesheet                      |
+| `@goobits/goo/label`                   | `GooLabel`                                                         | Label component                            |
+| `@goobits/goo/number`                  | `formatNumber`, `clamp`, `toPercent`, `fromPercent`, `roundNumber` | Number utilities                           |
+| `@goobits/goo/panel`                   | `GooPanel`                                                         | Inspector panel shell                      |
+| `@goobits/goo/popout`                  | `GooPopout`, `createGooPopout`, popout registry helpers            | Popout positioning and lifecycle           |
+| `@goobits/goo/positioning`             | `positionElementAt`, `calculatePosition`, positioning types        | Shared positioning math                    |
+| `@goobits/goo/progress-ring`           | `GooProgressRing`, `createGooProgressRingTimer`                    | Progress ring and timer overlay            |
+| `@goobits/goo/radio`                   | `GooRadio`, `GooRadioGroup`                                        | Radio controls                             |
+| `@goobits/goo/schema`                  | `GooSchema`, `GooSchemaComponent`, schema builders                 | Schema-driven control generation           |
+| `@goobits/goo/select`                  | `GooSelect`                                                        | Select/menu component with submenu support |
+| `@goobits/goo/select/styles.css`       | CSS                                                                | Select-only stylesheet                     |
+| `@goobits/goo/slider`                  | `GooSlider`                                                        | Single and multi-thumb sliders             |
+| `@goobits/goo/spinner`                 | `GooSpinner`, `renderGooSpinnerHtml`                               | Spinner component and HTML renderer        |
+| `@goobits/goo/table`                   | `GooTable`                                                         | Data-grid-backed table component           |
+| `@goobits/goo/textarea`                | `GooTextarea`                                                      | Textarea component                         |
+| `@goobits/goo/toast`                   | `GooToast`, `GooToaster`, `toast`, `toastStore`                    | Toast notification UI and store            |
+| `@goobits/goo/tooltip`                 | `GooTooltip`, `tooltip`, `createGooTooltip`                        | Tooltip component and action/helper        |
+| `@goobits/goo/turnstile`               | `GooTurnstileField`                                                | Cloudflare Turnstile field wrapper         |
+| `@goobits/goo/virtualGrid`             | `VirtualGrid`, selection/windowing helpers                         | Virtualized grid primitive                 |
+| `@goobits/goo/vortex`                  | `GooVortex`, `createGooVortex`                                     | Temporary positioned activity indicators   |
 
 ## Core Components
 
@@ -289,7 +289,7 @@ createGooController(model, 'enabled')
 <script lang="ts">
 	import { GooSchemaComponent } from '@goobits/goo/schema'
 
-	const data = { name: 'Brush', enabled: true, size: 24 }
+	const data = { name: 'Preset', enabled: true, size: 24 }
 	const schema = [
 		{ path: 'name', type: 'text', label: 'Name' },
 		{ path: 'enabled', type: 'checkbox', label: 'Enabled' },
@@ -310,7 +310,7 @@ import { GooAlert, GooConfirm, GooPrompt } from '@goobits/goo/dialog'
 await GooAlert('Saved')
 const confirm = await GooConfirm('Delete this item?')
 const prompt = await GooPrompt({
-	fields: [ { type: 'text', name: 'name', label: 'Name' } ]
+	fields: [{ type: 'text', name: 'name', label: 'Name' }]
 })
 ```
 
@@ -355,12 +355,12 @@ import { createGooContextMenu } from '@goobits/goo/context-menu'
 
 const menu = createGooContextMenu({
 	options: [
-		{ id: 'copy', label: 'Copy', onChoose: id => console.log(id) },
-		{ id: 'delete', label: 'Delete', onChoose: id => console.log(id) }
+		{ id: 'copy', label: 'Copy', onChoose: (id) => console.log(id) },
+		{ id: 'delete', label: 'Delete', onChoose: (id) => console.log(id) }
 	]
 })
 
-targetElement.addEventListener('contextmenu', event => {
+targetElement.addEventListener('contextmenu', (event) => {
 	event.preventDefault()
 	menu.open({ x: event.clientX, y: event.clientY })
 })
@@ -373,7 +373,7 @@ targetElement.addEventListener('contextmenu', event => {
 	import { tooltip } from '@goobits/goo/tooltip'
 </script>
 
-<button use:tooltip={{ content: 'Create a new layer' }}>New</button>
+<button use:tooltip={{ content: 'Create a new item' }}>New</button>
 ```
 
 ### Toast
@@ -473,7 +473,7 @@ vortex.destroy('save')
 		{ key: 'status', label: 'Status', value: row => row.status }
 	]
 	const rows = [
-		{ id: '1', name: 'Sketch', status: 'Ready' }
+		{ id: '1', name: 'Document', status: 'Ready' }
 	]
 </script>
 
@@ -529,21 +529,25 @@ iconRegistry.register('save', '<svg viewBox="0 0 24 24">...</svg>')
 For server or string-template rendering:
 
 ```ts
-import { renderIconHtml, renderIconPlaceholderHtml, renderIconPlaceholders } from '@goobits/goo/icon'
+import {
+	renderIconHtml,
+	renderIconPlaceholderHtml,
+	renderIconPlaceholders
+} from '@goobits/goo/icon'
 ```
 
 ## Image Diff
 
 ```svelte
 <script lang="ts">
-	import { DiffCanvas } from '@goobits/goo/components/diff'
+	import { DiffCanvas } from '@goobits/goo/diff'
 </script>
 
 <DiffCanvas {imageA} {imageB} />
 ```
 
 ```ts
-import { compare, renderGradient } from '@goobits/goo/components/diff'
+import { compare, renderGradient } from '@goobits/goo/diff'
 
 const result = compare(canvasA, canvasB)
 const visualization = renderGradient(result)
@@ -581,7 +585,7 @@ import { getLocale, isRTL, onLocaleChange, setLocale, translate } from '@goobits
 setLocale({
 	rtl: document.dir === 'rtl',
 	locale: navigator.language,
-	translate: key => key
+	translate: (key) => key
 })
 
 const unsubscribe = onLocaleChange(() => {

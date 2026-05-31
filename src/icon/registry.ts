@@ -13,11 +13,9 @@
  *
  * // Then render with <GooIcon value="pencil" size={20} />
  *
- * SECURITY: registered SVG is rendered verbatim via `{@html}` in `GooIcon` and
- * the raw-HTML icon helpers, so it is NOT sanitized. Only register SVG from
- * trusted, author-controlled sources (build-time icon modules). Never register
- * SVG derived from user input or untrusted remote data — doing so is a stored
- * XSS vector. Sanitize at the source if such input must be supported.
+ * SECURITY: registered SVG is sanitized before rendering. The sanitizer keeps
+ * common static SVG icon shapes and removes scripts, event handlers, external
+ * references, and unsupported elements.
  *
  * @module goo/icon/registry
  */
@@ -26,7 +24,120 @@
 // Icon Storage
 // =============================================================================
 
-const icons = new Map()
+type IconOptions = { size?: number }
+type IconDefinition = string | ((options: IconOptions) => string)
+
+const icons = new Map<string, IconDefinition>()
+const allowedSvgElements = new Set([
+	'svg',
+	'g',
+	'path',
+	'line',
+	'polyline',
+	'polygon',
+	'circle',
+	'ellipse',
+	'rect',
+	'defs',
+	'clippath',
+	'mask',
+	'lineargradient',
+	'radialgradient',
+	'stop',
+	'title',
+	'desc',
+	'use'
+])
+const allowedSvgAttributes = new Set([
+	'aria-hidden',
+	'aria-label',
+	'class',
+	'clip-path',
+	'clip-rule',
+	'cx',
+	'cy',
+	'd',
+	'fill',
+	'fill-opacity',
+	'fill-rule',
+	'focusable',
+	'gradienttransform',
+	'gradientunits',
+	'height',
+	'href',
+	'id',
+	'mask',
+	'offset',
+	'opacity',
+	'points',
+	'r',
+	'role',
+	'rx',
+	'ry',
+	'stop-color',
+	'stroke',
+	'stroke-dasharray',
+	'stroke-dashoffset',
+	'stroke-linecap',
+	'stroke-linejoin',
+	'stroke-miterlimit',
+	'stroke-opacity',
+	'stroke-width',
+	'transform',
+	'viewbox',
+	'width',
+	'x',
+	'x1',
+	'x2',
+	'xmlns',
+	'y',
+	'y1',
+	'y2'
+])
+const localReferenceAttributes = new Set([ 'clip-path', 'href', 'mask' ])
+
+function isLocalReference(value: string): boolean {
+	return value.startsWith('#') || /^url\(\s*#[^)]+\s*\)$/u.test(value)
+}
+
+function sanitizeSvgElement(element: Element): boolean {
+	const tagName = element.localName.toLowerCase()
+	if (!allowedSvgElements.has(tagName)) return false
+
+	for (const attributeName of element.getAttributeNames()) {
+		const normalizedName = attributeName.toLowerCase()
+		const value = element.getAttribute(attributeName) ?? ''
+		if (
+			normalizedName.startsWith('on') ||
+			!allowedSvgAttributes.has(normalizedName) ||
+			(localReferenceAttributes.has(normalizedName) && !isLocalReference(value))
+		) {
+			element.removeAttribute(attributeName)
+		}
+	}
+
+	for (const child of Array.from(element.children)) {
+		if (!sanitizeSvgElement(child)) {
+			child.remove()
+		}
+	}
+
+	return true
+}
+
+function sanitizeSvg(svg: string): string | null {
+	const trimmed = svg.trim()
+	if (!trimmed || typeof DOMParser === 'undefined') return null
+
+	const document = new DOMParser().parseFromString(trimmed, 'image/svg+xml')
+	const root = document.documentElement
+	if (document.querySelector('parsererror') || root.localName.toLowerCase() !== 'svg') {
+		return null
+	}
+	if (!sanitizeSvgElement(root)) return null
+
+	return root.outerHTML
+}
 
 // =============================================================================
 // Registry API
@@ -42,7 +153,7 @@ export const iconRegistry = {
 	 * @param {string} name - Icon name.
 	 * @param {string|Function} svg - SVG string or function returning SVG string
 	 */
-	register(name, svg) {
+	register(name: string, svg: IconDefinition) {
 		icons.set(name, svg)
 	},
 
@@ -50,7 +161,7 @@ export const iconRegistry = {
 	 * Register multiple icons at once.
 	 * @param {Object<string, string|Function>} iconMap - Map of name -> SVG
 	 */
-	registerAll(iconMap) {
+	registerAll(iconMap: Record<string, IconDefinition>) {
 		for (const [ name, svg ] of Object.entries(iconMap)) {
 			icons.set(name, svg)
 		}
@@ -63,15 +174,15 @@ export const iconRegistry = {
 	 * @param {number} [options.size] - Icon size
 	 * @returns {string|null} SVG string or null if not found
 	 */
-	get(name, options = {}) {
+	get(name: string, options: IconOptions = {}) {
 		const icon = icons.get(name)
 		if (!icon) return null
 
 		// Support both string SVGs and factory functions
 		if (typeof icon === 'function') {
-			return icon(options)
+			return sanitizeSvg(icon(options))
 		}
-		return icon
+		return sanitizeSvg(icon)
 	},
 
 	/**
@@ -79,7 +190,7 @@ export const iconRegistry = {
 	 * @param {string} name - Icon name
 	 * @returns {boolean}
 	 */
-	has(name) {
+	has(name: string) {
 		return icons.has(name)
 	},
 
@@ -96,7 +207,7 @@ export const iconRegistry = {
 	 * @param {string} name - Icon name
 	 * @returns {boolean} True if icon was removed
 	 */
-	unregister(name) {
+	unregister(name: string) {
 		return icons.delete(name)
 	},
 

@@ -3,15 +3,15 @@ import './GooDataGrid.css'
 
 import { tick } from 'svelte'
 
-import { calculateVirtualGridWindow, virtualGridSpacerHeight } from '../virtualGrid/virtualWindow.js'
-import type { VirtualGridWindow } from '../virtualGrid/types.js'
+import { calculateVirtualGridWindow, virtualGridSpacerHeight } from '../virtualGrid/virtualWindow.ts'
+import type { VirtualGridWindow } from '../virtualGrid/types.ts'
 import type {
 	GooDataGridCellValue,
 	GooDataGridProps,
 	GooDataGridRowKey,
 	GooDataGridSortState,
 	GooDataGridSortValue
-} from './types.js'
+} from './types.ts'
 
 const AUTO_VIRTUAL_ROW_COUNT = 80
 const DEFAULT_ROW_HEIGHT = 44

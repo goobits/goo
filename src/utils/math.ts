@@ -6,6 +6,9 @@
 
 /**
  * Clamp a value between min and max.
+ * @param value - value.
+ * @param min - min.
+ * @param max - max.
  */
 export const clamp = (value: number, min: number, max: number): number =>
 	Math.max(min, Math.min(max, value))

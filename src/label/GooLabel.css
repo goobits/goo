@@ -4,28 +4,49 @@
  */
 
 .goo-label {
+	--goo-label-color: var(
+		--goo-theme-control-label-color,
+		var(--goo-theme-muted, rgba(255, 255, 255, 0.72))
+	);
+	--goo-label-color-hover: var(
+		--goo-theme-control-label-color-hover,
+		var(--goo-theme-fg, rgba(255, 255, 255, 0.92))
+	);
+	--goo-label-required-color: var(--goo-theme-negative, #ef4444);
+	--goo-label-disabled-opacity: var(--goo-theme-disabled-opacity, 0.55);
+	--goo-label-motion: var(--goo-theme-transition-fast, 0.15s ease);
+
 	display: inline-flex;
 	align-items: center;
-	gap: var(--goo-theme-space-xs);
-	font-family: var(--goo-theme-font-sans);
-	font-size: var(--goo-theme-font-size-sm);
-	font-weight: 500;
-	color: var(--goo-theme-fg);
-	line-height: 1.4;
+	gap: var(--goo-theme-space-xs, 0.25rem);
+	font-family: var(--goo-theme-font-sans, system-ui, sans-serif);
+	font-size: var(--goo-theme-control-label-size, var(--goo-theme-font-size-sm, 0.8125rem));
+	font-weight: var(--goo-theme-control-label-weight, 600);
+	color: var(--goo-label-color);
+	line-height: 1.25;
 	cursor: default;
 	user-select: none;
+	transition:
+		color var(--goo-label-motion),
+		opacity var(--goo-label-motion);
+}
+
+.goo-label__content {
+	min-width: 0;
 }
 
 /* Required indicator */
 .goo-label__required {
 	content: '*';
-	color: var(--goo-theme-negative);
-	font-weight: 600;
+	color: var(--goo-label-required-color);
+	font-weight: 700;
+	line-height: 1;
 }
 
 /* Disabled state */
 .goo-label[data-disabled='true'] {
-	opacity: 0.5;
+	color: var(--goo-label-color);
+	opacity: var(--goo-label-disabled-opacity);
 	pointer-events: none;
 }
 
@@ -35,5 +56,5 @@
 }
 
 .goo-label[for]:hover {
-	color: var(--goo-theme-accent);
+	color: var(--goo-label-color-hover);
 }

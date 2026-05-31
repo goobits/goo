@@ -7,6 +7,9 @@ const BASE_Z_INDEX = 99999
 
 /** Minimal dialog surface the manager needs to stack and close dialogs. */
 export interface ManagedDialog {
+	/**
+ * Close.
+ */
 	close(): Promise<void>
 }
 
@@ -16,14 +19,16 @@ export interface ManagedDialog {
 class GooDialogManager {
 	#dialogs: ManagedDialog[] = []
 
-	/** Register a dialog so it participates in stacking and close-top handling. */
+	/** Register a dialog so it participates in stacking and close-top handling. 	 * @param dialog - dialog.
+	 */
 	register(dialog: ManagedDialog): void {
 		if (!this.#dialogs.includes(dialog)) {
 			this.#dialogs.push(dialog)
 		}
 	}
 
-	/** Remove a dialog from the stack. */
+	/** Remove a dialog from the stack. 	 * @param dialog - dialog.
+	 */
 	unregister(dialog: ManagedDialog): void {
 		const index = this.#dialogs.indexOf(dialog)
 		if (index !== -1) {
@@ -31,7 +36,8 @@ class GooDialogManager {
 		}
 	}
 
-	/** Compute the stacking z-index for a dialog based on its position in the stack. */
+	/** Compute the stacking z-index for a dialog based on its position in the stack. 	 * @param dialog - dialog.
+	 */
 	getZIndex(dialog: ManagedDialog): number {
 		const index = this.#dialogs.indexOf(dialog)
 		return BASE_Z_INDEX + (index >= 0 ? index * 2 : this.#dialogs.length * 2)
@@ -65,6 +71,9 @@ class GooDialogManager {
 }
 
 // Singleton instance
+/**
+	 * Dialog manager.
+	 */
 export const dialogManager = new GooDialogManager()
 
 // Also export class for testing

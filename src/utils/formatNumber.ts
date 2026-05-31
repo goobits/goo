@@ -3,7 +3,7 @@
  * @module goobits/utils/formatNumber
  */
 
-import { roundNumber } from './numberUtils.js'
+import { roundNumber } from './numberUtils.ts'
 
 /**
  * Unit suffix map for display formatting.
@@ -32,6 +32,9 @@ const suffixes: Record<string, string> = {
 	'm': 'm'
 }
 
+/**
+ * Formats number options.
+ */
 export interface FormatNumberOptions {
 
 	/** Maximum value for context-aware rounding */
@@ -48,19 +51,23 @@ export interface FormatNumberOptions {
 }
 
 /**
- * Format a number to a specific unit format.
- *
- * @param value - The number to format
- * @param unit - The unit type ('%', 'degree', 'px', 'float', 'int', etc.)
- * @param options - Formatting options
- * @returns Formatted number (with suffix if appendFormatSuffix is true)
- *
- * @example
- * formatNumber(0.5, '%') // '50%'
- * formatNumber(45, 'degree') // '45°'
- * formatNumber(1.234, 'float') // 1.234
- * formatNumber(1.5, 'int') // 2
- */
+	 * Format a number to a specific unit format.
+	 *
+	 * @param value - The number to format
+	 * @param unit - The unit type ('%', 'degree', 'px', 'float', 'int', etc.)
+	 * @param options - Formatting options
+	 * @returns Formatted number (with suffix if appendFormatSuffix is true)
+	 *
+	 * @example
+	 * formatNumber(0.5, '%') // '50%'
+	 * formatNumber(45, 'degree') // '45°'
+	 * formatNumber(1.234, 'float') // 1.234
+	 * formatNumber(1.5, 'int') // 2
+	 * @param step - step.
+	 * @param min - min.
+	 * @param max - max.
+	 * @param appendFormatSuffix - append format suffix.
+	 */
 export function formatNumber(
 	value: number,
 	unit: string,
@@ -84,6 +91,12 @@ export function formatNumber(
 /**
  * Convert a number to the appropriate precision for a unit.
  * Returns string for cases where trailing zeros matter (e.g., "6.70" not "6.7").
+ * @param value - value.
+ * @param unit - unit.
+ * @param step - step.
+ * @param min - min.
+ * @param max - max.
+ * @param appendFormatSuffix - append format suffix.
  */
 function convertToUnit(
 	value: number,

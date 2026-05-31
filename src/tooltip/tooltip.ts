@@ -30,7 +30,7 @@
 
 import './GooTooltip.css'
 
-import { createGooPopout } from '../popout/index.js'
+import { createGooPopout } from '../popout/index.ts'
 
 /** Infer popout instance type from factory return */
 type GooPopoutInstance = ReturnType<typeof createGooPopout>
@@ -39,6 +39,9 @@ type GooPopoutInstance = ReturnType<typeof createGooPopout>
 // Types
 // =============================================================================
 
+/**
+ * Goo tooltip options.
+ */
 export interface GooTooltipOptions {
 
 	/** Target element to attach tooltip to (required) */
@@ -78,6 +81,9 @@ export interface GooTooltipOptions {
 	onhide?: (ctx: { $element: HTMLElement }) => void
 }
 
+/**
+	 * Goo tooltip instance.
+	 */
 export interface GooTooltipInstance {
 
 	/** The tooltip DOM element (null when hidden and not yet created) */
@@ -95,7 +101,8 @@ export interface GooTooltipInstance {
 	/** Destroy the tooltip and clean up event listeners */
 	destroy(): void
 
-	/** Update tooltip content */
+	/** Update tooltip content 	 * @param content - content.
+	 */
 	setContent(content: string | HTMLElement): void
 }
 

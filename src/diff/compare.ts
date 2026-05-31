@@ -31,6 +31,9 @@ export interface DiffResult {
 	height: number
 }
 
+/**
+	 * Diff options.
+	 */
 export interface DiffOptions {
 
 	/** Minimum total RGBA difference to count as different (default: 5) */
@@ -46,8 +49,10 @@ const DEFAULT_OPTIONS: Required<DiffOptions> = {
 }
 
 /**
- * Extract ImageData from input (handles both ImageData and HTMLCanvasElement)
- */
+	 * Extract ImageData from input (handles both ImageData and HTMLCanvasElement)
+	 *
+	 * @param input - Input value.
+	 */
 function toImageData(input: ImageData | HTMLCanvasElement): ImageData {
 	if (typeof ImageData !== 'undefined' && input instanceof ImageData) {
 		return input

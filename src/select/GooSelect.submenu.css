@@ -6,7 +6,7 @@
 	flex-shrink: 0;
 	width: var(--goo-select-item-box-size, 1.25rem);
 	height: var(--goo-select-item-box-size, 1.25rem);
-	margin-left: auto;
+	margin-inline-start: auto;
 	font-size: var(--goo-theme-icon-xs, 0.75rem);
 	color: var(--goo-select-fg-muted);
 }
@@ -14,7 +14,26 @@
 .goo-select__submenu-arrow svg {
 	display: block;
 	height: 1rem;
+	transform: scaleX(var(--goo-select-submenu-arrow-scale, 1));
 	width: 1rem;
+}
+
+[dir='rtl'] .goo-select__option--submenu {
+	--goo-select-submenu-arrow-scale: -1;
+}
+
+.goo-select__option--submenu[data-submenu-side='right'] {
+	--goo-select-submenu-arrow-scale: 1;
+}
+
+.goo-select__option--submenu[data-submenu-side='left'] {
+	--goo-select-submenu-arrow-scale: -1;
+}
+
+.goo-select__option--selected .goo-select__submenu-arrow,
+.goo-select__option--selected:hover .goo-select__submenu-arrow,
+.goo-select__option--selected.goo-select__option--hovered .goo-select__submenu-arrow {
+	color: var(--goo-select-selected-fg);
 }
 
 /* Submenu content inside GooPopout */
@@ -48,11 +67,15 @@
 	min-width: 100%;
 }
 
+/* Sequential morph in three phases so the content is never clipped by the box:
+   (1) old content fades out at the old size (0-100ms), (2) the box resizes/repositions
+   to fit the new content while empty (100-260ms), (3) new content fades + slides in at
+   the new size (260-400ms). The resize is therefore delayed until the fade-out finishes. */
 .goo-select-submenu-popout--morph .goo-select__submenu-frame {
 	transition:
-		width 240ms cubic-bezier(0.16, 1, 0.3, 1),
-		height 240ms cubic-bezier(0.16, 1, 0.3, 1),
-		transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
+		width 160ms cubic-bezier(0.16, 1, 0.3, 1) 100ms,
+		height 160ms cubic-bezier(0.16, 1, 0.3, 1) 100ms,
+		transform 160ms cubic-bezier(0.16, 1, 0.3, 1) 100ms;
 }
 
 .goo-select__submenu-frame--morph {
@@ -60,15 +83,17 @@
 }
 
 .goo-select__submenu-frame--morph .goo-select__submenu-viewport {
+	height: 100%;
 	overflow: hidden;
 }
 
 .goo-select__submenu--measure,
 .goo-select__submenu--entering,
 .goo-select__submenu--leaving {
-	left: 0;
+	inset-inline-start: var(--goo-select-padding);
+	left: auto;
 	position: absolute;
-	top: 0;
+	top: var(--goo-select-padding);
 	width: max-content;
 }
 
@@ -81,54 +106,37 @@
 	visibility: hidden;
 }
 
-/* Directional slide + fade. The incoming submenu enters from the direction of
-   travel (down a list -> rises up into place; up a list -> drops down) and the
-   outgoing submenu leaves the opposite way, with a slight scale. The motion is
-   what makes the swap legible; a pure opacity fade is near-invisible on the dark
-   panel where low-opacity white text stays readable. */
+/* Phase 3: new content fades + slides in after the box has resized (delay 260ms),
+   at the new size, so it is fully visible rather than clipped. Slides from the
+   direction of travel (down a list -> rises up; up -> drops down). */
 .goo-select__submenu--entering {
 	opacity: 0;
 }
 
 .goo-select__submenu--entering.goo-select__submenu--down {
-	transform: translateY(10px) scale(0.99);
+	transform: translateY(8px);
 }
 
 .goo-select__submenu--entering.goo-select__submenu--up {
-	transform: translateY(-10px) scale(0.99);
+	transform: translateY(-8px);
 }
 
-.goo-select__submenu--entering-active {
+.goo-select__submenu--entering.goo-select__submenu--entering-active {
 	opacity: 1;
-	transform: translateY(0) scale(1);
+	transform: translateY(0);
 	transition:
-		opacity 180ms ease-out 30ms,
-		transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+		opacity 140ms ease-out 260ms,
+		transform 150ms cubic-bezier(0.16, 1, 0.3, 1) 260ms;
 }
 
+/* Phase 1: old content fades out first, at the old size, before the box resizes. */
 .goo-select__submenu--leaving {
 	opacity: 1;
 }
 
-/* Old content clears faster than the new content arrives, so a perceptible dip
-   reads as a real cross-fade instead of a constant-coverage hard swap. */
 .goo-select__submenu--leaving-active {
 	opacity: 0;
-	transition:
-		opacity 140ms ease-in,
-		transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.goo-select__submenu--leaving-active.goo-select__submenu--down {
-	transform: translateY(-10px) scale(0.99);
-}
-
-.goo-select__submenu--leaving-active.goo-select__submenu--up {
-	transform: translateY(10px) scale(0.99);
-}
-
-[dir='rtl'] .goo-select__submenu-arrow svg {
-	transform: scaleX(-1);
+	transition: opacity 100ms ease-in;
 }
 
 .goo-select__submenu-viewport::-webkit-scrollbar {
@@ -153,9 +161,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.goo-select-submenu-popout--morph .goo-select__submenu-frame,
-	.goo-select__submenu--entering,
-	.goo-select__submenu--leaving {
+	.goo-select-submenu-popout--morph .goo-select__submenu-frame {
 		transition: none;
 	}
 }

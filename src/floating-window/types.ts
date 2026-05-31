@@ -1,4 +1,4 @@
-import type { GooPointerDragEvent } from '../utils/pointerDrag.js'
+import type { GooPointerDragEvent } from '../utils/pointerDrag.ts'
 
 /**
  * Horizontal floating-window anchor.
@@ -75,16 +75,56 @@ export interface GooFloatingWindow {
 	element: HTMLElement
 	ready: Promise<void>
 	settings: GooFloatingWindowSettings
+	/**
+	 * Destroy.
+	 */
 	destroy(): void
+	/**
+	 * Flip horizontal.
+	 */
 	flipHorizontal(): void
+	/**
+	 * Focus.
+	 */
 	focus(): void
+	/**
+	 * Gets containment rect.
+	 */
 	getContainmentRect(): DOMRect
+	/**
+	 * Hide.
+	 */
 	hide(): boolean
+	/**
+	 * Checks whether open.
+	 */
 	isOpen(): boolean
+	/**
+	 * Restore.
+	 */
 	restore(): void
+	/**
+	 * Restore from storage.
+	 */
 	restoreFromStorage(): Promise<void>
+	/**
+	 * Sets alignment.
+	 *
+	 * @param position - position.
+	 */
 	setAlignment(position: GooFloatingWindowPosition): void
+	/**
+	 * Sets containment.
+	 *
+	 * @param containment - containment.
+	 */
 	setContainment(containment?: HTMLElement): void
+	/**
+	 * Show.
+	 */
 	show(): void
+	/**
+	 * Toggle.
+	 */
 	toggle(): void
 }

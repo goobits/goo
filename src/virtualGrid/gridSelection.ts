@@ -1,13 +1,28 @@
+/**
+ * Grid selection state.
+ */
 export interface GridSelectionState {
 	selection: Set<string>
 	lastClicked: string | null
 }
 
+/**
+ * Grid click modifiers.
+ */
 export interface GridClickModifiers {
 	shift: boolean
 	meta: boolean
 }
 
+/**
+ * Next grid click selection.
+ *
+ * @param current - current.
+ * @param lastClicked - last clicked.
+ * @param key - key.
+ * @param modifiers - modifiers.
+ * @param orderedKeys - ordered keys.
+ */
 export function nextGridClickSelection(
 	current: ReadonlySet<string>,
 	lastClicked: string | null,
@@ -39,6 +54,13 @@ export function nextGridClickSelection(
 	return { selection: new Set([ key ]), lastClicked: key }
 }
 
+/**
+ * Next grid marquee selection.
+ *
+ * @param initial - initial.
+ * @param hits - hits.
+ * @param mode - mode.
+ */
 export function nextGridMarqueeSelection(
 	initial: ReadonlySet<string>,
 	hits: ReadonlySet<string>,
@@ -52,6 +74,12 @@ export function nextGridMarqueeSelection(
 	return new Set(hits)
 }
 
+/**
+ * Same grid selection.
+ *
+ * @param a - a.
+ * @param b - b.
+ */
 export function sameGridSelection(a: ReadonlySet<string>, b: ReadonlySet<string>): boolean {
 	if (a.size !== b.size) return false
 	for (const key of a) {

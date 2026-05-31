@@ -1,8 +1,8 @@
 <script lang="ts">
 import { untrack } from 'svelte'
 import type { Snippet } from 'svelte'
-import { createGooPopout } from './popout.js'
-import type { GooPopoutAt, GooPopoutInstance, GooPopoutOptions } from './popout.js'
+import { createGooPopout } from './popout.ts'
+import type { GooPopoutAt, GooPopoutInstance, GooPopoutOptions } from './popout.ts'
 
 type GooPopoutTarget = HTMLElement | string | GooPopoutAt | null | undefined
 
@@ -38,7 +38,7 @@ let lastKey = ''
 let {
 	for: forTarget,
 	target,
-	open,
+	open = $bindable<boolean | undefined>(undefined),
 	align,
 	offset,
 	keepWithin,
@@ -132,9 +132,11 @@ function mountPopout(): void {
 		ariaLabel,
 		openImmediately: false,
 		onOpen: data => {
+			open = true
 			onopen?.(data)
 		},
 		onClose: data => {
+			open = false
 			onclose?.(data)
 		},
 		onDestroy: () => {

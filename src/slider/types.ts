@@ -1,6 +1,6 @@
 import type { Snippet } from 'svelte'
 
-import type { GooSliderThumb } from './sliderUtils.js'
+import type { GooSliderThumb } from './sliderUtils.ts'
 
 /** Available preset types for Goo slider track styling. */
 export type GooSliderPreset = 'opacity' | 'hue' | 'saturation' | 'lightness' | 'brightness' | 'bipolar' | 'size' | string
@@ -142,28 +142,37 @@ export type GooSliderElement = HTMLDivElement & {
 	/** Current thumbs. */
 	thumbs: GooSliderThumb[]
 
-	/** Set value or values. */
+	/** Set value or values. 	 * @param value - value.
+ * @param options - options.
+ */
 	setValue(value: GooSliderValue, options?: { silent?: boolean }): void
 
 	/** Get current value or values. */
 	getValue(): number | number[]
 
-	/** Update opacity preset color. */
+	/** Update opacity preset color. 	 * @param color - color.
+	 */
 	setPresetColor(color: string): void
 
-	/** Update saturation/lightness preset hue. */
+	/** Update saturation/lightness preset hue. 	 * @param hue - hue.
+	 */
 	setPresetHue(hue: number): void
 
-	/** Update lightness preset saturation. */
+	/** Update lightness preset saturation. 	 * @param saturation - saturation.
+	 */
 	setPresetSaturation(saturation: number): void
 
-	/** Set custom track gradient colors. */
+	/** Set custom track gradient colors. 	 * @param colors - colors.
+	 */
 	setGradient(colors: string[]): void
 
-	/** Enable or disable thumb transition animation. */
+	/** Enable or disable thumb transition animation. 	 * @param index - index.
+	 * @param animate - animate.
+	 */
 	setAnimate(index: number, animate: boolean): void
 
-	/** Convert a value to 0-1 percent within the slider range. */
+	/** Convert a value to 0-1 percent within the slider range. 	 * @param value - value.
+	 */
 	toPercent(value: number): number
 
 	/** Enable the slider. */

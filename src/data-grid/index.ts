@@ -1,3 +1,5 @@
+/// <reference path="../svelte.d.ts" />
+
 export { default as GooDataGrid } from './GooDataGrid.svelte'
 export type {
 	GooDataGridCellSlot,
@@ -11,4 +13,4 @@ export type {
 	GooDataGridSortDirection,
 	GooDataGridSortState,
 	GooDataGridSortValue
-} from './types.js'
+} from './types.ts'

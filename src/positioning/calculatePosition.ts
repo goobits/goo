@@ -4,9 +4,9 @@
  * @module goo/positioning/calculatePosition
  */
 
-import { HORIZONTAL, VERTICAL } from './direction.js'
-import { applyContainment, getOppositeEdge, type Rect } from './positionContainment.js'
-import type { AlignmentConfig, PositionOptions, PositionResult } from './types.js'
+import { HORIZONTAL, VERTICAL } from './direction.ts'
+import { applyContainment, getOppositeEdge, type Rect } from './positionContainment.ts'
+import type { AlignmentConfig, PositionOptions, PositionResult } from './types.ts'
 
 const PERCENT_MAP: Record<string, number> = {
 	top: 0,
@@ -75,7 +75,7 @@ export function calculatePosition(
 	}
 
 	// Calculate arrow position
-	result.arrowPosition = getArrowPosition(align, direction, result.flippedX)
+	result.arrowPosition = getArrowPosition(align, direction)
 	result.arrowOffset = calculateArrowOffset(targetRect, result, direction)
 
 	return result
@@ -130,7 +130,7 @@ export function applyArrowPosition($arrow: HTMLElement | null, position: Positio
 }
 
 // getOppositeEdge is re-exported from positionContainment.
-export { getOppositeEdge } from './positionContainment.js'
+export { getOppositeEdge } from './positionContainment.ts'
 
 // =============================================================================
 // Alignment Parsing
@@ -138,7 +138,7 @@ export { getOppositeEdge } from './positionContainment.js'
 
 /**
  * Check if a value is an edge (top, bottom, left, right).
- * @param value
+ * @param value - value.
  * @returns True if value is an edge
  */
 function isEdge(value: string): boolean {
@@ -148,8 +148,8 @@ function isEdge(value: string): boolean {
 /**
  * Normalize edge/position pair - swap if in wrong order.
  * Expected order: [edge] [position], but we also accept [position] [edge]
- * @param first
- * @param second
+ * @param first - first.
+ * @param second - second.
  * @returns Normalized edge and position
  */
 function normalizeEdgePosition(first: string, second: string): { edge: string; position: string } {
@@ -385,14 +385,11 @@ function calculateOffset(
  * Get arrow position class based on alignment.
  * @param align - Alignment configuration
  * @param direction - HORIZONTAL or VERTICAL
- * @param flippedX - Whether position was flipped horizontally
  * @returns Arrow position class ('left', 'right', 'top', 'bottom')
  */
-function getArrowPosition(align: AlignmentConfig, direction: number, flippedX: boolean): string {
+function getArrowPosition(align: AlignmentConfig, direction: number): string {
 	if (direction === HORIZONTAL) {
-		// Arrow points to the side
-		const pointsRight = align.edge === 'left'
-		return pointsRight !== flippedX ? 'left' : 'right'
+		return align.edge === 'left' ? 'left' : 'right'
 	} else {
 		// Arrow points up/down
 		return align.edge === 'top' ? 'top' : 'bottom'

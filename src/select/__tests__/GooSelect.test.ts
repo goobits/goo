@@ -2,9 +2,11 @@ import { render } from '@testing-library/svelte'
 import { tick } from 'svelte'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { pointerEvent } from '../../__tests__/_pointerEvents.ts'
 import GooSelect from '../GooSelect.svelte'
-import { GooSelect as ExportedGooSelect } from '../index.js'
-import type { GooSelectElement } from '../types.js'
+import { GooSelect as ExportedGooSelect } from '../index.ts'
+import { createIcon } from '../selectDom.ts'
+import type { GooSelectElement } from '../types.ts'
 
 describe('GooSelect', () => {
 	afterEach(() => {
@@ -116,6 +118,62 @@ describe('GooSelect', () => {
 
 		expect(document.querySelector('.goo-popout.goo-select-popout')).not.toBeNull()
 		expect(document.querySelectorAll('.goo-select__option').length).toBe(2)
+	})
+
+	it('does not render inline HTML icon strings', () => {
+		const icon = createIcon(' <img src=x onerror=alert(1)>')
+
+		expect(icon).toBeNull()
+	})
+
+	it('shows a selected option indicator by default', async() => {
+		const { container } = render(GooSelect, {
+			props: {
+				value: 'b',
+				options: [
+					{ id: 'a', label: 'A' },
+					{ id: 'b', label: 'B' }
+				]
+			}
+		})
+		const element = container.querySelector<GooSelectElement>('.goo-select')!
+
+		expect(element.open({ autoFocus: false })).toBe(true)
+		await tick()
+
+		const selected = document.querySelector<HTMLElement>('.goo-select__option[data-id="b"]')!
+		expect(selected.getAttribute('aria-selected')).toBe('true')
+		expect(selected.querySelector('.goo-select__check svg')).not.toBeNull()
+	})
+
+	it('can hide the selection indicator without disabling option choice', async() => {
+		const onchange = vi.fn()
+		const { container } = render(GooSelect, {
+			props: {
+				value: 'a',
+				showSelectionIndicator: false,
+				options: [
+					{ id: 'a', label: 'A' },
+					{ id: 'b', label: 'B' }
+				],
+				onchange
+			}
+		})
+		const element = container.querySelector<GooSelectElement>('.goo-select')!
+
+		expect(element.open({ autoFocus: false })).toBe(true)
+		await tick()
+
+		expect(document.querySelector('.goo-select__check')).toBeNull()
+		expect(document.querySelector<HTMLElement>('.goo-select__option[data-id="a"]')?.getAttribute('aria-selected')).toBe('false')
+
+		const option = document.querySelector<HTMLElement>('.goo-select__option[data-id="b"]')!
+		option.dispatchEvent(pointerEvent('pointerdown', { pointerId: 8 }))
+		option.dispatchEvent(pointerEvent('pointerup', { pointerId: 8 }))
+		await delay(300)
+
+		expect(element.getValue()).toBe('b')
+		expect(onchange).toHaveBeenCalledOnce()
 	})
 
 	it('opens header selects below the trigger without a popout arrow by default', async() => {
@@ -270,6 +328,83 @@ describe('GooSelect', () => {
 		expect(arrow.textContent).toBe('')
 	})
 
+	it('marks flipped LTR submenu rows so arrows point toward the opened side', async() => {
+		const restoreRects = installSubmenuPlacementRects({ optionX: 260, optionWidth: 56, submenuWidth: 120 })
+		const { container } = render(GooSelect, {
+			props: {
+				value: '',
+				options: [
+					{
+						id: 'more',
+						label: 'More',
+						type: 'submenu',
+						options: [
+							{ id: 'child', label: 'Child' }
+						]
+					}
+				]
+			}
+		})
+		const element = container.querySelector<GooSelectElement>('.goo-select')!
+
+		try {
+			expect(element.open({ autoFocus: false, keepWithin: { $element: document.documentElement, margin: 0 } })).toBe(true)
+			await tick()
+
+			const option = document.querySelector<HTMLElement>('.goo-select__option[data-id="more"]')!
+			option.scrollIntoView = vi.fn()
+			option.dispatchEvent(pointerEvent('pointerup'))
+			await nextAnimationFrame()
+
+			expect(option.dataset.submenuSide).toBe('left')
+			expect(option.classList.contains('goo-select__option--submenu-open-left')).toBe(true)
+			expect(document.querySelector('.goo-popout.goo-select-submenu-popout .goo-popout__arrow')?.classList.contains('right')).toBe(true)
+		} finally {
+			restoreRects()
+		}
+	})
+
+	it('propagates local RTL direction into select and submenu popouts', async() => {
+		const restoreRects = installSubmenuPlacementRects({ optionX: 160, optionWidth: 56, submenuWidth: 80 })
+		const { container } = render(GooSelect, {
+			props: {
+				dir: 'rtl',
+				value: '',
+				options: [
+					{
+						id: 'more',
+						label: 'More',
+						type: 'submenu',
+						options: [
+							{ id: 'child', label: 'Child' }
+						]
+					}
+				]
+			}
+		})
+		const element = container.querySelector<GooSelectElement>('.goo-select')!
+
+		try {
+			expect(element.open({ autoFocus: false, keepWithin: { $element: document.documentElement, margin: 0 } })).toBe(true)
+			await tick()
+
+			const popout = document.querySelector<HTMLElement>('.goo-popout.goo-select-popout')!
+			expect(popout.getAttribute('dir')).toBe('rtl')
+
+			const option = document.querySelector<HTMLElement>('.goo-select__option[data-id="more"]')!
+			option.scrollIntoView = vi.fn()
+			option.dispatchEvent(pointerEvent('pointerup'))
+			await nextAnimationFrame()
+
+			const submenu = document.querySelector<HTMLElement>('.goo-popout.goo-select-submenu-popout')!
+			expect(submenu.getAttribute('dir')).toBe('rtl')
+			expect(option.dataset.submenuSide).toBe('left')
+			expect(option.classList.contains('goo-select__option--submenu-open-left')).toBe(true)
+		} finally {
+			restoreRects()
+		}
+	})
+
 	it('reuses the submenu popout when moving between submenu options', async() => {
 		const { container } = render(GooSelect, {
 			props: {
@@ -319,7 +454,7 @@ describe('GooSelect', () => {
 		const frame = firstPopout.querySelector<HTMLElement>('.goo-select__submenu-frame')!
 		expect(frame.classList.contains('goo-select__submenu-frame--morph')).toBe(true)
 		expect(firstPopout.querySelectorAll('.goo-select__submenu')).toHaveLength(2)
-		await delay(360)
+		await delay(560)
 
 		const popouts = document.querySelectorAll<HTMLElement>('.goo-popout.goo-select-submenu-popout')
 		expect(popouts).toHaveLength(1)
@@ -377,7 +512,7 @@ describe('GooSelect', () => {
 		transformOption.dispatchEvent(new MouseEvent('mouseenter'))
 		await nextAnimationFrame()
 		exportOption.dispatchEvent(new MouseEvent('mouseenter'))
-		await delay(320)
+		await delay(560)
 
 		const popouts = document.querySelectorAll<HTMLElement>('.goo-popout.goo-select-submenu-popout')
 		expect(popouts).toHaveLength(1)
@@ -385,6 +520,89 @@ describe('GooSelect', () => {
 		expect(popouts[0].textContent).toContain('PNG')
 		expect(popouts[0].textContent).not.toContain('Bring to Front')
 		expect(popouts[0].textContent).not.toContain('Rotate')
+	})
+
+	it('closes a switched submenu after the pointer leaves the menu boundary', async() => {
+		const { container } = render(GooSelect, {
+			props: {
+				value: '',
+				options: [
+					{
+						id: 'order',
+						label: 'Order',
+						type: 'submenu',
+						options: [
+							{ id: 'front', label: 'Bring to Front' }
+						]
+					},
+					{
+						id: 'transform',
+						label: 'Transform',
+						type: 'submenu',
+						options: [
+							{ id: 'rotate', label: 'Rotate' }
+						]
+					}
+				]
+			}
+		})
+		const element = container.querySelector<GooSelectElement>('.goo-select')!
+
+		expect(element.open({ autoFocus: false })).toBe(true)
+		await tick()
+
+		const panel = document.querySelector<HTMLElement>('.goo-popout.goo-select-popout .goo-select__options')!
+		const orderOption = document.querySelector<HTMLElement>('.goo-select__option[data-id="order"]')!
+		const transformOption = document.querySelector<HTMLElement>('.goo-select__option[data-id="transform"]')!
+		orderOption.scrollIntoView = vi.fn()
+		transformOption.scrollIntoView = vi.fn()
+
+		orderOption.dispatchEvent(new MouseEvent('mouseenter'))
+		await delay(320)
+		expect(document.querySelector('.goo-popout.goo-select-submenu-popout')).not.toBeNull()
+
+		transformOption.dispatchEvent(new MouseEvent('mouseenter'))
+		await nextAnimationFrame()
+		expect(document.querySelector('.goo-popout.goo-select-submenu-popout')?.textContent).toContain('Rotate')
+
+		panel.dispatchEvent(new MouseEvent('mouseleave', { relatedTarget: document.body }))
+		await delay(520)
+
+		expect(document.querySelector('.goo-popout.goo-select-submenu-popout')).toBeNull()
+	})
+
+	it('keeps the submenu open while hovering submenu children', async() => {
+		const { container } = render(GooSelect, {
+			props: {
+				value: '',
+				options: [
+					{
+						id: 'order',
+						label: 'Order',
+						type: 'submenu',
+						options: [
+							{ id: 'front', label: 'Bring to Front' }
+						]
+					}
+				]
+			}
+		})
+		const element = container.querySelector<GooSelectElement>('.goo-select')!
+
+		expect(element.open({ autoFocus: false })).toBe(true)
+		await tick()
+
+		const orderOption = document.querySelector<HTMLElement>('.goo-select__option[data-id="order"]')!
+		orderOption.scrollIntoView = vi.fn()
+		orderOption.dispatchEvent(new MouseEvent('mouseenter'))
+		await delay(320)
+
+		const submenuOption = document.querySelector<HTMLElement>('.goo-select-submenu-popout .goo-select__option[data-id="front"]')!
+		submenuOption.dispatchEvent(new MouseEvent('mouseenter'))
+		await delay(320)
+
+		expect(document.querySelector('.goo-popout.goo-select-submenu-popout')).not.toBeNull()
+		expect(document.querySelector('.goo-popout.goo-select-submenu-popout')?.textContent).toContain('Bring to Front')
 	})
 
 	it('selects the option under the pointer when dragging from the trigger', async() => {
@@ -443,6 +661,102 @@ describe('GooSelect', () => {
 		await tick()
 		expect(element.getValue()).toBe('b')
 	})
+
+	it('ignores non-primary pointer release on already-open options', async() => {
+		const { container } = render(GooSelect, {
+			props: {
+				value: 'a',
+				options: [
+					{ id: 'a', label: 'A' },
+					{ id: 'b', label: 'B' }
+				]
+			}
+		})
+		const element = container.querySelector<GooSelectElement>('.goo-select')!
+
+		expect(element.open({ autoFocus: false })).toBe(true)
+		await tick()
+
+		const option = document.querySelector<HTMLElement>('.goo-select__option[data-id="b"]')!
+		option.dispatchEvent(pointerEvent('pointerdown', { button: 2, buttons: 2, pointerId: 11 }))
+		option.dispatchEvent(pointerEvent('pointerup', { button: 2, buttons: 0, pointerId: 11 }))
+		await tick()
+
+		expect(element.getValue()).toBe('a')
+	})
+
+	it('opens already-open submenu options on touch release', async() => {
+		const { container } = render(GooSelect, {
+			props: {
+				value: '',
+				options: [
+					{
+						id: 'more',
+						label: 'More',
+						type: 'submenu',
+						options: [
+							{ id: 'child', label: 'Child' }
+						]
+					}
+				]
+			}
+		})
+		const element = container.querySelector<GooSelectElement>('.goo-select')!
+
+		expect(element.open({ autoFocus: false })).toBe(true)
+		await tick()
+
+		const option = document.querySelector<HTMLElement>('.goo-select__option[data-id="more"]')!
+		option.scrollIntoView = vi.fn()
+		option.dispatchEvent(pointerEvent('pointerdown', { pointerId: 5, pointerType: 'touch' }))
+		option.dispatchEvent(pointerEvent('pointerup', { pointerId: 5, pointerType: 'touch' }))
+		await tick()
+
+		const submenu = document.querySelector<HTMLElement>('.goo-popout.goo-select-submenu-popout')!
+		expect(submenu).not.toBeNull()
+		expect(submenu.textContent).toContain('Child')
+		expect(element.hovered).toBe('more')
+	})
+
+	it('opens submenu options under a pen pointer dragged from the trigger', async() => {
+		const originalElementFromPoint = document.elementFromPoint
+		const { container } = render(GooSelect, {
+			props: {
+				value: '',
+				options: [
+					{
+						id: 'more',
+						label: 'More',
+						type: 'submenu',
+						options: [
+							{ id: 'child', label: 'Child' }
+						]
+					}
+				]
+			}
+		})
+		const element = container.querySelector<GooSelectElement>('.goo-select')!
+		const trigger = container.querySelector<HTMLElement>('.goo-select__trigger')!
+
+		try {
+			trigger.dispatchEvent(pointerEvent('pointerdown', { pointerId: 6, pointerType: 'pen', clientX: 20, clientY: 20 }))
+			await tick()
+
+			const option = document.querySelector<HTMLElement>('.goo-select__option[data-id="more"]')!
+			option.scrollIntoView = vi.fn()
+			document.elementFromPoint = vi.fn(() => option)
+			document.dispatchEvent(pointerEvent('pointermove', { pointerId: 6, pointerType: 'pen', clientX: 20, clientY: 48 }))
+			document.dispatchEvent(pointerEvent('pointerup', { pointerId: 6, pointerType: 'pen', clientX: 20, clientY: 48 }))
+			await tick()
+
+			const submenu = document.querySelector<HTMLElement>('.goo-popout.goo-select-submenu-popout')!
+			expect(submenu).not.toBeNull()
+			expect(submenu.textContent).toContain('Child')
+			expect(element.hovered).toBe('more')
+		} finally {
+			document.elementFromPoint = originalElementFromPoint
+		}
+	})
 })
 
 function rect(x: number, y: number, width: number, height: number): DOMRect {
@@ -467,17 +781,29 @@ function delay(ms: number): Promise<void> {
 	return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-function pointerEvent(
-	type: string,
-	options: { pointerId?: number; clientX?: number; clientY?: number } = {}
-): PointerEvent {
-	const event = new MouseEvent(type, {
-		bubbles: true,
-		cancelable: true,
-		button: 0,
-		clientX: options.clientX ?? 0,
-		clientY: options.clientY ?? 0
-	})
-	Object.defineProperty(event, 'pointerId', { value: options.pointerId ?? 1 })
-	return event as PointerEvent
+function installSubmenuPlacementRects({
+	optionX,
+	optionWidth,
+	submenuWidth
+}: {
+	optionX: number
+	optionWidth: number
+	submenuWidth: number
+}): () => void {
+	const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect
+
+	HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
+		if (this === document.documentElement || this === document.body) return rect(0, 0, 320, 240)
+		if (this.classList.contains('goo-select__option') && this.dataset.id === 'more') {
+			return rect(optionX, 32, optionWidth, 28)
+		}
+		if (this.classList.contains('goo-select-submenu-popout')) return rect(0, 0, submenuWidth, 80)
+		if (this.classList.contains('goo-select-popout')) return rect(0, 0, 180, 120)
+		if (this.classList.contains('goo-select')) return rect(24, 16, 120, 32)
+		return originalGetBoundingClientRect.call(this)
+	}
+
+	return () => {
+		HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect
+	}
 }

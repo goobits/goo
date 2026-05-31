@@ -5,7 +5,7 @@ import {
 	type GooSchema,
 	type GooSchemaOptions,
 	type GooSchemaType
-} from './GooSchema.js'
+} from './GooSchema.ts'
 
 type GooSchemaChangeHandler = (event: CustomEvent<{ path: string; value: unknown; data: Record<string, unknown> }>) => void
 

@@ -1,6 +1,8 @@
+/// <reference path="../svelte.d.ts" />
+
 import { flushSync, mount, unmount } from 'svelte'
 
-import { clampProgress } from './_progressRingRenderer.js'
+import { clampProgress } from './_progressRingRenderer.ts'
 import GooProgressRingComponent from './GooProgressRing.svelte'
 import type {
 	GooProgressRingHandle,
@@ -8,7 +10,7 @@ import type {
 	GooProgressRingTimer,
 	GooProgressRingTimerOptions,
 	GooProgressRingVariant
-} from './types.js'
+} from './types.ts'
 
 export { default as GooProgressRing } from './GooProgressRing.svelte'
 export type {
@@ -18,7 +20,7 @@ export type {
 	GooProgressRingTimerOptions,
 	GooProgressRingTimerType,
 	GooProgressRingVariant
-} from './types.js'
+} from './types.ts'
 
 /**
  * Create a Goo progress-ring timer controller.

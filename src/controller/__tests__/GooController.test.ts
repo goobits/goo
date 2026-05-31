@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import * as checkboxModule from '../../checkbox/GooCheckbox.svelte'
 import GooController from '../GooController.svelte'
-import { createGooController, GooController as GooControllerElement } from '../index.js'
+import { createGooController, GooController as GooControllerElement } from '../index.ts'
 
 describe('GooController', () => {
 	afterEach(() => {
@@ -89,6 +89,30 @@ describe('GooController', () => {
 		expect(controller.classList.contains('goo-controller--stacked')).toBe(true)
 		expect(controller.querySelector('.goo-controller__header .goo-label')?.textContent).toBe('Fill Color')
 		expect(controller.querySelector('.goo-controller__widget')).not.toBeNull()
+	})
+
+	it('treats stacked labels as text instead of HTML', async() => {
+		const model = { enabled: true }
+		const controller = createGooController({
+			object: model,
+			property: 'enabled',
+			type: 'checkbox',
+			label: '<img src=x onerror=alert(1)>',
+			controlTypes: {
+				checkbox: {
+					load: () => Promise.resolve(checkboxModule),
+					svelte: true,
+					layout: 'stacked'
+				}
+			}
+		})
+		document.body.appendChild(controller)
+		await controller._controlPromise
+		await tick()
+
+		const label = controller.querySelector('.goo-controller__header .goo-label')
+		expect(label?.textContent).toBe('<img src=x onerror=alert( 1)>')
+		expect(label?.querySelector('img')).toBeNull()
 	})
 
 	it('stacks button groups by default so segmented controls fit sidebars', async() => {

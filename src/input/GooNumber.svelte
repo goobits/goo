@@ -1,5 +1,5 @@
 <script module lang="ts">
-import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.js'
+import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.ts'
 
 /** GooController binding metadata for the Svelte number input component. */
 export const controlSchema: SvelteControlSchema = {
@@ -19,9 +19,9 @@ export const controlSchema: SvelteControlSchema = {
 import { onDestroy } from 'svelte'
 import './GooNumber.css'
 
-import { formatNumber } from '../utils/formatNumber.js'
-import { clamp, roundToStep } from '../utils/numberUtils.js'
-import type { GooNumberProps } from './types.js'
+import { formatNumber } from '../utils/formatNumber.ts'
+import { clamp, roundToStep } from '../utils/numberUtils.ts'
+import type { GooNumberProps } from './types.ts'
 
 const HOLD_DELAY = 250
 const REPEAT_INTERVAL = 50
@@ -34,9 +34,10 @@ let textValue = $state('')
 let holdTimeout: ReturnType<typeof setTimeout> | null = null
 let repeatInterval: ReturnType<typeof setInterval> | null = null
 let changePulseTimeout: ReturnType<typeof setTimeout> | null = null
+let skipNextValueSync = false
 
 let {
-	value = 0,
+	value = $bindable(0),
 	min = -Infinity,
 	max = Infinity,
 	step = 1,
@@ -70,9 +71,17 @@ const hostAttributes = $derived<Record<string, string | number | undefined>>({
 
 $effect(() => {
 	const nextValue = clamp(Number(value), min, max)
+	if (skipNextValueSync && Object.is(nextValue, currentValue)) {
+		skipNextValueSync = false
+		return
+	}
 	currentValue = nextValue
 	textValue = formatDisplayValue(nextValue)
 	lastCommittedValue = nextValue
+})
+
+$effect(() => {
+	if (disabled) stopHold()
 })
 
 onDestroy(() => {
@@ -115,6 +124,9 @@ export function select(): void {
 function syncValue(nextValue: number, { format }: { format: boolean }): void {
 	const oldValue = currentValue
 	currentValue = clamp(nextValue, min, max)
+	if (oldValue !== currentValue) {
+		syncBoundValue(currentValue)
+	}
 	if (format) {
 		textValue = formatDisplayValue(currentValue)
 	}
@@ -131,6 +143,7 @@ function handleInput(event: Event): void {
 	textValue = contentElement?.value ?? ''
 	currentValue = parseInputValue(textValue)
 	if (oldValue !== currentValue) {
+		syncBoundValue(currentValue)
 		pulseValueChange()
 		emitInput(oldValue)
 	}
@@ -190,6 +203,7 @@ function handleWheel(event: WheelEvent): void {
 }
 
 function startHold(direction: 'down' | 'up', shift: boolean): void {
+	stopHold()
 	increment(direction, shift)
 	holdTimeout = setTimeout(() => {
 		repeatInterval = setInterval(() => increment(direction, shift), REPEAT_INTERVAL)
@@ -225,6 +239,11 @@ function emitChange(oldValue: number): void {
 	const detail = { value: currentValue, oldValue, target: numberElement }
 	onchange?.(currentValue, oldValue)
 	numberElement?.dispatchEvent(new CustomEvent('change', { bubbles: true, detail }))
+}
+
+function syncBoundValue(nextValue: number): void {
+	skipNextValueSync = true
+	value = nextValue
 }
 
 function parseValue(rawValue: string): number {
@@ -306,6 +325,7 @@ function pulseValueChange(): void {
 			tabindex="-1"
 			aria-label="Increment"
 			onpointerdown={(event) => {
+				if (event.button !== 0) return
 				event.preventDefault()
 				event.stopPropagation()
 				if (!disabled) {
@@ -323,6 +343,7 @@ function pulseValueChange(): void {
 			tabindex="-1"
 			aria-label="Decrement"
 			onpointerdown={(event) => {
+				if (event.button !== 0) return
 				event.preventDefault()
 				event.stopPropagation()
 				if (!disabled) {

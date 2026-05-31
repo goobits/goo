@@ -4,9 +4,9 @@
  * @module goo/positioning/positionContainment
  */
 
-import { clamp } from '../utils/numberUtils.js'
-import { HORIZONTAL } from './direction.js'
-import type { AlignmentConfig, PositionResult } from './types.js'
+import { clamp } from '../utils/numberUtils.ts'
+import { HORIZONTAL } from './direction.ts'
+import type { AlignmentConfig, PositionResult } from './types.ts'
 
 // =============================================================================
 // Types
@@ -130,6 +130,9 @@ interface Bounds {
 
 /**
  * Calculate containment bounds from container rect.
+ * @param popoutRect - popout rect.
+ * @param margin - margin.
+ * @param containerRect - container rect.
  */
 function calculateBounds(
 	containerRect: DOMRect,
@@ -146,6 +149,10 @@ function calculateBounds(
 
 /**
  * Check if position needs to be flipped on either axis.
+ * @param result - result.
+ * @param direction - direction.
+ * @param bounds - bounds.
+ * @param align - align.
  */
 function checkFlipNeeded(
 	result: PositionResult,
@@ -169,6 +176,12 @@ function checkFlipNeeded(
 
 /**
  * Attempt to flip position and use it if it fits better.
+ * @param result - result.
+ * @param recalculatePosition - recalculate position.
+ * @param flipNeeded - flip needed.
+ * @param direction - direction.
+ * @param bounds - bounds.
+ * @param align - align.
  */
 function attemptFlip(
 	result: PositionResult,

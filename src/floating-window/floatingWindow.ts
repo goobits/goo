@@ -1,12 +1,12 @@
 import './FloatingWindow.css'
 
-import { createPointerDrag, type GooPointerDragHandle } from '../utils/pointerDrag.js'
+import { createPointerDrag, type GooPointerDragHandle } from '../utils/pointerDrag.ts'
 import type {
 	GooFloatingWindow,
 	GooFloatingWindowOptions,
 	GooFloatingWindowPosition,
 	GooFloatingWindowSettings
-} from './types.js'
+} from './types.ts'
 
 let zIndexGlobal = 101
 const focusedWindows: GooFloatingWindow[] = []

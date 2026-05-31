@@ -1,10 +1,12 @@
 import './GooSpinner.css'
 
-import { resolveSpinnerAttrs } from './_spinnerAttrs.js'
-import type { GooSpinnerRenderOptions } from './types.js'
+import { resolveSpinnerAttrs } from './_spinnerAttrs.ts'
+import type { GooSpinnerRenderOptions } from './types.ts'
+
+/// <reference path="../svelte.d.ts" />
 
 export { default as GooSpinner } from './GooSpinner.svelte'
-export type { GooSpinnerProps, GooSpinnerRenderOptions, GooSpinnerSize, GooSpinnerVariant } from './types.js'
+export type { GooSpinnerProps, GooSpinnerRenderOptions, GooSpinnerSize, GooSpinnerVariant } from './types.ts'
 
 /**
  * Render Goo spinner HTML for non-Svelte callers (imperative DOM / string templates).

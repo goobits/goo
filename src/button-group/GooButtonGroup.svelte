@@ -1,5 +1,5 @@
 <script module lang="ts">
-import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.js'
+import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.ts'
 
 /** GooController binding metadata for the Svelte button-group component. */
 export const controlSchema: SvelteControlSchema = {
@@ -23,8 +23,8 @@ import {
 	normalizeButtonGroupOptions,
 	normalizeButtonGroupValue,
 	readButtonGroupValue
-} from './_model.js'
-import type { GooButtonGroupProps, NormalizedButtonGroupOption } from './types.js'
+} from './_model.ts'
+import type { GooButtonGroupProps, NormalizedButtonGroupOption } from './types.ts'
 
 let groupElement: HTMLDivElement | undefined = $state()
 let selectedKeys = $state<Set<string>>(new Set())
@@ -32,7 +32,7 @@ let focusedKey = $state<string | null>(null)
 
 let {
 	options,
-	value,
+	value = $bindable<string | string[] | null | undefined>(undefined),
 	allowMultiple = false,
 	allowToggle: allowToggleProp,
 	layout = 'horizontal',
@@ -98,6 +98,7 @@ $effect(() => {
 export function setValue(nextValue: string | string[] | null): void {
 	selectedKeys = normalizeButtonGroupValue(nextValue)
 	focusedKey = getPreferredFocusKey(selectedKeys)
+	value = readButtonGroupValue(selectedKeys, allowMultiple)
 }
 
 export function getValue(): string | string[] | null {
@@ -110,7 +111,9 @@ function handleGroupClick(event: MouseEvent): void {
 	const button = getEventButton(event)
 	if (!button) return
 
-	selectKey(readButtonKey(button), { emit: true })
+	const key = readButtonKey(button)
+	selectKey(key, { emit: true })
+	button.focus()
 }
 
 function handleGroupKeydown(event: KeyboardEvent): void {
@@ -143,7 +146,7 @@ function handleGroupKeydown(event: KeyboardEvent): void {
 			break
 		case 'Enter':
 		case ' ':
-			if (event.key === ' ') event.preventDefault()
+			event.preventDefault()
 			if (focusedKey) {
 				selectKey(focusedKey, { emit: true })
 			}
@@ -163,6 +166,7 @@ function navigateButton(direction: number): void {
 	if (!allowMultiple) {
 		selectKey(nextKey, { emit: true })
 	}
+	void Promise.resolve().then(() => focusButton(nextKey))
 }
 
 function selectKey(key: string, { emit }: { emit: boolean }): void {
@@ -182,6 +186,7 @@ function selectKey(key: string, { emit }: { emit: boolean }): void {
 
 	selectedKeys = nextSelected
 	focusedKey = key
+	value = readButtonGroupValue(nextSelected, allowMultiple)
 
 	if (emit) {
 		const keySelected = nextSelected.has(key)
@@ -207,6 +212,11 @@ function getOptionButtonClass(option: NormalizedButtonGroupOption): string {
 	return values.join(' ')
 }
 
+function getButtonTabIndex(key: string): number {
+	if (disabled) return -1
+	return focusedKey === key ? tabIndex : -1
+}
+
 function getPreferredFocusKey(nextSelected: Set<string>): string | null {
 	const keys = getSelectableKeys()
 	return [ ...nextSelected ].find(key => keys.includes(key)) ?? keys[0] ?? null
@@ -226,7 +236,7 @@ function syncChildButtons(): void {
 	for (const button of getChildButtons()) {
 		const key = readButtonKey(button)
 		button.dataset.key = key
-		button.tabIndex = -1
+		button.tabIndex = getButtonTabIndex(key)
 		button.disabled = disabled
 		button.setAttribute('aria-pressed', String(isSelected(key)))
 		button.classList.toggle('goo-button--selected', isSelected(key))
@@ -237,6 +247,10 @@ function syncChildButtons(): void {
 
 function getChildButtons(): HTMLButtonElement[] {
 	return Array.from(groupElement?.querySelectorAll<HTMLButtonElement>(':scope > .goo-button') ?? [])
+}
+
+function focusButton(key: string): void {
+	getChildButtons().find(button => readButtonKey(button) === key)?.focus()
 }
 
 function getEventButton(event: MouseEvent): HTMLButtonElement | null {
@@ -274,14 +288,12 @@ function mountIcon(node: HTMLSpanElement, iconFactory: () => Element) {
 }
 </script>
 
-<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div
 	{...rest}
 	bind:this={groupElement}
 	class={classes}
 	role="group"
 	aria-label={label || undefined}
-	tabindex={tabIndex}
 	data-layout={layout === 'vertical' ? 'vertical' : undefined}
 	{...hostAttributes}
 	aria-disabled={disabled ? 'true' : undefined}
@@ -295,7 +307,7 @@ function mountIcon(node: HTMLSpanElement, iconFactory: () => Element) {
 				type="button"
 				class={getOptionButtonClass(option)}
 				data-key={option.key}
-				tabindex="-1"
+				tabindex={getButtonTabIndex(option.key)}
 				disabled={disabled ? true : undefined}
 				aria-disabled={disabled ? 'true' : undefined}
 				aria-pressed={isSelected(option.key)}

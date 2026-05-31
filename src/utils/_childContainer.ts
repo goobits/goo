@@ -1,7 +1,7 @@
 /**
  * @fileoverview ChildContainer utilities - Shared child management for Panel and Folder.
  * Provides folder/controller tracking, add/remove operations, and SSR hydration.
- * @module goobits/mixins/ChildContainer
+ * @module goobits/utils/_childContainer
  */
 
 // ============================================================================

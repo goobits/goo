@@ -17,6 +17,7 @@ interface ParsedSegment {
  * @example parseSegment("name") → { key: "name", isIndex: false }
  * @example parseSegment("0") → { key: 0, isIndex: true }
  * @example parseSegment("[0]") → { key: 0, isIndex: true }
+ * @param segment - segment.
  */
 function parseSegment(segment: string): ParsedSegment {
 	// Handle bracket notation: "[0]" or "[name]"
@@ -44,6 +45,7 @@ function parseSegment(segment: string): ParsedSegment {
  * @example splitPath("layers.0.enabled") → ["layers", "0", "enabled"]
  * @example splitPath("layers[0].enabled") → ["layers", "0", "enabled"]
  * @example splitPath("items[2]") → ["items", "2"]
+ * @param path - path.
  */
 function splitPath(path: string): string[] {
 	if (!path) return []
@@ -105,6 +107,8 @@ function splitPath(path: string): string[] {
  * Get value at dot-notation path (array-aware)
  * @example getByPath(obj, "layers.0.enabled") → obj.layers[0].enabled
  * @example getByPath(obj, "layers[0].enabled") → obj.layers[0].enabled
+ * @param path - path.
+ * @param obj - obj.
  */
 export function getByPath(obj: Record<string, unknown>, path: string): unknown {
 	if (!path) return obj
@@ -123,6 +127,9 @@ export function getByPath(obj: Record<string, unknown>, path: string): unknown {
  * Set value at dot-notation path (array-aware)
  * @example setByPath(obj, "layers.0.enabled", true) → obj.layers[0].enabled = true
  * @throws {Error} if path traverses through non-existent or non-object/array values
+ * @param value - value.
+ * @param path - path.
+ * @param obj - obj.
  */
 export function setByPath(obj: Record<string, unknown>, path: string, value: unknown): void {
 	const segments = splitPath(path)
@@ -164,6 +171,8 @@ export function setByPath(obj: Record<string, unknown>, path: string, value: unk
  * @example resolvePath(obj, "layers.0.enabled")
  *          → { object: obj.layers[0], property: "enabled" }
  * @returns null if path cannot be resolved
+ * @param root - root.
+ * @param path - path.
  */
 export function resolvePath(
 	root: Record<string, unknown>,
@@ -197,6 +206,7 @@ export function resolvePath(
  * Convert a key to human-readable label
  * @example keyToLabel("lineWidth") → "Line Width"
  * @example keyToLabel("color0") → "Color 0"
+ * @param key - key.
  */
 function keyToLabel(key: string): string {
 	return key
@@ -213,6 +223,7 @@ function keyToLabel(key: string): string {
  * @example pathToLabel("layers.0.enabled") → "Enabled"
  * @example pathToLabel("layers.0") → "Layers"
  * @example pathToLabel("items[2]") → "Items"
+ * @param path - path.
  */
 export function pathToLabel(path: string): string {
 	const segments = splitPath(path)

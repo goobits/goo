@@ -6,8 +6,8 @@ import {
 	renderIconHtml,
 	renderIconPlaceholderHtml,
 	renderIconPlaceholders
-} from '../index.js'
-import { iconRegistry } from '../registry.js'
+} from '../index.ts'
+import { iconRegistry } from '../registry.ts'
 
 describe('GooIcon', () => {
 	afterEach(() => {
@@ -103,5 +103,27 @@ describe('GooIcon', () => {
 		expect(icon?.getAttribute('data-value')).toBe('download')
 		expect(icon?.getAttribute('role')).toBe('img')
 		expect(icon?.querySelector('svg')).not.toBeNull()
+	})
+
+	it('sanitizes registered SVG before rendering', () => {
+		iconRegistry.register(
+			'unsafe',
+			'<svg viewBox="0 0 24 24" onload="alert(1)"><script>alert(1)</script><path onclick="alert(1)" d="M12 3v12"/></svg>'
+		)
+
+		const { container } = render(GooIcon, {
+			props: {
+				value: 'unsafe'
+			}
+		})
+
+		const svg = container.querySelector('svg')
+		const path = container.querySelector('path')
+
+		expect(svg).not.toBeNull()
+		expect(svg?.getAttribute('onload')).toBeNull()
+		expect(container.querySelector('script')).toBeNull()
+		expect(path?.getAttribute('onclick')).toBeNull()
+		expect(path?.getAttribute('d')).toBe('M12 3v12')
 	})
 })

@@ -4,9 +4,9 @@
  * @module goobits/controller/controlFactory
  */
 
-import { log } from '../shared/logger.js'
-import { type ControlTypeRegistry, resolveControlTypeConfig } from './controlRegistry.js'
-import { createSvelteControlHost, type SvelteComponentType, type SvelteControlHost, type SvelteControlSchema } from './SvelteControl.svelte.js'
+import { log } from '../utils/logger.ts'
+import { type ControlTypeRegistry, resolveControlTypeConfig } from './controlRegistry.ts'
+import { createSvelteControlHost, type SvelteComponentType, type SvelteControlHost, type SvelteControlSchema } from './SvelteControl.svelte.ts'
 
 // ============================================================================
 // Types
@@ -49,11 +49,11 @@ export interface ControlCreationOptions {
 // ============================================================================
 
 /**
- * Extract the control factory/class from a module.
- * Looks for remaining DOM factory exports, default export, or first function export.
- * @param module - The imported module
- * @returns The control factory/class or null
- */
+	 * Extract the control factory/class from a module.
+	 * Looks for remaining DOM factory exports, default export, or first function export.
+	 * @param module - The imported module
+	 * @returns The control factory/class or null
+	 */
 export function extractControlFromModule(
 	module: Record<string, unknown>
 ): ((...args: unknown[]) => unknown) | null {
@@ -170,6 +170,9 @@ interface SvelteControlModule {
 /**
  * Create a control from a Svelte component module.
  * Uses a Svelte host with the component's controlSchema.
+ * @param options - options.
+ * @param module - module.
+ * @param controlType - control type.
  */
 function createSvelteControl(
 	module: SvelteControlModule,

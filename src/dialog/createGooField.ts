@@ -3,16 +3,16 @@
  * @module goobits/dialog/createGooField
  */
 
-import type { AngleInputFieldOptions } from '../angle-input/_createAngleInputField.js'
-import type { ButtonGroupFieldOptions } from '../button-group/_createButtonGroupField.js'
-import type { CheckboxFieldOptions } from '../checkbox/_createCheckboxField.js'
-import type { ColorFieldOptions } from '../color/_createColorField.js'
-import { resolveControlTypeConfig } from '../controller/controlRegistry.js'
-import type { NumberInputFieldOptions, TextInputFieldOptions } from '../input/_createInputField.js'
-import type { RadioGroupFieldOptions } from '../radio/_createRadioGroupField.js'
-import type { SelectFieldOptions } from '../select/_createSelectField.js'
-import type { SliderFieldOptions } from '../slider/_createSliderField.js'
-import type { TextareaFieldOptions } from '../textarea/_createTextareaField.js'
+import type { AngleInputFieldOptions } from '../angle-input/_createAngleInputField.ts'
+import type { ButtonGroupFieldOptions } from '../button-group/_createButtonGroupField.ts'
+import type { CheckboxFieldOptions } from '../checkbox/_createCheckboxField.ts'
+import type { ColorFieldOptions } from '../color/_createColorField.ts'
+import { resolveControlTypeConfig } from '../controller/controlRegistry.ts'
+import type { NumberInputFieldOptions, TextInputFieldOptions } from '../input/_createInputField.ts'
+import type { RadioGroupFieldOptions } from '../radio/_createRadioGroupField.ts'
+import type { SelectFieldOptions } from '../select/_createSelectField.ts'
+import type { SliderFieldOptions } from '../slider/_createSliderField.ts'
+import type { TextareaFieldOptions } from '../textarea/_createTextareaField.ts'
 
 type InputFieldType = 'text' | 'email' | 'password' | 'url'
 type RadioFieldType = 'radio' | 'radiogroup'

@@ -2,7 +2,7 @@ import { mount, unmount } from 'svelte'
 
 import GooInput from './GooInput.svelte'
 import GooNumber from './GooNumber.svelte'
-import type { GooInputType } from './types.js'
+import type { GooInputType } from './types.ts'
 
 export type TextInputFieldOptions<T = string> = {
 	class?: string

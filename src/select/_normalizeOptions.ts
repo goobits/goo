@@ -4,7 +4,7 @@
  * @module goobits/select/normalizeOptions
  */
 
-import type { GooSelectOption } from './types.js'
+import type { GooSelectOption } from './types.ts'
 
 /**
  * Generate unique ID from label.

@@ -17,6 +17,19 @@ export function evaluate<T>(val: T | (() => T), ctx?: unknown): T {
 }
 
 /**
+ * Resolve the text direction that should be copied from a select root into
+ * body-level popouts.
+ * @param element - Element whose local direction context should be resolved.
+ * @returns Text direction for the element.
+ */
+export function getElementTextDirection(element: HTMLElement | undefined): 'ltr' | 'rtl' {
+	if (!element) return document.documentElement?.dir === 'rtl' ? 'rtl' : 'ltr'
+	const explicitDirection = element.closest('[dir="rtl"], [dir="ltr"]')?.getAttribute('dir')
+	if (explicitDirection === 'rtl' || explicitDirection === 'ltr') return explicitDirection
+	return getComputedStyle(element).direction === 'rtl' ? 'rtl' : 'ltr'
+}
+
+/**
  * Format keyboard shortcut key for display.
  * Converts keys to platform-specific symbols (⌘, ⌥, etc. on Mac).
  * @param key - Key to format
@@ -64,7 +77,8 @@ export function createShortcut(shortcut: string | string[] | null | undefined): 
 
 /**
  * Create icon element from various formats.
- * Supports: HTMLElement, URL/data URI, inline HTML (SVG), CSS class names.
+ * Supports: HTMLElement, URL/data URI, and CSS class names. Strings are never
+ * interpreted as HTML; pass an HTMLElement for custom markup.
  * @param icon - Icon specification
  * @returns HTMLElement or null if no icon provided
  */
@@ -85,31 +99,34 @@ export function createIcon(
 
 	// String-based icon
 	if (typeof evaluatedIcon === 'string') {
+		const iconValue = evaluatedIcon.trim()
+		if (!iconValue) return null
+
 		const $icon = document.createElement('span')
 		$icon.className = 'goo-select__icon'
 
 		// URL or data URI
 		if (
-			evaluatedIcon.startsWith('http') ||
-      evaluatedIcon.startsWith('./') ||
-      evaluatedIcon.startsWith('/') ||
-      evaluatedIcon.startsWith('data:')
+			iconValue.startsWith('http') ||
+			iconValue.startsWith('./') ||
+			iconValue.startsWith('/') ||
+			iconValue.startsWith('data:')
 		) {
 			const $img = document.createElement('img')
-			$img.src = evaluatedIcon
+			$img.src = iconValue
 			$img.alt = ''
 			$icon.appendChild($img)
 			return $icon
 		}
 
-		// Inline HTML (starts with <)
-		if (evaluatedIcon.startsWith('<')) {
-			$icon.innerHTML = evaluatedIcon
-			return $icon
+		// Inline HTML strings are intentionally not supported. Treating option
+		// data as markup makes untrusted menu data an XSS vector.
+		if (iconValue.startsWith('<')) {
+			return null
 		}
 
 		// CSS class
-		$icon.classList.add(...evaluatedIcon.split(' ').filter(Boolean))
+		$icon.classList.add(...iconValue.split(/\s+/).filter(Boolean))
 		return $icon
 	}
 

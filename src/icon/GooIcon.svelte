@@ -1,7 +1,7 @@
 <script lang="ts">
 import './GooIcon.css'
-import { iconRegistry } from './registry.js'
-import type { GooIconProps } from './types.js'
+import { iconRegistry } from './registry.ts'
+import type { GooIconProps } from './types.ts'
 
 let {
 	value = '',

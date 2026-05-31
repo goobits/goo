@@ -1,6 +1,6 @@
 <script lang="ts">
 import './GooToast.css'
-import type { GooToastProps } from './types.js'
+import type { GooToastProps } from './types.ts'
 
 let {
 	toast,
@@ -22,7 +22,19 @@ let isPaused = $state(false)
 let lastResumeAt = $state(Date.now())
 let frameHandle: number | null = null
 
+function scheduleFrame(): void {
+	if (frameHandle !== null) return
+	frameHandle = requestAnimationFrame(tick)
+}
+
+function cancelFrame(): void {
+	if (frameHandle === null) return
+	cancelAnimationFrame(frameHandle)
+	frameHandle = null
+}
+
 function tick(): void {
+	frameHandle = null
 	if (!hasAutoDismiss || isPaused) return
 
 	const now = Date.now()
@@ -35,47 +47,41 @@ function tick(): void {
 		return
 	}
 
-	frameHandle = requestAnimationFrame(tick)
+	scheduleFrame()
 }
 
 function pause(): void {
-	if (!hasAutoDismiss) return
+	if (!hasAutoDismiss || isPaused) return
 	const now = Date.now()
 	const elapsed = now - lastResumeAt
 	remainingMs = Math.max(0, remainingMs - elapsed)
 	isPaused = true
-	if (frameHandle !== null) {
-		cancelAnimationFrame(frameHandle)
-		frameHandle = null
-	}
+	cancelFrame()
 }
 
 function resume(): void {
-	if (!hasAutoDismiss) return
+	if (!hasAutoDismiss || !isPaused) return
 	isPaused = false
 	lastResumeAt = Date.now()
-	frameHandle = requestAnimationFrame(tick)
+	scheduleFrame()
 }
 
 function handleDismiss(): void {
+	cancelFrame()
 	ondismiss(toast.id)
 }
 
 function handleActionClick(): void {
 	toast.action?.onClick()
+	cancelFrame()
 	ondismiss(toast.id)
 }
 
 $effect(() => {
 	if (!hasAutoDismiss) return
 	lastResumeAt = Date.now()
-	frameHandle = requestAnimationFrame(tick)
-	return () => {
-		if (frameHandle !== null) {
-			cancelAnimationFrame(frameHandle)
-			frameHandle = null
-		}
-	}
+	scheduleFrame()
+	return cancelFrame
 })
 
 const progressPercent = $derived(

@@ -46,6 +46,11 @@ export type GooFolderElement = HTMLDivElement & {
 
 type MountedFolder = ReturnType<typeof mount>
 
+/**
+ * Creates folder.
+ *
+ * @param options - options.
+ */
 export function createFolder(options: GooFolderOptions = {}): GooFolderElement {
 	const target = document.createElement('div')
 	let element: GooFolderElement | null = null

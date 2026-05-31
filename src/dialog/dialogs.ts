@@ -4,7 +4,7 @@
  * @module goobits/dialog/dialogs
  */
 
-import { createGooDialog } from './dialog.js'
+import { createGooDialog } from './dialog.ts'
 
 // ============================================================================
 // Types
@@ -12,7 +12,7 @@ import { createGooDialog } from './dialog.js'
 
 /**
  * Extended promise with dialog control methods.
- * @typedef {Promise<DialogResult> & { destroy: () => void, close: () => void, $dialog: import('./dialog.js').GooDialogInstance }} DialogPromise
+ * @typedef {Promise<DialogResult> & { destroy: () => void, close: () => void, $dialog: import('./dialog.ts').GooDialogInstance }} DialogPromise
  */
 
 // ============================================================================
@@ -21,7 +21,7 @@ import { createGooDialog } from './dialog.js'
 
 /**
  * Wraps a dialog's open() promise with destroy/close methods.
- * @param {import('./dialog.js').GooDialogInstance} dialog - The dialog instance
+ * @param {import('./dialog.ts').GooDialogInstance} dialog - The dialog instance
  * @returns {DialogPromise} Promise with destroy/close methods attached
  */
 function wrapDialogPromise(dialog) {
@@ -34,14 +34,14 @@ function wrapDialogPromise(dialog) {
 }
 
 /**
- * @typedef {import('./dialog.js').DialogResult} DialogResult
- * @typedef {import('./dialog.js').DialogLabels} DialogLabels
- * @typedef {import('./dialog.js').DialogField} DialogField
+ * @typedef {import('./dialog.ts').DialogResult} DialogResult
+ * @typedef {import('./dialog.ts').DialogLabels} DialogLabels
+ * @typedef {import('./dialog.ts').DialogField} DialogField
  */
 
 /**
  * @typedef {Object} AlertOptions
- * @property {string|HTMLElement} content - Alert message
+ * @property {string|Node} content - Alert message. Strings render as text; pass a DOM node for rich markup.
  * @property {string} [heading] - Dialog title
  * @property {string} [className] - Additional CSS class
  * @property {boolean} [showClose=true] - Show close button
@@ -49,7 +49,7 @@ function wrapDialogPromise(dialog) {
 
 /**
  * @typedef {Object} ConfirmOptions
- * @property {string|HTMLElement} content - Confirm message
+ * @property {string|Node} content - Confirm message. Strings render as text; pass a DOM node for rich markup.
  * @property {string} [heading] - Dialog title
  * @property {DialogLabels} [labels] - Button labels
  * @property {'ok'|'cancel'} [defaultFocus='ok'] - Default focused button
@@ -58,7 +58,7 @@ function wrapDialogPromise(dialog) {
 
 /**
  * @typedef {Object} PromptOptions
- * @property {string|HTMLElement} [content] - Optional message above fields
+ * @property {string|Node} [content] - Optional message above fields. Strings render as text; pass a DOM node for rich markup.
  * @property {string} [heading] - Dialog title
  * @property {DialogField[]} fields - Form fields
  * @property {DialogLabels} [labels] - Button labels
@@ -69,7 +69,7 @@ function wrapDialogPromise(dialog) {
 
 /**
  * @typedef {Object} NotifyOptions
- * @property {string|HTMLElement} content - Notification message
+ * @property {string|Node} content - Notification message. Strings render as text; pass a DOM node for rich markup.
  * @property {number} [autoDismiss=5000] - Auto-dismiss after ms (0 = manual)
  * @property {boolean} [showClose=true] - Show close button
  * @property {string} [className] - Additional CSS class
@@ -77,7 +77,7 @@ function wrapDialogPromise(dialog) {
 
 /**
  * @typedef {Object} OverlayOptions
- * @property {string|HTMLElement} content - Overlay content
+ * @property {string|Node} content - Overlay content. Strings render as text; pass a DOM node for rich markup.
  * @property {string} [heading] - Dialog title
  * @property {boolean} [showClose=true] - Show close button
  * @property {string} [className] - Additional CSS class
@@ -190,13 +190,13 @@ export function GooNotify(options) {
 
 /**
  * Show a full-screen overlay dialog.
- * @param {OverlayOptions|string|HTMLElement} options - Options, message, or element
+ * @param {OverlayOptions|string|Node} options - Options, message, or node
  * @returns {Promise<DialogResult>}
  * @example
  * const overlay = GooOverlay({ content: myCustomElement, heading: 'Settings' })
  */
 export function GooOverlay(options) {
-	if (typeof options === 'string' || options instanceof HTMLElement) {
+	if (typeof options === 'string' || (typeof Node !== 'undefined' && options instanceof Node)) {
 		options = { content: options }
 	}
 

@@ -2,7 +2,7 @@ import { fireEvent, render } from '@testing-library/svelte'
 import { describe, expect, it, vi } from 'vitest'
 
 import GooButtonGroup from '../GooButtonGroup.svelte'
-import { GooButtonGroup as ExportedGooButtonGroup } from '../index.js'
+import { GooButtonGroup as ExportedGooButtonGroup } from '../index.ts'
 
 describe('GooButtonGroup', () => {
 	it('exports the native Svelte component from the package subpath', () => {
@@ -25,6 +25,9 @@ describe('GooButtonGroup', () => {
 
 		expect(container.querySelector('goo-button-group')).toBeNull()
 		expect(group?.getAttribute('role')).toBe('group')
+		expect(group?.getAttribute('tabindex')).toBeNull()
+		expect(group?.querySelector('.goo-button[data-key="left"]')?.getAttribute('tabindex')).toBe('-1')
+		expect(group?.querySelector('.goo-button[data-key="center"]')?.getAttribute('tabindex')).toBe('0')
 		expect(group?.querySelector('.goo-button[data-key="center"]')?.classList.contains('goo-button--selected')).toBe(true)
 	})
 
@@ -108,6 +111,32 @@ describe('GooButtonGroup', () => {
 
 		await fireEvent.click(container.querySelector('.goo-button[data-key="right"]')!)
 
+		expect(onchange).toHaveBeenCalledExactlyOnceWith('right')
+	})
+
+	it('moves real DOM focus when navigating with the keyboard', async() => {
+		const onchange = vi.fn()
+		const { container } = render(GooButtonGroup, {
+			props: {
+				value: 'left',
+				onchange,
+				options: [
+					{ key: 'left', value: 'Left' },
+					{ key: 'right', value: 'Right' }
+				]
+			}
+		})
+		const left = container.querySelector<HTMLButtonElement>('.goo-button[data-key="left"]')!
+		const right = container.querySelector<HTMLButtonElement>('.goo-button[data-key="right"]')!
+
+		left.focus()
+		await fireEvent.keyDown(left, { key: 'ArrowRight' })
+		await Promise.resolve()
+
+		expect(document.activeElement).toBe(right)
+		expect(left.getAttribute('tabindex')).toBe('-1')
+		expect(right.getAttribute('tabindex')).toBe('0')
+		expect(right.classList.contains('goo-button--selected')).toBe(true)
 		expect(onchange).toHaveBeenCalledExactlyOnceWith('right')
 	})
 })

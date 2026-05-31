@@ -1,5 +1,5 @@
 <script module lang="ts">
-import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.js'
+import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.ts'
 
 /** GooController binding metadata for the Svelte radio-group component. */
 export const controlSchema: SvelteControlSchema = {
@@ -16,8 +16,8 @@ export const controlSchema: SvelteControlSchema = {
 import { untrack } from 'svelte'
 import './GooRadioGroup.css'
 import GooRadio from './GooRadio.svelte'
-import { normalizeRadioOptions } from './_model.js'
-import type { GooRadioGroupProps } from './types.js'
+import { normalizeRadioOptions } from './_model.ts'
+import type { GooRadioGroupProps } from './types.ts'
 
 type RadioElement = HTMLButtonElement & {
 	checked: boolean
@@ -29,7 +29,7 @@ type RadioElement = HTMLButtonElement & {
 let groupElement: HTMLDivElement | undefined = $state()
 
 let {
-	value,
+	value = $bindable<string | undefined>(undefined),
 	options = [],
 	name = '',
 	disabled = false,
@@ -47,7 +47,11 @@ const normalizedOptions = $derived(normalizeRadioOptions(options))
 let currentValue = $state('')
 
 $effect(() => {
-	currentValue = value ?? normalizedOptions[0]?.value ?? currentValue
+	const nextValue = value ?? normalizedOptions[0]?.value
+	const previousValue = untrack(() => currentValue)
+	if (nextValue !== undefined && !Object.is(previousValue, nextValue)) {
+		currentValue = nextValue
+	}
 	void Promise.resolve().then(syncChildRadios)
 })
 
@@ -105,6 +109,7 @@ function syncChildRadios(): void {
 		} else if (radio.value !== currentValue && radio.checked === true) {
 			radio.uncheck?.({ silent: true })
 		}
+		radio.tabIndex = getRadioTabIndex(radio.value)
 	}
 }
 
@@ -113,6 +118,7 @@ function setValue(nextValue: string, { silent = false }: { silent?: boolean } = 
 	if (Object.is(oldValue, nextValue)) return
 
 	currentValue = nextValue
+	value = currentValue
 	syncChildRadios()
 	if (!silent && oldValue !== currentValue) {
 		emitChange(oldValue)
@@ -144,10 +150,17 @@ function handleKeydown(event: KeyboardEvent): void {
 	if (event.key === 'ArrowDown' || event.key === 'ArrowRight') direction = 1
 	if (!direction) return
 	event.preventDefault()
-	const currentIndex = Math.max(0, radios.findIndex(radio => radio.checked))
+	const focusedIndex = radios.findIndex(radio => radio === document.activeElement)
+	const checkedIndex = radios.findIndex(radio => radio.checked)
+	const currentIndex = Math.max(0, focusedIndex >= 0 ? focusedIndex : checkedIndex)
 	const nextIndex = (currentIndex + direction + radios.length) % radios.length
 	radios[nextIndex].focus()
 	radios[nextIndex].check()
+}
+
+function getRadioTabIndex(nextValue: string): number {
+	if (disabled) return -1
+	return nextValue === currentValue ? tabIndex : -1
 }
 </script>
 
@@ -161,7 +174,6 @@ function handleKeydown(event: KeyboardEvent): void {
 	aria-disabled={disabled ? 'true' : undefined}
 	data-layout={layout}
 	{...hostAttributes}
-	tabindex={disabled ? undefined : tabIndex}
 	onchange={handleChange}
 	onkeydown={handleKeydown}
 >
@@ -176,7 +188,7 @@ function handleKeydown(event: KeyboardEvent): void {
 					{name}
 					{disabled}
 					checked={option.value === currentValue}
-					tabIndex={-1}
+					tabIndex={getRadioTabIndex(option.value)}
 				/>
 			{/each}
 		{/if}

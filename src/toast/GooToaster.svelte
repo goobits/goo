@@ -1,7 +1,7 @@
 <script lang="ts">
 import './GooToaster.css'
-import type { GooToasterProps } from './types.js'
-import { toastStore } from './toast-service.svelte.js'
+import type { GooToasterProps } from './types.ts'
+import { toastStore } from './toast-service.svelte.ts'
 import GooToast from './GooToast.svelte'
 
 let {

@@ -4,11 +4,7 @@
  * @module goobits/select/keyboardHandler
  */
 
-import type { GooSelectOption, GooSelectPanelHost } from './types.js'
-
-// ============================================================================
-// Types
-// ============================================================================
+import type { GooSelectKeyboardHost } from './types.ts'
 
 /** Keyboard command event used by GooSelect navigation. */
 export interface GooSelectKeyCommand {
@@ -16,21 +12,7 @@ export interface GooSelectKeyCommand {
 	cancel: () => void
 }
 
-/** Interface for the select component that keyboard handler needs */
-export interface KeyboardHandlerHost {
-	state: {
-		disabled: boolean
-		value: string
-	}
-	_opened: boolean
-	_panel: GooSelectPanelHost | null
-	_selectOptions: GooSelectOption[]
-	$trigger: HTMLElement | null
-	open: () => void
-	close: () => void
-	_selectOption: (opt: GooSelectOption) => void
-	_getContext: () => unknown
-}
+type KeyboardHandlerHost = GooSelectKeyboardHost
 
 // ============================================================================
 // Key Mapping
@@ -101,9 +83,9 @@ export function handleKeyboard(host: KeyboardHandlerHost, event: GooSelectKeyCom
 		case 'right': {
 			event.cancel()
 			const $hovered = host._panel.getHoveredElement()
-			if ($hovered && ($hovered as { _submenuOptions?: unknown })._submenuOptions) {
+			if ($hovered && host._panel.hoveredId) {
 				const opt = host._panel.findOptionById(host._panel.hoveredId!)
-				if (opt) host._panel.openSubmenu($hovered, opt)
+				if (opt?.type === 'submenu') host._panel.openSubmenu($hovered, opt)
 			}
 			break
 		}

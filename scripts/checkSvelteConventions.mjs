@@ -20,7 +20,7 @@ for (const filePath of await collectSvelteFiles(sourceRoot)) {
 
 	for (const check of checks) {
 		if (check.pattern.test(stripped)) {
-			failures.push(`${filePath.replace(packageRoot.pathname, '')}: ${check.message}`)
+			failures.push(`${ filePath.replace(packageRoot.pathname, '') }: ${ check.message }`)
 		}
 	}
 }
@@ -28,7 +28,7 @@ for (const filePath of await collectSvelteFiles(sourceRoot)) {
 if (failures.length > 0) {
 	console.error('Svelte convention check failed:')
 	for (const failure of failures) {
-		console.error(`- ${failure}`)
+		console.error(`- ${ failure }`)
 	}
 	process.exitCode = 1
 }
@@ -42,7 +42,7 @@ async function collectSvelteFiles(directoryUrl) {
 			continue
 		}
 
-		const entryUrl = new URL(`${entry.name}${entry.isDirectory() ? '/' : ''}`, directoryUrl)
+		const entryUrl = new URL(`${ entry.name }${ entry.isDirectory() ? '/' : '' }`, directoryUrl)
 		if (entry.isDirectory()) {
 			files.push(...await collectSvelteFiles(entryUrl))
 		} else if (entry.name.endsWith('.svelte')) {

@@ -1,5 +1,5 @@
 <script module lang="ts">
-import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.js'
+import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.ts'
 
 /** GooController binding metadata for the Svelte checkbox component. */
 export const controlSchema: SvelteControlSchema = {
@@ -16,17 +16,18 @@ export const controlSchema: SvelteControlSchema = {
 <script lang="ts">
 import { untrack } from 'svelte'
 import './GooCheckbox.css'
-import { isRTL } from '../i18n/index.js'
-import { clamp } from '../utils/numberUtils.js'
-import type { GooCheckboxProps } from './types.js'
+import { isRTL } from '../i18n/index.ts'
+import { clamp } from '../utils/numberUtils.ts'
+import { createPointerDrag, type GooPointerDragEvent, type GooPointerDragHandle } from '../utils/pointerDrag.ts'
+import type { GooCheckboxProps } from './types.ts'
 
 let checkboxElement: HTMLDivElement | undefined = $state()
 let thumbElement: HTMLSpanElement | undefined = $state()
 let trackElement: HTMLSpanElement | undefined = $state()
 
 let {
-	value,
-	checked,
+	value = $bindable<boolean | undefined>(undefined),
+	checked = $bindable<boolean | undefined>(undefined),
 	label = '',
 	name = '',
 	formValue = 'on',
@@ -43,9 +44,22 @@ let {
 let incomingChecked = $derived(Boolean(checked ?? value ?? false))
 let currentChecked = $state(false)
 let dragState = $state<{ startX: number; width: number; offset: number; moved: boolean } | null>(null)
+let dragHandle: GooPointerDragHandle | null = null
 
 $effect(() => {
 	currentChecked = incomingChecked
+})
+
+$effect(() => {
+	const element = checkboxElement
+	if (!element || !thumbElement || !trackElement) return
+
+	dragHandle?.detach()
+	dragHandle = createPointerDrag(element, handlePointerDrag)
+	return () => {
+		dragHandle?.detach()
+		dragHandle = null
+	}
 })
 
 const classes = $derived.by(() => {
@@ -107,8 +121,12 @@ function emitChange(oldValue: boolean): void {
 function setChecked(nextValue: boolean, { silent = false }: { silent?: boolean } = {}): void {
 	const oldValue = currentChecked
 	currentChecked = Boolean(nextValue)
-	if (!silent && oldValue !== currentChecked) {
-		emitChange(oldValue)
+	if (oldValue !== currentChecked) {
+		value = currentChecked
+		checked = currentChecked
+		if (!silent) {
+			emitChange(oldValue)
+		}
 	}
 }
 
@@ -134,6 +152,7 @@ function handleKeydown(event: KeyboardEvent): void {
 	if (disabled) return
 	switch (event.key) {
 		case 'Enter':
+			event.preventDefault()
 			toggle()
 			break
 		case ' ':
@@ -141,28 +160,43 @@ function handleKeydown(event: KeyboardEvent): void {
 			toggle()
 			break
 		case 'ArrowLeft':
+			event.preventDefault()
 			toggle(isRTL())
 			break
 		case 'ArrowRight':
+			event.preventDefault()
 			toggle(!isRTL())
 			break
 	}
 }
 
-function handlePointerdown(event: PointerEvent): void {
-	if (disabled || !thumbElement || !trackElement || !checkboxElement) return
+function handlePointerDrag(event: GooPointerDragEvent): void {
+	if (event.START) {
+		startPointerDrag(event)
+		return
+	}
+	if (event.CHANGE) {
+		movePointerDrag(event)
+		return
+	}
+	if (event.END) {
+		finishPointerDrag()
+	}
+}
+
+function startPointerDrag(event: GooPointerDragEvent): void {
+	if (disabled || !thumbElement || !trackElement) return
 	const thumbRect = thumbElement.getBoundingClientRect()
 	const trackRect = trackElement.getBoundingClientRect()
 	dragState = {
-		startX: event.clientX,
+		startX: event.startClientX,
 		width: trackRect.width - thumbRect.width,
 		offset: currentChecked ? trackRect.width - thumbRect.width : 0,
 		moved: false
 	}
-	checkboxElement.setPointerCapture?.(event.pointerId)
 }
 
-function handlePointermove(event: PointerEvent): void {
+function movePointerDrag(event: GooPointerDragEvent): void {
 	if (!dragState || !thumbElement) return
 	const delta = event.clientX - dragState.startX
 	dragState.moved ||= Math.abs(delta) > 5
@@ -176,7 +210,7 @@ function handlePointermove(event: PointerEvent): void {
 	}
 }
 
-function handlePointerup(): void {
+function finishPointerDrag(): void {
 	if (!dragState || !thumbElement) return
 	thumbElement.style.left = ''
 	window.setTimeout(() => {
@@ -198,9 +232,6 @@ function handlePointerup(): void {
 	tabindex={disabled ? undefined : tabIndex}
 	onclick={handleClick}
 	onkeydown={handleKeydown}
-	onpointerdown={handlePointerdown}
-	onpointermove={handlePointermove}
-	onpointerup={handlePointerup}
 >
 	<span bind:this={trackElement} class="goo-checkbox__track" aria-hidden="true"></span>
 	<span bind:this={thumbElement} class="goo-checkbox__thumb" aria-hidden="true"></span>

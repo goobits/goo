@@ -1,4 +1,4 @@
-import { compare } from '../components/diff/compare.js'
+import { compare } from '../diff/compare.ts'
 
 describe('compare', () => {
 	test('ignores RGB differences in fully transparent pixels', () => {

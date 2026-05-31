@@ -1,6 +1,6 @@
 <script lang="ts">
 import './GooVortex.css'
-import type { GooVortexPoint } from './types.js'
+import type { GooVortexPoint } from './types.ts'
 
 let { message: initialMessage = '', src = '' }: { message?: string; src?: string } = $props()
 

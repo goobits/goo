@@ -1,3 +1,5 @@
+/// <reference path="../svelte.d.ts" />
+
 export { default as GooRadio } from './GooRadio.svelte'
 export { default as GooRadioGroup } from './GooRadioGroup.svelte'
 export type {
@@ -5,4 +7,4 @@ export type {
 	GooRadioGroupProps,
 	GooRadioOption,
 	GooRadioOptions,
-	GooRadioProps } from './types.js'
+	GooRadioProps } from './types.ts'

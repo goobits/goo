@@ -1,10 +1,11 @@
 <script module lang="ts">
-import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.js'
+import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.ts'
 
 /** GooController binding metadata for the Svelte select component. */
 export const controlSchema: SvelteControlSchema = {
 	propMapping: {
 		menu: 'menu',
+		name: 'name',
 		options: 'options',
 		placeholder: 'placeholder'
 	}
@@ -15,22 +16,23 @@ export const controlSchema: SvelteControlSchema = {
 import './GooSelect.css'
 import './GooSelect.submenu.css'
 
-import { createGooPopout } from '../popout/index.js'
-import type { GooPopoutInstance } from '../popout/index.js'
-import { DropdownPanel } from './_dropdownPanel.js'
+import { createGooPopout } from '../popout/index.ts'
+import type { GooPopoutInstance } from '../popout/index.ts'
+import { DropdownPanel } from './_dropdownPanel.ts'
 import {
 	handleKeyboard,
 	handleTypeahead,
 	mapNativeKeyToCommand
-} from './_keyboardHandler.js'
-import { normalizeOptions } from './_normalizeOptions.js'
+} from './_keyboardHandler.ts'
+import { normalizeOptions } from './_normalizeOptions.ts'
 import {
 	applySelectMenuWidth,
 	getSelectMenuAlign,
 	getSelectMenuOffset,
 	getSelectMenuPopoutClass,
 	normalizeSelectMenu
-} from './_selectMenu.js'
+} from './_selectMenu.ts'
+import { evaluate, getElementTextDirection } from './selectDom.ts'
 import type {
 	GooSelectElement,
 	GooSelectEventData,
@@ -39,8 +41,7 @@ import type {
 	GooSelectOption,
 	GooSelectProps,
 	GooSelectState
-} from './types.js'
-import { evaluate } from './selectDom.js'
+} from './types.ts'
 
 type SelectPopout = GooPopoutInstance
 
@@ -62,9 +63,10 @@ let triggerPointerId: number | null = null
 
 let {
 	options = [],
-	value = '',
+	value = $bindable(''),
+	name = '',
 	enableKeyboard = true,
-	enableSelection = true,
+	showSelectionIndicator = true,
 	showHeader = true,
 	menu,
 	placeholder = 'Select...',
@@ -96,7 +98,7 @@ const selectState = $derived<GooSelectState>({
 	value: selectedValue,
 	placeholder,
 	enableKeyboard,
-	enableSelection,
+	showSelectionIndicator,
 	showHeader,
 	disabled: effectiveDisabled
 })
@@ -118,7 +120,7 @@ const hostAttributes = $derived<Record<string, string | undefined>>({
 	disabled: effectiveDisabled ? '' : undefined,
 	'show-header': showHeader ? undefined : 'false',
 	'enable-keyboard': enableKeyboard ? undefined : 'false',
-	'enable-selection': enableSelection ? undefined : 'false'
+	'show-selection-indicator': showSelectionIndicator ? undefined : 'false'
 })
 
 $effect(() => {
@@ -163,6 +165,7 @@ export function setValue(nextValue: string, { silent = true }: { silent?: boolea
 	if (Object.is(oldValue, nextValue)) return
 
 	selectedValue = nextValue
+	value = selectedValue
 	panel?.updateContext({ value: selectedValue })
 	if (opened) {
 		panel?.render(normalizedOptions)
@@ -205,7 +208,7 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 
 	if (!panel) {
 		panel = new DropdownPanel({
-			enableSelection,
+			showSelectionIndicator,
 			value: selectedValue,
 			getContext: () => getContext(),
 			onSelect: (option, item) => selectOption(option, item),
@@ -220,7 +223,7 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 		})
 	} else {
 		panel.updateContext({
-			enableSelection,
+			showSelectionIndicator,
 			value: selectedValue
 		})
 	}
@@ -234,6 +237,7 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 	const triggerWidth = positionAt instanceof HTMLElement
 		? Math.max(1, Math.round(positionAt.getBoundingClientRect().width))
 		: undefined
+	const textDirection = getElementTextDirection(selectElement)
 	applySelectMenuWidth(panel.$container, currentMenu, triggerWidth)
 
 	popout = createGooPopout({
@@ -249,6 +253,8 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 		at: positionAt,
 		align: alignOverride ?? getSelectMenuAlign(currentMenu),
 		offset: offsetOverride ?? getSelectMenuOffset(currentMenu),
+		rtl: textDirection === 'rtl',
+		attributes: { dir: textDirection },
 		onClose: () => close({ fromPopout: true }),
 		onOpen: () => {
 			if (!autoFocus) return
@@ -456,14 +462,15 @@ function handleKeydown(event: KeyboardEvent): void {
 }
 
 function selectOption(option: GooSelectOption, item?: HTMLElement | null): void {
-	if (selectedValue === option.id && enableSelection) {
+	if (selectedValue === option.id && showSelectionIndicator) {
 		close({ quiet: true })
 		return
 	}
 
 	const oldValue = selectedValue
 	selectedValue = option.id ?? ''
-	if (enableSelection) {
+	value = selectedValue
+	if (showSelectionIndicator) {
 		panel?.setSelectedVisual(selectedValue)
 	}
 
@@ -523,6 +530,7 @@ function getTriggerIconClasses(icon: unknown): string {
 	if (!trimmed || trimmed.startsWith('<') || trimmed.startsWith('http') || trimmed.startsWith('./') || trimmed.startsWith('/') || trimmed.startsWith('data:')) return ''
 	return trimmed
 }
+
 </script>
 
 <div
@@ -562,6 +570,9 @@ function getTriggerIconClasses(icon: unknown): string {
 				</svg>
 			</span>
 		</button>
+	{/if}
+	{#if name}
+		<input type="hidden" data-goo-select-field {name} value={selectedValue} disabled={effectiveDisabled} />
 	{/if}
 	{#if children}
 		{@render children()}

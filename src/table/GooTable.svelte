@@ -1,6 +1,6 @@
 <script lang="ts" generics="T">
-import { GooDataGrid } from '../data-grid/index.js'
-import type { GooTableProps } from './types.js'
+import { GooDataGrid } from '../data-grid/index.ts'
+import type { GooTableProps } from './types.ts'
 
 let {
 	sortable = true,

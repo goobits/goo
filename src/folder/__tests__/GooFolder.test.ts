@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { createFolder } from '../_createFolder.js'
+import { createFolder } from '../_createFolder.ts'
 
 describe('GooFolder', () => {
 	afterEach(() => {
@@ -29,5 +29,16 @@ describe('GooFolder', () => {
 		folder.setOpen(true)
 
 		expect(onchange).not.toHaveBeenCalled()
+	})
+
+	it('treats string content as text instead of HTML', () => {
+		const folder = createFolder({
+			title: 'Settings',
+			content: '<img src=x onerror=alert(1)>'
+		})
+		document.body.appendChild(folder)
+
+		expect(folder.$content?.textContent).toBe('<img src=x onerror=alert(1)>')
+		expect(folder.$content?.querySelector('img')).toBeNull()
 	})
 })

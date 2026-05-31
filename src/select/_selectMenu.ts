@@ -1,4 +1,4 @@
-import type { GooSelectMenuOptions, GooSelectMenuPlacement } from './types.js'
+import type { GooSelectMenuOptions, GooSelectMenuPlacement } from './types.ts'
 
 export type NormalizedGooSelectMenu = {
 	arrow: boolean

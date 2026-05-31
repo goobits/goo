@@ -2,9 +2,10 @@ import { fireEvent, render } from '@testing-library/svelte'
 import { tick } from 'svelte'
 import { describe, expect, it, vi } from 'vitest'
 
+import { pointerEvent } from '../../__tests__/_pointerEvents.ts'
 import GooSlider from '../GooSlider.svelte'
-import { GooSlider as ExportedGooSlider } from '../index.js'
-import type { GooSliderElement } from '../types.js'
+import { GooSlider as ExportedGooSlider } from '../index.ts'
+import type { GooSliderElement } from '../types.ts'
 
 describe('GooSlider', () => {
 	it('exports the native Svelte component from the package subpath', () => {
@@ -79,6 +80,23 @@ describe('GooSlider', () => {
 
 		expect(onchange).toHaveBeenCalledOnce()
 		expect(onchange.mock.calls[0]?.[0]).toBe(80)
+	})
+
+	it('does not emit when setting the current value again', async() => {
+		const onchange = vi.fn()
+		const { container } = render(GooSlider, {
+			props: {
+				value: 20,
+				onchange
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+
+		slider.setValue(20)
+		await tick()
+
+		expect(onchange).not.toHaveBeenCalled()
+		expect(slider.getValue()).toBe(20)
 	})
 
 	it('updates value from keyboard interaction', async() => {
@@ -197,5 +215,88 @@ describe('GooSlider', () => {
 		expect(thumbs[0]?.getAttribute('aria-valuenow')).toBe('20')
 		expect(thumbs[1]?.getAttribute('aria-valuenow')).toBe('85')
 		expect(onchange).toHaveBeenCalled()
+	})
+
+	it('disables the hidden form value when the slider is disabled', () => {
+		const { container } = render(GooSlider, {
+			props: {
+				name: 'opacity',
+				value: 40,
+				disabled: true
+			}
+		})
+
+		expect(container.querySelector<HTMLInputElement>('input[data-goo-slider-input]')?.disabled).toBe(true)
+	})
+
+	it('ignores pointer release from a non-active pointer', () => {
+		const onchange = vi.fn()
+		const { container } = render(GooSlider, {
+			props: {
+				value: 20,
+				onchange
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		slider.setPointerCapture = vi.fn()
+		slider.releasePointerCapture = vi.fn()
+
+		slider.dispatchEvent(pointerEvent('pointerdown', { pointerId: 1, clientX: 20 }))
+		slider.dispatchEvent(pointerEvent('pointerup', { pointerId: 2, clientX: 40 }))
+
+		expect(slider.releasePointerCapture).not.toHaveBeenCalled()
+		expect(onchange).not.toHaveBeenCalled()
+
+		slider.dispatchEvent(pointerEvent('pointerup', { pointerId: 1, clientX: 40 }))
+
+		expect(slider.releasePointerCapture).toHaveBeenCalledExactlyOnceWith(1)
+		expect(onchange).toHaveBeenCalledOnce()
+	})
+
+	it('ignores non-primary pointer drags', () => {
+		const oninput = vi.fn()
+		const onchange = vi.fn()
+		const { container } = render(GooSlider, {
+			props: {
+				value: 20,
+				oninput,
+				onchange
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		slider.setPointerCapture = vi.fn()
+
+		slider.dispatchEvent(pointerEvent('pointerdown', { button: 2, buttons: 2, pointerId: 9, clientX: 20 }))
+		slider.dispatchEvent(pointerEvent('pointermove', { button: 2, buttons: 2, pointerId: 9, clientX: 80 }))
+		slider.dispatchEvent(pointerEvent('pointerup', { button: 2, buttons: 0, pointerId: 9, clientX: 80 }))
+
+		expect(slider.getValue()).toBe(20)
+		expect(slider.setPointerCapture).not.toHaveBeenCalled()
+		expect(oninput).not.toHaveBeenCalled()
+		expect(onchange).not.toHaveBeenCalled()
+	})
+
+	it('cleans up canceled pointer drags without committing a change', () => {
+		const oninput = vi.fn()
+		const onchange = vi.fn()
+		const { container } = render(GooSlider, {
+			props: {
+				value: 20,
+				oninput,
+				onchange
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		slider.setPointerCapture = vi.fn()
+		slider.releasePointerCapture = vi.fn()
+
+		slider.dispatchEvent(pointerEvent('pointerdown', { pointerId: 7, pointerType: 'touch', clientX: 20 }))
+		slider.dispatchEvent(pointerEvent('pointermove', { pointerId: 7, pointerType: 'touch', clientX: 80 }))
+		slider.dispatchEvent(pointerEvent('pointercancel', { pointerId: 7, pointerType: 'touch', clientX: 80 }))
+		slider.dispatchEvent(pointerEvent('pointerup', { pointerId: 7, pointerType: 'touch', clientX: 80 }))
+
+		expect(slider.releasePointerCapture).toHaveBeenCalledExactlyOnceWith(7)
+		expect(oninput).toHaveBeenCalled()
+		expect(onchange).not.toHaveBeenCalled()
 	})
 })

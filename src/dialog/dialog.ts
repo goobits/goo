@@ -5,8 +5,8 @@
 
 import './GooDialog.css'
 
-import type { CheckboxFieldElement } from '../checkbox/_createCheckboxField.js'
-import { focusFirst, focusLast, getFocusableElements } from '../utils/focusUtils.js'
+import type { CheckboxFieldElement } from '../checkbox/_createCheckboxField.ts'
+import { focusFirst, focusLast, getFocusableElements } from '../utils/focusUtils.ts'
 import {
 	appendContent,
 	buildFields,
@@ -17,11 +17,11 @@ import {
 	createFocusTrapSentinels,
 	type DialogField,
 	type DialogLabels
-} from './dialogBuilder.js'
-import { dialogManager } from './GooDialogManager.js'
+} from './dialogBuilder.ts'
+import { dialogManager } from './GooDialogManager.ts'
 
 // Re-export types for consumers
-export type { DialogField, DialogLabels } from './dialogBuilder.js'
+export type { DialogField, DialogLabels } from './dialogBuilder.ts'
 
 // ============================================================================
 // Types
@@ -33,7 +33,7 @@ export type { DialogField, DialogLabels } from './dialogBuilder.js'
 export interface GooDialogOptions {
 	type?: 'alert' | 'confirm' | 'prompt' | 'notify' | 'overlay'
 	heading?: string
-	content?: string | HTMLElement
+	content?: string | Node
 	labels?: DialogLabels
 	fields?: DialogField[]
 	verify?: (values: Record<string, unknown>, fieldElements: Map<string, HTMLElement>) => boolean | Promise<boolean>
@@ -132,7 +132,7 @@ export class GooDialogController {
 	declare $applyToAll: CheckboxFieldElement | null
 
 	// Internal state
-	declare _content: string | HTMLElement
+	declare _content: string | Node
 	declare _labels: DialogLabels
 	declare _fields: DialogField[]
 	declare _verify: ((values: Record<string, unknown>, fieldElements: Map<string, HTMLElement>) => boolean | Promise<boolean>) | undefined
@@ -151,6 +151,11 @@ export class GooDialogController {
 	declare _onCancel: ((result: DialogResult) => void) | undefined
 	declare _onClose: (() => void) | undefined
 
+	/**
+	 * Creates a GooDialogController instance.
+	 *
+	 * @param options - options.
+	 */
 	constructor(options: GooDialogOptions = {}) {
 		this.$element = document.createElement('div')
 		this.$element.className = 'goo-dialog'
@@ -190,6 +195,9 @@ export class GooDialogController {
 	// Lifecycle
 	// --------------------------------------------------------------------------
 
+	/**
+	 * Creates element.
+	 */
 	_createElement() {
 		const { type, width, height, heading, showClose } = this.state
 
@@ -269,6 +277,9 @@ export class GooDialogController {
 		this._bindEvents()
 	}
 
+	/**
+	 * Destroy element.
+	 */
 	_destroyElement() {
 		this._clearAutoDismiss()
 		this.$header = null
@@ -301,6 +312,9 @@ export class GooDialogController {
 	// Event Binding
 	// --------------------------------------------------------------------------
 
+	/**
+	 * Bind events.
+	 */
 	_bindEvents() {
 		// Close buttons
 		if (this.$closeBtn) {
@@ -329,6 +343,11 @@ export class GooDialogController {
 		this._$focusTrapEnd?.addEventListener('focus', () => this._focusFirst())
 	}
 
+	/**
+	 * Handles keydown.
+	 *
+	 * @param e - e.
+	 */
 	_handleKeydown(e) {
 		// Only the topmost dialog reacts to keys, so stacked dialogs close one at a time.
 		if (dialogManager.getTopDialog() !== this) return
@@ -355,6 +374,9 @@ export class GooDialogController {
 	// Actions
 	// --------------------------------------------------------------------------
 
+	/**
+	 * Handles ok.
+	 */
 	async _handleOk() {
 		// Validate if verify function provided
 		if (this._verify) {
@@ -375,6 +397,9 @@ export class GooDialogController {
 		this.close()
 	}
 
+	/**
+	 * Handles cancel.
+	 */
 	_handleCancel() {
 		const result: DialogResult = { cancel: true }
 		if (this._onCancel) this._onCancel(result)
@@ -383,6 +408,9 @@ export class GooDialogController {
 		this.close()
 	}
 
+	/**
+	 * Handles disregard.
+	 */
 	_handleDisregard() {
 		const result: DialogResult = {
 			disregard: true,
@@ -394,6 +422,9 @@ export class GooDialogController {
 		this.close()
 	}
 
+	/**
+	 * Gets field values.
+	 */
 	_getFieldValues(): Record<string, unknown> {
 		const values: Record<string, unknown> = {}
 		for (const [ name, $el ] of this._fieldElements) {
@@ -407,6 +438,9 @@ export class GooDialogController {
 	// Focus Management
 	// --------------------------------------------------------------------------
 
+	/**
+	 * Sets initial focus.
+	 */
 	_setInitialFocus() {
 		// Focus first field for prompt
 		if (this.state.type === 'prompt' && this._fieldElements.size > 0) {
@@ -438,14 +472,23 @@ export class GooDialogController {
 		}
 	}
 
+	/**
+	 * Focus first.
+	 */
 	_focusFirst() {
 		focusFirst(this.$element, '.goo-dialog__focus-trap')
 	}
 
+	/**
+	 * Focus last.
+	 */
 	_focusLast() {
 		focusLast(this.$element, '.goo-dialog__focus-trap')
 	}
 
+	/**
+	 * Gets focusable elements.
+	 */
 	_getFocusableElements() {
 		return getFocusableElements(this.$element, '.goo-dialog__focus-trap')
 	}
@@ -454,6 +497,9 @@ export class GooDialogController {
 	// Auto Dismiss
 	// --------------------------------------------------------------------------
 
+	/**
+	 * Start auto dismiss.
+	 */
 	_startAutoDismiss() {
 		if (this.state.autoDismiss > 0) {
 			this._autoDismissTimer = setTimeout(() => {
@@ -462,6 +508,9 @@ export class GooDialogController {
 		}
 	}
 
+	/**
+	 * Clears auto dismiss.
+	 */
 	_clearAutoDismiss() {
 		if (this._autoDismissTimer) {
 			clearTimeout(this._autoDismissTimer)
@@ -576,9 +625,9 @@ export class GooDialogController {
 
 	/**
 	 * Update dialog content.
-	 * @param {string|HTMLElement} content
+	 * @param {string|Node} content - content. Strings render as text; pass a DOM node for rich markup.
 	 */
-	setContent(content: string | HTMLElement) {
+	setContent(content: string | Node) {
 		this._content = content
 		if (this.$content) {
 			this.$content.innerHTML = ''
@@ -594,30 +643,66 @@ export class GooDialogController {
 		return this._isOpen
 	}
 
+	/**
+	 * Query selector.
+	 *
+	 * @param selectors - selectors.
+	 */
 	querySelector<T extends Element = Element>(selectors: string): T | null {
 		return this.$element.querySelector<T>(selectors)
 	}
 
+	/**
+	 * Query selector all.
+	 *
+	 * @param selectors - selectors.
+	 */
 	querySelectorAll<T extends Element = Element>(selectors: string): NodeListOf<T> {
 		return this.$element.querySelectorAll<T>(selectors)
 	}
 
+	/**
+	 * Sets attribute.
+	 *
+	 * @param name - name.
+	 * @param value - value.
+	 */
 	setAttribute(name: string, value: string): void {
 		this.$element.setAttribute(name, value)
 	}
 
+	/**
+	 * Gets attribute.
+	 *
+	 * @param name - name.
+	 */
 	getAttribute(name: string): string | null {
 		return this.$element.getAttribute(name)
 	}
 
+	/**
+	 * Adds event listener.
+	 *
+	 * @param args - args.
+	 */
 	addEventListener(...args: Parameters<HTMLElement['addEventListener']>): void {
 		this.$element.addEventListener(...args)
 	}
 
+	/**
+	 * Removes event listener.
+	 *
+	 * @param args - args.
+	 */
 	removeEventListener(...args: Parameters<HTMLElement['removeEventListener']>): void {
 		this.$element.removeEventListener(...args)
 	}
 
+	/**
+	 * Dispatch event.
+	 *
+	 * @param event - event.
+	 */
 	dispatchEvent(event: Event): boolean {
 		return this.$element.dispatchEvent(event)
 	}
@@ -627,8 +712,16 @@ export class GooDialogController {
 // Registration & Export
 // ============================================================================
 
+/**
+ * Goo dialog instance.
+ */
 export type GooDialogInstance = GooDialogController
 
+/**
+ * Creates goo dialog.
+ *
+ * @param options - options.
+ */
 export function createGooDialog(options: GooDialogOptions = {}): GooDialogController {
 	return new GooDialogController(options)
 }

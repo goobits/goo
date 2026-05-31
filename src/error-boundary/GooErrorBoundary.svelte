@@ -1,6 +1,6 @@
 <script lang="ts">
 import './GooErrorBoundary.css'
-import type { GooErrorBoundaryProps } from './types.js'
+import type { GooErrorBoundaryProps } from './types.ts'
 
 let {
 	children,

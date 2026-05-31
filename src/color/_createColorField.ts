@@ -1,7 +1,7 @@
 import { mount, unmount } from 'svelte'
 
 import GooColor from './GooColor.svelte'
-import type { GooColorEventData } from './types.js'
+import type { GooColorEventData } from './types.ts'
 
 export type ColorFieldOptions = {
 	alpha?: boolean

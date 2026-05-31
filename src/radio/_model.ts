@@ -1,4 +1,4 @@
-import type { GooRadioOption, GooRadioOptions } from './types.js'
+import type { GooRadioOption, GooRadioOptions } from './types.ts'
 
 type RawRadioOption = string | {
 	id?: string | number

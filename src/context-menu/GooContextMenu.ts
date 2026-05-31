@@ -4,15 +4,21 @@
  * @module goo/context-menu
  */
 
-import { createSelectField } from '../select/_createSelectField.js'
-import type { GooSelectElement, GooSelectMenuOptions, GooSelectOption } from '../select/index.js'
+import { createSelectField } from '../select/_createSelectField.ts'
+import type { GooSelectElement, GooSelectMenuOptions, GooSelectOption } from '../select/index.ts'
 
+/**
+ * Goo context menu option.
+ */
 export type GooContextMenuOption = GooSelectOption
 
+/**
+ * Goo context menu options.
+ */
 export interface GooContextMenuOptions {
 	options?: GooContextMenuOption[]
 	enableKeyboard?: boolean
-	enableSelection?: boolean
+	showSelectionIndicator?: boolean
 	menu?: GooSelectMenuOptions
 	className?: string
 	boundContext?: unknown
@@ -27,7 +33,7 @@ export interface GooContextMenuOptions {
  * Create a context menu instance.
  * This is a thin wrapper around GooSelect configured for context menu use.
  *
- * @param {GooContextMenuOptions} [options={}]
+ * @param {GooContextMenuOptions} [options={}] - Context menu options.
  * @returns {GooSelectElement}
  *
  * @example
@@ -51,7 +57,7 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooSe
 	const {
 		options: menuOptions = [],
 		enableKeyboard = true,
-		enableSelection = false,
+		showSelectionIndicator = false,
 		menu = {},
 		className = '',
 		boundContext,
@@ -66,7 +72,7 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooSe
 	const select = createSelectField({
 		options: menuOptions,
 		enableKeyboard,
-		enableSelection,
+		showSelectionIndicator,
 		showHeader: false,      // No trigger button
 		id,
 		value: value ?? selected,

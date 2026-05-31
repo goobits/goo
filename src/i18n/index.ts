@@ -31,21 +31,22 @@ let config: Required<LocaleConfig> = {
 const listeners = new Set<Listener>()
 
 /**
- * Configure locale settings for goo components.
- * Can be called multiple times to update settings.
- *
- * @example
- * // Basic setup
- * setLocale({ rtl: true, locale: 'ar-SA' })
- *
- * @example
- * // With translation function
- * setLocale({
- *   rtl: document.dir === 'rtl',
- *   locale: navigator.language,
- *   translate: (key) => myI18nLibrary.t(key)
- * })
- */
+	 * Configure locale settings for goo components.
+	 * Can be called multiple times to update settings.
+	 *
+	 * @example
+	 * // Basic setup
+	 * setLocale({ rtl: true, locale: 'ar-SA' })
+	 *
+	 * @example
+	 * // With translation function
+	 * setLocale({
+	 *   rtl: document.dir === 'rtl',
+	 *   locale: navigator.language,
+	 *   translate: (key) => myI18nLibrary.t(key)
+	 * })
+	 * @param options - options.
+	 */
 export function setLocale(options: LocaleConfig): void {
 	const prevRtl = config.rtl
 	const prevLocale = config.locale

@@ -1,8 +1,8 @@
 <script lang="ts" generics="T">
 	import './VirtualGrid.css'
 
-	import type { VirtualGridProps, VirtualGridSlot, VirtualGridWindow } from './types.js'
-	import { calculateVirtualGridWindow, virtualGridSpacerHeight } from './virtualWindow.js'
+	import type { VirtualGridProps, VirtualGridSlot, VirtualGridWindow } from './types.ts'
+	import { calculateVirtualGridWindow, virtualGridSpacerHeight } from './virtualWindow.ts'
 
 	const DEFAULT_OVERSCAN_ROWS = 8
 	const MOBILE_OVERSCAN_ROWS = 4

@@ -5,7 +5,7 @@
 
 import type { Snippet } from 'svelte'
 
-import type { GooPopoutOptions } from '../popout/popout.js'
+import type { GooPopoutOptions } from '../popout/popout.ts'
 
 /**
  * Single option in a GooSelect menu.
@@ -30,7 +30,7 @@ export interface GooSelectState {
 	value: string
 	placeholder: string
 	enableKeyboard: boolean
-	enableSelection: boolean
+	showSelectionIndicator: boolean
 	showHeader: boolean
 	disabled: boolean
 	[key: string]: unknown
@@ -68,7 +68,8 @@ export type GooSelectProps = {
 	options?: readonly string[] | readonly GooSelectOption[] | Record<string, unknown>
 	value?: string
 	enableKeyboard?: boolean
-	enableSelection?: boolean
+	/** Whether the open menu marks the current value with a check indicator. */
+	showSelectionIndicator?: boolean
 	showHeader?: boolean
 	menu?: GooSelectMenuOptions
 
@@ -78,6 +79,7 @@ export type GooSelectProps = {
 	style?: string
 	id?: string
 	size?: string
+	name?: string
 	placeholder?: string
 	tooltip?: string | (() => string)
 	title?: string
@@ -120,11 +122,38 @@ export interface GooSelectEventData {
 /** Panel surface required by select host and keyboard helpers. */
 export interface GooSelectPanelHost {
 	hoveredId: string | null
+	/**
+ * Navigate.
+ *
+ * @param dir - dir.
+ */
 	navigate(dir: 1 | -1): void
+	/**
+	 * Gets hovered element.
+	 */
 	getHoveredElement(): HTMLElement | null
+	/**
+	 * Finds option by id.
+	 *
+	 * @param id - id.
+	 */
 	findOptionById(id: string): GooSelectOption | null
+	/**
+	 * Open submenu.
+	 *
+	 * @param $item - $item.
+	 * @param opt - opt.
+	 */
 	openSubmenu($item: HTMLElement, opt: GooSelectOption): void
+	/**
+	 * Close submenu.
+	 */
 	closeSubmenu(): void
+	/**
+	 * Handles typeahead.
+	 *
+	 * @param char - char.
+	 */
 	handleTypeahead(char: string): void
 }
 
@@ -156,22 +185,28 @@ export type GooSelectElement = HTMLDivElement & GooSelectKeyboardHost & {
 	/** Available select options. */
 	options: GooSelectOption[]
 
-	/** Set option id. */
+	/** Set option id. 	 * @param value - value.
+ * @param options - options.
+ */
 	setValue(value: string, options?: { silent?: boolean }): void
 
 	/** Get option id. */
 	getValue(): string
 
-	/** Replace available options. */
+	/** Replace available options. 	 * @param options - options.
+	 */
 	setOptions(options: readonly string[] | readonly GooSelectOption[] | Record<string, unknown>): void
 
-	/** Set or update the trigger icon. */
+	/** Set or update the trigger icon. 	 * @param icon - icon.
+	 */
 	setTriggerIcon(icon: string | HTMLElement | (() => HTMLElement) | null): void
 
-	/** Open the dropdown. */
+	/** Open the dropdown. 	 * @param options - options.
+	 */
 	open(options?: GooSelectOpenOptions): boolean
 
-	/** Close the dropdown. */
+	/** Close the dropdown. 	 * @param options - options.
+	 */
 	close(options?: { quiet?: boolean }): void
 
 	/** Toggle the dropdown. */
@@ -189,7 +224,8 @@ export type GooSelectElement = HTMLDivElement & GooSelectKeyboardHost & {
 	/** Blur the trigger. */
 	blur(): void
 
-	/** Set bound callback context. */
+	/** Set bound callback context. 	 * @param context - context.
+	 */
 	setBoundContext(context: unknown): void
 }
 

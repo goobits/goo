@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
 	calculateVirtualGridWindow,
 	virtualGridSpacerHeight
-} from '../virtualWindow.js'
+} from '../virtualWindow.ts'
 
 describe('virtualGridWindow', () => {
 	it('returns every slot when virtualization is inactive', () => {

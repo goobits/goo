@@ -4,7 +4,7 @@ import {
 	createGooFloatingWindow,
 	hideFocusedGooFloatingWindow,
 	normalizeFloatingWindowSettings
-} from '../index.js'
+} from '../index.ts'
 
 describe('GooFloatingWindow', () => {
 	const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect

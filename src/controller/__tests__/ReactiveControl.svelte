@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { reactiveControlTracker } from './_reactiveControlTracker.js'
+	import { reactiveControlTracker } from './_reactiveControlTracker.ts'
 
 	interface Props {
 		value?: number

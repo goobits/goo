@@ -1,5 +1,5 @@
 <script module lang="ts">
-import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.js'
+import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.ts'
 
 /** GooController binding metadata for the Svelte textarea component. */
 export const controlSchema: SvelteControlSchema = {
@@ -20,15 +20,16 @@ export const controlSchema: SvelteControlSchema = {
 <script lang="ts">
 import './GooTextarea.css'
 
-import type { GooTextareaProps } from './types.js'
+import type { GooTextareaProps } from './types.ts'
 
 let textareaElement: HTMLDivElement | undefined = $state()
 let inputElement: HTMLTextAreaElement | undefined = $state()
 let currentValue = $state('')
 let lastCommittedValue = $state('')
+let skipNextValueSync = false
 
 let {
-	value = '',
+	value = $bindable(''),
 	placeholder = '',
 	name = '',
 	inputId,
@@ -49,6 +50,10 @@ let {
 }: GooTextareaProps = $props()
 
 $effect(() => {
+	if (skipNextValueSync && Object.is(String(value ?? ''), currentValue)) {
+		skipNextValueSync = false
+		return
+	}
 	currentValue = String(value ?? '')
 	lastCommittedValue = currentValue
 })
@@ -69,8 +74,11 @@ const hostAttributes = $derived<Record<string, string | undefined>>({
 export function setValue(nextValue: string, { silent = true }: { silent?: boolean } = {}): void {
 	const oldValue = currentValue
 	currentValue = String(nextValue)
-	if (!silent && oldValue !== currentValue) {
-		emitChange(oldValue)
+	if (oldValue !== currentValue) {
+		syncBoundValue(currentValue)
+		if (!silent) {
+			emitChange(oldValue)
+		}
 	}
 }
 
@@ -95,6 +103,7 @@ function handleInput(event: Event): void {
 	const oldValue = currentValue
 	currentValue = inputElement?.value ?? ''
 	if (oldValue !== currentValue) {
+		syncBoundValue(currentValue)
 		const detail = { value: currentValue, oldValue, target: textareaElement }
 		oninput?.(currentValue, oldValue)
 		textareaElement?.dispatchEvent(new CustomEvent('input', { bubbles: true, detail }))
@@ -106,6 +115,7 @@ function handleChange(event: Event): void {
 	const oldValue = lastCommittedValue
 	currentValue = inputElement?.value ?? ''
 	if (oldValue !== currentValue) {
+		syncBoundValue(currentValue)
 		lastCommittedValue = currentValue
 		emitChange(oldValue)
 	}
@@ -115,6 +125,11 @@ function emitChange(oldValue: string): void {
 	const detail = { value: currentValue, oldValue, target: textareaElement }
 	onchange?.(currentValue, oldValue)
 	textareaElement?.dispatchEvent(new CustomEvent('change', { bubbles: true, detail }))
+}
+
+function syncBoundValue(nextValue: string): void {
+	skipNextValueSync = true
+	value = nextValue
 }
 </script>
 

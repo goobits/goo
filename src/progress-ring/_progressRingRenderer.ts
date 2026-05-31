@@ -1,4 +1,4 @@
-import type { GooProgressRingVariant } from './types.js'
+import type { GooProgressRingVariant } from './types.ts'
 
 const SPINNER_COLORS = [ '#35ad0e', '#d8ad44', '#d00324', '#dc00b8', '#017efc' ]
 
@@ -113,7 +113,8 @@ export class ProgressRingRenderer {
 		this.#paint()
 	}
 
-	/** Configure visual rendering options for the progress ring. */
+	/** Configure visual rendering options for the progress ring. 	 * @param options - options.
+	 */
 	configure(options: ProgressRingRenderConfig): void {
 		this.#colorStops = options.colorStops ?? this.#colorStops
 		this.#fillStyle = options.fillStyle ?? this.#fillStyle
@@ -133,7 +134,9 @@ export class ProgressRingRenderer {
 		this.#startAnimation()
 	}
 
-	/** Update the ring progress and optional display labels. */
+	/** Update the ring progress and optional display labels. 	 * @param progress - progress.
+	 * @param display - display.
+	 */
 	setProgress(progress: number, display?: { format?: string; value?: number | string }): void {
 		this.#progress = clampProgress(progress)
 		this.#value = display?.value ?? Math.ceil(this.#progress * 100)
@@ -391,7 +394,8 @@ export class ProgressRingRenderer {
 	}
 }
 
-/** Clamp a value into the normalized 0..1 progress range. */
+/** Clamp a value into the normalized 0..1 progress range.  * @param progress - progress.
+ */
 export function clampProgress(progress: number): number {
 	return Math.min(1, Math.max(0, progress))
 }

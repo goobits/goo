@@ -8,9 +8,9 @@ import {
 	applyArrowPosition,
 	applyPosition,
 	calculatePosition
-} from './calculatePosition.js'
-import { HORIZONTAL } from './direction.js'
-import type { PositionElementAtOptions, PositionResult } from './types.js'
+} from './calculatePosition.ts'
+import { HORIZONTAL } from './direction.ts'
+import type { PositionElementAtOptions, PositionResult } from './types.ts'
 
 /**
  * Position an element relative to a target element or point.

@@ -6,8 +6,8 @@
  * Hover: Binary view (shows exact same/different pixels)
  */
 
-import { compare, type DiffResult } from './compare.js'
-import { renderGradient, renderBinary } from './render.js'
+import { compare, type DiffResult } from './compare.ts'
+import { renderGradient, renderBinary } from './render.ts'
 
 interface Props {
 	/** First image to compare */

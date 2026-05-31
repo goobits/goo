@@ -15,6 +15,7 @@ export interface Emitter {
 /**
  * Create emitter methods backed by a handlers map.
  * Core implementation shared by mixin and factory patterns.
+ * @param onError - on error.
  */
 function createEmitterMethods(onError?: (error: unknown) => void): Emitter {
 	const handlers = new Map<string, Set<Handler>>()
@@ -88,6 +89,7 @@ export function createEmitter(onError?: (error: unknown) => void): Emitter {
  * const comp = new MyComponent()
  * const detach = comp.on('done', (data) => console.log(data.result))
  * // Later: detach() to unsubscribe
+ * @param target - target.
  */
 export function emitter<T extends object>(target: T): T & Emitter {
 	const methods = createEmitterMethods()

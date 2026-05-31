@@ -3,7 +3,7 @@
  * On-demand rendering - only call when you need visual output.
  */
 
-import type { DiffResult } from './compare.js'
+import type { DiffResult } from './compare.ts'
 
 /**
  * Render a gradient visualization of differences.

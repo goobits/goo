@@ -1,6 +1,6 @@
 <script lang="ts">
 import './GooProgressRing.css'
-import { ProgressRingRenderer, type ProgressRingRenderConfig } from './_progressRingRenderer.js'
+import { ProgressRingRenderer, type ProgressRingRenderConfig } from './_progressRingRenderer.ts'
 
 let root: HTMLDivElement | undefined = $state()
 let canvasEl: HTMLCanvasElement | undefined = $state()

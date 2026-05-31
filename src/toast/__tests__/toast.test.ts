@@ -8,9 +8,9 @@ import {
 	GooToaster as ExportedGooToaster,
 	toast,
 	toastStore
-} from '../index.js'
-import { _resetToastStoreForTests } from '../toast-service.svelte.js'
-import type { Toast } from '../types.js'
+} from '../index.ts'
+import { _resetToastStoreForTests } from '../toast-service.svelte.ts'
+import type { Toast } from '../types.ts'
 
 function makeToast(overrides: Partial<Toast> = {}): Toast {
 	return {
@@ -160,6 +160,34 @@ describe('GooToast', () => {
 			}
 		})
 		expect(container.querySelector('.goo-toast__dismiss')).toBeNull()
+	})
+
+	it('does not start duplicate auto-dismiss frames on repeated resume events', async() => {
+		const requestAnimationFrameSpy = vi
+			.spyOn(window, 'requestAnimationFrame')
+			.mockImplementation(() => 1)
+		const cancelAnimationFrameSpy = vi
+			.spyOn(window, 'cancelAnimationFrame')
+			.mockImplementation(() => undefined)
+		try {
+			const { container } = render(GooToast, {
+				props: {
+					toast: makeToast({ duration: 5000 }),
+					ondismiss: vi.fn()
+				}
+			})
+			await Promise.resolve()
+			const toastElement = container.querySelector<HTMLElement>('.goo-toast')!
+
+			await fireEvent.mouseLeave(toastElement)
+			await fireEvent.focusOut(toastElement)
+
+			expect(requestAnimationFrameSpy).toHaveBeenCalledOnce()
+			expect(cancelAnimationFrameSpy).not.toHaveBeenCalled()
+		} finally {
+			requestAnimationFrameSpy.mockRestore()
+			cancelAnimationFrameSpy.mockRestore()
+		}
 	})
 })
 

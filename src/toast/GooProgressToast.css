@@ -1,0 +1,30 @@
+.goo-progress-toast {
+	position: fixed;
+	right: 16px;
+	bottom: 16px;
+	z-index: 100000;
+	display: grid;
+	grid-template-columns: 32px minmax(160px, auto);
+	gap: 8px 12px;
+	align-items: center;
+	max-width: min(360px, calc(100vw - 32px));
+	padding: 12px;
+	color: var(--goo-toast-color, #fff);
+	background: var(--goo-toast-background, #1f2937);
+	border-radius: 6px;
+	box-shadow: 0 12px 32px rgb(0 0 0 / 22%);
+}
+
+.goo-progress-toast__ring {
+	width: 32px;
+	height: 32px;
+}
+
+.goo-progress-toast__status {
+	margin: 0;
+}
+
+.goo-progress-toast__cancel {
+	grid-column: 2;
+	justify-self: start;
+}

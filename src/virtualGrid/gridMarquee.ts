@@ -1,7 +1,16 @@
+/**
+ * Rect XYWH.
+ */
 export interface RectXYWH { x: number; y: number; width: number; height: number }
 
+/**
+ * Grid marquee mode.
+ */
 export type GridMarqueeMode = 'replace' | 'additive'
 
+/**
+ * Grid marquee options.
+ */
 export interface GridMarqueeOptions {
 	getInitialSelection: () => Set<string>
 	apply: (hits: Set<string>, mode: GridMarqueeMode, initial: Set<string>) => void
@@ -17,6 +26,12 @@ const DEFAULT_KEY_ATTRIBUTE = 'data-key'
 const DEFAULT_OVERLAY_CLASS = 'goo-grid-marquee'
 const DRAG_THRESHOLD = 3
 
+/**
+ * Rect intersects.
+ *
+ * @param a - a.
+ * @param b - b.
+ */
 export function rectIntersects(a: RectXYWH, b: RectXYWH): boolean {
 	return a.x < b.x + b.width
 		&& a.x + a.width > b.x
@@ -24,6 +39,12 @@ export function rectIntersects(a: RectXYWH, b: RectXYWH): boolean {
 		&& a.y + a.height > b.y
 }
 
+/**
+ * Grid marquee.
+ *
+ * @param node - node.
+ * @param opts - opts.
+ */
 export function gridMarquee(node: HTMLElement, opts: GridMarqueeOptions) {
 	let tracking = false
 	let active = false

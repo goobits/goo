@@ -1,9 +1,9 @@
 import { render } from '@testing-library/svelte'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { _resetTurnstileLoaderForTests } from '../_script-loader.js'
+import { _resetTurnstileLoaderForTests } from '../_script-loader.ts'
 import GooTurnstileField from '../GooTurnstileField.svelte'
-import { GooTurnstileField as ExportedGooTurnstileField } from '../index.js'
+import { GooTurnstileField as ExportedGooTurnstileField } from '../index.ts'
 
 const SCRIPT_ID = 'goo-turnstile-script'
 

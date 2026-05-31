@@ -2,11 +2,11 @@
 import { untrack } from 'svelte'
 import type { Snippet } from 'svelte'
 
-import { type GooFolderElement, type GooFolderOptions } from '../folder/_createFolder.js'
-import { addChild, clearChildren, hydrateChildren, removeChild } from '../mixins/ChildContainer.js'
-import { clamp } from '../utils/numberUtils.js'
-import { createPointerDrag } from '../utils/pointerDrag.js'
-import type { GooPanelElement, GooPanelOptions } from './_createPanel.js'
+import { type GooFolderElement, type GooFolderOptions } from '../folder/_createFolder.ts'
+import { addChild, clearChildren, hydrateChildren, removeChild } from '../utils/_childContainer.ts'
+import { clamp } from '../utils/numberUtils.ts'
+import { createPointerDrag } from '../utils/pointerDrag.ts'
+import type { GooPanelElement, GooPanelOptions } from './_createPanel.ts'
 import './GooPanel.css'
 
 type GooPanelProps = GooPanelOptions & {
@@ -51,7 +51,7 @@ const panelWidth = $derived(docked ? '100%' : `${ width }px`)
 
 function appendContent(target: HTMLElement, nextContent: GooPanelOptions['content']): void {
 	if (!nextContent) return
-	if (typeof nextContent === 'string') target.innerHTML = nextContent
+	if (typeof nextContent === 'string') target.textContent = nextContent
 	else target.appendChild(nextContent)
 }
 

@@ -2,7 +2,7 @@ export {
 	createGooFloatingWindow,
 	hideFocusedGooFloatingWindow,
 	normalizeFloatingWindowSettings
-} from './floatingWindow.js'
+} from './floatingWindow.ts'
 export type {
 	GooFloatingWindow,
 	GooFloatingWindowHorizontalAlign,
@@ -11,4 +11,4 @@ export type {
 	GooFloatingWindowSettings,
 	GooFloatingWindowStorage,
 	GooFloatingWindowVerticalAlign
-} from './types.js'
+} from './types.ts'

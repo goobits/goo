@@ -3,8 +3,8 @@ import { tick } from 'svelte'
 import { describe, expect, it, vi } from 'vitest'
 
 import GooColor from '../GooColor.svelte'
-import { GooColor as ExportedGooColor } from '../index.js'
-import type { GooColorElement } from '../types.js'
+import { GooColor as ExportedGooColor } from '../index.ts'
+import type { GooColorElement } from '../types.ts'
 
 describe('GooColor', () => {
 	it('exports the native Svelte component from the package subpath', () => {
@@ -146,5 +146,35 @@ describe('GooColor', () => {
 		expect(oninput.mock.calls[0]?.[0]).toBe('#654321')
 		expect(onchange).toHaveBeenCalledOnce()
 		expect(onchange.mock.calls[0]?.[0]).toBe('#654321')
+	})
+
+	it('does not leak native child input/change events through the root surface', async() => {
+		const { container } = render(GooColor, {
+			props: {
+				value: '#123456'
+			}
+		})
+		const color = container.querySelector<GooColorElement>('.goo-color')!
+		const input = container.querySelector<HTMLInputElement>('.goo-color__input')!
+		const onRootInput = vi.fn()
+		const onRootChange = vi.fn()
+		color.addEventListener('input', onRootInput)
+		color.addEventListener('change', onRootChange)
+
+		await fireEvent.input(input, { target: { value: '#654321' } })
+		await fireEvent.change(input, { target: { value: '#654321' } })
+
+		expect(onRootInput).toHaveBeenCalled()
+		for (const [ event ] of onRootInput.mock.calls) {
+			expect(event).toMatchObject({
+				detail: expect.objectContaining({ value: '#654321' }),
+				target: color
+			})
+		}
+		expect(onRootChange).toHaveBeenCalledOnce()
+		expect(onRootChange.mock.calls[0]?.[0]).toMatchObject({
+			detail: expect.objectContaining({ value: '#654321' }),
+			target: color
+		})
 	})
 })

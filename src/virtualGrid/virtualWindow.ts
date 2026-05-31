@@ -1,4 +1,4 @@
-import type { VirtualGridWindow } from './types.js'
+import type { VirtualGridWindow } from './types.ts'
 
 /** Parameters for calculating the visible virtual grid window. */
 export interface VirtualGridWindowOptions {
@@ -17,6 +17,15 @@ export interface VirtualGridWindowOptions {
  * Calculate the visible slot window for a virtualized grid.
  * @param options - Current grid measurement and scroll state.
  * @returns Visible slot bounds and spacer row counts.
+ * @param virtual - virtual.
+ * @param viewportHeight - viewport height.
+ * @param totalItems - total items.
+ * @param tileHeight - tile height.
+ * @param scrollTop - scroll top.
+ * @param rowGap - row gap.
+ * @param overscanRows - overscan rows.
+ * @param itemsTop - items top.
+ * @param columns - columns.
  */
 export function calculateVirtualGridWindow({
 	columns,

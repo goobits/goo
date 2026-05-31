@@ -6,49 +6,193 @@
 	"private": true,
 	"packageManager": "pnpm@10.13.1",
 	"exports": {
-		".": "./src/index.ts",
-		"./button": "./src/button/index.ts",
+		".": {
+			"types": "./src/index.ts",
+			"svelte": "./src/index.ts",
+			"import": "./src/index.ts"
+		},
+		"./button": {
+			"types": "./src/button/index.ts",
+			"svelte": "./src/button/index.ts",
+			"import": "./src/button/index.ts"
+		},
 		"./button/styles.css": "./src/button/GooButton.css",
-		"./button-group": "./src/button-group/index.ts",
+		"./button-group": {
+			"types": "./src/button-group/index.ts",
+			"svelte": "./src/button-group/index.ts",
+			"import": "./src/button-group/index.ts"
+		},
 		"./button-group/styles.css": "./src/button-group/GooButtonGroup.css",
-		"./checkbox": "./src/checkbox/index.ts",
-		"./input": "./src/input/index.ts",
+		"./checkbox": {
+			"types": "./src/checkbox/index.ts",
+			"svelte": "./src/checkbox/index.ts",
+			"import": "./src/checkbox/index.ts"
+		},
+		"./input": {
+			"types": "./src/input/index.ts",
+			"svelte": "./src/input/index.ts",
+			"import": "./src/input/index.ts"
+		},
 		"./input/styles.css": "./src/input/GooInput.css",
-		"./radio": "./src/radio/index.ts",
-		"./select": "./src/select/index.ts",
+		"./radio": {
+			"types": "./src/radio/index.ts",
+			"svelte": "./src/radio/index.ts",
+			"import": "./src/radio/index.ts"
+		},
+		"./select": {
+			"types": "./src/select/index.ts",
+			"svelte": "./src/select/index.ts",
+			"import": "./src/select/index.ts"
+		},
 		"./select/styles.css": "./src/select/GooSelect.css",
-		"./slider": "./src/slider/index.ts",
-		"./spinner": "./src/spinner/index.ts",
-		"./angle-input": "./src/angle-input/index.ts",
-		"./textarea": "./src/textarea/index.ts",
-		"./dialog": "./src/dialog/index.ts",
-		"./floating-window": "./src/floating-window/index.ts",
-		"./popout": "./src/popout/index.ts",
-		"./positioning": "./src/positioning/index.ts",
-		"./progress-ring": "./src/progress-ring/index.ts",
-		"./context-menu": "./src/context-menu/index.ts",
-		"./data-grid": "./src/data-grid/index.ts",
-		"./folder": "./src/folder/index.ts",
-		"./panel": "./src/panel/index.ts",
-		"./controller": "./src/controller/index.ts",
-		"./color": "./src/color/index.ts",
-		"./i18n": "./src/i18n/index.ts",
-		"./icon": "./src/icon/index.ts",
-		"./icon/registry": "./src/icon/registry.ts",
-		"./label": "./src/label/index.ts",
-		"./number": "./src/number/index.ts",
-		"./tooltip": "./src/tooltip/index.ts",
-		"./vortex": "./src/vortex/index.ts",
-		"./virtualGrid": "./src/virtualGrid/index.ts",
-		"./schema": "./src/schema/index.ts",
-		"./table": "./src/table/index.ts",
-		"./components/diff": "./src/components/diff/index.ts",
-		"./error-boundary": "./src/error-boundary/index.ts",
-		"./turnstile": "./src/turnstile/index.ts",
-		"./toast": "./src/toast/index.ts"
+		"./slider": {
+			"types": "./src/slider/index.ts",
+			"svelte": "./src/slider/index.ts",
+			"import": "./src/slider/index.ts"
+		},
+		"./spinner": {
+			"types": "./src/spinner/index.ts",
+			"svelte": "./src/spinner/index.ts",
+			"import": "./src/spinner/index.ts"
+		},
+		"./angle-input": {
+			"types": "./src/angle-input/index.ts",
+			"svelte": "./src/angle-input/index.ts",
+			"import": "./src/angle-input/index.ts"
+		},
+		"./app-loader": {
+			"types": "./src/app-loader/index.ts",
+			"import": "./src/app-loader/index.ts"
+		},
+		"./textarea": {
+			"types": "./src/textarea/index.ts",
+			"svelte": "./src/textarea/index.ts",
+			"import": "./src/textarea/index.ts"
+		},
+		"./dialog": {
+			"types": "./src/dialog/index.ts",
+			"svelte": "./src/dialog/index.ts",
+			"import": "./src/dialog/index.ts"
+		},
+		"./floating-window": {
+			"types": "./src/floating-window/index.ts",
+			"import": "./src/floating-window/index.ts"
+		},
+		"./popout": {
+			"types": "./src/popout/index.ts",
+			"svelte": "./src/popout/index.ts",
+			"import": "./src/popout/index.ts"
+		},
+		"./positioning": {
+			"types": "./src/positioning/index.ts",
+			"import": "./src/positioning/index.ts"
+		},
+		"./progress-ring": {
+			"types": "./src/progress-ring/index.ts",
+			"svelte": "./src/progress-ring/index.ts",
+			"import": "./src/progress-ring/index.ts"
+		},
+		"./context-menu": {
+			"types": "./src/context-menu/index.ts",
+			"import": "./src/context-menu/index.ts"
+		},
+		"./data-grid": {
+			"types": "./src/data-grid/index.ts",
+			"svelte": "./src/data-grid/index.ts",
+			"import": "./src/data-grid/index.ts"
+		},
+		"./folder": {
+			"types": "./src/folder/index.ts",
+			"svelte": "./src/folder/index.ts",
+			"import": "./src/folder/index.ts"
+		},
+		"./panel": {
+			"types": "./src/panel/index.ts",
+			"svelte": "./src/panel/index.ts",
+			"import": "./src/panel/index.ts"
+		},
+		"./controller": {
+			"types": "./src/controller/index.ts",
+			"svelte": "./src/controller/index.ts",
+			"import": "./src/controller/index.ts"
+		},
+		"./color": {
+			"types": "./src/color/index.ts",
+			"svelte": "./src/color/index.ts",
+			"import": "./src/color/index.ts"
+		},
+		"./i18n": {
+			"types": "./src/i18n/index.ts",
+			"import": "./src/i18n/index.ts"
+		},
+		"./icon": {
+			"types": "./src/icon/index.ts",
+			"svelte": "./src/icon/index.ts",
+			"import": "./src/icon/index.ts"
+		},
+		"./icon/registry": {
+			"types": "./src/icon/registry.ts",
+			"import": "./src/icon/registry.ts"
+		},
+		"./label": {
+			"types": "./src/label/index.ts",
+			"svelte": "./src/label/index.ts",
+			"import": "./src/label/index.ts"
+		},
+		"./number": {
+			"types": "./src/number/index.ts",
+			"import": "./src/number/index.ts"
+		},
+		"./tooltip": {
+			"types": "./src/tooltip/index.ts",
+			"svelte": "./src/tooltip/index.ts",
+			"import": "./src/tooltip/index.ts"
+		},
+		"./vortex": {
+			"types": "./src/vortex/index.ts",
+			"svelte": "./src/vortex/index.ts",
+			"import": "./src/vortex/index.ts"
+		},
+		"./virtualGrid": {
+			"types": "./src/virtualGrid/index.ts",
+			"svelte": "./src/virtualGrid/index.ts",
+			"import": "./src/virtualGrid/index.ts"
+		},
+		"./schema": {
+			"types": "./src/schema/index.ts",
+			"svelte": "./src/schema/index.ts",
+			"import": "./src/schema/index.ts"
+		},
+		"./table": {
+			"types": "./src/table/index.ts",
+			"svelte": "./src/table/index.ts",
+			"import": "./src/table/index.ts"
+		},
+		"./diff": {
+			"types": "./src/diff/index.ts",
+			"svelte": "./src/diff/index.ts",
+			"import": "./src/diff/index.ts"
+		},
+		"./error-boundary": {
+			"types": "./src/error-boundary/index.ts",
+			"svelte": "./src/error-boundary/index.ts",
+			"import": "./src/error-boundary/index.ts"
+		},
+		"./turnstile": {
+			"types": "./src/turnstile/index.ts",
+			"svelte": "./src/turnstile/index.ts",
+			"import": "./src/turnstile/index.ts"
+		},
+		"./toast": {
+			"types": "./src/toast/index.ts",
+			"svelte": "./src/toast/index.ts",
+			"import": "./src/toast/index.ts"
+		}
 	},
 	"files": [
-		"src"
+		"src",
+		"!src/**/__tests__/**",
+		"!src/**/*.test.ts"
 	],
 	"scripts": {
 		"dev": "vite --host 127.0.0.1",

@@ -3,7 +3,7 @@
  * @module goobits/schema/types
  */
 
-import type { ControlTypeRegistry } from '../controller/controlRegistry.js'
+import type { ControlTypeRegistry } from '../controller/controlRegistry.ts'
 
 /**
  * Control field definition type identifiers.
@@ -36,13 +36,13 @@ export interface GooSchemaField {
 	path: string
 
 	/**
-   * Control type (auto-detected from value if omitted):
-   * - boolean -> 'checkbox'
-   * - number + min/max -> 'range' (or 'slider')
-   * - number without bounds -> 'number'
-   * - string -> 'text'
-   * - array of options -> 'select'
-   */
+	 * Control type (auto-detected from value if omitted):
+	 * - boolean -> 'checkbox'
+	 * - number + min/max -> 'range' (or 'slider')
+	 * - number without bounds -> 'number'
+	 * - string -> 'text'
+	 * - array of options -> 'select'
+	 */
 	type?: GooSchemaControlType
 
 	/** Display label (auto-generated from path if omitted) */
@@ -92,8 +92,8 @@ export interface GooSchemaField {
 }
 
 /**
- * Folder container - groups related fields.
- */
+	 * Folder container - groups related fields.
+	 */
 export interface GooSchemaFolder {
 	type: 'folder'
 
@@ -112,8 +112,8 @@ export interface GooSchemaFolder {
 }
 
 /**
- * Panel root container.
- */
+	 * Panel root container.
+	 */
 export interface GooSchemaPanel {
 	type: 'panel'
 
@@ -134,8 +134,8 @@ export interface GooSchemaPanel {
 }
 
 /**
- * Any schema node.
- */
+	 * Any schema node.
+	 */
 export type GooSchemaNode = GooSchemaField | GooSchemaFolder
 
 /**

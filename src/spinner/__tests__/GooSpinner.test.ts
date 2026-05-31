@@ -2,7 +2,7 @@ import { render } from '@testing-library/svelte'
 import { describe, expect, it } from 'vitest'
 
 import GooSpinner from '../GooSpinner.svelte'
-import { renderGooSpinnerHtml } from '../index.js'
+import { renderGooSpinnerHtml } from '../index.ts'
 
 describe('GooSpinner', () => {
 	it('renders accessible spinner markup for raw HTML callers', () => {

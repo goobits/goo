@@ -1,7 +1,13 @@
-import { createGooPopout, type GooPopoutInstance } from '../popout/index.js'
-import type { GooSelectOption } from './types.js'
+import { createGooPopout, type GooPopoutInstance } from '../popout/index.ts'
+import type { PositionResult } from '../positioning/index.ts'
+import { getElementTextDirection } from './selectDom.ts'
+import type { GooSelectOption } from './types.ts'
 
-const SUBMENU_TRANSITION_MS = 240
+const SUBMENU_TRANSITION_MS = 420
+const SUBMENU_SIDE_CLASSES = [
+	'goo-select__option--submenu-open-left',
+	'goo-select__option--submenu-open-right'
+]
 
 type Direction = 'down' | 'up'
 type RenderOptionsList = (options: GooSelectOption[], container: HTMLElement) => void
@@ -9,28 +15,40 @@ type SubmenuElements = {
 	$frame: HTMLElement
 	$viewport: HTMLElement
 }
+type SubmenuBoundaryHandlers = {
+	onMouseEnter?: () => void
+	onMouseLeave?: (event: MouseEvent) => void
+}
 
 export class SubmenuPopoutController {
 	#renderOptionsList: RenderOptionsList
+	#boundaryHandlers: SubmenuBoundaryHandlers
 	#popout: GooPopoutInstance | null = null
 	#activeId: string | null = null
 	#activeOwner: HTMLElement | null = null
+	#boundaryCleanup: (() => void) | null = null
 	#transitionCleanup: (() => void) | null = null
 	#transitionFrame = 0
 	#transitionToken = 0
 
-	constructor(renderOptionsList: RenderOptionsList) {
+	constructor(renderOptionsList: RenderOptionsList, boundaryHandlers: SubmenuBoundaryHandlers = {}) {
 		this.#renderOptionsList = renderOptionsList
+		this.#boundaryHandlers = boundaryHandlers
 	}
 
 	get opened(): boolean {
 		return Boolean(this.#popout?.opened)
 	}
 
+	containsElement(target: EventTarget | null): boolean {
+		return target instanceof Node && Boolean(this.#popout?.$element?.contains(target))
+	}
+
 	open($item: HTMLElement, option: GooSelectOption): void {
 		const submenuId = option.id ?? ''
 		if (this.#popout?.opened && this.#activeId === submenuId) {
-			this.#popout.updatePosition($item)
+			this.#setActiveOwner($item)
+			this.#updatePopoutPosition($item)
 			return
 		}
 
@@ -38,13 +56,14 @@ export class SubmenuPopoutController {
 		if (this.#popout?.opened) {
 			const direction = this.#getSwitchDirection($item)
 			this.#activeId = submenuId
-			this.#activeOwner = $item
+			this.#setActiveOwner($item)
 			this.#replaceSubmenuContent($item, $nextSubmenu, direction)
 			return
 		}
 
 		this.#activeId = submenuId
-		this.#activeOwner = $item
+		this.#setActiveOwner($item)
+		const textDirection = getElementTextDirection($item)
 		this.#popout = createGooPopout({
 			$content: this.#createSubmenuFrame($nextSubmenu),
 			$parent: document.body,
@@ -55,12 +74,19 @@ export class SubmenuPopoutController {
 			showBackdrop: false,
 			at: $item,
 			align: 'left to right',
-			offset: { x: 8, y: 0 }
+			offset: { x: 8, y: 0 },
+			rtl: textDirection === 'rtl',
+			attributes: { dir: textDirection },
+			onPosition: ({ position }) => this.#syncActiveOwnerPlacement(position)
 		})
+		this.#bindBoundaryEvents()
 	}
 
 	close(): void {
 		this.#finishTransition()
+		this.#boundaryCleanup?.()
+		this.#boundaryCleanup = null
+		this.#clearOwnerPlacement(this.#activeOwner)
 		this.#popout?.destroy()
 		this.#popout = null
 		this.#activeId = null
@@ -91,7 +117,7 @@ export class SubmenuPopoutController {
 
 		if (!popout || !elements) {
 			popout?.$content?.replaceChildren(this.#createSubmenuFrame($nextSubmenu))
-			popout?.updatePosition($item)
+			this.#updatePopoutPosition($item)
 			return
 		}
 
@@ -100,12 +126,12 @@ export class SubmenuPopoutController {
 		// Capture the current rendered size before tearing down any in-flight
 		// transition. Interrupting a morph mid-flight must continue from where the
 		// frame visually is, not snap to the natural content size that settling exposes.
-		const previousSize = measureFrame($frame)
-		this.#cancelTransition()
+		const previousSize = measureElement($frame)
+		this.#finishTransition()
 		const $previousSubmenu = $viewport.querySelector<HTMLElement>(':scope > .goo-select__submenu')
 		if (!$previousSubmenu || prefersReducedMotion()) {
 			$viewport.replaceChildren($nextSubmenu)
-			popout.updatePosition($item)
+			this.#updatePopoutPosition($item)
 			return
 		}
 
@@ -125,7 +151,7 @@ export class SubmenuPopoutController {
 		forceLayout($nextSubmenu)
 		forceLayout($previousSubmenu)
 
-		popout.updatePosition($item)
+		this.#updatePopoutPosition($item)
 		const token = ++this.#transitionToken
 
 		let finished = false
@@ -134,7 +160,7 @@ export class SubmenuPopoutController {
 			if (finished || token !== this.#transitionToken) return
 			finished = true
 			if (onTransitionEnd) {
-				$frame.removeEventListener('transitionend', onTransitionEnd)
+				$nextSubmenu.removeEventListener('transitionend', onTransitionEnd)
 			}
 			$previousSubmenu.remove()
 			$nextSubmenu.classList.remove(
@@ -148,16 +174,17 @@ export class SubmenuPopoutController {
 			$frame.style.removeProperty('width')
 			$frame.style.removeProperty('height')
 			$frame.style.removeProperty('transform')
-			popout.reposition()
 			this.#transitionCleanup = null
 		}
+		// Finish when the new content has finished sliding in (the last visible phase),
+		// not when opacity ends -- opacity is slightly shorter than the slide.
 		const timeout = setTimeout(finish, SUBMENU_TRANSITION_MS + 80)
 		onTransitionEnd = (event: TransitionEvent) => {
-			if (event.target === $frame && (event.propertyName === 'width' || event.propertyName === 'height')) {
+			if (event.target === $nextSubmenu && event.propertyName === 'transform') {
 				finish()
 			}
 		}
-		$frame.addEventListener('transitionend', onTransitionEnd)
+		$nextSubmenu.addEventListener('transitionend', onTransitionEnd)
 
 		this.#transitionFrame = requestAnimationFrame(() => {
 			if (token !== this.#transitionToken) return
@@ -182,11 +209,11 @@ export class SubmenuPopoutController {
 			$frame.style.height = `${ nextSize.height }px`
 			$previousSubmenu.classList.add('goo-select__submenu--leaving-active')
 			$nextSubmenu.classList.add('goo-select__submenu--entering-active')
-			popout.updatePosition($item)
+			this.#updatePopoutPosition($item)
 		})
 
 		this.#transitionCleanup = () => {
-			$frame.removeEventListener('transitionend', onTransitionEnd)
+			$nextSubmenu.removeEventListener('transitionend', onTransitionEnd)
 			clearTimeout(timeout)
 			this.#settleInterruptedTransition($frame, $viewport)
 		}
@@ -194,16 +221,6 @@ export class SubmenuPopoutController {
 
 	#finishTransition(): void {
 		this.#transitionToken += 1
-		if (this.#transitionFrame) {
-			cancelAnimationFrame(this.#transitionFrame)
-			this.#transitionFrame = 0
-		}
-
-		this.#transitionCleanup?.()
-		this.#transitionCleanup = null
-	}
-
-	#cancelTransition(): void {
 		if (this.#transitionFrame) {
 			cancelAnimationFrame(this.#transitionFrame)
 			this.#transitionFrame = 0
@@ -241,20 +258,52 @@ export class SubmenuPopoutController {
 		return $frame && $viewport ? { $frame, $viewport } : null
 	}
 
+	#bindBoundaryEvents(): void {
+		const element = this.#popout?.$element
+		if (!element || this.#boundaryCleanup) return
+
+		const handleMouseEnter = () => this.#boundaryHandlers.onMouseEnter?.()
+		const handleMouseLeave = (event: MouseEvent) => this.#boundaryHandlers.onMouseLeave?.(event)
+		element.addEventListener('mouseenter', handleMouseEnter)
+		element.addEventListener('mouseleave', handleMouseLeave)
+		this.#boundaryCleanup = () => {
+			element.removeEventListener('mouseenter', handleMouseEnter)
+			element.removeEventListener('mouseleave', handleMouseLeave)
+		}
+	}
+
+	#setActiveOwner($item: HTMLElement): void {
+		if (this.#activeOwner === $item) return
+		this.#clearOwnerPlacement(this.#activeOwner)
+		this.#activeOwner = $item
+	}
+
+	#clearOwnerPlacement($item: HTMLElement | null): void {
+		$item?.classList.remove(...SUBMENU_SIDE_CLASSES)
+		$item?.removeAttribute('data-submenu-side')
+	}
+
+	#syncActiveOwnerPlacement(position: PositionResult | null = this.#popout?.position ?? null): void {
+		const side = getSubmenuSide(position)
+		if (!this.#activeOwner || !side) return
+
+		this.#clearOwnerPlacement(this.#activeOwner)
+		this.#activeOwner.dataset.submenuSide = side
+		this.#activeOwner.classList.add(`goo-select__option--submenu-open-${ side }`)
+	}
+
+	#updatePopoutPosition($item: HTMLElement): void {
+		if (!this.#popout) return
+		this.#popout.updatePosition($item)
+		this.#popout.reposition()
+	}
+
 	#getSwitchDirection($item: HTMLElement): Direction {
 		if (!this.#activeOwner) return 'down'
 
 		return this.#activeOwner.compareDocumentPosition($item) & Node.DOCUMENT_POSITION_FOLLOWING
 			? 'down'
 			: 'up'
-	}
-}
-
-function measureFrame(element: HTMLElement): { height: number; width: number } {
-	const rect = element.getBoundingClientRect()
-	return {
-		height: Math.max(1, Math.ceil(rect.height || element.scrollHeight || element.offsetHeight)),
-		width: Math.max(1, Math.ceil(rect.width || element.scrollWidth || element.offsetWidth))
 	}
 }
 
@@ -310,4 +359,10 @@ function prefersReducedMotion(): boolean {
 
 function forceLayout(element: HTMLElement): void {
 	void element.offsetWidth
+}
+
+function getSubmenuSide(position: PositionResult | null): 'left' | 'right' | null {
+	if (position?.arrowPosition === 'left') return 'right'
+	if (position?.arrowPosition === 'right') return 'left'
+	return null
 }

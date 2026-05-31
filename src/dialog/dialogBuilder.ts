@@ -3,13 +3,16 @@
  * @module goobits/dialog/dialogBuilder
  */
 
-import { type CheckboxFieldElement, createCheckboxField } from '../checkbox/_createCheckboxField.js'
-import { createGooField, type GooFieldConfig } from './createGooField.js'
+import { type CheckboxFieldElement, createCheckboxField } from '../checkbox/_createCheckboxField.ts'
+import { createGooField, type GooFieldConfig } from './createGooField.ts'
 
 // ============================================================================
 // Types
 // ============================================================================
 
+/**
+ * Dialog labels.
+ */
 export interface DialogLabels {
 	ok?: string
 	cancel?: string
@@ -17,17 +20,26 @@ export interface DialogLabels {
 	applyToAll?: string
 }
 
+/**
+ * Dialog field.
+ */
 export type DialogField = GooFieldConfig & {
 	name?: string
 	label?: string
 }
 
+/**
+ * Dialog state.
+ */
 export interface DialogState {
 	type: string
 	heading: string
 	showClose: boolean
 }
 
+/**
+ * Dialog elements.
+ */
 export interface DialogElements {
 	$header: HTMLElement | null
 	$title: HTMLElement | null
@@ -42,6 +54,9 @@ export interface DialogElements {
 	$applyToAll: CheckboxFieldElement | null
 }
 
+/**
+ * Footer elements.
+ */
 export interface FooterElements {
 	$okBtn: HTMLButtonElement | null
 	$cancelBtn: HTMLButtonElement | null
@@ -88,17 +103,15 @@ function createFooterButton(value: string, variant: 'primary' | 'secondary'): HT
 
 /**
  * Append content to a target element.
- * Handles string (with HTML detection), HTMLElement, DocumentFragment, and Node.
+ * Handles strings as text. Pass a DOM node for rich markup.
+ * @param content - content.
+ * @param $target - target.
  */
 export function appendContent($target: HTMLElement, content: string | HTMLElement | Node | null | undefined): void {
 	if (!content) return
 
 	if (typeof content === 'string') {
-		if (content.includes('<')) {
-			$target.innerHTML = content
-		} else {
-			$target.textContent = content
-		}
+		$target.textContent = content
 	} else if (content instanceof HTMLElement || content instanceof DocumentFragment) {
 		$target.appendChild(content)
 	} else if (content instanceof Node) {
@@ -114,11 +127,16 @@ export function appendContent($target: HTMLElement, content: string | HTMLElemen
 
 /**
  * Build standard dialog layout (alert, confirm, prompt).
+ * @param state - state.
+ * @param labels - labels.
+ * @param fields - fields.
+ * @param content - content.
+ * @param $dialog - dialog.
  */
 export function buildStandardLayout(
 	$dialog: HTMLElement,
 	state: DialogState,
-	content: string | HTMLElement,
+	content: string | Node,
 	labels: DialogLabels,
 	fields: DialogField[]
 ): DialogElements {
@@ -198,10 +216,13 @@ export function buildStandardLayout(
 
 /**
  * Build notify dialog layout.
+ * @param showClose - show close.
+ * @param content - content.
+ * @param $dialog - dialog.
  */
 export function buildNotifyLayout(
 	$dialog: HTMLElement,
-	content: string | HTMLElement,
+	content: string | Node,
 	showClose: boolean
 ): Pick<DialogElements, '$content' | '$closeBtn'> {
 	const elements: Pick<DialogElements, '$content' | '$closeBtn'> = {
@@ -229,11 +250,14 @@ export function buildNotifyLayout(
 
 /**
  * Build overlay dialog layout.
+ * @param state - state.
+ * @param content - content.
+ * @param $dialog - dialog.
  */
 export function buildOverlayLayout(
 	$dialog: HTMLElement,
 	state: DialogState,
-	content: string | HTMLElement
+	content: string | Node
 ): Pick<DialogElements, '$header' | '$title' | '$content' | '$closeBtn'> {
 	const { heading, showClose } = state
 
@@ -279,6 +303,8 @@ export function buildOverlayLayout(
 /**
  * Build dialog fields.
  * Returns a map of field name to field element.
+ * @param fields - fields.
+ * @param $fieldsContainer - fields container.
  */
 export function buildFields(
 	$fieldsContainer: HTMLElement,
@@ -317,6 +343,8 @@ export function buildFields(
 
 /**
  * Build dialog footer with buttons.
+ * @param labels - labels.
+ * @param $footer - footer.
  */
 export function buildFooter(
 	$footer: HTMLElement,

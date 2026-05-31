@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { createPanel } from '../_createPanel.js'
+import { createPanel } from '../_createPanel.ts'
 
 describe('GooPanel', () => {
 	afterEach(() => {
@@ -39,5 +39,17 @@ describe('GooPanel', () => {
 		expect(panel.$header).toBeNull()
 		expect(panel.$title).toBeNull()
 		expect(panel.querySelector('.goo-panel__header')).toBeNull()
+	})
+
+	it('treats string content as text instead of HTML', () => {
+		const panel = createPanel({
+			title: 'Controls',
+			content: '<img src=x onerror=alert(1)>',
+			autoPlace: false
+		})
+		document.body.appendChild(panel)
+
+		expect(panel.$content?.textContent).toBe('<img src=x onerror=alert(1)>')
+		expect(panel.$content?.querySelector('img')).toBeNull()
 	})
 })

@@ -34,6 +34,9 @@ export interface SvelteControlSchema {
 	selfContained?: boolean
 }
 
+/**
+	 * Svelte control host options.
+	 */
 export interface SvelteControlHostOptions {
 	component: SvelteComponentType
 	schema?: SvelteControlSchema
@@ -48,18 +51,45 @@ export interface SvelteControlHostOptions {
 
 type MountedControl = ReturnType<typeof mount>
 
+/**
+ * Svelte control host.
+ */
 export interface SvelteControlHost {
 	readonly element: HTMLElement | null
+	/**
+	 * Create.
+	 */
 	create(): HTMLElement
+	/**
+	 * Sets value.
+	 *
+	 * @param value - value.
+	 * @param options - options.
+	 */
 	setValue(value: unknown, options?: { silent?: boolean }): void
+	/**
+	 * Sets options.
+	 *
+	 * @param options - options.
+	 */
 	setOptions(options: ControlSchemaOptions): void
+	/**
+	 * Gets value.
+	 */
 	getValue(): unknown
+	/**
+	 * Updates display.
+	 */
 	updateDisplay(): void
+	/**
+	 * Destroy.
+	 */
 	destroy(): void
 }
 
 /**
  * Mounts a Svelte control as a GooController-compatible host.
+ * @param opts - opts.
  */
 export function createSvelteControlHost(opts: SvelteControlHostOptions): SvelteControlHost {
 	const {

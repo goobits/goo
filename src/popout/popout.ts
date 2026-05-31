@@ -7,8 +7,8 @@
 
 import './GooPopout.css'
 
-import { applyArrowPosition, applyPosition, calculatePosition } from '../positioning/index.js'
-import { createPointerDrag } from '../utils/pointerDrag.js'
+import { applyArrowPosition, applyPosition, calculatePosition, type PositionResult } from '../positioning/index.ts'
+import { createPointerDrag } from '../utils/pointerDrag.ts'
 
 // =============================================================================
 // Popout Registry (for parent-child chains)
@@ -136,6 +136,9 @@ export interface GooPopoutOptions {
 	chromeless?: boolean
 	onOpen?: (data: { $element: HTMLElement; instance: GooPopoutInstance }) => void
 	onClose?: (data: { $element: HTMLElement; instance: GooPopoutInstance }) => void
+
+	/** Called after each non-fullscreen placement calculation is applied. */
+	onPosition?: (data: { $element: HTMLElement; instance: GooPopoutInstance; position: PositionResult }) => void
 	onDestroy?: () => void
 }
 
@@ -157,6 +160,9 @@ export interface GooPopoutInstance {
 	readonly $element: HTMLElement | null
 	readonly $content: HTMLElement | null
 	readonly $arrow: HTMLElement | null
+
+	/** Most recently applied non-fullscreen position, if the popout has been placed. */
+	readonly position: PositionResult | null
 	readonly opened: boolean
 	$parent: GooPopoutInstance | null
 	$child: GooPopoutInstance | null
@@ -176,7 +182,7 @@ export interface GooPopoutInstance {
 
 /**
  * Create a new popout instance.
- * @param {GooPopoutOptions} options
+ * @param {GooPopoutOptions} options - options.
  * @returns {GooPopoutInstance}
  */
 export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstance {
@@ -204,6 +210,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		rtl,
 		onOpen,
 		onClose,
+		onPosition,
 		onDestroy
 	} = options
 
@@ -219,11 +226,9 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 	let currentPosition: ReturnType<typeof calculatePosition> | null = null
 	let previousActiveElement: HTMLElement | null = null
 	let repositionFrame = 0
-	const resolvedRtl = rtl
-		?? (document.documentElement?.dir === 'rtl'
-			|| document.body?.dir === 'rtl')
-	const fallbackAlign = alignInput
-		?? (resolvedRtl ? 'right to left' : 'left to right')
+	const resolvedRtl =
+		rtl ?? (document.documentElement?.dir === 'rtl' || document.body?.dir === 'rtl')
+	const fallbackAlign = alignInput ?? (resolvedRtl ? 'right to left' : 'left to right')
 	let currentAlign = fallbackAlign
 	let currentOffset = { ...offsetInput }
 	const fullScreen = fullScreenOption || !!keepWithin?.fullScreen
@@ -239,14 +244,33 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 	// ==========================================================================
 
 	const instance: GooPopoutInstance = {
-		get $element() { return $element },
-		get $content() { return $element?.querySelector('.goo-popout__content') as HTMLElement | null },
-		get $arrow() { return $arrow },
-		get opened() { return opened },
-		get $parent() { return parentPopout },
-		set $parent(p: GooPopoutInstance | null) { parentPopout = p },
-		get $child() { return childPopout },
-		set $child(c: GooPopoutInstance | null) { childPopout = c },
+		get $element() {
+			return $element
+		},
+		get $content() {
+			return $element?.querySelector('.goo-popout__content') as HTMLElement | null
+		},
+		get $arrow() {
+			return $arrow
+		},
+		get position() {
+			return currentPosition
+		},
+		get opened() {
+			return opened
+		},
+		get $parent() {
+			return parentPopout
+		},
+		set $parent(p: GooPopoutInstance | null) {
+			parentPopout = p
+		},
+		get $child() {
+			return childPopout
+		},
+		set $child(c: GooPopoutInstance | null) {
+			childPopout = c
+		},
 
 		open,
 		close,
@@ -267,9 +291,8 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 	async function open() {
 		if (opened || destroying) return
 		if (initialFocus !== 'none') {
-			previousActiveElement = document.activeElement instanceof HTMLElement
-				? document.activeElement
-				: null
+			previousActiveElement =
+				document.activeElement instanceof HTMLElement ? document.activeElement : null
 		}
 
 		// Create DOM
@@ -425,6 +448,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		currentPosition = calculatePosition($element, positionOptions)
 		applyPosition($element, currentPosition)
 		applyArrowPosition($arrow, currentPosition)
+		onPosition?.({ $element, instance, position: currentPosition })
 	}
 
 	function scheduleReposition() {
@@ -576,7 +600,9 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		const el = document.createElement('div') as PopoutElement
 		const fullScreenClass = fullScreen ? 'goo-popout--fullscreen' : ''
 		const chromelessClass = chromeless ? 'goo-popout--chromeless' : ''
-		el.className = `goo-popout ${ fullScreenClass } ${ chromelessClass } ${ className }`.replace(/\s+/g, ' ').trim()
+		el.className = `goo-popout ${ fullScreenClass } ${ chromelessClass } ${ className }`
+			.replace(/\s+/g, ' ')
+			.trim()
 		el.tabIndex = 0
 		if (role) {
 			el.setAttribute('role', role)
@@ -668,7 +694,9 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 
 				document.addEventListener('pointerdown', handlePointerDown, { capture: true })
 				cleanupHandlers.push(() => {
-					document.removeEventListener('pointerdown', handlePointerDown, { capture: true })
+					document.removeEventListener('pointerdown', handlePointerDown, {
+						capture: true
+					})
 				})
 			}, 100)
 		}
@@ -764,6 +792,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 	 * Resolve the scroll container that should consume a wheel event inside the popout.
 	 * Walk up from the event target so nested scroll regions keep the wheel interaction
 	 * instead of letting it chain through the document underneath.
+	 * @param e - e.
 	 */
 	function getScrollableWheelContainer(e: WheelEvent) {
 		const root = $element
@@ -789,32 +818,36 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		let startX: number, startY: number, startLeft: number, startTop: number
 		let _hasDragged = false
 
-		const handler = createPointerDrag($element!, event => {
-			if (event.START) {
-				const rect = $element!.getBoundingClientRect()
-				startX = event.clientX
-				startY = event.clientY
-				startLeft = rect.left
-				startTop = rect.top
-				_hasDragged = false
-			}
+		const handler = createPointerDrag(
+			$element!,
+			event => {
+				if (event.START) {
+					const rect = $element!.getBoundingClientRect()
+					startX = event.clientX
+					startY = event.clientY
+					startLeft = rect.left
+					startTop = rect.top
+					_hasDragged = false
+				}
 
-			if (!event.DOWN) return
-			const dx = event.clientX - startX
-			const dy = event.clientY - startY
-			if (Math.abs(dx) <= 5 && Math.abs(dy) <= 5) return
+				if (!event.DOWN) return
+				const dx = event.clientX - startX
+				const dy = event.clientY - startY
+				if (Math.abs(dx) <= 5 && Math.abs(dy) <= 5) return
 
-			_hasDragged = true
-			event.preventDefault()
+				_hasDragged = true
+				event.preventDefault()
 
-			$element!.style.left = `${ startLeft + dx }px`
-			$element!.style.top = `${ startTop + dy }px`
+				$element!.style.left = `${ startLeft + dx }px`
+				$element!.style.top = `${ startTop + dy }px`
 
-			// Hide arrow when dragged
-			if ($arrow) {
-				$arrow.classList.add('goo-popout__arrow--hidden')
-			}
-		}, { ignoreTouch: true })
+				// Hide arrow when dragged
+				if ($arrow) {
+					$arrow.classList.add('goo-popout__arrow--hidden')
+				}
+			},
+			{ ignoreTouch: true }
+		)
 
 		cleanupHandlers.push(handler)
 	}
@@ -833,7 +866,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 
 	/**
 	 * Check if click was inside this popout, its children, or its trigger element.
-	 * @param {HTMLElement} target
+	 * @param {HTMLElement} target - target.
 	 * @returns {boolean}
 	 */
 	function isClickInsidePopoutChain(target: HTMLElement): boolean {
@@ -922,7 +955,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 
 	/**
 	 * Animate popout in.
-	 * @param {HTMLElement} el
+	 * @param {HTMLElement} el - el.
 	 * @returns {Promise<void>}
 	 */
 	function animateIn(el: HTMLElement): Promise<void> {
@@ -942,7 +975,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 
 	/**
 	 * Animate popout out.
-	 * @param {HTMLElement} el
+	 * @param {HTMLElement} el - el.
 	 * @returns {Promise<void>}
 	 */
 	function animateOut(el: HTMLElement | null): Promise<void> {
@@ -974,6 +1007,6 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 // Export
 // =============================================================================
 
-export { HORIZONTAL, VERTICAL } from '../positioning/index.js'
+export { HORIZONTAL, VERTICAL } from '../positioning/index.ts'
 
 export default createGooPopout

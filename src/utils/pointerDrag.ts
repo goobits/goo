@@ -1,8 +1,14 @@
+/**
+ * Goo point.
+ */
 export interface GooPoint {
 	readonly x: number
 	readonly y: number
 }
 
+/**
+ * Goo pointer target event.
+ */
 export interface GooPointerTargetEvent {
 	readonly originalEvent: PointerEvent
 	readonly target: HTMLElement
@@ -12,10 +18,29 @@ export interface GooPointerTargetEvent {
 	readonly pointerType: string
 	readonly isTouch: boolean
 	readonly point: GooPoint
+	/**
+	 * As client XY.
+	 */
 	asClientXY(): GooPoint
+	/**
+	 * Element from point.
+	 *
+	 * @param selector - selector.
+	 */
 	elementFromPoint(selector: string): Element | null
+	/**
+	 * Element from point.
+	 *
+	 * @param predicate - predicate.
+	 */
 	elementFromPoint(predicate: (element: Element) => boolean): Element | null
+	/**
+	 * Prevent default.
+	 */
 	preventDefault(): void
+	/**
+	 * Stop propagation.
+	 */
 	stopPropagation(): void
 }
 
@@ -35,7 +60,18 @@ export interface GooPointerDragEvent<Environment extends object = Record<string,
 	readonly elementX: number
 	readonly elementY: number
 	readonly env: Environment
+	/**
+ * Delta.
+ *
+ * @param start - start.
+ * @param end - end.
+ */
 	delta(start: GooPoint, end: GooPoint): GooPoint
+	/**
+	 * Has moved.
+	 *
+	 * @param threshold - threshold.
+	 */
 	hasMoved(threshold?: number): boolean
 }
 
@@ -54,11 +90,14 @@ export interface GooPointerTapOptions extends GooPointerDragOptions {
 
 /** Detachable handle returned by Goo pointer helpers. */
 export interface GooPointerDragHandle {
+	/**
+ * Detach.
+ */
 	detach(): void
 }
 
 /**
- * Attach a pointer-drag listener without depending on the Sketchpad gesture stack.
+ * Attach a pointer-drag listener without depending on an app-specific gesture stack.
  * @param target - Element that receives the pointer interaction.
  * @param onDrag - Callback for start, move, end, and cancel states.
  * @param options - Optional drag behavior flags.
@@ -116,6 +155,7 @@ export function createPointerDrag<Environment extends object = Record<string, un
 
 	function onPointerDown(event: PointerEvent): void {
 		if (activePointerId !== null) return
+		if (!isPrimaryPointerStart(event)) return
 		if (options.ignoreTouch && event.pointerType === 'touch') return
 		activePointerId = event.pointerId
 		startClientX = event.clientX
@@ -188,6 +228,7 @@ export function createPointerTap(
 
 	function onPointerDown(event: PointerEvent): void {
 		if (activePointerId !== null) return
+		if (!isPrimaryPointerStart(event)) return
 		if (options.ignoreTouch && event.pointerType === 'touch') return
 		activePointerId = event.pointerId
 		startClientX = event.clientX
@@ -237,6 +278,10 @@ function createPointerTargetEvent(target: HTMLElement, originalEvent: PointerEve
 		preventDefault: () => originalEvent.preventDefault(),
 		stopPropagation: () => originalEvent.stopPropagation()
 	}
+}
+
+function isPrimaryPointerStart(event: PointerEvent): boolean {
+	return event.button === 0
 }
 
 function findElementFromPoint(

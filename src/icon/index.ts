@@ -1,10 +1,12 @@
 // Icon registry for storing SVG definitions
-import { iconRegistry } from './registry.js'
-import type { GooIconProps } from './types.js'
+import { iconRegistry } from './registry.ts'
+import type { GooIconProps } from './types.ts'
+
+/// <reference path="../svelte.d.ts" />
 
 export { default as GooIcon } from './GooIcon.svelte'
-export { iconRegistry } from './registry.js'
-export type { GooIconProps } from './types.js'
+export { iconRegistry } from './registry.ts'
+export type { GooIconProps } from './types.ts'
 
 /** Options for rendering registry-backed icon markup. */
 export type GooIconRenderOptions = GooIconProps & {

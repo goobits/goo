@@ -1,6 +1,6 @@
 import { flushSync, mount, unmount } from 'svelte'
 
-import { createFolder, type GooFolderElement, type GooFolderOptions } from '../folder/_createFolder.js'
+import { createFolder, type GooFolderElement, type GooFolderOptions } from '../folder/_createFolder.ts'
 import GooPanelComponent from './GooPanel.svelte'
 
 /**
@@ -60,6 +60,11 @@ export type GooPanelElement = HTMLDivElement & {
 
 type MountedPanel = ReturnType<typeof mount>
 
+/**
+ * Creates panel.
+ *
+ * @param options - options.
+ */
 export function createPanel(options: GooPanelOptions = {}): GooPanelElement {
 	const target = document.createElement('div')
 	let element: GooPanelElement | null = null

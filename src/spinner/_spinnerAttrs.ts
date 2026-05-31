@@ -1,4 +1,4 @@
-import type { GooSpinnerSize, GooSpinnerVariant } from './types.js'
+import type { GooSpinnerSize, GooSpinnerVariant } from './types.ts'
 
 /** Spinner presentation resolved from size / thickness / variant inputs. */
 export type ResolvedSpinnerAttrs = {
@@ -16,6 +16,7 @@ export type ResolvedSpinnerAttrs = {
 /**
  * Resolve a spinner's size/thickness/variant into class-markup attributes and
  * CSS custom properties, shared by `GooSpinner.svelte` and `renderGooSpinnerHtml`.
+ * @param input - input.
  */
 export function resolveSpinnerAttrs(input: {
 	size?: GooSpinnerSize | number | string

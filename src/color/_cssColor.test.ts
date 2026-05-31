@@ -1,4 +1,4 @@
-import { parseCssColorOrNull, rgbaToCssHex, rgbToHex } from './_cssColor.js'
+import { parseCssColorOrNull, rgbaToCssHex, rgbToHex } from './_cssColor.ts'
 
 describe('_cssColor', () => {
 	test('parses hex colors', () => {

@@ -1,5 +1,8 @@
 import type { Snippet } from 'svelte'
 
+/**
+ * Virtual grid window.
+ */
 export interface VirtualGridWindow {
 	startSlot: number
 	endSlot: number
@@ -7,6 +10,9 @@ export interface VirtualGridWindow {
 	bottomRows: number
 }
 
+/**
+ * Virtual grid slot.
+ */
 export interface VirtualGridSlot<T> {
 	slot: number
 	item: T | null
@@ -14,6 +20,9 @@ export interface VirtualGridSlot<T> {
 	deferContent: boolean
 }
 
+/**
+ * Virtual grid props.
+ */
 export interface VirtualGridProps<T> {
 	items: T[]
 	scrollRoot?: HTMLElement

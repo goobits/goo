@@ -26,16 +26,19 @@ export type GooVortexOptions = {
 /** Imperative handle exposed by a mounted `GooVortex` component. */
 export type GooVortexHandle = {
 
-	/** Center the vortex on a point, then play the entrance animation. */
+	/** Center the vortex on a point, then play the entrance animation. 	 * @param point - point.
+ */
 	enter(point: GooVortexPoint): void
 
 	/** Play the exit animation. */
 	exit(): void
 
-	/** Center the vortex around a screen point. */
+	/** Center the vortex around a screen point. 	 * @param point - point.
+	 */
 	positionAt(point: GooVortexPoint): void
 
-	/** Update the message displayed over the vortex. */
+	/** Update the message displayed over the vortex. 	 * @param message - message.
+	 */
 	setMessage(message: string): void
 }
 

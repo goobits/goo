@@ -74,7 +74,9 @@ export type GooAngleInputElement = HTMLDivElement & {
 	/** Current unit. */
 	unit: GooAngleInputUnit
 
-	/** Set the angle value in the configured unit. */
+	/** Set the angle value in the configured unit. 	 * @param value - value.
+ * @param options - options.
+ */
 	setValue(value: number | string, options?: { silent?: boolean }): void
 
 	/** Get the angle value in the configured unit. */

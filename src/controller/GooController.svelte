@@ -1,6 +1,6 @@
 <script lang="ts">
 import { untrack } from 'svelte'
-import { createGooController, type GooController, type GooControllerOptions } from './GooController.js'
+import { createGooController, type GooController, type GooControllerOptions } from './GooController.ts'
 
 type GooControllerProps = GooControllerOptions & {
 	element?: GooController | null

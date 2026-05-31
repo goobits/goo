@@ -5,21 +5,21 @@
 
 import './GooSchema.css'
 
-import { type ControlTypeRegistry, resolveControlTypeConfig } from '../controller/controlRegistry.js'
-import { createGooController } from '../controller/GooController.js'
-import { createSvelteControlHost, type SvelteComponentType, type SvelteControlSchema } from '../controller/SvelteControl.svelte.js'
-import { createFolder, type GooFolderElement } from '../folder/_createFolder.js'
-import { createPanel } from '../panel/_createPanel.js'
-import { schemaLog as log } from '../shared/logger.js'
-import { getByPath, resolvePath } from './pathUtils.js'
-import { buildControllerOptions, type ControllerOptions } from './schemaFieldBuilder.js'
+import { type ControlTypeRegistry, resolveControlTypeConfig } from '../controller/controlRegistry.ts'
+import { createGooController } from '../controller/GooController.ts'
+import { createSvelteControlHost, type SvelteComponentType, type SvelteControlSchema } from '../controller/SvelteControl.svelte.ts'
+import { createFolder, type GooFolderElement } from '../folder/_createFolder.ts'
+import { createPanel } from '../panel/_createPanel.ts'
+import { schemaLog as log } from '../utils/logger.ts'
+import { getByPath, resolvePath } from './pathUtils.ts'
+import { buildControllerOptions, type ControllerOptions } from './schemaFieldBuilder.ts'
 import type {
 	GooSchemaField,
 	GooSchemaFolder,
 	GooSchemaNode,
 	GooSchemaState,
 	GooSchemaType
-} from './types.js'
+} from './types.ts'
 
 export type {
 	GooSchemaControlType,
@@ -29,7 +29,7 @@ export type {
 	GooSchemaPanel,
 	GooSchemaState,
 	GooSchemaType
-} from './types.js'
+} from './types.ts'
 
 // ============================================================================
 // GooSchema Web Component
@@ -64,6 +64,9 @@ export interface GooSchemaOptions {
 	controlTypes?: ControlTypeRegistry
 }
 
+/**
+ * Goo schema.
+ */
 export interface GooSchema extends HTMLElement {
 	state: GooSchemaState
 	_data: Record<string, unknown>
@@ -74,6 +77,9 @@ export interface GooSchema extends HTMLElement {
 	_rebuildPending: boolean
 }
 
+/**
+ * Goo schema.
+ */
 export class GooSchema {
 	static formAssociated = false
 
@@ -85,6 +91,11 @@ export class GooSchema {
 		controlTypes: 'object' as const
 	}
 
+	/**
+	 * Creates a GooSchema instance.
+	 *
+	 * @param options - options.
+	 */
 	constructor(options: GooSchemaOptions = {}) {
 		return createGooSchemaElement(options)
 	}
@@ -93,7 +104,8 @@ export class GooSchema {
 	// Public API
 	// ─────────────────────────────────────────────────────────────────
 
-	/** Bind data object and rebuild UI */
+	/** Bind data object and rebuild UI 	 * @param data - data.
+	 */
 	setData(data: Record<string, unknown>): void {
 		this._data = data
 		this._rebuild()
@@ -104,7 +116,8 @@ export class GooSchema {
 		return this._data
 	}
 
-	/** Update schema and rebuild UI */
+	/** Update schema and rebuild UI 	 * @param schema - schema.
+	 */
 	setSchema(schema: GooSchemaType): void {
 		this.state.schema = schema
 		this._rebuild()
@@ -115,12 +128,14 @@ export class GooSchema {
 		return this.state.schema
 	}
 
-	/** Set the programmatic change handler. */
+	/** Set the programmatic change handler. 	 * @param handler - handler.
+	 */
 	setChangeHandler(handler: (path: string, value: unknown) => void): void {
 		this._changeHandler = handler
 	}
 
-	/** Get controller for a specific path */
+	/** Get controller for a specific path 	 * @param path - path.
+	 */
 	getController(path: string): unknown {
 		return this._controllers.get(path)
 	}
@@ -133,11 +148,11 @@ export class GooSchema {
 	}
 
 	/**
-   * Re-evaluate conditional visibility and rebuild if needed
-   * Call this when data changes that might affect if/unless conditions
-   * Note: This rebuilds the entire UI - for performance, consider
-   * using static conditions or managing visibility manually
-   */
+	 * Re-evaluate conditional visibility and rebuild if needed
+	 * Call this when data changes that might affect if/unless conditions
+	 * Note: This rebuilds the entire UI - for performance, consider
+	 * using static conditions or managing visibility manually
+	 */
 	reevaluateConditions(): void {
 		this._rebuild()
 	}
@@ -148,8 +163,8 @@ export class GooSchema {
 	// ─────────────────────────────────────────────────────────────────
 
 	/**
-   * Schedule a rebuild on next microtask (debounces multiple property sets)
-   */
+	 * Schedule a rebuild on next microtask (debounces multiple property sets)
+	 */
 	_scheduleRebuild(): void {
 		if (this._rebuildPending) return
 		this._rebuildPending = true
@@ -160,8 +175,9 @@ export class GooSchema {
 	}
 
 	/**
-   * Set schema via property (used by Svelte: schema={brushSchema})
-   */
+	 * Set schema via property (used by Svelte: schema={brushSchema})
+	 * @param value - value.
+	 */
 	set schema(value: GooSchemaType) {
 		if (value && typeof value === 'object') {
 			if (value === this.state.schema) return
@@ -170,13 +186,17 @@ export class GooSchema {
 		}
 	}
 
+	/**
+	 * Schema.
+	 */
 	get schema(): GooSchemaType {
 		return this.state.schema
 	}
 
 	/**
-   * Set data via property (used by Svelte: data={layer.brush})
-   */
+	 * Set data via property (used by Svelte: data={layer.brush})
+	 * @param value - value.
+	 */
 	set data(value: Record<string, unknown>) {
 		if (value && typeof value === 'object') {
 			if (value === this._data) return
@@ -185,13 +205,17 @@ export class GooSchema {
 		}
 	}
 
+	/**
+	 * Data.
+	 */
 	get data(): Record<string, unknown> {
 		return this._data
 	}
 
 	/**
-   * Set controlTypes via property (used by Svelte: controlTypes={demoRegistry})
-   */
+	 * Set controlTypes via property (used by Svelte: controlTypes={demoRegistry})
+	 * @param value - value.
+	 */
 	set controlTypes(value: ControlTypeRegistry | undefined) {
 		if (value && typeof value === 'object') {
 			if (value === this.state.controlTypes) return
@@ -200,14 +224,18 @@ export class GooSchema {
 		}
 	}
 
+	/**
+	 * Control types.
+	 */
 	get controlTypes(): ControlTypeRegistry | undefined {
 		return this.state.controlTypes
 	}
 
 	/**
-   * Set bare mode via property (used by Svelte: bare={true})
-   * Bare mode renders controls directly without panel wrapper
-   */
+	 * Set bare mode via property (used by Svelte: bare={true})
+	 * Bare mode renders controls directly without panel wrapper
+	 * @param value - value.
+	 */
 	set bare(value: boolean) {
 		if (this.state.bare !== value) {
 			this.state.bare = value
@@ -215,11 +243,15 @@ export class GooSchema {
 		}
 	}
 
+	/**
+	 * Bare.
+	 */
 	get bare(): boolean {
 		return this.state.bare ?? false
 	}
 
-	/** Set whether generated panels render their header. */
+	/** Set whether generated panels render their header. 	 * @param value - value.
+	 */
 	set showPanelHeader(value: boolean) {
 		if (this.state.showPanelHeader !== value) {
 			this.state.showPanelHeader = value
@@ -227,6 +259,9 @@ export class GooSchema {
 		}
 	}
 
+	/**
+	 * Show panel header.
+	 */
 	get showPanelHeader(): boolean {
 		return this.state.showPanelHeader ?? true
 	}
@@ -235,10 +270,16 @@ export class GooSchema {
 	// Lifecycle
 	// ─────────────────────────────────────────────────────────────────
 
+	/**
+	 * Creates element.
+	 */
 	_createElement(): void {
 		this._rebuild()
 	}
 
+	/**
+	 * Destroy element.
+	 */
 	_destroyElement(): void {
 		this._root = null
 		this._controllers.clear()
@@ -248,6 +289,9 @@ export class GooSchema {
 	// Build Methods
 	// ─────────────────────────────────────────────────────────────────
 
+	/**
+	 * Rebuild.
+	 */
 	async _rebuild(): Promise<void> {
 		const token = ++this._rebuildToken
 
@@ -295,6 +339,13 @@ export class GooSchema {
 		}
 	}
 
+	/**
+	 * Builds nodes.
+	 *
+	 * @param nodes - nodes.
+	 * @param parent - parent.
+	 * @param token - token.
+	 */
 	async _buildNodes(nodes: GooSchemaNode[], parent: HTMLElement, token: number): Promise<void> {
 		for (const node of nodes) {
 			if (token !== this._rebuildToken) return
@@ -310,6 +361,13 @@ export class GooSchema {
 		}
 	}
 
+	/**
+	 * Builds folder.
+	 *
+	 * @param node - node.
+	 * @param parent - parent.
+	 * @param token - token.
+	 */
 	async _buildFolder(node: GooSchemaFolder, parent: HTMLElement, token: number): Promise<void> {
 		if (token !== this._rebuildToken) return
 		const folder: GooFolderElement = createFolder({
@@ -327,6 +385,13 @@ export class GooSchema {
 		}
 	}
 
+	/**
+	 * Builds field.
+	 *
+	 * @param node - node.
+	 * @param parent - parent.
+	 * @param token - token.
+	 */
 	async _buildField(node: GooSchemaField, parent: HTMLElement, token: number): Promise<void> {
 		if (token !== this._rebuildToken) return
 		const resolved = resolvePath(this._data, node.path)
@@ -397,9 +462,16 @@ export class GooSchema {
 	}
 
 	/**
-   * Build a selfContained field - renders Svelte control directly without goo-controller wrapper.
-   * Used for visual editors that have their own complete UI (header, controls, canvas).
-   */
+	 * Build a selfContained field - renders Svelte control directly without goo-controller wrapper.
+	 * Used for visual editors that have their own complete UI (header, controls, canvas).
+	 * @param token - token.
+	 * @param property - property.
+	 * @param parent - parent.
+	 * @param object - object.
+	 * @param node - node.
+	 * @param module - module.
+	 * @param controllerOptions - controller options.
+	 */
 	async _buildSelfContainedField(
 		node: GooSchemaField,
 		object: Record<string, unknown>,
@@ -449,10 +521,11 @@ export class GooSchema {
 	}
 
 	/**
-   * Check conditional visibility (static - evaluated once at build time)
-   * Note: Conditions are NOT reactive. To update visibility after data changes,
-   * call reevaluateConditions() which rebuilds the entire UI.
-   */
+	 * Check conditional visibility (static - evaluated once at build time)
+	 * Note: Conditions are NOT reactive. To update visibility after data changes,
+	 * call reevaluateConditions() which rebuilds the entire UI.
+	 * @param node - node.
+	 */
 	_checkCondition(node: GooSchemaNode): boolean {
 		if ('if' in node && node.if) {
 			return !!getByPath(this._data, node.if)
@@ -502,6 +575,7 @@ function createGooSchemaElement(options: GooSchemaOptions = {}): GooSchema {
 
 /**
  * Factory function for creating GooSchema instances
+ * @param options - options.
  */
 export function createGooSchema(options: GooSchemaOptions & {
 	schema: GooSchemaType

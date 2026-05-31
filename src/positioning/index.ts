@@ -5,7 +5,7 @@
  */
 
 // High-level utility
-export { positionElementAt } from './positionElementAt.js'
+export { positionElementAt } from './positionElementAt.ts'
 
 // Core positioning functions
 export {
@@ -14,8 +14,8 @@ export {
 	calculatePosition,
 	getOppositeEdge,
 	parseAlignment
-} from './calculatePosition.js'
-export { HORIZONTAL, VERTICAL } from './direction.js'
+} from './calculatePosition.ts'
+export { HORIZONTAL, VERTICAL } from './direction.ts'
 
 // Types
 export type {
@@ -23,4 +23,4 @@ export type {
 	PositionElementAtOptions,
 	PositionOptions,
 	PositionResult
-} from './types.js'
+} from './types.ts'

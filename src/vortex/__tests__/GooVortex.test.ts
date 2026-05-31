@@ -1,7 +1,7 @@
 import { flushSync } from 'svelte'
 import { describe, expect, it } from 'vitest'
 
-import { createGooVortex } from '../index.js'
+import { createGooVortex } from '../index.ts'
 
 describe('GooVortex', () => {
 	it('creates, updates, and destroys vortex elements', async() => {

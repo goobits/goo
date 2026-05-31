@@ -3,9 +3,9 @@
  * @module goobits/select/DropdownPanel
  */
 
-import { SubmenuPopoutController } from './_submenuPopout.js'
-import { createIcon, createShortcut, evaluate } from './selectDom.js'
-import type { GooSelectOption } from './types.js'
+import { SubmenuPopoutController } from './_submenuPopout.ts'
+import { createIcon, createShortcut, evaluate } from './selectDom.ts'
+import type { GooSelectOption } from './types.ts'
 
 // ============================================================================
 // Constants
@@ -21,16 +21,14 @@ let panelInstanceCount = 0
 // Types
 // ============================================================================
 
-// Internal type for option elements with custom properties
-type OptionElement = HTMLElement & { _submenuOptions?: GooSelectOption[] }
+type OptionElement = HTMLElement
 
 /**
  * Context provided by GooSelect to the panel.
  */
 export interface DropdownPanelContext {
-
-	/** Whether to show selection checkmarks */
-	enableSelection: boolean
+	/** Whether to show current-value checkmarks. */
+	showSelectionIndicator: boolean
 
 	/** Current option ID */
 	value: string
@@ -75,15 +73,23 @@ export class DropdownPanel {
 
 	constructor(ctx: DropdownPanelContext) {
 		this.#ctx = ctx
-		this.#submenuPopout = new SubmenuPopoutController((options, container) => {
-			this.#renderOptionsList(options, container)
-		})
 		this.listboxId = `${ this.#instanceId }-listbox`
 		this.$container = document.createElement('div')
 		this.$container.className = 'goo-select__options'
 		this.$container.id = this.listboxId
 		this.$container.setAttribute('role', 'listbox')
 		this.$container.setAttribute('tabindex', '-1')
+		this.#submenuPopout = new SubmenuPopoutController(
+			(options, container) => this.#renderOptionsList(options, container),
+			{
+				onMouseEnter: () => this.#cancelSubmenuTimer(),
+				onMouseLeave: event => this.#scheduleSubmenuClose(event.relatedTarget)
+			}
+		)
+		this.$container.addEventListener('mouseenter', () => this.#cancelSubmenuTimer())
+		this.$container.addEventListener('mouseleave', event =>
+			this.#scheduleSubmenuClose(event.relatedTarget)
+		)
 	}
 
 	// --------------------------------------------------------------------------
@@ -92,6 +98,7 @@ export class DropdownPanel {
 
 	/**
 	 * Update context (e.g., when selected value changes).
+	 * @param ctx - ctx.
 	 */
 	updateContext(ctx: Partial<DropdownPanelContext>) {
 		Object.assign(this.#ctx, ctx)
@@ -99,6 +106,7 @@ export class DropdownPanel {
 
 	/**
 	 * Render options to the container.
+	 * @param options - options.
 	 */
 	render(options: GooSelectOption[]) {
 		this.#options = options
@@ -121,6 +129,7 @@ export class DropdownPanel {
 
 	/**
 	 * Set the hovered option by ID.
+	 * @param id - id.
 	 */
 	setHovered(id: string) {
 		// Remove previous hover
@@ -161,6 +170,7 @@ export class DropdownPanel {
 
 	/**
 	 * Update selection visual (checkmark) to a new option.
+	 * @param id - id.
 	 */
 	setSelectedVisual(id: string) {
 		// Remove previous selection visual
@@ -188,6 +198,7 @@ export class DropdownPanel {
 	/**
 	 * Animate option selection with flash effect.
 	 * @returns Promise that resolves when animation completes
+	 * @param $item - item.
 	 */
 	animateSelection($item: HTMLElement): Promise<void> {
 		return new Promise<void>(resolve => {
@@ -227,6 +238,8 @@ export class DropdownPanel {
 
 	/**
 	 * Open a submenu for an option.
+	 * @param opt - opt.
+	 * @param $item - item.
 	 */
 	openSubmenu($item: HTMLElement, opt: GooSelectOption) {
 		this.#submenuPopout.open($item, opt)
@@ -241,6 +254,7 @@ export class DropdownPanel {
 
 	/**
 	 * Find option by ID in the options tree.
+	 * @param id - id.
 	 */
 	findOptionById(id: string): GooSelectOption | null {
 		return this.#findOptionByIdRecursive(this.#options, id)
@@ -255,6 +269,7 @@ export class DropdownPanel {
 
 	/**
 	 * Find a rendered option by logical id without treating the id as CSS.
+	 * @param id - id.
 	 */
 	getOptionElementById(id: string): OptionElement | null {
 		for (const item of this.getNavigableOptions()) {
@@ -265,11 +280,17 @@ export class DropdownPanel {
 
 	/**
 	 * Find the enabled option under a viewport coordinate.
+	 * @param clientY - client y.
+	 * @param clientX - client x.
 	 */
 	getOptionElementAtPoint(clientX: number, clientY: number): OptionElement | null {
 		const target = document.elementFromPoint(clientX, clientY)
 		const item = target?.closest<HTMLElement>('.goo-select__option')
-		if (!item || !this.$container.contains(item) || item.classList.contains('goo-select__option--disabled')) {
+		if (
+			!item ||
+			!this.$container.contains(item) ||
+			item.classList.contains('goo-select__option--disabled')
+		) {
 			return null
 		}
 		return item as OptionElement
@@ -277,6 +298,7 @@ export class DropdownPanel {
 
 	/**
 	 * Apply hover behavior for an option element.
+	 * @param item - item.
 	 */
 	hoverOptionElement(item: HTMLElement): void {
 		const option = this.#readOptionFromElement(item)
@@ -286,12 +308,17 @@ export class DropdownPanel {
 
 	/**
 	 * Select a concrete option element when it is selectable.
+	 * @param item - item.
 	 */
 	selectOptionElement(item: HTMLElement): boolean {
 		if (item.classList.contains('goo-select__option--disabled')) return false
 
 		const option = this.#readOptionFromElement(item)
-		if (!option || option.type === 'submenu') return false
+		if (!option) return false
+		if (option.type === 'submenu') {
+			this.#openSubmenuOption(item, option)
+			return true
+		}
 
 		this.#ctx.onSelect(option, item)
 		return true
@@ -312,7 +339,8 @@ export class DropdownPanel {
 		// Find matching option
 		const items = this.getNavigableOptions()
 		const match = items.find($item => {
-			const label = $item.querySelector('.goo-select__label')?.textContent?.toLowerCase() || ''
+			const label =
+				$item.querySelector('.goo-select__label')?.textContent?.toLowerCase() || ''
 			return label.startsWith(this.#typeaheadBuffer)
 		})
 
@@ -359,7 +387,10 @@ export class DropdownPanel {
 	#renderOptionsList(opts: GooSelectOption[], container: HTMLElement, depth = 0) {
 		for (const opt of opts) {
 			// Check if supported
-			if (opt.isSupported !== undefined && !evaluate(opt.isSupported, this.#ctx.getContext())) {
+			if (
+				opt.isSupported !== undefined &&
+				!evaluate(opt.isSupported, this.#ctx.getContext())
+			) {
 				continue
 			}
 
@@ -369,7 +400,7 @@ export class DropdownPanel {
 	}
 
 	#renderOption(opt: GooSelectOption, depth: number): HTMLElement | null {
-		const { enableSelection, value } = this.#ctx
+		const { showSelectionIndicator, value } = this.#ctx
 
 		// Divider
 		if (opt.type === 'divider') {
@@ -396,7 +427,7 @@ export class DropdownPanel {
 
 		// Regular option or submenu
 		const isDisabled = evaluate(opt.isDisabled, this.#ctx.getContext())
-		const isSelected = enableSelection && value === opt.id
+		const isSelected = showSelectionIndicator && value === opt.id
 		const isSubmenu = opt.type === 'submenu'
 
 		const $item = document.createElement('div')
@@ -415,7 +446,7 @@ export class DropdownPanel {
 		if (isDisabled) $item.setAttribute('aria-disabled', 'true')
 
 		// Selection checkmark
-		if (enableSelection) {
+		if (showSelectionIndicator) {
 			const $check = document.createElement('span')
 			$check.className = 'goo-select__check'
 			$check.innerHTML = isSelected
@@ -455,9 +486,6 @@ export class DropdownPanel {
 			$arrow.innerHTML =
 				'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>'
 			$item.appendChild($arrow)
-
-			// Store submenu options on element (for keyboard navigation)
-			;($item as OptionElement)._submenuOptions = opt.options
 		}
 
 		// Bind events
@@ -473,13 +501,19 @@ export class DropdownPanel {
 			this.#hoverOption($item, opt)
 		})
 
-		// Select on release so an already-open menu behaves like native selects.
-		if (!isDisabled && opt.type !== 'submenu') {
+		// Select/open on release so an already-open menu behaves like native selects.
+		if (!isDisabled) {
 			$item.addEventListener('pointerdown', event => {
+				if (event.button !== 0) return
 				event.preventDefault() // Prevent focus loss
 			})
 			$item.addEventListener('pointerup', event => {
+				if (event.button !== 0) return
 				event.preventDefault()
+				if (opt.type === 'submenu') {
+					this.#openSubmenuOption($item, opt)
+					return
+				}
 				this.#ctx.onSelect(opt, $item)
 			})
 		}
@@ -490,7 +524,7 @@ export class DropdownPanel {
 
 		// Handle submenu
 		if (opt.type === 'submenu') {
-			clearTimeout(this.#submenuTimer!)
+			this.#cancelSubmenuTimer()
 			if (this.#submenuPopout.opened) {
 				this.openSubmenu($item, opt)
 				return
@@ -498,13 +532,39 @@ export class DropdownPanel {
 			this.#submenuTimer = setTimeout(() => {
 				this.openSubmenu($item, opt)
 			}, SUBMENU_DELAY)
-		} else {
+		} else if (this.$container.contains($item)) {
 			// Close any open submenu when hovering non-submenu
-			clearTimeout(this.#submenuTimer!)
-			this.#submenuTimer = setTimeout(() => {
-				this.closeSubmenu()
-			}, SUBMENU_DELAY)
+			this.#scheduleSubmenuClose()
+		} else {
+			this.#cancelSubmenuTimer()
 		}
+	}
+
+	#openSubmenuOption($item: HTMLElement, opt: GooSelectOption): void {
+		this.setHovered(opt.id!)
+		this.#cancelSubmenuTimer()
+		this.openSubmenu($item, opt)
+	}
+
+	#cancelSubmenuTimer(): void {
+		clearTimeout(this.#submenuTimer!)
+		this.#submenuTimer = null
+	}
+
+	#scheduleSubmenuClose(relatedTarget: EventTarget | null = null): void {
+		if (this.#isInsideMenuBoundary(relatedTarget)) return
+
+		this.#cancelSubmenuTimer()
+		this.#submenuTimer = setTimeout(() => {
+			this.closeSubmenu()
+		}, SUBMENU_DELAY)
+	}
+
+	#isInsideMenuBoundary(target: EventTarget | null): boolean {
+		return (
+			target instanceof Node &&
+			(this.$container.contains(target) || this.#submenuPopout.containsElement(target))
+		)
 	}
 
 	#readOptionFromElement(item: HTMLElement): GooSelectOption | null {

@@ -44,8 +44,8 @@ export interface PositionOptions {
 }
 
 /**
- * Result of position calculation.
- */
+	 * Result of position calculation.
+	 */
 export interface PositionResult {
 
 	/** Calculated X position */
@@ -77,8 +77,8 @@ export interface PositionResult {
 }
 
 /**
- * Options for positioning an element at a target.
- */
+	 * Options for positioning an element at a target.
+	 */
 export interface PositionElementAtOptions {
 
 	/** Target element or point to position relative to */

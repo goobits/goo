@@ -1,4 +1,6 @@
-export { createGooField, createGooFields } from './createGooField.js'
+/// <reference path="../svelte.d.ts" />
+
+export { createGooField, createGooFields } from './createGooField.ts'
 export {
 	createGooDialog,
 	type DialogField,
@@ -6,12 +8,12 @@ export {
 	type DialogResult,
 	GooDialogController,
 	type GooDialogInstance,
-	type GooDialogOptions } from './dialog.js'
+	type GooDialogOptions } from './dialog.ts'
 export {
 	GooAlert,
 	GooConfirm,
 	GooNotify,
 	GooOverlay,
-	GooPrompt } from './dialogs.js'
+	GooPrompt } from './dialogs.ts'
 export { default as GooDialog } from './GooDialog.svelte'
-export { dialogManager, GooDialogManager } from './GooDialogManager.js'
+export { dialogManager, GooDialogManager } from './GooDialogManager.ts'

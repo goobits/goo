@@ -1,8 +1,8 @@
 <script lang="ts">
 import { untrack } from 'svelte'
 import type { Snippet } from 'svelte'
-import { createGooTooltip } from './tooltip.js'
-import type { GooTooltipActionOptions, GooTooltipInstance } from './tooltip.js'
+import { createGooTooltip } from './tooltip.ts'
+import type { GooTooltipActionOptions, GooTooltipInstance } from './tooltip.ts'
 
 type GooTooltipTarget = HTMLElement | string | null | undefined
 

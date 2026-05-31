@@ -42,6 +42,11 @@
 	}
 }
 
+.goo-slider:not(.goo-slider--vertical) {
+	inline-size: var(--goo-slider-width, 100%);
+	min-inline-size: min(100%, var(--goo-slider-min-width, 10rem));
+}
+
 /* Track is the positioning context for thumbs and coverage */
 .goo-slider__track {
 	display: block;

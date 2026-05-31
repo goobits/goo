@@ -2,9 +2,10 @@ import { fireEvent, render } from '@testing-library/svelte'
 import { tick } from 'svelte'
 import { describe, expect, it, vi } from 'vitest'
 
+import { pointerEvent } from '../../__tests__/_pointerEvents.ts'
 import GooAngleInput from '../GooAngleInput.svelte'
-import { GooAngleInput as ExportedGooAngleInput } from '../index.js'
-import type { GooAngleInputElement } from '../types.js'
+import { GooAngleInput as ExportedGooAngleInput } from '../index.ts'
+import type { GooAngleInputElement } from '../types.ts'
 
 describe('GooAngleInput', () => {
 	it('exports the native Svelte component from the package subpath', () => {
@@ -67,4 +68,78 @@ describe('GooAngleInput', () => {
 		expect(onchange).toHaveBeenCalledOnce()
 		expect(onchange.mock.calls[0]?.[0]).toBe(80)
 	})
+
+	it('disables the hidden form value when the angle input is disabled', () => {
+		const { container } = render(GooAngleInput, {
+			props: {
+				name: 'angle',
+				value: 20,
+				disabled: true
+			}
+		})
+
+		expect(container.querySelector<HTMLInputElement>('input[data-goo-angle-input-field]')?.disabled).toBe(true)
+	})
+
+	it('ignores non-primary pointer drags', () => {
+		const oninput = vi.fn()
+		const onchange = vi.fn()
+		const { container } = render(GooAngleInput, {
+			props: {
+				value: 0,
+				oninput,
+				onchange
+			}
+		})
+		const track = container.querySelector<HTMLButtonElement>('.goo-angle-input__track')!
+		track.getBoundingClientRect = () => rect(0, 0, 100, 100)
+		track.setPointerCapture = vi.fn()
+
+		track.dispatchEvent(pointerEvent('pointerdown', { button: 2, buttons: 2, pointerId: 8, clientX: 50, clientY: 0 }))
+		track.dispatchEvent(pointerEvent('pointermove', { button: 2, buttons: 2, pointerId: 8, clientX: 100, clientY: 50 }))
+		track.dispatchEvent(pointerEvent('pointerup', { button: 2, buttons: 0, pointerId: 8, clientX: 100, clientY: 50 }))
+
+		expect(track.setPointerCapture).not.toHaveBeenCalled()
+		expect(oninput).not.toHaveBeenCalled()
+		expect(onchange).not.toHaveBeenCalled()
+	})
+
+	it('cleans up canceled pointer drags without committing a change', () => {
+		const oninput = vi.fn()
+		const onchange = vi.fn()
+		const { container } = render(GooAngleInput, {
+			props: {
+				value: 0,
+				oninput,
+				onchange
+			}
+		})
+		const track = container.querySelector<HTMLButtonElement>('.goo-angle-input__track')!
+		track.getBoundingClientRect = () => rect(0, 0, 100, 100)
+		track.setPointerCapture = vi.fn()
+		track.releasePointerCapture = vi.fn()
+
+		track.dispatchEvent(pointerEvent('pointerdown', { pointerId: 4, pointerType: 'pen', clientX: 50, clientY: 0 }))
+		track.dispatchEvent(pointerEvent('pointermove', { pointerId: 4, pointerType: 'pen', clientX: 100, clientY: 50 }))
+		track.dispatchEvent(pointerEvent('pointercancel', { pointerId: 4, pointerType: 'pen', clientX: 100, clientY: 50 }))
+		track.dispatchEvent(pointerEvent('pointerup', { pointerId: 4, pointerType: 'pen', clientX: 100, clientY: 50 }))
+
+		expect(track.releasePointerCapture).toHaveBeenCalledExactlyOnceWith(4)
+		expect(oninput).toHaveBeenCalled()
+		expect(onchange).not.toHaveBeenCalled()
+	})
 })
+
+function rect(x: number, y: number, width: number, height: number): DOMRect {
+	return {
+		bottom: y + height,
+		height,
+		left: x,
+		right: x + width,
+		toJSON: () => ({}),
+		top: y,
+		width,
+		x,
+		y
+	} as DOMRect
+}

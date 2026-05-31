@@ -1,7 +1,7 @@
 <script lang="ts">
 import './GooTurnstileField.css'
-import type { GooTurnstileFieldProps } from './types.js'
-import { ensureTurnstileScript } from './_script-loader.js'
+import type { GooTurnstileFieldProps } from './types.ts'
+import { ensureTurnstileScript } from './_script-loader.ts'
 
 let {
 	siteKey = '',

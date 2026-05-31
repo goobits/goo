@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
-import { createGooProgressRingTimer, type GooProgressRingTimer } from '../index.js'
+import { createGooProgressRingTimer, type GooProgressRingTimer } from '../index.ts'
 
-/** The rendered ring element inside a timer's shell. */
+/** The rendered ring element inside a timer's shell.  * @param timer - timer.
+ */
 function ringEl(timer: GooProgressRingTimer): HTMLElement {
 	return timer.$element.querySelector('.goo-progress-ring') as HTMLElement
 }

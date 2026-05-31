@@ -1,5 +1,5 @@
 <script module lang="ts">
-import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.js'
+import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.ts'
 
 /** GooController binding metadata for the Svelte color component. */
 export const controlSchema: SvelteControlSchema = {
@@ -14,8 +14,8 @@ export const controlSchema: SvelteControlSchema = {
 <script lang="ts">
 import './GooColor.css'
 
-import { parseCssColorOrNull, rgbaToCssHex, rgbToHex } from './_cssColor.js'
-import type { GooColorElement, GooColorEventData, GooColorProps } from './types.js'
+import { parseCssColorOrNull, rgbaToCssHex, rgbToHex } from './_cssColor.ts'
+import type { GooColorElement, GooColorEventData, GooColorProps } from './types.ts'
 
 let colorRoot: HTMLDivElement | undefined = $state()
 // The root <div> is augmented with the GooColor API at runtime (assignColorApi),
@@ -27,9 +27,10 @@ let alphaElement: HTMLInputElement | undefined = $state()
 let currentValue = $state('#000000')
 let lastCommittedValue = $state('#000000')
 let effectiveDisabled = $state(false)
+let skipNextValueSync = false
 
 let {
-	value = '#000000',
+	value = $bindable('#000000'),
 	alpha = false,
 	nativePicker = true,
 	name,
@@ -67,6 +68,10 @@ const hostAttributes = $derived<Record<string, string | undefined>>({
 
 $effect(() => {
 	const nextValue = normalizeColorValue(value, alpha)
+	if (skipNextValueSync && Object.is(nextValue, currentValue)) {
+		skipNextValueSync = false
+		return
+	}
 	currentValue = nextValue
 	lastCommittedValue = nextValue
 })
@@ -89,9 +94,12 @@ $effect(() => {
 export function setValue(nextValue: string, { silent = true }: { silent?: boolean } = {}): void {
 	const oldValue = currentValue
 	currentValue = normalizeColorValue(nextValue, alpha)
-	if (!silent && oldValue !== currentValue) {
-		lastCommittedValue = currentValue
-		emitColorEvent('set')
+	if (oldValue !== currentValue) {
+		syncBoundValue(currentValue)
+		if (!silent) {
+			lastCommittedValue = currentValue
+			emitColorEvent('set')
+		}
 	}
 }
 
@@ -133,19 +141,23 @@ function openPicker(): void {
 }
 
 function handlePickerInput(event: Event): void {
+	event.stopPropagation()
 	setColorValue(pickerElement?.value ?? currentValue, 'input', event)
 }
 
 function handlePickerChange(event: Event): void {
+	event.stopPropagation()
 	commitColorValue(pickerElement?.value ?? currentValue, event)
 }
 
 function handleTextInput(event: Event): void {
+	event.stopPropagation()
 	const nextValue = parseInputValue(inputElement?.value)
 	if (nextValue) setColorValue(nextValue, 'input', event)
 }
 
 function handleTextChange(event: Event): void {
+	event.stopPropagation()
 	const nextValue = parseInputValue(inputElement?.value)
 	if (nextValue) {
 		commitColorValue(nextValue, event)
@@ -155,10 +167,12 @@ function handleTextChange(event: Event): void {
 }
 
 function handleAlphaInput(event: Event): void {
+	event.stopPropagation()
 	setAlphaValue(getAlphaSliderValue(), 'input', event)
 }
 
 function handleAlphaChange(event: Event): void {
+	event.stopPropagation()
 	commitAlphaValue(getAlphaSliderValue(), event)
 }
 
@@ -168,6 +182,7 @@ function setColorValue(nextValue: string, state: GooColorEventData['state'], eve
 	const oldValue = currentValue
 	currentValue = normalizeColorValue(nextValue, alpha)
 	if (oldValue !== currentValue) {
+		syncBoundValue(currentValue)
 		emitColorEvent(state, event)
 	}
 }
@@ -177,6 +192,7 @@ function commitColorValue(nextValue: string, event?: Event): void {
 
 	currentValue = normalizeColorValue(nextValue, alpha)
 	if (lastCommittedValue !== currentValue) {
+		syncBoundValue(currentValue)
 		lastCommittedValue = currentValue
 		emitColorEvent('change', event)
 	}
@@ -189,6 +205,7 @@ function setAlphaValue(nextAlpha: number, state: GooColorEventData['state'], eve
 	const oldValue = currentValue
 	currentValue = rgbaToCssHex(parsed.r / 255, parsed.g / 255, parsed.b / 255, nextAlpha)
 	if (oldValue !== currentValue) {
+		syncBoundValue(currentValue)
 		emitColorEvent(state, event)
 	}
 }
@@ -199,6 +216,7 @@ function commitAlphaValue(nextAlpha: number, event?: Event): void {
 	const parsed = parseCssColorOrNull(currentValue) ?? { r: 0, g: 0, b: 0 }
 	currentValue = rgbaToCssHex(parsed.r / 255, parsed.g / 255, parsed.b / 255, nextAlpha)
 	if (lastCommittedValue !== currentValue) {
+		syncBoundValue(currentValue)
 		lastCommittedValue = currentValue
 		emitColorEvent('change', event)
 	}
@@ -258,6 +276,43 @@ function parseInputValue(nextValue?: string): string | null {
 function getAlphaSliderValue(): number {
 	return Number.parseFloat(alphaElement?.value ?? '100') / 100
 }
+
+function syncBoundValue(nextValue: string): void {
+	skipNextValueSync = true
+	value = nextValue
+}
+
+type ColorInputKind = 'alpha' | 'picker' | 'text'
+
+function wireColorEvents(node: HTMLInputElement, kind: ColorInputKind) {
+	const onInput = (event: Event) => {
+		event.stopPropagation()
+		if (kind === 'alpha') handleAlphaInput(event)
+		if (kind === 'picker') handlePickerInput(event)
+		if (kind === 'text') handleTextInput(event)
+	}
+	const onChange = (event: Event) => {
+		event.stopPropagation()
+		if (kind === 'alpha') handleAlphaChange(event)
+		if (kind === 'picker') handlePickerChange(event)
+		if (kind === 'text') handleTextChange(event)
+	}
+	const onBlur = (event: Event) => {
+		if (kind !== 'text') return
+		event.stopPropagation()
+		handleTextChange(event)
+	}
+	node.addEventListener('input', onInput)
+	node.addEventListener('change', onChange)
+	if (kind === 'text') node.addEventListener('blur', onBlur)
+	return {
+		destroy() {
+			node.removeEventListener('input', onInput)
+			node.removeEventListener('change', onChange)
+			node.removeEventListener('blur', onBlur)
+		}
+	}
+}
 </script>
 
 <div
@@ -287,8 +342,7 @@ function getAlphaSliderValue(): number {
 				value={hexValue}
 				disabled={effectiveDisabled}
 				tabindex={tabIndex}
-				oninput={handlePickerInput}
-				onchange={handlePickerChange}
+				use:wireColorEvents={'picker'}
 			/>
 		{:else}
 			<span
@@ -306,9 +360,7 @@ function getAlphaSliderValue(): number {
 			maxlength="7"
 			disabled={effectiveDisabled}
 			tabindex={tabIndex}
-			oninput={handleTextInput}
-			onchange={handleTextChange}
-			onblur={handleTextChange}
+			use:wireColorEvents={'text'}
 		/>
 	</div>
 	{#if alpha}
@@ -322,8 +374,7 @@ function getAlphaSliderValue(): number {
 			value={alphaValue}
 			disabled={effectiveDisabled}
 			tabindex={tabIndex}
-			oninput={handleAlphaInput}
-			onchange={handleAlphaChange}
+			use:wireColorEvents={'alpha'}
 		/>
 	{/if}
 	{#if children}

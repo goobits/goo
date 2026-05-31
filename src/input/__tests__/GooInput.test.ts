@@ -2,9 +2,10 @@ import { fireEvent, render } from '@testing-library/svelte'
 import { tick } from 'svelte'
 import { describe, expect, it, vi } from 'vitest'
 
+import { pointerEvent } from '../../__tests__/_pointerEvents.ts'
 import GooInput from '../GooInput.svelte'
 import GooNumber from '../GooNumber.svelte'
-import { GooInput as ExportedGooInput, GooNumber as ExportedGooNumber } from '../index.js'
+import { GooInput as ExportedGooInput, GooNumber as ExportedGooNumber } from '../index.ts'
 
 describe('GooInput', () => {
 	it('exports native Svelte input components from the package subpath', () => {
@@ -188,5 +189,74 @@ describe('GooNumber', () => {
 		await tick()
 
 		expect(upButton.classList.contains('goo-number__arrow--pressed')).toBe(false)
+	})
+
+	it('keeps only one active pointer-hold repeat for number arrows', () => {
+		vi.useFakeTimers()
+		try {
+			const oninput = vi.fn()
+			const { container } = render(GooNumber, {
+				props: {
+					value: 4,
+					oninput
+				}
+			})
+			const upButton = container.querySelector<HTMLButtonElement>('.goo-number__arrow--up')!
+
+			upButton.dispatchEvent(pointerEvent('pointerdown', { pointerId: 1 }))
+			upButton.dispatchEvent(pointerEvent('pointerdown', { pointerId: 2 }))
+			vi.advanceTimersByTime(300)
+
+			expect(oninput).toHaveBeenCalledTimes(3)
+		} finally {
+			vi.useRealTimers()
+		}
+	})
+
+	it('ignores non-primary number arrow pointer holds', () => {
+		vi.useFakeTimers()
+		try {
+			const oninput = vi.fn()
+			const { container } = render(GooNumber, {
+				props: {
+					value: 4,
+					oninput
+				}
+			})
+			const upButton = container.querySelector<HTMLButtonElement>('.goo-number__arrow--up')!
+
+			upButton.dispatchEvent(pointerEvent('pointerdown', { button: 2, buttons: 2, pointerId: 3 }))
+			vi.advanceTimersByTime(1000)
+
+			expect(oninput).not.toHaveBeenCalled()
+		} finally {
+			vi.useRealTimers()
+		}
+	})
+
+	it('stops number arrow pointer holds when disabled', async() => {
+		vi.useFakeTimers()
+		try {
+			const oninput = vi.fn()
+			const { container, rerender } = render(GooNumber, {
+				props: {
+					value: 4,
+					oninput
+				}
+			})
+			const upButton = container.querySelector<HTMLButtonElement>('.goo-number__arrow--up')!
+
+			upButton.dispatchEvent(pointerEvent('pointerdown', { pointerId: 1 }))
+			await rerender({
+				value: 4,
+				disabled: true,
+				oninput
+			})
+			vi.advanceTimersByTime(1000)
+
+			expect(oninput).toHaveBeenCalledOnce()
+		} finally {
+			vi.useRealTimers()
+		}
 	})
 })

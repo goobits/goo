@@ -1,8 +1,8 @@
 <script lang="ts">
 import { untrack } from 'svelte'
 import type { Snippet } from 'svelte'
-import { createGooDialog } from './dialog.js'
-import type { GooDialogInstance, GooDialogOptions, DialogResult } from './dialog.js'
+import { createGooDialog } from './dialog.ts'
+import type { GooDialogInstance, GooDialogOptions, DialogResult } from './dialog.ts'
 
 type GooDialogProps = Omit<GooDialogOptions, 'content' | 'onOk' | 'onCancel' | 'onClose'> & {
 	open?: boolean
@@ -18,7 +18,7 @@ let currentDialog: GooDialogInstance | null = null
 let mounted = false
 
 let {
-	open = false,
+	open = $bindable(false),
 	type = 'alert',
 	heading = '',
 	labels,
@@ -61,7 +61,10 @@ function createDialog(): void {
 		autoDismiss,
 		onOk: onok,
 		onCancel: oncancel,
-		onClose: onclose
+		onClose: () => {
+			open = false
+			onclose?.()
+		}
 	})
 	instance = currentDialog
 	if (open) void currentDialog.open()

@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { createPointerDrag, createPointerTap } from '../pointerDrag.js'
+import { pointerEvent } from '../../__tests__/_pointerEvents.ts'
+import { createPointerDrag, createPointerTap } from '../pointerDrag.ts'
 
 describe('createPointerDrag', () => {
 	it('emits pointer drag lifecycle events with shared drag state', () => {
@@ -74,6 +75,24 @@ describe('createPointerDrag', () => {
 		handle.detach()
 	})
 
+	it('ignores non-primary pointer starts for drags and taps', () => {
+		const target = document.createElement('button')
+		const onDrag = vi.fn()
+		const onTap = vi.fn()
+		const dragHandle = createPointerDrag(target, onDrag)
+		const tapHandle = createPointerTap(target, onTap)
+
+		target.dispatchEvent(pointerEvent('pointerdown', { button: 2, buttons: 2, pointerId: 10 }))
+		target.dispatchEvent(pointerEvent('pointermove', { button: 2, buttons: 2, pointerId: 10, clientX: 12 }))
+		target.dispatchEvent(pointerEvent('pointerup', { button: 2, buttons: 0, pointerId: 10, clientX: 12 }))
+
+		expect(onDrag).not.toHaveBeenCalled()
+		expect(onTap).not.toHaveBeenCalled()
+
+		dragHandle.detach()
+		tapHandle.detach()
+	})
+
 	it('detaches all event listeners', () => {
 		const target = document.createElement('div')
 		const onDrag = vi.fn()
@@ -115,22 +134,6 @@ describe('createPointerDrag', () => {
 		handle.detach()
 	})
 })
-
-function pointerEvent(type: string, init: Partial<PointerEvent> = {}): PointerEvent {
-	const event = new MouseEvent(type, {
-		bubbles: true,
-		cancelable: true,
-		clientX: init.clientX ?? 0,
-		clientY: init.clientY ?? 0
-	}) as PointerEvent
-
-	Object.defineProperties(event, {
-		pointerId: { value: init.pointerId ?? 1 },
-		pointerType: { value: init.pointerType ?? 'mouse' }
-	})
-
-	return event
-}
 
 function rect(x: number, y: number, width: number, height: number): DOMRect {
 	return {

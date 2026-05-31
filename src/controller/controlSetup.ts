@@ -4,7 +4,7 @@
  * @module goobits/controller/controlSetup
  */
 
-import type { GooSelectMenuOptions } from '../select/types.js'
+import type { GooSelectMenuOptions } from '../select/types.ts'
 
 // ============================================================================
 // Types
@@ -77,6 +77,7 @@ export interface DualRangeEventData {
  * Convert camelCase/snake_case property names to human-readable labels.
  * "tipScaleY" → "Tip Scale Y"
  * "color0" → "Color 0"
+ * @param name - name.
  */
 export function humanizePropertyName(name: string): string {
 	if (!name) return ''
@@ -106,6 +107,8 @@ export function humanizePropertyName(name: string): string {
 
 /**
  * Detect the appropriate control type based on value and options.
+ * @param value - value.
+ * @param options - options.
  */
 export function detectControlType(value: unknown, options: ControllerSetupOptions): string {
 	// Explicit type override
@@ -175,6 +178,8 @@ export interface FormattedSelectOption {
 
 /**
  * Format options for select control.
+ * @param options - options.
+ * @param _currentValue - current value.
  */
 export function formatSelectOptions(options: ControlOptionValue[] | undefined, _currentValue: unknown): FormattedSelectOption[] {
 	if (!options) return []
@@ -189,6 +194,10 @@ export function formatSelectOptions(options: ControlOptionValue[] | undefined, _
 
 /**
  * Build default options for a control based on stored options.
+ * @param value - value.
+ * @param stored - stored.
+ * @param handlers - handlers.
+ * @param controlType - control type.
  */
 export function buildControlOptions(
 	value: unknown,
@@ -251,6 +260,7 @@ export function buildControlOptions(
 
 /**
  * Get all stored options for passing to custom buildOptions.
+ * @param stored - stored.
  */
 export function getAllOptions(stored: StoredOptions): Record<string, unknown> {
 	return {
@@ -292,6 +302,9 @@ export interface DualRangeOptions {
 /**
  * Create dual-range slider options.
  * Returns options ready to pass to the slider field factory.
+ * @param value - value.
+ * @param stored - stored.
+ * @param handlers - handlers.
  */
 export function buildDualRangeOptions(
 	value: number[] | { min: number; max: number },
@@ -333,6 +346,9 @@ export type DualRangeTarget = number[] | DualRangeMinMax | null | undefined
 /**
  * Handle dual-range value change/input.
  * Updates the target object and returns the value to emit.
+ * @param target - target.
+ * @param isMinMaxFormat - is min max format.
+ * @param eventData - event data.
  */
 export function handleDualRangeUpdate(
 	eventData: DualRangeEventData,

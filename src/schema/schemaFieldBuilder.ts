@@ -4,9 +4,9 @@
  * @module goobits/schema/schemaFieldBuilder
  */
 
-import type { ControlTypeRegistry } from '../controller/controlRegistry.js'
-import { pathToLabel } from './pathUtils.js'
-import type { GooSchemaField } from './types.js'
+import type { ControlTypeRegistry } from '../controller/controlRegistry.ts'
+import { pathToLabel } from './pathUtils.ts'
+import type { GooSchemaField } from './types.ts'
 
 // =============================================================================
 // Types
@@ -132,6 +132,7 @@ export function detectFieldType(
 
 /**
  * Check if a string looks like a color value.
+ * @param value - value.
  */
 function isColorString(value: string): boolean {
 	return (

@@ -254,6 +254,9 @@
 	height: auto;
 	max-height: none;
 	overflow: visible;
+	position: relative;
+	z-index: 2;
+	background: var(--goo-popout-bg);
 }
 
 .goo-popout.goo-select-popout:focus-visible,
@@ -378,6 +381,12 @@
 	color: var(--goo-select-fg);
 }
 
+.goo-select__option--selected .goo-select__icon,
+.goo-select__option--selected:hover .goo-select__icon,
+.goo-select__option--selected.goo-select__option--hovered .goo-select__icon {
+	color: var(--goo-select-selected-fg);
+}
+
 .goo-select__icon img {
 	max-width: 24px;
 	max-height: 24px;
@@ -426,6 +435,11 @@
 	font-size: var(--goo-theme-font-size-xs, 0.75rem);
 	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
 	line-height: 1;
+}
+
+.goo-select__option--selected .goo-select__shortcut-key {
+	background: color-mix(in srgb, var(--goo-select-selected-fg) 18%, transparent);
+	color: var(--goo-select-selected-fg);
 }
 
 /* ============================================================================

@@ -1,5 +1,5 @@
 <script module lang="ts">
-import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.js'
+import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.ts'
 
 /** GooController binding metadata for the Svelte slider component. */
 export const controlSchema: SvelteControlSchema = {
@@ -26,10 +26,10 @@ export const controlSchema: SvelteControlSchema = {
 <script lang="ts">
 import './GooSlider.css'
 
-import { formatNumber } from '../utils/formatNumber.js'
-import { clamp, toPercent } from '../utils/numberUtils.js'
-import { parseFloatArray, toFormattedValue, type GooSliderThumb } from './sliderUtils.js'
-import { sliderPresetConfigs, sliderShapes } from './sliderPresets.js'
+import { formatNumber } from '../utils/formatNumber.ts'
+import { clamp, toPercent } from '../utils/numberUtils.ts'
+import { parseFloatArray, toFormattedValue, type GooSliderThumb } from './sliderUtils.ts'
+import { sliderPresetConfigs, sliderShapes } from './sliderPresets.ts'
 import type {
 	GooSliderDirection,
 	GooSliderElement,
@@ -37,7 +37,7 @@ import type {
 	GooSliderProps,
 	GooSliderUnit,
 	GooSliderValue
-} from './types.js'
+} from './types.ts'
 
 type SliderRuntimeState = {
 	direction: GooSliderDirection
@@ -55,6 +55,7 @@ let trackElement: HTMLDivElement | undefined = $state()
 let thumbElements: HTMLElement[] = $state([])
 let currentValues: number[] = $state([ 50 ])
 let activeIndex: number | null = $state(null)
+let activePointerId: number | null = $state(null)
 let zIndex = $state(0)
 let animate = $state(false)
 let currentPresetColor = $state('')
@@ -64,7 +65,7 @@ let currentGradient: string[] | undefined = $state()
 let effectiveDisabled = $state(false)
 
 let {
-	value = 50,
+	value = $bindable<GooSliderValue>(50),
 	min = 0,
 	max = 100,
 	step = 1,
@@ -180,7 +181,10 @@ const hostAttributes = $derived<Record<string, string | number | undefined>>({
 })
 
 $effect(() => {
-	currentValues = normalizeValueArray(value, numericMin)
+	const nextValues = normalizeValueArray(value, numericMin)
+	if (!areNumberArraysEqual(currentValues, nextValues)) {
+		currentValues = nextValues
+	}
 })
 
 $effect(() => {
@@ -214,14 +218,22 @@ $effect(() => {
 })
 
 export function setValue(nextValue: GooSliderValue, { silent = true }: { silent?: boolean } = {}): void {
-	currentValues = normalizeValueArray(nextValue, numericMin).map(formatValue)
-	if (!silent) {
+	const nextValues = normalizeValueArray(nextValue, numericMin)
+	const didChange = !areNumberArraysEqual(currentValues, nextValues)
+	if (didChange) {
+		currentValues = nextValues
+	}
+	const nextSliderValue = valuesToSliderValue(nextValues, numericMin)
+	if (!areSliderValuesEqual(value, nextSliderValue)) {
+		value = nextSliderValue
+	}
+	if (!silent && didChange) {
 		emitSliderEvent(0, 'change')
 	}
 }
 
 export function getValue(): number | number[] {
-	return currentValues.length > 1 ? currentValues.slice() : currentValues[0] ?? numericMin
+	return valuesToSliderValue(currentValues, numericMin)
 }
 
 function assignSliderApi(slider: GooSliderElement): void {
@@ -269,29 +281,42 @@ function assignSliderApi(slider: GooSliderElement): void {
 
 function handlePointerDown(event: PointerEvent): void {
 	if (effectiveDisabled || !sliderElement) return
+	if (event.button !== 0) return
 
 	event.preventDefault()
 	const index = findNearestThumbIndex(event)
 	if (index === null) return
 	activeIndex = index
+	activePointerId = event.pointerId
 	thumbElements[index]?.style.setProperty('z-index', String(++zIndex))
 	sliderElement.setPointerCapture?.(event.pointerId)
 	updateThumbFromPointer(index, event, 'input')
 }
 
 function handlePointerMove(event: PointerEvent): void {
-	if (effectiveDisabled || activeIndex === null) return
+	if (effectiveDisabled || activeIndex === null || activePointerId !== event.pointerId) return
 	event.preventDefault()
 	updateThumbFromPointer(activeIndex, event, 'input')
 }
 
 function handlePointerUp(event: PointerEvent): void {
-	if (activeIndex === null) return
+	finishPointerDrag(event, { commit: true })
+}
+
+function handlePointerCancel(event: PointerEvent): void {
+	finishPointerDrag(event, { commit: false })
+}
+
+function finishPointerDrag(event: PointerEvent, { commit }: { commit: boolean }): void {
+	if (activeIndex === null || activePointerId !== event.pointerId) return
 	event.preventDefault()
 	const index = activeIndex
 	activeIndex = null
+	activePointerId = null
 	sliderElement?.releasePointerCapture?.(event.pointerId)
-	emitSliderEvent(index, 'change', event)
+	if (commit) {
+		emitSliderEvent(index, 'change', event)
+	}
 }
 
 function keyToNextValue(currentValue: number, event: KeyboardEvent): number | null {
@@ -353,6 +378,7 @@ function updateThumbValue(index: number, nextValue: number, state: 'change' | 'i
 	}
 
 	currentValues = values
+	value = getValue()
 	emitSliderEvent(index, state, event)
 }
 
@@ -464,6 +490,18 @@ function normalizeValueArray(nextValue: GooSliderValue | undefined, fallback = 5
 	return values.length ? values.map(formatValue) : [ fallback ]
 }
 
+function valuesToSliderValue(values: number[], fallback: number): number | number[] {
+	return values.length > 1 ? values.slice() : values[0] ?? fallback
+}
+
+function areNumberArraysEqual(left: number[], right: number[]): boolean {
+	return left.length === right.length && left.every((value, index) => Object.is(value, right[index]))
+}
+
+function areSliderValuesEqual(left: GooSliderValue | undefined, right: number | number[]): boolean {
+	return areNumberArraysEqual(normalizeValueArray(left, numericMin), normalizeValueArray(right, numericMin))
+}
+
 function formatSliderValue(rawValue: number[]): string {
 	return rawValue.join(',')
 }
@@ -499,7 +537,7 @@ function toPositiveNumber(nextValue: unknown, fallback: number): number {
 	onpointerdown={handlePointerDown}
 	onpointermove={handlePointerMove}
 	onpointerup={handlePointerUp}
-	onpointercancel={handlePointerUp}
+	onpointercancel={handlePointerCancel}
 	onkeydown={isMulti ? undefined : handleKeydown}
 	{...hostAttributes}
 	aria-disabled={effectiveDisabled ? 'true' : undefined}
@@ -534,6 +572,6 @@ function toPositiveNumber(nextValue: unknown, fallback: number): number {
 		{@render children()}
 	{/if}
 	{#if name}
-		<input type="hidden" data-goo-slider-input {name} value={sliderValue} />
+		<input type="hidden" data-goo-slider-input {name} value={sliderValue} disabled={effectiveDisabled} />
 	{/if}
 </div>

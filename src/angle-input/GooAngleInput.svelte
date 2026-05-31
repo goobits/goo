@@ -1,5 +1,5 @@
 <script module lang="ts">
-import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.js'
+import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.ts'
 
 /** GooController binding metadata for the Svelte angle input component. */
 export const controlSchema: SvelteControlSchema = {
@@ -19,7 +19,7 @@ import type {
 	GooAngleInputEventData,
 	GooAngleInputProps,
 	GooAngleInputUnit
-} from './types.js'
+} from './types.ts'
 
 let angleRoot: HTMLDivElement | undefined = $state()
 // The root <div> is augmented with the GooAngleInput API at runtime
@@ -31,9 +31,10 @@ let currentValue = $state(0)
 let lastCommittedValue = $state(0)
 let currentUnit: GooAngleInputUnit = $state('degree')
 let effectiveDisabled = $state(false)
+let skipNextValueSync = false
 
 let {
-	value = 0,
+	value = $bindable<number | string>(0),
 	unit = 'degree',
 	name,
 	id,
@@ -70,6 +71,10 @@ const hostAttributes = $derived<Record<string, string | number | undefined>>({
 
 $effect(() => {
 	const nextValue = parseAngleValue(value)
+	if (skipNextValueSync && Object.is(nextValue, currentValue)) {
+		skipNextValueSync = false
+		return
+	}
 	currentValue = nextValue
 	lastCommittedValue = nextValue
 })
@@ -95,9 +100,12 @@ $effect(() => {
 export function setValue(nextValue: number | string, { silent = true }: { silent?: boolean } = {}): void {
 	const oldValue = currentValue
 	currentValue = parseAngleValue(nextValue)
-	if (!silent && oldValue !== currentValue) {
-		lastCommittedValue = currentValue
-		emitAngleInputEvent('set')
+	if (oldValue !== currentValue) {
+		syncBoundValue(currentValue)
+		if (!silent) {
+			lastCommittedValue = currentValue
+			emitAngleInputEvent('set')
+		}
 	}
 }
 
@@ -161,6 +169,7 @@ function handleNumberBlur(): void {
 
 function handlePointerDown(event: PointerEvent): void {
 	if (effectiveDisabled || !trackElement) return
+	if (event.button !== 0) return
 	event.preventDefault()
 	focus()
 	activePointerId = event.pointerId
@@ -179,12 +188,23 @@ function handlePointerMove(event: PointerEvent): void {
 }
 
 function handlePointerUp(event: PointerEvent): void {
+	finishPointerDrag(event, { commit: true })
+}
+
+function handlePointerCancel(event: PointerEvent): void {
+	finishPointerDrag(event, { commit: false })
+}
+
+function finishPointerDrag(event: PointerEvent, { commit }: { commit: boolean }): void {
 	if (activePointerId !== event.pointerId) return
 	event.preventDefault()
 	activePointerId = null
 	trackElement?.releasePointerCapture?.(event.pointerId)
-	lastCommittedValue = currentValue
-	emitAngleInputEvent('change', event)
+	if (commit) {
+		focus()
+		lastCommittedValue = currentValue
+		emitAngleInputEvent('change', event)
+	}
 }
 
 function setAngleFromPointer(event: PointerEvent, state: GooAngleInputEventData['state']): void {
@@ -199,6 +219,7 @@ function setAngleFromPointer(event: PointerEvent, state: GooAngleInputEventData[
 
 function setAngleFromDegrees(nextDegrees: number, state: GooAngleInputEventData['state'], event?: Event): void {
 	currentValue = fromDegrees(normalizeDegrees(nextDegrees), activeUnit)
+	syncBoundValue(currentValue)
 	if (state !== 'input') {
 		lastCommittedValue = currentValue
 	}
@@ -246,6 +267,11 @@ function parseAngleValue(nextValue: number | string | undefined): number {
 function normalizeUnit(nextUnit: unknown): GooAngleInputUnit {
 	return nextUnit === 'radian' ? 'radian' : 'degree'
 }
+
+function syncBoundValue(nextValue: number): void {
+	skipNextValueSync = true
+	value = nextValue
+}
 </script>
 
 <div
@@ -268,7 +294,7 @@ function normalizeUnit(nextUnit: unknown): GooAngleInputUnit {
 		onpointerdown={handlePointerDown}
 		onpointermove={handlePointerMove}
 		onpointerup={handlePointerUp}
-		onpointercancel={handlePointerUp}
+		onpointercancel={handlePointerCancel}
 	>
 		<div
 			class="goo-angle-input__handle"
@@ -297,6 +323,6 @@ function normalizeUnit(nextUnit: unknown): GooAngleInputUnit {
 		{@render children()}
 	{/if}
 	{#if name}
-		<input type="hidden" data-goo-angle-input-field {name} value={currentValue} />
+		<input type="hidden" data-goo-angle-input-field {name} value={currentValue} disabled={effectiveDisabled} />
 	{/if}
 </div>

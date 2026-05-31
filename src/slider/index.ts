@@ -1,10 +1,12 @@
+/// <reference path="../svelte.d.ts" />
+
 export { default as GooSlider } from './GooSlider.svelte'
 export {
 	sliderPresetConfigs,
 	sliderPresets,
 	sliderShapes
-} from './sliderPresets.js'
-export type { GooSliderThumb } from './sliderUtils.js'
+} from './sliderPresets.ts'
+export type { GooSliderThumb } from './sliderUtils.ts'
 export type {
 	GooSliderDirection,
 	GooSliderElement,
@@ -14,4 +16,4 @@ export type {
 	GooSliderShape,
 	GooSliderUnit,
 	GooSliderValue
-} from './types.js'
+} from './types.ts'

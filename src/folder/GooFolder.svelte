@@ -7,8 +7,8 @@ let folderInstanceCount = 0
 import { untrack } from 'svelte'
 import type { Snippet } from 'svelte'
 
-import { addChild, clearChildren, hydrateChildren, removeChild } from '../mixins/ChildContainer.js'
-import type { GooFolderElement, GooFolderOptions } from './_createFolder.js'
+import { addChild, clearChildren, hydrateChildren, removeChild } from '../utils/_childContainer.ts'
+import type { GooFolderElement, GooFolderOptions } from './_createFolder.ts'
 import './GooFolder.css'
 
 type GooFolderProps = GooFolderOptions & {
@@ -49,7 +49,7 @@ let apiReady = false
 
 function appendContent(target: HTMLElement, nextContent: GooFolderOptions['content']): void {
 	if (!nextContent) return
-	if (typeof nextContent === 'string') target.innerHTML = nextContent
+	if (typeof nextContent === 'string') target.textContent = nextContent
 	else target.appendChild(nextContent)
 }
 

@@ -1,7 +1,7 @@
-export type { ControlTypeConfig, ControlTypeEntry, ControlTypeRegistry } from './controlRegistry.js'
+export type { ControlTypeConfig, ControlTypeEntry, ControlTypeRegistry } from './controlRegistry.ts'
 export {
 	defaultControlRegistry,
 	resolveControlTypeConfig
-} from './controlRegistry.js'
-export * from './GooController.js'
-export type { SvelteControlSchema } from './SvelteControl.svelte.js'
+} from './controlRegistry.ts'
+export * from './GooController.ts'
+export type { SvelteControlSchema } from './SvelteControl.svelte.ts'

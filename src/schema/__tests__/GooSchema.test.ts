@@ -3,7 +3,7 @@ import { tick } from 'svelte'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import GooSchema from '../GooSchema.svelte'
-import { createGooSchema, GooSchema as GooSchemaElement } from '../index.js'
+import { createGooSchema, GooSchema as GooSchemaElement } from '../index.ts'
 
 describe('GooSchema', () => {
 	afterEach(() => {

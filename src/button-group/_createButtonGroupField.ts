@@ -1,7 +1,7 @@
 import { mount, unmount } from 'svelte'
 
 import GooButtonGroup from './GooButtonGroup.svelte'
-import type { ButtonGroupOptions, GooButtonGroupLayout } from './types.js'
+import type { ButtonGroupOptions, GooButtonGroupLayout } from './types.ts'
 
 export type ButtonGroupFieldOptions = {
 	allowMultiple?: boolean

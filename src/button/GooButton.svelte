@@ -1,6 +1,6 @@
 <script lang="ts">
 import './GooButton.css'
-import type { GooButtonProps } from './types.js'
+import type { GooButtonProps } from './types.ts'
 
 let buttonElement: HTMLButtonElement | undefined = $state()
 
@@ -17,7 +17,7 @@ let {
 	size,
 	square = false,
 	toggle = false,
-	pressed = false,
+	pressed = $bindable(false),
 	layout = 'inline',
 	class: className = '',
 	style,
@@ -63,6 +63,7 @@ function handleClick(event: MouseEvent): void {
 		const oldValue = currentPressed
 		currentPressed = !currentPressed
 		if (oldValue !== currentPressed) {
+			pressed = currentPressed
 			onchange?.(currentPressed, oldValue)
 			buttonElement?.dispatchEvent(new CustomEvent('change', {
 				bubbles: true,

@@ -1,3 +1,5 @@
+/// <reference path="../svelte.d.ts" />
+
 import { mount, unmount } from 'svelte'
 
 import GooVortexComponent from './GooVortex.svelte'
@@ -7,7 +9,7 @@ import type {
 	GooVortexItem,
 	GooVortexOptions,
 	GooVortexUpdateOptions
-} from './types.js'
+} from './types.ts'
 
 export type {
 	GooVortexCreateOptions,
@@ -16,7 +18,7 @@ export type {
 	GooVortexOptions,
 	GooVortexPoint,
 	GooVortexUpdateOptions
-} from './types.js'
+} from './types.ts'
 
 /** Manager for positioned Goo vortex indicators. */
 export class GooVortex {
@@ -27,10 +29,10 @@ export class GooVortex {
 	#randomize: boolean
 
 	/**
-	 * Create a Goo vortex manager.
-	 * @param parent - Parent element that receives vortex elements.
-	 * @param options - Vortex image and selection options.
-	 */
+ * Create a Goo vortex manager.
+ * @param parent - Parent element that receives vortex elements.
+ * @param options - Vortex image and selection options.
+ */
 	constructor(parent: HTMLElement, options: GooVortexOptions = {}) {
 		this.#parent = parent
 		this.#imageUrls = options.imageUrls ?? []
@@ -103,6 +105,9 @@ export class GooVortex {
 		})
 	}
 
+	/**
+	 * #get image url.
+	 */
 	#getImageUrl(): string {
 		if (!this.#imageUrls.length) {
 			return ''

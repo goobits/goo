@@ -1,7 +1,7 @@
 import { mount, unmount } from 'svelte'
 
 import GooRadioGroup from './GooRadioGroup.svelte'
-import type { GooRadioGroupLayout, GooRadioOptions } from './types.js'
+import type { GooRadioGroupLayout, GooRadioOptions } from './types.ts'
 
 export type RadioGroupFieldOptions = {
 	class?: string

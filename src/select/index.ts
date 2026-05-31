@@ -3,6 +3,8 @@
  * @module goobits/select
  */
 
+/// <reference path="../svelte.d.ts" />
+
 export { default as GooSelect } from './GooSelect.svelte'
 export type {
 	GooSelectElement,
@@ -13,4 +15,4 @@ export type {
 	GooSelectOption,
 	GooSelectProps,
 	GooSelectState
-} from './types.js'
+} from './types.ts'

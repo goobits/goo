@@ -1,44 +1,47 @@
+/// <reference path="./svelte.d.ts" />
+
 /**
  * @goobits/goo
  * Modern UI components with CSS custom properties
  */
 
 // i18n / Locale
-export * from './i18n/index.js'
+export * from './i18n/index.ts'
 
 // Utilities (for external use)
-export * from './number/index.js'
-export * from './utils/pointerDrag.js'
+export * from './number/index.ts'
+export * from './utils/pointerDrag.ts'
 
 // Components
-export * from './angle-input/index.js'
-export * from './button/index.js'
-export * from './button-group/index.js'
-export * from './checkbox/index.js'
-export * from './context-menu/index.js'
-export * from './data-grid/index.js'
-export * from './dialog/index.js'
-export * from './icon/index.js'
-export * from './input/index.js'
-export * from './label/index.js'
-export * from './popout/index.js'
-export * from './progress-ring/index.js'
-export * from './radio/index.js'
-export * from './select/index.js'
-export * from './slider/index.js'
-export * from './spinner/index.js'
-export * from './table/index.js'
-export * from './textarea/index.js'
-export * from './tooltip/index.js'
-export * from './virtualGrid/index.js'
-export * from './vortex/index.js'
+export * from './angle-input/index.ts'
+export * from './button/index.ts'
+export * from './button-group/index.ts'
+export * from './checkbox/index.ts'
+export * from './context-menu/index.ts'
+export * from './data-grid/index.ts'
+export * from './dialog/index.ts'
+export * from './diff/index.ts'
+export * from './icon/index.ts'
+export * from './input/index.ts'
+export * from './label/index.ts'
+export * from './popout/index.ts'
+export * from './progress-ring/index.ts'
+export * from './radio/index.ts'
+export * from './select/index.ts'
+export * from './slider/index.ts'
+export * from './spinner/index.ts'
+export * from './table/index.ts'
+export * from './textarea/index.ts'
+export * from './tooltip/index.ts'
+export * from './virtualGrid/index.ts'
+export * from './vortex/index.ts'
 
 // Composition components
-export * from './color/index.js'
-export * from './controller/index.js'
-export * from './floating-window/index.js'
-export * from './folder/index.js'
-export * from './panel/index.js'
+export * from './color/index.ts'
+export * from './controller/index.ts'
+export * from './floating-window/index.ts'
+export * from './folder/index.ts'
+export * from './panel/index.ts'
 
 // Schema-driven UI
-export * from './schema/index.js'
+export * from './schema/index.ts'

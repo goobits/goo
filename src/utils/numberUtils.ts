@@ -4,9 +4,9 @@
  */
 
 // Inlined math utilities (no external deps)
-export { clamp, inverseLerp, lerp, roundNumber, roundToStep } from './math.js'
+export { clamp, inverseLerp, lerp, roundNumber, roundToStep } from './math.ts'
 
-import { inverseLerp, lerp } from './math.js'
+import { inverseLerp, lerp } from './math.ts'
 
 /**
  * Convert a value to a percentage (0-1) within a range.

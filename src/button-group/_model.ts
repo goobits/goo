@@ -1,4 +1,4 @@
-import type { ButtonGroupOptions, NormalizedButtonGroupOption } from './types.js'
+import type { ButtonGroupOptions, NormalizedButtonGroupOption } from './types.ts'
 
 type RawButtonGroupOption = {
 	className?: string

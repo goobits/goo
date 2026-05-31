@@ -1,7 +1,7 @@
 import { mount, unmount } from 'svelte'
 
 import GooAngleInput from './GooAngleInput.svelte'
-import type { GooAngleInputEventData, GooAngleInputUnit } from './types.js'
+import type { GooAngleInputEventData, GooAngleInputUnit } from './types.ts'
 
 export type AngleInputFieldOptions = {
 	class?: string

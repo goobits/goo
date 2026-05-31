@@ -3,7 +3,7 @@ import { createRawSnippet } from 'svelte'
 import { describe, expect, it, vi } from 'vitest'
 
 import GooErrorBoundary from '../GooErrorBoundary.svelte'
-import { GooErrorBoundary as ExportedGooErrorBoundary } from '../index.js'
+import { GooErrorBoundary as ExportedGooErrorBoundary } from '../index.ts'
 
 const childrenSnippet = createRawSnippet(() => ({
 	render: () => '<p data-testid="children">healthy</p>'

@@ -1,7 +1,7 @@
 <script lang="ts">
 import './GooSpinner.css'
-import { resolveSpinnerAttrs } from './_spinnerAttrs.js'
-import type { GooSpinnerProps } from './types.js'
+import { resolveSpinnerAttrs } from './_spinnerAttrs.ts'
+import type { GooSpinnerProps } from './types.ts'
 
 let {
 	size,

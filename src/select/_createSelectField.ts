@@ -1,7 +1,7 @@
 import { mount, unmount } from 'svelte'
 
 import GooSelect from './GooSelect.svelte'
-import type { GooSelectElement, GooSelectEventData, GooSelectMenuOptions, GooSelectOpenOptions, GooSelectOption } from './types.js'
+import type { GooSelectElement, GooSelectEventData, GooSelectMenuOptions, GooSelectOpenOptions, GooSelectOption } from './types.ts'
 
 export type SelectFieldOptions = {
 	boundContext?: unknown
@@ -9,7 +9,7 @@ export type SelectFieldOptions = {
 	className?: string
 	disabled?: boolean
 	enableKeyboard?: boolean
-	enableSelection?: boolean
+	showSelectionIndicator?: boolean
 	id?: string
 	onchange?: (id: string, data: GooSelectEventData) => void
 	onclose?: () => void
@@ -46,7 +46,7 @@ export function createSelectField(options: SelectFieldOptions = {}): GooSelectEl
 				value: currentValue,
 				options: options.options,
 				enableKeyboard: options.enableKeyboard,
-				enableSelection: options.enableSelection,
+				showSelectionIndicator: options.showSelectionIndicator,
 				showHeader: options.showHeader,
 				menu: options.menu,
 				placeholder: options.placeholder,

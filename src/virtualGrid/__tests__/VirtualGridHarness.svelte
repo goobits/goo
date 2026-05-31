@@ -1,6 +1,6 @@
 <script lang="ts">
 import VirtualGrid from '../VirtualGrid.svelte'
-import type { VirtualGridProps } from '../types.js'
+import type { VirtualGridProps } from '../types.ts'
 
 type HarnessProps = Omit<VirtualGridProps<number>, 'children' | 'items'> & { items?: number[] }
 

@@ -71,7 +71,9 @@ export type GooColorElement = HTMLDivElement & {
 	/** Current color value. */
 	value: string
 
-	/** Set color value. */
+	/** Set color value. 	 * @param value - value.
+ * @param options - options.
+ */
 	setValue(value: string, options?: { silent?: boolean }): void
 
 	/** Get current color value. */

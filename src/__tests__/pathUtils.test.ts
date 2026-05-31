@@ -3,7 +3,7 @@
  * pathUtils tests - Array-aware dot-notation path traversal
  */
 
-import { getByPath, pathToLabel, resolvePath, setByPath } from '../schema/pathUtils.js'
+import { getByPath, pathToLabel, resolvePath, setByPath } from '../schema/pathUtils.ts'
 
 describe('pathUtils', () => {
 	describe('getByPath', () => {

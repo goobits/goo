@@ -1,4 +1,4 @@
-import type { Toast, ToastOptions, ToastService, ToastVariant } from './types.js'
+import type { Toast, ToastOptions, ToastService, ToastVariant } from './types.ts'
 
 const DEFAULT_ICONS: Record<ToastVariant, string> = {
 	info: 'ℹ',
@@ -57,6 +57,13 @@ class ToastStore {
 		}
 	}
 
+	update(id: string, title: string, options: ToastOptions = {}): void {
+		const existing = this.#toasts.find(t => t.id === id)
+		if (!existing) return
+
+		this.add(title, { ...options, id, variant: options.variant ?? existing.variant })
+	}
+
 	clear(): void {
 		this.#toasts.length = 0
 	}
@@ -73,18 +80,19 @@ class ToastStore {
 export const toastStore = new ToastStore()
 
 /**
- * Imperative toast API.
- *
- * @example
- *   toast.success('Saved')
- *   toast.error('Failed', { duration: 0, action: { label: 'Retry', onClick: retry } })
- */
+	 * Imperative toast API.
+	 *
+	 * @example
+	 *   toast.success('Saved')
+	 *   toast.error('Failed', { duration: 0, action: { label: 'Retry', onClick: retry } })
+	 */
 export const toast: ToastService = {
 	info: (title, options) => toastStore.add(title, { ...options, variant: 'info' }),
 	success: (title, options) => toastStore.add(title, { ...options, variant: 'success' }),
 	warning: (title, options) => toastStore.add(title, { ...options, variant: 'warning' }),
 	error: (title, options) => toastStore.add(title, { ...options, variant: 'error' }),
 	show: (title, options) => toastStore.add(title, options),
+	update: (id, title, options) => toastStore.update(id, title, options),
 	dismiss: id => toastStore.remove(id),
 	clear: () => toastStore.clear()
 }

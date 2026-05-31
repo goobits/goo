@@ -3,6 +3,9 @@
  * @module goobits/schema
  */
 
+/// <reference path="../svelte.d.ts" />
+
+export { default, default as GooSchemaComponent } from './GooSchema.svelte'
 export {
 	createGooSchema,
 	GooSchema,
@@ -11,7 +14,6 @@ export {
 	type GooSchemaNode,
 	type GooSchemaOptions,
 	type GooSchemaType
-} from './GooSchema.js'
-export { default, default as GooSchemaComponent } from './GooSchema.svelte'
-export * from './pathUtils.js'
-export * from './schemaFieldBuilder.js'
+} from './GooSchema.ts'
+export * from './pathUtils.ts'
+export * from './schemaFieldBuilder.ts'

@@ -1,5 +1,5 @@
 <script module lang="ts">
-import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.js'
+import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.ts'
 
 /** GooController binding metadata for the Svelte text input component. */
 export const controlSchema: SvelteControlSchema = {
@@ -19,16 +19,17 @@ export const controlSchema: SvelteControlSchema = {
 import { onDestroy } from 'svelte'
 import './GooInput.css'
 
-import type { GooInputProps } from './types.js'
+import type { GooInputProps } from './types.ts'
 
 let inputElement: HTMLDivElement | undefined = $state()
 let contentElement: HTMLInputElement | HTMLTextAreaElement | undefined = $state()
 let currentValue = $state<T>('' as T)
 let lastCommittedValue = $state<T>('' as T)
 let changePulseTimeout: ReturnType<typeof setTimeout> | null = null
+let skipNextValueSync = false
 
 let {
-	value = '' as T,
+	value = $bindable<T>('' as T),
 	placeholder = '',
 	type = 'text',
 	multiline = false,
@@ -50,6 +51,10 @@ let {
 }: GooInputProps<T> = $props()
 
 $effect(() => {
+	if (skipNextValueSync && Object.is(value, currentValue)) {
+		skipNextValueSync = false
+		return
+	}
 	currentValue = value
 	lastCommittedValue = value
 })
@@ -78,6 +83,7 @@ export function setValue(nextValue: T, { silent = true }: { silent?: boolean } =
 	const oldValue = currentValue
 	currentValue = nextValue
 	if (oldValue !== currentValue) {
+		syncBoundValue(currentValue)
 		pulseValueChange()
 	}
 	if (!silent && oldValue !== currentValue) {
@@ -108,6 +114,7 @@ function handleInput(event: Event): void {
 	const oldValue = currentValue
 	currentValue = contentElement?.value as T
 	if (oldValue !== currentValue) {
+		syncBoundValue(currentValue)
 		pulseValueChange()
 		const detail = { value: currentValue, oldValue, target: inputElement }
 		oninput?.(currentValue, oldValue)
@@ -133,6 +140,7 @@ function handleBlur(event: Event): void {
 	const oldValue = lastCommittedValue
 	currentValue = contentElement?.value as T
 	if (oldValue !== currentValue) {
+		syncBoundValue(currentValue)
 		lastCommittedValue = currentValue
 		emitChange(oldValue)
 	}
@@ -158,6 +166,11 @@ function emitChange(oldValue: T): void {
 	const detail = { value: currentValue, oldValue, target: inputElement }
 	onchange?.(currentValue, oldValue)
 	inputElement?.dispatchEvent(new CustomEvent('change', { bubbles: true, detail }))
+}
+
+function syncBoundValue(nextValue: T): void {
+	skipNextValueSync = true
+	value = nextValue
 }
 
 function pulseValueChange(): void {

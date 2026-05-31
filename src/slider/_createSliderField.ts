@@ -8,7 +8,7 @@ import type {
 	GooSliderShape,
 	GooSliderUnit,
 	GooSliderValue
-} from './types.js'
+} from './types.ts'
 
 export type SliderFieldOptions = {
 	canCross?: boolean

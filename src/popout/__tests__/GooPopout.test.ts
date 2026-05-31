@@ -3,8 +3,8 @@ import { tick } from 'svelte'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import GooPopout from '../GooPopout.svelte'
-import type { GooPopoutInstance } from '../index.js'
-import { createGooPopout } from '../index.js'
+import type { GooPopoutInstance } from '../index.ts'
+import { createGooPopout } from '../index.ts'
 
 describe('GooPopout', () => {
 	afterEach(() => {
@@ -65,6 +65,45 @@ describe('GooPopout', () => {
 
 			expect(popout.style.visibility).toBe('')
 			expect(Number.parseFloat(popout.style.left)).toBe(74)
+
+			await instance.destroy()
+		} finally {
+			target.remove()
+			HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect
+		}
+	})
+
+	it('reports the resolved arrow side after containment flips horizontally', async() => {
+		const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect
+		const target = document.createElement('button')
+		const content = document.createElement('div')
+		const onPosition = vi.fn()
+
+		document.body.appendChild(target)
+		HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
+			if (this === document.documentElement) return rect(0, 0, 300, 200)
+			if (this === target) return rect(260, 20, 30, 20)
+			if (this.classList.contains('goo-popout')) return rect(0, 0, 120, 40)
+			return originalGetBoundingClientRect.call(this)
+		}
+
+		try {
+			const instance = createGooPopout({
+				at: target,
+				$content: content,
+				align: 'left to right',
+				offset: { x: 6, y: 0 },
+				keepWithin: { $element: document.documentElement, margin: 12 },
+				onPosition,
+				openImmediately: false
+			})
+
+			await instance.open()
+
+			expect(instance.position?.flippedX).toBe(true)
+			expect(instance.position?.arrowPosition).toBe('right')
+			expect(document.querySelector('.goo-popout__arrow')?.classList.contains('right')).toBe(true)
+			expect(onPosition).toHaveBeenCalled()
 
 			await instance.destroy()
 		} finally {

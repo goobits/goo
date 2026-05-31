@@ -1,9 +1,25 @@
+/**
+ * Grid arrow key.
+ */
 export type GridArrowKey = 'ArrowUp' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight'
 
+/**
+ * Checks whether grid arrow key.
+ *
+ * @param key - key.
+ */
 export function isGridArrowKey(key: string): key is GridArrowKey {
 	return key === 'ArrowUp' || key === 'ArrowDown' || key === 'ArrowLeft' || key === 'ArrowRight'
 }
 
+/**
+ * Next grid index.
+ *
+ * @param current - current.
+ * @param key - key.
+ * @param columns - columns.
+ * @param total - total.
+ */
 export function nextGridIndex(
 	current: number,
 	key: GridArrowKey,

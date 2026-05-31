@@ -1,14 +1,14 @@
 <script lang="ts">
 import { untrack } from 'svelte'
 import './GooRadio.css'
-import type { GooRadioProps } from './types.js'
+import type { GooRadioProps } from './types.ts'
 
 let radioElement: HTMLButtonElement | undefined = $state()
 
 let {
 	value = '',
 	label = '',
-	checked = false,
+	checked = $bindable(false),
 	disabled = false,
 	name = '',
 	class: className = '',
@@ -73,6 +73,9 @@ function emitChange(oldValue: string | null): void {
 function setChecked(nextChecked: boolean, { silent = false }: { silent?: boolean } = {}): void {
 	const oldChecked = currentChecked
 	currentChecked = Boolean(nextChecked)
+	if (oldChecked !== currentChecked) {
+		checked = currentChecked
+	}
 	if (!silent && oldChecked !== currentChecked) {
 		emitChange(oldChecked ? value : null)
 	}
@@ -103,6 +106,7 @@ function handleKeydown(event: KeyboardEvent): void {
 	if (disabled) return
 	switch (event.key) {
 		case 'Enter':
+			event.preventDefault()
 			check()
 			break
 		case ' ':
