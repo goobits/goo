@@ -163,13 +163,17 @@ export class SubmenuPopoutController {
 			const dx = previousRect.left - nextRect.left
 			const dy = previousRect.top - nextRect.top
 			if (dx || dy) {
+				// FLIP invert: snap to the previous position with no transition, then play to 0.
+				$frame.style.transition = 'none'
 				$frame.style.transform = `translate(${ dx }px, ${ dy }px)`
-			}
+				forceLayout($frame)
+				$frame.style.removeProperty('transition')
 
-			requestAnimationFrame(() => {
-				if (token !== this.#transitionToken) return
-				$frame.style.transform = 'translate(0, 0)'
-			})
+				requestAnimationFrame(() => {
+					if (token !== this.#transitionToken) return
+					$frame.style.transform = 'translate(0, 0)'
+				})
+			}
 
 			$frame.style.width = `${ nextSize.width }px`
 			$frame.style.height = `${ nextSize.height }px`
