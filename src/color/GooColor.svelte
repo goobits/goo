@@ -282,34 +282,32 @@ function syncBoundValue(nextValue: string): void {
 	value = nextValue
 }
 
-type ColorInputKind = 'alpha' | 'picker' | 'text'
+function wirePickerEvents(node: HTMLInputElement) {
+	return wireInputEvents(node, handlePickerInput, handlePickerChange)
+}
 
-function wireColorEvents(node: HTMLInputElement, kind: ColorInputKind) {
-	const onInput = (event: Event) => {
-		event.stopPropagation()
-		if (kind === 'alpha') handleAlphaInput(event)
-		if (kind === 'picker') handlePickerInput(event)
-		if (kind === 'text') handleTextInput(event)
-	}
-	const onChange = (event: Event) => {
-		event.stopPropagation()
-		if (kind === 'alpha') handleAlphaChange(event)
-		if (kind === 'picker') handlePickerChange(event)
-		if (kind === 'text') handleTextChange(event)
-	}
-	const onBlur = (event: Event) => {
-		if (kind !== 'text') return
-		event.stopPropagation()
-		handleTextChange(event)
-	}
+function wireTextEvents(node: HTMLInputElement) {
+	return wireInputEvents(node, handleTextInput, handleTextChange, handleTextChange)
+}
+
+function wireAlphaEvents(node: HTMLInputElement) {
+	return wireInputEvents(node, handleAlphaInput, handleAlphaChange)
+}
+
+function wireInputEvents(
+	node: HTMLInputElement,
+	onInput: (event: Event) => void,
+	onChange: (event: Event) => void,
+	onBlur?: (event: Event) => void
+) {
 	node.addEventListener('input', onInput)
 	node.addEventListener('change', onChange)
-	if (kind === 'text') node.addEventListener('blur', onBlur)
+	if (onBlur) node.addEventListener('blur', onBlur)
 	return {
 		destroy() {
 			node.removeEventListener('input', onInput)
 			node.removeEventListener('change', onChange)
-			node.removeEventListener('blur', onBlur)
+			if (onBlur) node.removeEventListener('blur', onBlur)
 		}
 	}
 }
@@ -342,7 +340,7 @@ function wireColorEvents(node: HTMLInputElement, kind: ColorInputKind) {
 				value={hexValue}
 				disabled={effectiveDisabled}
 				tabindex={tabIndex}
-				use:wireColorEvents={'picker'}
+				use:wirePickerEvents
 			/>
 		{:else}
 			<span
@@ -360,7 +358,7 @@ function wireColorEvents(node: HTMLInputElement, kind: ColorInputKind) {
 			maxlength="7"
 			disabled={effectiveDisabled}
 			tabindex={tabIndex}
-			use:wireColorEvents={'text'}
+			use:wireTextEvents
 		/>
 	</div>
 	{#if alpha}
@@ -374,7 +372,7 @@ function wireColorEvents(node: HTMLInputElement, kind: ColorInputKind) {
 			value={alphaValue}
 			disabled={effectiveDisabled}
 			tabindex={tabIndex}
-			use:wireColorEvents={'alpha'}
+			use:wireAlphaEvents
 		/>
 	{/if}
 	{#if children}
