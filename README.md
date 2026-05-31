@@ -638,4 +638,4 @@ pnpm run test:e2e
 
 ## License
 
-SketchAPI
+MIT
