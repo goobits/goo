@@ -19,6 +19,33 @@ const ALLOWED_ELEMENTS = new Set([
 ])
 
 const SAFE_URL_PATTERN = /^(?:https?:|mailto:|\/(?!\/)|\.\/|\.\.\/|#)/i
+const LINE_BREAK_PATTERN = /<br\s*\/?>|\r?\n/gi
+
+/**
+ * Create plain dialog content that preserves line breaks.
+ *
+ * Goo dialogs intentionally render strings as text. Use this helper for
+ * translated plain text that may contain newline markers, especially when the
+ * translation interpolates user- or document-controlled values.
+ *
+ * @param content - Plain translated dialog text or an existing DOM node.
+ * @returns A DOM node suitable for Goo dialog `content`.
+ */
+export function createGooDialogTextContent(content: string | Node): Node {
+	if (typeof content !== 'string') {
+		return content
+	}
+
+	const fragment = document.createDocumentFragment()
+	const parts = content.split(LINE_BREAK_PATTERN)
+	parts.forEach((part, index) => {
+		if (index) {
+			fragment.appendChild(document.createElement('br'))
+		}
+		fragment.appendChild(document.createTextNode(part))
+	})
+	return fragment
+}
 
 /**
  * Create explicit rich dialog content from trusted app-owned markup.

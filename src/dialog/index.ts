@@ -9,7 +9,7 @@ export {
 	GooDialogController,
 	type GooDialogInstance,
 	type GooDialogOptions } from './dialog.ts'
-export { createTrustedGooDialogContent } from './dialogContent.ts'
+export { createGooDialogTextContent, createTrustedGooDialogContent } from './dialogContent.ts'
 export {
 	GooAlert,
 	GooConfirm,

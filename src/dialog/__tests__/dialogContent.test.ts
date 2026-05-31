@@ -1,6 +1,18 @@
 import { describe, expect, it } from 'vitest'
 
-import { createTrustedGooDialogContent } from '../dialogContent.ts'
+import { createGooDialogTextContent, createTrustedGooDialogContent } from '../dialogContent.ts'
+
+describe('createGooDialogTextContent', () => {
+	it('preserves translated line break markers without parsing other markup', () => {
+		const content = createGooDialogTextContent('One<br>Two\n<b>Three</b>')
+		const host = document.createElement('div')
+		host.append(content)
+
+		expect(host.querySelectorAll('br')).toHaveLength(2)
+		expect(host.querySelector('b')).toBeNull()
+		expect(host.textContent).toBe('OneTwo<b>Three</b>')
+	})
+})
 
 describe('createTrustedGooDialogContent', () => {
 	it('keeps simple translated markup while removing executable attributes', () => {
