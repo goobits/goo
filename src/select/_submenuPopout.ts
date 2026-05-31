@@ -97,6 +97,10 @@ export class SubmenuPopoutController {
 
 		const { $frame, $viewport } = elements
 		const previousRect = $frame.getBoundingClientRect()
+		// Capture the current rendered size before tearing down any in-flight
+		// transition. Interrupting a morph mid-flight must continue from where the
+		// frame visually is, not snap to the natural content size that settling exposes.
+		const previousSize = measureFrame($frame)
 		this.#cancelTransition()
 		const $previousSubmenu = $viewport.querySelector<HTMLElement>(':scope > .goo-select__submenu')
 		if (!$previousSubmenu || prefersReducedMotion()) {
@@ -105,7 +109,6 @@ export class SubmenuPopoutController {
 			return
 		}
 
-		const previousSize = measureFrame($frame)
 		$frame.classList.add('goo-select__submenu-frame--morph')
 		$frame.style.width = `${ previousSize.width }px`
 		$frame.style.height = `${ previousSize.height }px`
