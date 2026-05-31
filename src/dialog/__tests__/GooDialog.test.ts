@@ -55,6 +55,24 @@ describe('GooDialog', () => {
 		await expect(resultPromise).resolves.toEqual({ cancel: true })
 	})
 
+	it('renders literal br markers as line breaks without parsing other HTML', async() => {
+		const dialog = createGooDialog({
+			type: 'alert',
+			content: '<strong>Line 1</strong><br>Line 2'
+		})
+
+		const resultPromise = dialog.open()
+		await nextFrame()
+
+		const content = document.querySelector<HTMLElement>('.goo-dialog__content')
+		expect(content?.textContent).toBe('<strong>Line 1</strong>Line 2')
+		expect(content?.querySelector('br')).not.toBeNull()
+		expect(content?.querySelector('strong')).toBeNull()
+
+		await dialog.close()
+		await expect(resultPromise).resolves.toEqual({ cancel: true })
+	})
+
 	it('treats updated string content as text instead of HTML', () => {
 		const dialog = createGooDialog({
 			type: 'alert',
