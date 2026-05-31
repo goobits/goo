@@ -18,10 +18,10 @@ const ALLOWED_ELEMENTS = new Set([
 	'UL'
 ])
 
-const SAFE_URL_PATTERN = /^(?:https?:|mailto:|\/|\.\/|\.\.\/|#)/i
+const SAFE_URL_PATTERN = /^(?:https?:|mailto:|\/(?!\/)|\.\/|\.\.\/|#)/i
 
 /**
- * Create explicit rich dialog content from app-owned translated markup.
+ * Create explicit rich dialog content from trusted app-owned markup.
  *
  * Goo dialogs intentionally render plain strings as text. Use this helper only
  * for trusted application strings that intentionally include simple markup such
@@ -30,7 +30,7 @@ const SAFE_URL_PATTERN = /^(?:https?:|mailto:|\/|\.\/|\.\.\/|#)/i
  * @param content - Trusted translated dialog markup or an existing DOM node.
  * @returns A DOM node suitable for Goo dialog `content`.
  */
-export function createGooDialogContent(content: string | Node): Node {
+export function createTrustedGooDialogContent(content: string | Node): Node {
 	if (typeof content !== 'string') {
 		return content
 	}

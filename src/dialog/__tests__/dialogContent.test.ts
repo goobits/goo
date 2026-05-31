@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import { createGooDialogContent } from '../dialogContent.ts'
+import { createTrustedGooDialogContent } from '../dialogContent.ts'
 
-describe('createGooDialogContent', () => {
+describe('createTrustedGooDialogContent', () => {
 	it('keeps simple translated markup while removing executable attributes', () => {
-		const content = createGooDialogContent(
+		const content = createTrustedGooDialogContent(
 			'<p class="notice" onclick="alert(1)">Line 1<br><a href="https://example.com" target="_blank">More</a></p>'
 		)
 		const host = document.createElement('div')
@@ -18,7 +18,7 @@ describe('createGooDialogContent', () => {
 	})
 
 	it('drops unsupported elements without interpreting them', () => {
-		const content = createGooDialogContent('Safe <img src=x onerror=alert(1)> text')
+		const content = createTrustedGooDialogContent('Safe <img src=x onerror=alert(1)> text')
 		const host = document.createElement('div')
 		host.append(content)
 
