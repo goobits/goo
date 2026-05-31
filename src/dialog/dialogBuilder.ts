@@ -111,30 +111,13 @@ export function appendContent($target: HTMLElement, content: string | HTMLElemen
 	if (!content) return
 
 	if (typeof content === 'string') {
-		appendTextContent($target, content)
+		$target.textContent = content
 	} else if (content instanceof HTMLElement || content instanceof DocumentFragment) {
 		$target.appendChild(content)
 	} else if (content instanceof Node) {
 		$target.appendChild(content)
 	} else {
 		console.warn('[GooDialog] Unexpected content type:', typeof content, content)
-	}
-}
-
-function appendTextContent($target: HTMLElement, content: string): void {
-	if (!/<br\s*\/?>/i.test(content)) {
-		$target.textContent = content
-		return
-	}
-
-	const parts = content.split(/<br\s*\/?>/gi)
-	for (let idx = 0; idx < parts.length; idx++) {
-		if (idx > 0) {
-			$target.appendChild(document.createElement('br'))
-		}
-		if (parts[idx]) {
-			$target.appendChild(document.createTextNode(parts[idx]))
-		}
 	}
 }
 

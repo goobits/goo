@@ -1,6 +1,7 @@
 /// <reference path="../svelte.d.ts" />
 
 export { createGooField, createGooFields } from './createGooField.ts'
+export { createGooDialogContent } from './dialogContent.ts'
 export {
 	createGooDialog,
 	type DialogField,
