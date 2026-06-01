@@ -60,10 +60,6 @@
 			"svelte": "./src/angle-input/index.ts",
 			"import": "./src/angle-input/index.ts"
 		},
-		"./app-loader": {
-			"types": "./src/app-loader/index.ts",
-			"import": "./src/app-loader/index.ts"
-		},
 		"./textarea": {
 			"types": "./src/textarea/index.ts",
 			"svelte": "./src/textarea/index.ts",
