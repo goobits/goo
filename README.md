@@ -87,6 +87,8 @@ Prefer subpath imports in apps when you only need one surface.
 | `@goobits/goo/positioning`             | `positionElementAt`, `calculatePosition`, positioning types        | Shared positioning math                    |
 | `@goobits/goo/progress-ring`           | `GooProgressRing`, `createGooProgressRingTimer`                    | Progress ring and timer overlay            |
 | `@goobits/goo/radio`                   | `GooRadio`, `GooRadioGroup`                                        | Radio controls                             |
+| `@goobits/goo/range-module`            | `createGooRangeModule`, `createRangeModuleField`                   | Slider with synced numeric input fields    |
+| `@goobits/goo/range-module/styles.css` | CSS                                                                | Range-module-only stylesheet               |
 | `@goobits/goo/schema`                  | `GooSchema`, `GooSchemaComponent`, schema builders                 | Schema-driven control generation           |
 | `@goobits/goo/select`                  | `GooSelect`                                                        | Select/menu component with submenu support |
 | `@goobits/goo/select/styles.css`       | CSS                                                                | Select-only stylesheet                     |
@@ -223,6 +225,25 @@ Prefer subpath imports in apps when you only need one surface.
 <GooSlider preset="opacity" presetColor="#ff0000" />
 ```
 
+### Range Module
+
+```ts
+import { createGooRangeModule } from '@goobits/goo/range-module'
+
+const range = createGooRangeModule({
+	value: 24,
+	min: 1,
+	max: 100,
+	step: 1,
+	unit: 'px',
+	oninput: (value) => {
+		console.log(value)
+	}
+})
+
+document.body.appendChild(range)
+```
+
 ### Angle Input
 
 ```svelte
@@ -293,12 +314,14 @@ createGooController(model, 'enabled')
 	const schema = [
 		{ path: 'name', type: 'text', label: 'Name' },
 		{ path: 'enabled', type: 'checkbox', label: 'Enabled' },
-		{ path: 'size', type: 'range', min: 1, max: 100, label: 'Size' }
+		{ path: 'size', type: 'range-module', min: 1, max: 100, label: 'Size' }
 	]
 </script>
 
 <GooSchemaComponent {schema} {data} />
 ```
+
+Custom GooSchema controls register Svelte modules through `@goobits/goo/controller` control type maps. See `docs/svelte-controls.md` for the `controlSchema` contract, including self-contained editor controls that opt out of GooController row wrapping.
 
 ## Overlay And Feedback
 

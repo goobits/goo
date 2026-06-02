@@ -315,6 +315,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		$element.offsetHeight // Force reflow
 
 		await animateIn($element)
+		if (!$element || destroying || !opened) return
 
 		// Callback
 		if (onOpen) onOpen({ $element, instance })

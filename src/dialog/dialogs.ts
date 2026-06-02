@@ -78,6 +78,7 @@ function wrapDialogPromise(dialog) {
 /**
  * @typedef {Object} OverlayOptions
  * @property {string|Node} content - Overlay content. Strings render as text; pass a DOM node for rich markup.
+ * @property {string} [ariaLabel] - Accessible label when no visible heading is rendered
  * @property {string} [heading] - Dialog title
  * @property {boolean} [showClose=true] - Show close button
  * @property {string} [className] - Additional CSS class

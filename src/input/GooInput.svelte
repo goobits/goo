@@ -35,6 +35,10 @@ let {
 	multiline = false,
 	name = '',
 	inputId,
+	ariaLabel,
+	autocomplete,
+	spellcheck,
+	autocapitalize,
 	disabled = false,
 	readonly = false,
 	required = false,
@@ -47,6 +51,7 @@ let {
 	onchange,
 	onfocus,
 	onblur,
+	onkeydown,
 	...rest
 }: GooInputProps<T> = $props()
 
@@ -151,6 +156,8 @@ function handleBlur(event: Event): void {
 function handleKeydown(event: KeyboardEvent): void {
 	event.stopPropagation()
 	if (disabled) return
+	onkeydown?.(event)
+	if (event.defaultPrevented) return
 
 	if (!multiline && (event.key === 'Escape' || event.key === 'Enter')) {
 		event.preventDefault()
@@ -203,6 +210,10 @@ function pulseValueChange(): void {
 			id={inputId}
 			{name}
 			{placeholder}
+			aria-label={ariaLabel}
+			autocomplete={autocomplete}
+			spellcheck={spellcheck}
+			autocapitalize={autocapitalize}
 			{disabled}
 			readOnly={readonly}
 			{required}
@@ -222,6 +233,10 @@ function pulseValueChange(): void {
 			{type}
 			{name}
 			{placeholder}
+			aria-label={ariaLabel}
+			autocomplete={autocomplete}
+			spellcheck={spellcheck}
+			autocapitalize={autocapitalize}
 			{disabled}
 			readOnly={readonly}
 			{required}

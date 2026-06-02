@@ -19,7 +19,7 @@ type GooSchemaProps = GooSchemaOptions & {
 	oninput?: GooSchemaChangeHandler
 }
 
-let host: HTMLDivElement | undefined = $state()
+let host: HTMLDivElement | null = $state(null)
 let schemaElement: GooSchema | null = null
 let mounted = false
 let lastCreateKey = ''
@@ -64,20 +64,22 @@ function destroySchema(): void {
 }
 
 function mountSchema(): void {
-	if (!host) return
+	const target = host
+	if (!target) return
 	destroySchema()
-	schemaElement = createGooSchema({
+	const nextSchemaElement = createGooSchema({
 		schema,
 		data,
 		bare,
 		showPanelHeader,
 		controlTypes
 	})
+	schemaElement = nextSchemaElement
 	if (className) schemaElement.classList.add(...className.split(' ').filter(Boolean))
 	if (style) schemaElement.setAttribute('style', style)
 	schemaElement.addEventListener('change', handleChange)
 	schemaElement.addEventListener('input', handleInput)
-	host.replaceChildren(schemaElement)
+	target.replaceChildren(schemaElement)
 	instance = schemaElement
 	lastSchema = schema
 	lastData = data
@@ -145,7 +147,10 @@ $effect(() => {
 		mountSchema()
 	})
 	mounted = true
-	return destroySchema
+	return () => {
+		mounted = false
+		destroySchema()
+	}
 })
 
 $effect(() => {

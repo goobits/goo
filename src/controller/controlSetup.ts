@@ -56,6 +56,7 @@ export interface StoredOptions {
 	presetHue?: number
 	showCoverage?: boolean
 	buttonLabel?: string
+	controlOptions?: Record<string, unknown>
 	menu?: GooSelectMenuOptions
 	shape?: string
 	layout?: 'inline' | 'stacked'
@@ -231,6 +232,8 @@ export function buildControlOptions(
 	if (stored.step !== undefined) opts.step = stored.step
 	if (stored.inputId) opts.inputId = stored.inputId
 	if (stored.name) opts.name = stored.name
+	if (stored.buttonLabel) opts.label = stored.buttonLabel
+	if (stored.controlOptions) Object.assign(opts, stored.controlOptions)
 
 	// Add range-specific options
 	if (stored.preset) opts.preset = stored.preset
@@ -264,6 +267,7 @@ export function buildControlOptions(
  */
 export function getAllOptions(stored: StoredOptions): Record<string, unknown> {
 	return {
+		...stored.controlOptions,
 		min: stored.min,
 		max: stored.max,
 		step: stored.step,

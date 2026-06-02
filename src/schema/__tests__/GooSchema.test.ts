@@ -64,4 +64,69 @@ describe('GooSchema', () => {
 		instance?.dispatchEvent(new CustomEvent('change', { detail: { path: 'enabled', value: false, data: instance.getData() } }))
 		expect(onchange).toHaveBeenCalledOnce()
 	})
+
+	it('remounts the Svelte wrapper when creation options change', async() => {
+		const { container, rerender } = render(GooSchema, {
+			props: {
+				schema: [ { path: 'size', min: 0, max: 100 } ],
+				data: { size: 12 },
+				bare: true
+			}
+		})
+		await tick()
+		await new Promise(resolve => setTimeout(resolve, 50))
+
+		expect(container.querySelector('.goo-schema__bare')).not.toBeNull()
+
+		await rerender({
+			schema: [ { path: 'size', min: 0, max: 100 } ],
+			data: { size: 12 },
+			bare: false,
+			showPanelHeader: false
+		})
+		await tick()
+		await new Promise(resolve => setTimeout(resolve, 50))
+
+		expect(container.querySelector('.goo-panel')).not.toBeNull()
+		expect(container.querySelector('.goo-panel__header')).toBeNull()
+	})
+
+	it('forwards rich range metadata to controller controls', async() => {
+		let receivedOptions: Record<string, unknown> | undefined
+		const schema = createGooSchema({
+			schema: [
+				{
+					path: 'size',
+					type: 'range-module',
+					min: 0,
+					max: 100,
+					canCross: true,
+					canPush: true
+				}
+			],
+			data: { size: 12 },
+			bare: true,
+			controlTypes: {
+				'range-module': {
+					load: () => Promise.resolve({}),
+					extract: () => options => {
+						receivedOptions = options as Record<string, unknown>
+						return Object.assign(document.createElement('div'), {
+							getValue: () => 12,
+							setValue: vi.fn()
+						})
+					}
+				}
+			}
+		})
+		document.body.appendChild(schema)
+		await new Promise(resolve => setTimeout(resolve, 50))
+
+		expect(receivedOptions).toMatchObject({
+			canCross: true,
+			canPush: true,
+			max: 100,
+			min: 0
+		})
+	})
 })

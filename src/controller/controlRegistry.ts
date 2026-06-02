@@ -13,6 +13,8 @@
 
 import { createAngleInputField } from '../angle-input/_createAngleInputField.ts'
 import * as angleInputModule from '../angle-input/GooAngleInput.svelte'
+import { createBlendModeField } from '../blend-mode/createBlendModeField.ts'
+import * as blendModeModule from '../blend-mode/index.ts'
 import * as buttonModule from '../button/GooButton.svelte'
 import { createButtonGroupField } from '../button-group/_createButtonGroupField.ts'
 import * as buttonGroupModule from '../button-group/GooButtonGroup.svelte'
@@ -25,6 +27,8 @@ import * as inputModule from '../input/GooInput.svelte'
 import * as numberModule from '../input/GooNumber.svelte'
 import { createRadioGroupField } from '../radio/_createRadioGroupField.ts'
 import * as radioModule from '../radio/GooRadioGroup.svelte'
+import { createRangeModuleField } from '../range-module/GooRangeModule.ts'
+import * as rangeModule from '../range-module/index.ts'
 import { createSelectField } from '../select/_createSelectField.ts'
 import * as selectModule from '../select/GooSelect.svelte'
 import { createSliderField } from '../slider/_createSliderField.ts'
@@ -104,8 +108,18 @@ export const defaultControlRegistry: ControlTypeRegistry = {
 	slider: { load: () => loadModule(sliderModule), svelte: true, createField: createSliderField },
 	number: { load: () => loadModule(numberModule), svelte: true, createField: createNumberField },
 	select: { load: () => loadModule(selectModule), svelte: true, createField: createSelectField },
+	'blend-mode': {
+		load: () => loadModule(blendModeModule),
+		extract: module => module.createBlendModeField as ControlFactory,
+		createField: createBlendModeField
+	},
 	radio: { load: () => loadModule(radioModule), svelte: true, createField: createRadioGroupField },
 	radiogroup: { load: () => loadModule(radioModule), svelte: true, createField: createRadioGroupField },
+	'range-module': {
+		load: () => loadModule(rangeModule),
+		extract: module => module.createRangeModuleField as ControlFactory,
+		createField: createRangeModuleField
+	},
 	text: { load: () => loadModule(inputModule), svelte: true, createField: createInputField },
 	email: { load: () => loadModule(inputModule), svelte: true, createField: createInputField },
 	password: { load: () => loadModule(inputModule), svelte: true, createField: createInputField },

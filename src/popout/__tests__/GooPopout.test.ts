@@ -244,6 +244,28 @@ describe('GooPopout', () => {
 		target.remove()
 	})
 
+	it('does not fire onOpen after closing during the opening animation', async() => {
+		const target = document.createElement('button')
+		const content = document.createElement('div')
+		const onOpen = vi.fn()
+		document.body.appendChild(target)
+		const instance = createGooPopout({
+			at: target,
+			$content: content,
+			onOpen,
+			openImmediately: false
+		})
+
+		const openPromise = instance.open()
+		await instance.close()
+		await openPromise
+
+		expect(onOpen).not.toHaveBeenCalled()
+		expect(instance.opened).toBe(false)
+
+		target.remove()
+	})
+
 	it('binds the Svelte component instance for imperative control', async() => {
 		const target = document.createElement('button')
 		target.id = 'popout-target'

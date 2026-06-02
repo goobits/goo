@@ -130,10 +130,6 @@
 
 /* Animation for smooth open/close (optional enhancement) */
 @media (prefers-reduced-motion: no-preference) {
-	.goo-folder__content {
-		overflow: hidden;
-	}
-
 	.goo-folder.goo-folder--open > .goo-folder__content {
 		animation: goo-folder-expand 0.2s ease-out;
 	}

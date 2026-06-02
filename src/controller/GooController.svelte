@@ -6,7 +6,7 @@ type GooControllerProps = GooControllerOptions & {
 	element?: GooController | null
 }
 
-let host: HTMLDivElement | undefined = $state()
+let host: HTMLDivElement | null = $state(null)
 let controller: GooController | null = null
 let mounted = false
 
@@ -30,6 +30,7 @@ let {
 	showCoverage,
 	disabled,
 	className = '',
+	controlOptions,
 	layout,
 	controlTypes,
 	element = $bindable<GooController | null>(null)
@@ -54,6 +55,7 @@ function getOptions(): GooControllerOptions {
 		showCoverage,
 		disabled,
 		className,
+		controlOptions,
 		layout,
 		controlTypes,
 		onchange,
@@ -68,19 +70,20 @@ function destroyController(): void {
 }
 
 function mountController(): void {
-	if (!host) return
+	const target = host
+	if (!target) return
 	destroyController()
 	controller = createGooController(getOptions())
-	host.replaceChildren(controller)
+	target.replaceChildren(controller)
 	element = controller
 }
 
-function updateController(): void {
+function updateController(nextOptions = getOptions()): void {
 	if (!host || !controller) {
 		mountController()
 		return
 	}
-	controller.updateOptions(getOptions())
+	controller.updateOptions(nextOptions)
 	element = controller
 }
 
@@ -108,13 +111,16 @@ $effect(() => {
 	if (!host) return
 	untrack(mountController)
 	mounted = true
-	return destroyController
+	return () => {
+		mounted = false
+		destroyController()
+	}
 })
 
 $effect(() => {
-	getOptions()
+	const nextOptions = getOptions()
 	if (!mounted) return
-	updateController()
+	untrack(() => updateController(nextOptions))
 })
 </script>
 

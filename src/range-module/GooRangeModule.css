@@ -1,0 +1,106 @@
+.goo-range-module.goo-range-module--goo {
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	gap: var(--goo-range-module-gap, 0.5rem);
+	inline-size: 100%;
+	min-inline-size: 0;
+}
+
+.goo-range-module.goo-range-module--goo.goo-range-module--no-inputs {
+	gap: var(--goo-range-module-gap-no-inputs, 0.25rem);
+}
+
+.goo-range-module.goo-range-module--goo.goo-range-module--disabled {
+	opacity: 0.5;
+	pointer-events: none;
+}
+
+.goo-range-module--goo .goo-range-module__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--goo-range-module-header-gap, 0.5rem);
+	inline-size: 100%;
+	min-inline-size: 0;
+}
+
+.goo-range-module--goo .goo-range-module__label {
+	min-inline-size: 0;
+	overflow: hidden;
+	color: var(--goo-theme-control-label-color, var(--goo-theme-fg, #fff));
+	font-size: var(--goo-theme-control-label-size, 0.8125rem);
+	font-weight: var(--goo-theme-control-label-weight, 600);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.goo-range-module--goo .goo-range-module__slider {
+	min-inline-size: 0;
+	inline-size: 100%;
+}
+
+.goo-range-module--goo .goo-range-module__inputs {
+	display: flex;
+	align-items: center;
+	flex: 0 0 auto;
+	gap: var(--goo-range-module-input-gap, 0.25rem);
+	min-inline-size: 0;
+}
+
+.goo-range-module--goo .goo-range-module__inputs > .goo-number-field {
+	flex: 0 0 var(--goo-range-module-input-width, 4.5rem);
+	inline-size: var(--goo-range-module-input-width, 4.5rem);
+	min-inline-size: 0;
+	max-inline-size: var(--goo-range-module-input-width, 4.5rem);
+}
+
+.goo-range-module--goo .goo-range-module__number {
+	inline-size: 100%;
+	min-inline-size: 0;
+}
+
+.goo-range-module--goo .goo-range-module__number.goo-number {
+	width: 100%;
+	min-width: 0;
+}
+
+.goo-range-module--goo .goo-range-module__inputs--grouped {
+	flex-wrap: nowrap;
+}
+
+.goo-range-module--goo .goo-slider.goo-slider {
+	--goo-slider-track-height: 6px;
+	--goo-slider-track-radius: 3px;
+
+	width: 100%;
+	min-inline-size: 0;
+}
+
+.goo-range-module--goo .goo-slider__track {
+	margin-inline: 0;
+}
+
+.goo-range-module--goo .goo-slider:not(.goo-slider--vertical) .goo-slider__track::after {
+	--goo-range-module-tick-color: var(--goo-theme-control-range-tick-color, #666);
+
+	content: '';
+	position: absolute;
+	top: -5px;
+	left: 4.5px;
+	width: calc(100% - 9px);
+	height: 4px;
+	background:
+		linear-gradient(var(--goo-range-module-tick-color), var(--goo-range-module-tick-color)) 0 0 / 1px 4px no-repeat,
+		linear-gradient(var(--goo-range-module-tick-color), var(--goo-range-module-tick-color)) 50% 0 / 1px 4px no-repeat,
+		linear-gradient(var(--goo-range-module-tick-color), var(--goo-range-module-tick-color)) 100% 0 / 1px 4px no-repeat,
+		repeating-linear-gradient(
+			to right,
+			transparent 0,
+			transparent calc(10% - 1px),
+			var(--goo-range-module-tick-color) calc(10% - 1px),
+			var(--goo-range-module-tick-color) 10%
+		) 0 1px / 100% 3px no-repeat;
+	pointer-events: none;
+	z-index: 0;
+}

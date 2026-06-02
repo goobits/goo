@@ -48,6 +48,31 @@ describe('GooController', () => {
 		expect(element?.getValue()).toBe(true)
 	})
 
+	it('updates the Svelte wrapper after props change', async() => {
+		const model = { size: 12 }
+		const { container, rerender } = render(GooController, {
+			props: {
+				object: model,
+				property: 'size',
+				min: 0,
+				max: 100
+			}
+		})
+		await tick()
+
+		expect(container.querySelector('.goo-controller')).not.toBeNull()
+
+		await rerender({
+			object: model,
+			property: 'size',
+			min: 0,
+			max: 200
+		})
+		await tick()
+
+		expect(container.querySelector('.goo-controller')).not.toBeNull()
+	})
+
 	it('uses checkbox row labels as accessible labels without duplicating visible text', async() => {
 		const model = { contiguous: true }
 		const controller = createGooController({
@@ -177,5 +202,67 @@ describe('GooController', () => {
 		const popout = document.querySelector<HTMLElement>('.goo-popout.goo-select-popout')!
 		expect(popout.classList.contains('goo-select-popout--menu-attached')).toBe(true)
 		expect(popout.querySelector('.goo-select__options--width-content')).not.toBeNull()
+	})
+
+	it('renders blend-mode controls as compact select pickers', async() => {
+		const model = { blendMode: 'overlay' }
+		const controller = createGooController({
+			object: model,
+			property: 'blendMode',
+			type: 'blend-mode',
+			label: 'Blend',
+			modes: [ 'normal', 'multiply', 'screen', 'overlay' ]
+		})
+		document.body.appendChild(controller)
+		await controller._controlPromise
+		await tick()
+
+		const picker = controller.querySelector<HTMLElement>('.goo-blend-mode-picker')
+		expect(controller.classList.contains('goo-controller--stacked')).toBe(false)
+		expect(picker?.classList.contains('goo-select')).toBe(true)
+		expect(picker?.querySelector('.goo-select__trigger-label')?.textContent).toBe('Overlay')
+		expect(controller.querySelector('.goo-button-group')).toBeNull()
+	})
+
+	it('forwards custom control options through the registry', async() => {
+		const model = { size: 12 }
+		let receivedOptions: Record<string, unknown> | undefined
+		const controller = createGooController({
+			object: model,
+			property: 'size',
+			type: 'custom-range',
+			min: 0,
+			max: 100,
+			canCross: true,
+			controlOptions: {
+				canPush: true
+			},
+			controlTypes: {
+				'custom-range': {
+					load: () => Promise.resolve({}),
+					extract: () => {
+						return options => {
+							receivedOptions = options as Record<string, unknown>
+							return Object.assign(document.createElement('div'), {
+								getValue: () => model.size,
+								setOptions: nextOptions => {
+									receivedOptions = nextOptions as Record<string, unknown>
+								}
+							})
+						}
+					}
+				}
+			}
+		})
+		document.body.appendChild(controller)
+		await controller._controlPromise
+		await tick()
+
+		expect(receivedOptions).toMatchObject({
+			canCross: true,
+			canPush: true,
+			max: 100,
+			min: 0
+		})
 	})
 })

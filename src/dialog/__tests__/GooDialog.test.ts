@@ -66,4 +66,18 @@ describe('GooDialog', () => {
 		expect(dialog.$content?.textContent).toBe('<button onclick=alert(1)>Run</button>')
 		expect(dialog.$content?.querySelector('button')).toBeNull()
 	})
+
+	it('does not use rich DOM content as the dialog accessible name', () => {
+		const content = document.createElement('section')
+		content.innerHTML = '<h2>Keyboard shortcuts</h2><p>Lots of body copy</p>'
+		const dialog = createGooDialog({
+			type: 'overlay',
+			ariaLabel: 'Open document',
+			content,
+			showClose: false
+		})
+
+		expect(dialog.getAttribute('aria-label')).toBe('Open document')
+		expect(dialog.getAttribute('aria-labelledby')).toBeNull()
+	})
 })

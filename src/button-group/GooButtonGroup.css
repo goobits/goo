@@ -208,6 +208,11 @@
 }
 
 /* Support stacked layout buttons in groups */
+.goo-button-group:has(> .goo-button[layout='stacked']) {
+	height: auto;
+	min-height: var(--goo-button-group-height);
+}
+
 .goo-button-group > .goo-button[layout='stacked'] {
 	flex-direction: column;
 	gap: 0.25em;

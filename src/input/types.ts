@@ -24,6 +24,18 @@ export type GooInputProps<T = string> = {
 	/** Native input id. */
 	inputId?: string
 
+	/** Accessible label for the native input element. */
+	ariaLabel?: string
+
+	/** Native autocomplete hint. */
+	autocomplete?: string
+
+	/** Native spellcheck setting. */
+	spellcheck?: boolean | 'false' | 'true'
+
+	/** Native autocapitalize hint. */
+	autocapitalize?: string
+
 	/** Element id. */
 	id?: string
 
@@ -65,6 +77,9 @@ export type GooInputProps<T = string> = {
 
 	/** Blur callback. */
 	onblur?: () => void
+
+	/** Keydown callback fired from the native input before Goo default handling. */
+	onkeydown?: (event: KeyboardEvent) => void
 
 	/** Native attributes forwarded to the rendered control. */
 	[key: string]: unknown

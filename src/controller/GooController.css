@@ -17,8 +17,11 @@
 	--goo-controller-label-size: var(--goo-theme-control-label-size, 0.8125rem);
 	--goo-controller-label-weight: var(--goo-theme-control-label-weight, 600);
 
+	box-sizing: border-box;
 	display: flex;
 	align-items: center;
+	inline-size: 100%;
+	min-inline-size: 0;
 	padding: var(--goo-controller-padding);
 	background: var(--goo-controller-bg);
 	border-bottom: 1px solid var(--goo-controller-border);
@@ -52,6 +55,10 @@
 	display: none;
 }
 
+.goo-controller.goo-controller--range-module[data-label]::before {
+	display: none;
+}
+
 .goo-controller.goo-controller--radio[data-label]::before {
 	text-align: right;
 }
@@ -60,6 +67,7 @@
 .goo-controller__widget {
 	flex: 1;
 	min-width: 0;
+	max-width: 100%;
 	display: flex;
 	align-items: center;
 }
@@ -68,6 +76,7 @@
 .goo-controller__widget > * {
 	flex: 1;
 	min-width: 0;
+	max-width: 100%;
 }
 
 /* Number type - compact input */
@@ -79,6 +88,10 @@
 /* Select type */
 .goo-controller.goo-controller--select .goo-controller__widget {
 	flex: 1 1 auto;
+}
+
+.goo-controller.goo-controller--range-module .goo-controller__widget {
+	flex: 1 1 100%;
 }
 
 /* Color type - compact swatch + input */
@@ -135,6 +148,7 @@
 .goo-controller .goo-number {
 	--goo-number-height: var(--goo-theme-control-height-md, 2rem);
 	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
+	width: 100%;
 }
 
 .goo-controller .goo-input {

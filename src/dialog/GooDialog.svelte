@@ -20,6 +20,7 @@ let mounted = false
 let {
 	open = $bindable(false),
 	type = 'alert',
+	ariaLabel,
 	heading = '',
 	labels,
 	fields,
@@ -42,9 +43,11 @@ let {
 
 function createDialog(): void {
 	if (!contentElement) return
+	if (currentDialog) return
 	contentElement.hidden = false
 	currentDialog = createGooDialog({
 		type,
+		ariaLabel,
 		heading,
 		content: contentElement,
 		labels,

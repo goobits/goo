@@ -41,28 +41,41 @@
 }
 
 /* Folder content: keep row separation consistent inside groups */
-.goo-schema .goo-folder .goo-folder__content {
+.goo-schema .goo-folder .goo-folder__content,
+.goo-schema__bare .goo-folder .goo-folder__content {
 	gap: 0;
 	padding: 0;
 }
 
-.goo-schema .goo-folder .goo-folder__content > .goo-controller {
+.goo-schema .goo-folder .goo-folder__content > .goo-controller,
+.goo-schema__bare .goo-folder .goo-folder__content > .goo-controller {
 	--goo-controller-padding: var(--goo-theme-control-row-padding, 0.5rem 0.75rem);
 	border-bottom: 1px solid var(--goo-theme-control-divider, rgba(128, 128, 128, 0.1));
 }
 
+.goo-schema .goo-folder .goo-folder__content > .goo-controller.goo-controller--range-module,
+.goo-schema__bare .goo-folder .goo-folder__content > .goo-controller.goo-controller--range-module {
+	--goo-controller-padding: 0.5rem 0;
+}
+
 .goo-schema .goo-folder .goo-folder__content > .goo-svelte-control,
-.goo-schema .goo-folder .goo-folder__content > .goo-native-control {
+.goo-schema .goo-folder .goo-folder__content > .goo-native-control,
+.goo-schema__bare .goo-folder .goo-folder__content > .goo-svelte-control,
+.goo-schema__bare .goo-folder .goo-folder__content > .goo-native-control {
 	padding: var(--goo-theme-control-row-padding, 0.5rem 0.75rem);
 	border-bottom: 1px solid var(--goo-theme-control-divider, rgba(128, 128, 128, 0.1));
 }
 
-.goo-schema .goo-folder .goo-folder__content > .goo-svelte-control {
+.goo-schema .goo-folder .goo-folder__content > .goo-svelte-control,
+.goo-schema__bare .goo-folder .goo-folder__content > .goo-svelte-control {
 	padding-inline: 0;
 }
 
 .goo-schema .goo-folder .goo-folder__content > .goo-controller:last-child,
 .goo-schema .goo-folder .goo-folder__content > .goo-svelte-control:last-child,
-.goo-schema .goo-folder .goo-folder__content > .goo-native-control:last-child {
+.goo-schema .goo-folder .goo-folder__content > .goo-native-control:last-child,
+.goo-schema__bare .goo-folder .goo-folder__content > .goo-controller:last-child,
+.goo-schema__bare .goo-folder .goo-folder__content > .goo-svelte-control:last-child,
+.goo-schema__bare .goo-folder .goo-folder__content > .goo-native-control:last-child {
 	border-bottom: none;
 }

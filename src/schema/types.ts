@@ -16,8 +16,10 @@ export type GooSchemaControlType =
   | 'color'
   | 'text'
   | 'number'
+  | 'range-module'
   | 'button'
   | 'button-group'
+  | 'blend-mode'
   | 'angle'
   | 'textarea'
   | 'radio'
@@ -57,6 +59,15 @@ export interface GooSchemaField {
 	/** Step increment. */
 	step?: number
 
+	/** Render a slider with adjacent numeric input(s). */
+	input?: boolean
+
+	/** Allow range thumbs to cross. */
+	canCross?: boolean
+
+	/** Push neighboring thumbs when crossing is disabled. */
+	canPush?: boolean
+
 	/** Dual-thumb slider for [min, max] pairs. Data must be [min, max] array or {min, max} object. */
 	dual?: boolean
 
@@ -80,6 +91,9 @@ export interface GooSchemaField {
 
 	/** Options for select/button-group controls. */
 	options?: Array<string | { label: string; id?: string; icon?: string }>
+
+	/** Mode ids for blend-mode controls. */
+	modes?: readonly string[]
 
 	/** Show field when path is truthy. */
 	if?: string

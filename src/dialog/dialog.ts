@@ -32,6 +32,7 @@ export type { DialogField, DialogLabels } from './dialogBuilder.ts'
  */
 export interface GooDialogOptions {
 	type?: 'alert' | 'confirm' | 'prompt' | 'notify' | 'overlay'
+	ariaLabel?: string
 	heading?: string
 	content?: string | Node
 	labels?: DialogLabels
@@ -66,6 +67,7 @@ export interface DialogResult {
  * State interface for GooDialog.
  */
 export interface GooDialogState {
+	ariaLabel?: string
 	type: string
 	heading: string
 	showBackdrop: boolean
@@ -160,6 +162,7 @@ export class GooDialogController {
 		this.$element = document.createElement('div')
 		this.$element.className = 'goo-dialog'
 		this.state = {
+			ariaLabel: undefined,
 			type: 'alert',
 			heading: '',
 			showBackdrop: true,
@@ -263,7 +266,7 @@ export class GooDialogController {
 			}
 		}
 
-		// Give the dialog an accessible name from its title (or content as a fallback).
+		// Give the dialog an accessible name from its title, explicit label, or short text content.
 		this._applyAccessibleName()
 
 		// Focus trap sentinels
@@ -297,15 +300,22 @@ export class GooDialogController {
 	}
 
 	/**
-	 * Reference the title (or content) so `role="dialog"` exposes an accessible name.
+	 * Reference the title, or use an explicit/string label, so `role="dialog"` exposes an accessible name.
 	 */
 	_applyAccessibleName() {
 		const instanceId = `goo-dialog-${ ++dialogInstanceCount }`
-		const $named = this.$title ?? this.$content
-		if (!$named) return
+		if (this.$title) {
+			if (!this.$title.id) this.$title.id = `${ instanceId }-title`
+			this.$element.setAttribute('aria-labelledby', this.$title.id)
+			this.$element.removeAttribute('aria-label')
+			return
+		}
 
-		if (!$named.id) $named.id = `${ instanceId }-${ this.$title ? 'title' : 'content' }`
-		this.$element.setAttribute('aria-labelledby', $named.id)
+		const label = this.state.ariaLabel || (typeof this._content === 'string' ? this._content.trim() : '')
+		if (!label) return
+
+		this.$element.setAttribute('aria-label', label)
+		this.$element.removeAttribute('aria-labelledby')
 	}
 
 	// --------------------------------------------------------------------------

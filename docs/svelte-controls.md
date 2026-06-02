@@ -27,7 +27,10 @@ let { value, options = [], disabled = false, onchange }: Props = $props()
 
 ```ts
 // editors/my-picker/index.ts
-import type { SvelteControlSchema } from '../../controller/svelteControlWrapper.ts'
+import type {
+	ControlSchemaOptions,
+	SvelteControlSchema
+} from '../../controller/SvelteControl.svelte.ts'
 
 export { default } from './MyPicker.svelte'
 export const controlSchema: SvelteControlSchema = {
@@ -41,7 +44,15 @@ export const controlSchema: SvelteControlSchema = {
 
 ```ts
 // controller/controlRegistry.ts
-'my-picker': svelteControl(() => import('../editors/my-picker/index.ts'))
+import * as myPickerModule from '../editors/my-picker/index.ts'
+
+function loadModule(module: object): Promise<ControlModule> {
+	return Promise.resolve(module as ControlModule)
+}
+
+export const defaultControlRegistry = {
+	'my-picker': { load: () => loadModule(myPickerModule), svelte: true }
+}
 ```
 
 ## Use in schema
@@ -56,13 +67,16 @@ const schema = [{ path: 'selectedOption', type: 'my-picker', options: ['A', 'B',
 interface SvelteControlSchema {
 	valueKey?: string
 	changeKey?: string
+	inputKey?: string
 	propMapping?: Record<string, string>
-	transformValue?: (value: any, options: any) => any
-	transformOutput?: (output: any, options: any) => any
+	transformValue?: (value: unknown, options: ControlSchemaOptions) => unknown
+	transformOutput?: (output: unknown, options: ControlSchemaOptions) => unknown
+	selfContained?: boolean
 }
 ```
 
-## Built-in Svelte controls
+`selfContained` controls render their full row and bypass the normal GooController label/layout wrapper. Use it only for controls that own all of their visible UI.
 
-- `blend-picker`
-- `color-list`
+## Built-in controls
+
+Built-in Goo controls are registered in `src/controller/controlRegistry.ts`. Use `type: 'range-module'` for a native Goo slider with synced numeric inputs. Rich editor-specific controls live in `@goobits/goo-editors` and should be registered by the host package or app through its control type map.

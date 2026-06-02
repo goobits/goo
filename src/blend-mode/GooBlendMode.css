@@ -1,0 +1,8 @@
+.goo-blend-mode-picker.goo-select {
+	--goo-select-min-width: 0;
+	width: 100%;
+}
+
+.goo-blend-mode-picker.goo-select .goo-select__trigger {
+	min-width: 0;
+}

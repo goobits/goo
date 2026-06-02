@@ -39,6 +39,12 @@
 			"svelte": "./src/radio/index.ts",
 			"import": "./src/radio/index.ts"
 		},
+		"./range-module": {
+			"types": "./src/range-module/index.ts",
+			"svelte": "./src/range-module/index.ts",
+			"import": "./src/range-module/index.ts"
+		},
+		"./range-module/styles.css": "./src/range-module/GooRangeModule.css",
 		"./select": {
 			"types": "./src/select/index.ts",
 			"svelte": "./src/select/index.ts",

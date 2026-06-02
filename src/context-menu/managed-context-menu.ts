@@ -42,6 +42,18 @@ type ManagedGooContextMenuOpenOptions = GooSelectOpenOptions & {
 	y?: number
 }
 
+type ManagedGooContextMenuFactory = {
+	(options?: ManagedGooContextMenuOptions): ManagedGooContextMenu
+	close: typeof close
+	currentMenu?: ManagedGooContextMenu
+	get: typeof get
+	id?: string
+	open: typeof open
+	opened: boolean
+	register: typeof register
+	registeredMenus: typeof registeredMenus
+}
+
 const contextMenuState: {
 	currentMenu?: ManagedGooContextMenu
 	id?: string
@@ -58,7 +70,7 @@ export const GooContextMenu = Object.assign(createManagedGooContextMenu, {
 	open,
 	register,
 	registeredMenus
-})
+}) as ManagedGooContextMenuFactory
 
 Object.defineProperties(GooContextMenu, {
 	currentMenu: {

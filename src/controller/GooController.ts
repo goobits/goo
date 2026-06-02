@@ -71,6 +71,7 @@ export type ControllerOptionValue = string | ControllerOption
  * Options for creating a GooController instance.
  */
 export interface GooControllerOptions {
+	[controlOption: string]: unknown
 	object?: Record<string, unknown>
 	property?: string
 	min?: number
@@ -94,6 +95,7 @@ export interface GooControllerOptions {
 	showCoverage?: boolean
 	disabled?: boolean
 	className?: string
+	controlOptions?: Record<string, unknown>
 
 	/** Layout mode: 'inline' (default) or 'stacked' (label row + control row) */
 	layout?: 'inline' | 'stacked'
@@ -154,6 +156,7 @@ export interface GooController extends HTMLElement {
 	_showCoverage: boolean | undefined
 	_shape: string | undefined
 	_layout: 'inline' | 'stacked' | undefined
+	_controlOptions: Record<string, unknown> | undefined
 	_dualRangeIsMinMax: boolean | undefined
 	_controlTypes: ControlTypeRegistry | undefined
 	emit: (event: string, data?: unknown) => void
@@ -342,7 +345,8 @@ export class GooController {
 			showCoverage: this._showCoverage,
 			buttonLabel: this._buttonLabel,
 			shape: this._shape,
-			layout: this._layout
+			layout: this._layout,
+			controlOptions: this._controlOptions
 		}
 	}
 
@@ -753,6 +757,7 @@ export class GooController {
 		this._menu = options.menu
 		this._showCoverage = options.coverage ?? options.showCoverage
 		this._shape = options.shape
+		this._controlOptions = extractControlOptions(options)
 
 		if (Array.isArray(options.min)) {
 			this._selectOptions = options.min
@@ -903,6 +908,7 @@ function initializeController(element: GooController, options: GooControllerOpti
 	element._showCoverage = options.coverage ?? options.showCoverage
 	element._shape = options.shape
 	element._layout = layout
+	element._controlOptions = extractControlOptions(options)
 	element._controlTypes = options.controlTypes
 
 	if (Array.isArray(options.min)) {
@@ -912,6 +918,48 @@ function initializeController(element: GooController, options: GooControllerOpti
 	if (options.className) {
 		element.classList.add(...options.className.split(' ').filter(Boolean))
 	}
+}
+
+const CONTROLLER_OPTION_KEYS = new Set([
+	'$parent',
+	'className',
+	'controlOptions',
+	'controlTypes',
+	'coverage',
+	'disabled',
+	'inputId',
+	'label',
+	'layout',
+	'max',
+	'menu',
+	'min',
+	'name',
+	'object',
+	'onchange',
+	'oninput',
+	'options',
+	'preset',
+	'presetColor',
+	'presetHue',
+	'property',
+	'shape',
+	'showCoverage',
+	'step',
+	'type',
+	'unit'
+])
+
+function extractControlOptions(options: GooControllerOptions): Record<string, unknown> | undefined {
+	let controlOptions = options.controlOptions ? { ...options.controlOptions } : undefined
+
+	for (const [ key, value ] of Object.entries(options)) {
+		if (!CONTROLLER_OPTION_KEYS.has(key) && value !== undefined) {
+			controlOptions ??= {}
+			controlOptions[key] = value
+		}
+	}
+
+	return controlOptions
 }
 
 function resolveControllerLayout(
