@@ -20,9 +20,11 @@ const DEFAULT_MODES = [ 'normal', 'multiply', 'screen', 'overlay' ] as const
 
 /** Creates a compact blend-mode select field for Goo schema/controller use. */
 export function createBlendModeField(options: BlendModeFieldOptions = {}): GooSelectElement {
+	const className = [ 'goo-blend-mode-picker', options.className ?? options.class ].filter(Boolean).join(' ')
 	return createSelectField({
 		...options,
-		className: [ 'goo-blend-mode-picker', options.className ?? options.class ].filter(Boolean).join(' '),
+		class: className,
+		className,
 		menu: {
 			placement: 'bottom-end',
 			width: 'trigger',
@@ -33,11 +35,10 @@ export function createBlendModeField(options: BlendModeFieldOptions = {}): GooSe
 	})
 }
 
-function normalizeBlendModeOptions(
-	options: BlendModeFieldOptions['options'] | readonly string[]
-): readonly GooSelectOption[] | Record<string, unknown> {
-	if (!Array.isArray(options)) return options ?? []
-	return options.map(option => {
+function normalizeBlendModeOptions(options: unknown): readonly GooSelectOption[] | Record<string, unknown> {
+	if (!Array.isArray(options)) return isRecord(options) ? options : []
+	const optionList = options as readonly BlendModeFieldOption[]
+	return optionList.map(option => {
 		if (typeof option === 'string') {
 			return { id: option, label: toTitleCase(option) }
 		}
@@ -49,6 +50,10 @@ function normalizeBlendModeOptions(
 			icon: option.icon
 		}
 	})
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return Boolean(value) && typeof value === 'object'
 }
 
 function toTitleCase(value: string): string {
