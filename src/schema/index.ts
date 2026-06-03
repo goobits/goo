@@ -5,10 +5,14 @@
 
 /// <reference path="../svelte.d.ts" />
 
+export * from './fieldConditions.ts'
+export * from './fieldLayout.ts'
+export * from './fieldValueFormat.ts'
 export { default, default as GooSchemaComponent } from './GooSchema.svelte'
 export {
 	createGooSchema,
 	GooSchema,
+	type GooSchemaControlType,
 	type GooSchemaField,
 	type GooSchemaFolder,
 	type GooSchemaNode,

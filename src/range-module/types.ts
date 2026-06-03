@@ -1,6 +1,6 @@
-import type { GooSliderDirection, GooSliderElement, GooSliderEventData, GooSliderPreset, GooSliderShape, GooSliderUnit } from '../slider/types.ts'
+import type { GooSliderDirection, GooSliderElement, GooSliderPreset, GooSliderShape, GooSliderUnit } from '../slider/types.ts'
 
-export type GooRangeModuleValue = number | number[] | { min: number; max: number }
+export type GooRangeModuleValue = number | number[] | { min: number; max: number } | { x: number; y: number }
 export type GooRangeModuleState = 'input' | 'change' | 'set'
 
 export type GooRangeModuleEventData = {

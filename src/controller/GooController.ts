@@ -233,7 +233,7 @@ export class GooController {
 		if (this._layout === 'stacked') this.classList.add('goo-controller--stacked')
 
 		// Set label attribute (displayed via CSS ::before for inline mode)
-		const labelText = this._buttonLabel || this._property || ''
+		const labelText = this._buttonLabel ?? this._property ?? ''
 		const humanizedLabel = humanizePropertyName(labelText)
 		this.setAttribute('data-label', humanizedLabel)
 

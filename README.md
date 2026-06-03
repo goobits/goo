@@ -9,6 +9,13 @@ Reusable Svelte 5 UI components and small browser utilities. Goo is built around
 - Theme with `--goo-theme-*` CSS variables.
 - Programmatic value setters should stay silent; user input should emit `change` or `input`.
 
+## Ownership Boundaries
+
+- Goo owns generic primitives, layout shells, popouts, virtual grids, and `GooSchema`.
+- Goo should not depend on Sketchpad globals, tool configs, document/layer state, assets, paint resources, or renderer APIs.
+- Rich product/editor controls belong in `@goobits/goo-editors` when they are reusable across hosts.
+- Host-specific schema conversion belongs outside Goo; Sketchpad uses `@sketchapi/controls/sketch/config-pane`.
+
 ## Install
 
 ```bash
@@ -73,6 +80,7 @@ Prefer subpath imports in apps when you only need one surface.
 | `@goobits/goo/data-grid`               | `GooDataGrid`                                                      | Sortable tabular/grid UI                   |
 | `@goobits/goo/dialog`                  | dialog helpers, `GooDialog` surface                                | Alert, confirm, prompt, and field dialogs  |
 | `@goobits/goo/error-boundary`          | `GooErrorBoundary`                                                 | Svelte error boundary wrapper              |
+| `@goobits/goo/focus-trap`              | `GooFocusTrap`                                                     | Modal focus trap wrapper                   |
 | `@goobits/goo/floating-window`         | `createGooFloatingWindow`, `hideFocusedGooFloatingWindow`          | Floating window manager                    |
 | `@goobits/goo/folder`                  | `GooFolder`                                                        | Collapsible folder controls                |
 | `@goobits/goo/i18n`                    | `setLocale`, `translate`, `isRTL`, `onLocaleChange`                | Locale adapter utilities                   |

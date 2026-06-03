@@ -26,6 +26,16 @@ export type GooSchemaControlType =
   | 'slider'
   | (string & {})
 
+export type GooSchemaCondition = string | {
+	path: string
+	equals?: unknown
+	notEquals?: unknown
+}
+
+export type GooSchemaFieldLayout = 'inline' | 'stacked' | 'self-contained'
+
+export type GooSchemaValueFormat = 'percent' | 'number' | 'integer' | 'float' | string
+
 /**
  * Control field definition - binds to a data property.
  */
@@ -87,7 +97,25 @@ export interface GooSchemaField {
 	shape?: 'default' | 'wedge' | 'wedge-left' | string
 
 	/** Unit of measurement. */
-	unit?: 'degree' | 'radian' | '%' | 'px' | 'x'
+	unit?: 'degree' | 'radian' | '%' | 'px' | 'x' | string
+
+	/** Unit used for display when it differs from the raw semantic unit. */
+	displayUnit?: 'degree' | 'radian' | '%' | 'px' | 'x' | string
+
+	/** Display/parse format hint for controls that support specialized formatting. */
+	format?: GooSchemaValueFormat
+
+	/** Alias for `format` when schema authors want an explicit value-display term. */
+	valueFormat?: GooSchemaValueFormat
+
+	/** Hide the generated controller label while preserving the bound path. */
+	showLabel?: boolean
+
+	/** Let controls that support full-width rendering consume the schema hint. */
+	fullWidth?: boolean
+
+	/** Show range tick marks when the control supports ticks. */
+	ticks?: boolean
 
 	/** Options for select/button-group controls. */
 	options?: Array<string | { label: string; id?: string; icon?: string }>
@@ -95,14 +123,17 @@ export interface GooSchemaField {
 	/** Mode ids for blend-mode controls. */
 	modes?: readonly string[]
 
-	/** Show field when path is truthy. */
-	if?: string
+	/** Show field when condition matches. */
+	if?: GooSchemaCondition
 
-	/** Show field when path is falsy. */
-	unless?: string
+	/** Hide field when condition matches. */
+	unless?: GooSchemaCondition
 
 	/** Layout mode for goo-controller. */
-	layout?: 'inline' | 'stacked'
+	layout?: GooSchemaFieldLayout
+
+	/** Render directly without a GooController row wrapper. */
+	selfContained?: boolean
 }
 
 /**
@@ -114,6 +145,9 @@ export interface GooSchemaFolder {
 	/** Folder title. */
 	title: string
 
+	/** Additional classes for the folder element. */
+	className?: string
+
 	/** Initially expanded. */
 	open?: boolean
 
@@ -121,8 +155,8 @@ export interface GooSchemaFolder {
 	children: GooSchemaNode[]
 
 	/** Conditional visibility. */
-	if?: string
-	unless?: string
+	if?: GooSchemaCondition
+	unless?: GooSchemaCondition
 }
 
 /**
@@ -158,6 +192,32 @@ export type GooSchemaNode = GooSchemaField | GooSchemaFolder
 export type GooSchemaType = GooSchemaPanel | GooSchemaNode[]
 
 /**
+ * Options for creating a GooSchema instance.
+ */
+export interface GooSchemaOptions {
+	/** Root schema definition. */
+	schema?: GooSchemaType
+
+	/** Data object bound to schema fields. */
+	data?: Record<string, unknown>
+
+	/** Programmatic change handler. */
+	onchange?: (path: string, value: unknown) => void
+
+	/** Render controls directly without panel wrapper. */
+	bare?: boolean
+
+	/** Render the generated GooPanel header when not in bare mode. */
+	showPanelHeader?: boolean
+
+	/** Additional classes applied to every generated folder. */
+	folderClassName?: string
+
+	/** Optional control type registry override. */
+	controlTypes?: ControlTypeRegistry
+}
+
+/**
  * Runtime state for a GooSchema instance.
  */
 export interface GooSchemaState {
@@ -169,6 +229,9 @@ export interface GooSchemaState {
 
 	/** Render the generated GooPanel header when not in bare mode. */
 	showPanelHeader?: boolean
+
+	/** Additional classes applied to every generated folder. */
+	folderClassName?: string
 
 	/** Optional control type registry override. */
 	controlTypes?: ControlTypeRegistry

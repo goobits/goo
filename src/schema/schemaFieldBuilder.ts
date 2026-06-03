@@ -5,6 +5,8 @@
  */
 
 import type { ControlTypeRegistry } from '../controller/controlRegistry.ts'
+import { getControllerFieldLayout } from './fieldLayout.ts'
+import { applyFieldValueFormatOptions } from './fieldValueFormat.ts'
 import { pathToLabel } from './pathUtils.ts'
 import type { GooSchemaField } from './types.ts'
 
@@ -63,10 +65,16 @@ const SCHEMA_FIELD_KEYS = new Set([
 	'presetHue',
 	'shape',
 	'unit',
+	'displayUnit',
 	'options',
 	'if',
 	'unless',
 	'layout',
+	'selfContained',
+	'format',
+	'valueFormat',
+	'showLabel',
+	'ticks',
 
 	// Framework-reserved keys: never forwarded as control options because they
 	// are the binding target / wired handlers set by GooSchema. Excluding them
@@ -200,7 +208,7 @@ export function buildControllerOptions(
 	const options: ControllerOptions = {
 		object,
 		property,
-		label: node.label || pathToLabel(node.path)
+		label: node.showLabel === false ? '' : node.label || pathToLabel(node.path)
 	}
 
 	// Type (use detected type)
@@ -219,6 +227,7 @@ export function buildControllerOptions(
 
 	// Unit
 	if (node.unit) options.unit = node.unit
+	applyFieldValueFormatOptions(node, options)
 
 	// Select options - normalize strings to { label, id } format
 	if (node.options) {
@@ -226,7 +235,8 @@ export function buildControllerOptions(
 	}
 
 	// Layout
-	if (node.layout) options.layout = node.layout
+	const layout = getControllerFieldLayout(node)
+	if (layout) options.layout = layout
 
 	for (const [ key, value ] of Object.entries(node)) {
 		if (!SCHEMA_FIELD_KEYS.has(key) && value !== undefined) {

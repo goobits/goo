@@ -2,6 +2,7 @@ import { render } from '@testing-library/svelte'
 import { tick } from 'svelte'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { isSelfContainedField } from '../fieldLayout.ts'
 import GooSchema from '../GooSchema.svelte'
 import { createGooSchema, GooSchema as GooSchemaElement } from '../index.ts'
 
@@ -37,6 +38,28 @@ describe('GooSchema', () => {
 
 		expect(schema.querySelector('.goo-panel')).not.toBeNull()
 		expect(schema.querySelector('.goo-panel__header')).toBeNull()
+	})
+
+	it('applies configured classes to generated folders', async() => {
+		const schema = createGooSchema({
+			schema: [
+				{
+					type: 'folder',
+					title: 'Shape',
+					className: 'shape-folder',
+					children: [ { path: 'size', min: 0, max: 100 } ]
+				}
+			],
+			data: { size: 12 },
+			bare: true,
+			folderClassName: 'goo-folder--inspector'
+		})
+		document.body.appendChild(schema)
+		await new Promise(resolve => setTimeout(resolve, 50))
+
+		const folder = schema.querySelector('.goo-folder')
+		expect(folder?.classList.contains('goo-folder--inspector')).toBe(true)
+		expect(folder?.classList.contains('shape-folder')).toBe(true)
 	})
 
 	it('renders the Svelte wrapper and forwards change events', async() => {
@@ -128,5 +151,115 @@ describe('GooSchema', () => {
 			max: 100,
 			min: 0
 		})
+	})
+
+	it('supports condition objects for field visibility', async() => {
+		const schema = createGooSchema({
+			schema: [
+				{ path: 'visibleSize', min: 0, max: 100, if: { path: 'mode', equals: 'advanced' } },
+				{ path: 'hiddenSize', min: 0, max: 100, unless: { path: 'mode', equals: 'advanced' } }
+			],
+			data: {
+				hiddenSize: 8,
+				mode: 'advanced',
+				visibleSize: 12
+			},
+			bare: true
+		})
+		document.body.appendChild(schema)
+		await new Promise(resolve => setTimeout(resolve, 50))
+
+		expect(schema.getController('visibleSize')).not.toBeUndefined()
+		expect(schema.getController('hiddenSize')).toBeUndefined()
+	})
+
+	it('maps percent format to percent unit when unit is omitted', async() => {
+		let receivedOptions: Record<string, unknown> | undefined
+		const schema = createGooSchema({
+			schema: [
+				{
+					path: 'opacity',
+					type: 'range-module',
+					format: 'percent',
+					min: 0,
+					max: 1,
+					step: 0.01,
+					ticks: true
+				}
+			],
+			data: { opacity: 0.5 },
+			bare: true,
+			controlTypes: {
+				'range-module': {
+					load: () => Promise.resolve({}),
+					extract: () => options => {
+						receivedOptions = options as Record<string, unknown>
+						return Object.assign(document.createElement('div'), {
+							getValue: () => 0.5,
+							setValue: vi.fn()
+						})
+					}
+				}
+			}
+		})
+		document.body.appendChild(schema)
+		await new Promise(resolve => setTimeout(resolve, 50))
+
+		expect(receivedOptions).toMatchObject({
+			format: 'percent',
+			ticks: true,
+			unit: '%'
+		})
+	})
+
+	it('supports value display aliases and hidden generated labels', async() => {
+		let receivedOptions: Record<string, unknown> | undefined
+		const schema = createGooSchema({
+			schema: [
+				{
+					path: 'opacity',
+					type: 'range-module',
+					valueFormat: 'percent',
+					displayUnit: '%',
+					showLabel: false,
+					fullWidth: true,
+					min: 0,
+					max: 1,
+					step: 0.01
+				}
+			],
+			data: { opacity: 0.5 },
+			bare: true,
+			controlTypes: {
+				'range-module': {
+					load: () => Promise.resolve({}),
+					extract: () => options => {
+						receivedOptions = options as Record<string, unknown>
+						return Object.assign(document.createElement('div'), {
+							getValue: () => 0.5,
+							setValue: vi.fn()
+						})
+					}
+				}
+			}
+		})
+		document.body.appendChild(schema)
+		await new Promise(resolve => setTimeout(resolve, 50))
+
+		expect(receivedOptions).toMatchObject({
+			format: 'percent',
+			fullWidth: true,
+			unit: '%'
+		})
+		expect(receivedOptions).not.toHaveProperty('label')
+		expect((schema.getController('opacity') as HTMLElement).getAttribute('data-label')).toBe('')
+	})
+
+	it('recognizes self-contained field layout metadata', () => {
+		expect(isSelfContainedField({
+			path: 'mode',
+			type: 'standalone',
+			layout: 'self-contained'
+		})).toBe(true)
 	})
 })

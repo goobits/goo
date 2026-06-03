@@ -14,7 +14,7 @@ import type {
 } from './types.ts'
 
 type MountedControl = ReturnType<typeof mount>
-type ValueMode = 'number' | 'array' | 'minmax'
+type ValueMode = 'number' | 'array' | 'minmax' | 'xy'
 
 const DEFAULT_MIN = 0
 const DEFAULT_MAX = 100
@@ -276,6 +276,9 @@ function shouldShowInputs(options: GooRangeModuleOptions): boolean {
 
 function normalizeValues(value: GooRangeModuleValue | undefined, fallbackMin = DEFAULT_MIN): number[] {
 	if (value && typeof value === 'object' && !Array.isArray(value)) {
+		if (isXyValue(value)) {
+			return [ toFiniteNumber(value.x, fallbackMin), toFiniteNumber(value.y, fallbackMin) ]
+		}
 		return [ toFiniteNumber(value.min, fallbackMin), toFiniteNumber(value.max, fallbackMin) ]
 	}
 	if (Array.isArray(value)) {
@@ -295,6 +298,12 @@ function formatValue(values: number[], mode: ValueMode): GooRangeModuleValue {
 			max: values[1] ?? values[0] ?? DEFAULT_MIN
 		}
 	}
+	if (mode === 'xy') {
+		return {
+			x: values[0] ?? DEFAULT_MIN,
+			y: values[1] ?? values[0] ?? DEFAULT_MIN
+		}
+	}
 	if (mode === 'array') {
 		return values.slice()
 	}
@@ -303,8 +312,12 @@ function formatValue(values: number[], mode: ValueMode): GooRangeModuleValue {
 
 function detectValueMode(value: GooRangeModuleValue | undefined): ValueMode {
 	if (Array.isArray(value)) return 'array'
-	if (value && typeof value === 'object') return 'minmax'
+	if (value && typeof value === 'object') return isXyValue(value) ? 'xy' : 'minmax'
 	return 'number'
+}
+
+function isXyValue(value: object): value is { x: number; y: number } {
+	return 'x' in value || 'y' in value
 }
 
 function toFiniteNumber(value: unknown, fallback: number): number {

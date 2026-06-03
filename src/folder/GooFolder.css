@@ -118,6 +118,73 @@
 	display: flex;
 }
 
+/* Inspector variant - compact section styling for dense property panels. */
+.goo-folder--inspector {
+	--goo-folder-inspector-active-bg: var(--goo-theme-accent-subtle, rgba(59, 130, 246, 0.15));
+	--goo-folder-inspector-accent: var(--goo-theme-accent, #3b82f6);
+
+	margin-block-end: var(--goo-theme-space-xs, 0.125rem);
+	border-radius: var(--goo-theme-radius-lg, 0.5rem);
+}
+
+.goo-folder--inspector::before {
+	content: '';
+	position: absolute;
+	inset-block: 6px;
+	inset-inline-start: 0;
+	inline-size: 3px;
+	border-radius: 3px;
+	background: var(--goo-folder-inspector-accent);
+	opacity: 0;
+	pointer-events: none;
+}
+
+.goo-folder--inspector.goo-folder--open {
+	background: var(--goo-folder-inspector-active-bg);
+}
+
+.goo-folder--inspector.goo-folder--open::before {
+	opacity: 1;
+}
+
+.goo-folder--inspector > .goo-folder__header {
+	gap: var(--goo-theme-space-sm, 0.5rem);
+	padding: var(--goo-theme-space-sm, 0.5rem) var(--goo-theme-space-sm, 0.5rem)
+		var(--goo-theme-space-sm, 0.5rem) var(--goo-theme-space-md, 0.75rem);
+	background: transparent;
+	border-radius: var(--goo-theme-radius-lg, 0.5rem);
+}
+
+.goo-folder--inspector > .goo-folder__header:hover {
+	background: transparent;
+}
+
+.goo-folder--inspector.goo-folder--open > .goo-folder__header {
+	border-radius: var(--goo-theme-radius-lg, 0.5rem) var(--goo-theme-radius-lg, 0.5rem) 0 0;
+}
+
+.goo-folder--inspector > .goo-folder__header > .goo-folder__chevron {
+	width: 1rem;
+	height: 1rem;
+	color: var(--goo-theme-muted, rgba(255, 255, 255, 0.5));
+}
+
+.goo-folder--inspector > .goo-folder__header > .goo-folder__title {
+	font-size: var(--goo-theme-control-label-size, 0.8125rem);
+	font-weight: 600;
+	text-transform: none;
+	letter-spacing: normal;
+	color: var(--goo-theme-fg, var(--goo-folder-fg));
+}
+
+.goo-folder--inspector > .goo-folder__content {
+	gap: 0;
+	padding: 0;
+	background: transparent;
+	border-radius: 0 0 var(--goo-theme-radius-lg, 0.5rem) var(--goo-theme-radius-lg, 0.5rem);
+	overflow: visible;
+}
+
 /* Disabled state */
 .goo-folder.goo-folder--disabled {
 	opacity: 0.5;

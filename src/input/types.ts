@@ -1,4 +1,5 @@
 import type { Snippet } from 'svelte'
+import type { HTMLInputAttributes, HTMLTextareaAttributes } from 'svelte/elements'
 
 /** Native text input type supported by Goo input. */
 export type GooInputType = 'email' | 'password' | 'search' | 'tel' | 'text' | 'url' | string
@@ -28,13 +29,13 @@ export type GooInputProps<T = string> = {
 	ariaLabel?: string
 
 	/** Native autocomplete hint. */
-	autocomplete?: string
+	autocomplete?: HTMLInputAttributes['autocomplete'] | HTMLTextareaAttributes['autocomplete']
 
 	/** Native spellcheck setting. */
-	spellcheck?: boolean | 'false' | 'true'
+	spellcheck?: HTMLInputAttributes['spellcheck'] | HTMLTextareaAttributes['spellcheck']
 
 	/** Native autocapitalize hint. */
-	autocapitalize?: string
+	autocapitalize?: HTMLInputAttributes['autocapitalize'] | HTMLTextareaAttributes['autocapitalize']
 
 	/** Element id. */
 	id?: string

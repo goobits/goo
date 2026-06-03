@@ -53,4 +53,25 @@ describe('GooRangeModule', () => {
 		expect(range.getValue()).toEqual({ min: 12, max: 32 })
 		expect(range.range.values).toEqual([ 12, 32 ])
 	})
+
+	it('preserves x/y object values for paired axes', async() => {
+		const range = createRangeModuleField({
+			canCross: true,
+			max: 50,
+			min: -50,
+			step: 1,
+			unit: 'px',
+			value: { x: -4, y: 12 }
+		})
+		document.body.appendChild(range)
+		await new Promise(resolve => setTimeout(resolve, 0))
+
+		expect(range.querySelectorAll('.goo-number')).toHaveLength(2)
+		expect(range.range.values).toEqual([ -4, 12 ])
+
+		range.setValue({ x: 8, y: -10 })
+
+		expect(range.getValue()).toEqual({ x: 8, y: -10 })
+		expect(range.range.values).toEqual([ 8, -10 ])
+	})
 })

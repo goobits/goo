@@ -66,6 +66,10 @@
 			"svelte": "./src/angle-input/index.ts",
 			"import": "./src/angle-input/index.ts"
 		},
+		"./blend-mode": {
+			"types": "./src/blend-mode/index.ts",
+			"import": "./src/blend-mode/index.ts"
+		},
 		"./textarea": {
 			"types": "./src/textarea/index.ts",
 			"svelte": "./src/textarea/index.ts",
@@ -107,6 +111,11 @@
 			"types": "./src/folder/index.ts",
 			"svelte": "./src/folder/index.ts",
 			"import": "./src/folder/index.ts"
+		},
+		"./focus-trap": {
+			"types": "./src/focus-trap/index.ts",
+			"svelte": "./src/focus-trap/index.ts",
+			"import": "./src/focus-trap/index.ts"
 		},
 		"./panel": {
 			"types": "./src/panel/index.ts",

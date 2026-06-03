@@ -11,12 +11,15 @@ import { createSvelteControlHost, type SvelteComponentType, type SvelteControlSc
 import { createFolder, type GooFolderElement } from '../folder/_createFolder.ts'
 import { createPanel } from '../panel/_createPanel.ts'
 import { schemaLog as log } from '../utils/logger.ts'
-import { getByPath, resolvePath } from './pathUtils.ts'
+import { shouldRenderSchemaNode } from './fieldConditions.ts'
+import { isSelfContainedField } from './fieldLayout.ts'
+import { resolvePath } from './pathUtils.ts'
 import { buildControllerOptions, type ControllerOptions } from './schemaFieldBuilder.ts'
 import type {
 	GooSchemaField,
 	GooSchemaFolder,
 	GooSchemaNode,
+	GooSchemaOptions,
 	GooSchemaState,
 	GooSchemaType
 } from './types.ts'
@@ -26,6 +29,7 @@ export type {
 	GooSchemaField,
 	GooSchemaFolder,
 	GooSchemaNode,
+	GooSchemaOptions,
 	GooSchemaPanel,
 	GooSchemaState,
 	GooSchemaType
@@ -34,35 +38,6 @@ export type {
 // ============================================================================
 // GooSchema Web Component
 // ============================================================================
-
-/**
- * Schema-driven UI generator
- *
- * @fires {CustomEvent} change - Fired when any field value changes
- *        detail: { path: string, value: unknown, data: Record<string, unknown> }
- * @fires {CustomEvent} input - Fired continuously during interaction
- *        detail: { path: string, value: unknown, data: Record<string, unknown> }
- *
- * @example
- * const panel = createGooSchema({
- *   schema: { type: 'panel', title: 'Settings', children: [...] },
- *   data: myObject,
- *   onchange: (path, value) => console.log(`${path} changed to ${value}`)
- * })
- *
- * // Or listen via DOM events
- * panel.addEventListener('change', (e) => {
- *   console.log(`${e.detail.path} = ${e.detail.value}`)
- * })
- */
-export interface GooSchemaOptions {
-	schema?: GooSchemaType
-	data?: Record<string, unknown>
-	onchange?: (path: string, value: unknown) => void
-	bare?: boolean
-	showPanelHeader?: boolean
-	controlTypes?: ControlTypeRegistry
-}
 
 /**
  * Goo schema.
@@ -88,6 +63,7 @@ export class GooSchema {
 		schema: 'object' as const,
 		bare: 'boolean' as const,
 		showPanelHeader: 'boolean' as const,
+		folderClassName: 'string' as const,
 		controlTypes: 'object' as const
 	}
 
@@ -266,6 +242,24 @@ export class GooSchema {
 		return this.state.showPanelHeader ?? true
 	}
 
+	/**
+	 * Set classes applied to generated folders.
+	 * @param value - folder class names.
+	 */
+	set folderClassName(value: string | undefined) {
+		if (this.state.folderClassName !== value) {
+			this.state.folderClassName = value
+			this._scheduleRebuild()
+		}
+	}
+
+	/**
+	 * Folder class names.
+	 */
+	get folderClassName(): string | undefined {
+		return this.state.folderClassName
+	}
+
 	// ─────────────────────────────────────────────────────────────────
 	// Lifecycle
 	// ─────────────────────────────────────────────────────────────────
@@ -351,7 +345,7 @@ export class GooSchema {
 			if (token !== this._rebuildToken) return
 
 			// Check conditional visibility (static - evaluated once at build time)
-			if (!this._checkCondition(node)) continue
+			if (!shouldRenderSchemaNode(node, this._data)) continue
 
 			if ('type' in node && node.type === 'folder') {
 				await this._buildFolder(node as GooSchemaFolder, parent, token)
@@ -372,7 +366,8 @@ export class GooSchema {
 		if (token !== this._rebuildToken) return
 		const folder: GooFolderElement = createFolder({
 			title: node.title,
-			open: node.open ?? false
+			open: node.open ?? false,
+			className: mergeClassNames(this.state.folderClassName, node.className)
 		})
 
 		await this._buildNodes(node.children, folder, token)
@@ -417,7 +412,7 @@ export class GooSchema {
 			if (controlConfig?.svelte) {
 				const module = await controlConfig.load() as { default: SvelteComponentType; controlSchema?: SvelteControlSchema }
 				if (token !== this._rebuildToken) return
-				if (module.controlSchema?.selfContained) {
+				if (module.controlSchema?.selfContained || isSelfContainedField(node)) {
 					// Render selfContained control directly without goo-controller wrapper
 					await this._buildSelfContainedField(
 						node,
@@ -489,10 +484,10 @@ export class GooSchema {
 			this._changeHandler?.(node.path, value)
 		}
 
-		// For selfContained controls, only pass label if explicitly specified in schema.
+		// For selfContained controls, only pass label if explicitly requested in schema.
 		// This allows the component to use its own default label.
 		const options = { ...controllerOptions }
-		if (!node.label) {
+		if (!node.label || node.showLabel === false) {
 			delete options.label
 		}
 
@@ -520,21 +515,6 @@ export class GooSchema {
 		}
 	}
 
-	/**
-	 * Check conditional visibility (static - evaluated once at build time)
-	 * Note: Conditions are NOT reactive. To update visibility after data changes,
-	 * call reevaluateConditions() which rebuilds the entire UI.
-	 * @param node - node.
-	 */
-	_checkCondition(node: GooSchemaNode): boolean {
-		if ('if' in node && node.if) {
-			return !!getByPath(this._data, node.if)
-		}
-		if ('unless' in node && node.unless) {
-			return !getByPath(this._data, node.unless)
-		}
-		return true
-	}
 }
 
 // ============================================================================
@@ -547,6 +527,7 @@ function initializeSchema(element: GooSchema, options: GooSchemaOptions): void {
 		schema: options.schema || [],
 		bare: options.bare ?? false,
 		showPanelHeader: options.showPanelHeader ?? true,
+		folderClassName: options.folderClassName,
 		controlTypes: options.controlTypes
 	}
 	element._data = options.data || {}
@@ -571,6 +552,14 @@ function createGooSchemaElement(options: GooSchemaOptions = {}): GooSchema {
 	initializeSchema(element, options)
 	element._createElement()
 	return element
+}
+
+function mergeClassNames(...values: Array<string | undefined>): string | undefined {
+	const className = values
+		.flatMap(value => value?.split(/\s+/) ?? [])
+		.filter(Boolean)
+		.join(' ')
+	return className || undefined
 }
 
 /**

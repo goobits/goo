@@ -27,6 +27,7 @@ let lastSchema: GooSchemaType | undefined
 let lastData: Record<string, unknown> | undefined
 let lastBare: boolean | undefined
 let lastShowPanelHeader: boolean | undefined
+let lastFolderClassName: string | undefined
 let lastControlTypes: GooSchemaOptions['controlTypes'] | undefined
 
 let {
@@ -34,6 +35,7 @@ let {
 	data,
 	bare = false,
 	showPanelHeader = true,
+	folderClassName,
 	controlTypes,
 	class: className = '',
 	style,
@@ -72,6 +74,7 @@ function mountSchema(): void {
 		data,
 		bare,
 		showPanelHeader,
+		folderClassName,
 		controlTypes
 	})
 	schemaElement = nextSchemaElement
@@ -85,6 +88,7 @@ function mountSchema(): void {
 	lastData = data
 	lastBare = bare
 	lastShowPanelHeader = showPanelHeader
+	lastFolderClassName = folderClassName
 	lastControlTypes = controlTypes
 }
 
@@ -105,6 +109,10 @@ function updateSchema(): void {
 	if (showPanelHeader !== lastShowPanelHeader) {
 		schemaElement.showPanelHeader = showPanelHeader
 		lastShowPanelHeader = showPanelHeader
+	}
+	if (folderClassName !== lastFolderClassName) {
+		schemaElement.folderClassName = folderClassName
+		lastFolderClassName = folderClassName
 	}
 	if (controlTypes !== lastControlTypes) {
 		schemaElement.controlTypes = controlTypes
