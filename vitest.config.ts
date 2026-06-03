@@ -6,6 +6,9 @@ export default defineConfig({
 	resolve: {
 		conditions: [ 'browser' ]
 	},
+	ssr: {
+		noExternal: [ '@lucide/svelte' ]
+	},
 	test: {
 		environment: 'jsdom',
 		include: [ 'src/**/*.test.{js,ts}' ],
