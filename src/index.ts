@@ -35,6 +35,7 @@ export * from './spinner/index.ts'
 export * from './table/index.ts'
 export * from './textarea/index.ts'
 export * from './tooltip/index.ts'
+export * from './toolbar/index.ts'
 export * from './virtualGrid/index.ts'
 export * from './vortex/index.ts'
 

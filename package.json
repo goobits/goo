@@ -203,6 +203,11 @@
 			"types": "./src/toast/index.ts",
 			"svelte": "./src/toast/index.ts",
 			"import": "./src/toast/index.ts"
+		},
+		"./toolbar": {
+			"types": "./src/toolbar/index.ts",
+			"svelte": "./src/toolbar/index.ts",
+			"import": "./src/toolbar/index.ts"
 		}
 	},
 	"files": [
