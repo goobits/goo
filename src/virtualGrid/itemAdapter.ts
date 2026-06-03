@@ -1,0 +1,143 @@
+export type VirtualGridItemKey = number | string
+
+export type VirtualGridItem = {
+	id?: VirtualGridItemKey
+	key?: VirtualGridItemKey
+	selected?: boolean
+}
+
+export type VirtualGridItemRef<T extends VirtualGridItem> = HTMLElement | T | number | string | undefined
+
+export function getGridItem<T extends VirtualGridItem>(
+	items: T[],
+	ref: VirtualGridItemRef<T>
+): T | undefined {
+	if (ref instanceof HTMLElement) {
+		ref = readElementRef(ref)
+	}
+
+	switch (typeof ref) {
+		case 'string':
+			return items.find(item => item?.key != null && String(item.key) === ref)
+
+		case 'number':
+			return items[ref]
+
+		case 'object':
+			return findMatchingItem(items, ref)
+
+		default:
+			return undefined
+	}
+}
+
+export function getGridItemElement<T extends VirtualGridItem>(
+	rootElement: HTMLElement | undefined,
+	items: T[],
+	ref: VirtualGridItemRef<T>
+): HTMLElement | null {
+	const item = getGridItem(items, ref)
+	if (!item || !rootElement) return null
+
+	if (item.key != null) {
+		return rootElement.querySelector<HTMLElement>(`[data-key="${ escapeSelectorValue(String(item.key)) }"]`)
+	}
+
+	return rootElement.querySelector<HTMLElement>(`[data-index="${ items.indexOf(item) }"]`)
+}
+
+export function getSelectedGridItem<T extends VirtualGridItem>(items: T[]): T | undefined {
+	return items.find(item => item?.selected)
+}
+
+export function setGridItemSelected<T extends VirtualGridItem>(
+	items: T[],
+	ref: VirtualGridItemRef<T>,
+	selected = true
+): T | undefined {
+	const item = getGridItem(items, ref)
+	if (!item || item.selected === selected) return
+
+	item.selected = selected
+	return item
+}
+
+export function getGridColumns(rootElement: HTMLElement | undefined): number {
+	const grid = rootElement?.querySelector<HTMLElement>('.goo-virtual-grid')
+	return Math.max(1, Number.parseInt(grid?.dataset.columns ?? '1'))
+}
+
+export function getGridRowHeight(rootElement: HTMLElement | undefined, fallback: number): number {
+	const item = rootElement?.querySelector<HTMLElement>('sketch-grid-item')
+	const rect = item?.getBoundingClientRect()
+	return Math.max(1, rect?.height || fallback)
+}
+
+export function scrollToGridItem<T extends VirtualGridItem>(
+	rootElement: HTMLElement | undefined,
+	items: T[],
+	ref: VirtualGridItemRef<T>,
+	fallbackRowHeight: number
+): void {
+	const item = getGridItem(items, ref)
+	if (!item || !rootElement) return
+
+	const index = items.indexOf(item)
+	if (index < 0) return
+
+	const columns = getGridColumns(rootElement)
+	const rowHeight = getGridRowHeight(rootElement, fallbackRowHeight)
+	rootElement.scrollTop = Math.floor(index / columns) * rowHeight
+}
+
+export function getVisibleGridIndexes<T extends VirtualGridItem>(
+	rootElement: HTMLElement | undefined,
+	items: T[],
+	rowsToBuffer: number,
+	fallbackRowHeight: number
+): { startIndex: number; endIndex: number } {
+	if (!rootElement) {
+		return { startIndex: 0, endIndex: Math.max(0, items.length - 1) }
+	}
+
+	const columns = getGridColumns(rootElement)
+	const rowHeight = getGridRowHeight(rootElement, fallbackRowHeight)
+	const visibleRows = Math.max(1, Math.ceil(rootElement.clientHeight / rowHeight))
+	const firstVisibleRow = Math.max(0, Math.floor(rootElement.scrollTop / rowHeight))
+	const startIndex = Math.max(0, (firstVisibleRow - rowsToBuffer) * columns)
+	const endIndex = Math.min(
+		items.length - 1,
+		(firstVisibleRow + visibleRows + rowsToBuffer) * columns - 1
+	)
+
+	return { startIndex, endIndex }
+}
+
+function readElementRef(element: HTMLElement): string | number | undefined {
+	if (element.dataset.key != null) {
+		return element.dataset.key
+	}
+
+	const index = element.dataset.index
+	return index == null ? undefined : Number.parseInt(index)
+}
+
+function findMatchingItem<T extends VirtualGridItem>(items: T[], ref: T): T | undefined {
+	if (ref.key != null) {
+		const key = String(ref.key)
+		return items.find(item => item?.key != null && String(item.key) === key)
+	}
+
+	if (ref.id != null) {
+		const id = String(ref.id)
+		return items.find(item => item?.id != null && String(item.id) === id)
+	}
+
+	return ref
+}
+
+function escapeSelectorValue(value: string): string {
+	return globalThis.CSS?.escape
+		? globalThis.CSS.escape(value)
+		: value.replaceAll('\\', '\\\\').replaceAll('"', '\\"')
+}

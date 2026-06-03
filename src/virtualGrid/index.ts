@@ -5,4 +5,5 @@ export type { VirtualGridProps, VirtualGridSlot, VirtualGridWindow } from './typ
 /// <reference path="../svelte.d.ts" />
 
 export { default as VirtualGrid } from './VirtualGrid.svelte'
+export * from './itemAdapter.ts'
 export * from './virtualWindow.ts'
