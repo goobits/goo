@@ -164,6 +164,11 @@
 			"svelte": "./src/vortex/index.ts",
 			"import": "./src/vortex/index.ts"
 		},
+		"./grid-popout": {
+			"types": "./src/grid-popout/index.ts",
+			"svelte": "./src/grid-popout/index.ts",
+			"import": "./src/grid-popout/index.ts"
+		},
 		"./virtualGrid": {
 			"types": "./src/virtualGrid/index.ts",
 			"svelte": "./src/virtualGrid/index.ts",

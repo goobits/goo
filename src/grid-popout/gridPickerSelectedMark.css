@@ -1,0 +1,22 @@
+.goo-grid-picker-selected-mark {
+	align-items: center;
+	background: var(--goo-theme-accent, #3b82f6);
+	border-radius: 999px;
+	color: var(--goo-theme-accent-fg, #fff);
+	display: inline-flex;
+	height: 1rem;
+	justify-content: center;
+	position: absolute;
+	right: var(--goo-theme-space-xs, 0.25rem);
+	top: var(--goo-theme-space-xs, 0.25rem);
+	width: 1rem;
+	z-index: 1;
+}
+
+.goo-grid-picker-selected-mark svg,
+.goo-grid-picker-selected-mark__icon {
+	display: block;
+	height: 0.75rem;
+	stroke-width: 3;
+	width: 0.75rem;
+}

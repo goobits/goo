@@ -43,6 +43,7 @@ export * from './color/index.ts'
 export * from './controller/index.ts'
 export * from './floating-window/index.ts'
 export * from './folder/index.ts'
+export * from './grid-popout/index.ts'
 export * from './panel/index.ts'
 
 // Schema-driven UI
