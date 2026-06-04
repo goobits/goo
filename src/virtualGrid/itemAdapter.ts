@@ -68,7 +68,7 @@ export function getGridColumns(rootElement: HTMLElement | undefined): number {
 }
 
 export function getGridRowHeight(rootElement: HTMLElement | undefined, fallback: number): number {
-	const item = rootElement?.querySelector<HTMLElement>('sketch-grid-item')
+	const item = rootElement?.querySelector<HTMLElement>('.goo-grid-view__item, sketch-grid-item')
 	const rect = item?.getBoundingClientRect()
 	return Math.max(1, rect?.height || fallback)
 }

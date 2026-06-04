@@ -42,6 +42,7 @@
 		{#each tools as tool}
 			<button
 				id={tool.id}
+				aria-label={tool.tooltip}
 				class={toolClass(tool)}
 				data-exec={tool.exec}
 				data-tooltip={tool.tooltip}
