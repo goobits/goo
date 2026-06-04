@@ -208,7 +208,8 @@
 			"types": "./src/toolbar/index.ts",
 			"svelte": "./src/toolbar/index.ts",
 			"import": "./src/toolbar/index.ts"
-		}
+		},
+		"./toolbar/styles.css": "./src/toolbar/Toolbar.css"
 	},
 	"files": [
 		"src",

@@ -1,0 +1,537 @@
+.goo-floating-toolbar,
+sketch-floatingtoolbar {
+	-webkit-touch-callout: none;
+	backdrop-filter: blur(18px) saturate(1.35);
+	background: color-mix(in srgb, var(--goo-theme-bg) 82%, transparent);
+	background-image: linear-gradient(
+		135deg,
+		color-mix(in srgb, var(--goo-theme-fg) 14%, transparent),
+		color-mix(in srgb, var(--goo-theme-bg) 72%, transparent)
+	);
+	border: 1px solid color-mix(in srgb, var(--goo-theme-fg) 18%, transparent);
+	border-radius: var(--goo-theme-radius-lg);
+	box-shadow:
+		0 16px 44px rgb(0 0 0 / 22%),
+		inset 0 1px 0 color-mix(in srgb, var(--goo-theme-fg) 20%, transparent);
+	color: var(--goo-theme-fg);
+	display: none;
+	margin: 0;
+	outline: none;
+	position: absolute;
+	right: 0;
+	text-align: center;
+	top: 0;
+	user-select: none;
+	width: 54px;
+	z-index: 101;
+}
+
+[dir='rtl'] .goo-floating-toolbar,
+[dir='rtl'] sketch-floatingtoolbar {
+	left: 0;
+	right: auto;
+}
+
+.goo-floating-toolbar:focus::after,
+sketch-floatingtoolbar:focus::after {
+	border-radius: inherit;
+	box-shadow: inset 0 0 0 1px var(--goo-theme-accent) !important;
+	content: '';
+	display: block;
+	height: 100%;
+	left: 0;
+	pointer-events: none;
+	position: absolute;
+	top: 0;
+	width: 100%;
+	z-index: 2;
+}
+
+.goo-floating-toolbar sketch-tool,
+.goo-floating-toolbar__tool,
+sketch-floatingtoolbar sketch-tool {
+	cursor: pointer;
+	display: block;
+	font-size: var(--goo-theme-icon-lg);
+	height: 44px;
+	line-height: 44px !important;
+	position: relative;
+	transition:
+		background 140ms ease,
+		color 140ms ease,
+		opacity 140ms ease;
+	width: 100%;
+}
+
+.goo-floating-toolbar sketch-tool::before,
+.goo-floating-toolbar__tool::before,
+sketch-floatingtoolbar sketch-tool::before {
+	color: var(--goo-theme-fg);
+}
+
+.goo-floating-toolbar sketch-tool:hover,
+.goo-floating-toolbar__tool:hover,
+sketch-floatingtoolbar sketch-tool:hover {
+	background: color-mix(in srgb, var(--goo-theme-fg) 8%, transparent);
+}
+
+.goo-floating-toolbar sketch-tool-icon,
+.goo-floating-toolbar__tool sketch-tool-icon,
+sketch-floatingtoolbar sketch-tool-icon {
+	align-items: center;
+	color: var(--goo-theme-fg);
+	display: flex;
+	height: 100%;
+	justify-content: center;
+	pointer-events: none;
+	width: 100%;
+}
+
+.goo-floating-toolbar sketch-tool-icon svg,
+.goo-floating-toolbar__tool sketch-tool-icon svg,
+sketch-floatingtoolbar sketch-tool-icon svg {
+	height: var(--goo-theme-icon-lg);
+	pointer-events: none;
+	stroke-width: 2.25;
+	transform: none;
+	width: var(--goo-theme-icon-lg);
+}
+
+.goo-floating-toolbar sketch-tool.disabled,
+.goo-floating-toolbar__tool.disabled,
+sketch-floatingtoolbar sketch-tool.disabled {
+	cursor: default;
+	opacity: 0.25;
+	pointer-events: none;
+}
+
+.goo-floating-toolbar sketch-tool.sketch-selected,
+.goo-floating-toolbar__tool--selected,
+sketch-floatingtoolbar sketch-tool.sketch-selected {
+	background: var(--goo-theme-accent);
+	border-radius: var(--goo-theme-radius-sm);
+}
+
+.goo-floating-toolbar sketch-tool.sketch-selected::before,
+.goo-floating-toolbar__tool--selected::before,
+sketch-floatingtoolbar sketch-tool.sketch-selected::before {
+	color: var(--goo-theme-accent-fg);
+}
+
+.goo-floating-toolbar sketch-tool.sketch-selected sketch-tool-icon,
+.goo-floating-toolbar__tool--selected sketch-tool-icon,
+sketch-floatingtoolbar sketch-tool.sketch-selected sketch-tool-icon {
+	color: var(--goo-theme-accent-fg);
+}
+
+.goo-floating-toolbar hr,
+sketch-floatingtoolbar hr {
+	background: color-mix(in srgb, var(--goo-theme-fg) 20%, var(--goo-theme-bg));
+	border: 0;
+	margin: 6px 8px 5px;
+}
+
+sketch-toolbar {
+	--goo-toolbar-icon-size: var(--goo-theme-icon-lg);
+	--goo-toolbar-tool-min-width: 50px;
+	--goo-toolbar-tool-size: 50px;
+	--goo-toolbar-size: 50px;
+
+	-webkit-touch-callout: none;
+	background: var(--goo-theme-bg);
+	background-image: linear-gradient(
+		90deg,
+		var(--goo-theme-bg),
+		color-mix(in srgb, var(--goo-theme-fg) 2%, transparent)
+	);
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	justify-content: space-between;
+	left: 0;
+	overflow: hidden;
+	position: absolute;
+	text-align: center;
+	top: 0;
+	user-select: none;
+	width: var(--goo-toolbar-size);
+	z-index: 10001;
+}
+
+sketch-toolbar::after {
+	content: '1';
+	font-family: zero-width;
+	pointer-events: none;
+	visibility: hidden;
+}
+
+[dir='rtl'] sketch-toolbar:not(.mirror-rtl),
+sketch-toolbar.position-right {
+	background-image: linear-gradient(
+		270deg,
+		var(--goo-theme-bg),
+		color-mix(in srgb, var(--goo-theme-fg) 2%, transparent)
+	);
+	left: auto;
+	right: 0;
+}
+
+[dir='rtl'] sketch-toolbar.mirror-rtl {
+	background-image: linear-gradient(
+		90deg,
+		var(--goo-theme-bg),
+		color-mix(in srgb, var(--goo-theme-fg) 2%, transparent)
+	);
+	left: 0;
+	right: auto;
+}
+
+sketch-toolbar.position-top {
+	background-image: linear-gradient(
+		180deg,
+		var(--goo-theme-bg),
+		color-mix(in srgb, var(--goo-theme-fg) 2%, transparent)
+	);
+	bottom: auto;
+	flex-direction: row;
+	height: var(--goo-toolbar-size);
+	top: 0;
+	width: 100%;
+}
+
+sketch-toolbar.position-bottom {
+	background-image: linear-gradient(
+		0deg,
+		var(--goo-theme-bg),
+		color-mix(in srgb, var(--goo-theme-fg) 2%, transparent)
+	);
+	bottom: 0;
+	flex-direction: row;
+	height: var(--goo-toolbar-size);
+	top: auto;
+	width: 100%;
+}
+
+[dir='rtl'] sketch-toolbar.position-top,
+[dir='rtl'] sketch-toolbar.position-bottom {
+	background-image: linear-gradient(
+		180deg,
+		var(--goo-theme-bg),
+		color-mix(in srgb, var(--goo-theme-fg) 2%, transparent)
+	);
+	left: 0;
+	right: 0;
+}
+
+sketch-toolbar sketch-toolgroup {
+	border-radius: var(--goo-theme-radius-sm);
+	outline: none;
+	position: relative;
+}
+
+sketch-toolbar sketch-toolgroup.primary {
+	display: block;
+	flex: 1;
+	flex-direction: column;
+}
+
+sketch-toolbar sketch-toolgroup.primary::-webkit-scrollbar {
+	background: transparent;
+	height: 0;
+	width: 0;
+}
+
+sketch-toolbar sketch-toolgroup.primary[style*='display: flex'] {
+	justify-content: flex-start;
+}
+
+sketch-toolbar sketch-toolgroup.secondary {
+	border-top: 1px solid color-mix(in srgb, var(--goo-theme-fg) 10%, transparent);
+	box-shadow: -0.25rem 0 0.5rem color-mix(in srgb, var(--goo-theme-fg) 5%, transparent);
+	width: 100%;
+}
+
+sketch-toolbar sketch-toolgroup.secondary[style*='display: flex'] {
+	justify-content: flex-end;
+}
+
+[dir='rtl'] sketch-toolbar.position-top sketch-toolgroup.secondary,
+[dir='rtl'] sketch-toolbar.position-bottom sketch-toolgroup.secondary {
+	left: 0;
+	right: auto;
+}
+
+sketch-toolbar sketch-toolgroup:first-child {
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
+}
+
+sketch-toolbar sketch-toolgroup:last-child {
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+sketch-toolbar sketch-toolgroup:focus::before {
+	border-radius: inherit;
+	box-shadow: inset 0 0 0 1px var(--goo-theme-accent) !important;
+	content: '';
+	display: block;
+	height: 100%;
+	left: 0;
+	pointer-events: none;
+	position: absolute;
+	top: 0;
+	width: 100%;
+}
+
+sketch-toolbar.position-top sketch-toolgroup,
+sketch-toolbar.position-bottom sketch-toolgroup {
+	display: flex;
+	flex-direction: row;
+	height: 100%;
+}
+
+sketch-toolbar.position-top sketch-toolgroup:first-child,
+sketch-toolbar.position-bottom sketch-toolgroup:first-child {
+	border-radius: 0;
+	border-bottom-left-radius: var(--goo-theme-radius-sm);
+	border-top-left-radius: var(--goo-theme-radius-sm);
+}
+
+sketch-toolbar.position-top sketch-toolgroup:last-child,
+sketch-toolbar.position-bottom sketch-toolgroup:last-child {
+	border-radius: 0;
+	border-bottom-right-radius: var(--goo-theme-radius-sm);
+	border-top-right-radius: var(--goo-theme-radius-sm);
+}
+
+sketch-toolbar.position-top sketch-toolgroup.secondary,
+sketch-toolbar.position-bottom sketch-toolgroup.secondary {
+	bottom: auto;
+	height: 100%;
+	position: relative;
+	right: 0;
+	width: auto;
+}
+
+sketch-toolbar.position-top sketch-toolgroup.primary,
+sketch-toolbar.position-bottom sketch-toolgroup.primary {
+	flex-direction: row;
+	height: 100%;
+}
+
+sketch-toolbar sketch-tool {
+	color: var(--goo-theme-fg);
+	cursor: pointer;
+	display: block;
+	flex-shrink: 0;
+	font-size: var(--goo-toolbar-icon-size);
+	height: var(--goo-toolbar-tool-size);
+	line-height: var(--goo-toolbar-tool-size);
+	min-width: var(--goo-toolbar-tool-min-width);
+	position: relative;
+}
+
+sketch-toolbar sketch-tool[data-tool-group='brush'],
+sketch-toolbar sketch-tool[data-tool-group='fill'],
+sketch-toolbar sketch-tool[data-tool='settings'],
+sketch-toolbar sketch-tool[data-tool='userGuide'],
+sketch-toolbar sketch-tool[data-tool='newDocument'] {
+	border-top: 1px solid var(--goo-theme-bg);
+}
+
+sketch-toolbar sketch-tool sketch-tool-icon {
+	align-items: center;
+	display: flex;
+	height: 100%;
+	justify-content: center;
+	left: 0;
+	line-height: var(--goo-toolbar-tool-size);
+	pointer-events: none;
+	width: 100%;
+	z-index: 1;
+}
+
+sketch-toolbar sketch-tool sketch-tool-icon::before,
+sketch-toolset sketch-tool::before,
+.sketch-toolset sketch-tool::before {
+	color: var(--goo-theme-fg);
+}
+
+sketch-toolbar sketch-tool sketch-tool-icon::after,
+sketch-toolset sketch-tool::after,
+.sketch-toolset sketch-tool::after {
+	color: var(--goo-theme-bg);
+}
+
+sketch-toolbar sketch-tool sketch-tool-icon.sketch-tool-icon--lucide,
+sketch-toolbar sketch-tool sketch-tool-icon.sketch-tool-icon--svg {
+	color: var(--goo-theme-fg);
+}
+
+sketch-toolbar sketch-tool sketch-tool-icon.sketch-tool-icon--lucide svg {
+	height: var(--goo-toolbar-icon-size);
+	stroke-width: 2.25;
+	transform: none;
+	width: var(--goo-toolbar-icon-size);
+}
+
+sketch-toolbar sketch-tool sketch-tool-icon.sketch-tool-icon--svg svg {
+	fill: currentColor;
+	height: var(--goo-toolbar-icon-size);
+	transform: none;
+	width: var(--goo-toolbar-icon-size);
+}
+
+sketch-toolbar sketch-tool:hover {
+	animation: none;
+}
+
+sketch-toolbar sketch-tool.selected {
+	background: var(--goo-theme-selected);
+}
+
+sketch-toolbar sketch-tool.selected sketch-tool-icon::before,
+sketch-toolbar sketch-tool.selected sketch-tool-icon::after {
+	color: var(--goo-theme-selected-fg);
+}
+
+sketch-toolbar sketch-tool.selected sketch-tool-icon.sketch-tool-icon--lucide,
+sketch-toolbar sketch-tool.selected sketch-tool-icon.sketch-tool-icon--svg {
+	color: var(--goo-theme-selected-fg);
+}
+
+sketch-toolbar.position-top sketch-tool,
+sketch-toolbar.position-bottom sketch-tool {
+	height: 100%;
+	min-width: var(--goo-toolbar-tool-size);
+}
+
+sketch-toolbar.position-top sketch-tool[data-tool-group='brush'],
+sketch-toolbar.position-top sketch-tool[data-tool-group='fill'],
+sketch-toolbar.position-top sketch-tool[data-tool='settings'],
+sketch-toolbar.position-top sketch-tool[data-tool='userGuide'],
+sketch-toolbar.position-top sketch-tool[data-tool='newDocument'],
+sketch-toolbar.position-bottom sketch-tool[data-tool-group='brush'],
+sketch-toolbar.position-bottom sketch-tool[data-tool-group='fill'],
+sketch-toolbar.position-bottom sketch-tool[data-tool='settings'],
+sketch-toolbar.position-bottom sketch-tool[data-tool='userGuide'],
+sketch-toolbar.position-bottom sketch-tool[data-tool='newDocument'] {
+	border-left: 1px solid var(--goo-theme-bg);
+	border-top: none;
+}
+
+sketch-toolset,
+.sketch-toolset {
+	-webkit-touch-callout: none;
+	background: var(--goo-theme-bg);
+	background-image: linear-gradient(
+		90deg,
+		var(--goo-theme-bg),
+		color-mix(in srgb, var(--goo-theme-fg) 2%, var(--goo-theme-bg))
+	);
+	border: 0;
+	height: 40px;
+	left: 0;
+	line-height: 40px;
+	padding: 0;
+	position: absolute;
+	text-align: center;
+	top: 0;
+	transition: opacity 250ms;
+	user-select: none;
+	width: inherit;
+	z-index: 3;
+}
+
+sketch-toolset sketch-tool,
+.sketch-toolset sketch-tool {
+	cursor: pointer;
+	display: block;
+	fill: var(--goo-theme-fg);
+	float: left;
+	font-size: var(--goo-theme-icon-lg);
+	height: 40px;
+	line-height: 40px !important;
+	min-width: 45px;
+	outline: none;
+	padding: 0;
+	position: relative;
+	text-align: center;
+	text-shadow: 1px 1px 0 transparent;
+	vertical-align: middle;
+	z-index: 0;
+}
+
+sketch-toolset sketch-tool.selected,
+.sketch-toolset sketch-tool.selected {
+	background: var(--goo-theme-selected);
+	color: var(--goo-theme-selected-fg);
+	fill: var(--goo-theme-selected-fg);
+	z-index: 1;
+}
+
+sketch-toolset sketch-tool.selected::before,
+.sketch-toolset sketch-tool.selected::before {
+	color: var(--goo-theme-selected-fg);
+}
+
+sketch-toolset sketch-tool.selected::after,
+.sketch-toolset sketch-tool.selected::after {
+	color: var(--goo-theme-selected);
+}
+
+sketch-toolset sketch-tool.disabled,
+sketch-toolset sketch-tool[disabled],
+.sketch-toolset sketch-tool.disabled,
+.sketch-toolset sketch-tool[disabled] {
+	cursor: default;
+	opacity: 0.25;
+	pointer-events: none;
+}
+
+sketch-toolset sketch-tool svg,
+.sketch-toolset sketch-tool svg {
+	transform: matrix(0.6, 0, 0, 0.6, 0, 0);
+}
+
+sketch-toolset sketch-tool sketch-tool-icon,
+.sketch-toolset sketch-tool sketch-tool-icon {
+	display: inline-block;
+	line-height: inherit !important;
+	transform: scale(1);
+	transition: 0.15s transform;
+}
+
+sketch-toolset sketch-tool.selected sketch-tool-icon,
+.sketch-toolset sketch-tool.selected sketch-tool-icon {
+	transform: scale(1.25);
+}
+
+sketch-toolset sketch-tooltitle,
+.sketch-toolset sketch-tooltitle {
+	display: none;
+	font-size: var(--goo-theme-font-size-xs);
+}
+
+.sketch-toolbar-popout.sketch-toolset {
+	--goo-popout-content-display: flex;
+	--goo-popout-content-flex-direction: column;
+	--goo-popout-content-overflow: hidden;
+
+	height: auto;
+	width: var(--goo-toolbar-tool-size, 50px);
+	z-index: 99999;
+}
+
+.position-top .sketch-toolbar-popout.sketch-toolset,
+.position-bottom .sketch-toolbar-popout.sketch-toolset {
+	--goo-popout-content-flex-direction: row;
+
+	height: var(--goo-toolbar-tool-size, 50px);
+	width: auto;
+}
+
+.sketch-toolbar-popout.sketch-toolset sketch-tool[data-tool='newDocument'] {
+	border-top: none;
+}
