@@ -1,5 +1,4 @@
-.goo-floating-toolbar,
-sketch-floatingtoolbar {
+.goo-floating-toolbar {
 	-webkit-touch-callout: none;
 	backdrop-filter: blur(18px) saturate(1.35);
 	background: color-mix(in srgb, var(--goo-theme-bg) 82%, transparent);
@@ -26,14 +25,12 @@ sketch-floatingtoolbar {
 	z-index: 101;
 }
 
-[dir='rtl'] .goo-floating-toolbar,
-[dir='rtl'] sketch-floatingtoolbar {
+[dir='rtl'] .goo-floating-toolbar {
 	left: 0;
 	right: auto;
 }
 
-.goo-floating-toolbar:focus::after,
-sketch-floatingtoolbar:focus::after {
+.goo-floating-toolbar:focus::after {
 	border-radius: inherit;
 	box-shadow: inset 0 0 0 1px var(--goo-theme-accent) !important;
 	content: '';
@@ -47,9 +44,11 @@ sketch-floatingtoolbar:focus::after {
 	z-index: 2;
 }
 
-.goo-floating-toolbar sketch-tool,
-.goo-floating-toolbar__tool,
-sketch-floatingtoolbar sketch-tool {
+.goo-floating-toolbar__tool {
+	appearance: none;
+	background: transparent;
+	border: 0;
+	color: inherit;
 	cursor: pointer;
 	display: block;
 	font-size: var(--goo-theme-icon-lg);
@@ -63,21 +62,15 @@ sketch-floatingtoolbar sketch-tool {
 	width: 100%;
 }
 
-.goo-floating-toolbar sketch-tool::before,
-.goo-floating-toolbar__tool::before,
-sketch-floatingtoolbar sketch-tool::before {
+.goo-floating-toolbar__tool::before {
 	color: var(--goo-theme-fg);
 }
 
-.goo-floating-toolbar sketch-tool:hover,
-.goo-floating-toolbar__tool:hover,
-sketch-floatingtoolbar sketch-tool:hover {
+.goo-floating-toolbar__tool:hover {
 	background: color-mix(in srgb, var(--goo-theme-fg) 8%, transparent);
 }
 
-.goo-floating-toolbar sketch-tool-icon,
-.goo-floating-toolbar__tool sketch-tool-icon,
-sketch-floatingtoolbar sketch-tool-icon {
+.goo-floating-toolbar__tool > * {
 	align-items: center;
 	color: var(--goo-theme-fg);
 	display: flex;
@@ -87,9 +80,7 @@ sketch-floatingtoolbar sketch-tool-icon {
 	width: 100%;
 }
 
-.goo-floating-toolbar sketch-tool-icon svg,
-.goo-floating-toolbar__tool sketch-tool-icon svg,
-sketch-floatingtoolbar sketch-tool-icon svg {
+.goo-floating-toolbar__tool svg {
 	height: var(--goo-theme-icon-lg);
 	pointer-events: none;
 	stroke-width: 2.25;
@@ -97,35 +88,26 @@ sketch-floatingtoolbar sketch-tool-icon svg {
 	width: var(--goo-theme-icon-lg);
 }
 
-.goo-floating-toolbar sketch-tool.disabled,
-.goo-floating-toolbar__tool.disabled,
-sketch-floatingtoolbar sketch-tool.disabled {
+.goo-floating-toolbar__tool.disabled {
 	cursor: default;
 	opacity: 0.25;
 	pointer-events: none;
 }
 
-.goo-floating-toolbar sketch-tool.sketch-selected,
-.goo-floating-toolbar__tool--selected,
-sketch-floatingtoolbar sketch-tool.sketch-selected {
+.goo-floating-toolbar__tool--selected {
 	background: var(--goo-theme-accent);
 	border-radius: var(--goo-theme-radius-sm);
 }
 
-.goo-floating-toolbar sketch-tool.sketch-selected::before,
-.goo-floating-toolbar__tool--selected::before,
-sketch-floatingtoolbar sketch-tool.sketch-selected::before {
+.goo-floating-toolbar__tool--selected::before {
 	color: var(--goo-theme-accent-fg);
 }
 
-.goo-floating-toolbar sketch-tool.sketch-selected sketch-tool-icon,
-.goo-floating-toolbar__tool--selected sketch-tool-icon,
-sketch-floatingtoolbar sketch-tool.sketch-selected sketch-tool-icon {
+.goo-floating-toolbar__tool--selected > * {
 	color: var(--goo-theme-accent-fg);
 }
 
-.goo-floating-toolbar hr,
-sketch-floatingtoolbar hr {
+.goo-floating-toolbar hr {
 	background: color-mix(in srgb, var(--goo-theme-fg) 20%, var(--goo-theme-bg));
 	border: 0;
 	margin: 6px 8px 5px;

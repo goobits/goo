@@ -31,7 +31,7 @@
 	}
 </script>
 
-<sketch-FloatingToolbar
+<div
 	bind:this={rootElement}
 	class="goo-floating-toolbar"
 	role="toolbar"
@@ -40,17 +40,18 @@
 >
 	{#each groups as tools, groupIndex}
 		{#each tools as tool}
-			<sketch-Tool
+			<button
 				id={tool.id}
 				class={toolClass(tool)}
 				data-exec={tool.exec}
 				data-tooltip={tool.tooltip}
+				type="button"
 				use:mountFunctionIcon={tool.icon}
-			></sketch-Tool>
+			></button>
 		{/each}
 
 		{#if groupIndex < groups.length - 1}
 			<hr>
 		{/if}
 	{/each}
-</sketch-FloatingToolbar>
+</div>
