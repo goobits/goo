@@ -3,7 +3,7 @@
  * Goo-owned grid picker trigger with a popout list of selectable options.
  */
 
-import { closePopoutsOutside, createGooPopout, type GooPopoutInstance } from '@goobits/goo/popout'
+import { closePopoutsOutside, createGooPopout, type GooPopoutInstance } from '../popout/index.ts'
 
 import GridPopoutTrigger from './GridPopoutTrigger.svelte'
 import './gridPickerSelectedMark.css'
