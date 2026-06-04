@@ -71,8 +71,8 @@
 }
 
 .goo-range-module--goo .goo-slider.goo-slider {
-	--goo-slider-track-height: 6px;
-	--goo-slider-track-radius: 3px;
+	--goo-slider-track-height: 8px;
+	--goo-slider-track-radius: 4px;
 
 	width: 100%;
 	min-inline-size: 0;
