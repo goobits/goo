@@ -37,7 +37,7 @@
 }
 
 /* Label via ::before pseudo-element */
-.goo-controller[data-label]::before {
+.goo-controller[data-label]:not([data-label=""])::before {
 	content: attr(data-label);
 	flex: 0 1 var(--goo-controller-label-width);
 	min-width: 0;
@@ -50,16 +50,20 @@
 	text-overflow: ellipsis;
 }
 
+.goo-controller[data-label=""]::before {
+	display: none;
+}
+
 /* Hide label for button type (button shows its own text) */
-.goo-controller.goo-controller--button[data-label]::before {
+.goo-controller.goo-controller--button[data-label]:not([data-label=""])::before {
 	display: none;
 }
 
-.goo-controller.goo-controller--range-module[data-label]::before {
+.goo-controller.goo-controller--range-module[data-label]:not([data-label=""])::before {
 	display: none;
 }
 
-.goo-controller.goo-controller--radio[data-label]::before {
+.goo-controller.goo-controller--radio[data-label]:not([data-label=""])::before {
 	text-align: right;
 }
 
