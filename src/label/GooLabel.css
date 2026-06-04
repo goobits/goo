@@ -55,3 +55,160 @@
 .goo-label[for]:hover {
 	color: var(--goo-label-color-hover);
 }
+
+sketch-line-break {
+	display: block;
+	margin-bottom: 0.35em;
+	padding-bottom: 0.35em;
+	border-bottom: 1px solid color-mix(in srgb, var(--goo-theme-fg) 3%, var(--goo-theme-bg));
+}
+
+.goo-quote {
+	background: color-mix(in srgb, var(--goo-theme-fg) 15%, var(--goo-theme-bg));
+	border-radius: var(--goo-theme-radius-md, 0.25rem);
+	clear: both;
+	cursor: default;
+	display: block;
+	font-style: italic;
+	line-height: 1.5em;
+	padding: 1em;
+}
+
+sketch-title {
+	border-bottom-right-radius: 5px;
+	cursor: default;
+	display: inline-block;
+	letter-spacing: 1px;
+	line-height: 22px;
+	margin: 0;
+	overflow: hidden;
+	padding: 0 0.5rem;
+	position: relative;
+	text-transform: capitalize;
+	z-index: 1;
+}
+
+sketch-title a {
+	pointer-events: all;
+}
+
+sketch-label-group {
+	display: block;
+	border: 2px solid var(--goo-theme-bg);
+	border-radius: var(--goo-theme-radius-md, 0.25rem);
+}
+
+sketch-label-group sketch-label:first-child {
+	margin: 0;
+	background: var(--goo-theme-bg);
+	border-top: none;
+}
+
+sketch-label {
+	width: inherit;
+	position: relative;
+	display: block;
+	border-bottom: 1px solid var(--goo-theme-bg);
+	border-top: 1px solid color-mix(in srgb, var(--goo-theme-fg) 5%, var(--goo-theme-bg));
+}
+
+sketch-label:last-child {
+	border-bottom: none;
+}
+
+sketch-label.sk-font-menu {
+	height: auto;
+}
+
+sketch-label[data-tag='textarea'] {
+	min-height: 80px;
+}
+
+sketch-label input,
+sketch-label textarea {
+	border-radius: var(--goo-theme-radius-md, 0.25rem);
+	padding: 5px 7px;
+}
+
+sketch-label[data-tag='checkbox'],
+sketch-label[data-tag='point'],
+sketch-label[data-tag='selectmenu'] {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	height: 40px;
+	line-height: 40px;
+	padding: 0 0.5rem;
+}
+
+sketch-label[data-tag='checkbox'] sketch-title,
+sketch-label[data-tag='point'] sketch-title,
+sketch-label[data-tag='selectmenu'] sketch-title {
+	padding: 0;
+}
+
+[data-tag='ButtonGroup'] {
+	clear: both;
+	border-top: 1px solid color-mix(in srgb, var(--goo-theme-fg) 5%, var(--goo-theme-bg));
+}
+
+sketch-label.goo-config-field .goo-config-field__title {
+	flex: 0 1 auto;
+	min-width: 0;
+}
+
+sketch-label.goo-config-field .goo-config-primitive {
+	min-width: 0;
+}
+
+sketch-label.goo-config-field .goo-config-select,
+sketch-label.goo-config-field .goo-config-select__container {
+	flex: 1 1 auto;
+	min-width: 0;
+	width: 100%;
+}
+
+sketch-label.goo-config-field .goo-config-select__container {
+	--goo-select-min-width: 0;
+}
+
+sketch-label.goo-config-field[data-tag='checkbox'],
+sketch-label.goo-config-field[data-tag='selectmenu'],
+sketch-label.goo-config-field[data-tag='input'],
+sketch-label.goo-config-field[data-tag='number'] {
+	align-items: center;
+	display: flex;
+	gap: 0.5rem;
+	height: 40px;
+	justify-content: space-between;
+	line-height: 40px;
+	padding: 0 0.5rem;
+}
+
+sketch-label.goo-config-field[data-tag='checkbox'] sketch-title,
+sketch-label.goo-config-field[data-tag='selectmenu'] sketch-title,
+sketch-label.goo-config-field[data-tag='input'] sketch-title,
+sketch-label.goo-config-field[data-tag='number'] sketch-title {
+	line-height: 1;
+	padding: 0;
+}
+
+sketch-label.goo-config-field[data-tag='textarea'] {
+	padding: 0.5rem;
+}
+
+sketch-label.goo-config-field[data-tag='textarea'] .goo-textarea {
+	margin-top: 0.375rem;
+	width: 100%;
+}
+
+sketch-label.goo-config-field .goo-checkbox,
+sketch-label.goo-config-field .goo-select,
+sketch-label.goo-config-field .goo-input,
+sketch-label.goo-config-field .goo-number {
+	flex: 0 0 auto;
+}
+
+sketch-label.goo-config-field .goo-select.goo-config-select__container {
+	flex: 1 1 auto;
+}

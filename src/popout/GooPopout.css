@@ -216,6 +216,39 @@
 	min-width: 226px;
 }
 
+.goo-filter-popout {
+	font-size: var(--goo-theme-font-size-sm);
+	width: 150px;
+}
+
+.goo-filter-popout__item {
+	border-bottom: 1px solid rgb(0 0 0 / 10%);
+	cursor: pointer;
+	padding: 0.5rem 0.5rem 0.5rem 0.75rem;
+	text-transform: capitalize;
+}
+
+.goo-filter-popout__item:hover {
+	background: var(--goo-theme-bg-hover);
+}
+
+.goo-filter-popout__item:hover::after {
+	border: solid currentColor;
+	border-width: 0 2px 2px 0;
+	content: '';
+	float: right;
+	height: 0.55em;
+	margin-top: 0.1em;
+	transform: rotate(45deg);
+	width: 0.3em;
+}
+
+.goo-filter-popout__footer {
+	display: block;
+	margin: 0.5em 0;
+	text-align: center;
+}
+
 /* =============================================================================
    Animation Classes
    ============================================================================= */

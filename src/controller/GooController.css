@@ -200,6 +200,32 @@
 	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
 }
 
+.goo-tool-config,
+.goo-palette,
+sketch-toolconfig,
+sketch-palette {
+	box-sizing: border-box;
+	inline-size: 100%;
+	min-inline-size: 0;
+}
+
+.goo-tool-config .goo-angle-input,
+.goo-palette .goo-angle-input,
+sketch-toolconfig .goo-angle-input,
+sketch-palette .goo-angle-input {
+	margin: 0 0.5rem;
+}
+
+.sketch-style-popout .goo-tool-config,
+.sketch-style-popout sketch-toolconfig {
+	inline-size: 100%;
+}
+
+.goo-controller--sketch-file-picker .goo-file-picker.goo-button {
+	margin-inline: 0;
+	width: 100%;
+}
+
 /* ==========================================================================
    Stacked Layout
    Two-row layout: header row (label) + full-width control row
