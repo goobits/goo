@@ -95,8 +95,7 @@
    Dark/Light mode adjustments
    ============================================================================= */
 
-[data-theme='light'] .goo-popout.goo-tooltip,
-[data-theme-mode='light'] .goo-popout.goo-tooltip {
+[data-theme='light'] .goo-popout.goo-tooltip {
 	--goo-popout-bg: var(--goo-tooltip-bg, rgba(50, 50, 55, 0.95));
 	--goo-popout-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }

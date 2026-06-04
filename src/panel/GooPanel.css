@@ -220,9 +220,9 @@
 
 .goo-settings-dialog,
 .goo-settings-surface-dialog {
-	--goo-settings-pane-bg: var(--sketch-theme-dialog-bg, var(--goo-theme-bg));
-	--goo-settings-pane-fg: var(--sketch-theme-dialog-fg, var(--goo-theme-fg));
-	--goo-settings-pane-muted-fg: var(--sketch-theme-dialog-muted-fg, var(--goo-theme-muted));
+	--goo-settings-pane-bg: var(--goo-theme-surface);
+	--goo-settings-pane-fg: var(--goo-theme-fg);
+	--goo-settings-pane-muted-fg: var(--goo-theme-fg-muted);
 	--goo-settings-pane-border: color-mix(
 		in srgb,
 		var(--goo-theme-fg) 10%,

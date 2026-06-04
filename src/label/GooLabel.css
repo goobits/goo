@@ -6,7 +6,7 @@
 .goo-label {
 	--goo-label-color: var(
 		--goo-theme-control-label-color,
-		var(--goo-theme-muted, rgba(255, 255, 255, 0.72))
+		var(--goo-theme-fg-muted, rgba(255, 255, 255, 0.72))
 	);
 	--goo-label-color-hover: var(--goo-theme-control-label-color-hover);
 	--goo-label-required-color: var(--goo-theme-negative, #ef4444);
