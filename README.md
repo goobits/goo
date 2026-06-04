@@ -633,6 +633,7 @@ Goo components read CSS custom properties from the current DOM tree. Define the 
 	--goo-theme-bg: #ffffff;
 	--goo-theme-fg: #111827;
 	--goo-theme-muted: rgba(17, 24, 39, 0.6);
+	--goo-theme-text-disabled: rgba(17, 24, 39, 0.35);
 	--goo-theme-surface: #ffffff;
 	--goo-theme-surface-raised: #f9fafb;
 	--goo-theme-surface-sunken: #f3f4f6;
@@ -643,11 +644,40 @@ Goo components read CSS custom properties from the current DOM tree. Define the 
 	--goo-theme-selected: #dbeafe;
 	--goo-theme-selected-fg: #1e3a8a;
 	--goo-theme-positive: #16a34a;
+	--goo-theme-positive-fg: #ffffff;
 	--goo-theme-negative: #dc2626;
+	--goo-theme-negative-fg: #ffffff;
 	--goo-theme-warning: #f59e0b;
+	--goo-theme-warning-fg: #111827;
 	--goo-theme-secondary: #7c3aed;
+	--goo-theme-secondary-fg: #ffffff;
+	--goo-theme-focus-ring: rgba(37, 99, 235, 0.4);
 }
 ```
+
+Core components should use this contract directly:
+
+| Group | Tokens |
+| ----- | ------ |
+| Text | `--goo-theme-fg`, `--goo-theme-muted`, `--goo-theme-text-disabled` |
+| Surfaces | `--goo-theme-bg`, `--goo-theme-surface`, `--goo-theme-surface-raised`, `--goo-theme-surface-sunken` |
+| Borders | `--goo-theme-border`, `--goo-theme-border-subtle`, `--goo-theme-focus-ring` |
+| Accent/selection | `--goo-theme-accent`, `--goo-theme-accent-fg`, `--goo-theme-selected`, `--goo-theme-selected-fg` |
+| Status | `--goo-theme-positive`, `--goo-theme-positive-fg`, `--goo-theme-negative`, `--goo-theme-negative-fg`, `--goo-theme-warning`, `--goo-theme-warning-fg` |
+| Secondary | `--goo-theme-secondary`, `--goo-theme-secondary-fg` |
+| Radius/space/type | `--goo-theme-radius-sm/md/lg/xl/full`, `--goo-theme-space-xs/sm/md/lg/xl`, `--goo-theme-font-size-xs/sm/md/lg/xl` |
+
+Hover, active, and subtle accent backgrounds are derived at the component site:
+
+```css
+background: color-mix(in srgb, var(--goo-theme-fg) 8%, transparent);
+background: color-mix(in srgb, var(--goo-theme-fg) 15%, transparent);
+background: color-mix(in srgb, var(--goo-theme-accent) 18%, transparent);
+```
+
+Do not add legacy aliases such as `--goo-theme-fg-muted`, `--goo-theme-fg-secondary`,
+`--goo-theme-bg-elevated`, `--goo-theme-bg-hover`, `--goo-theme-bg-active`,
+`--goo-theme-accent-subtle`, or `--goo-theme-radius-xs`.
 
 For muted text on a colored background, mix the foreground token instead of using the base muted token:
 
