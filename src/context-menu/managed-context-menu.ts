@@ -333,12 +333,6 @@ function normalizeLabel(label: unknown): GooContextMenuOption['label'] {
 		return label
 	}
 
-	if (typeof label === 'string' && label.includes('<')) {
-		const labelElement = document.createElement('span')
-		labelElement.innerHTML = label
-		return labelElement
-	}
-
 	return String(label ?? '')
 }
 
