@@ -7,7 +7,7 @@ let folderInstanceCount = 0
 import { untrack } from 'svelte'
 import type { Snippet } from 'svelte'
 
-import { addChild, clearChildren, hydrateChildren, removeChild } from '../utils/_childContainer.ts'
+import { addChild, clearChildren, hydrateChildren, removeChild } from '../support/utils/_childContainer.ts'
 import type { GooFolderElement, GooFolderOptions } from './_createFolder.ts'
 import './GooFolder.css'
 

@@ -3,9 +3,9 @@ import { untrack } from 'svelte'
 import type { Snippet } from 'svelte'
 
 import { type GooFolderElement, type GooFolderOptions } from '../folder/_createFolder.ts'
-import { addChild, clearChildren, hydrateChildren, removeChild } from '../utils/_childContainer.ts'
-import { clamp } from '../utils/numberUtils.ts'
-import { createPointerDrag } from '../utils/pointerDrag.ts'
+import { addChild, clearChildren, hydrateChildren, removeChild } from '../support/utils/_childContainer.ts'
+import { clamp } from '../support/utils/numberUtils.ts'
+import { createPointerDrag } from '../support/utils/pointerDrag.ts'
 import type { GooPanelElement, GooPanelOptions } from './_createPanel.ts'
 import './GooPanel.css'
 

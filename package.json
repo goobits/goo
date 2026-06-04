@@ -90,8 +90,8 @@
 			"import": "./src/popout/index.ts"
 		},
 		"./positioning": {
-			"types": "./src/positioning/index.ts",
-			"import": "./src/positioning/index.ts"
+			"types": "./src/support/positioning/index.ts",
+			"import": "./src/support/positioning/index.ts"
 		},
 		"./progress-ring": {
 			"types": "./src/progress-ring/index.ts",
@@ -133,8 +133,8 @@
 			"import": "./src/color/index.ts"
 		},
 		"./i18n": {
-			"types": "./src/i18n/index.ts",
-			"import": "./src/i18n/index.ts"
+			"types": "./src/support/i18n/index.ts",
+			"import": "./src/support/i18n/index.ts"
 		},
 		"./icon": {
 			"types": "./src/icon/index.ts",
@@ -151,8 +151,8 @@
 			"import": "./src/label/index.ts"
 		},
 		"./number": {
-			"types": "./src/number/index.ts",
-			"import": "./src/number/index.ts"
+			"types": "./src/support/number/index.ts",
+			"import": "./src/support/number/index.ts"
 		},
 		"./tooltip": {
 			"types": "./src/tooltip/index.ts",

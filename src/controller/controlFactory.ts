@@ -4,7 +4,7 @@
  * @module goobits/controller/controlFactory
  */
 
-import { log } from '../utils/logger.ts'
+import { log } from '../support/utils/logger.ts'
 import { type ControlTypeRegistry, resolveControlTypeConfig } from './controlRegistry.ts'
 import { createSvelteControlHost, type SvelteComponentType, type SvelteControlHost, type SvelteControlSchema } from './SvelteControl.svelte.ts'
 

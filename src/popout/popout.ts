@@ -7,8 +7,8 @@
 
 import './GooPopout.css'
 
-import { applyArrowPosition, applyPosition, calculatePosition, type PositionResult } from '../positioning/index.ts'
-import { createPointerDrag } from '../utils/pointerDrag.ts'
+import { applyArrowPosition, applyPosition, calculatePosition, type PositionResult } from '../support/positioning/index.ts'
+import { createPointerDrag } from '../support/utils/pointerDrag.ts'
 
 // =============================================================================
 // Popout Registry (for parent-child chains)
@@ -1008,6 +1008,6 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 // Export
 // =============================================================================
 
-export { HORIZONTAL, VERTICAL } from '../positioning/index.ts'
+export { HORIZONTAL, VERTICAL } from '../support/positioning/index.ts'
 
 export default createGooPopout

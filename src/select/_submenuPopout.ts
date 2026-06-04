@@ -1,5 +1,5 @@
 import { createGooPopout, type GooPopoutInstance } from '../popout/index.ts'
-import type { PositionResult } from '../positioning/index.ts'
+import type { PositionResult } from '../support/positioning/index.ts'
 import { getElementTextDirection } from './selectDom.ts'
 import type { GooSelectOption } from './types.ts'
 

@@ -6,11 +6,11 @@
  */
 
 // i18n / Locale
-export * from './i18n/index.ts'
+export * from './support/i18n/index.ts'
 
 // Utilities (for external use)
-export * from './number/index.ts'
-export * from './utils/pointerDrag.ts'
+export * from './support/number/index.ts'
+export * from './support/utils/pointerDrag.ts'
 
 // Components
 export * from './angle-input/index.ts'
@@ -34,8 +34,8 @@ export * from './slider/index.ts'
 export * from './spinner/index.ts'
 export * from './table/index.ts'
 export * from './textarea/index.ts'
-export * from './tooltip/index.ts'
 export * from './toolbar/index.ts'
+export * from './tooltip/index.ts'
 export * from './virtualGrid/index.ts'
 export * from './vortex/index.ts'
 

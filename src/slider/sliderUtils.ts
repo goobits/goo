@@ -3,8 +3,8 @@
  * @module goobits/slider/sliderUtils
  */
 
-import { formatNumber } from '../utils/formatNumber.ts'
-import { roundToStep } from '../utils/numberUtils.ts'
+import { formatNumber } from '../support/utils/formatNumber.ts'
+import { roundToStep } from '../support/utils/numberUtils.ts'
 
 // ============================================================================
 // Types

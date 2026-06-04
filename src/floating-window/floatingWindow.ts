@@ -1,6 +1,6 @@
 import './FloatingWindow.css'
 
-import { createPointerDrag, type GooPointerDragHandle } from '../utils/pointerDrag.ts'
+import { createPointerDrag, type GooPointerDragHandle } from '../support/utils/pointerDrag.ts'
 import type {
 	GooFloatingWindow,
 	GooFloatingWindowOptions,

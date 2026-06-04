@@ -6,7 +6,7 @@
 import './GooDialog.css'
 
 import type { CheckboxFieldElement } from '../checkbox/_createCheckboxField.ts'
-import { focusFirst, focusLast, getFocusableElements } from '../utils/focusUtils.ts'
+import { focusFirst, focusLast, getFocusableElements } from '../support/utils/focusUtils.ts'
 import {
 	appendContent,
 	buildFields,

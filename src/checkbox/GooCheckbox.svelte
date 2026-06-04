@@ -16,9 +16,9 @@ export const controlSchema: SvelteControlSchema = {
 <script lang="ts">
 import { untrack } from 'svelte'
 import './GooCheckbox.css'
-import { isRTL } from '../i18n/index.ts'
-import { clamp } from '../utils/numberUtils.ts'
-import { createPointerDrag, type GooPointerDragEvent, type GooPointerDragHandle } from '../utils/pointerDrag.ts'
+import { isRTL } from '../support/i18n/index.ts'
+import { clamp } from '../support/utils/numberUtils.ts'
+import { createPointerDrag, type GooPointerDragEvent, type GooPointerDragHandle } from '../support/utils/pointerDrag.ts'
 import type { GooCheckboxProps } from './types.ts'
 
 let checkboxElement: HTMLDivElement | undefined = $state()

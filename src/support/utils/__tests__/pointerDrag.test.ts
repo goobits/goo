@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { pointerEvent } from '../../__tests__/_pointerEvents.ts'
+import { pointerEvent } from '../../../__tests__/_pointerEvents.ts'
 import { createPointerDrag, createPointerTap } from '../pointerDrag.ts'
 
 describe('createPointerDrag', () => {

@@ -1,4 +1,4 @@
-import type { GooPointerDragEvent } from '../utils/pointerDrag.ts'
+import type { GooPointerDragEvent } from '../support/utils/pointerDrag.ts'
 
 /**
  * Horizontal floating-window anchor.

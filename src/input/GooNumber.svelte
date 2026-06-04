@@ -19,8 +19,8 @@ export const controlSchema: SvelteControlSchema = {
 import { onDestroy } from 'svelte'
 import './GooNumber.css'
 
-import { formatNumber } from '../utils/formatNumber.ts'
-import { clamp, roundToStep } from '../utils/numberUtils.ts'
+import { formatNumber } from '../support/utils/formatNumber.ts'
+import { clamp, roundToStep } from '../support/utils/numberUtils.ts'
 import type { GooNumberProps } from './types.ts'
 
 const HOLD_DELAY = 250

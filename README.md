@@ -606,7 +606,7 @@ import { clamp, formatNumber, fromPercent, roundNumber, toPercent } from '@goobi
 
 ### Pointer Drag
 
-The root entrypoint exports the shared pointer-drag helper from `src/utils/pointerDrag.ts` for controls that need consistent pointer capture behavior.
+The root entrypoint exports the shared pointer-drag helper from `src/support/utils/pointerDrag.ts` for controls that need consistent pointer capture behavior.
 
 ### Locale
 

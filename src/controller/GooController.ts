@@ -8,8 +8,8 @@ import './GooController.css'
 
 import type { GooSelectMenuOptions } from '../select/types.ts'
 import { createSliderField } from '../slider/_createSliderField.ts'
-import { emitter } from '../utils/emitter.ts'
-import { log } from '../utils/logger.ts'
+import { emitter } from '../support/utils/emitter.ts'
+import { log } from '../support/utils/logger.ts'
 import { createControlFromRegistry } from './controlFactory.ts'
 import { type ControlTypeRegistry, resolveControlTypeConfig } from './controlRegistry.ts'
 import {

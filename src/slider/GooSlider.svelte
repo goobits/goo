@@ -26,8 +26,8 @@ export const controlSchema: SvelteControlSchema = {
 <script lang="ts">
 import './GooSlider.css'
 
-import { formatNumber } from '../utils/formatNumber.ts'
-import { clamp, toPercent } from '../utils/numberUtils.ts'
+import { formatNumber } from '../support/utils/formatNumber.ts'
+import { clamp, toPercent } from '../support/utils/numberUtils.ts'
 import { parseFloatArray, toFormattedValue, type GooSliderThumb } from './sliderUtils.ts'
 import { sliderPresetConfigs, sliderShapes } from './sliderPresets.ts'
 import type {
