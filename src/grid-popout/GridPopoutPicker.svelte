@@ -501,7 +501,7 @@ function escapeSelectorValue(value: string): string {
 :global(.goo-popout.goo-grid-popout--icon-grid grid-title),
 :global(goo-popout.goo-grid-popout--subtool grid-title),
 :global(.goo-popout.goo-grid-popout--subtool grid-title) {
-	color: var(--goo-theme-fg-muted, var(--goo-theme-fg));
+	color: var(--goo-theme-fg-muted);
 	font-size: var(--goo-theme-font-size-xs);
 	line-height: 1.2;
 	max-width: 100%;

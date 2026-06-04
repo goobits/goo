@@ -8,12 +8,9 @@
 		--goo-theme-control-label-color,
 		var(--goo-theme-muted, rgba(255, 255, 255, 0.72))
 	);
-	--goo-label-color-hover: var(
-		--goo-theme-control-label-color-hover,
-		var(--goo-theme-fg, rgba(255, 255, 255, 0.92))
-	);
+	--goo-label-color-hover: var(--goo-theme-control-label-color-hover);
 	--goo-label-required-color: var(--goo-theme-negative, #ef4444);
-	--goo-label-disabled-opacity: var(--goo-theme-disabled-opacity, 0.55);
+	--goo-label-disabled-opacity: var(--goo-theme-disabled-opacity);
 	--goo-label-motion: var(--goo-theme-transition-fast, 0.15s ease);
 
 	display: inline-flex;

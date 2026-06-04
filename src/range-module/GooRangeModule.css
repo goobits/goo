@@ -82,7 +82,7 @@
 }
 
 .goo-range-module--goo .goo-slider:not(.goo-slider--vertical) .goo-slider__track::after {
-	--goo-range-module-tick-color: var(--goo-theme-control-range-tick-color, #666);
+	--goo-range-module-tick-color: var(--goo-theme-control-range-tick-color);
 
 	content: '';
 	position: absolute;
