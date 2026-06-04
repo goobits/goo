@@ -26,7 +26,7 @@
 	--goo-slider-motion-normal: var(--goo-theme-transition-normal, 0.2s ease);
 
 	/* Default color for theme-aware track background fallback (when no gradient provided) */
-	color: var(--goo-theme-muted, rgba(128, 128, 128, 0.5));
+	color: var(--goo-theme-fg-muted, rgba(128, 128, 128, 0.5));
 
 	display: block;
 	cursor: pointer;

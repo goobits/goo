@@ -21,7 +21,7 @@
 	--goo-select-border: var(--goo-theme-border, rgba(128, 128, 128, 0.2));
 	--goo-select-border-focus: var(--goo-theme-accent, #3b82f6);
 	--goo-select-fg: var(--goo-theme-fg, rgba(255, 255, 255, 0.9));
-	--goo-select-fg-muted: var(--goo-theme-muted, rgba(128, 128, 128, 0.5));
+	--goo-select-fg-muted: var(--goo-theme-fg-muted, rgba(128, 128, 128, 0.5));
 	--goo-select-fg-disabled: var(--goo-theme-text-disabled, rgba(128, 128, 128, 0.25));
 	--goo-select-accent: var(--goo-theme-accent, #3b82f6);
 	--goo-select-radius: var(--goo-theme-radius-sm, 0.25rem);
@@ -237,7 +237,7 @@
 	--goo-select-font-size: var(--goo-theme-font-size-sm, 0.75rem);
 	--goo-select-radius: var(--goo-theme-radius-sm, 0.25rem);
 	--goo-select-fg: var(--goo-theme-fg, rgba(255, 255, 255, 0.9));
-	--goo-select-fg-muted: var(--goo-theme-muted, rgba(128, 128, 128, 0.5));
+	--goo-select-fg-muted: var(--goo-theme-fg-muted, rgba(128, 128, 128, 0.5));
 	--goo-select-fg-disabled: var(--goo-theme-text-disabled, rgba(128, 128, 128, 0.25));
 	--goo-select-bg-hover: color-mix(in srgb, var(--goo-theme-fg, #fff) 8%, transparent);
 	--goo-select-selected-bg: var(--goo-theme-accent, #3b82f6);
@@ -474,7 +474,7 @@
 	display: block;
 	padding: 0.25rem var(--goo-select-item-padding-x);
 	margin-bottom: 0.25rem;
-	color: var(--goo-theme-muted, rgba(128, 128, 128, 0.5));
+	color: var(--goo-theme-fg-muted, rgba(128, 128, 128, 0.5));
 	font-size: var(--goo-theme-font-size-xs, 0.75rem);
 	font-weight: 600;
 	text-transform: uppercase;

@@ -166,7 +166,7 @@
 .goo-folder--inspector > .goo-folder__header > .goo-folder__chevron {
 	width: 1rem;
 	height: 1rem;
-	color: var(--goo-theme-muted, rgba(255, 255, 255, 0.5));
+	color: var(--goo-theme-fg-muted, rgba(255, 255, 255, 0.5));
 }
 
 .goo-folder--inspector > .goo-folder__header > .goo-folder__title {

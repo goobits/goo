@@ -39,7 +39,7 @@
 }
 
 .goo-textarea__input::placeholder {
-	color: var(--goo-theme-muted, #666);
+	color: var(--goo-theme-fg-muted, #666);
 }
 
 .goo-textarea__input:disabled {

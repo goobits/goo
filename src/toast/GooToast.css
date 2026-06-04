@@ -6,7 +6,7 @@
 .goo-toast {
 	--goo-toast-bg: var(--goo-theme-bg-elevated, #232323);
 	--goo-toast-fg: var(--goo-theme-fg, rgba(255, 255, 255, 0.9));
-	--goo-toast-muted: var(--goo-theme-muted, rgba(255, 255, 255, 0.55));
+	--goo-toast-muted: var(--goo-theme-fg-muted, rgba(255, 255, 255, 0.55));
 	--goo-toast-border: var(--goo-theme-border-subtle, rgba(255, 255, 255, 0.1));
 	--goo-toast-radius: var(--goo-theme-radius-md, 0.375rem);
 	--goo-toast-shadow: var(--goo-theme-shadow-md, 0 4px 12px rgba(0, 0, 0, 0.15));
