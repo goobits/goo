@@ -181,7 +181,7 @@ function clearContentFadeTimer(): void {
 	{id}
 	class={triggerClass}
 	data-param={dataParam}
-	class:sketch-opened={currentOpened}
+	class:goo-grid-trigger--opened={currentOpened}
 	tabindex={disabled ? -1 : tabIndex}
 	role="button"
 	aria-label={currentAriaLabel}
@@ -343,7 +343,7 @@ goo-grid-popout-trigger .goo-grid-trigger__arrow {
 	width: var(--goo-grid-trigger-arrow-inline-size);
 }
 
-goo-grid-popout-trigger.sketch-opened {
+goo-grid-popout-trigger.goo-grid-trigger--opened {
 	background: var(--goo-theme-bg-active);
 }
 
@@ -358,11 +358,11 @@ goo-grid-popout-trigger .goo-grid-trigger__arrow :global(svg) {
 	width: 1em;
 }
 
-goo-grid-popout-trigger.sketch-opened .goo-grid-trigger__arrow {
+goo-grid-popout-trigger.goo-grid-trigger--opened .goo-grid-trigger__arrow {
 	transform: rotate(-90deg);
 }
 
-:global([dir="rtl"]) goo-grid-popout-trigger.sketch-opened .goo-grid-trigger__arrow {
+:global([dir="rtl"]) goo-grid-popout-trigger.goo-grid-trigger--opened .goo-grid-trigger__arrow {
 	transform: rotate(90deg);
 }
 

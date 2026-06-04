@@ -66,7 +66,7 @@ export function createGridPopoutTrigger({
 
 	if (tooltip) {
 		UITooltip(trigger, () => {
-			if (trigger.classList.contains('sketch-opened')) {
+			if (trigger.classList.contains('goo-grid-trigger--opened')) {
 				return
 			}
 
