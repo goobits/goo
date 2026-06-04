@@ -186,6 +186,12 @@
 
 .goo-controller .goo-select {
 	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
+	inline-size: 100%;
+	min-inline-size: 0;
+}
+
+.goo-controller .goo-select__trigger {
+	min-width: 0;
 }
 
 .goo-controller .goo-angle-input {
