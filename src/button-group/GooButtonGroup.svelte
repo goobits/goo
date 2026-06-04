@@ -208,6 +208,7 @@ function getOptionButtonClass(option: NormalizedButtonGroupOption): string {
 	if (isSelected(option.key)) values.push('goo-button--selected')
 	if (focusedKey === option.key) values.push('goo-button--focused')
 	if (disabled) values.push('goo-button--disabled')
+	if (option.hideLabel) values.push('goo-button--icon-only')
 	if (option.className) values.push(...option.className.split(' ').filter(Boolean))
 	return values.join(' ')
 }
@@ -310,6 +311,7 @@ function mountIcon(node: HTMLSpanElement, iconFactory: () => Element) {
 				tabindex={getButtonTabIndex(option.key)}
 				disabled={disabled ? true : undefined}
 				aria-disabled={disabled ? 'true' : undefined}
+				aria-label={option.ariaLabel || option.tooltip || option.value || undefined}
 				aria-pressed={isSelected(option.key)}
 				title={option.tooltip || undefined}
 			>
@@ -318,7 +320,9 @@ function mountIcon(node: HTMLSpanElement, iconFactory: () => Element) {
 				{:else if typeof option.icon === 'function'}
 					<span class="goo-button__icon" aria-hidden="true" use:mountIcon={option.icon}></span>
 				{/if}
-				<span class="goo-button__title" data-translate>{option.value}</span>
+				{#if !option.hideLabel}
+					<span class="goo-button__title" data-translate>{option.value}</span>
+				{/if}
 			</button>
 		{/each}
 	{:else if children}

@@ -24,6 +24,12 @@ export interface ButtonGroupOption {
 	/** Tooltip/title text. */
 	tooltip?: string
 
+	/** Accessible label for icon-only buttons. Defaults to `tooltip` or visible text. */
+	ariaLabel?: string
+
+	/** Hide the visible title while keeping the option keyboard/selectable. */
+	hideLabel?: boolean
+
 	/** Additional class names for the button. */
 	className?: string
 }
@@ -42,6 +48,12 @@ export interface NormalizedButtonGroupOption {
 
 	/** Tooltip/title text. */
 	tooltip?: string
+
+	/** Accessible label for icon-only buttons. Defaults to `tooltip` or visible text. */
+	ariaLabel?: string
+
+	/** Hide the visible title while keeping the option keyboard/selectable. */
+	hideLabel?: boolean
 
 	/** Additional class names for the button. */
 	className?: string

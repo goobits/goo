@@ -168,6 +168,8 @@
 	align-items: center;
 	justify-content: center;
 	flex-shrink: 0;
+	height: var(--goo-button-icon-size, 1em);
+	width: var(--goo-button-icon-size, 1em);
 }
 
 /* Ensure SVGs inside icons are properly centered */
@@ -175,6 +177,8 @@
 .goo-button > .goo-icon > svg,
 .goo-button > .icon > svg {
 	display: block;
+	height: 100%;
+	width: 100%;
 }
 
 /* Square buttons - use [square] attribute for icon-only buttons */

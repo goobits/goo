@@ -85,6 +85,12 @@
 	text-align: center;
 }
 
+.goo-button-group > .goo-button.goo-button--icon-only {
+	aspect-ratio: 1;
+	flex: 0 0 var(--goo-button-group-height);
+	padding: 0;
+}
+
 .goo-button-group > .goo-button .goo-button__title {
 	min-width: 0;
 	overflow: hidden;
@@ -159,6 +165,10 @@
 .goo-button-group[size='compact'] > .goo-button {
 	padding: 0 0.625rem;
 	font-size: var(--goo-theme-font-size-xs, 0.75rem);
+}
+
+.goo-button-group[size='compact'] > .goo-button.goo-button--icon-only {
+	padding: 0;
 }
 
 /* Vertical layout variant — let the group's height grow to fit N stacked buttons

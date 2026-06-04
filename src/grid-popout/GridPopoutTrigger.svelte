@@ -236,7 +236,9 @@ function clearContentFadeTimer(): void {
 <style>
 goo-grid-popout-trigger {
 	--goo-grid-trigger-arrow-size: var(--goo-theme-icon-md, 1rem);
-	--goo-grid-trigger-arrow-inline-size: calc(var(--goo-grid-trigger-arrow-size) + 22px);
+	--goo-grid-trigger-arrow-inline-size: 38px;
+	--goo-grid-trigger-icon-inline-size: 50px;
+	--goo-grid-trigger-title-inline-start: var(--goo-grid-trigger-icon-inline-size);
 	box-sizing: border-box;
 	clear: both;
 	color: var(--goo-theme-fg);
@@ -283,7 +285,7 @@ goo-grid-popout-trigger :global(grid-title) {
 	display: flex;
 	color: var(--goo-theme-fg);
 	height: 60px;
-	left: 65px;
+	inset-inline-start: 65px;
 	line-height: 1.2;
 	overflow: hidden;
 	position: absolute;
@@ -291,7 +293,7 @@ goo-grid-popout-trigger :global(grid-title) {
 	top: 50%;
 	transform: translateY(-50%);
 	white-space: nowrap;
-	width: 115px;
+	width: calc(100% - 65px - var(--goo-grid-trigger-arrow-inline-size));
 }
 
 goo-grid-popout-trigger :global(grid-title span) {
@@ -302,7 +304,7 @@ goo-grid-popout-trigger :global(.icon),
 goo-grid-popout-trigger :global(.goo-grid-trigger__icon) {
 	font-size: calc(var(--goo-theme-icon-lg, 1.125rem) * 1.7);
 	height: 60px !important;
-	left: 0;
+	inset-inline-start: 0;
 	line-height: 57px;
 	margin-left: 4px;
 	object-fit: contain;
@@ -334,7 +336,7 @@ goo-grid-popout-trigger .goo-grid-trigger__arrow {
 	line-height: 1;
 	min-width: var(--goo-grid-trigger-arrow-inline-size);
 	position: absolute;
-	right: 0;
+	inset-inline-end: 0;
 	top: 0;
 	transform-origin: center;
 	transition: 150ms transform;
@@ -371,7 +373,7 @@ goo-grid-popout-trigger.sketch-opened .goo-grid-trigger__arrow {
 }
 
 :global([dir="rtl"]) goo-grid-popout-trigger .goo-grid-trigger__arrow {
-	left: 11px;
+	left: 0;
 	right: auto;
 }
 
@@ -391,8 +393,9 @@ goo-grid-popout-trigger.goo-grid-trigger--small :global(grid-title) {
 	align-items: center;
 	display: flex;
 	height: 40px;
-	left: 50px;
+	inset-inline-start: var(--goo-grid-trigger-title-inline-start);
 	line-height: 1.2;
+	width: calc(100% - var(--goo-grid-trigger-title-inline-start) - var(--goo-grid-trigger-arrow-inline-size));
 }
 
 goo-grid-popout-trigger.goo-grid-trigger--small :global(.icon),

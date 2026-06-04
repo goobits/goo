@@ -7,6 +7,8 @@ type RawButtonGroupOption = {
 	key?: string | number
 	label?: string | number
 	tooltip?: string
+	ariaLabel?: string
+	hideLabel?: boolean
 	value?: string | number
 }
 
@@ -49,6 +51,8 @@ function normalizeButtonGroupOption(option: RawButtonGroupOption): NormalizedBut
 		value: String(label),
 		icon: option.icon,
 		tooltip: option.tooltip,
+		ariaLabel: option.ariaLabel,
+		hideLabel: option.hideLabel,
 		className: option.className
 	}
 }
