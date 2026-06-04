@@ -113,3 +113,24 @@
 	margin: 6px 8px 5px;
 }
 
+.goo-toolbar-tool-button {
+	align-items: center;
+	appearance: none;
+	background: transparent;
+	border: 0;
+	color: var(--goo-theme-fg);
+	cursor: pointer;
+	display: inline-flex;
+	gap: var(--goo-theme-space-sm);
+	justify-content: center;
+	min-height: 2.25rem;
+	padding: var(--goo-theme-space-xs) var(--goo-theme-space-sm);
+}
+
+.goo-toolbar-tool-button:hover {
+	background: color-mix(in srgb, var(--goo-theme-fg) 8%, transparent);
+}
+
+.goo-toolbar-tool-button__icon {
+	display: inline-flex;
+}

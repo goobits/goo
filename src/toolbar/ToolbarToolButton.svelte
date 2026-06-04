@@ -15,16 +15,18 @@
 	}
 </script>
 
-<sketch-Tool
+<button
 	bind:this={rootElement}
+	class="goo-toolbar-tool-button"
 	data-tool={id}
+	type="button"
 	use:mountFunctionIcon={{ icon, position: 'prepend' }}
 >
 	{#if typeof icon === 'string'}
-		<sketch-tool-icon class={icon}></sketch-tool-icon>
+		<span class="goo-toolbar-tool-button__icon {icon}" aria-hidden="true"></span>
 	{/if}
 
 	{#if title}
-		<sketch-ToolTitle data-translate>{title}</sketch-ToolTitle>
+		<span class="goo-toolbar-tool-button__title">{title}</span>
 	{/if}
-</sketch-Tool>
+</button>
