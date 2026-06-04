@@ -83,6 +83,17 @@
 	max-width: 100%;
 }
 
+.goo-controller[data-label=""] .goo-controller__widget {
+	flex: 1 1 100%;
+	inline-size: 100%;
+	max-inline-size: none;
+}
+
+.goo-controller[data-label=""] .goo-controller__widget > * {
+	inline-size: 100%;
+	max-inline-size: none;
+}
+
 /* Number type - compact input */
 .goo-controller.goo-controller--number .goo-controller__widget {
 	flex: 0 0 auto;
