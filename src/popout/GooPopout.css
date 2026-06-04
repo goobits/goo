@@ -207,6 +207,11 @@
 
 /* Style popouts for toolbar tool configuration */
 .goo-popout.sketch-style-popout {
+	--goo-popout-content-height: auto;
+	--goo-popout-content-max-height: min(420px, calc(100vh - 16px));
+	--goo-popout-content-overflow-x: hidden;
+	--goo-popout-content-overflow-y: auto;
+
 	inline-size: min(226px, calc(100vw - 16px));
 	min-width: 226px;
 }
