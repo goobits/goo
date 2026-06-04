@@ -21,7 +21,7 @@ describe('toolbarLayoutModel', () => {
 		})
 	})
 
-	it('preserves already-grouped legacy toolbar layouts', () => {
+	it('preserves already-grouped toolbar layouts', () => {
 		const layout = toToolbarButtonLayout({
 			top: [ { id: 'select' } ],
 			bottom: [ { id: 'settings' } ],

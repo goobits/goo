@@ -328,14 +328,6 @@ export function normalizeFloatingWindowSettings(value: unknown): GooFloatingWind
 		return null
 	}
 
-	if (typeof value === 'string') {
-		try {
-			value = JSON.parse(value)
-		} catch {
-			return null
-		}
-	}
-
 	if (typeof value !== 'object' || Array.isArray(value)) {
 		return null
 	}

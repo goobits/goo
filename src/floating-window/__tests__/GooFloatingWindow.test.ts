@@ -14,30 +14,6 @@ describe('GooFloatingWindow', () => {
 		document.body.innerHTML = ''
 	})
 
-	it('restores legacy JSON-string settings from storage', async() => {
-		const container = createContainer()
-		const element = createElement(container)
-
-		const floatingWindow = createGooFloatingWindow({
-			containment: container,
-			display: 'block',
-			element,
-			id: 'sketch-FloatingToolbar',
-			position: 'top right',
-			right: 10,
-			storage: {
-				get: () => '{"display":"block","hAlign":"right","right":0.2,"top":0.1,"vAlign":"top"}',
-				set: vi.fn()
-			}
-		})
-
-		await floatingWindow.ready
-
-		expect(element.style.right).toBe('120px')
-		expect(element.style.top).toBe('50px')
-		expect(element.classList.contains('opened')).toBe(true)
-	})
-
 	it('records plain settings through the storage adapter', async() => {
 		const container = createContainer()
 		const element = createElement(container)
