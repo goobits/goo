@@ -15,7 +15,9 @@ const QUICK_REPEAT_TOGGLE_MS = 350
 interface Props {
 	ariaLabel?: string
 	class?: string
+	dataParam?: string
 	disabled?: boolean
+	id?: string
 	items?: GridPopoutItem[]
 	popoutClass?: string
 	selected?: string
@@ -27,7 +29,9 @@ interface Props {
 let {
 	ariaLabel = 'Open menu',
 	class: className = '',
+	dataParam,
 	disabled = false,
+	id,
 	items = [],
 	popoutClass = '',
 	selected = '',
@@ -349,7 +353,9 @@ function escapeSelectorValue(value: string): string {
 <GridPopoutTrigger
 	{ariaLabel}
 	class={className}
+	{dataParam}
 	{disabled}
+	{id}
 	iconClass={currentItem?.iconClass ?? ''}
 	iconSvg={currentItem?.iconSvg}
 	{opened}
