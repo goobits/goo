@@ -218,6 +218,139 @@
 	flex-shrink: 0;
 }
 
+.goo-settings-dialog,
+.goo-settings-surface-dialog {
+	--goo-settings-pane-bg: var(--sketch-theme-dialog-bg, var(--goo-theme-bg));
+	--goo-settings-pane-fg: var(--sketch-theme-dialog-fg, var(--goo-theme-fg));
+	--goo-settings-pane-muted-fg: var(--sketch-theme-dialog-muted-fg, var(--goo-theme-muted));
+	--goo-settings-pane-border: color-mix(
+		in srgb,
+		var(--goo-theme-fg) 10%,
+		var(--goo-theme-bg)
+	);
+	--goo-settings-pane-width: 350px;
+
+	background: var(--goo-settings-pane-bg);
+	color: var(--goo-settings-pane-fg);
+}
+
+.goo-settings-surface-dialog {
+	width: var(--goo-settings-pane-width);
+}
+
+.goo-settings-dialog .dialog__content {
+	padding: 0;
+}
+
+.goo-settings-surface-dialog .dialog__content {
+	padding: var(--goo-theme-space-lg, 1.5rem);
+}
+
+.goo-settings-pane {
+	display: block;
+	width: 100%;
+	max-width: var(--goo-settings-pane-width);
+	padding: 0;
+	margin: 0;
+	background: var(--goo-settings-pane-bg);
+	color: var(--goo-settings-pane-fg);
+}
+
+.goo-settings-pane * {
+	color: var(--goo-settings-pane-fg) !important;
+}
+
+.goo-settings-pane sketch-label {
+	background: var(--goo-settings-pane-bg);
+	color: var(--goo-settings-pane-fg);
+	padding: var(--goo-theme-space-md, 1rem) var(--goo-theme-space-lg, 1.5rem);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	transition: background 0.2s ease;
+}
+
+.goo-settings-pane sketch-title,
+.goo-settings-pane sketch-title span,
+.goo-settings-pane .surface-set__label {
+	background: var(--goo-settings-pane-bg) !important;
+	color: var(--goo-settings-pane-fg) !important;
+	opacity: 1 !important;
+}
+
+.goo-settings-pane sketch-label sketch-title {
+	background: var(--goo-settings-pane-bg);
+	color: var(--goo-settings-pane-fg);
+	flex: 1;
+}
+
+.goo-settings-pane sketch-title {
+	display: flex;
+	align-items: center;
+	top: 0;
+	font-weight: 400;
+	gap: 0.5rem;
+}
+
+.goo-settings-pane__category {
+	text-transform: uppercase;
+	background: linear-gradient(
+		0deg,
+		var(--goo-settings-pane-bg),
+		color-mix(in srgb, var(--goo-settings-pane-fg) 4%, var(--goo-settings-pane-bg))
+	);
+	border-top: 3px solid var(--goo-settings-pane-border);
+	display: block;
+	font-weight: 600;
+	margin: 0;
+	padding: var(--goo-theme-space-md, 1rem) var(--goo-theme-space-lg, 1.5rem);
+	width: 100%;
+	color: var(--goo-settings-pane-muted-fg);
+	font-size: var(--goo-theme-font-size-md);
+	line-height: var(--goo-theme-space-xl, 2rem);
+	letter-spacing: 0.25px;
+}
+
+.goo-settings-pane__category-content {
+	display: block;
+}
+
+.goo-settings-pane .surface-gallery__paint {
+	aspect-ratio: auto;
+}
+
+[dir='rtl'] .goo-settings-pane sketch-button {
+	float: left;
+}
+
+[dir='rtl'] .goo-settings-pane sketch-settheme div {
+	float: left;
+}
+
+[dir='rtl'] .goo-settings-pane sketch-label {
+	background: var(--goo-settings-pane-bg);
+	color: var(--goo-settings-pane-fg);
+	padding: var(--goo-theme-space-sm, 0.5rem) var(--goo-theme-space-lg, 1.5rem)
+		var(--goo-theme-space-sm, 0.5rem) var(--goo-theme-space-xs, 0.25rem);
+}
+
+@media (max-width: 450px) {
+	.goo-settings-pane {
+		max-width: 100%;
+	}
+
+	.goo-settings-dialog .dialog__content,
+	.goo-settings-surface-dialog .dialog__content {
+		display: flex;
+		justify-content: center;
+	}
+
+	.goo-settings-dialog .dialog__content-scroll,
+	.goo-settings-surface-dialog .dialog__content-scroll {
+		max-height: calc(100vh - 3rem - 1px);
+	}
+}
+
 .goo-panel.goo-panel--docked .goo-panel__header {
 	cursor: default;
 }
