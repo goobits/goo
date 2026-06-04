@@ -260,7 +260,7 @@
 	color: var(--goo-settings-pane-fg) !important;
 }
 
-.goo-settings-pane sketch-label {
+.goo-settings-pane__field {
 	background: var(--goo-settings-pane-bg);
 	color: var(--goo-settings-pane-fg);
 	padding: var(--goo-theme-space-md, 1rem) var(--goo-theme-space-lg, 1.5rem);
@@ -270,21 +270,21 @@
 	transition: background 0.2s ease;
 }
 
-.goo-settings-pane sketch-title,
-.goo-settings-pane sketch-title span,
+.goo-settings-pane__title,
+.goo-settings-pane__title span,
 .goo-settings-pane .surface-set__label {
 	background: var(--goo-settings-pane-bg) !important;
 	color: var(--goo-settings-pane-fg) !important;
 	opacity: 1 !important;
 }
 
-.goo-settings-pane sketch-label sketch-title {
+.goo-settings-pane__field .goo-settings-pane__title {
 	background: var(--goo-settings-pane-bg);
 	color: var(--goo-settings-pane-fg);
 	flex: 1;
 }
 
-.goo-settings-pane sketch-title {
+.goo-settings-pane__title {
 	display: flex;
 	align-items: center;
 	top: 0;
@@ -319,15 +319,15 @@
 	aspect-ratio: auto;
 }
 
-[dir='rtl'] .goo-settings-pane sketch-button {
+[dir='rtl'] .goo-settings-pane__button {
 	float: left;
 }
 
-[dir='rtl'] .goo-settings-pane sketch-settheme div {
+[dir='rtl'] .goo-settings-pane__theme-control {
 	float: left;
 }
 
-[dir='rtl'] .goo-settings-pane sketch-label {
+[dir='rtl'] .goo-settings-pane__field {
 	background: var(--goo-settings-pane-bg);
 	color: var(--goo-settings-pane-fg);
 	padding: var(--goo-theme-space-sm, 0.5rem) var(--goo-theme-space-lg, 1.5rem)

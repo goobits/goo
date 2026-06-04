@@ -14,7 +14,9 @@ Reusable Svelte 5 UI components and small browser utilities. Goo is built around
 - Goo owns generic primitives, layout shells, popouts, virtual grids, and `GooSchema`.
 - Goo should not depend on Sketchpad globals, tool configs, document/layer state, assets, paint resources, or renderer APIs.
 - Rich product/editor controls belong in `@goobits/goo-editors` when they are reusable across hosts.
+- Model-agnostic workspace panels belong in `@goobits/goo-panels`; hosts provide data, persistence, commands, and renderer callbacks.
 - Host-specific schema conversion belongs outside Goo; Sketchpad uses `@sketchapi/controls/sketch/config-pane`.
+- Sketchpad custom tags and runtime DOM adapters belong in Sketchpad app/domain code. Goo components should expose Goo class names and generic HTML/Svelte surfaces.
 
 ## Install
 
