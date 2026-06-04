@@ -51,6 +51,24 @@
 	opacity: 0;
 }
 
+.goo-dialog.goo-dialog--chromeless {
+	background: transparent;
+	border: 0;
+	box-shadow: none;
+}
+
+.goo-dialog.goo-dialog--chromeless .goo-dialog__content {
+	box-shadow: none;
+}
+
+.goo-dialog.goo-dialog--passive {
+	pointer-events: none;
+}
+
+.goo-dialog.goo-dialog--hidden-close .goo-dialog__close {
+	display: none;
+}
+
 /* Header */
 .goo-dialog__header {
 	display: flex;
