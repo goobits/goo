@@ -18,7 +18,7 @@
 	--goo-input-focus-ring: color-mix(in srgb, var(--goo-input-border-focus) 32%, transparent);
 	--goo-input-change-pulse: color-mix(in srgb, var(--goo-input-border-focus) 18%, transparent);
 	--goo-input-fg: var(--goo-theme-fg, rgba(255, 255, 255, 0.9));
-	--goo-input-fg-placeholder: var(--goo-theme-fg-muted, rgba(128, 128, 128, 0.5));
+	--goo-input-fg-placeholder: var(--goo-theme-muted);
 	--goo-input-radius: var(--goo-theme-radius-sm, 0.25rem);
 	--goo-input-height: var(--goo-theme-control-height-md, 2rem);
 	--goo-input-padding: var(--goo-theme-control-padding-md, 0 0.5rem);

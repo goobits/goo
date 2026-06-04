@@ -97,7 +97,7 @@
 	appearance: none;
 	background: transparent;
 	border: none;
-	color: var(--goo-theme-fg-muted, #888);
+	color: var(--goo-theme-muted);
 	cursor: pointer;
 	padding: 4px;
 	border-radius: 4px;
@@ -144,7 +144,7 @@
 .goo-dialog__field-label {
 	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
 	font-weight: 500;
-	color: var(--goo-theme-fg-muted, #888);
+	color: var(--goo-theme-muted);
 }
 
 /* Footer */
@@ -172,7 +172,7 @@
 	align-items: center;
 	gap: 8px;
 	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
-	color: var(--goo-theme-fg-muted, #888);
+	color: var(--goo-theme-muted);
 }
 
 /* OK button - attention styling */

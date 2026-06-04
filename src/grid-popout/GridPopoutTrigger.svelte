@@ -344,12 +344,12 @@ goo-grid-popout-trigger .goo-grid-trigger__arrow {
 }
 
 goo-grid-popout-trigger.goo-grid-trigger--opened {
-	background: var(--goo-theme-bg-active);
+	background: color-mix(in srgb, var(--goo-theme-fg) 15%, transparent);
 }
 
 goo-grid-popout-trigger.goo-grid-trigger--bordered {
 	border-bottom: 1px solid var(--goo-theme-border);
-	border-top: 1px solid var(--goo-theme-bg-active);
+	border-top: 1px solid color-mix(in srgb, var(--goo-theme-fg) 15%, transparent);
 }
 
 goo-grid-popout-trigger .goo-grid-trigger__arrow :global(svg) {

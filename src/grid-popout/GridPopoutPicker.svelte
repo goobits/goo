@@ -408,14 +408,14 @@ function escapeSelectorValue(value: string): string {
 :global(goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) sketch-grid-item:focus-visible),
 :global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) sketch-grid-item:hover),
 :global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) sketch-grid-item:focus-visible) {
-	background: var(--goo-theme-bg-active);
+	background: color-mix(in srgb, var(--goo-theme-fg) 15%, transparent);
 	border-color: var(--goo-theme-border-subtle, var(--goo-theme-border));
 	outline: none;
 }
 
 :global(goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) sketch-grid-item.selected),
 :global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) sketch-grid-item.selected) {
-	background: var(--goo-theme-bg-elevated, var(--goo-theme-bg-active));
+	background: var(--goo-theme-surface-raised);
 	border-color: var(--goo-theme-accent);
 	box-shadow: inset 0 0 0 1px var(--goo-theme-accent);
 	color: var(--goo-theme-fg);
@@ -507,7 +507,7 @@ function escapeSelectorValue(value: string): string {
 :global(.goo-popout.goo-grid-popout--icon-grid grid-title),
 :global(goo-popout.goo-grid-popout--subtool grid-title),
 :global(.goo-popout.goo-grid-popout--subtool grid-title) {
-	color: var(--goo-theme-fg-muted);
+	color: var(--goo-theme-muted);
 	font-size: var(--goo-theme-font-size-xs);
 	line-height: 1.2;
 	max-width: 100%;

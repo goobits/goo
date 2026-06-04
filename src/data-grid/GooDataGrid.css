@@ -1,8 +1,5 @@
 .goo-data-grid {
-	--goo-data-grid-bg: var(
-		--goo-theme-bg-elevated,
-		color-mix(in srgb, var(--goo-theme-fg, #fff) 4%, transparent)
-	);
+	--goo-data-grid-bg: var(--goo-theme-surface-raised);
 	--goo-data-grid-border: var(
 		--goo-theme-border,
 		color-mix(in srgb, var(--goo-theme-fg, #fff) 14%, transparent)
@@ -12,7 +9,7 @@
 		color-mix(in srgb, var(--goo-theme-fg, #fff) 9%, transparent)
 	);
 	--goo-data-grid-fg: var(--goo-theme-fg, rgba(255, 255, 255, 0.92));
-	--goo-data-grid-muted: var(--goo-theme-fg-muted);
+	--goo-data-grid-muted: var(--goo-theme-muted);
 	--goo-data-grid-hover: color-mix(in srgb, var(--goo-theme-accent, #3b82f6) 10%, transparent);
 	--goo-data-grid-radius: var(--goo-theme-radius-md, 0.375rem);
 	--goo-data-grid-row-height: 2.75rem;

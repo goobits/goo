@@ -26,7 +26,7 @@
 	--goo-slider-motion-normal: var(--goo-theme-transition-normal, 0.2s ease);
 
 	/* Default color for theme-aware track background fallback (when no gradient provided) */
-	color: var(--goo-theme-fg-muted, rgba(128, 128, 128, 0.5));
+	color: var(--goo-theme-muted);
 
 	display: block;
 	cursor: pointer;
@@ -170,7 +170,7 @@
 		width: auto;
 		min-width: 48px;
 		max-width: 80px;
-		--goo-number-bg: var(--goo-theme-bg-elevated, rgba(255, 255, 255, 0.12));
+		--goo-number-bg: var(--goo-theme-surface-raised);
 		--goo-number-border: transparent;
 		--goo-number-border-radius: 6px;
 		--goo-number-height: var(--goo-theme-control-height-sm, 1.5rem);

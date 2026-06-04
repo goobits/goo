@@ -5,10 +5,10 @@
 
 .goo-error-boundary {
 	/* Customizable via CSS custom properties */
-	--goo-error-boundary-bg: var(--goo-theme-bg-elevated, #1f1f1f);
+	--goo-error-boundary-bg: var(--goo-theme-surface-raised);
 	--goo-error-boundary-border: var(--goo-theme-negative, #ef4444);
 	--goo-error-boundary-fg: var(--goo-theme-fg, rgba(255, 255, 255, 0.9));
-	--goo-error-boundary-muted: var(--goo-theme-fg-muted, rgba(255, 255, 255, 0.5));
+	--goo-error-boundary-muted: var(--goo-theme-muted);
 	--goo-error-boundary-radius: var(--goo-theme-radius-md, 0.375rem);
 	--goo-error-boundary-padding: var(--goo-theme-space-lg, 2rem);
 	--goo-error-boundary-accent: var(--goo-theme-accent, #3b82f6);

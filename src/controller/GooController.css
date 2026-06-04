@@ -6,10 +6,7 @@
 .goo-controller {
 	/* Customizable via CSS custom properties */
 	--goo-controller-bg: transparent;
-	--goo-controller-bg-hover: var(
-		--goo-theme-bg-hover,
-		color-mix(in srgb, var(--goo-theme-fg, #fff) 3%, transparent)
-	);
+	--goo-controller-bg-hover: color-mix(in srgb, var(--goo-theme-fg, #fff) 3%, transparent);
 	--goo-controller-border: var(--goo-theme-border-subtle, rgba(128, 128, 128, 0.1));
 	--goo-controller-padding: var(--goo-theme-control-row-padding, 0.5rem 0.75rem);
 	--goo-controller-label-width: clamp(140px, 40%, 360px);

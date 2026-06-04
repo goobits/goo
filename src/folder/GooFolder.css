@@ -10,10 +10,7 @@
 		--goo-theme-surface-raised,
 		color-mix(in srgb, var(--goo-theme-fg, #fff) 5%, transparent)
 	);
-	--goo-folder-header-bg-hover: var(
-		--goo-theme-bg-hover,
-		color-mix(in srgb, var(--goo-theme-fg, #fff) 8%, transparent)
-	);
+	--goo-folder-header-bg-hover: color-mix(in srgb, var(--goo-theme-fg, #fff) 8%, transparent);
 	--goo-folder-border: var(--goo-theme-border, rgba(128, 128, 128, 0.2));
 	--goo-folder-fg: var(--goo-theme-fg, inherit);
 	--goo-folder-radius: var(--goo-theme-radius-md, 4px);
@@ -120,7 +117,7 @@
 
 /* Inspector variant - compact section styling for dense property panels. */
 .goo-folder--inspector {
-	--goo-folder-inspector-active-bg: var(--goo-theme-accent-subtle, rgba(59, 130, 246, 0.15));
+	--goo-folder-inspector-active-bg: color-mix(in srgb, var(--goo-theme-accent) 18%, transparent);
 	--goo-folder-inspector-accent: var(--goo-theme-accent, #3b82f6);
 
 	margin-block-end: var(--goo-theme-space-xs, 0.125rem);
@@ -166,7 +163,7 @@
 .goo-folder--inspector > .goo-folder__header > .goo-folder__chevron {
 	width: 1rem;
 	height: 1rem;
-	color: var(--goo-theme-fg-muted, rgba(255, 255, 255, 0.5));
+	color: var(--goo-theme-muted);
 }
 
 .goo-folder--inspector > .goo-folder__header > .goo-folder__title {

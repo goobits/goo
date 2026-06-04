@@ -61,7 +61,7 @@
 }
 
 .goo-popout__content::-webkit-scrollbar-thumb {
-	background: var(--goo-theme-fg-muted, rgba(128, 128, 128, 0.3));
+	background: var(--goo-theme-muted);
 	border-radius: 3px;
 }
 
@@ -229,7 +229,7 @@
 }
 
 .goo-filter-popout__item:hover {
-	background: var(--goo-theme-bg-hover);
+	background: color-mix(in srgb, var(--goo-theme-fg) 8%, transparent);
 }
 
 .goo-filter-popout__item:hover::after {
