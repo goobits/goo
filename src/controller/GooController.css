@@ -205,8 +205,7 @@
 
 .goo-tool-config,
 .goo-palette,
-sketch-toolconfig,
-sketch-palette {
+sketch-toolconfig {
 	box-sizing: border-box;
 	inline-size: 100%;
 	min-inline-size: 0;
@@ -214,8 +213,7 @@ sketch-palette {
 
 .goo-tool-config .goo-angle-input,
 .goo-palette .goo-angle-input,
-sketch-toolconfig .goo-angle-input,
-sketch-palette .goo-angle-input {
+sketch-toolconfig .goo-angle-input {
 	margin: 0 0.5rem;
 }
 
