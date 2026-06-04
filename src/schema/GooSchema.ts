@@ -134,7 +134,7 @@ export class GooSchema {
 	}
 
 	// ─────────────────────────────────────────────────────────────────
-	// Property accessors for framework compatibility (Svelte, etc.)
+	// Property accessors for framework interop (Svelte, etc.)
 	// These bypass the attribute system which stringifies objects
 	// ─────────────────────────────────────────────────────────────────
 

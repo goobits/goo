@@ -184,6 +184,12 @@
 	padding: var(--goo-theme-control-padding-md, 0 0.75rem);
 }
 
+.goo-controller .goo-button.goo-button--full-row {
+	line-height: 1;
+	min-height: var(--goo-button-full-row-height, var(--goo-theme-control-height-lg, 2.5rem));
+	padding-block: 0;
+}
+
 .goo-controller .goo-select {
 	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
 	inline-size: 100%;
@@ -221,7 +227,39 @@ sketch-palette .goo-angle-input {
 	inline-size: 100%;
 }
 
-.goo-controller--sketch-file-picker .goo-file-picker.goo-button {
+sketch-FilterFooter {
+	box-sizing: border-box;
+	display: block;
+	inline-size: 100%;
+}
+
+.goo-controller--file-picker,
+.goo-controller--filter-footer {
+	--goo-controller-padding: 0;
+
+	padding: 0;
+}
+
+.goo-controller--file-picker .goo-controller__widget,
+.goo-controller--filter-footer .goo-controller__widget {
+	align-items: stretch;
+	inline-size: 100%;
+}
+
+.goo-controller--file-picker .goo-file-picker,
+.goo-controller--filter-footer .goo-config-button,
+.goo-controller--filter-footer sketch-FilterFooter {
+	display: flex;
+	inline-size: 100%;
+	margin-inline: 0;
+}
+
+.goo-controller--file-picker .goo-file-picker.sketch-button {
+	margin-inline: 0;
+	width: 100%;
+}
+
+.goo-controller--file-picker .goo-file-picker .goo-button {
 	margin-inline: 0;
 	width: 100%;
 }

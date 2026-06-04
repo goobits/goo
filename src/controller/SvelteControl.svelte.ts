@@ -4,7 +4,7 @@ import { mount, unmount } from 'svelte'
 /** Options passed to a Svelte control schema. */
 export type ControlSchemaOptions = Record<string, unknown>
 
-/** Svelte component type compatible with mount(). */
+/** Svelte component type accepted by mount(). */
 export type SvelteComponentType = Component<Record<string, unknown>>
 
 /**
@@ -88,7 +88,7 @@ export interface SvelteControlHost {
 }
 
 /**
- * Mounts a Svelte control as a GooController-compatible host.
+ * Mounts a Svelte control as a GooController host.
  * @param opts - opts.
  */
 export function createSvelteControlHost(opts: SvelteControlHostOptions): SvelteControlHost {

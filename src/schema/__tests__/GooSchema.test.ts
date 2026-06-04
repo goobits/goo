@@ -212,7 +212,7 @@ describe('GooSchema', () => {
 		})
 	})
 
-	it('supports value display aliases and hidden generated labels', async() => {
+	it('supports value display options and hidden generated labels', async() => {
 		let receivedOptions: Record<string, unknown> | undefined
 		const schema = createGooSchema({
 			schema: [

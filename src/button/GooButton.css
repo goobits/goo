@@ -187,12 +187,38 @@
 	padding: 0;
 }
 
-/* Title element */
-.goo-button__title {
-	display: inline-block;
+.goo-button--full-row {
+	--goo-button-full-row-height: 40px;
+	--goo-button-icon-size: var(--goo-theme-icon-md, 1rem);
+
+	box-sizing: border-box;
+	border-radius: 0;
+	gap: 0.5rem;
+	height: var(--goo-button-full-row-height);
+	inline-size: 100%;
+	justify-content: center;
+	line-height: 1;
+	min-height: var(--goo-button-full-row-height);
+	min-inline-size: 100%;
+	padding-block: 0;
+	width: 100%;
 }
 
-/* Disabled state - flat selector for broader compatibility */
+.goo-button--full-row.goo-button--attention,
+.goo-button--full-row[variant='attention'] {
+	--goo-button-bg: color-mix(in srgb, var(--goo-theme-warning, #fbbf24) 12%, transparent);
+	--goo-button-bg-hover: color-mix(in srgb, var(--goo-theme-warning, #fbbf24) 18%, transparent);
+	--goo-button-border: color-mix(in srgb, var(--goo-theme-warning, #fbbf24) 32%, transparent);
+}
+
+/* Title element */
+.goo-button__title {
+	display: inline-flex;
+	align-items: center;
+	line-height: 1;
+}
+
+/* Disabled state - flat selector for button and custom-element hosts */
 /* Uses theme-aware variables for light/dark mode support */
 .goo-button[disabled],
 .goo-button.goo-button--disabled {

@@ -9,7 +9,7 @@ let root: HTMLDivElement | undefined = $state()
 // Intentionally seeds from the initial prop; later updates come via setMessage().
 let message = $state(initialMessage)
 // Named `animationState` (not `state`) so the `$state` rune token is not parsed
-// as legacy `$`-store access to a `state` variable by svelte-check.
+// as Svelte store-style access to a `state` variable by svelte-check.
 let animationState = $state('')
 
 export function setMessage(next: string): void {

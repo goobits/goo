@@ -93,7 +93,7 @@ const selectMenu = $derived(normalizeSelectMenu(menu))
 const triggerLabel = $derived(getOptionLabel(selectedOption) || placeholder)
 const showPlaceholder = $derived(!selectedOption)
 // Named `selectState` (not `state`) so the `$state` rune token is not parsed as
-// legacy `$`-store access to a `state` variable by svelte-check.
+// Svelte store-style access to a `state` variable by svelte-check.
 const selectState = $derived<GooSelectState>({
 	value: selectedValue,
 	placeholder,

@@ -41,7 +41,7 @@ let enabled = false
 let showTimeoutId = 0
 let hideTimeoutId = 0
 
-/** Imperative Goo tooltip runtime compatible with existing Sketch tooltip call sites. */
+/** Imperative Goo tooltip runtime used by existing Sketch tooltip call sites. */
 export const GooTooltipRuntime: GooTooltipRuntimeApi = Object.assign(attachTooltip, {
 	destroy,
 	hide,
