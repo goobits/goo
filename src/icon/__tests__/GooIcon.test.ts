@@ -1,5 +1,5 @@
 import { render } from '@testing-library/svelte'
-import { afterEach, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import GooIcon from '../GooIcon.svelte'
 import {
@@ -10,10 +10,6 @@ import {
 import { iconRegistry } from '../registry.ts'
 
 describe('GooIcon', () => {
-	afterEach(() => {
-		iconRegistry.clear()
-	})
-
 	it('renders a registered icon at the requested size', () => {
 		iconRegistry.register('check', '<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>')
 

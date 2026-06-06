@@ -200,22 +200,6 @@ export const iconRegistry = {
 	 */
 	list() {
 		return Array.from(icons.keys())
-	},
-
-	/**
-	 * Remove an icon from the registry.
-	 * @param {string} name - Icon name
-	 * @returns {boolean} True if icon was removed
-	 */
-	unregister(name: string) {
-		return icons.delete(name)
-	},
-
-	/**
-	 * Clear all registered icons.
-	 */
-	clear() {
-		icons.clear()
 	}
 }
 

@@ -110,7 +110,8 @@ Prefer subpath imports in apps when you only need one surface.
 | `@goobits/goo/toast`                   | `GooToast`, `GooToaster`, `toast`, `toastStore`                    | Toast notification UI and store            |
 | `@goobits/goo/tooltip`                 | `GooTooltip`, `tooltip`, `createGooTooltip`                        | Tooltip component and action/helper        |
 | `@goobits/goo/turnstile`               | `GooTurnstileField`                                                | Cloudflare Turnstile field wrapper         |
-| `@goobits/goo/virtualGrid`             | `VirtualGrid`, selection/windowing helpers                         | Virtualized grid primitive                 |
+| `@goobits/goo/virtualGrid`             | `VirtualGrid`, component types                                     | Virtualized grid primitive                 |
+| `@goobits/goo/virtualGrid/model`       | selection, item, marquee, and windowing helpers                    | Virtual grid model utilities               |
 | `@goobits/goo/vortex`                  | `GooVortex`, `createGooVortex`                                     | Temporary positioned activity indicators   |
 
 ## Public Handles

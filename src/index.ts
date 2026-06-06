@@ -198,19 +198,9 @@ export { createGooTooltip, GooTooltip, tooltip } from './tooltip/index.ts'
 export type { GooTurnstileFieldProps, GooTurnstileSize, GooTurnstileTheme } from './turnstile/index.ts'
 export { GooTurnstileField } from './turnstile/index.ts'
 export type {
-	GridArrowKey,
-	GridClickModifiers,
-	GridMarqueeMode,
-	GridMarqueeOptions,
-	GridSelectionState,
-	RectXYWH,
-	VirtualGridItem,
-	VirtualGridItemKey,
-	VirtualGridItemRef,
 	VirtualGridProps,
 	VirtualGridSlot,
-	VirtualGridWindow,
-	VirtualGridWindowOptions
+	VirtualGridWindow
 } from './virtualGrid/index.ts'
 export {
 	VirtualGrid
