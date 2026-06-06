@@ -113,6 +113,12 @@ Prefer subpath imports in apps when you only need one surface.
 | `@goobits/goo/virtualGrid/model`       | selection, item, marquee, and windowing helpers                    | Virtual grid model utilities               |
 | `@goobits/goo/vortex`                  | `createGooVortex`, `GooVortexManager`                              | Temporary positioned activity indicators   |
 
+## Surface Stability
+
+- Stable: component subpaths, `controller`, `schema`, `dialog`, `toast`, `popout`, `tooltip`, `i18n`, `number`, `pointer`, and `positioning`.
+- Experimental: `diff`, `grid-popout`, `toolbar`, `virtualGrid/model`, and `vortex`; keep callers on documented exports and avoid reaching into source files.
+- Internal: `src/support/*` helpers unless they are exposed through a named package subpath.
+
 ## Public Handles
 
 Imperative Goo factories create ordinary HTML elements and attach a small public handle API. Use the documented methods such as `destroy()`, `setValue()`, `getValue()`, `updateDisplay()`, `updateOptions()`, `getRange()`, and `getController()` instead of reaching into underscore-prefixed implementation state or component-specific destroy aliases.
