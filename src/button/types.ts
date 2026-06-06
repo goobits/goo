@@ -5,6 +5,9 @@ import type { GooForwardedAttributes } from '../support/types/forwardedAttribute
 /** Native Goo button layout mode. */
 export type GooButtonLayout = 'inline' | 'stacked'
 
+/** Native link target for anchor-backed Goo buttons. */
+export type GooButtonTarget = '_blank' | '_parent' | '_self' | '_top' | (string & {})
+
 /** Native Goo button type. */
 export type GooButtonType = 'button' | 'reset' | 'submit'
 
@@ -25,6 +28,21 @@ export type GooButtonProps = GooForwardedAttributes & {
 
 	/** Whether the button is disabled. */
 	disabled?: boolean
+
+	/** Link URL. When present, GooButton renders an anchor element. */
+	href?: string
+
+	/** Anchor target used when `href` is present. */
+	target?: GooButtonTarget
+
+	/** Anchor relationship used when `href` is present. */
+	rel?: string
+
+	/** Render as a full-width row button. */
+	block?: boolean
+
+	/** Render as a full-width row button. */
+	fullRow?: boolean
 
 	/** Optional title/tooltip text. */
 	title?: string

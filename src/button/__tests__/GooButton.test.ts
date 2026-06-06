@@ -39,4 +39,34 @@ describe('GooButton', () => {
 		expect(button.getAttribute('aria-pressed')).toBe('true')
 		expect(button.classList.contains('goo-button--selected')).toBe(true)
 	})
+
+	it('renders an anchor when href is provided', () => {
+		const { container } = render(GooButton, {
+			props: {
+				href: '/billing',
+				value: 'Billing',
+				variant: 'secondary'
+			}
+		})
+
+		const link = container.querySelector('a.goo-button')
+
+		expect(container.querySelector('button')).toBeNull()
+		expect(link?.getAttribute('href')).toBe('/billing')
+		expect(link?.getAttribute('variant')).toBe('secondary')
+	})
+
+	it('maps block to the full-row button class', () => {
+		const { container } = render(GooButton, {
+			props: {
+				block: true,
+				value: 'Continue'
+			}
+		})
+
+		const button = container.querySelector('button.goo-button') as HTMLButtonElement
+
+		expect(button.classList.contains('goo-button--block')).toBe(true)
+		expect(button.classList.contains('goo-button--full-row')).toBe(true)
+	})
 })

@@ -187,7 +187,8 @@
 	padding: 0;
 }
 
-.goo-button--full-row {
+.goo-button--full-row,
+.goo-button--block {
 	--goo-button-full-row-height: 40px;
 	--goo-button-icon-size: var(--goo-theme-icon-md, 1rem);
 
@@ -205,7 +206,9 @@
 }
 
 .goo-button--full-row.goo-button--attention,
-.goo-button--full-row[variant='attention'] {
+.goo-button--full-row[variant='attention'],
+.goo-button--block.goo-button--attention,
+.goo-button--block[variant='attention'] {
 	--goo-button-bg: color-mix(in srgb, var(--goo-theme-warning, #fbbf24) 12%, transparent);
 	--goo-button-bg-hover: color-mix(in srgb, var(--goo-theme-warning, #fbbf24) 18%, transparent);
 	--goo-button-border: color-mix(in srgb, var(--goo-theme-warning, #fbbf24) 32%, transparent);

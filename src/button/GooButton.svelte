@@ -2,13 +2,18 @@
 import './GooButton.css'
 import type { GooButtonProps } from './types.ts'
 
-let buttonElement: HTMLButtonElement | undefined = $state()
+let buttonElement: HTMLAnchorElement | HTMLButtonElement | undefined = $state()
 
 let {
 	value = '',
 	formValue,
 	type = 'button',
 	disabled = false,
+	href,
+	target,
+	rel,
+	block = false,
+	fullRow = false,
 	title,
 	tooltip,
 	ariaLabel,
@@ -39,6 +44,7 @@ const classes = $derived.by(() => {
 	const values = ['goo-button']
 	if (disabled) values.push('goo-button--disabled')
 	if (toggle && currentPressed) values.push('goo-button--selected')
+	if (block || fullRow) values.push('goo-button--full-row', 'goo-button--block')
 	if (className) values.push(className)
 	return values.filter(Boolean).join(' ')
 })
@@ -81,31 +87,63 @@ function handleClick(event: MouseEvent): void {
 		detail: { sourceEvent: event }
 	}))
 }
+
+const resolvedTitle = $derived(title || tooltip || undefined)
+const resolvedAriaLabel = $derived(ariaLabel || (!children && !value ? resolvedTitle : undefined))
 </script>
 
-<button
-	{...rest}
-	bind:this={buttonElement}
-	class={classes}
-	{type}
-	value={formValue}
-	{disabled}
-	title={title || tooltip || undefined}
-	aria-label={ariaLabel || (!children && !value ? title || tooltip || undefined : undefined)}
-	{...hostAttributes}
-	aria-disabled={disabled ? 'true' : undefined}
-	aria-pressed={toggle ? currentPressed : ariaPressed}
-	{style}
-	onclick={handleClick}
->
-	{#if icon}
-		<span class="goo-button__icon" aria-hidden="true">
-			{@render icon()}
-		</span>
-	{/if}
-	{#if children}
-		{@render children()}
-	{:else if value}
-		<span class="goo-button__title" data-translate>{value}</span>
-	{/if}
-</button>
+{#if href}
+	<a
+		{...rest}
+		bind:this={buttonElement}
+		class={classes}
+		href={disabled ? undefined : href}
+		{target}
+		{rel}
+		title={resolvedTitle}
+		aria-label={resolvedAriaLabel}
+		{...hostAttributes}
+		aria-disabled={disabled ? 'true' : undefined}
+		tabindex={disabled ? -1 : rest.tabindex ?? rest.tabIndex}
+		{style}
+		onclick={handleClick}
+	>
+		{#if icon}
+			<span class="goo-button__icon" aria-hidden="true">
+				{@render icon()}
+			</span>
+		{/if}
+		{#if children}
+			{@render children()}
+		{:else if value}
+			<span class="goo-button__title" data-translate>{value}</span>
+		{/if}
+	</a>
+{:else}
+	<button
+		{...rest}
+		bind:this={buttonElement}
+		class={classes}
+		{type}
+		value={formValue}
+		{disabled}
+		title={resolvedTitle}
+		aria-label={resolvedAriaLabel}
+		{...hostAttributes}
+		aria-disabled={disabled ? 'true' : undefined}
+		aria-pressed={toggle ? currentPressed : ariaPressed}
+		{style}
+		onclick={handleClick}
+	>
+		{#if icon}
+			<span class="goo-button__icon" aria-hidden="true">
+				{@render icon()}
+			</span>
+		{/if}
+		{#if children}
+			{@render children()}
+		{:else if value}
+			<span class="goo-button__title" data-translate>{value}</span>
+		{/if}
+	</button>
+{/if}
