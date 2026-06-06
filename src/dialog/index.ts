@@ -15,7 +15,7 @@ export {
 	type GooAlertOptions,
 	GooConfirm,
 	type GooConfirmOptions,
-	type GooDialogPromise,
+	type GooDialogTask,
 	GooNotify,
 	type GooNotifyOptions,
 	GooOverlay,

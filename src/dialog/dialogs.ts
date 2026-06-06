@@ -5,10 +5,15 @@
 
 import { createGooDialog, type DialogField, type DialogLabels, type DialogResult, type GooDialogInstance } from './dialog.ts'
 
-/** Promise returned by dialog convenience helpers. */
-export type GooDialogPromise = Promise<DialogResult> & {
-	$dialog: GooDialogInstance
+/** Task returned by dialog convenience helpers. */
+export type GooDialogTask = {
+	/** Public dialog controller. */
+	readonly dialog: GooDialogInstance
+	/** Resolves with the user's dialog action. */
+	readonly result: Promise<DialogResult>
+	/** Close the dialog. */
 	close(): void
+	/** Destroy the dialog. */
 	destroy(): void
 }
 
@@ -59,12 +64,14 @@ export interface GooOverlayOptions {
 
 type ContentOptions = { content: string | Node }
 
-function wrapDialogPromise(dialog: GooDialogInstance): GooDialogPromise {
-	const promise = dialog.open() as GooDialogPromise
-	promise.destroy = () => dialog.close()
-	promise.close = () => dialog.close()
-	promise.$dialog = dialog
-	return promise
+function createDialogTask(dialog: GooDialogInstance): GooDialogTask {
+	const result = dialog.open()
+	return {
+		dialog,
+		result,
+		close: () => void dialog.close(),
+		destroy: () => void dialog.close()
+	}
 }
 
 function normalizeContentOptions<T extends ContentOptions>(
@@ -84,9 +91,9 @@ function isNode(value: unknown): value is Node {
  * Show a simple alert dialog.
  *
  * @param options - Options or message string.
- * @returns Promise with dialog control methods attached.
+ * @returns Dialog task containing the result promise and controller.
  */
-export function GooAlert(options: GooAlertOptions | string): GooDialogPromise {
+export function GooAlert(options: GooAlertOptions | string): GooDialogTask {
 	const normalized = normalizeContentOptions<GooAlertOptions>(options)
 	const dialog = createGooDialog({
 		type: 'alert',
@@ -94,16 +101,16 @@ export function GooAlert(options: GooAlertOptions | string): GooDialogPromise {
 		...normalized
 	})
 
-	return wrapDialogPromise(dialog)
+	return createDialogTask(dialog)
 }
 
 /**
  * Show a confirmation dialog with OK/Cancel buttons.
  *
  * @param options - Options or message string.
- * @returns Promise with dialog control methods attached.
+ * @returns Dialog task containing the result promise and controller.
  */
-export function GooConfirm(options: GooConfirmOptions | string): GooDialogPromise {
+export function GooConfirm(options: GooConfirmOptions | string): GooDialogTask {
 	const normalized = normalizeContentOptions<GooConfirmOptions>(options)
 	const dialog = createGooDialog({
 		type: 'confirm',
@@ -116,16 +123,16 @@ export function GooConfirm(options: GooConfirmOptions | string): GooDialogPromis
 		...normalized
 	})
 
-	return wrapDialogPromise(dialog)
+	return createDialogTask(dialog)
 }
 
 /**
  * Show a prompt dialog with form fields.
  *
  * @param options - Prompt options.
- * @returns Promise with dialog control methods attached.
+ * @returns Dialog task containing the result promise and controller.
  */
-export function GooPrompt(options: GooPromptOptions): GooDialogPromise {
+export function GooPrompt(options: GooPromptOptions): GooDialogTask {
 	const dialog = createGooDialog({
 		type: 'prompt',
 		labels: {
@@ -137,16 +144,16 @@ export function GooPrompt(options: GooPromptOptions): GooDialogPromise {
 		...options
 	})
 
-	return wrapDialogPromise(dialog)
+	return createDialogTask(dialog)
 }
 
 /**
  * Show a notification banner.
  *
  * @param options - Options or message string.
- * @returns Promise with dialog control methods attached.
+ * @returns Dialog task containing the result promise and controller.
  */
-export function GooNotify(options: GooNotifyOptions | string): GooDialogPromise {
+export function GooNotify(options: GooNotifyOptions | string): GooDialogTask {
 	const normalized = normalizeContentOptions<GooNotifyOptions>(options)
 	const dialog = createGooDialog({
 		type: 'notify',
@@ -157,16 +164,16 @@ export function GooNotify(options: GooNotifyOptions | string): GooDialogPromise 
 		...normalized
 	})
 
-	return wrapDialogPromise(dialog)
+	return createDialogTask(dialog)
 }
 
 /**
  * Show a full-screen overlay dialog.
  *
  * @param options - Options, message, or node.
- * @returns Promise with dialog control methods attached.
+ * @returns Dialog task containing the result promise and controller.
  */
-export function GooOverlay(options: GooOverlayOptions | string | Node): GooDialogPromise {
+export function GooOverlay(options: GooOverlayOptions | string | Node): GooDialogTask {
 	const normalized = normalizeContentOptions<GooOverlayOptions>(options)
 	const dialog = createGooDialog({
 		type: 'overlay',
@@ -174,5 +181,5 @@ export function GooOverlay(options: GooOverlayOptions | string | Node): GooDialo
 		...normalized
 	})
 
-	return wrapDialogPromise(dialog)
+	return createDialogTask(dialog)
 }

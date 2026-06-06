@@ -1,4 +1,4 @@
-import type { GooSelectOpenOptions } from '../select/index.ts'
+import type { GooSelectOpenOptions, GooSelectOptionsInput } from '../select/index.ts'
 import { createGooContextMenu, type GooContextMenuElement, type GooContextMenuOption } from './GooContextMenu.ts'
 
 export type ManagedGooContextMenuOpenAt = HTMLElement | { x: number; y: number }
@@ -35,14 +35,14 @@ export type ManagedGooContextMenu = {
 	isOpen(): boolean
 	on(eventName: string, handler: (...args: unknown[]) => void): () => void
 	open(options?: ManagedGooContextMenuOpenOptions): boolean
-	setOptions(options: readonly string[] | readonly GooContextMenuOption[] | Record<string, unknown>): void
+	setOptions(options: GooSelectOptionsInput): void
 	setValue(value: string | number, options?: { silent?: boolean }): void
 }
 
 /** Options for the managed Goo context menu API. */
 export interface ManagedGooContextMenuOptions {
 	at?: ManagedGooContextMenuOpenAt
-	boundContext?: unknown
+	actionContext?: unknown
 	enableKeyboard?: boolean
 	id?: string
 	items?: ManagedGooContextMenuItems
@@ -60,7 +60,7 @@ export interface ManagedGooContextMenuOptions {
 
 type ManagedGooContextMenuOpenOptions = Omit<GooSelectOpenOptions, 'at'> & {
 	at?: ManagedGooContextMenuOpenAt
-	boundContext?: unknown
+	actionContext?: unknown
 	onClose?: () => void
 	onDestroy?: () => void
 	parentElement?: HTMLElement
@@ -84,8 +84,6 @@ export type GooContextMenuManager = {
 	open: typeof open
 	/** Register a reusable context menu. */
 	register: typeof register
-	/** Registered context menus keyed by id. */
-	registeredMenus: typeof registeredMenus
 }
 
 const contextMenuState: {
@@ -105,8 +103,7 @@ export const GooContextMenu: GooContextMenuManager = {
 	getOpenedId,
 	isOpen,
 	open,
-	register,
-	registeredMenus
+	register
 }
 
 /** Create and immediately open a managed Goo context menu. */
@@ -179,7 +176,7 @@ function createRegisteredContextMenu(
 	const handleRef: { current?: ManagedGooContextMenu } = {}
 	const menuOptions = normalizeContextMenuItems(items, () => getManagedMenuHandle(handleRef))
 	const contextMenu = createGooContextMenu({
-		boundContext: config.boundContext,
+		actionContext: config.actionContext,
 		className: [ id, 'goo-managed-context-menu' ].join(' '),
 		enableKeyboard: config.enableKeyboard,
 		id: `goo-contextmenu-${ id }`,
@@ -219,7 +216,7 @@ function createRegisteredContextMenu(
 			onDestroyCallback = options.onDestroy || options.onClose
 			return contextMenu.open({
 				...options,
-				boundContext: options.boundContext || config.boundContext
+				actionContext: options.actionContext || config.actionContext
 			})
 		},
 		setOptions: options => contextMenu.setOptions(options),

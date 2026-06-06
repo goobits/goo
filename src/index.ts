@@ -77,7 +77,7 @@ export type {
 	GooConfirmOptions,
 	GooDialogInstance,
 	GooDialogOptions,
-	GooDialogPromise,
+	GooDialogTask,
 	GooNotifyOptions,
 	GooOverlayOptions,
 	GooPromptOptions
@@ -109,8 +109,8 @@ export type { GooInputProps, GooInputType, GooNumberProps } from './input/index.
 export { GooInput, GooNumber } from './input/index.ts'
 export type { GooLabelProps } from './label/index.ts'
 export { GooLabel } from './label/index.ts'
-export type { GooPopoutAt, GooPopoutInstance, GooPopoutOptions } from './popout/index.ts'
-export { createGooPopout, GooPopout } from './popout/index.ts'
+export type { GooPopoutAt, GooPopoutInstance, GooPopoutManager, GooPopoutOptions } from './popout/index.ts'
+export { createGooPopout, GooPopout, gooPopoutRuntime } from './popout/index.ts'
 export type {
 	GooProgressRingHandle,
 	GooProgressRingSteps,
@@ -138,6 +138,10 @@ export type {
 	GooSelectMenuPlacement,
 	GooSelectOpenOptions,
 	GooSelectOption,
+	GooSelectOptionInput,
+	GooSelectOptionMap,
+	GooSelectOptionMapValue,
+	GooSelectOptionsInput,
 	GooSelectProps
 } from './select/index.ts'
 export { GooSelect } from './select/index.ts'
@@ -249,8 +253,8 @@ export type {
 export { createGooFloatingWindow } from './floating-window/index.ts'
 export type { GooFolderElement, GooFolderOptions } from './folder/index.ts'
 export { GooFolder } from './folder/index.ts'
-export type { GridPopoutItem, GridPopoutSvgElement, GridPopoutSvgIcon, GridPopoutTriggerHandle, GridPopoutTriggerOptions } from './grid-popout/index.ts'
-export { createGridPopoutTrigger, GridPickerSelectedMark, GridPopoutPicker, GridPopoutTrigger } from './grid-popout/index.ts'
+export type { GridPopoutItem, GridPopoutTriggerHandle, GridPopoutTriggerOptions } from './grid-popout/index.ts'
+export { createGridPopoutTrigger } from './grid-popout/index.ts'
 export type { GooPanelElement, GooPanelOptions } from './panel/index.ts'
 export { GooPanel } from './panel/index.ts'
 

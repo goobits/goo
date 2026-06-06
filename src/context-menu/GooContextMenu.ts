@@ -5,7 +5,7 @@
  */
 
 import { createSelectField } from '../select/_createSelectField.ts'
-import type { GooSelectElement, GooSelectMenuOptions, GooSelectOpenOptions, GooSelectOption } from '../select/index.ts'
+import type { GooSelectElement, GooSelectMenuOptions, GooSelectOpenOptions, GooSelectOption, GooSelectOptionsInput } from '../select/index.ts'
 
 /**
  * Goo context menu option.
@@ -21,7 +21,7 @@ export interface GooContextMenuOptions {
 	showSelectionIndicator?: boolean
 	menu?: GooSelectMenuOptions
 	className?: string
-	boundContext?: unknown
+	actionContext?: unknown
 	id?: string
 	selected?: string
 	value?: string
@@ -40,7 +40,7 @@ export type GooContextMenuElement = GooSelectElement & {
 	/** Attach this context menu to an element's `contextmenu` event. */
 	attachTo(
 		element: HTMLElement,
-		handler?: (event: MouseEvent) => false | { options?: GooContextMenuOption[] } | void
+		handler?: (event: MouseEvent) => false | { options?: GooSelectOptionsInput } | void
 	): () => void
 	/** Open the menu at a point or target. */
 	open(options?: GooContextMenuOpenOptions): boolean
@@ -77,7 +77,7 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 		showSelectionIndicator = false,
 		menu = {},
 		className = '',
-		boundContext,
+		actionContext,
 		id,
 		selected,
 		value,
@@ -100,7 +100,7 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 			...menu
 		},
 		className: `goo-context-menu ${ className }`.trim(),
-		boundContext,
+		actionContext,
 		onopen,
 		onclose
 	})

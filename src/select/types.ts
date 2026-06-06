@@ -24,6 +24,25 @@ export interface GooSelectOption {
 	title?: string
 }
 
+/** Shorthand option accepted by GooSelect option inputs. */
+export type GooSelectOptionInput = string | GooSelectOption
+
+/** Object-map value accepted by GooSelect option inputs. */
+export type GooSelectOptionMapValue =
+	| string
+	| number
+	| GooSelectOption
+	| readonly GooSelectOptionInput[]
+	| GooSelectOptionMap
+
+/** Object-map shorthand accepted by GooSelect option inputs. */
+export type GooSelectOptionMap = {
+	[id: string]: GooSelectOptionMapValue
+}
+
+/** Options accepted by GooSelect before normalization. */
+export type GooSelectOptionsInput = readonly GooSelectOptionInput[] | GooSelectOptionMap
+
 /**
  * State interface for GooSelect.
  */
@@ -65,7 +84,7 @@ export type GooSelectMenuOptions = {
 
 /** Props accepted by the Svelte `GooSelect` component. */
 export type GooSelectProps = GooForwardedAttributes & {
-	options?: readonly string[] | readonly GooSelectOption[] | Record<string, unknown>
+	options?: GooSelectOptionsInput
 	value?: string
 	enableKeyboard?: boolean
 	/** Whether the open menu marks the current value with a check indicator. */
@@ -84,7 +103,7 @@ export type GooSelectProps = GooForwardedAttributes & {
 	tooltip?: string | (() => string)
 	title?: string
 	disabled?: boolean
-	boundContext?: unknown
+	actionContext?: unknown
 	triggerIcon?: string | HTMLElement | (() => HTMLElement)
 
 	/** Optional child content. */
@@ -142,7 +161,7 @@ export type GooSelectElement = HTMLDivElement & {
 
 	/** Replace available options. 	 * @param options - options.
 	 */
-	setOptions(options: readonly string[] | readonly GooSelectOption[] | Record<string, unknown>): void
+	setOptions(options: GooSelectOptionsInput): void
 
 	/** Set or update the trigger icon. 	 * @param icon - icon.
 	 */
@@ -181,7 +200,7 @@ export interface GooSelectOpenOptions {
 	clickToClose?: GooPopoutOptions['clickToClose']
 	keepWithin?: { element?: HTMLElement; margin?: number }
 	parentElement?: HTMLElement
-	boundContext?: unknown
+	actionContext?: unknown
 
 	/** Override the popout alignment string (e.g. `'left top to left bottom'`). */
 	align?: string

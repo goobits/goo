@@ -3,7 +3,7 @@
  * Goo-owned grid picker trigger with a popout list of selectable options.
  */
 
-import { closePopoutsOutside, createGooPopout, type GooPopoutInstance } from '../popout/index.ts'
+import { createGooPopout, gooPopoutRuntime, type GooPopoutInstance } from '../popout/index.ts'
 
 import GridPopoutTrigger from './GridPopoutTrigger.svelte'
 import './gridPickerSelectedMark.css'
@@ -138,7 +138,7 @@ function togglePopout(): void {
 function openPopout(): void {
 	if (disabled || !rootElement || popout?.element || !items.length) return
 
-	closePopoutsOutside(rootElement)
+	gooPopoutRuntime.closeOutside(rootElement)
 	opened = true
 	lastPopoutOpenAt = performance.now()
 

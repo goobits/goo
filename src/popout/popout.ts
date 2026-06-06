@@ -19,7 +19,7 @@ const activePopouts = new Set<GooPopoutRuntime>()
 /**
  * Close all active popouts.
  */
-export function closeAllPopouts() {
+function closeAllPopouts() {
 	for (const popout of Array.from(activePopouts)) {
 		popout.close()
 	}
@@ -30,7 +30,7 @@ export function closeAllPopouts() {
  * This preserves parent panes while switching between sibling popouts inside them.
  * @param target - Element that should keep its containing popout chain open.
  */
-export function closePopoutsOutside(target: HTMLElement) {
+function closePopoutsOutside(target: HTMLElement) {
 	for (const popout of Array.from(activePopouts)) {
 		const element = popout.element
 		if (element?.contains(target)) {
@@ -45,9 +45,26 @@ export function closePopoutsOutside(target: HTMLElement) {
  * Get the currently active popout (most recently opened).
  * @returns {GooPopoutInstance|null}
  */
-export function getActivePopout() {
+function getActivePopout() {
 	const arr = Array.from(activePopouts)
 	return arr[arr.length - 1] || null
+}
+
+/** Runtime controls for the shared Goo popout registry. */
+export interface GooPopoutManager {
+	/** Close all active popouts. */
+	closeAll(): void
+	/** Close active popouts that do not contain the provided element. */
+	closeOutside(target: HTMLElement): void
+	/** Return the most recently opened popout. */
+	getActive(): GooPopoutInstance | null
+}
+
+/** Shared Goo popout registry controls. */
+export const gooPopoutRuntime: GooPopoutManager = {
+	closeAll: closeAllPopouts,
+	closeOutside: closePopoutsOutside,
+	getActive: getActivePopout
 }
 
 // =============================================================================
@@ -1010,7 +1027,5 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 // =============================================================================
 // Export
 // =============================================================================
-
-export { HORIZONTAL, VERTICAL } from '../support/positioning/index.ts'
 
 export default createGooPopout

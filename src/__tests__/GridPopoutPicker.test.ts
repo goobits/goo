@@ -5,7 +5,9 @@ import GridPopoutPicker from '../grid-popout/GridPopoutPicker.svelte'
 import type { GridPopoutItem } from '../grid-popout/types.ts'
 
 vi.mock('@goobits/goo/popout', () => ({
-	closePopoutsOutside: vi.fn(),
+	gooPopoutRuntime: {
+		closeOutside: vi.fn()
+	},
 	createGooPopout: vi.fn((options: {
 		content: HTMLElement
 		className?: string

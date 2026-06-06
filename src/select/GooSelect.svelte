@@ -39,6 +39,7 @@ import type {
 	GooSelectEventData,
 	GooSelectOpenOptions,
 	GooSelectOption,
+	GooSelectOptionsInput,
 	GooSelectProps,
 	GooSelectState
 } from './types.ts'
@@ -73,7 +74,7 @@ let {
 	tooltip,
 	title,
 	disabled = false,
-	boundContext,
+	actionContext,
 	triggerIcon,
 	id,
 	size,
@@ -140,7 +141,7 @@ $effect(() => {
 })
 
 $effect(() => {
-	currentBoundContext = boundContext
+	currentBoundContext = actionContext
 })
 
 $effect(() => {
@@ -180,7 +181,7 @@ export function getValue(): string {
 	return selectedValue
 }
 
-export function setOptions(nextOptions: readonly string[] | readonly GooSelectOption[] | Record<string, unknown>): void {
+export function setOptions(nextOptions: GooSelectOptionsInput): void {
 	normalizedOptions = normalizeOptions(nextOptions)
 	if (opened) panel?.render(normalizedOptions)
 }
@@ -198,7 +199,7 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 		clickToClose = true,
 		keepWithin,
 		parentElement,
-		boundContext: contextOverride,
+		actionContext: contextOverride,
 		align: alignOverride,
 		offset: offsetOverride
 	} = options

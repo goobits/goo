@@ -2,10 +2,17 @@ import { mount, unmount } from 'svelte'
 
 import { normalizeOptions } from './_normalizeOptions.ts'
 import GooSelect from './GooSelect.svelte'
-import type { GooSelectElement, GooSelectEventData, GooSelectMenuOptions, GooSelectOpenOptions, GooSelectOption } from './types.ts'
+import type {
+	GooSelectElement,
+	GooSelectEventData,
+	GooSelectMenuOptions,
+	GooSelectOpenOptions,
+	GooSelectOption,
+	GooSelectOptionsInput
+} from './types.ts'
 
 export type SelectFieldOptions = {
-	boundContext?: unknown
+	actionContext?: unknown
 	class?: string
 	className?: string
 	disabled?: boolean
@@ -15,7 +22,7 @@ export type SelectFieldOptions = {
 	onchange?: (id: string, data: GooSelectEventData) => void
 	onclose?: () => void
 	onopen?: () => void
-	options?: readonly string[] | readonly GooSelectOption[] | Record<string, unknown>
+	options?: GooSelectOptionsInput
 	placeholder?: string
 	menu?: GooSelectMenuOptions
 	showHeader?: boolean
@@ -54,7 +61,7 @@ export function createSelectField(options: SelectFieldOptions = {}): GooSelectEl
 				tooltip: options.tooltip,
 				title: options.title,
 				disabled: options.disabled,
-				boundContext: options.boundContext,
+				actionContext: options.actionContext,
 				triggerIcon: options.triggerIcon,
 				id: options.id,
 				class: options.class ?? options.className,

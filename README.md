@@ -94,7 +94,7 @@ Prefer subpath imports in apps when you only need one surface.
 | `@goobits/goo/label`                   | `GooLabel`                                                         | Label component                            |
 | `@goobits/goo/number`                  | `formatNumber`, `clamp`, `toPercent`, `fromPercent`, `roundNumber` | Number utilities                           |
 | `@goobits/goo/panel`                   | `GooPanel`                                                         | Inspector panel shell                      |
-| `@goobits/goo/popout`                  | `GooPopout`, `createGooPopout`, popout registry helpers            | Popout positioning and lifecycle           |
+| `@goobits/goo/popout`                  | `GooPopout`, `createGooPopout`, `gooPopoutRuntime`                 | Popout positioning and lifecycle           |
 | `@goobits/goo/positioning`             | `positionElementAt`, `calculatePosition`, positioning types        | Shared positioning math                    |
 | `@goobits/goo/progress-ring`           | `GooProgressRing`, `createGooProgressRingTimer`                    | Progress ring and timer overlay            |
 | `@goobits/goo/radio`                   | `GooRadio`, `GooRadioGroup`                                        | Radio controls                             |
@@ -351,11 +351,11 @@ Imperative schema callers can use `createGooSchema()` to receive a native elemen
 ```ts
 import { GooAlert, GooConfirm, GooPrompt } from '@goobits/goo/dialog'
 
-await GooAlert('Saved')
-const confirm = await GooConfirm('Delete this item?')
+await GooAlert('Saved').result
+const confirm = await GooConfirm('Delete this item?').result
 const prompt = await GooPrompt({
 	fields: [{ type: 'text', name: 'name', label: 'Name' }]
-})
+}).result
 ```
 
 `createGooDialog()` returns a public controller handle with `element`, `open()`, `close()`, and `setContent()`. Use `controller.element` for DOM events, attributes, and queries; header/content/footer nodes are implementation details.

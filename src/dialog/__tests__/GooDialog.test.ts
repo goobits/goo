@@ -28,7 +28,7 @@ describe('GooDialog', () => {
 	})
 
 	it('resolves confirm dialogs from footer actions', async() => {
-		const resultPromise = GooConfirm('Continue?')
+		const resultPromise = GooConfirm('Continue?').result
 		await nextFrame()
 		const dialog = document.querySelector<HTMLElement>('.goo-dialog[open]')
 
