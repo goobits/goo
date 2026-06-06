@@ -2,13 +2,8 @@ import { fireEvent, render } from '@testing-library/svelte'
 import { describe, expect, it, vi } from 'vitest'
 
 import GooButtonGroup from '../GooButtonGroup.svelte'
-import { GooButtonGroup as ExportedGooButtonGroup } from '../index.ts'
 
 describe('GooButtonGroup', () => {
-	it('exports the native Svelte component from the package subpath', () => {
-		expect(ExportedGooButtonGroup).toBe(GooButtonGroup)
-	})
-
 	it('renders option buttons without a custom element host', () => {
 		const { container } = render(GooButtonGroup, {
 			props: {

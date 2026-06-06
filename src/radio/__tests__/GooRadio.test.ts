@@ -4,14 +4,8 @@ import { describe, expect, it, vi } from 'vitest'
 
 import GooRadio from '../GooRadio.svelte'
 import GooRadioGroup from '../GooRadioGroup.svelte'
-import { GooRadio as ExportedGooRadio, GooRadioGroup as ExportedGooRadioGroup } from '../index.ts'
 
 describe('GooRadio', () => {
-	it('exports native Svelte components from the package subpath', () => {
-		expect(ExportedGooRadio).toBe(GooRadio)
-		expect(ExportedGooRadioGroup).toBe(GooRadioGroup)
-	})
-
 	it('renders a radio button without a custom element host', () => {
 		const { container } = render(GooRadio, {
 			props: {

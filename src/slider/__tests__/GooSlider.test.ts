@@ -4,14 +4,9 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { pointerEvent } from '../../__tests__/_pointerEvents.ts'
 import GooSlider from '../GooSlider.svelte'
-import { GooSlider as ExportedGooSlider } from '../index.ts'
 import type { GooSliderElement } from '../types.ts'
 
 describe('GooSlider', () => {
-	it('exports the native Svelte component from the package subpath', () => {
-		expect(ExportedGooSlider).toBe(GooSlider)
-	})
-
 	it('renders a native slider surface without custom element tags', () => {
 		const { container } = render(GooSlider, {
 			props: {

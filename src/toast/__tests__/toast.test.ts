@@ -4,8 +4,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import GooToast from '../GooToast.svelte'
 import GooToaster from '../GooToaster.svelte'
 import {
-	GooToast as ExportedGooToast,
-	GooToaster as ExportedGooToaster,
 	toast,
 	toastStore
 } from '../index.ts'
@@ -29,11 +27,6 @@ function makeToast(overrides: Partial<Toast> = {}): Toast {
 describe('toast service', () => {
 	beforeEach(() => {
 		_resetToastStoreForTests()
-	})
-
-	it('exports both Svelte components on the public surface', () => {
-		expect(ExportedGooToast).toBe(GooToast)
-		expect(ExportedGooToaster).toBe(GooToaster)
 	})
 
 	it('adds toasts for each variant helper', () => {

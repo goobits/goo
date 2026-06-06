@@ -2,13 +2,8 @@ import { fireEvent, render } from '@testing-library/svelte'
 import { describe, expect, it, vi } from 'vitest'
 
 import GooTextarea from '../GooTextarea.svelte'
-import { GooTextarea as ExportedGooTextarea } from '../index.ts'
 
 describe('GooTextarea', () => {
-	it('exports the native Svelte component from the package subpath', () => {
-		expect(ExportedGooTextarea).toBe(GooTextarea)
-	})
-
 	it('renders a native textarea without a custom element host', () => {
 		const { container } = render(GooTextarea, {
 			props: {

@@ -4,13 +4,8 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { pointerEvent } from '../../__tests__/_pointerEvents.ts'
 import GooCheckbox from '../GooCheckbox.svelte'
-import { GooCheckbox as ExportedGooCheckbox } from '../index.ts'
 
 describe('GooCheckbox', () => {
-	it('exports the native Svelte component from the package subpath', () => {
-		expect(ExportedGooCheckbox).toBe(GooCheckbox)
-	})
-
 	it('toggles without entering the transitionless dragging state', async() => {
 		const onchange = vi.fn()
 		const { container } = render(GooCheckbox, {

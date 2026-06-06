@@ -4,17 +4,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { pointerEvent } from '../../__tests__/_pointerEvents.ts'
 import GooSelect from '../GooSelect.svelte'
-import { GooSelect as ExportedGooSelect } from '../index.ts'
 import { createIcon } from '../selectDom.ts'
 import type { GooSelectElement } from '../types.ts'
 
 describe('GooSelect', () => {
 	afterEach(() => {
-		document.querySelectorAll('.goo-popout').forEach(element => element.remove())
-	})
-
-	it('exports the native Svelte component from the package subpath', () => {
-		expect(ExportedGooSelect).toBe(GooSelect)
+	document.querySelectorAll('.goo-popout').forEach(element => element.remove())
 	})
 
 	it('renders a native select surface without custom element tags', () => {

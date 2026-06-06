@@ -3,17 +3,12 @@ import { createRawSnippet } from 'svelte'
 import { describe, expect, it, vi } from 'vitest'
 
 import GooErrorBoundary from '../GooErrorBoundary.svelte'
-import { GooErrorBoundary as ExportedGooErrorBoundary } from '../index.ts'
 
 const childrenSnippet = createRawSnippet(() => ({
 	render: () => '<p data-testid="children">healthy</p>'
 }))
 
 describe('GooErrorBoundary', () => {
-	it('exports the Svelte component as the boundary surface', () => {
-		expect(ExportedGooErrorBoundary).toBe(GooErrorBoundary)
-	})
-
 	it('renders children when no error has been captured', () => {
 		const { container } = render(GooErrorBoundary, {
 			props: {

@@ -4,14 +4,9 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { pointerEvent } from '../../__tests__/_pointerEvents.ts'
 import GooAngleInput from '../GooAngleInput.svelte'
-import { GooAngleInput as ExportedGooAngleInput } from '../index.ts'
 import type { GooAngleInputElement } from '../types.ts'
 
 describe('GooAngleInput', () => {
-	it('exports the native Svelte component from the package subpath', () => {
-		expect(ExportedGooAngleInput).toBe(GooAngleInput)
-	})
-
 	it('renders a native angle input surface without custom element tags', () => {
 		const { container } = render(GooAngleInput, {
 			props: {

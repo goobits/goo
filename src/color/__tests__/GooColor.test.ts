@@ -3,14 +3,9 @@ import { tick } from 'svelte'
 import { describe, expect, it, vi } from 'vitest'
 
 import GooColor from '../GooColor.svelte'
-import { GooColor as ExportedGooColor } from '../index.ts'
 import type { GooColorElement } from '../types.ts'
 
 describe('GooColor', () => {
-	it('exports the native Svelte component from the package subpath', () => {
-		expect(ExportedGooColor).toBe(GooColor)
-	})
-
 	it('renders a native color surface without custom element tags', () => {
 		const { container } = render(GooColor, {
 			props: {

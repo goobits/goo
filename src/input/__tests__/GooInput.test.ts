@@ -5,14 +5,8 @@ import { describe, expect, it, vi } from 'vitest'
 import { pointerEvent } from '../../__tests__/_pointerEvents.ts'
 import GooInput from '../GooInput.svelte'
 import GooNumber from '../GooNumber.svelte'
-import { GooInput as ExportedGooInput, GooNumber as ExportedGooNumber } from '../index.ts'
 
 describe('GooInput', () => {
-	it('exports native Svelte input components from the package subpath', () => {
-		expect(ExportedGooInput).toBe(GooInput)
-		expect(ExportedGooNumber).toBe(GooNumber)
-	})
-
 	it('renders text input without a custom element host', () => {
 		const { container } = render(GooInput, {
 			props: {

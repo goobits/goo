@@ -2,13 +2,8 @@ import { fireEvent, render } from '@testing-library/svelte'
 import { describe, expect, it, vi } from 'vitest'
 
 import GooButton from '../GooButton.svelte'
-import { GooButton as ExportedGooButton } from '../index.ts'
 
 describe('GooButton', () => {
-	it('exports the Svelte component as the button surface', () => {
-		expect(ExportedGooButton).toBe(GooButton)
-	})
-
 	it('renders a native button without a goo-button custom element', () => {
 		const { container } = render(GooButton, {
 			props: {

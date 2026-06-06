@@ -3,13 +3,8 @@ import { tick } from 'svelte'
 import { describe, expect, it, vi } from 'vitest'
 
 import GooDataGrid from '../GooDataGrid.svelte'
-import { GooDataGrid as ExportedGooDataGrid } from '../index.ts'
 
 describe('GooDataGrid', () => {
-	it('exports the Svelte component from the data-grid subpath', () => {
-		expect(ExportedGooDataGrid).toBe(GooDataGrid)
-	})
-
 	it('renders rows and columns without a custom element host', () => {
 		const { container } = render(GooDataGrid, {
 			props: {

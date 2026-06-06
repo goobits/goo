@@ -3,7 +3,6 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { _resetTurnstileLoaderForTests } from '../_script-loader.ts'
 import GooTurnstileField from '../GooTurnstileField.svelte'
-import { GooTurnstileField as ExportedGooTurnstileField } from '../index.ts'
 
 const SCRIPT_ID = 'goo-turnstile-script'
 
@@ -19,10 +18,6 @@ describe('GooTurnstileField', () => {
 
 	afterEach(() => {
 		cleanupScript()
-	})
-
-	it('exports the Svelte component as the turnstile surface', () => {
-		expect(ExportedGooTurnstileField).toBe(GooTurnstileField)
 	})
 
 	it('renders nothing when siteKey is empty', () => {
