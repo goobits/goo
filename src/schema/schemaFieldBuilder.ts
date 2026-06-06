@@ -4,7 +4,7 @@
  * @module goobits/schema/schemaFieldBuilder
  */
 
-import type { ControlOptionBag, ControlOptionValue, ControlTypeRegistry } from '../controller/controlRegistry.ts'
+import type { GooControlOptionBag, GooControlOptionValue, GooControlTypeRegistry } from '../controller/controlRegistry.ts'
 import type { GooControllerOptions } from '../controller/GooController.ts'
 import { getControllerFieldLayout } from './fieldLayout.ts'
 import { applyFieldValueFormatOptions } from './fieldValueFormat.ts'
@@ -32,24 +32,25 @@ type RawOption = string | {
 
 /** Controller options built from a schema field */
 export interface ControllerOptions extends GooControllerOptions {
+	[key: string]: unknown
 	object: Record<string, unknown>
 	property: string
 	label: string
-	type?: string
-	controlTypes?: ControlTypeRegistry
+	type?: GooControllerOptions['type']
+	controlTypes?: GooControlTypeRegistry
 	min?: number
 	max?: number
 	step?: number
 	coverage?: boolean
-	preset?: string
+	preset?: GooControllerOptions['preset']
 	presetColor?: string
 	presetHue?: number
-	shape?: string
+	shape?: GooControllerOptions['shape']
 	dual?: boolean
 	unit?: string
 	options?: NormalizedSelectOption[]
 	layout?: 'inline' | 'stacked'
-	controlOptions?: ControlOptionBag
+	controlOptions?: GooControlOptionBag
 }
 
 const SCHEMA_FIELD_KEYS = new Set([
@@ -244,15 +245,15 @@ export function buildControllerOptions(
 	const layout = getControllerFieldLayout(node)
 	if (layout) options.layout = layout
 
-	let controlOptions: ControlOptionBag | undefined = node.controlOptions ? { ...node.controlOptions } : undefined
+	let controlOptions: GooControlOptionBag | undefined = node.controlOptions ? { ...node.controlOptions } : undefined
 	for (const [ key, value ] of Object.entries(valueFormatOptions)) {
-		if (key !== 'unit' && isControlOptionValue(value)) {
+		if (key !== 'unit' && isGooControlOptionValue(value)) {
 			controlOptions ??= {}
 			controlOptions[key] = value
 		}
 	}
 	for (const [ key, value ] of Object.entries(node)) {
-		if (!SCHEMA_FIELD_KEYS.has(key) && isControlOptionValue(value)) {
+		if (!SCHEMA_FIELD_KEYS.has(key) && isGooControlOptionValue(value)) {
 			controlOptions ??= {}
 			controlOptions[key] = value
 		}
@@ -264,7 +265,7 @@ export function buildControllerOptions(
 	return options
 }
 
-function isControlOptionValue(value: unknown): value is ControlOptionValue {
+function isGooControlOptionValue(value: unknown): value is GooControlOptionValue {
 	return (
 		value == null ||
 		typeof value === 'string' ||

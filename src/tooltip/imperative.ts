@@ -17,18 +17,22 @@ export interface GooTooltipRuntimeOptions {
 	showOnHover?: boolean
 }
 
-/** Tooltip state returned by the imperative Goo tooltip runtime. */
-export interface GooTooltipRuntimeState {
-	content: TooltipContent
-	element: HTMLElement
-	instance: GooTooltipInstance
-	options: GooTooltipRuntimeOptions
+/** Handle returned by the imperative Goo tooltip runtime. */
+export interface GooTooltipRuntimeHandle {
+	/** Element the tooltip is attached to. */
+	readonly element: HTMLElement
+	/** Destroy this tooltip handle. */
+	destroy(): void
+	/** Hide this tooltip when it is active. */
+	hide(): void
+	/** Show or refresh this tooltip. */
+	show(): void
 }
 
 /** Imperative Goo tooltip manager for Sketch-style non-Svelte call sites. */
 export interface GooTooltipRuntimeApi {
 	/** Attach a tooltip to an element and return the runtime state for manual control. */
-	attach(element: HTMLElement | string, content: TooltipContent, options?: GooTooltipRuntimeOptions): GooTooltipRuntimeState | undefined
+	attach(element: HTMLElement | string, content: TooltipContent, options?: GooTooltipRuntimeOptions): GooTooltipRuntimeHandle | undefined
 	/** Destroy the active tooltip and remove any synthetic anchor. */
 	destroy(): void
 	/** Whether an imperative tooltip is currently visible. */
@@ -36,12 +40,23 @@ export interface GooTooltipRuntimeApi {
 	/** Hide the active tooltip. */
 	hide(callback?: () => void): void
 	/** Re-show the active or provided tooltip state when enabled. */
-	ping(state?: GooTooltipRuntimeState): void
+	ping(handle?: GooTooltipRuntimeHandle): void
 	/** Show a tooltip state or ad-hoc tooltip content. */
-	show(content: TooltipContent | GooTooltipRuntimeState, options?: GooTooltipRuntimeOptions): void
+	show(content: TooltipContent | GooTooltipRuntimeHandle, options?: GooTooltipRuntimeOptions): void
 }
 
-let currentState: GooTooltipRuntimeState | undefined
+type TooltipState = {
+	content: TooltipContent
+	element: HTMLElement
+	instance: GooTooltipInstance
+	options: GooTooltipRuntimeOptions
+}
+
+type TooltipRuntimeHandleInternal = GooTooltipRuntimeHandle & {
+	readonly state: TooltipState
+}
+
+let currentState: TooltipState | undefined
 let currentInstance: GooTooltipInstance | undefined
 let anchor: HTMLElement | undefined
 let enabled = false
@@ -64,7 +79,7 @@ function attachTooltip(
 	element: HTMLElement | string,
 	content: TooltipContent,
 	options: GooTooltipRuntimeOptions = {}
-): GooTooltipRuntimeState | undefined {
+): GooTooltipRuntimeHandle | undefined {
 	const target = resolveElement(element)
 	const value = resolveContent(content)
 	if (!target || !value) return undefined
@@ -79,23 +94,26 @@ function attachTooltip(
 		trigger: resolveTrigger(options),
 		interactive: options.interactive
 	})
-	const state: GooTooltipRuntimeState = {
+	const state: TooltipState = {
 		content,
 		element: target,
 		instance,
 		options
 	}
 
-	return state
+	return createHandle(state)
 }
 
 function show(
-	content: TooltipContent | GooTooltipRuntimeState,
+	content: TooltipContent | GooTooltipRuntimeHandle,
 	options: GooTooltipRuntimeOptions = {}
 ): void {
-	const state = isTooltipState(content)
-		? content
-		: createShowState(content, options)
+	let state: TooltipState
+	if (isTooltipHandle(content)) {
+		state = content.state
+	} else {
+		state = createShowState(content as TooltipContent, options)
+	}
 	const value = resolveContent(state.content)
 	if (!value) return
 
@@ -104,7 +122,15 @@ function show(
 
 	const delay = state.options.showDelay ?? options.showDelay ?? 0
 	if (delay > 0) {
-		showTimeoutId = window.setTimeout(() => show({ ...state, options: { ...state.options, showDelay: 0 } }), delay)
+		showTimeoutId = window.setTimeout(() => {
+			show(createHandle({
+				...state,
+				options: {
+					...state.options,
+					showDelay: 0
+				}
+			}))
+		}, delay)
 		return
 	}
 
@@ -128,9 +154,10 @@ function hide(callback?: () => void): void {
 	callback?.()
 }
 
-function ping(state: GooTooltipRuntimeState = currentState as GooTooltipRuntimeState): void {
+function ping(handle?: GooTooltipRuntimeHandle): void {
+	const state = handle && isTooltipHandle(handle) ? handle.state : currentState
 	if (!state || !enabled) return
-	show(state)
+	show(createHandle(state))
 }
 
 function destroy(): void {
@@ -144,7 +171,7 @@ function destroy(): void {
 	enabled = false
 }
 
-function createShowState(content: TooltipContent, options: GooTooltipRuntimeOptions): GooTooltipRuntimeState {
+function createShowState(content: TooltipContent, options: GooTooltipRuntimeOptions): TooltipState {
 	const target = options.element || resolveAnchor(options)
 	const instance = createGooTooltip({
 		for: target,
@@ -160,6 +187,35 @@ function createShowState(content: TooltipContent, options: GooTooltipRuntimeOpti
 		element: target,
 		instance,
 		options
+	}
+}
+
+function createHandle(state: TooltipState): TooltipRuntimeHandleInternal {
+	return {
+		get element() {
+			return state.element
+		},
+		get state() {
+			return state
+		},
+		destroy() {
+			state.instance.destroy()
+			if (currentState === state) {
+				currentState = undefined
+				currentInstance = undefined
+				enabled = false
+			}
+		},
+		hide() {
+			if (currentState === state) {
+				hide()
+			} else {
+				state.instance.hide()
+			}
+		},
+		show() {
+			show(this)
+		}
 	}
 }
 
@@ -239,6 +295,6 @@ function alignFromDirection(direction: GooTooltipRuntimeOptions['direction'] = '
 	}
 }
 
-function isTooltipState(value: TooltipContent | GooTooltipRuntimeState): value is GooTooltipRuntimeState {
-	return typeof value === 'object' && value !== null && 'instance' in value && 'content' in value
+function isTooltipHandle(value: TooltipContent | GooTooltipRuntimeHandle): value is TooltipRuntimeHandleInternal {
+	return typeof value === 'object' && value !== null && 'state' in value
 }

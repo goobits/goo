@@ -7,7 +7,7 @@ import type { AngleInputFieldOptions } from '../angle-input/_createAngleInputFie
 import type { ButtonGroupFieldOptions } from '../button-group/_createButtonGroupField.ts'
 import type { CheckboxFieldOptions } from '../checkbox/_createCheckboxField.ts'
 import type { ColorFieldOptions } from '../color/_createColorField.ts'
-import { resolveControlTypeConfig } from '../controller/controlRegistry.ts'
+import { resolveGooControlTypeConfig } from '../controller/controlRegistry.ts'
 import type { NumberInputFieldOptions, TextInputFieldOptions } from '../input/_createInputField.ts'
 import type { RadioGroupFieldOptions } from '../radio/_createRadioGroupField.ts'
 import type { SelectFieldOptions } from '../select/_createSelectField.ts'
@@ -36,7 +36,7 @@ export type GooFieldConfig =
  * @returns The field element, or null when the type is unknown.
  */
 export function createGooField(config: GooFieldConfig): HTMLElement | null {
-	return resolveControlTypeConfig(config.type)?.createField?.(config) ?? null
+	return resolveGooControlTypeConfig(config.type)?.createField?.(config) ?? null
 }
 
 /**

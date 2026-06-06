@@ -112,7 +112,6 @@ export { GooLabel } from './label/index.ts'
 export type { GooPopoutAt, GooPopoutInstance, GooPopoutManager, GooPopoutOptions } from './popout/index.ts'
 export { createGooPopout, GooPopout, gooPopoutRuntime } from './popout/index.ts'
 export type {
-	GooProgressRingHandle,
 	GooProgressRingSteps,
 	GooProgressRingTimer,
 	GooProgressRingTimerOptions,
@@ -207,8 +206,7 @@ export {
 } from './virtualGrid/index.ts'
 export type {
 	GooVortexCreateOptions,
-	GooVortexHandle,
-	GooVortexItem,
+	GooVortexManager,
 	GooVortexOptions,
 	GooVortexPoint,
 	GooVortexUpdateOptions
@@ -221,13 +219,13 @@ export { GooColor } from './color/index.ts'
 export type {
 	ControllerOption,
 	ControllerOptionValue,
-	ControlOptionBag,
-	ControlOptions,
-	ControlOptionValue,
-	ControlTypeConfig,
-	ControlTypeEntry,
-	ControlTypeRegistry,
 	GooControllerOptions,
+	GooControlOptionBag,
+	GooControlOptions,
+	GooControlOptionValue,
+	GooControlTypeConfig,
+	GooControlTypeEntry,
+	GooControlTypeRegistry,
 	SvelteControlSchema
 } from './controller/index.ts'
 export { createGooController, GooController } from './controller/index.ts'
@@ -236,11 +234,12 @@ export type {
 	GooFloatingWindowHorizontalAlign,
 	GooFloatingWindowOptions,
 	GooFloatingWindowPosition,
+	GooFloatingWindowRuntime,
 	GooFloatingWindowSettings,
 	GooFloatingWindowStorage,
 	GooFloatingWindowVerticalAlign
 } from './floating-window/index.ts'
-export { createGooFloatingWindow } from './floating-window/index.ts'
+export { createGooFloatingWindow, gooFloatingWindowRuntime } from './floating-window/index.ts'
 export type { GooFolderElement, GooFolderOptions } from './folder/index.ts'
 export { GooFolder } from './folder/index.ts'
 export type { GridPopoutItem, GridPopoutTriggerHandle, GridPopoutTriggerOptions } from './grid-popout/index.ts'

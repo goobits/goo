@@ -8,10 +8,11 @@ import './GooController.css'
 
 import type { GooSelectMenuOptions } from '../select/types.ts'
 import { createSliderField } from '../slider/_createSliderField.ts'
+import type { GooSliderPreset, GooSliderShape } from '../slider/types.ts'
 import { emitter } from '../support/utils/emitter.ts'
 import { log } from '../support/utils/logger.ts'
 import { createControlFromRegistry } from './controlFactory.ts'
-import { type ControlOptionBag, type ControlOptions, type ControlTypeRegistry, resolveControlTypeConfig } from './controlRegistry.ts'
+import { type GooControlOptionBag, type GooControlOptions, type GooControlTypeRegistry, resolveGooControlTypeConfig } from './controlRegistry.ts'
 import {
 	buildControlOptions,
 	buildDualRangeOptions,
@@ -68,7 +69,30 @@ export interface ControllerOption {
 export type ControllerOptionValue = string | ControllerOption
 
 /** Component-specific options forwarded to the mounted control. */
-export type GooControllerControlOptions = ControlOptionBag
+export type GooControllerControlOptions = GooControlOptionBag
+
+/** Built-in Goo control type ids. Custom ids are resolved through `controlTypes`. */
+export type GooControllerControlType =
+	| 'angle'
+	| 'blend-mode'
+	| 'button'
+	| 'button-group'
+	| 'checkbox'
+	| 'color'
+	| 'email'
+	| 'number'
+	| 'password'
+	| 'radio'
+	| 'radiogroup'
+	| 'range'
+	| 'range-dual'
+	| 'range-module'
+	| 'select'
+	| 'slider'
+	| 'text'
+	| 'textarea'
+	| 'url'
+	| (string & {})
 
 /**
  * Options for creating a GooController instance.
@@ -80,7 +104,7 @@ export interface GooControllerOptions {
 	max?: number
 	step?: number
 	options?: ControllerOptionValue[]
-	type?: string
+	type?: GooControllerControlType
 	onchange?: (value: unknown) => void
 	oninput?: (value: unknown) => void
 	parentElement?: HTMLElement
@@ -88,11 +112,11 @@ export interface GooControllerOptions {
 	inputId?: string
 	name?: string
 	unit?: string
-	preset?: string
+	preset?: GooSliderPreset
 	presetColor?: string
 	presetHue?: number
 	menu?: GooSelectMenuOptions
-	shape?: string
+	shape?: GooSliderShape
 	coverage?: boolean
 	showCoverage?: boolean
 	disabled?: boolean
@@ -103,7 +127,7 @@ export interface GooControllerOptions {
 	layout?: 'inline' | 'stacked'
 
 	/** Optional control type registry override */
-	controlTypes?: ControlTypeRegistry
+	controlTypes?: GooControlTypeRegistry
 }
 
 // ============================================================================
@@ -185,15 +209,15 @@ interface GooControllerInternal extends GooController {
 	_layout: 'inline' | 'stacked' | undefined
 	_controlOptions: GooControllerControlOptions | undefined
 	_dualRangeIsMinMax: boolean | undefined
-	_controlTypes: ControlTypeRegistry | undefined
+	_controlTypes: GooControlTypeRegistry | undefined
 	_getExistingControl(): HTMLElement | null
 	_attachControl(control: HTMLElement): void
 	_createElement(): void
 	_createControl(): Promise<void>
 	_createControlInner(): Promise<void>
 	_getStoredOptions(): StoredOptions
-	_buildDefaultOptions(value: unknown, Control: unknown): ControlOptions
-	_getAllOptions(): ControlOptions
+	_buildDefaultOptions(value: unknown, Control: unknown): GooControlOptions
+	_getAllOptions(): GooControlOptions
 	_createDualRange(value: unknown): Promise<void>
 	_handleDualChange(eventData: DualRangeEventData): void
 	_handleDualInput(eventData: DualRangeEventData): void
@@ -1018,7 +1042,7 @@ function resolveControllerLayout(
 	controlType: string,
 	options: GooControllerOptions
 ): 'inline' | 'stacked' | undefined {
-	return options.layout ?? resolveControlTypeConfig(controlType, options.controlTypes)?.layout
+	return options.layout ?? resolveGooControlTypeConfig(controlType, options.controlTypes)?.layout
 }
 
 function attachControllerMethods(element: GooControllerInternal): void {

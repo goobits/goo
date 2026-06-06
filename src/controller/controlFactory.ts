@@ -6,11 +6,11 @@
 
 import { log } from '../support/utils/logger.ts'
 import {
-	type ControlExport,
-	type ControlOptions,
-	type ControlOptionValue,
-	type ControlTypeRegistry,
-	resolveControlTypeConfig
+	type GooControlExport,
+	type GooControlOptions,
+	type GooControlOptionValue,
+	type GooControlTypeRegistry,
+	resolveGooControlTypeConfig
 } from './controlRegistry.ts'
 import { createSvelteControlHost, type SvelteComponentType, type SvelteControlHost, type SvelteControlSchema } from './SvelteControl.svelte.ts'
 
@@ -35,7 +35,7 @@ export interface ControlCreationOptions {
 	value: unknown
 
 	/** All controller options for building control options */
-	controllerOptions: ControlOptions
+	controllerOptions: GooControlOptions
 
 	/** Change handler callback */
 	onchange: (value: unknown) => void
@@ -44,10 +44,10 @@ export interface ControlCreationOptions {
 	oninput?: (value: unknown) => void
 
 	/** Custom options builder (overrides default) */
-	buildOptions?: (value: unknown, Control: ControlExport) => ControlOptions
+	buildOptions?: (value: unknown, Control: GooControlExport) => GooControlOptions
 
 	/** Optional control type registry override */
-	controlTypes?: ControlTypeRegistry
+	controlTypes?: GooControlTypeRegistry
 }
 
 // ============================================================================
@@ -62,23 +62,23 @@ export interface ControlCreationOptions {
 	 */
 export function extractControlFromModule(
 	module: Record<string, unknown>
-): ControlExport | null {
+): GooControlExport | null {
 	// Prefer remaining UI* factory exports while schema/controller migration is in progress.
 	for (const key of Object.keys(module)) {
 		if (key.startsWith('UI') && typeof module[key] === 'function') {
-			return module[key] as ControlExport
+			return module[key] as GooControlExport
 		}
 	}
 
 	// Fall back to default export
 	if (module.default && typeof module.default === 'function') {
-		return module.default as ControlExport
+		return module.default as GooControlExport
 	}
 
 	// Fall back to first function export
 	for (const key of Object.keys(module)) {
 		if (typeof module[key] === 'function') {
-			return module[key] as ControlExport
+			return module[key] as GooControlExport
 		}
 	}
 
@@ -111,7 +111,7 @@ export async function createControlFromRegistry(
 	controlType: string,
 	options: ControlCreationOptions
 ): Promise<ControlCreationResult> {
-	const config = resolveControlTypeConfig(controlType, options.controlTypes)
+	const config = resolveGooControlTypeConfig(controlType, options.controlTypes)
 	if (!config) {
 		return { status: 'not_found' }
 	}
@@ -122,7 +122,7 @@ export async function createControlFromRegistry(
 
 		// Handle Svelte components with controlSchema.
 		if (config.svelte) {
-			return createSvelteControl(module as unknown as SvelteControlModule, options, controlType)
+			return createSvelteControl(module as unknown as SvelteGooControlModule, options, controlType)
 		}
 
 		// Extract the control class/factory
@@ -151,9 +151,9 @@ export async function createControlFromRegistry(
 		if (typeof Control === 'function') {
 			// Check if it's a factory function or a class.
 			const isClass = Control.prototype && Control.prototype.constructor === Control
-			const ControlConstructor = Control as new (options: ControlOptions) => HTMLElement
-			const ControlFactory = Control as (options: ControlOptions) => HTMLElement
-			control = isClass ? new ControlConstructor(controlOptions) : ControlFactory(controlOptions)
+			const GooControlConstructor = Control as new (options: GooControlOptions) => HTMLElement
+			const GooControlFactory = Control as (options: GooControlOptions) => HTMLElement
+			control = isClass ? new GooControlConstructor(controlOptions) : GooControlFactory(controlOptions)
 		}
 
 		if (control) {
@@ -168,7 +168,7 @@ export async function createControlFromRegistry(
 }
 
 /** Module structure for Svelte control components */
-interface SvelteControlModule {
+interface SvelteGooControlModule {
 	default: SvelteComponentType
 	controlSchema?: SvelteControlSchema
 }
@@ -181,11 +181,11 @@ interface SvelteControlModule {
  * @param controlType - control type.
  */
 function createSvelteControl(
-	module: SvelteControlModule,
+	module: SvelteGooControlModule,
 	options: ControlCreationOptions,
 	controlType: string
 ): ControlCreationResult {
-	const controlOptions = buildSvelteControlOptions(controlType, options.controllerOptions)
+	const controlOptions = buildSvelteGooControlOptions(controlType, options.controllerOptions)
 	const host = createSvelteControlHost({
 		component: module.default,
 		schema: module.controlSchema,
@@ -217,7 +217,7 @@ function createSvelteControl(
 	return { status: 'error' }
 }
 
-function buildSvelteControlOptions(controlType: string, controllerOptions: ControlOptions): ControlOptions {
+function buildSvelteGooControlOptions(controlType: string, controllerOptions: GooControlOptions): GooControlOptions {
 	const controlOptions = { ...controllerOptions }
 	if (controlType === 'checkbox' && typeof controlOptions.label === 'string') {
 		controlOptions.ariaLabel ??= controlOptions.label
@@ -231,10 +231,10 @@ function buildSvelteControlOptions(controlType: string, controllerOptions: Contr
  * @param options - Creation options
  * @returns Options object for the control constructor
  */
-function buildDefaultOptions(options: ControlCreationOptions): ControlOptions {
+function buildDefaultOptions(options: ControlCreationOptions): GooControlOptions {
 	const { value, controllerOptions, onchange, oninput } = options
-	const opts: ControlOptions = {
-		value: value as ControlOptionValue,
+	const opts: GooControlOptions = {
+		value: value as GooControlOptionValue,
 		onchange: (v: unknown) => {
 			// Handle both direct values and event objects with .value
 			const actualValue =

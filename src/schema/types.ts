@@ -3,7 +3,8 @@
  * @module goobits/schema/types
  */
 
-import type { ControlOptionBag, ControlTypeRegistry } from '../controller/controlRegistry.ts'
+import type { GooControlOptionBag, GooControlTypeRegistry } from '../controller/controlRegistry.ts'
+import type { GooSliderPreset, GooSliderShape } from '../slider/types.ts'
 
 /**
  * Control field definition type identifiers.
@@ -81,7 +82,7 @@ export interface GooSchemaField {
 	coverage?: boolean
 
 	/** Range preset styling. */
-	preset?: 'hue' | 'opacity' | 'saturation' | 'brightness' | 'bipolar' | 'size'
+	preset?: GooSliderPreset
 
 	/** Color for opacity preset. */
 	presetColor?: string
@@ -90,7 +91,7 @@ export interface GooSchemaField {
 	presetHue?: number
 
 	/** Track shape (for sliders). */
-	shape?: 'default' | 'wedge' | 'wedge-left' | string
+	shape?: GooSliderShape
 
 	/** Unit of measurement. */
 	unit?: 'degree' | 'radian' | '%' | 'px' | 'x' | string
@@ -120,7 +121,7 @@ export interface GooSchemaField {
 	modes?: readonly string[]
 
 	/** Component-specific options forwarded to the selected control. */
-	controlOptions?: ControlOptionBag
+	controlOptions?: GooControlOptionBag
 
 	/** Show field when condition matches. */
 	if?: GooSchemaCondition
@@ -213,7 +214,7 @@ export interface GooSchemaOptions {
 	folderClassName?: string
 
 	/** Optional control type registry override. */
-	controlTypes?: ControlTypeRegistry
+	controlTypes?: GooControlTypeRegistry
 }
 
 /**
@@ -233,5 +234,5 @@ export interface GooSchemaState {
 	folderClassName?: string
 
 	/** Optional control type registry override. */
-	controlTypes?: ControlTypeRegistry
+	controlTypes?: GooControlTypeRegistry
 }

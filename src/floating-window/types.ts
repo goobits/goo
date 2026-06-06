@@ -25,7 +25,7 @@ export type GooFloatingWindowPosition =
 export interface GooFloatingWindowSettings {
 	bottom?: number
 	closeable?: boolean
-	display?: string
+	display?: 'block' | 'none' | boolean
 	format?: '%' | 'px'
 	hAlign?: GooFloatingWindowHorizontalAlign
 	index?: number
@@ -74,60 +74,34 @@ export interface GooFloatingWindowOptions extends GooFloatingWindowSettings {
 export interface GooFloatingWindow {
 	element: HTMLElement
 	ready: Promise<void>
-	/**
-	 * Destroy.
-	 */
+	/** Destroy the floating-window behavior and leave the element in place. */
 	destroy(): void
-	/**
-	 * Flip horizontal.
-	 */
-	flipHorizontal(): void
-	/**
-	 * Focus.
-	 */
+	/** Bring this window to the top of the floating-window stack. */
 	focus(): void
-	/**
-	 * Gets containment rect.
-	 */
-	getContainmentRect(): DOMRect
-	/**
-	 * Returns a plain snapshot of current persisted settings.
-	 */
-	getSettings(): GooFloatingWindowSettings
-	/**
-	 * Hide.
-	 */
+	/** Hide the window when it is closeable. */
 	hide(): boolean
-	/**
-	 * Checks whether open.
-	 */
+	/** Whether the window is currently visible. */
 	isOpen(): boolean
+	/** Recalculate the window position against its current containment element. */
+	refresh(): void
 	/**
-	 * Restore.
-	 */
-	restore(): void
-	/**
-	 * Restore from storage.
-	 */
-	restoreFromStorage(): Promise<void>
-	/**
-	 * Sets alignment.
-	 *
-	 * @param position - position.
-	 */
-	setAlignment(position: GooFloatingWindowPosition): void
-	/**
-	 * Sets containment.
-	 *
-	 * @param containment - containment.
+	 * Replace the containment element used for positioning.
+	 * @param containment - New containment element.
 	 */
 	setContainment(containment?: HTMLElement): void
 	/**
-	 * Show.
+	 * Set the anchor position while preserving the current on-screen location where possible.
+	 * @param position - New anchor position.
 	 */
+	setPosition(position: GooFloatingWindowPosition): void
+	/** Show the window. */
 	show(): void
-	/**
-	 * Toggle.
-	 */
+	/** Toggle the window visibility. */
 	toggle(): void
+}
+
+/** Runtime helpers for global floating-window behaviors. */
+export interface GooFloatingWindowRuntime {
+	/** Hide the topmost focused closeable floating window. */
+	hideFocused(): boolean
 }

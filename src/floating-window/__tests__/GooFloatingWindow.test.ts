@@ -2,8 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import {
 	createGooFloatingWindow,
-	hideFocusedGooFloatingWindow,
-	normalizeFloatingWindowSettings
+	gooFloatingWindowRuntime
 } from '../index.ts'
 
 describe('GooFloatingWindow', () => {
@@ -40,7 +39,7 @@ describe('GooFloatingWindow', () => {
 		}))
 	})
 
-	it('flips horizontal alignment while preserving visible position', async() => {
+	it('sets horizontal position while preserving visible location', async() => {
 		const container = createContainer()
 		const element = createElement(container)
 		const floatingWindow = createGooFloatingWindow({
@@ -53,9 +52,8 @@ describe('GooFloatingWindow', () => {
 		})
 
 		await floatingWindow.ready
-		floatingWindow.flipHorizontal()
+		floatingWindow.setPosition('top left')
 
-		expect(floatingWindow.getSettings().hAlign).toBe('left')
 		expect(element.style.left).toBe('470px')
 		expect(element.style.right).toBe('')
 	})
@@ -74,11 +72,11 @@ describe('GooFloatingWindow', () => {
 		await floatingWindow.ready
 		floatingWindow.focus()
 
-		expect(hideFocusedGooFloatingWindow()).toBe(true)
+		expect(gooFloatingWindowRuntime.hideFocused()).toBe(true)
 		expect(floatingWindow.isOpen()).toBe(false)
 
 		floatingWindow.destroy()
-		expect(hideFocusedGooFloatingWindow()).toBe(false)
+		expect(gooFloatingWindowRuntime.hideFocused()).toBe(false)
 	})
 
 	it('does not consume focused non-closeable windows', async() => {
@@ -96,11 +94,11 @@ describe('GooFloatingWindow', () => {
 		await floatingWindow.ready
 		floatingWindow.focus()
 
-		expect(hideFocusedGooFloatingWindow()).toBe(false)
+		expect(gooFloatingWindowRuntime.hideFocused()).toBe(false)
 		expect(floatingWindow.isOpen()).toBe(true)
 	})
 
-	it('exposes the containment rect used by client overflow logic', async() => {
+	it('refreshes position when containment changes', async() => {
 		const container = createContainer()
 		const element = createElement(container)
 		const floatingWindow = createGooFloatingWindow({
@@ -110,14 +108,10 @@ describe('GooFloatingWindow', () => {
 		})
 
 		await floatingWindow.ready
+		floatingWindow.setContainment(container)
+		floatingWindow.refresh()
 
-		expect(floatingWindow.getContainmentRect().width).toBe(600)
-	})
-
-	it('rejects invalid persisted settings', () => {
-		expect(normalizeFloatingWindowSettings('{')).toBeNull()
-		expect(normalizeFloatingWindowSettings([])).toBeNull()
-		expect(normalizeFloatingWindowSettings(3)).toBeNull()
+		expect(element.classList.contains('opened')).toBe(true)
 	})
 
 	function createContainer(): HTMLElement {

@@ -6,7 +6,7 @@
  *
  * @example Adding a new control type:
  * 1. Create your control component in its own folder
- * 2. Import its module and add one line here: 'my-control': () => loadModule(myControlModule)
+ * 2. Import its module and add one line here: 'my-control': () => loadModule(myGooControlModule)
  * 3. Done! GooController will auto-detect or use type: 'my-control'
  *
  */
@@ -36,11 +36,11 @@ import * as sliderModule from '../slider/GooSlider.svelte'
 import { createTextareaField } from '../textarea/_createTextareaField.ts'
 import * as textareaModule from '../textarea/GooTextarea.svelte'
 
-/** Control module structure */
-export type ControlModule = Record<string, unknown>
+/** Control module structure loaded for a Goo controller type. */
+export type GooControlModule = Record<string, unknown>
 
 /** Primitive or object value accepted by control option bags. */
-export type ControlOptionValue =
+export type GooControlOptionValue =
   | string
   | number
   | boolean
@@ -50,35 +50,35 @@ export type ControlOptionValue =
   | ((...args: unknown[]) => unknown)
 
 /** Component-specific option bag passed through `controlOptions`. */
-export type ControlOptionBag = Record<string, ControlOptionValue>
+export type GooControlOptionBag = Record<string, GooControlOptionValue>
 
 /** Runtime options passed to constructor/factory functions. */
-export interface ControlOptions {
+export interface GooControlOptions {
 	[option: string]: unknown
 }
 
 /** Control factory function type. */
-export type ControlFactory = (options: ControlOptions) => HTMLElement
+export type GooControlFactory = (options: GooControlOptions) => HTMLElement
 
 /** Control constructor type. */
-export type ControlConstructor = new (options: ControlOptions) => HTMLElement
+export type GooControlConstructor = new (options: GooControlOptions) => HTMLElement
 
 /** Control factory or class type. */
-export type ControlExport = ControlFactory | ControlConstructor
+export type GooControlExport = GooControlFactory | GooControlConstructor
 
 /**
- * Control type config.
+ * Goo control type configuration used by GooController and GooSchema extensions.
  */
-export interface ControlTypeConfig {
+export interface GooControlTypeConfig {
 
 	/** Lazy import function returning the module */
-	load: () => Promise<ControlModule>
+	load: () => Promise<GooControlModule>
 
 	/**
 	 * Extract the control class/factory from the module.
 	 * Defaults to module.default or first export.
 	 */
-	extract?: (module: ControlModule) => ControlExport | null
+	extract?: (module: GooControlModule) => GooControlExport | null
 
 	/**
 	 * Build options to pass to the control constructor.
@@ -86,13 +86,13 @@ export interface ControlTypeConfig {
 	 */
 	buildOptions?: (
 		value: unknown,
-		options: ControlOptions,
+		options: GooControlOptions,
 		handleChange: (v: unknown) => void,
 		handleInput?: (v: unknown) => void
-	) => ControlOptions
+	) => GooControlOptions
 
 	/** Synchronous DOM field factory used by dialog fields. */
-	createField?: (options: ControlOptions) => HTMLElement
+	createField?: (options: GooControlOptions) => HTMLElement
 
 	/** If true, this is a Svelte component that exports controlSchema. */
 	svelte?: boolean
@@ -102,17 +102,17 @@ export interface ControlTypeConfig {
 }
 
 /**
-	 * Control type entry.
-	 */
-export type ControlTypeEntry = (() => Promise<ControlModule>) | ControlTypeConfig
+ * Goo control type registry entry.
+ */
+export type GooControlTypeEntry = (() => Promise<GooControlModule>) | GooControlTypeConfig
 
 /**
- * Control type registry.
+ * Goo control type registry for schema/controller extension points.
  */
-export type ControlTypeRegistry = Record<string, ControlTypeEntry>
+export type GooControlTypeRegistry = Record<string, GooControlTypeEntry>
 
-function loadModule(module: object): Promise<ControlModule> {
-	return Promise.resolve(module as ControlModule)
+function loadModule(module: object): Promise<GooControlModule> {
+	return Promise.resolve(module as GooControlModule)
 }
 
 /**
@@ -121,7 +121,7 @@ function loadModule(module: object): Promise<ControlModule> {
  * Simple form: type name → module loader
  * Advanced form: type name → { load, extract?, buildOptions? }
  */
-export const defaultControlRegistry: ControlTypeRegistry = {
+export const defaultControlRegistry: GooControlTypeRegistry = {
 	// Built-in controls
 	checkbox: { load: () => loadModule(checkboxModule), svelte: true, createField: createCheckboxField },
 	button: { load: () => loadModule(buttonModule), svelte: true },
@@ -131,14 +131,14 @@ export const defaultControlRegistry: ControlTypeRegistry = {
 	select: { load: () => loadModule(selectModule), svelte: true, createField: createSelectField },
 	'blend-mode': {
 		load: () => loadModule(blendModeModule),
-		extract: module => module.createBlendModeField as ControlFactory,
+		extract: module => module.createBlendModeField as GooControlFactory,
 		createField: createBlendModeField
 	},
 	radio: { load: () => loadModule(radioModule), svelte: true, createField: createRadioGroupField },
 	radiogroup: { load: () => loadModule(radioModule), svelte: true, createField: createRadioGroupField },
 	'range-module': {
 		load: () => loadModule(rangeModule),
-		extract: module => module.createRangeModuleField as ControlFactory,
+		extract: module => module.createRangeModuleField as GooControlFactory,
 		createField: createRangeModuleField
 	},
 	text: { load: () => loadModule(inputModule), svelte: true, createField: createInputField },
@@ -169,10 +169,10 @@ export const defaultControlRegistry: ControlTypeRegistry = {
  * @param type - type.
  * @param registry - registry.
  */
-export function resolveControlTypeConfig(
+export function resolveGooControlTypeConfig(
 	type: string,
-	registry?: ControlTypeRegistry
-): ControlTypeConfig | null {
+	registry?: GooControlTypeRegistry
+): GooControlTypeConfig | null {
 	const entry = registry?.[type] ?? defaultControlRegistry[type]
 	if (!entry) return null
 

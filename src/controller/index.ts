@@ -1,14 +1,10 @@
 export type {
-	ControlOptionBag,
-	ControlOptions,
-	ControlOptionValue,
-	ControlTypeConfig,
-	ControlTypeEntry,
-	ControlTypeRegistry
-} from './controlRegistry.ts'
-export {
-	defaultControlRegistry,
-	resolveControlTypeConfig
+	GooControlOptionBag,
+	GooControlOptions,
+	GooControlOptionValue,
+	GooControlTypeConfig,
+	GooControlTypeEntry,
+	GooControlTypeRegistry
 } from './controlRegistry.ts'
 export type {
 	ControllerOption,

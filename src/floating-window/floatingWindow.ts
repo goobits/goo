@@ -5,6 +5,7 @@ import type {
 	GooFloatingWindow,
 	GooFloatingWindowOptions,
 	GooFloatingWindowPosition,
+	GooFloatingWindowRuntime,
 	GooFloatingWindowSettings
 } from './types.ts'
 
@@ -58,16 +59,12 @@ export function createGooFloatingWindow(options: GooFloatingWindowOptions): GooF
 			return ready
 		},
 		destroy,
-		flipHorizontal,
 		focus,
-		getContainmentRect,
-		getSettings,
 		hide,
 		isOpen,
-		restore,
-		restoreFromStorage,
-		setAlignment,
+		refresh: restore,
 		setContainment,
+		setPosition,
 		show,
 		toggle
 	}
@@ -148,7 +145,7 @@ export function createGooFloatingWindow(options: GooFloatingWindowOptions): GooF
 		delete element.dataset.gooFloatingWindow
 	}
 
-	function flipHorizontal(): void {
+	function flipHorizontalAnchor(): void {
 		const rect = element.getBoundingClientRect()
 		const containmentRect = getContainmentRect()
 
@@ -181,10 +178,6 @@ export function createGooFloatingWindow(options: GooFloatingWindowOptions): GooF
 
 	function getContainmentRect(): DOMRect {
 		return containmentElement?.getBoundingClientRect() ?? document.documentElement.getBoundingClientRect()
-	}
-
-	function getSettings(): GooFloatingWindowSettings {
-		return toPlainSettings(settings)
 	}
 
 	function getParentRect(): DOMRect {
@@ -284,10 +277,10 @@ export function createGooFloatingWindow(options: GooFloatingWindowOptions): GooF
 		restore()
 	}
 
-	function setAlignment(position: GooFloatingWindowPosition): void {
+	function setPosition(position: GooFloatingWindowPosition): void {
 		const [ nextVAlign, nextHAlign ] = position.split(' ') as ['top' | 'bottom', 'left' | 'right']
 		if (settings.hAlign !== nextHAlign) {
-			flipHorizontal()
+			flipHorizontalAnchor()
 		}
 		settings.vAlign = nextVAlign
 		settings.hAlign = nextHAlign
@@ -327,7 +320,7 @@ export function createGooFloatingWindow(options: GooFloatingWindowOptions): GooF
  * @param value - Stored value from an application storage adapter.
  * @returns Plain settings object, or null when invalid.
  */
-export function normalizeFloatingWindowSettings(value: unknown): GooFloatingWindowSettings | null {
+function normalizeFloatingWindowSettings(value: unknown): GooFloatingWindowSettings | null {
 	if (!value) {
 		return null
 	}
@@ -358,7 +351,7 @@ function getFocusedGooFloatingWindow(): GooFloatingWindow | undefined {
  * Hide the focused Goo floating window if it is closeable.
  * @returns True when a focused floating window was hidden.
  */
-export function hideFocusedGooFloatingWindow(): boolean {
+function hideFocusedGooFloatingWindow(): boolean {
 	let floatingWindow = getFocusedGooFloatingWindow()
 	while (floatingWindow) {
 		if (floatingWindow.hide()) {
@@ -370,14 +363,19 @@ export function hideFocusedGooFloatingWindow(): boolean {
 	return false
 }
 
+/** Runtime helpers for global floating-window behavior. */
+export const gooFloatingWindowRuntime: GooFloatingWindowRuntime = {
+	hideFocused: hideFocusedGooFloatingWindow
+}
+
 function clamp(value: number, min: number, max: number): number {
 	return Math.min(max, Math.max(min, value))
 }
 
-function normalizeDisplay(display: unknown): string | undefined {
+function normalizeDisplay(display: unknown): 'block' | 'none' | undefined {
 	if (display === true) return 'block'
 	if (display === false) return 'none'
-	if (typeof display === 'string') return display
+	if (display === 'block' || display === 'none') return display
 	return undefined
 }
 

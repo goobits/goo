@@ -5,7 +5,7 @@
 
 import './GooSchema.css'
 
-import { resolveControlTypeConfig } from '../controller/controlRegistry.ts'
+import { resolveGooControlTypeConfig } from '../controller/controlRegistry.ts'
 import { createGooController } from '../controller/GooController.ts'
 import { createSvelteControlHost, type SvelteComponentType, type SvelteControlSchema } from '../controller/SvelteControl.svelte.ts'
 import { createFolder, type GooFolderElement } from '../folder/_createFolder.ts'
@@ -290,7 +290,7 @@ async function buildField(
 	}
 
 	if (node.type) {
-		const controlConfig = resolveControlTypeConfig(node.type, controlTypes)
+		const controlConfig = resolveGooControlTypeConfig(node.type, controlTypes)
 		if (controlConfig?.svelte) {
 			const module = await controlConfig.load() as { default: SvelteComponentType; controlSchema?: SvelteControlSchema }
 			if (token !== element._rebuildToken) return

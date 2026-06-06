@@ -5,7 +5,7 @@
  */
 
 import type { GooSelectMenuOptions } from '../select/types.ts'
-import type { ControlOptions, ControlOptionValue as RegistryControlOptionValue } from './controlRegistry.ts'
+import type { GooControlOptions, GooControlOptionValue as RegistryControlOptionValue } from './controlRegistry.ts'
 
 // ============================================================================
 // Types
@@ -24,14 +24,14 @@ export interface ControlOption {
 }
 
 /** Valid option types for select/button-group controls */
-export type ControlOptionValue = string | ControlOption
+export type GooControlOptionValue = string | ControlOption
 
 export interface ControllerSetupOptions {
 	type?: string
-	min?: number | ControlOptionValue[]
+	min?: number | GooControlOptionValue[]
 	max?: number
 	step?: number
-	options?: ControlOptionValue[]
+	options?: GooControlOptionValue[]
 	unit?: string
 	preset?: string
 	presetColor?: string
@@ -48,7 +48,7 @@ export interface StoredOptions {
 	min?: number
 	max?: number
 	step?: number
-	selectOptions?: ControlOptionValue[]
+	selectOptions?: GooControlOptionValue[]
 	inputId?: string
 	name?: string
 	unit?: string
@@ -57,7 +57,7 @@ export interface StoredOptions {
 	presetHue?: number
 	showCoverage?: boolean
 	buttonLabel?: string
-	controlOptions?: ControlOptions
+	controlOptions?: GooControlOptions
 	menu?: GooSelectMenuOptions
 	shape?: string
 	layout?: 'inline' | 'stacked'
@@ -183,7 +183,7 @@ export interface FormattedSelectOption {
  * @param options - options.
  * @param _currentValue - current value.
  */
-export function formatSelectOptions(options: ControlOptionValue[] | undefined, _currentValue: unknown): FormattedSelectOption[] {
+export function formatSelectOptions(options: GooControlOptionValue[] | undefined, _currentValue: unknown): FormattedSelectOption[] {
 	if (!options) return []
 
 	return options.map(opt => {
@@ -210,8 +210,8 @@ export function buildControlOptions(
 		oninput: (v: unknown) => void
 		onButtonClick?: () => void
 	}
-): ControlOptions {
-	const opts: ControlOptions = {
+): GooControlOptions {
+	const opts: GooControlOptions = {
 		value: value as RegistryControlOptionValue,
 		onchange: (v: unknown) => {
 			const extractedValue = typeof v === 'object' && v !== null && 'value' in v
@@ -266,7 +266,7 @@ export function buildControlOptions(
  * Get all stored options for passing to custom buildOptions.
  * @param stored - stored.
  */
-export function getAllOptions(stored: StoredOptions): ControlOptions {
+export function getAllOptions(stored: StoredOptions): GooControlOptions {
 	return {
 		...stored.controlOptions,
 		min: stored.min,
@@ -318,13 +318,13 @@ export function buildDualRangeOptions(
 		onchange: (eventData: DualRangeEventData) => void
 		oninput: (eventData: DualRangeEventData) => void
 	}
-): { sliderOptions: ControlOptions; isMinMaxFormat: boolean } {
+): { sliderOptions: GooControlOptions; isMinMaxFormat: boolean } {
 	// Detect if value is array [a, b] or object {min, max}
 	const isMinMaxFormat = !Array.isArray(value)
 	const minMaxValue = value as { min: number; max: number }
 	const arrayValue = isMinMaxFormat ? [ minMaxValue.min, minMaxValue.max ] : value
 
-	const sliderOptions: ControlOptions = {
+	const sliderOptions: GooControlOptions = {
 		value: arrayValue as RegistryControlOptionValue,
 		min: stored.min ?? 0,
 		max: stored.max ?? 100,
