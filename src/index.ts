@@ -200,12 +200,12 @@ export { GooColor } from './color/index.ts'
 export type {
 	ControllerOption,
 	ControllerOptionValue,
+	GooControlFactory,
 	GooControllerOptions,
 	GooControlOptionBag,
 	GooControlOptions,
 	GooControlOptionValue,
 	GooControlTypeConfig,
-	GooControlTypeEntry,
 	GooControlTypeRegistry,
 	SvelteControlSchema
 } from './controller/index.ts'

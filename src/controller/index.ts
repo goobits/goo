@@ -1,9 +1,9 @@
 export type {
+	GooControlFactory,
 	GooControlOptionBag,
 	GooControlOptions,
 	GooControlOptionValue,
 	GooControlTypeConfig,
-	GooControlTypeEntry,
 	GooControlTypeRegistry
 } from './controlRegistry.ts'
 export type {

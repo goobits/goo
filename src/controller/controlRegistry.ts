@@ -6,8 +6,8 @@
  *
  * @example Adding a new control type:
  * 1. Create your control component in its own folder
- * 2. Import its module and add one line here: 'my-control': () => loadModule(myGooControlModule)
- * 3. Done! GooController will auto-detect or use type: 'my-control'
+ * 2. Add a registry config with `svelte: true` or an explicit `extract`
+ * 3. Use the type in GooController or GooSchema
  *
  */
 
@@ -76,7 +76,7 @@ export interface GooControlTypeConfig {
 
 	/**
 	 * Extract the control class/factory from the module.
-	 * Defaults to module.default or first export.
+	 * Required for non-Svelte controls.
 	 */
 	extract?: (module: GooControlModule) => GooControlExport | null
 
@@ -102,14 +102,9 @@ export interface GooControlTypeConfig {
 }
 
 /**
- * Goo control type registry entry.
- */
-export type GooControlTypeEntry = (() => Promise<GooControlModule>) | GooControlTypeConfig
-
-/**
  * Goo control type registry for schema/controller extension points.
  */
-export type GooControlTypeRegistry = Record<string, GooControlTypeEntry>
+export type GooControlTypeRegistry = Record<string, GooControlTypeConfig>
 
 function loadModule(module: object): Promise<GooControlModule> {
 	return Promise.resolve(module as GooControlModule)
@@ -118,8 +113,8 @@ function loadModule(module: object): Promise<GooControlModule> {
 /**
  * Registry of control types.
  *
- * Simple form: type name → module loader
- * Advanced form: type name → { load, extract?, buildOptions? }
+ * Each entry declares whether it mounts a Svelte component or names the DOM
+ * factory/class extractor explicitly.
  */
 export const defaultControlRegistry: GooControlTypeRegistry = {
 	// Built-in controls
@@ -165,7 +160,6 @@ export const defaultControlRegistry: GooControlTypeRegistry = {
 
 /**
  * Get control type configuration.
- * Normalizes simple function entries to full config objects.
  * @param type - type.
  * @param registry - registry.
  */
@@ -174,13 +168,5 @@ export function resolveGooControlTypeConfig(
 	registry?: GooControlTypeRegistry
 ): GooControlTypeConfig | null {
 	const entry = registry?.[type] ?? defaultControlRegistry[type]
-	if (!entry) return null
-
-	// Simple function form
-	if (typeof entry === 'function') {
-		return { load: entry }
-	}
-
-	// Full config form
-	return entry
+	return entry ?? null
 }

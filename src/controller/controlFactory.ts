@@ -8,7 +8,6 @@ import { log } from '../support/utils/logger.ts'
 import {
 	type GooControlExport,
 	type GooControlOptions,
-	type GooControlOptionValue,
 	type GooControlTypeRegistry,
 	resolveGooControlTypeConfig
 } from './controlRegistry.ts'
@@ -43,46 +42,11 @@ export interface ControlCreationOptions {
 	/** Input handler callback */
 	oninput?: (value: unknown) => void
 
-	/** Custom options builder (overrides default) */
-	buildOptions?: (value: unknown, Control: GooControlExport) => GooControlOptions
+	/** Builds options for DOM factory/class controls. */
+	buildOptions: (value: unknown, Control: GooControlExport) => GooControlOptions
 
 	/** Optional control type registry override */
 	controlTypes?: GooControlTypeRegistry
-}
-
-// ============================================================================
-// Module Extraction
-// ============================================================================
-
-/**
-	 * Extract the control factory/class from a module.
-	 * Looks for remaining DOM factory exports, default export, or first function export.
-	 * @param module - The imported module
-	 * @returns The control factory/class or null
-	 */
-export function extractControlFromModule(
-	module: Record<string, unknown>
-): GooControlExport | null {
-	// Prefer remaining UI* factory exports while schema/controller migration is in progress.
-	for (const key of Object.keys(module)) {
-		if (key.startsWith('UI') && typeof module[key] === 'function') {
-			return module[key] as GooControlExport
-		}
-	}
-
-	// Fall back to default export
-	if (module.default && typeof module.default === 'function') {
-		return module.default as GooControlExport
-	}
-
-	// Fall back to first function export
-	for (const key of Object.keys(module)) {
-		if (typeof module[key] === 'function') {
-			return module[key] as GooControlExport
-		}
-	}
-
-	return null
 }
 
 // ============================================================================
@@ -101,7 +65,8 @@ export function extractControlFromModule(
  * const result = await createControlFromRegistry('slider', {
  *   value: 50,
  *   controllerOptions: { min: 0, max: 100 },
- *   onchange: (v) => console.log('Changed:', v)
+ *   onchange: (v) => console.log('Changed:', v),
+ *   buildOptions: (value) => ({ value })
  * })
  * if (result.status === 'created') {
  *   container.appendChild(result.control)
@@ -125,8 +90,13 @@ export async function createControlFromRegistry(
 			return createSvelteControl(module as unknown as SvelteGooControlModule, options, controlType)
 		}
 
-		// Extract the control class/factory
-		const Control = config.extract ? config.extract(module) : extractControlFromModule(module)
+		if (!config.extract) {
+			log.warn(`Control type "${ controlType }" must provide an explicit extractor.`)
+			return { status: 'error' }
+		}
+
+		// Extract the control class/factory.
+		const Control = config.extract(module)
 
 		if (!Control) {
 			log.warn(`Could not extract control from module for type: ${ controlType }`)
@@ -141,9 +111,7 @@ export async function createControlFromRegistry(
 				options.onchange,
 				options.oninput
 			)
-			: options.buildOptions
-				? options.buildOptions(options.value, Control)
-				: buildDefaultOptions(options)
+			: options.buildOptions(options.value, Control)
 
 		// Create the control instance
 		let control: HTMLElement | null = null
@@ -224,54 +192,4 @@ function buildSvelteGooControlOptions(controlType: string, controllerOptions: Go
 		delete controlOptions.label
 	}
 	return controlOptions
-}
-
-/**
- * Build default options for a control.
- * @param options - Creation options
- * @returns Options object for the control constructor
- */
-function buildDefaultOptions(options: ControlCreationOptions): GooControlOptions {
-	const { value, controllerOptions, onchange, oninput } = options
-	const opts: GooControlOptions = {
-		value: value as GooControlOptionValue,
-		onchange: (v: unknown) => {
-			// Handle both direct values and event objects with .value
-			const actualValue =
-				typeof v === 'object' && v !== null && 'value' in v ? (v as { value: unknown }).value : v
-			onchange(actualValue)
-		}
-	}
-
-	// Add oninput if provided
-	if (oninput) {
-		opts.oninput = (v: unknown) => {
-			const actualValue =
-				typeof v === 'object' && v !== null && 'value' in v ? (v as { value: unknown }).value : v
-			oninput(actualValue)
-		}
-	}
-
-	// Copy relevant options from controller
-	const optionKeys = [
-		'min',
-		'max',
-		'step',
-		'options',
-		'preset',
-		'presetColor',
-		'presetHue',
-		'coverage',
-		'unit',
-		'label',
-		'shape',
-		'layout'
-	]
-	for (const key of optionKeys) {
-		if (key in controllerOptions && controllerOptions[key] !== undefined) {
-			opts[key] = controllerOptions[key]
-		}
-	}
-
-	return opts
 }
