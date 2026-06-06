@@ -25,8 +25,6 @@ export { createPointerDrag, createPointerTap } from './support/utils/pointerDrag
 // Components
 export type { GooAngleInputElement, GooAngleInputEventData, GooAngleInputProps, GooAngleInputUnit } from './angle-input/index.ts'
 export { GooAngleInput } from './angle-input/index.ts'
-export type { BlendModeFieldOption, BlendModeFieldOptions } from './blend-mode/index.ts'
-export { createBlendModeField } from './blend-mode/index.ts'
 export type { GooButtonLayout, GooButtonProps, GooButtonType, GooButtonVariant } from './button/index.ts'
 export { GooButton } from './button/index.ts'
 export type {
@@ -54,7 +52,7 @@ export type {
 	ManagedGooContextMenuOpenAt,
 	ManagedGooContextMenuOptions
 } from './context-menu/index.ts'
-export { createGooContextMenu, createManagedGooContextMenu, GooContextMenu } from './context-menu/index.ts'
+export { createGooContextMenu, GooContextMenu } from './context-menu/index.ts'
 export type {
 	GooDataGridCellSlot,
 	GooDataGridCellValue,
@@ -85,14 +83,11 @@ export type {
 export {
 	createGooDialog,
 	createGooDialogTextContent,
-	createGooField,
-	createGooFields,
 	createTrustedGooDialogContent,
 	dialogManager,
 	GooAlert,
 	GooConfirm,
 	GooDialog,
-	GooDialogController,
 	GooDialogManager,
 	GooNotify,
 	GooOverlay,
@@ -158,20 +153,6 @@ export type {
 export { GooSlider, sliderPresetConfigs, sliderPresets, sliderShapes } from './slider/index.ts'
 export type { GooSpinnerProps, GooSpinnerRenderOptions, GooSpinnerSize, GooSpinnerVariant } from './spinner/index.ts'
 export { GooSpinner, renderGooSpinnerHtml } from './spinner/index.ts'
-export type {
-	GooTableCellSlot,
-	GooTableCellValue,
-	GooTableColumn,
-	GooTableColumnAlign,
-	GooTableDensity,
-	GooTableHeaderSlot,
-	GooTableProps,
-	GooTableRowKey,
-	GooTableSortDirection,
-	GooTableSortState,
-	GooTableSortValue
-} from './table/index.ts'
-export { GooTable } from './table/index.ts'
 export type { GooTextareaProps } from './textarea/index.ts'
 export { GooTextarea } from './textarea/index.ts'
 export type {
@@ -211,7 +192,7 @@ export type {
 	GooVortexPoint,
 	GooVortexUpdateOptions
 } from './vortex/index.ts'
-export { createGooVortex, GooVortex } from './vortex/index.ts'
+export { createGooVortex } from './vortex/index.ts'
 
 // Composition components
 export type { GooColorElement, GooColorEventData, GooColorProps } from './color/index.ts'

@@ -3,11 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import GooToast from '../GooToast.svelte'
 import GooToaster from '../GooToaster.svelte'
-import {
-	toast,
-	toastStore
-} from '../index.ts'
-import { _resetToastStoreForTests } from '../toast-service.svelte.ts'
+import { toast } from '../index.ts'
+import { _resetToastStoreForTests, toastStore } from '../toast-service.svelte.ts'
 import type { Toast } from '../types.ts'
 
 function makeToast(overrides: Partial<Toast> = {}): Toast {

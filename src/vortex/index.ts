@@ -21,7 +21,7 @@ export type {
 } from './types.ts'
 
 /** Manager for positioned Goo vortex indicators. */
-export class GooVortex implements GooVortexManager {
+class GooVortex implements GooVortexManager {
 	#running: Record<string, GooVortexInstance> = {}
 
 	#imageUrls: string[]
@@ -29,10 +29,10 @@ export class GooVortex implements GooVortexManager {
 	#randomize: boolean
 
 	/**
- * Create a Goo vortex manager.
- * @param parent - Parent element that receives vortex elements.
- * @param options - Vortex image and selection options.
- */
+	 * Create a Goo vortex manager.
+	 * @param parent - Parent element that receives vortex elements.
+	 * @param options - Vortex image and selection options.
+	 */
 	constructor(parent: HTMLElement, options: GooVortexOptions = {}) {
 		this.#parent = parent
 		this.#imageUrls = options.imageUrls ?? []

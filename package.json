@@ -66,10 +66,6 @@
 			"svelte": "./src/angle-input/index.ts",
 			"import": "./src/angle-input/index.ts"
 		},
-		"./blend-mode": {
-			"types": "./src/blend-mode/index.ts",
-			"import": "./src/blend-mode/index.ts"
-		},
 		"./textarea": {
 			"types": "./src/textarea/index.ts",
 			"svelte": "./src/textarea/index.ts",
@@ -182,11 +178,6 @@
 			"types": "./src/schema/index.ts",
 			"svelte": "./src/schema/index.ts",
 			"import": "./src/schema/index.ts"
-		},
-		"./table": {
-			"types": "./src/table/index.ts",
-			"svelte": "./src/table/index.ts",
-			"import": "./src/table/index.ts"
 		},
 		"./diff": {
 			"types": "./src/diff/index.ts",

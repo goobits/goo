@@ -12,7 +12,6 @@ export type {
 	GooControllerOptions
 } from './GooController.ts'
 export {
-	addColor,
 	createGooController,
 	GooController
 } from './GooController.ts'

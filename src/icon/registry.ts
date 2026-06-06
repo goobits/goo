@@ -6,7 +6,7 @@
  *
  * @example
  * // Register icons at app startup
- * import { iconRegistry } from '@goobits/goo/icon'
+ * import { iconRegistry } from '@goobits/goo/icon/registry'
  * import { pencil, eraser } from './my-icons.js'
  *
  * iconRegistry.registerAll({ pencil, eraser })

@@ -87,7 +87,7 @@ Prefer subpath imports in apps when you only need one surface.
 | `@goobits/goo/floating-window`         | `createGooFloatingWindow`, `gooFloatingWindowRuntime`              | Floating window manager                    |
 | `@goobits/goo/folder`                  | `GooFolder`                                                        | Collapsible folder controls                |
 | `@goobits/goo/i18n`                    | `setLocale`, `translate`, `isRTL`, `onLocaleChange`                | Locale adapter utilities                   |
-| `@goobits/goo/icon`                    | `GooIcon`, `iconRegistry`, render helpers                          | Registry-backed icons                      |
+| `@goobits/goo/icon`                    | `GooIcon`, render helpers                                          | Registry-backed icons                      |
 | `@goobits/goo/icon/registry`           | `iconRegistry`                                                     | Icon registry singleton                    |
 | `@goobits/goo/input`                   | `GooInput`, `GooNumber`                                            | Text and number inputs                     |
 | `@goobits/goo/input/styles.css`        | CSS                                                                | Input-only stylesheet                      |
@@ -105,9 +105,8 @@ Prefer subpath imports in apps when you only need one surface.
 | `@goobits/goo/select/styles.css`       | CSS                                                                | Select-only stylesheet                     |
 | `@goobits/goo/slider`                  | `GooSlider`                                                        | Single and multi-thumb sliders             |
 | `@goobits/goo/spinner`                 | `GooSpinner`, `renderGooSpinnerHtml`                               | Spinner component and HTML renderer        |
-| `@goobits/goo/table`                   | `GooTable`                                                         | Data-grid-backed table component           |
 | `@goobits/goo/textarea`                | `GooTextarea`                                                      | Textarea component                         |
-| `@goobits/goo/toast`                   | `GooToast`, `GooToaster`, `toast`, `toastStore`                    | Toast notification UI and store            |
+| `@goobits/goo/toast`                   | `GooToast`, `GooToaster`, `toast`                                  | Toast notification UI and service          |
 | `@goobits/goo/tooltip`                 | `GooTooltip`, `tooltip`, `createGooTooltip`, `gooTooltipRuntime`   | Tooltip component and action/helper        |
 | `@goobits/goo/turnstile`               | `GooTurnstileField`                                                | Cloudflare Turnstile field wrapper         |
 | `@goobits/goo/virtualGrid`             | `VirtualGrid`, component types                                     | Virtualized grid primitive                 |
@@ -118,7 +117,7 @@ Prefer subpath imports in apps when you only need one surface.
 
 Imperative Goo factories create ordinary HTML elements and attach a small public handle API. Use the documented methods such as `destroy()`, `setValue()`, `getValue()`, `updateDisplay()`, `updateOptions()`, `getRange()`, and `getController()` instead of reaching into underscore-prefixed implementation state or component-specific destroy aliases.
 
-`GooController`, `GooSchema`, and `GooDialogController` remain factory-compatible exports for existing call sites, but new imperative code should prefer `createGooController()`, `createGooSchema()`, and `createGooDialog()`. `GooSelect` internals such as keyboard and panel state are private to the package; public callers should use the component props, DOM events, or the exported element methods.
+`GooController` and `GooSchema` remain factory-compatible exports for existing call sites, but new imperative code should prefer `createGooController()` and `createGooSchema()`. Use `createGooDialog()` for imperative dialogs. `GooSelect` internals such as keyboard and panel state are private to the package; public callers should use the component props, DOM events, or the exported element methods.
 
 ## Core Components
 
@@ -413,7 +412,7 @@ targetElement.addEventListener('contextmenu', (event) => {
 })
 ```
 
-Use `GooContextMenu.register()`, `GooContextMenu.open()`, and `GooContextMenu.close()` for app-wide registered menus. Use `createManagedGooContextMenu()` only when a caller needs to create and immediately open a managed menu instance.
+Use `GooContextMenu.register()`, `GooContextMenu.open()`, and `GooContextMenu.close()` for app-wide registered menus.
 
 ### Tooltip
 
@@ -530,16 +529,6 @@ vortex.destroy('save')
 <GooDataGrid {columns} {rows} />
 ```
 
-### Table
-
-```svelte
-<script lang="ts">
-	import { GooTable } from '@goobits/goo/table'
-</script>
-
-<GooTable columns={columns} rows={rows} />
-```
-
 ### Virtual Grid
 
 ```svelte
@@ -563,7 +552,7 @@ vortex.destroy('save')
 Register app-owned SVGs once, then render them by name:
 
 ```ts
-import { iconRegistry } from '@goobits/goo/icon'
+import { iconRegistry } from '@goobits/goo/icon/registry'
 
 iconRegistry.register('save', '<svg viewBox="0 0 24 24">...</svg>')
 ```

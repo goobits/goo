@@ -1104,13 +1104,3 @@ export function createGooController(
 
 	return createControllerElement(mergedOptions)
 }
-
-/**
- * Add a color controller.
- * @param object - The object to bind
- * @param property - The property name
- * @returns The created controller instance
- */
-export function addColor(object: Record<string, unknown>, property: string): GooController {
-	return createControllerElement({ object, property, type: 'color' })
-}
