@@ -82,6 +82,18 @@ export type GooSelectMenuOptions = {
 	width?: 'auto' | 'content' | 'trigger'
 }
 
+/** Event names emitted by a GooSelect element. */
+export type GooSelectEventName = 'change' | 'open' | 'close'
+
+/** Change callback fired after selection. */
+export type GooSelectChangeHandler = (value: string, data: GooSelectEventData) => void
+
+/** Open callback fired after the dropdown opens. */
+export type GooSelectOpenHandler = () => void
+
+/** Close callback fired after the dropdown closes. */
+export type GooSelectCloseHandler = () => void
+
 /** Props accepted by the Svelte `GooSelect` component. */
 export type GooSelectProps = GooForwardedAttributes & {
 	options?: GooSelectOptionsInput
@@ -113,13 +125,13 @@ export type GooSelectProps = GooForwardedAttributes & {
 	element?: GooSelectElement | null
 
 	/** Change callback fired after selection. */
-	onchange?: (value: string, data: GooSelectEventData) => void
+	onchange?: GooSelectChangeHandler
 
 	/** Open callback. */
-	onopen?: () => void
+	onopen?: GooSelectOpenHandler
 
 	/** Close callback. */
-	onclose?: () => void
+	onclose?: GooSelectCloseHandler
 
 }
 

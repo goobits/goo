@@ -3,9 +3,15 @@
  * @module goobits/schema
  */
 
-export { default, default as GooSchemaComponent } from './GooSchema.svelte'
+export { default as GooSchema } from './GooSchema.svelte'
 export type {
+	GooSchemaChangeHandler,
 	GooSchemaControlType,
+	GooSchemaData,
+	GooSchema as GooSchemaElement,
+	GooSchemaEvent,
+	GooSchemaEventDetail,
+	GooSchemaEventName,
 	GooSchemaField,
 	GooSchemaFolder,
 	GooSchemaNode,
@@ -13,6 +19,5 @@ export type {
 	GooSchemaType,
 	GooSchemaUpdateOptions } from './GooSchema.ts'
 export {
-	createGooSchema,
-	GooSchema
+	createGooSchema
 } from './GooSchema.ts'

@@ -3,7 +3,7 @@
  * @module goobits/dialog/dialogs
  */
 
-import { createGooDialog, type DialogField, type DialogLabels, type DialogResult, type GooDialogInstance } from './dialog.ts'
+import { createGooDialog, type DialogField, type DialogLabels, type DialogResult, type DialogVerifyHandler, type GooDialogDefaultFocus, type GooDialogInstance } from './dialog.ts'
 
 /** Task returned by dialog convenience helpers. */
 export type GooDialogTask = {
@@ -29,7 +29,7 @@ export interface GooAlertOptions {
 export interface GooConfirmOptions {
 	className?: string
 	content: string | Node
-	defaultFocus?: 'ok' | 'cancel'
+	defaultFocus?: Extract<GooDialogDefaultFocus, 'ok' | 'cancel'>
 	heading?: string
 	labels?: DialogLabels
 }
@@ -38,11 +38,11 @@ export interface GooConfirmOptions {
 export interface GooPromptOptions {
 	className?: string
 	content?: string | Node
-	defaultFocus?: 'ok' | 'cancel'
+	defaultFocus?: Extract<GooDialogDefaultFocus, 'ok' | 'cancel'>
 	fields: DialogField[]
 	heading?: string
 	labels?: DialogLabels
-	verify?: (values: Record<string, unknown>, fieldElements: Map<string, HTMLElement>) => boolean | Promise<boolean>
+	verify?: DialogVerifyHandler
 }
 
 /** Options accepted by `GooNotify`. */

@@ -7,10 +7,14 @@
 
 export { default as GooSelect } from './GooSelect.svelte'
 export type {
+	GooSelectChangeHandler,
+	GooSelectCloseHandler,
 	GooSelectElement,
 	GooSelectEventData,
+	GooSelectEventName,
 	GooSelectMenuOptions,
 	GooSelectMenuPlacement,
+	GooSelectOpenHandler,
 	GooSelectOpenOptions,
 	GooSelectOption,
 	GooSelectOptionInput,

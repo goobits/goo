@@ -57,19 +57,13 @@ The e2e command starts a local Vite server and runs Playwright under `xvfb-run`.
 <GooButton variant="primary">Save</GooButton>
 ```
 
-The root entrypoint also re-exports an explicit set of public component and utility modules:
-
-```ts
-import { GooButton, GooSelect, createGooController } from '@goobits/goo'
-```
-
-Prefer subpath imports in apps when you only need one surface.
+Use package subpaths in apps and shared packages so each caller names the surface it depends on.
 
 ## Public Subpaths
 
 | Subpath                                | Main exports                                                       | Purpose                                    |
 | -------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------ |
-| `@goobits/goo`                         | root barrel                                                        | Most component and utility exports         |
+| `@goobits/goo`                         | root barrel                                                        | Convenience aggregate for documented exports |
 | `@goobits/goo/angle-input`             | `GooAngleInput`                                                    | Angle entry field                          |
 | `@goobits/goo/button`                  | `GooButton`                                                        | Button component                           |
 | `@goobits/goo/button/styles.css`       | CSS                                                                | Button-only stylesheet                     |
@@ -100,7 +94,7 @@ Prefer subpath imports in apps when you only need one surface.
 | `@goobits/goo/progress-ring`           | `GooProgressRing`, `createGooProgressRingTimer`                    | Progress ring and timer overlay            |
 | `@goobits/goo/radio`                   | `GooRadio`, `GooRadioGroup`                                        | Radio controls                             |
 | `@goobits/goo/range-module`            | `createGooRangeModule`, `createRangeModuleField`                   | Slider with synced numeric input fields    |
-| `@goobits/goo/schema`                  | `GooSchema`, `GooSchemaComponent`, schema types                    | Schema-driven control generation           |
+| `@goobits/goo/schema`                  | `GooSchema`, `createGooSchema`, schema types                       | Schema-driven control generation           |
 | `@goobits/goo/select`                  | `GooSelect`                                                        | Select/menu component with submenu support |
 | `@goobits/goo/select/styles.css`       | CSS                                                                | Select-only stylesheet                     |
 | `@goobits/goo/slider`                  | `GooSlider`                                                        | Single and multi-thumb sliders             |
@@ -123,7 +117,7 @@ Prefer subpath imports in apps when you only need one surface.
 
 Imperative Goo factories create ordinary HTML elements and attach a small public handle API. Use the documented methods such as `destroy()`, `setValue()`, `getValue()`, `updateDisplay()`, `updateOptions()`, `getRange()`, and `getController()` instead of reaching into underscore-prefixed implementation state or component-specific destroy aliases.
 
-`GooController` and `GooSchema` remain factory-compatible exports for existing call sites, but new imperative code should prefer `createGooController()` and `createGooSchema()`. Use `createGooDialog()` for imperative dialogs. `GooSelect` internals such as keyboard and panel state are private to the package; public callers should use the component props, DOM events, or the exported element methods.
+Use `createGooController()` and `createGooSchema()` for imperative controller/schema handles. Use the `GooSchema` Svelte component for markup. Use `createGooDialog()` for imperative dialogs. `GooSelect` internals such as keyboard and panel state are private to the package; public callers should use the component props, DOM events, or the exported element methods.
 
 ## Core Components
 
@@ -333,7 +327,7 @@ Controllers return native elements with chainable public methods such as `name()
 
 ```svelte
 <script lang="ts">
-	import { GooSchemaComponent } from '@goobits/goo/schema'
+	import { GooSchema } from '@goobits/goo/schema'
 
 	const data = { name: 'Preset', enabled: true, size: 24 }
 	const schema = [
@@ -343,7 +337,7 @@ Controllers return native elements with chainable public methods such as `name()
 	]
 </script>
 
-<GooSchemaComponent {schema} {data} />
+<GooSchema {schema} {data} />
 ```
 
 Custom GooSchema controls register Svelte modules through `@goobits/goo/controller` control type maps. See `docs/svelte-controls.md` for the `controlSchema` contract, including self-contained editor controls that opt out of GooController row wrapping.

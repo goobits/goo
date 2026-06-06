@@ -16,6 +16,8 @@ import { isSelfContainedField } from './fieldLayout.ts'
 import { resolvePath } from './pathUtils.ts'
 import { buildControllerOptions, type ControllerOptions } from './schemaFieldBuilder.ts'
 import type {
+	GooSchemaChangeHandler,
+	GooSchemaData,
 	GooSchemaField,
 	GooSchemaFolder,
 	GooSchemaNode,
@@ -25,7 +27,9 @@ import type {
 } from './types.ts'
 
 export type {
+	GooSchemaChangeHandler,
 	GooSchemaControlType,
+	GooSchemaData,
 	GooSchemaField,
 	GooSchemaFolder,
 	GooSchemaNode,
@@ -39,8 +43,14 @@ export type {
 export interface GooSchemaEventDetail {
 	path: string
 	value: unknown
-	data: Record<string, unknown>
+	data: GooSchemaData
 }
+
+/** Event names emitted by the GooSchema element. */
+export type GooSchemaEventName = 'change' | 'input'
+
+/** DOM custom event emitted by the GooSchema Svelte wrapper and element. */
+export type GooSchemaEvent = CustomEvent<GooSchemaEventDetail>
 
 /** Mutable display and control options accepted by a mounted GooSchema handle. */
 export type GooSchemaUpdateOptions = Pick<
@@ -52,19 +62,19 @@ export type GooSchemaUpdateOptions = Pick<
 export interface GooSchema extends HTMLElement {
 	destroy(): void
 	getController(path: string): HTMLElement | undefined
-	getData(): Record<string, unknown>
+	getData(): GooSchemaData
 	getSchema(): GooSchemaType
 	refresh(): void
 	refreshConditions(): void
-	setData(data: Record<string, unknown>): void
+	setData(data: GooSchemaData): void
 	setOptions(options: GooSchemaUpdateOptions): void
 	setSchema(schema: GooSchemaType): void
 }
 
 type GooSchemaInternal = GooSchema & {
-	_changeHandler: ((path: string, value: unknown) => void) | null
+	_changeHandler: GooSchemaChangeHandler | null
 	_controllers: Map<string, unknown>
-	_data: Record<string, unknown>
+	_data: GooSchemaData
 	_rebuildPending: boolean
 	_rebuildToken: number
 	_root: HTMLElement | null
@@ -74,7 +84,7 @@ type GooSchemaInternal = GooSchema & {
 	_buildNodes(nodes: GooSchemaNode[], parent: HTMLElement, token: number): Promise<void>
 	_buildSelfContainedField(
 		node: GooSchemaField,
-		object: Record<string, unknown>,
+		object: GooSchemaData,
 		property: string,
 		controllerOptions: ControllerOptions,
 		module: { default: SvelteComponentType; controlSchema?: SvelteControlSchema },
@@ -83,18 +93,6 @@ type GooSchemaInternal = GooSchema & {
 	): Promise<void>
 	_rebuild(): Promise<void>
 	_scheduleRebuild(): void
-}
-
-/**
- * Factory-compatible named export for callers that previously imported
- * `GooSchema` as a value. Prefer `createGooSchema`.
- *
- * @param options - Schema options.
- * @returns Schema element handle.
- */
-// eslint-disable-next-line @typescript-eslint/no-redeclare -- Public API intentionally exposes a value factory and matching handle type.
-export function GooSchema(options: GooSchemaOptions = {}): GooSchema {
-	return createGooSchema(options)
 }
 
 function initializeSchema(element: GooSchemaInternal, options: GooSchemaOptions): void {
@@ -127,7 +125,7 @@ function attachSchemaApi(element: GooSchemaInternal): void {
 		refreshConditions: () => {
 			void element._rebuild()
 		},
-		setData: (data: Record<string, unknown>) => {
+		setData: (data: GooSchemaData) => {
 			element._data = data
 			void element._rebuild()
 		},
@@ -321,7 +319,7 @@ async function buildField(
 async function buildSelfContainedField(
 	element: GooSchemaInternal,
 	node: GooSchemaField,
-	object: Record<string, unknown>,
+	object: GooSchemaData,
 	property: string,
 	controllerOptions: ControllerOptions,
 	module: { default: SvelteComponentType; controlSchema?: SvelteControlSchema },

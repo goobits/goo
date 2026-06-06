@@ -3,21 +3,23 @@ import { untrack } from 'svelte'
 import {
 	createGooSchema,
 	type GooSchema,
+	type GooSchemaData,
+	type GooSchemaEvent,
 	type GooSchemaOptions,
 	type GooSchemaUpdateOptions,
 	type GooSchemaType
 } from './GooSchema.ts'
 
-type GooSchemaChangeHandler = (event: CustomEvent<{ path: string; value: unknown; data: Record<string, unknown> }>) => void
+type GooSchemaDomEventHandler = (event: GooSchemaEvent) => void
 
 type GooSchemaProps = GooSchemaOptions & {
 	schema: GooSchemaType
-	data: Record<string, unknown>
+	data: GooSchemaData
 	class?: string
 	style?: string
 	instance?: GooSchema | null
-	onchange?: GooSchemaChangeHandler
-	oninput?: GooSchemaChangeHandler
+	onchange?: GooSchemaDomEventHandler
+	oninput?: GooSchemaDomEventHandler
 }
 
 let host: HTMLDivElement | null = $state(null)
@@ -25,7 +27,7 @@ let schemaElement: GooSchema | null = null
 let mounted = false
 let lastCreateKey = ''
 let lastSchema: GooSchemaType | undefined
-let lastData: Record<string, unknown> | undefined
+let lastData: GooSchemaData | undefined
 let lastBare: boolean | undefined
 let lastShowPanelHeader: boolean | undefined
 let lastFolderClassName: string | undefined
@@ -50,11 +52,11 @@ function getCreateKey(): string {
 }
 
 function handleChange(event: Event): void {
-	onchange?.(event as CustomEvent<{ path: string; value: unknown; data: Record<string, unknown> }>)
+	onchange?.(event as GooSchemaEvent)
 }
 
 function handleInput(event: Event): void {
-	oninput?.(event as CustomEvent<{ path: string; value: unknown; data: Record<string, unknown> }>)
+	oninput?.(event as GooSchemaEvent)
 }
 
 function destroySchema(): void {
@@ -124,11 +126,11 @@ function updateSchema(): void {
 	}
 }
 
-export function setData(nextData: Record<string, unknown>): void {
+export function setData(nextData: GooSchemaData): void {
 	schemaElement?.setData(nextData)
 }
 
-export function getData(): Record<string, unknown> | undefined {
+export function getData(): GooSchemaData | undefined {
 	return schemaElement?.getData()
 }
 

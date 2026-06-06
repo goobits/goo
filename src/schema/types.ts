@@ -3,29 +3,17 @@
  * @module goobits/schema/types
  */
 
-import type { GooControlOptionBag, GooControlTypeRegistry } from '../controller/controlRegistry.ts'
+import type { GooControlOptionBag, GooControlType, GooControlTypeRegistry } from '../controller/controlRegistry.ts'
 import type { GooSliderPreset, GooSliderShape } from '../slider/types.ts'
 
 /**
  * Control field definition type identifiers.
  */
-export type GooSchemaControlType =
-  | 'range'
-  | 'range-dual'
-  | 'checkbox'
-  | 'select'
-  | 'color'
-  | 'text'
-  | 'number'
-  | 'range-module'
-  | 'button'
-  | 'button-group'
-  | 'blend-mode'
-  | 'angle'
-  | 'textarea'
-  | 'radio'
-  | 'slider'
-  | (string & {})
+export type GooSchemaControlType = GooControlType
+
+export type GooSchemaData = Record<string, unknown>
+
+export type GooSchemaChangeHandler = (path: string, value: unknown) => void
 
 export type GooSchemaCondition = string | {
 	path: string
@@ -199,10 +187,10 @@ export interface GooSchemaOptions {
 	schema?: GooSchemaType
 
 	/** Data object bound to schema fields. */
-	data?: Record<string, unknown>
+	data?: GooSchemaData
 
 	/** Programmatic change handler. */
-	onchange?: (path: string, value: unknown) => void
+	onchange?: GooSchemaChangeHandler
 
 	/** Render controls directly without panel wrapper. */
 	bare?: boolean

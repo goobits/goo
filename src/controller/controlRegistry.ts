@@ -39,6 +39,32 @@ import * as textareaModule from '../textarea/GooTextarea.svelte'
 /** Control module structure loaded for a Goo controller type. */
 export type GooControlModule = Record<string, unknown>
 
+/** Built-in Goo control ids understood by the default registry. */
+export type GooBuiltInControlType =
+  | 'angle'
+  | 'blend-mode'
+  | 'button'
+  | 'button-group'
+  | 'buttongroup'
+  | 'checkbox'
+  | 'color'
+  | 'email'
+  | 'number'
+  | 'password'
+  | 'radio'
+  | 'radiogroup'
+  | 'range'
+  | 'range-dual'
+  | 'range-module'
+  | 'select'
+  | 'slider'
+  | 'text'
+  | 'textarea'
+  | 'url'
+
+/** Built-in or host-registered Goo control id. */
+export type GooControlType = GooBuiltInControlType | (string & {})
+
 /** Primitive or object value accepted by control option bags. */
 export type GooControlOptionValue =
   | string

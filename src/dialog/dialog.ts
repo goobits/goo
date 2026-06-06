@@ -27,22 +27,37 @@ export type { DialogField, DialogLabels } from './dialogBuilder.ts'
 // Types
 // ============================================================================
 
+/** Supported Goo dialog presentation types. */
+export type GooDialogType = 'alert' | 'confirm' | 'prompt' | 'notify' | 'overlay'
+
+/** Focus targets accepted by standard Goo dialogs. */
+export type GooDialogDefaultFocus = 'ok' | 'cancel' | 'disregard'
+
+/** Values collected from dialog fields. */
+export type DialogValues = Record<string, unknown>
+
+/** Field element map passed to dialog verification callbacks. */
+export type DialogFieldElements = Map<string, HTMLElement>
+
+/** Verification callback for prompt dialogs. */
+export type DialogVerifyHandler = (values: DialogValues, fieldElements: DialogFieldElements) => boolean | Promise<boolean>
+
 /**
  * Dialog options for construction
  */
 export interface GooDialogOptions {
-	type?: 'alert' | 'confirm' | 'prompt' | 'notify' | 'overlay'
+	type?: GooDialogType
 	ariaLabel?: string
 	heading?: string
 	content?: string | Node
 	labels?: DialogLabels
 	fields?: DialogField[]
-	verify?: (values: Record<string, unknown>, fieldElements: Map<string, HTMLElement>) => boolean | Promise<boolean>
+	verify?: DialogVerifyHandler
 	showBackdrop?: boolean
 	showClose?: boolean
 	closeOnBackdrop?: boolean
 	closeOnEscape?: boolean
-	defaultFocus?: 'ok' | 'cancel' | 'disregard'
+	defaultFocus?: GooDialogDefaultFocus
 	width?: string | number
 	height?: string | number
 	className?: string
@@ -60,7 +75,7 @@ export interface DialogResult {
 	cancel?: boolean
 	disregard?: boolean
 	applyToAll?: boolean
-	values?: Record<string, unknown>
+	values?: DialogValues
 }
 
 /**
@@ -136,10 +151,10 @@ class GooDialogControllerRuntime {
 	declare _content: string | Node
 	declare _labels: DialogLabels
 	declare _fields: DialogField[]
-	declare _verify: ((values: Record<string, unknown>, fieldElements: Map<string, HTMLElement>) => boolean | Promise<boolean>) | undefined
+	declare _verify: DialogVerifyHandler | undefined
 	declare _className: string | undefined
 	declare _resolve: ((result: DialogResult) => void) | null
-	declare _fieldElements: Map<string, HTMLElement>
+	declare _fieldElements: DialogFieldElements
 	declare _$backdrop: HTMLElement | null
 	declare _$focusTrapStart: HTMLElement | null
 	declare _$focusTrapEnd: HTMLElement | null
@@ -434,8 +449,8 @@ class GooDialogControllerRuntime {
 	/**
 	 * Gets field values.
 	 */
-	_getFieldValues(): Record<string, unknown> {
-		const values: Record<string, unknown> = {}
+	_getFieldValues(): DialogValues {
+		const values: DialogValues = {}
 		for (const [ name, $el ] of this._fieldElements) {
 			const elWithValue = $el as unknown as { value?: unknown; getValue?: () => unknown; state?: { value?: unknown } }
 			values[name] = elWithValue.value ?? elWithValue.getValue?.() ?? elWithValue.state?.value ?? ''

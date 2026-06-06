@@ -12,7 +12,7 @@ import type { GooSliderPreset, GooSliderShape } from '../slider/types.ts'
 import { emitter } from '../support/utils/emitter.ts'
 import { log } from '../support/utils/logger.ts'
 import { createControlFromRegistry } from './controlFactory.ts'
-import { type GooControlOptionBag, type GooControlOptions, type GooControlTypeRegistry, resolveGooControlTypeConfig } from './controlRegistry.ts'
+import { type GooControlOptionBag, type GooControlOptions, type GooControlType, type GooControlTypeRegistry, resolveGooControlTypeConfig } from './controlRegistry.ts'
 import {
 	buildControlOptions,
 	buildDualRangeOptions,
@@ -71,28 +71,34 @@ export type ControllerOptionValue = string | ControllerOption
 /** Component-specific options forwarded to the mounted control. */
 export type GooControllerControlOptions = GooControlOptionBag
 
-/** Built-in Goo control type ids. Custom ids are resolved through `controlTypes`. */
-export type GooControllerControlType =
-	| 'angle'
-	| 'blend-mode'
-	| 'button'
-	| 'button-group'
-	| 'checkbox'
-	| 'color'
-	| 'email'
-	| 'number'
-	| 'password'
-	| 'radio'
-	| 'radiogroup'
-	| 'range'
-	| 'range-dual'
-	| 'range-module'
-	| 'select'
-	| 'slider'
-	| 'text'
-	| 'textarea'
-	| 'url'
-	| (string & {})
+/** Built-in or host-registered Goo controller control id. */
+export type GooControllerControlType = GooControlType
+
+/** Object/property pair bound by a Goo controller. */
+export interface GooControllerBinding {
+	object: Record<string, unknown> | undefined
+	property: string | undefined
+}
+
+/** Event names emitted through the Goo controller handle API. */
+export type GooControllerEventName = 'change' | 'input'
+
+/** Detail emitted when a controller commits a value change. */
+export interface GooControllerChangeDetail {
+	value: unknown
+	oldValue?: unknown
+	target: GooController
+}
+
+/** Detail emitted while a controller value is changing. */
+export interface GooControllerInputDetail {
+	value: unknown
+	target: GooController
+}
+
+/** Detail shape for a Goo controller event name. */
+export type GooControllerEventDetail<EventName extends GooControllerEventName = GooControllerEventName> =
+	EventName extends 'change' ? GooControllerChangeDetail : GooControllerInputDetail
 
 /**
  * Options for creating a GooController instance.
@@ -139,7 +145,7 @@ export interface GooControllerOptions {
  */
 export interface GooController extends HTMLElement {
 	/** Return the current object/property binding. */
-	getBinding(): { object: Record<string, unknown> | undefined; property: string | undefined }
+	getBinding(): GooControllerBinding
 	/** Return the mounted inner control element, if any. */
 	getControlElement(): HTMLElement | null
 	/** Whether the controller is disabled. */
@@ -172,12 +178,24 @@ export interface GooController extends HTMLElement {
 	addTo(parent: HTMLElement & { add?: (child: HTMLElement) => void }): GooController
 	/** Destroy this controller and remove it from the DOM. */
 	destroy(): void
+	/** Subscribe to controller handle events. */
+	on<EventName extends GooControllerEventName>(
+		event: EventName,
+		handler: (detail: GooControllerEventDetail<EventName>) => void
+	): () => void
+	/** Remove a controller handle event subscription. */
+	off<EventName extends GooControllerEventName>(
+		event: EventName,
+		handler: (detail: GooControllerEventDetail<EventName>) => void
+	): void
 }
 
 interface GooControllerInternal extends GooController {
 	state: GooControllerState
-	emit: (event: string, data?: unknown) => void
-	on: (event: string, handler: (...args: unknown[]) => void) => () => void
+	emit: <EventName extends GooControllerEventName>(
+		event: EventName,
+		data: GooControllerEventDetail<EventName>
+	) => void
 	$widget: HTMLElement | null
 	_callbacks: {
 		onchange?: GooControllerOptions['onchange']
@@ -553,7 +571,7 @@ class GooControllerRuntime {
 	 * @param oldValue - old value.
 	 */
 	_emitChange(value: unknown, oldValue?: unknown) {
-		const detail = { value, oldValue, target: this }
+		const detail: GooControllerChangeDetail = { value, oldValue, target: this }
 		this.dispatchEvent(new CustomEvent('change', { detail, bubbles: true }))
 		this.emit('change', detail)
 		this._callbacks.onchange?.(value)
@@ -565,7 +583,7 @@ class GooControllerRuntime {
 	 * @param value - value.
 	 */
 	_emitInput(value: unknown) {
-		const detail = { value, target: this }
+		const detail: GooControllerInputDetail = { value, target: this }
 		this.dispatchEvent(new CustomEvent('input', { detail, bubbles: true }))
 		this.emit('input', detail)
 		this._callbacks.oninput?.(value)
@@ -960,12 +978,11 @@ interface GooControllerRuntime extends GooControllerInternal {}
  * @param options - Controller options.
  * @returns The created controller element.
  */
-// eslint-disable-next-line @typescript-eslint/no-redeclare -- Public API intentionally exposes a value factory and matching handle type.
-export function GooController(options: GooControllerOptions = {}): GooController {
+function GooControllerElement(options: GooControllerOptions = {}): GooController {
 	return createControllerElement(options)
 }
 
-Object.defineProperties(GooController, {
+Object.defineProperties(GooControllerElement, {
 	formAssociated: {
 		configurable: true,
 		value: GooControllerRuntime.formAssociated
@@ -982,7 +999,7 @@ Object.defineProperties(GooController, {
 
 const runtimeDescriptors = Object.getOwnPropertyDescriptors(GooControllerRuntime.prototype)
 delete runtimeDescriptors.constructor
-Object.defineProperties(GooController.prototype, runtimeDescriptors)
+Object.defineProperties(GooControllerElement.prototype, runtimeDescriptors)
 
 // ============================================================================
 // Factory & Export
@@ -1047,10 +1064,10 @@ function resolveControllerLayout(
 
 function attachControllerMethods(element: GooControllerInternal): void {
 	const nativePrototype = Object.getPrototypeOf(element)
-	if (Object.getPrototypeOf(GooController.prototype) !== nativePrototype) {
-		Object.setPrototypeOf(GooController.prototype, nativePrototype)
+	if (Object.getPrototypeOf(GooControllerElement.prototype) !== nativePrototype) {
+		Object.setPrototypeOf(GooControllerElement.prototype, nativePrototype)
 	}
-	Object.setPrototypeOf(element, GooController.prototype)
+	Object.setPrototypeOf(element, GooControllerElement.prototype)
 	emitter(element)
 }
 

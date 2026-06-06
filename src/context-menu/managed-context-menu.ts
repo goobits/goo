@@ -5,6 +5,8 @@ export type ManagedGooContextMenuOpenAt = HTMLElement | { x: number; y: number }
 export type ManagedGooContextMenuItems = ManagedGooContextMenuItem[] | Record<string, ManagedGooContextMenuObjectItem | string | number>
 export type ManagedGooContextMenuItemPredicate = (this: ManagedGooContextMenu, id: string) => boolean
 export type ManagedGooContextMenuItemAction = (this: ManagedGooContextMenu, id: string) => void
+export type ManagedGooContextMenuEventName = 'open' | 'close'
+export type ManagedGooContextMenuEventHandler = (this: ManagedGooContextMenu) => void
 
 /** Object item accepted by the managed Goo context menu API before normalization. */
 export type ManagedGooContextMenuObjectItem = Omit<
@@ -33,7 +35,7 @@ export type ManagedGooContextMenu = {
 	close(options?: { quiet?: boolean }): void
 	getValue(): string
 	isOpen(): boolean
-	on(eventName: string, handler: (...args: unknown[]) => void): () => void
+	on(eventName: ManagedGooContextMenuEventName, handler: ManagedGooContextMenuEventHandler): () => void
 	open(options?: ManagedGooContextMenuOpenOptions): boolean
 	setOptions(options: GooSelectOptionsInput): void
 	setValue(value: string | number, options?: { silent?: boolean }): void
@@ -154,7 +156,7 @@ function createRegisteredContextMenu(
 	items: ManagedGooContextMenuOptions['items'],
 	config: ManagedGooContextMenuOptions = {}
 ): ManagedGooContextMenu {
-	const listeners = new Map<string, Set<(...args: unknown[]) => void>>()
+	const listeners = new Map<ManagedGooContextMenuEventName, Set<ManagedGooContextMenuEventHandler>>()
 	const handleRef: { current?: ManagedGooContextMenu } = {}
 	const menuOptions = normalizeContextMenuItems(items, () => getManagedMenuHandle(handleRef))
 	const contextMenu = createGooContextMenu({
@@ -246,9 +248,9 @@ function createRegisteredContextMenu(
 		emit('close')
 	}
 
-	function emit(eventName: string, ...args: unknown[]): void {
+	function emit(eventName: ManagedGooContextMenuEventName): void {
 		for (const handler of listeners.get(eventName) || []) {
-			handler(...args)
+			handler.call(handle)
 		}
 	}
 }

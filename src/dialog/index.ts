@@ -3,10 +3,15 @@
 export {
 	createGooDialog,
 	type DialogField,
+	type DialogFieldElements,
 	type DialogLabels,
 	type DialogResult,
+	type DialogValues,
+	type DialogVerifyHandler,
+	type GooDialogDefaultFocus,
 	type GooDialogInstance,
-	type GooDialogOptions } from './dialog.ts'
+	type GooDialogOptions,
+	type GooDialogType } from './dialog.ts'
 export { createGooDialogTextContent, createTrustedGooDialogContent } from './dialogContent.ts'
 export {
 	GooAlert,

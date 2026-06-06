@@ -9,6 +9,8 @@ export {
 	GooContextMenu,
 	type GooContextMenuManager,
 	type ManagedGooContextMenu,
+	type ManagedGooContextMenuEventHandler,
+	type ManagedGooContextMenuEventName,
 	type ManagedGooContextMenuItem,
 	type ManagedGooContextMenuItemAction,
 	type ManagedGooContextMenuItemPredicate,
