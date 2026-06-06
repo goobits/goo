@@ -43,6 +43,7 @@ let {
 	step = 1,
 	unit = '',
 	inputId,
+	ariaLabel,
 	name = '',
 	disabled = false,
 	size,
@@ -303,6 +304,7 @@ function pulseValueChange(): void {
 		type="text"
 		role="spinbutton"
 		id={inputId}
+		aria-label={ariaLabel}
 		aria-valuemin={min}
 		aria-valuemax={max}
 		aria-valuenow={currentValue}

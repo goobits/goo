@@ -110,6 +110,9 @@ export type GooNumberProps = GooForwardedAttributes & {
 	/** Native input id. */
 	inputId?: string
 
+	/** Accessible label for the native number input element. */
+	ariaLabel?: string
+
 	/** Element id. */
 	id?: string
 
