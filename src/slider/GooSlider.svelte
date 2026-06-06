@@ -80,7 +80,7 @@ let {
 	title,
 	name,
 	direction = 'horizontal',
-	preset = '',
+	preset,
 	presetColor = '',
 	presetHue = 0,
 	presetSaturation = 100,

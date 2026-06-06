@@ -4,10 +4,10 @@ import type { GooForwardedAttributes } from '../support/types/forwardedAttribute
 import type { GooSliderThumb } from './sliderUtils.ts'
 
 /** Available preset types for Goo slider track styling. */
-export type GooSliderPreset = 'opacity' | 'hue' | 'saturation' | 'lightness' | 'brightness' | 'bipolar' | 'size' | string
+export type GooSliderPreset = 'opacity' | 'hue' | 'saturation' | 'lightness' | 'brightness' | 'bipolar' | 'size'
 
 /** Available shape types for Goo slider track geometry. */
-export type GooSliderShape = 'default' | 'wedge' | 'wedge-left' | string
+export type GooSliderShape = 'default' | 'wedge' | 'wedge-left'
 
 /** Unit types for slider values. */
 export type GooSliderUnit = '%' | 'degree' | 'em' | 'float' | 'int' | 'integer' | 'number' | 'px' | 'rad' | 'radian' | 'x' | string

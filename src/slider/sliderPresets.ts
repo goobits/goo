@@ -1,3 +1,5 @@
+import type { GooSliderPreset } from './types.ts'
+
 interface PresetConfig {
 
 	/** CSS class applied for the preset. */
@@ -16,7 +18,7 @@ export const sliderPresets = {
 } as const
 
 /** Slider preset class configuration. */
-export const sliderPresetConfigs: Record<string, PresetConfig> = {
+export const sliderPresetConfigs: Record<GooSliderPreset, PresetConfig> = {
 	opacity: { className: 'goo-slider--opacity' },
 	hue: { className: 'goo-slider--hue' },
 	saturation: { className: 'goo-slider--saturation' },
