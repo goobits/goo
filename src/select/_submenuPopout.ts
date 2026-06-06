@@ -36,24 +36,24 @@ export class SubmenuPopoutController {
 		this.#boundaryHandlers = boundaryHandlers
 	}
 
-	get opened(): boolean {
-		return Boolean(this.#popout?.opened)
+	isOpen(): boolean {
+		return Boolean(this.#popout?.isOpen())
 	}
 
 	containsElement(target: EventTarget | null): boolean {
-		return target instanceof Node && Boolean(this.#popout?.$element?.contains(target))
+		return target instanceof Node && Boolean(this.#popout?.element?.contains(target))
 	}
 
 	open($item: HTMLElement, option: GooSelectOption): void {
 		const submenuId = option.id ?? ''
-		if (this.#popout?.opened && this.#activeId === submenuId) {
+		if (this.#popout?.isOpen() && this.#activeId === submenuId) {
 			this.#setActiveOwner($item)
 			this.#updatePopoutPosition($item)
 			return
 		}
 
 		const $nextSubmenu = this.#createSubmenuContent(option.options || [])
-		if (this.#popout?.opened) {
+		if (this.#popout?.isOpen()) {
 			const direction = this.#getSwitchDirection($item)
 			this.#activeId = submenuId
 			this.#setActiveOwner($item)
@@ -65,8 +65,8 @@ export class SubmenuPopoutController {
 		this.#setActiveOwner($item)
 		const textDirection = getElementTextDirection($item)
 		this.#popout = createGooPopout({
-			$content: this.#createSubmenuFrame($nextSubmenu),
-			$parent: document.body,
+			content: this.#createSubmenuFrame($nextSubmenu),
+			parentElement: document.body,
 			className: 'goo-select-submenu-popout goo-select-submenu-popout--morph',
 			clickToClose: false,
 			escapeToClose: false,
@@ -116,7 +116,7 @@ export class SubmenuPopoutController {
 		const elements = this.#getElements()
 
 		if (!popout || !elements) {
-			popout?.$content?.replaceChildren(this.#createSubmenuFrame($nextSubmenu))
+			popout?.contentElement?.replaceChildren(this.#createSubmenuFrame($nextSubmenu))
 			this.#updatePopoutPosition($item)
 			return
 		}
@@ -253,13 +253,13 @@ export class SubmenuPopoutController {
 	}
 
 	#getElements(): SubmenuElements | null {
-		const $frame = this.#popout?.$content?.querySelector<HTMLElement>(':scope > .goo-select__submenu-frame') ?? null
+		const $frame = this.#popout?.contentElement?.querySelector<HTMLElement>(':scope > .goo-select__submenu-frame') ?? null
 		const $viewport = $frame?.querySelector<HTMLElement>(':scope > .goo-select__submenu-viewport') ?? null
 		return $frame && $viewport ? { $frame, $viewport } : null
 	}
 
 	#bindBoundaryEvents(): void {
-		const element = this.#popout?.$element
+		const element = this.#popout?.element
 		if (!element || this.#boundaryCleanup) return
 
 		const handleMouseEnter = () => this.#boundaryHandlers.onMouseEnter?.()

@@ -48,15 +48,14 @@ export type GooProgressRingTimerOptions = {
 
 /** Runtime controller returned by `createGooProgressRingTimer`. */
 export type GooProgressRingTimer = {
-	$element: HTMLElement
 	advance(): void
-	canvas: HTMLCanvasElement | undefined
 	destroy(duration?: number): void
 	readonly duration: number
+	readonly element: HTMLElement
+	getCanvas(): HTMLCanvasElement | undefined
 	hide(options?: { immediate?: boolean }): void
 	indeterminate: boolean
 	progress: number
-	ring: GooProgressRingHandle
 	setProgress(progress: number): void
 	show(view?: 'cover'): void
 	readonly stepIndex: number

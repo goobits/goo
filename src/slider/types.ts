@@ -1,5 +1,6 @@
 import type { Snippet } from 'svelte'
 
+import type { GooForwardedAttributes } from '../support/types/forwardedAttributes.ts'
 import type { GooSliderThumb } from './sliderUtils.ts'
 
 /** Available preset types for Goo slider track styling. */
@@ -40,7 +41,7 @@ export interface GooSliderEventData {
 }
 
 /** Props accepted by the Svelte `GooSlider` component. */
-export type GooSliderProps = {
+export type GooSliderProps = GooForwardedAttributes & {
 
 	/** Current value or values. */
 	value?: GooSliderValue
@@ -126,8 +127,6 @@ export type GooSliderProps = {
 	/** Input callback fired while dragging. */
 	oninput?: (value: number | number[], data: GooSliderEventData) => void
 
-	/** Native attributes forwarded to the slider root. */
-	[key: string]: unknown
 }
 
 /** Native root element bound by `GooSlider` for imperative updates. */
@@ -138,9 +137,6 @@ export type GooSliderElement = HTMLDivElement & {
 
 	/** Current values as an array. */
 	values: number[]
-
-	/** Current thumbs. */
-	thumbs: GooSliderThumb[]
 
 	/** Set value or values. 	 * @param value - value.
  * @param options - options.
@@ -165,15 +161,6 @@ export type GooSliderElement = HTMLDivElement & {
 	/** Set custom track gradient colors. 	 * @param colors - colors.
 	 */
 	setGradient(colors: string[]): void
-
-	/** Enable or disable thumb transition animation. 	 * @param index - index.
-	 * @param animate - animate.
-	 */
-	setAnimate(index: number, animate: boolean): void
-
-	/** Convert a value to 0-1 percent within the slider range. 	 * @param value - value.
-	 */
-	toPercent(value: number): number
 
 	/** Enable the slider. */
 	enable(): void

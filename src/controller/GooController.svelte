@@ -87,8 +87,8 @@ function updateController(nextOptions = getOptions()): void {
 	element = controller
 }
 
-export function updateDisplay(): void {
-	controller?.updateDisplay()
+export function refresh(): void {
+	controller?.refresh()
 }
 
 export function getValue(): unknown {

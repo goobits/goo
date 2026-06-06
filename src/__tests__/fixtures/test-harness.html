@@ -38,7 +38,7 @@
 		import { createInputField } from '../../input/_createInputField.ts'
 		import { createSliderField } from '../../slider/_createSliderField.ts'
 		import { createGooController } from '@goobits/goo/controller'
-		import { createGooSchema, detectFieldType } from '@goobits/goo/schema'
+		import { createGooSchema } from '@goobits/goo/schema'
 
 		window.goo = {
 			createPanel,
@@ -48,8 +48,7 @@
 			createInput: createInputField,
 			createSlider: createSliderField,
 			createGooController,
-			createGooSchema,
-			detectFieldType
+			createGooSchema
 		}
 
 		// Signal that components are ready

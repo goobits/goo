@@ -47,7 +47,11 @@ export type {
 	GooContextMenuOptions,
 	ManagedGooContextMenu,
 	ManagedGooContextMenuItem,
+	ManagedGooContextMenuItemAction,
+	ManagedGooContextMenuItemPredicate,
+	ManagedGooContextMenuItems,
 	ManagedGooContextMenuObjectItem,
+	ManagedGooContextMenuOpenAt,
 	ManagedGooContextMenuOptions
 } from './context-menu/index.ts'
 export { createGooContextMenu, createManagedGooContextMenu, GooContextMenu } from './context-menu/index.ts'
@@ -95,18 +99,18 @@ export {
 	GooPrompt
 } from './dialog/index.ts'
 export type { DiffOptions, DiffResult } from './diff/index.ts'
-export { compare, DiffCanvas, renderBinary, renderGradient } from './diff/index.ts'
+export { DiffCanvas } from './diff/index.ts'
 export type { GooErrorBoundaryFallback, GooErrorBoundaryProps } from './error-boundary/index.ts'
 export { GooErrorBoundary } from './error-boundary/index.ts'
 export { GooFocusTrap } from './focus-trap/index.ts'
 export type { GooIconProps, GooIconRenderOptions } from './icon/index.ts'
-export { GooIcon, iconRegistry, renderIconHtml, renderIconPlaceholderHtml, renderIconPlaceholders } from './icon/index.ts'
+export { GooIcon } from './icon/index.ts'
 export type { GooInputProps, GooInputType, GooNumberProps } from './input/index.ts'
 export { GooInput, GooNumber } from './input/index.ts'
 export type { GooLabelProps } from './label/index.ts'
 export { GooLabel } from './label/index.ts'
 export type { GooPopoutAt, GooPopoutInstance, GooPopoutOptions } from './popout/index.ts'
-export { closeAllPopouts, closePopoutsOutside, createGooPopout, getActivePopout, GooPopout, HORIZONTAL, VERTICAL } from './popout/index.ts'
+export { createGooPopout, GooPopout } from './popout/index.ts'
 export type {
 	GooProgressRingHandle,
 	GooProgressRingSteps,
@@ -173,35 +177,20 @@ export type {
 	FloatingToolbarElement,
 	FloatingToolbarGroups,
 	FloatingToolbarToolConfig,
-	ToolbarButtonLayout,
 	ToolbarChromeIcon,
-	ToolbarConfig,
-	ToolbarLayoutMode,
-	ToolbarPosition,
 	ToolbarToolButtonConfig,
-	ToolbarToolButtonElement,
-	ToolbarToolEntry
+	ToolbarToolButtonElement
 } from './toolbar/index.ts'
 export {
-	chooseToolbarLayout,
 	createFloatingToolbarView,
-	createToolbarToolButton,
-	FloatingToolbarView,
-	getToolbarLayoutSignature,
-	isToolbarHorizontalPosition,
-	mountFunctionIcon,
-	readFloatingToolbarGroups,
-	ToolbarToolButton,
-	toToolbarButtonLayout
+	createToolbarToolButton
 } from './toolbar/index.ts'
 export type {
 	GooTooltipActionOptions,
 	GooTooltipInstance,
-	GooTooltipOptions,
-	GooTooltipRuntimeOptions,
-	GooTooltipRuntimeState
+	GooTooltipOptions
 } from './tooltip/index.ts'
-export { createGooTooltip, GooTooltip, GooTooltipRuntime, tooltip } from './tooltip/index.ts'
+export { createGooTooltip, GooTooltip, tooltip } from './tooltip/index.ts'
 export type { GooTurnstileFieldProps, GooTurnstileSize, GooTurnstileTheme } from './turnstile/index.ts'
 export { GooTurnstileField } from './turnstile/index.ts'
 export type {
@@ -220,24 +209,8 @@ export type {
 	VirtualGridWindowOptions
 } from './virtualGrid/index.ts'
 export {
-	calculateVirtualGridWindow,
-	getGridColumns,
-	getGridItem,
-	getGridItemElement,
-	getGridRowHeight,
-	getSelectedGridItem,
-	getVisibleGridIndexes,
-	gridMarquee,
-	isGridArrowKey,
-	nextGridClickSelection,
-	nextGridIndex,
-	nextGridMarqueeSelection,
-	rectIntersects,
-	sameGridSelection,
-	scrollToGridItem,
-	setGridItemSelected,
-	VirtualGrid,
-	virtualGridSpacerHeight } from './virtualGrid/index.ts'
+	VirtualGrid
+} from './virtualGrid/index.ts'
 export type {
 	GooVortexCreateOptions,
 	GooVortexHandle,
@@ -254,13 +227,16 @@ export { GooColor } from './color/index.ts'
 export type {
 	ControllerOption,
 	ControllerOptionValue,
+	ControlOptionBag,
+	ControlOptions,
+	ControlOptionValue,
 	ControlTypeConfig,
 	ControlTypeEntry,
 	ControlTypeRegistry,
 	GooControllerOptions,
 	SvelteControlSchema
 } from './controller/index.ts'
-export { addColor, createGooController, defaultControlRegistry, GooController, resolveControlTypeConfig } from './controller/index.ts'
+export { createGooController, GooController } from './controller/index.ts'
 export type {
 	GooFloatingWindow,
 	GooFloatingWindowHorizontalAlign,
@@ -270,40 +246,26 @@ export type {
 	GooFloatingWindowStorage,
 	GooFloatingWindowVerticalAlign
 } from './floating-window/index.ts'
-export { createGooFloatingWindow, hideFocusedGooFloatingWindow, normalizeFloatingWindowSettings } from './floating-window/index.ts'
+export { createGooFloatingWindow } from './floating-window/index.ts'
 export type { GooFolderElement, GooFolderOptions } from './folder/index.ts'
 export { GooFolder } from './folder/index.ts'
-export type { GridPopoutItem, GridPopoutSvgElement, GridPopoutSvgIcon, GridPopoutTriggerElement, GridPopoutTriggerOptions } from './grid-popout/index.ts'
+export type { GridPopoutItem, GridPopoutSvgElement, GridPopoutSvgIcon, GridPopoutTriggerHandle, GridPopoutTriggerOptions } from './grid-popout/index.ts'
 export { createGridPopoutTrigger, GridPickerSelectedMark, GridPopoutPicker, GridPopoutTrigger } from './grid-popout/index.ts'
 export type { GooPanelElement, GooPanelOptions } from './panel/index.ts'
 export { GooPanel } from './panel/index.ts'
 
 // Schema-driven UI
 export type {
-	ControllerFieldLayout,
-	ControllerOptions,
 	GooSchemaControlType,
 	GooSchemaField,
 	GooSchemaFolder,
 	GooSchemaNode,
 	GooSchemaOptions,
 	GooSchemaType,
-	NormalizedSelectOption
+	GooSchemaUpdateOptions
 } from './schema/index.ts'
 export {
-	applyFieldValueFormatOptions,
-	buildControllerOptions,
 	createGooSchema,
-	detectFieldType,
-	getByPath,
-	getControllerFieldLayout,
 	GooSchema,
-	GooSchemaComponent,
-	isSelfContainedField,
-	normalizeFieldLayout,
-	normalizeSelectOptions,
-	pathToLabel,
-	resolvePath,
-	setByPath,
-	shouldRenderSchemaNode
+	GooSchemaComponent
 } from './schema/index.ts'

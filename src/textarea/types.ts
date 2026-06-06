@@ -1,7 +1,9 @@
 import type { Snippet } from 'svelte'
 
+import type { GooForwardedAttributes } from '../support/types/forwardedAttributes.ts'
+
 /** Props accepted by the Svelte `GooTextarea` component. */
-export type GooTextareaProps = {
+export type GooTextareaProps = GooForwardedAttributes & {
 
 	/** Current text value. */
 	value?: string
@@ -60,6 +62,4 @@ export type GooTextareaProps = {
 	/** Change callback. */
 	onchange?: (value: string, oldValue?: string) => void
 
-	/** Native attributes forwarded to the rendered control. */
-	[key: string]: unknown
 }

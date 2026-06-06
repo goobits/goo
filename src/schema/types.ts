@@ -3,7 +3,7 @@
  * @module goobits/schema/types
  */
 
-import type { ControlTypeRegistry } from '../controller/controlRegistry.ts'
+import type { ControlOptionBag, ControlTypeRegistry } from '../controller/controlRegistry.ts'
 
 /**
  * Control field definition type identifiers.
@@ -40,10 +40,6 @@ export type GooSchemaValueFormat = 'percent' | 'number' | 'integer' | 'float' | 
  * Control field definition - binds to a data property.
  */
 export interface GooSchemaField {
-
-	/** Component-specific options forwarded to the selected control. */
-	[controlOption: string]: unknown
-
 	/** Dot-notation path to bind: "tip.bristles.count" or "layers.0.enabled" */
 	path: string
 
@@ -122,6 +118,9 @@ export interface GooSchemaField {
 
 	/** Mode ids for blend-mode controls. */
 	modes?: readonly string[]
+
+	/** Component-specific options forwarded to the selected control. */
+	controlOptions?: ControlOptionBag
 
 	/** Show field when condition matches. */
 	if?: GooSchemaCondition

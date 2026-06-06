@@ -57,11 +57,11 @@ export function createGooFloatingWindow(options: GooFloatingWindowOptions): GooF
 		get ready() {
 			return ready
 		},
-		settings,
 		destroy,
 		flipHorizontal,
 		focus,
 		getContainmentRect,
+		getSettings,
 		hide,
 		isOpen,
 		restore,
@@ -181,6 +181,10 @@ export function createGooFloatingWindow(options: GooFloatingWindowOptions): GooF
 
 	function getContainmentRect(): DOMRect {
 		return containmentElement?.getBoundingClientRect() ?? document.documentElement.getBoundingClientRect()
+	}
+
+	function getSettings(): GooFloatingWindowSettings {
+		return toPlainSettings(settings)
 	}
 
 	function getParentRect(): DOMRect {

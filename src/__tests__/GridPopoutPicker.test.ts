@@ -7,22 +7,22 @@ import type { GridPopoutItem } from '../grid-popout/types.ts'
 vi.mock('@goobits/goo/popout', () => ({
 	closePopoutsOutside: vi.fn(),
 	createGooPopout: vi.fn((options: {
-		$content: HTMLElement
+		content: HTMLElement
 		className?: string
 		onClose?: () => void
 		onDestroy?: () => void
-		onOpen?: (data: { $element: HTMLElement }) => void
+		onOpen?: (data: { element: HTMLElement }) => void
 	}) => {
 		const $element = document.createElement('div')
 		$element.className = `goo-popout ${ options.className ?? '' }`.trim()
-		$element.appendChild(options.$content)
+		$element.appendChild(options.content)
 		document.body.appendChild($element)
 
 		const instance = {
-			get $element() {
+			get element() {
 				return $element.isConnected ? $element : null
 			},
-			get opened() {
+			isOpen() {
 				return $element.isConnected
 			},
 			close: vi.fn(async() => {
@@ -35,7 +35,7 @@ vi.mock('@goobits/goo/popout', () => ({
 			})
 		}
 
-		options.onOpen?.({ $element })
+		options.onOpen?.({ element: $element })
 		return instance
 	})
 }))

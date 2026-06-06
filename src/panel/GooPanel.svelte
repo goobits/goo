@@ -85,19 +85,15 @@ function assignApi(): void {
 		root._folders = []
 		root._pendingChildren = []
 		Object.defineProperties(root, {
-			$header: { configurable: true, get: () => headerElement ?? null },
-			$title: { configurable: true, get: () => titleElement ?? null },
-			$toggle: { configurable: true, get: () => toggleElement ?? null },
-			$content: { configurable: true, get: () => contentElement ?? null },
+			headerElement: { configurable: true, get: () => headerElement ?? null },
+			titleElement: { configurable: true, get: () => titleElement ?? null },
+			toggleElement: { configurable: true, get: () => toggleElement ?? null },
+			contentElement: { configurable: true, get: () => contentElement ?? null },
 			open: { configurable: true, get: () => open, set: (value: boolean) => setOpen(value) },
 			closed: { configurable: true, get: () => !open, set: (value: boolean) => setOpen(!value) },
 			title: { configurable: true, get: () => title, set: (value: string) => title = value },
 			width: { configurable: true, get: () => width, set: (value: number) => width = value },
-			docked: { configurable: true, get: () => docked, set: (value: boolean) => docked = value },
-			content: { configurable: true, get: () => contentElement ?? null },
-			domElement: { configurable: true, get: () => root },
-			controllers: { configurable: true, get: () => root?._controllers ?? [] },
-			folders: { configurable: true, get: () => root?._folders ?? [] }
+			docked: { configurable: true, get: () => docked, set: (value: boolean) => docked = value }
 		})
 		root.setOpen = setOpen
 		root.toggle = toggle

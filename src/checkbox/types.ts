@@ -1,7 +1,9 @@
 import type { Snippet } from 'svelte'
 
+import type { GooForwardedAttributes } from '../support/types/forwardedAttributes.ts'
+
 /** Props accepted by the Svelte `GooCheckbox` component. */
-export type GooCheckboxProps = {
+export type GooCheckboxProps = GooForwardedAttributes & {
 
 	/** Current checked state. */
 	value?: boolean
@@ -45,6 +47,4 @@ export type GooCheckboxProps = {
 	/** Change callback. */
 	onchange?: (value: boolean, oldValue?: boolean) => void
 
-	/** Native attributes forwarded to the rendered control. */
-	[key: string]: unknown
 }

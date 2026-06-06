@@ -63,7 +63,7 @@ describe('GooDialog', () => {
 
 		dialog.setContent('<button onclick=alert(1)>Run</button>')
 
-		const content = dialog.querySelector<HTMLElement>('.goo-dialog__content')
+		const content = dialog.element.querySelector<HTMLElement>('.goo-dialog__content')
 		expect(content?.textContent).toBe('<button onclick=alert(1)>Run</button>')
 		expect(content?.querySelector('button')).toBeNull()
 	})
@@ -78,7 +78,7 @@ describe('GooDialog', () => {
 			showClose: false
 		})
 
-		expect(dialog.getAttribute('aria-label')).toBe('Open document')
-		expect(dialog.getAttribute('aria-labelledby')).toBeNull()
+		expect(dialog.element.getAttribute('aria-label')).toBe('Open document')
+		expect(dialog.element.getAttribute('aria-labelledby')).toBeNull()
 	})
 })

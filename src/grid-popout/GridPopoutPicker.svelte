@@ -136,14 +136,14 @@ function togglePopout(): void {
 }
 
 function openPopout(): void {
-	if (disabled || !rootElement || popout?.$element || !items.length) return
+	if (disabled || !rootElement || popout?.element || !items.length) return
 
 	closePopoutsOutside(rootElement)
 	opened = true
 	lastPopoutOpenAt = performance.now()
 
 	popout = createGooPopout({
-		$content: createContent(),
+		content: createContent(),
 		at: rootElement,
 		className: getPopoutClassName(),
 		clickToClose: shouldCloseFromPointer,
@@ -156,8 +156,8 @@ function openPopout(): void {
 			popout = null
 			document.removeEventListener('keydown', handleDocumentKeydown, true)
 		},
-		onOpen({ $element }) {
-			focusSelectedOption($element)
+		onOpen({ element }) {
+			focusSelectedOption(element)
 		}
 	})
 	document.addEventListener('keydown', handleDocumentKeydown, true)
@@ -320,7 +320,7 @@ function focusSiblingOption(option: HTMLElement | null, delta: number): void {
 }
 
 function getOptions(): HTMLElement[] {
-	return Array.from(popout?.$element?.querySelectorAll<HTMLElement>('sketch-grid-item') ?? [])
+	return Array.from(popout?.element?.querySelectorAll<HTMLElement>('sketch-grid-item') ?? [])
 }
 
 function chooseItem(id: string): void {

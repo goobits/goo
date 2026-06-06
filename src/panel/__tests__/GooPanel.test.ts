@@ -36,8 +36,8 @@ describe('GooPanel', () => {
 		document.body.appendChild(panel)
 
 		expect(panel.classList.contains('goo-panel--headerless')).toBe(true)
-		expect(panel.$header).toBeNull()
-		expect(panel.$title).toBeNull()
+		expect(panel.headerElement).toBeNull()
+		expect(panel.titleElement).toBeNull()
 		expect(panel.querySelector('.goo-panel__header')).toBeNull()
 	})
 
@@ -49,7 +49,7 @@ describe('GooPanel', () => {
 		})
 		document.body.appendChild(panel)
 
-		expect(panel.$content?.textContent).toBe('<img src=x onerror=alert(1)>')
-		expect(panel.$content?.querySelector('img')).toBeNull()
+		expect(panel.contentElement?.textContent).toBe('<img src=x onerror=alert(1)>')
+		expect(panel.contentElement?.querySelector('img')).toBeNull()
 	})
 })

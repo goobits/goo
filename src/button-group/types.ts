@@ -1,5 +1,7 @@
 import type { Snippet } from 'svelte'
 
+import type { GooForwardedAttributes } from '../support/types/forwardedAttributes.ts'
+
 /** Button group layout direction. */
 export type GooButtonGroupLayout = 'horizontal' | 'vertical'
 
@@ -63,7 +65,7 @@ export interface NormalizedButtonGroupOption {
 export type ButtonGroupOptions = Array<string | ButtonGroupOption> | Record<string, string | ButtonGroupOption>
 
 /** Props accepted by the Svelte `GooButtonGroup` component. */
-export type GooButtonGroupProps = {
+export type GooButtonGroupProps = GooForwardedAttributes & {
 
 	/** Button definitions to render. Existing child buttons are used when omitted. */
 	options?: ButtonGroupOptions
@@ -107,6 +109,4 @@ export type GooButtonGroupProps = {
 	/** Callback fired with the full selected value after a selection change. */
 	onchange?: (value: string | string[] | null) => void
 
-	/** Native attributes forwarded to the rendered group. */
-	[key: string]: unknown
 }

@@ -23,15 +23,12 @@ export interface GooFolderOptions {
  * Native element API exposed by mounted Goo folders.
  */
 export type GooFolderElement = HTMLDivElement & {
-	$header: HTMLElement | null
-	$title: HTMLElement | null
-	$content: HTMLElement | null
-	$chevron: HTMLElement | null
+	headerElement: HTMLElement | null
+	titleElement: HTMLElement | null
+	contentElement: HTMLElement | null
+	chevronElement: HTMLElement | null
 	open: boolean
 	title: string
-	content: HTMLElement | null
-	controllers: HTMLElement[]
-	folders: HTMLElement[]
 	setOpen: (value: boolean, options?: { silent?: boolean }) => void
 	toggle: () => boolean
 	expand: () => void

@@ -10,7 +10,7 @@ async function waitForControllerControl(controller: GooControllerElement): Promi
 	for (let attempt = 0; attempt < 10; attempt++) {
 		await Promise.resolve()
 		await tick()
-		const control = controller.control
+		const control = controller.getControlElement()
 		if (control) return control
 	}
 	throw new Error('Expected controller control to be ready')
@@ -182,7 +182,7 @@ describe('GooController', () => {
 			originalSetValue?.(value, options)
 		}
 
-		controller.updateDisplay()
+		controller.refresh()
 
 		expect(setValue).not.toHaveBeenCalled()
 	})
@@ -221,7 +221,9 @@ describe('GooController', () => {
 			property: 'blendMode',
 			type: 'blend-mode',
 			label: 'Blend',
-			modes: [ 'normal', 'multiply', 'screen', 'overlay' ]
+			controlOptions: {
+				modes: [ 'normal', 'multiply', 'screen', 'overlay' ]
+			}
 		})
 		document.body.appendChild(controller)
 		await waitForControllerControl(controller)
@@ -242,8 +244,8 @@ describe('GooController', () => {
 			type: 'custom-range',
 			min: 0,
 			max: 100,
-			canCross: true,
 			controlOptions: {
+				canCross: true,
 				canPush: true
 			},
 			controlTypes: {

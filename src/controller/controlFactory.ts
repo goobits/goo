@@ -5,7 +5,13 @@
  */
 
 import { log } from '../support/utils/logger.ts'
-import { type ControlTypeRegistry, resolveControlTypeConfig } from './controlRegistry.ts'
+import {
+	type ControlExport,
+	type ControlOptions,
+	type ControlOptionValue,
+	type ControlTypeRegistry,
+	resolveControlTypeConfig
+} from './controlRegistry.ts'
 import { createSvelteControlHost, type SvelteComponentType, type SvelteControlHost, type SvelteControlSchema } from './SvelteControl.svelte.ts'
 
 // ============================================================================
@@ -29,7 +35,7 @@ export interface ControlCreationOptions {
 	value: unknown
 
 	/** All controller options for building control options */
-	controllerOptions: Record<string, unknown>
+	controllerOptions: ControlOptions
 
 	/** Change handler callback */
 	onchange: (value: unknown) => void
@@ -38,7 +44,7 @@ export interface ControlCreationOptions {
 	oninput?: (value: unknown) => void
 
 	/** Custom options builder (overrides default) */
-	buildOptions?: (value: unknown, Control: unknown) => Record<string, unknown>
+	buildOptions?: (value: unknown, Control: ControlExport) => ControlOptions
 
 	/** Optional control type registry override */
 	controlTypes?: ControlTypeRegistry
@@ -56,23 +62,23 @@ export interface ControlCreationOptions {
 	 */
 export function extractControlFromModule(
 	module: Record<string, unknown>
-): ((...args: unknown[]) => unknown) | null {
+): ControlExport | null {
 	// Prefer remaining UI* factory exports while schema/controller migration is in progress.
 	for (const key of Object.keys(module)) {
 		if (key.startsWith('UI') && typeof module[key] === 'function') {
-			return module[key] as (...args: unknown[]) => unknown
+			return module[key] as ControlExport
 		}
 	}
 
 	// Fall back to default export
 	if (module.default && typeof module.default === 'function') {
-		return module.default as (...args: unknown[]) => unknown
+		return module.default as ControlExport
 	}
 
 	// Fall back to first function export
 	for (const key of Object.keys(module)) {
 		if (typeof module[key] === 'function') {
-			return module[key] as (...args: unknown[]) => unknown
+			return module[key] as ControlExport
 		}
 	}
 
@@ -145,8 +151,8 @@ export async function createControlFromRegistry(
 		if (typeof Control === 'function') {
 			// Check if it's a factory function or a class.
 			const isClass = Control.prototype && Control.prototype.constructor === Control
-			const ControlConstructor = Control as new (options: Record<string, unknown>) => HTMLElement
-			const ControlFactory = Control as (options: Record<string, unknown>) => HTMLElement
+			const ControlConstructor = Control as new (options: ControlOptions) => HTMLElement
+			const ControlFactory = Control as (options: ControlOptions) => HTMLElement
 			control = isClass ? new ControlConstructor(controlOptions) : ControlFactory(controlOptions)
 		}
 
@@ -211,7 +217,7 @@ function createSvelteControl(
 	return { status: 'error' }
 }
 
-function buildSvelteControlOptions(controlType: string, controllerOptions: Record<string, unknown>): Record<string, unknown> {
+function buildSvelteControlOptions(controlType: string, controllerOptions: ControlOptions): ControlOptions {
 	const controlOptions = { ...controllerOptions }
 	if (controlType === 'checkbox' && typeof controlOptions.label === 'string') {
 		controlOptions.ariaLabel ??= controlOptions.label
@@ -225,10 +231,10 @@ function buildSvelteControlOptions(controlType: string, controllerOptions: Recor
  * @param options - Creation options
  * @returns Options object for the control constructor
  */
-function buildDefaultOptions(options: ControlCreationOptions): Record<string, unknown> {
+function buildDefaultOptions(options: ControlCreationOptions): ControlOptions {
 	const { value, controllerOptions, onchange, oninput } = options
-	const opts: Record<string, unknown> = {
-		value,
+	const opts: ControlOptions = {
+		value: value as ControlOptionValue,
 		onchange: (v: unknown) => {
 			// Handle both direct values and event objects with .value
 			const actualValue =

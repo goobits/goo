@@ -1,5 +1,7 @@
 import type { Snippet } from 'svelte'
 
+import type { GooForwardedAttributes } from '../support/types/forwardedAttributes.ts'
+
 /** Radio option definition. */
 export interface GooRadioOption {
 	value: string
@@ -13,7 +15,7 @@ export type GooRadioOptions = Array<string | GooRadioOption | { id?: string | nu
 export type GooRadioGroupLayout = 'vertical' | 'horizontal'
 
 /** Props accepted by the Svelte `GooRadio` component. */
-export type GooRadioProps = {
+export type GooRadioProps = GooForwardedAttributes & {
 	value?: string
 	label?: string
 	checked?: boolean
@@ -24,11 +26,10 @@ export type GooRadioProps = {
 	tabIndex?: number
 	children?: Snippet
 	onchange?: (value: string | null, oldValue?: string | null) => void
-	[key: string]: unknown
 }
 
 /** Props accepted by the Svelte `GooRadioGroup` component. */
-export type GooRadioGroupProps = {
+export type GooRadioGroupProps = GooForwardedAttributes & {
 	value?: string
 	options?: GooRadioOptions
 	name?: string
@@ -40,5 +41,4 @@ export type GooRadioGroupProps = {
 	tabIndex?: number
 	children?: Snippet
 	onchange?: (value: string, oldValue?: string) => void
-	[key: string]: unknown
 }

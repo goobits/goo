@@ -4,7 +4,8 @@
  * @module goobits/schema/schemaFieldBuilder
  */
 
-import type { ControlTypeRegistry } from '../controller/controlRegistry.ts'
+import type { ControlOptionBag, ControlOptionValue, ControlTypeRegistry } from '../controller/controlRegistry.ts'
+import type { GooControllerOptions } from '../controller/GooController.ts'
 import { getControllerFieldLayout } from './fieldLayout.ts'
 import { applyFieldValueFormatOptions } from './fieldValueFormat.ts'
 import { pathToLabel } from './pathUtils.ts'
@@ -30,8 +31,7 @@ type RawOption = string | {
 }
 
 /** Controller options built from a schema field */
-export interface ControllerOptions {
-	[controlOption: string]: unknown
+export interface ControllerOptions extends GooControllerOptions {
 	object: Record<string, unknown>
 	property: string
 	label: string
@@ -49,6 +49,7 @@ export interface ControllerOptions {
 	unit?: string
 	options?: NormalizedSelectOption[]
 	layout?: 'inline' | 'stacked'
+	controlOptions?: ControlOptionBag
 }
 
 const SCHEMA_FIELD_KEYS = new Set([
@@ -70,6 +71,7 @@ const SCHEMA_FIELD_KEYS = new Set([
 	'if',
 	'unless',
 	'layout',
+	'controlOptions',
 	'selfContained',
 	'format',
 	'valueFormat',
@@ -225,9 +227,13 @@ export function buildControllerOptions(
 	if (node.shape) options.shape = node.shape
 	if (node.dual) options.dual = node.dual
 
-	// Unit
+	// Unit and value-display metadata
 	if (node.unit) options.unit = node.unit
-	applyFieldValueFormatOptions(node, options)
+	const valueFormatOptions: Record<string, unknown> = { unit: options.unit }
+	applyFieldValueFormatOptions(node, valueFormatOptions)
+	if (typeof valueFormatOptions.unit === 'string') {
+		options.unit = valueFormatOptions.unit
+	}
 
 	// Select options - normalize strings to { label, id } format
 	if (node.options) {
@@ -238,11 +244,33 @@ export function buildControllerOptions(
 	const layout = getControllerFieldLayout(node)
 	if (layout) options.layout = layout
 
-	for (const [ key, value ] of Object.entries(node)) {
-		if (!SCHEMA_FIELD_KEYS.has(key) && value !== undefined) {
-			options[key] = value
+	let controlOptions: ControlOptionBag | undefined = node.controlOptions ? { ...node.controlOptions } : undefined
+	for (const [ key, value ] of Object.entries(valueFormatOptions)) {
+		if (key !== 'unit' && isControlOptionValue(value)) {
+			controlOptions ??= {}
+			controlOptions[key] = value
 		}
+	}
+	for (const [ key, value ] of Object.entries(node)) {
+		if (!SCHEMA_FIELD_KEYS.has(key) && isControlOptionValue(value)) {
+			controlOptions ??= {}
+			controlOptions[key] = value
+		}
+	}
+	if (controlOptions && Object.keys(controlOptions).length) {
+		options.controlOptions = controlOptions
 	}
 
 	return options
+}
+
+function isControlOptionValue(value: unknown): value is ControlOptionValue {
+	return (
+		value == null ||
+		typeof value === 'string' ||
+		typeof value === 'number' ||
+		typeof value === 'boolean' ||
+		typeof value === 'function' ||
+		typeof value === 'object'
+	)
 }

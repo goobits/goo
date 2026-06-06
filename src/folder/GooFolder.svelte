@@ -88,15 +88,12 @@ function assignApi(): void {
 		root._folders = []
 		root._pendingChildren = []
 		Object.defineProperties(root, {
-			$header: { configurable: true, get: () => headerElement ?? null },
-			$title: { configurable: true, get: () => titleElement ?? null },
-			$content: { configurable: true, get: () => contentElement ?? null },
-			$chevron: { configurable: true, get: () => chevronElement ?? null },
+			headerElement: { configurable: true, get: () => headerElement ?? null },
+			titleElement: { configurable: true, get: () => titleElement ?? null },
+			contentElement: { configurable: true, get: () => contentElement ?? null },
+			chevronElement: { configurable: true, get: () => chevronElement ?? null },
 			open: { configurable: true, get: () => open, set: (value: boolean) => setOpen(value) },
-			title: { configurable: true, get: () => title, set: (value: string) => title = value },
-			content: { configurable: true, get: () => contentElement ?? null },
-			controllers: { configurable: true, get: () => root?._controllers ?? [] },
-			folders: { configurable: true, get: () => root?._folders ?? [] }
+			title: { configurable: true, get: () => title, set: (value: string) => title = value }
 		})
 		root.setOpen = setOpen
 		root.toggle = toggle

@@ -25,12 +25,19 @@ export interface GooTooltipRuntimeState {
 	options: GooTooltipRuntimeOptions
 }
 
-type GooTooltipRuntimeApi = {
-	(element: HTMLElement | string, content: TooltipContent, options?: GooTooltipRuntimeOptions): GooTooltipRuntimeState | undefined
+/** Imperative Goo tooltip manager for Sketch-style non-Svelte call sites. */
+export interface GooTooltipRuntimeApi {
+	/** Attach a tooltip to an element and return the runtime state for manual control. */
+	attach(element: HTMLElement | string, content: TooltipContent, options?: GooTooltipRuntimeOptions): GooTooltipRuntimeState | undefined
+	/** Destroy the active tooltip and remove any synthetic anchor. */
 	destroy(): void
+	/** Whether an imperative tooltip is currently visible. */
 	readonly enabled: boolean
+	/** Hide the active tooltip. */
 	hide(callback?: () => void): void
+	/** Re-show the active or provided tooltip state when enabled. */
 	ping(state?: GooTooltipRuntimeState): void
+	/** Show a tooltip state or ad-hoc tooltip content. */
 	show(content: TooltipContent | GooTooltipRuntimeState, options?: GooTooltipRuntimeOptions): void
 }
 
@@ -41,19 +48,17 @@ let enabled = false
 let showTimeoutId = 0
 let hideTimeoutId = 0
 
-/** Imperative Goo tooltip runtime used by existing Sketch tooltip call sites. */
-export const GooTooltipRuntime: GooTooltipRuntimeApi = Object.assign(attachTooltip, {
+/** Imperative Goo tooltip runtime used by Sketch-style non-Svelte call sites. */
+export const gooTooltipRuntime: GooTooltipRuntimeApi = {
+	attach: attachTooltip,
 	destroy,
+	get enabled() {
+		return enabled
+	},
 	hide,
 	ping,
 	show
-}) as GooTooltipRuntimeApi
-
-Object.defineProperty(GooTooltipRuntime, 'enabled', {
-	get() {
-		return enabled
-	}
-})
+}
 
 function attachTooltip(
 	element: HTMLElement | string,
@@ -67,7 +72,7 @@ function attachTooltip(
 	const instance = createGooTooltip({
 		for: target,
 		content: typeof value === 'string' ? value : '',
-		$content: value instanceof HTMLElement ? value : undefined,
+		contentElement: value instanceof HTMLElement ? value : undefined,
 		align: alignFromDirection(options.direction),
 		offset: normalizeOffset(options.offset),
 		showDelay: options.showDelay ?? 0,

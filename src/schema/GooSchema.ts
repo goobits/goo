@@ -5,7 +5,7 @@
 
 import './GooSchema.css'
 
-import { type ControlTypeRegistry, resolveControlTypeConfig } from '../controller/controlRegistry.ts'
+import { resolveControlTypeConfig } from '../controller/controlRegistry.ts'
 import { createGooController } from '../controller/GooController.ts'
 import { createSvelteControlHost, type SvelteComponentType, type SvelteControlSchema } from '../controller/SvelteControl.svelte.ts'
 import { createFolder, type GooFolderElement } from '../folder/_createFolder.ts'
@@ -42,23 +42,23 @@ export interface GooSchemaEventDetail {
 	data: Record<string, unknown>
 }
 
+/** Mutable display and control options accepted by a mounted GooSchema handle. */
+export type GooSchemaUpdateOptions = Pick<
+	GooSchemaOptions,
+	'bare' | 'controlTypes' | 'folderClassName' | 'showPanelHeader'
+>
+
 /** Public imperative handle returned by `createGooSchema`. */
 export interface GooSchema extends HTMLElement {
-	bare: boolean
-	controlTypes: ControlTypeRegistry | undefined
-	data: Record<string, unknown>
-	folderClassName: string | undefined
-	schema: GooSchemaType
-	showPanelHeader: boolean
 	destroy(): void
-	getController(path: string): unknown
+	getController(path: string): HTMLElement | undefined
 	getData(): Record<string, unknown>
 	getSchema(): GooSchemaType
-	reevaluateConditions(): void
-	setChangeHandler(handler: ((path: string, value: unknown) => void) | null): void
+	refresh(): void
+	refreshConditions(): void
 	setData(data: Record<string, unknown>): void
+	setOptions(options: GooSchemaUpdateOptions): void
 	setSchema(schema: GooSchemaType): void
-	updateDisplay(): void
 }
 
 type GooSchemaInternal = GooSchema & {
@@ -115,89 +115,49 @@ function initializeSchema(element: GooSchemaInternal, options: GooSchemaOptions)
 }
 
 function attachSchemaApi(element: GooSchemaInternal): void {
-	Object.defineProperties(element, {
-		bare: {
-			configurable: true,
-			get: () => element.state.bare ?? false,
-			set: (value: boolean) => {
-				if (element.state.bare === value) return
-				element.state.bare = value
-				element._scheduleRebuild()
-			}
-		},
-		controlTypes: {
-			configurable: true,
-			get: () => element.state.controlTypes,
-			set: (value: ControlTypeRegistry | undefined) => {
-				if (value === element.state.controlTypes) return
-				element.state.controlTypes = value
-				element._scheduleRebuild()
-			}
-		},
-		data: {
-			configurable: true,
-			get: () => element._data,
-			set: (value: Record<string, unknown>) => {
-				if (!value || typeof value !== 'object' || value === element._data) return
-				element._data = value
-				element._scheduleRebuild()
-			}
-		},
-		folderClassName: {
-			configurable: true,
-			get: () => element.state.folderClassName,
-			set: (value: string | undefined) => {
-				if (value === element.state.folderClassName) return
-				element.state.folderClassName = value
-				element._scheduleRebuild()
-			}
-		},
-		schema: {
-			configurable: true,
-			get: () => element.state.schema,
-			set: (value: GooSchemaType) => {
-				if (!value || typeof value !== 'object' || value === element.state.schema) return
-				element.state.schema = value
-				element._scheduleRebuild()
-			}
-		},
-		showPanelHeader: {
-			configurable: true,
-			get: () => element.state.showPanelHeader ?? true,
-			set: (value: boolean) => {
-				if (element.state.showPanelHeader === value) return
-				element.state.showPanelHeader = value
-				element._scheduleRebuild()
-			}
-		}
-	})
-
 	Object.assign(element, {
 		destroy: () => {
 			element._root = null
 			element._controllers.clear()
 			element.remove()
 		},
-		getController: (path: string) => element._controllers.get(path),
+		getController: (path: string) => element._controllers.get(path) as HTMLElement | undefined,
 		getData: () => element._data,
 		getSchema: () => element.state.schema,
-		reevaluateConditions: () => {
+		refreshConditions: () => {
 			void element._rebuild()
-		},
-		setChangeHandler: (handler: ((path: string, value: unknown) => void) | null) => {
-			element._changeHandler = handler
 		},
 		setData: (data: Record<string, unknown>) => {
 			element._data = data
 			void element._rebuild()
 		},
+		setOptions: (options: GooSchemaUpdateOptions) => {
+			let shouldRebuild = false
+			if ('bare' in options && element.state.bare !== options.bare) {
+				element.state.bare = options.bare
+				shouldRebuild = true
+			}
+			if ('showPanelHeader' in options && element.state.showPanelHeader !== options.showPanelHeader) {
+				element.state.showPanelHeader = options.showPanelHeader
+				shouldRebuild = true
+			}
+			if ('folderClassName' in options && element.state.folderClassName !== options.folderClassName) {
+				element.state.folderClassName = options.folderClassName
+				shouldRebuild = true
+			}
+			if ('controlTypes' in options && element.state.controlTypes !== options.controlTypes) {
+				element.state.controlTypes = options.controlTypes
+				shouldRebuild = true
+			}
+			if (shouldRebuild) element._scheduleRebuild()
+		},
 		setSchema: (schema: GooSchemaType) => {
 			element.state.schema = schema
 			void element._rebuild()
 		},
-		updateDisplay: () => {
+		refresh: () => {
 			for (const [ , controller ] of element._controllers) {
-				(controller as { updateDisplay?: () => void }).updateDisplay?.()
+				(controller as { refresh?: () => void }).refresh?.()
 			}
 		},
 		_scheduleRebuild: () => {

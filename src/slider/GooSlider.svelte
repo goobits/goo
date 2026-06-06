@@ -47,6 +47,12 @@ type SliderRuntimeState = {
 	unit: string
 }
 
+type GooSliderRuntimeElement = GooSliderElement & {
+	readonly thumbs: GooSliderThumb[]
+	setAnimate(index: number, animate: boolean): void
+	toPercent(value: number): number
+}
+
 let sliderRoot: HTMLDivElement | undefined = $state()
 // The root <div> is augmented with the GooSlider API at runtime (assignSliderApi),
 // so expose it under the augmented type while binding to the real element type.
@@ -213,7 +219,7 @@ $effect(() => {
 		return
 	}
 
-	assignSliderApi(sliderElement)
+	assignSliderApi(sliderElement as GooSliderRuntimeElement)
 	element = sliderElement
 })
 
@@ -236,7 +242,7 @@ export function getValue(): number | number[] {
 	return valuesToSliderValue(currentValues, numericMin)
 }
 
-function assignSliderApi(slider: GooSliderElement): void {
+function assignSliderApi(slider: GooSliderRuntimeElement): void {
 	Object.defineProperties(slider, {
 		value: {
 			configurable: true,

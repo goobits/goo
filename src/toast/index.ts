@@ -12,7 +12,7 @@ export {
 	showGooToastWarning } from './imperative.ts'
 export {
 	createGooProgressToast,
-	type GooProgressToastElement,
+	type GooProgressToastHandle,
 	type GooProgressToastOptions
 } from './progress-toast.ts'
 export { toast, toastStore } from './toast-service.svelte.ts'

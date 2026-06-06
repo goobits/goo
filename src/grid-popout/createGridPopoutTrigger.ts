@@ -1,10 +1,11 @@
 import { flushSync, mount, unmount } from 'svelte'
 
-import { GooTooltipRuntime as UITooltip } from '../tooltip/index.ts'
+import { gooTooltipRuntime as UITooltip } from '../tooltip/index.ts'
 import GridPopoutPicker from './GridPopoutPicker.svelte'
 import type { GridPopoutItem } from './types.ts'
 
-export type GridPopoutTriggerElement = HTMLElement & {
+export type GridPopoutTriggerHandle = {
+	readonly element: HTMLElement
 	destroy(): void
 	setValue(value: string): void
 }
@@ -20,14 +21,14 @@ export type GridPopoutTriggerOptions = {
 	ariaLabel?: string
 	className?: string
 	items: GridPopoutItem[]
-	onChoose?: (this: HTMLElement, value: string) => void | Promise<void>
+	onChoose?: (this: GridPopoutTriggerHandle, value: string) => void | Promise<void>
 	popoutClassName?: string
 	selected?: string
 	tooltip?: GridPopoutTooltip
 }
 
 /**
- * Creates a mounted grid popout trigger and returns its root element.
+ * Creates a mounted grid popout trigger and returns its handle.
  */
 export function createGridPopoutTrigger({
 	ariaLabel = '',
@@ -37,9 +38,9 @@ export function createGridPopoutTrigger({
 	popoutClassName = '',
 	selected,
 	tooltip
-}: GridPopoutTriggerOptions): GridPopoutTriggerElement {
+}: GridPopoutTriggerOptions): GridPopoutTriggerHandle {
 	const target = document.createElement('div')
-	const triggerRef: { current: GridPopoutTriggerElement | null } = { current: null }
+	const handleRef: { current?: GridPopoutTriggerHandle } = {}
 	const component = mount(GridPopoutPicker, {
 		target,
 		props: {
@@ -49,23 +50,23 @@ export function createGridPopoutTrigger({
 			popoutClass: popoutClassName,
 			selected,
 			onchoose(value: string) {
-				if (triggerRef.current) {
-					void onChoose?.call(triggerRef.current, value)
+				if (handleRef.current) {
+					void onChoose?.call(handleRef.current, value)
 				}
 			}
 		}
 	}) as GridPopoutPickerApi
+	let destroyed = false
 
 	flushSync()
-	const trigger = component.getRootElement() as GridPopoutTriggerElement | null
+	const trigger = component.getRootElement()
 	if (!trigger) {
 		unmount(component)
 		throw new Error('GridPopoutPicker failed to mount.')
 	}
-	triggerRef.current = trigger
 
 	if (tooltip) {
-		UITooltip(trigger, () => {
+		UITooltip.attach(trigger, () => {
 			if (trigger.classList.contains('goo-grid-trigger--opened')) {
 				return
 			}
@@ -78,8 +79,20 @@ export function createGridPopoutTrigger({
 		})
 	}
 
-	trigger.destroy = () => unmount(component)
-	trigger.setValue = value => component.setValue(value)
+	const handle: GridPopoutTriggerHandle = {
+		get element() {
+			return trigger
+		},
+		destroy() {
+			if (destroyed) return
+			destroyed = true
+			void unmount(component)
+		},
+		setValue(value) {
+			component.setValue(value)
+		}
+	}
+	handleRef.current = handle
 
-	return trigger
+	return handle
 }

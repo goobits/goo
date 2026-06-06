@@ -195,7 +195,7 @@ describe('GooSelect', () => {
 		try {
 			expect(element.open({
 				autoFocus: false,
-				keepWithin: { $element: document.documentElement, margin: 0 }
+				keepWithin: { element: document.documentElement, margin: 0 }
 			})).toBe(true)
 			await nextAnimationFrame()
 			await nextAnimationFrame()
@@ -287,7 +287,7 @@ describe('GooSelect', () => {
 
 			expect(() => element.setValue(specialId)).not.toThrow()
 			await tick()
-			expect(element.hovered).toBe(specialId)
+			expect(element.getHoveredOptionId()).toBe(specialId)
 
 			const option = Array.from(document.querySelectorAll<HTMLElement>('.goo-select__option'))
 				.find(nextOption => nextOption.dataset.id === specialId)
@@ -346,7 +346,7 @@ describe('GooSelect', () => {
 		const element = container.querySelector<GooSelectElement>('.goo-select')!
 
 		try {
-			expect(element.open({ autoFocus: false, keepWithin: { $element: document.documentElement, margin: 0 } })).toBe(true)
+			expect(element.open({ autoFocus: false, keepWithin: { element: document.documentElement, margin: 0 } })).toBe(true)
 			await tick()
 
 			const option = document.querySelector<HTMLElement>('.goo-select__option[data-id="more"]')!
@@ -383,7 +383,7 @@ describe('GooSelect', () => {
 		const element = container.querySelector<GooSelectElement>('.goo-select')!
 
 		try {
-			expect(element.open({ autoFocus: false, keepWithin: { $element: document.documentElement, margin: 0 } })).toBe(true)
+			expect(element.open({ autoFocus: false, keepWithin: { element: document.documentElement, margin: 0 } })).toBe(true)
 			await tick()
 
 			const popout = document.querySelector<HTMLElement>('.goo-popout.goo-select-popout')!
@@ -713,7 +713,7 @@ describe('GooSelect', () => {
 		const submenu = document.querySelector<HTMLElement>('.goo-popout.goo-select-submenu-popout')!
 		expect(submenu).not.toBeNull()
 		expect(submenu.textContent).toContain('Child')
-		expect(element.hovered).toBe('more')
+		expect(element.getHoveredOptionId()).toBe('more')
 	})
 
 	it('opens submenu options under a pen pointer dragged from the trigger', async() => {
@@ -750,7 +750,7 @@ describe('GooSelect', () => {
 			const submenu = document.querySelector<HTMLElement>('.goo-popout.goo-select-submenu-popout')!
 			expect(submenu).not.toBeNull()
 			expect(submenu.textContent).toContain('Child')
-			expect(element.hovered).toBe('more')
+			expect(element.getHoveredOptionId()).toBe('more')
 		} finally {
 			document.elementFromPoint = originalElementFromPoint
 		}

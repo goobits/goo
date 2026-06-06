@@ -525,7 +525,7 @@ export class DropdownPanel {
 		// Handle submenu
 		if (opt.type === 'submenu') {
 			this.#cancelSubmenuTimer()
-			if (this.#submenuPopout.opened) {
+			if (this.#submenuPopout.isOpen()) {
 				this.openSubmenu($item, opt)
 				return
 			}

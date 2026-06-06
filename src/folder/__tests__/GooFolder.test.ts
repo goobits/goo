@@ -38,7 +38,7 @@ describe('GooFolder', () => {
 		})
 		document.body.appendChild(folder)
 
-		expect(folder.$content?.textContent).toBe('<img src=x onerror=alert(1)>')
-		expect(folder.$content?.querySelector('img')).toBeNull()
+		expect(folder.contentElement?.textContent).toBe('<img src=x onerror=alert(1)>')
+		expect(folder.contentElement?.querySelector('img')).toBeNull()
 	})
 })

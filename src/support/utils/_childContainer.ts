@@ -12,7 +12,7 @@
  * Interface for components that contain child folders and controllers.
  */
 export interface ChildContainerHost {
-	$content: HTMLElement | null
+	contentElement: HTMLElement | null
 	_folders: HTMLElement[]
 	_controllers: HTMLElement[]
 	_pendingChildren: HTMLElement[]
@@ -43,11 +43,11 @@ export function trackChild(host: ChildContainerHost, element: HTMLElement): void
  * @returns The added element
  */
 export function addChild<T extends HTMLElement>(host: ChildContainerHost, element: T): T {
-	if (host.$content) {
-		host.$content.appendChild(element)
+	if (host.contentElement) {
+		host.contentElement.appendChild(element)
 		trackChild(host, element)
 	} else {
-		// Buffer children until $content is available
+		// Buffer children until the content region is available.
 		host._pendingChildren.push(element)
 	}
 	return element
@@ -60,7 +60,7 @@ export function addChild<T extends HTMLElement>(host: ChildContainerHost, elemen
  * @returns Whether element was removed
  */
 export function removeChild(host: ChildContainerHost, element: HTMLElement): boolean {
-	if (!host.$content?.contains(element)) return false
+	if (!host.contentElement?.contains(element)) return false
 
 	element.remove()
 
@@ -79,8 +79,8 @@ export function removeChild(host: ChildContainerHost, element: HTMLElement): boo
  * @param host - The container host
  */
 export function clearChildren(host: ChildContainerHost): void {
-	if (host.$content) {
-		host.$content.innerHTML = ''
+	if (host.contentElement) {
+		host.contentElement.innerHTML = ''
 	}
 	host._folders = []
 	host._controllers = []
@@ -92,10 +92,10 @@ export function clearChildren(host: ChildContainerHost): void {
  * @param host - The container host
  */
 export function hydrateChildren(host: ChildContainerHost): void {
-	if (!host.$content) return
+	if (!host.contentElement) return
 
 	// Collect existing children from DOM
-	for (const child of host.$content.children) {
+	for (const child of host.contentElement.children) {
 		trackChild(host, child as HTMLElement)
 	}
 
@@ -103,7 +103,7 @@ export function hydrateChildren(host: ChildContainerHost): void {
 	if (host._pendingChildren?.length) {
 		for (const child of host._pendingChildren) {
 			if (child?.nodeType) {
-				host.$content.appendChild(child)
+				host.contentElement.appendChild(child)
 				trackChild(host, child)
 			}
 		}

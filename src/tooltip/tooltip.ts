@@ -51,7 +51,7 @@ export interface GooTooltipOptions {
 	content?: string
 
 	/** Custom element content (alternative to content string) */
-	$content?: HTMLElement
+	contentElement?: HTMLElement
 
 	/** Alignment relative to target. Default: 'center bottom to center top' (above) */
 	align?: string
@@ -75,10 +75,10 @@ export interface GooTooltipOptions {
 	interactive?: boolean
 
 	/** Callback when tooltip shows */
-	onshow?: (ctx: { $element: HTMLElement }) => void
+	onshow?: (ctx: { element: HTMLElement }) => void
 
 	/** Callback when tooltip hides */
-	onhide?: (ctx: { $element: HTMLElement }) => void
+	onhide?: (ctx: { element: HTMLElement }) => void
 }
 
 /**
@@ -87,7 +87,7 @@ export interface GooTooltipOptions {
 export interface GooTooltipInstance {
 
 	/** The tooltip DOM element (null when hidden and not yet created) */
-	readonly $element: HTMLElement | null
+	readonly element: HTMLElement | null
 
 	/** Whether tooltip is currently visible */
 	readonly visible: boolean
@@ -123,7 +123,7 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 	const {
 		for: target,
 		content = '',
-		$content,
+		contentElement: providedContentElement,
 		align = 'center bottom to center top',
 		offset = { x: 0, y: 8 },
 		showDelay = 400,
@@ -153,8 +153,8 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 	function getContentElement(): HTMLElement {
 		if (contentElement) return contentElement
 
-		if ($content) {
-			contentElement = $content
+		if (providedContentElement) {
+			contentElement = providedContentElement
 		} else {
 			contentElement = document.createElement('span')
 			contentElement.className = 'goo-tooltip__text'
@@ -170,7 +170,7 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 
 	function show() {
 		cancelHide()
-		if (isDestroyed || popout?.opened) return
+		if (isDestroyed || popout?.isOpen()) return
 
 		const configureTooltipElement = ($element: HTMLElement) => {
 			$element.id = tooltipId
@@ -180,7 +180,7 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 		// Create popout on first show (lazy DOM creation)
 		if (!popout) {
 			popout = createGooPopout({
-				$content: getContentElement(),
+				content: getContentElement(),
 				at: target,
 				align,
 				offset,
@@ -190,51 +190,51 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 				escapeToClose: true,
 				openImmediately: false, // We control timing
 				initialFocus: 'none', // Tooltip must not steal focus from the hover target.
-				onOpen: ({ $element }) => {
-					configureTooltipElement($element)
+				onOpen: ({ element }) => {
+					configureTooltipElement(element)
 				}
 			})
 		}
 
 		popout.open()
-		if (popout.$element) configureTooltipElement(popout.$element)
+		if (popout.element) configureTooltipElement(popout.element)
 
 		// a11y: link target to tooltip
 		target.setAttribute('aria-describedby', tooltipId)
 
 		// Interactive: keep open when hovering tooltip itself
-		if (interactive && popout.$element) {
-			popout.$element.dataset.interactive = 'true'
-			popout.$element.addEventListener('mouseenter', cancelHide)
-			popout.$element.addEventListener('mouseleave', scheduleHide)
+		if (interactive && popout.element) {
+			popout.element.dataset.interactive = 'true'
+			popout.element.addEventListener('mouseenter', cancelHide)
+			popout.element.addEventListener('mouseleave', scheduleHide)
 		}
 
-		if (onshow && popout.$element) {
-			onshow({ $element: popout.$element })
+		if (onshow && popout.element) {
+			onshow({ element: popout.element })
 		}
 	}
 
 	function hide() {
 		cancelShow()
-		if (isDestroyed || !popout?.opened) return
+		if (isDestroyed || !popout?.isOpen()) return
 
 		popout.close()
 		target.removeAttribute('aria-describedby')
 
-		if (onhide && popout.$element) {
-			onhide({ $element: popout.$element })
+		if (onhide && popout.element) {
+			onhide({ element: popout.element })
 		}
 	}
 
 	function scheduleShow() {
 		cancelHide()
-		if (isDestroyed || popout?.opened) return
+		if (isDestroyed || popout?.isOpen()) return
 		showTimeout = setTimeout(show, showDelay)
 	}
 
 	function scheduleHide() {
 		cancelShow()
-		if (isDestroyed || !popout?.opened) return
+		if (isDestroyed || !popout?.isOpen()) return
 		hideTimeout = setTimeout(hide, hideDelay)
 	}
 
@@ -270,9 +270,9 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 			contentElement = newContent
 
 			// If popout exists and is showing, update its content
-			if (popout?.$content) {
-				popout.$content.innerHTML = ''
-				popout.$content.appendChild(newContent)
+			if (popout?.contentElement) {
+				popout.contentElement.innerHTML = ''
+				popout.contentElement.appendChild(newContent)
 			}
 		}
 	}
@@ -301,14 +301,14 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 
 	// Hide on scroll (tooltip doesn't follow target)
 	const onScroll = () => {
-		if (popout?.opened) hide()
+		if (popout?.isOpen()) hide()
 	}
 	window.addEventListener('scroll', onScroll, { capture: true, passive: true })
 	cleanups.push(() => window.removeEventListener('scroll', onScroll, { capture: true } as EventListenerOptions))
 
 	// Hide on window blur (user switched tabs/windows)
 	const onWindowBlur = () => {
-		if (popout?.opened) hide()
+		if (popout?.isOpen()) hide()
 	}
 	window.addEventListener('blur', onWindowBlur)
 	cleanups.push(() => window.removeEventListener('blur', onWindowBlur))
@@ -347,11 +347,11 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 	// -------------------------------------------------------------------------
 
 	return {
-		get $element() {
-			return popout?.$element ?? null
+		get element() {
+			return popout?.element ?? null
 		},
 		get visible() {
-			return popout?.opened ?? false
+			return popout?.isOpen() ?? false
 		},
 		show,
 		hide,

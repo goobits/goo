@@ -1,5 +1,6 @@
 import { flushSync, mount, unmount } from 'svelte'
 
+import type { GooDisposableElement } from '../support/types/elementHandles.ts'
 import FloatingToolbarView from './FloatingToolbarView.svelte'
 import type { FloatingToolbarGroups } from './toolbarChromeModel.ts'
 
@@ -7,9 +8,7 @@ type FloatingToolbarViewApi = ReturnType<typeof mount> & {
 	getRootElement(): HTMLElement | undefined
 }
 
-export type FloatingToolbarElement = HTMLElement & {
-	destroy(): void
-}
+export type FloatingToolbarElement = GooDisposableElement
 
 export type CreateFloatingToolbarViewOptions = {
 	toolGroups: FloatingToolbarGroups
@@ -25,6 +24,7 @@ export function createFloatingToolbarView({
 			toolGroups
 		}
 	}) as FloatingToolbarViewApi
+	let destroyed = false
 
 	flushSync()
 	const toolbar = component.getRootElement() as FloatingToolbarElement | undefined
@@ -34,6 +34,8 @@ export function createFloatingToolbarView({
 	}
 
 	toolbar.destroy = (): void => {
+		if (destroyed) return
+		destroyed = true
 		void unmount(component)
 	}
 

@@ -5,7 +5,7 @@ import { createGooProgressRingTimer, type GooProgressRingTimer } from '../index.
 /** The rendered ring element inside a timer's shell.  * @param timer - timer.
  */
 function ringEl(timer: GooProgressRingTimer): HTMLElement {
-	return timer.$element.querySelector('.goo-progress-ring') as HTMLElement
+	return timer.element.querySelector('.goo-progress-ring') as HTMLElement
 }
 
 describe('GooProgressRing', () => {
@@ -16,9 +16,9 @@ describe('GooProgressRing', () => {
 			size: 64
 		})
 
-		expect(timer.$element.tagName).toBe('DIV')
-		expect(timer.$element.classList.contains('goo-progress-ring-timer')).toBe(true)
-		expect(timer.canvas?.tagName.toLowerCase()).toBe('canvas')
+		expect(timer.element.tagName).toBe('DIV')
+		expect(timer.element.classList.contains('goo-progress-ring-timer')).toBe(true)
+		expect(timer.getCanvas()?.tagName.toLowerCase()).toBe('canvas')
 		expect(timer.progress).toBe(0.25)
 		expect(timer.visible).toBe(true)
 		expect(ringEl(timer).getAttribute('aria-label')).toBe('Progress')
@@ -46,15 +46,15 @@ describe('GooProgressRing', () => {
 
 		timer.show('cover')
 		expect(timer.visible).toBe(true)
-		expect(timer.$element.dataset.cover).toBe('true')
-		expect(timer.$element.classList.contains('visible')).toBe(true)
+		expect(timer.element.dataset.cover).toBe('true')
+		expect(timer.element.classList.contains('visible')).toBe(true)
 
 		timer.hide({ immediate: true })
 		expect(timer.visible).toBe(false)
-		expect(timer.$element.style.visibility).toBe('hidden')
+		expect(timer.element.style.visibility).toBe('hidden')
 
 		timer.destroy()
-		expect(timer.$element.isConnected).toBe(false)
+		expect(timer.element.isConnected).toBe(false)
 	})
 
 	it('supports indeterminate spinner mode', () => {

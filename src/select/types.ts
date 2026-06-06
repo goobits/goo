@@ -6,6 +6,7 @@
 import type { Snippet } from 'svelte'
 
 import type { GooPopoutOptions } from '../popout/popout.ts'
+import type { GooForwardedAttributes } from '../support/types/forwardedAttributes.ts'
 
 /**
  * Single option in a GooSelect menu.
@@ -33,7 +34,6 @@ export interface GooSelectState {
 	showSelectionIndicator: boolean
 	showHeader: boolean
 	disabled: boolean
-	[key: string]: unknown
 }
 
 /** Supported placement values for a GooSelect menu. */
@@ -64,7 +64,7 @@ export type GooSelectMenuOptions = {
 }
 
 /** Props accepted by the Svelte `GooSelect` component. */
-export type GooSelectProps = {
+export type GooSelectProps = GooForwardedAttributes & {
 	options?: readonly string[] | readonly GooSelectOption[] | Record<string, unknown>
 	value?: string
 	enableKeyboard?: boolean
@@ -102,8 +102,6 @@ export type GooSelectProps = {
 	/** Close callback. */
 	onclose?: () => void
 
-	/** Native attributes forwarded to the select root. */
-	[key: string]: unknown
 }
 
 /** Data emitted by select change events. */
@@ -119,79 +117,28 @@ export interface GooSelectEventData {
 	oldValue: string
 }
 
-/** Panel surface required by select host and keyboard helpers. */
-export interface GooSelectPanelHost {
-	hoveredId: string | null
-	/**
- * Navigate.
- *
- * @param dir - dir.
- */
-	navigate(dir: 1 | -1): void
-	/**
-	 * Gets hovered element.
-	 */
-	getHoveredElement(): HTMLElement | null
-	/**
-	 * Finds option by id.
-	 *
-	 * @param id - id.
-	 */
-	findOptionById(id: string): GooSelectOption | null
-	/**
-	 * Open submenu.
-	 *
-	 * @param $item - $item.
-	 * @param opt - opt.
-	 */
-	openSubmenu($item: HTMLElement, opt: GooSelectOption): void
-	/**
-	 * Close submenu.
-	 */
-	closeSubmenu(): void
-	/**
-	 * Handles typeahead.
-	 *
-	 * @param char - char.
-	 */
-	handleTypeahead(char: string): void
-}
-
-/** Host surface required by keyboard helpers. */
-export interface GooSelectKeyboardHost {
-	state: GooSelectState
-	_opened: boolean
-	_panel: GooSelectPanelHost | null
-	_selectOptions: GooSelectOption[]
-	$trigger: HTMLElement | null
-	open: () => boolean
-	close: () => void
-	_selectOption: (opt: GooSelectOption) => void
-	_getContext: () => unknown
-}
-
 /** Native root element bound by `GooSelect` for imperative updates. */
 export type GooSelectElement = HTMLDivElement & {
 
 	/** Current option id. */
 	value: string
 
-	/** Whether the dropdown is open. */
-	opened: boolean
-
-	/** Current hovered option id. */
-	hovered: string | null
-
-	/** Available select options. */
-	options: GooSelectOption[]
-
 	/** Set option id. 	 * @param value - value.
- * @param options - options.
- */
+	 * @param options - options.
+	 */
 	setValue(value: string, options?: { silent?: boolean }): void
 
 	/** Get option id. */
 	getValue(): string
+
+	/** Whether the dropdown is open. */
+	isOpen(): boolean
+
+	/** Current hovered option id, if the menu is open. */
+	getHoveredOptionId(): string | null
+
+	/** Available select options. */
+	getOptions(): GooSelectOption[]
 
 	/** Replace available options. 	 * @param options - options.
 	 */
@@ -223,10 +170,6 @@ export type GooSelectElement = HTMLDivElement & {
 
 	/** Blur the trigger. */
 	blur(): void
-
-	/** Set bound callback context. 	 * @param context - context.
-	 */
-	setBoundContext(context: unknown): void
 }
 
 /**
@@ -236,7 +179,7 @@ export interface GooSelectOpenOptions {
 	autoFocus?: boolean
 	at?: HTMLElement | { x: number; y: number }
 	clickToClose?: GooPopoutOptions['clickToClose']
-	keepWithin?: { $element?: HTMLElement; margin?: number }
+	keepWithin?: { element?: HTMLElement; margin?: number }
 	parentElement?: HTMLElement
 	boundContext?: unknown
 

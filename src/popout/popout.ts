@@ -14,7 +14,7 @@ import { createPointerDrag } from '../support/utils/pointerDrag.ts'
 // Popout Registry (for parent-child chains)
 // =============================================================================
 
-const activePopouts = new Set<GooPopoutInstance>()
+const activePopouts = new Set<GooPopoutRuntime>()
 
 /**
  * Close all active popouts.
@@ -32,7 +32,7 @@ export function closeAllPopouts() {
  */
 export function closePopoutsOutside(target: HTMLElement) {
 	for (const popout of Array.from(activePopouts)) {
-		const element = popout.$element
+		const element = popout.element
 		if (element?.contains(target)) {
 			continue
 		}
@@ -60,14 +60,14 @@ export function getActivePopout() {
 interface PopoutElement extends HTMLElement {
 	_factoryControlled?: boolean
 	_isGooPopout?: boolean
-	_popoutInstance?: GooPopoutInstance
+	_popoutInstance?: GooPopoutRuntime
 }
 
 /**
  * Containment configuration.
  */
 export interface PopoutKeepWithin {
-	$element?: HTMLElement
+	element?: HTMLElement
 	margin?: number
 	fullScreen?: boolean
 }
@@ -88,8 +88,8 @@ export interface GooPopoutAt {
  * Options for creating a Goo popout instance.
  */
 export interface GooPopoutOptions {
-	$content?: Element | Element[]
-	$parent?: HTMLElement
+	content?: Element | Element[]
+	parentElement?: HTMLElement
 	ariaLabel?: string
 
 	/**
@@ -134,11 +134,11 @@ export interface GooPopoutOptions {
 	 * as a box within a box. Positioning still anchors to the target.
 	 */
 	chromeless?: boolean
-	onOpen?: (data: { $element: HTMLElement; instance: GooPopoutInstance }) => void
-	onClose?: (data: { $element: HTMLElement; instance: GooPopoutInstance }) => void
+	onOpen?: (data: { element: HTMLElement; instance: GooPopoutInstance }) => void
+	onClose?: (data: { element: HTMLElement; instance: GooPopoutInstance }) => void
 
 	/** Called after each non-fullscreen placement calculation is applied. */
-	onPosition?: (data: { $element: HTMLElement; instance: GooPopoutInstance; position: PositionResult }) => void
+	onPosition?: (data: { element: HTMLElement; instance: GooPopoutInstance; position: PositionResult }) => void
 	onDestroy?: () => void
 }
 
@@ -157,15 +157,13 @@ export interface GooPopoutPointerEvent {
  * GooPopout instance object returned from the factory function.
  */
 export interface GooPopoutInstance {
-	readonly $element: HTMLElement | null
-	readonly $content: HTMLElement | null
-	readonly $arrow: HTMLElement | null
+	readonly element: HTMLElement | null
+	readonly contentElement: HTMLElement | null
+	readonly arrowElement: HTMLElement | null
 
 	/** Most recently applied non-fullscreen position, if the popout has been placed. */
 	readonly position: PositionResult | null
-	readonly opened: boolean
-	$parent: GooPopoutInstance | null
-	$child: GooPopoutInstance | null
+	isOpen: () => boolean
 	open: () => Promise<void>
 	close: () => Promise<void>
 	toggle: () => void
@@ -180,6 +178,11 @@ export interface GooPopoutInstance {
 	updatePosition: (newAt: GooPopoutAt | HTMLElement, newAlign?: string) => void
 }
 
+interface GooPopoutRuntime extends GooPopoutInstance {
+	parent: GooPopoutRuntime | null
+	child: GooPopoutRuntime | null
+}
+
 /**
  * Create a new popout instance.
  * @param {GooPopoutOptions} options - options.
@@ -187,8 +190,8 @@ export interface GooPopoutInstance {
  */
 export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstance {
 	const {
-		$content,
-		$parent = document.body,
+		content,
+		parentElement = document.body,
 		ariaLabel = 'Popout',
 		role = 'dialog',
 		at,
@@ -221,8 +224,8 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 	let opened = false
 	let destroying = false
 	const cleanupHandlers: Array<(() => void) | { detach?: () => void }> = []
-	let parentPopout: GooPopoutInstance | null = null
-	let childPopout: GooPopoutInstance | null = null
+	let parentPopout: GooPopoutRuntime | null = null
+	let childPopout: GooPopoutRuntime | null = null
 	let currentPosition: ReturnType<typeof calculatePosition> | null = null
 	let previousActiveElement: HTMLElement | null = null
 	let repositionFrame = 0
@@ -243,32 +246,32 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 	// Instance Object
 	// ==========================================================================
 
-	const instance: GooPopoutInstance = {
-		get $element() {
+	const instance: GooPopoutRuntime = {
+		get element() {
 			return $element
 		},
-		get $content() {
+		get contentElement() {
 			return $element?.querySelector('.goo-popout__content') as HTMLElement | null
 		},
-		get $arrow() {
+		get arrowElement() {
 			return $arrow
 		},
 		get position() {
 			return currentPosition
 		},
-		get opened() {
+		isOpen() {
 			return opened
 		},
-		get $parent() {
+		get parent() {
 			return parentPopout
 		},
-		set $parent(p: GooPopoutInstance | null) {
+		set parent(p: GooPopoutRuntime | null) {
 			parentPopout = p
 		},
-		get $child() {
+		get child() {
 			return childPopout
 		},
-		set $child(c: GooPopoutInstance | null) {
+		set child(c: GooPopoutRuntime | null) {
 			childPopout = c
 		},
 
@@ -297,7 +300,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 
 		// Create DOM
 		$element = createPopoutElement()
-		$parent.appendChild($element)
+		parentElement.appendChild($element)
 
 		// Index parent-child chain
 		indexParentChain()
@@ -318,7 +321,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		if (!$element || destroying || !opened) return
 
 		// Callback
-		if (onOpen) onOpen({ $element, instance })
+		if (onOpen) onOpen({ element: $element, instance })
 	}
 
 	/**
@@ -338,7 +341,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		}
 
 		// Callback
-		if (onClose && $element) onClose({ $element, instance })
+		if (onClose && $element) onClose({ element: $element, instance })
 
 		// Animate out and destroy
 		await destroy()
@@ -377,7 +380,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 
 		// Remove from parent chain
 		if (parentPopout) {
-			parentPopout.$child = null
+			parentPopout.child = null
 		}
 
 		// Animate out
@@ -433,7 +436,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 			return
 		}
 
-		const keepWithinElement = keepWithin?.$element ?? document.documentElement
+		const keepWithinElement = keepWithin?.element ?? document.documentElement
 		const keepWithinMargin = keepWithin?.margin ?? 15
 
 		const positionOptions = {
@@ -449,7 +452,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		currentPosition = calculatePosition($element, positionOptions)
 		applyPosition($element, currentPosition)
 		applyArrowPosition($arrow, currentPosition)
-		onPosition?.({ $element, instance, position: currentPosition })
+		onPosition?.({ element: $element, instance, position: currentPosition })
 	}
 
 	function scheduleReposition() {
@@ -646,8 +649,8 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		const contentWrapper = document.createElement('div')
 		contentWrapper.className = 'goo-popout__content'
 
-		if ($content) {
-			const contentItems = Array.isArray($content) ? $content : [ $content ]
+		if (content) {
+			const contentItems = Array.isArray(content) ? content : [ content ]
 			for (const item of contentItems) {
 				if (item instanceof HTMLElement && item.dataset.gooPopoutStaged === 'true') {
 					item.hidden = false
@@ -882,10 +885,10 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 			const popoutEl = el as PopoutElement
 			if (popoutEl._isGooPopout) {
 				// Check if it's this popout or a descendant
-				let p: GooPopoutInstance | null = instance
+				let p: GooPopoutRuntime | null = instance
 				while (p) {
 					if (popoutEl._popoutInstance === p) return true
-					p = p.$child
+					p = p.child
 				}
 			}
 
@@ -943,7 +946,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 			const popoutEl = el as PopoutElement
 			if (popoutEl._isGooPopout && popoutEl._popoutInstance) {
 				parentPopout = popoutEl._popoutInstance
-				parentPopout.$child = instance
+				parentPopout.child = instance
 				return
 			}
 			el = el.parentElement

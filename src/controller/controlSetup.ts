@@ -5,6 +5,7 @@
  */
 
 import type { GooSelectMenuOptions } from '../select/types.ts'
+import type { ControlOptions, ControlOptionValue as RegistryControlOptionValue } from './controlRegistry.ts'
 
 // ============================================================================
 // Types
@@ -56,7 +57,7 @@ export interface StoredOptions {
 	presetHue?: number
 	showCoverage?: boolean
 	buttonLabel?: string
-	controlOptions?: Record<string, unknown>
+	controlOptions?: ControlOptions
 	menu?: GooSelectMenuOptions
 	shape?: string
 	layout?: 'inline' | 'stacked'
@@ -209,9 +210,9 @@ export function buildControlOptions(
 		oninput: (v: unknown) => void
 		onButtonClick?: () => void
 	}
-): Record<string, unknown> {
-	const opts: Record<string, unknown> = {
-		value,
+): ControlOptions {
+	const opts: ControlOptions = {
+		value: value as RegistryControlOptionValue,
 		onchange: (v: unknown) => {
 			const extractedValue = typeof v === 'object' && v !== null && 'value' in v
 				? (v as { value: unknown }).value
@@ -265,7 +266,7 @@ export function buildControlOptions(
  * Get all stored options for passing to custom buildOptions.
  * @param stored - stored.
  */
-export function getAllOptions(stored: StoredOptions): Record<string, unknown> {
+export function getAllOptions(stored: StoredOptions): ControlOptions {
 	return {
 		...stored.controlOptions,
 		min: stored.min,
@@ -317,14 +318,14 @@ export function buildDualRangeOptions(
 		onchange: (eventData: DualRangeEventData) => void
 		oninput: (eventData: DualRangeEventData) => void
 	}
-): { sliderOptions: Record<string, unknown>; isMinMaxFormat: boolean } {
+): { sliderOptions: ControlOptions; isMinMaxFormat: boolean } {
 	// Detect if value is array [a, b] or object {min, max}
 	const isMinMaxFormat = !Array.isArray(value)
 	const minMaxValue = value as { min: number; max: number }
 	const arrayValue = isMinMaxFormat ? [ minMaxValue.min, minMaxValue.max ] : value
 
-	const sliderOptions = {
-		value: arrayValue,
+	const sliderOptions: ControlOptions = {
+		value: arrayValue as RegistryControlOptionValue,
 		min: stored.min ?? 0,
 		max: stored.max ?? 100,
 		step: stored.step,

@@ -45,7 +45,7 @@ export interface GooFloatingWindowStorage {
 	 * @param id - Stable storage key.
 	 * @returns Persisted settings or undefined when no settings exist.
 	 */
-	get(id: string): Promise<unknown> | unknown
+	get(id: string): Promise<GooFloatingWindowSettings | undefined> | GooFloatingWindowSettings | undefined
 
 	/**
 	 * Persist settings for a window id.
@@ -74,7 +74,6 @@ export interface GooFloatingWindowOptions extends GooFloatingWindowSettings {
 export interface GooFloatingWindow {
 	element: HTMLElement
 	ready: Promise<void>
-	settings: GooFloatingWindowSettings
 	/**
 	 * Destroy.
 	 */
@@ -91,6 +90,10 @@ export interface GooFloatingWindow {
 	 * Gets containment rect.
 	 */
 	getContainmentRect(): DOMRect
+	/**
+	 * Returns a plain snapshot of current persisted settings.
+	 */
+	getSettings(): GooFloatingWindowSettings
 	/**
 	 * Hide.
 	 */

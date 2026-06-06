@@ -1,5 +1,6 @@
 import { mount, unmount } from 'svelte'
 
+import { normalizeOptions } from './_normalizeOptions.ts'
 import GooSelect from './GooSelect.svelte'
 import type { GooSelectElement, GooSelectEventData, GooSelectMenuOptions, GooSelectOpenOptions, GooSelectOption } from './types.ts'
 
@@ -72,17 +73,11 @@ export function createSelectField(options: SelectFieldOptions = {}): GooSelectEl
 		return (instance ?? {}) as Record<string, unknown>
 	}
 
-	Object.defineProperties(field, {
-		value: {
-			configurable: true,
-			get: () => currentValue,
-			set: (value: string) => {
-				field.setValue(String(value), { silent: true })
-			}
-		},
-		opened: {
-			configurable: true,
-			get: () => Boolean(field.querySelector('.goo-select--open'))
+	Object.defineProperty(field, 'value', {
+		configurable: true,
+		get: () => currentValue,
+		set: (value: string) => {
+			field.setValue(String(value), { silent: true })
 		}
 	})
 
@@ -91,6 +86,9 @@ export function createSelectField(options: SelectFieldOptions = {}): GooSelectEl
 		;(component().setValue as ((value: string, opts?: { silent?: boolean }) => void) | undefined)?.(value, { silent })
 	}
 	field.getValue = () => currentValue
+	field.isOpen = () => (component().isOpen as (() => boolean) | undefined)?.() ?? false
+	field.getHoveredOptionId = () => (component().getHoveredOptionId as (() => string | null) | undefined)?.() ?? null
+	field.getOptions = () => (component().getOptions as (() => GooSelectOption[]) | undefined)?.() ?? normalizeOptions(options.options)
 	field.setOptions = nextOptions => {
 		options.options = nextOptions
 		;(component().setOptions as ((nextOptions: typeof options.options) => void) | undefined)?.(nextOptions)
@@ -119,10 +117,6 @@ export function createSelectField(options: SelectFieldOptions = {}): GooSelectEl
 	}
 	field.blur = () => {
 		;(component().blur as (() => void) | undefined)?.()
-	}
-	field.setBoundContext = context => {
-		options.boundContext = context
-		;(component().setBoundContext as ((context: unknown) => void) | undefined)?.(context)
 	}
 
 	render()

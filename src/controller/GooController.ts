@@ -11,7 +11,7 @@ import { createSliderField } from '../slider/_createSliderField.ts'
 import { emitter } from '../support/utils/emitter.ts'
 import { log } from '../support/utils/logger.ts'
 import { createControlFromRegistry } from './controlFactory.ts'
-import { type ControlTypeRegistry, resolveControlTypeConfig } from './controlRegistry.ts'
+import { type ControlOptionBag, type ControlOptions, type ControlTypeRegistry, resolveControlTypeConfig } from './controlRegistry.ts'
 import {
 	buildControlOptions,
 	buildDualRangeOptions,
@@ -67,11 +67,13 @@ export interface ControllerOption {
 /** Valid option types for select/button-group controls */
 export type ControllerOptionValue = string | ControllerOption
 
+/** Component-specific options forwarded to the mounted control. */
+export type GooControllerControlOptions = ControlOptionBag
+
 /**
  * Options for creating a GooController instance.
  */
 export interface GooControllerOptions {
-	[controlOption: string]: unknown
 	object?: Record<string, unknown>
 	property?: string
 	min?: number
@@ -81,7 +83,7 @@ export interface GooControllerOptions {
 	type?: string
 	onchange?: (value: unknown) => void
 	oninput?: (value: unknown) => void
-	$parent?: HTMLElement
+	parentElement?: HTMLElement
 	label?: string
 	inputId?: string
 	name?: string
@@ -95,7 +97,7 @@ export interface GooControllerOptions {
 	showCoverage?: boolean
 	disabled?: boolean
 	className?: string
-	controlOptions?: Record<string, unknown>
+	controlOptions?: GooControllerControlOptions
 
 	/** Layout mode: 'inline' (default) or 'stacked' (label row + control row) */
 	layout?: 'inline' | 'stacked'
@@ -112,20 +114,12 @@ export interface GooControllerOptions {
  * Public controller element returned by `createGooController`.
  */
 export interface GooController extends HTMLElement {
-	/** Mutable controller state. */
-	state: GooControllerState
-	/** Current bound value. */
-	value: unknown
-	/** The object currently bound to the controller. */
-	readonly object: Record<string, unknown> | undefined
-	/** The property currently bound to the controller. */
-	readonly property: string | undefined
-	/** The inner Goo control element. */
-	readonly control: HTMLElement | null
-	/** Emit an event through the controller's lightweight event emitter. */
-	emit: (event: string, data?: unknown) => void
-	/** Subscribe to an event on the controller's lightweight event emitter. */
-	on: (event: string, handler: (...args: unknown[]) => void) => () => void
+	/** Return the current object/property binding. */
+	getBinding(): { object: Record<string, unknown> | undefined; property: string | undefined }
+	/** Return the mounted inner control element, if any. */
+	getControlElement(): HTMLElement | null
+	/** Whether the controller is disabled. */
+	isDisabled(): boolean
 	/** Set the visible controller label. */
 	name(label: string): GooController
 	/** Set the numeric step option. */
@@ -139,7 +133,7 @@ export interface GooController extends HTMLElement {
 	/** Stop polling the bound object for external value changes. */
 	stopListening(): GooController
 	/** Sync the inner control display from the bound object. */
-	updateDisplay(): GooController
+	refresh(): GooController
 	/** Disable the controller and its inner control. */
 	disable(): GooController
 	/** Enable the controller and its inner control. */
@@ -157,6 +151,9 @@ export interface GooController extends HTMLElement {
 }
 
 interface GooControllerInternal extends GooController {
+	state: GooControllerState
+	emit: (event: string, data?: unknown) => void
+	on: (event: string, handler: (...args: unknown[]) => void) => () => void
 	$widget: HTMLElement | null
 	_callbacks: {
 		onchange?: GooControllerOptions['onchange']
@@ -186,7 +183,7 @@ interface GooControllerInternal extends GooController {
 	_showCoverage: boolean | undefined
 	_shape: string | undefined
 	_layout: 'inline' | 'stacked' | undefined
-	_controlOptions: Record<string, unknown> | undefined
+	_controlOptions: GooControllerControlOptions | undefined
 	_dualRangeIsMinMax: boolean | undefined
 	_controlTypes: ControlTypeRegistry | undefined
 	_getExistingControl(): HTMLElement | null
@@ -195,8 +192,8 @@ interface GooControllerInternal extends GooController {
 	_createControl(): Promise<void>
 	_createControlInner(): Promise<void>
 	_getStoredOptions(): StoredOptions
-	_buildDefaultOptions(value: unknown, Control: unknown): Record<string, unknown>
-	_getAllOptions(): Record<string, unknown>
+	_buildDefaultOptions(value: unknown, Control: unknown): ControlOptions
+	_getAllOptions(): ControlOptions
 	_createDualRange(value: unknown): Promise<void>
 	_handleDualChange(eventData: DualRangeEventData): void
 	_handleDualInput(eventData: DualRangeEventData): void
@@ -571,7 +568,7 @@ class GooControllerRuntime {
 		if (this._object && this._property) {
 			this._object[this._property] = val
 		}
-		this.updateDisplay()
+		this.refresh()
 	}
 
 	/**
@@ -596,6 +593,30 @@ class GooControllerRuntime {
 	 */
 	get control() {
 		return this._control
+	}
+
+	/**
+	 * Return the current object/property binding.
+	 */
+	getBinding() {
+		return {
+			object: this._object,
+			property: this._property
+		}
+	}
+
+	/**
+	 * Return the mounted inner control element.
+	 */
+	getControlElement() {
+		return this._control
+	}
+
+	/**
+	 * Whether the controller is disabled.
+	 */
+	isDisabled() {
+		return Boolean(this.state.disabled)
 	}
 
 	/**
@@ -670,7 +691,7 @@ class GooControllerRuntime {
 			const currentValue = this._property ? this._object?.[this._property] : undefined
 			if (currentValue !== this._lastValue) {
 				this._lastValue = currentValue
-				this.updateDisplay()
+				this.refresh()
 			}
 		}, interval)
 
@@ -702,7 +723,7 @@ class GooControllerRuntime {
 	 * Update the control's display to match the object property.
 	 * @returns {GooController} this (for chaining)
 	 */
-	updateDisplay() {
+	refresh() {
 		const value = this._property ? this._object?.[this._property] : undefined
 
 		if (this._control) {
@@ -814,7 +835,7 @@ class GooControllerRuntime {
 		}
 
 		this._control?.setOptions?.(this._getAllOptions())
-		this.updateDisplay()
+		this.refresh()
 		return this
 	}
 
@@ -827,7 +848,7 @@ class GooControllerRuntime {
 		if (this._object && this._property) {
 			this._object[this._property] = value
 		}
-		this.updateDisplay()
+		this.refresh()
 		return this
 	}
 
@@ -989,46 +1010,8 @@ function initializeController(element: GooControllerInternal, options: GooContro
 	}
 }
 
-const CONTROLLER_OPTION_KEYS = new Set([
-	'$parent',
-	'className',
-	'controlOptions',
-	'controlTypes',
-	'coverage',
-	'disabled',
-	'inputId',
-	'label',
-	'layout',
-	'max',
-	'menu',
-	'min',
-	'name',
-	'object',
-	'onchange',
-	'oninput',
-	'options',
-	'preset',
-	'presetColor',
-	'presetHue',
-	'property',
-	'shape',
-	'showCoverage',
-	'step',
-	'type',
-	'unit'
-])
-
-function extractControlOptions(options: GooControllerOptions): Record<string, unknown> | undefined {
-	let controlOptions = options.controlOptions ? { ...options.controlOptions } : undefined
-
-	for (const [ key, value ] of Object.entries(options)) {
-		if (!CONTROLLER_OPTION_KEYS.has(key) && value !== undefined) {
-			controlOptions ??= {}
-			controlOptions[key] = value
-		}
-	}
-
-	return controlOptions
+function extractControlOptions(options: GooControllerOptions): GooControllerControlOptions | undefined {
+	return options.controlOptions ? { ...options.controlOptions } : undefined
 }
 
 function resolveControllerLayout(
@@ -1054,8 +1037,8 @@ function createControllerElement(options: GooControllerOptions = {}): GooControl
 	attachControllerMethods(element)
 	initializeController(element, options)
 	element._createElement()
-	if (options.$parent) {
-		options.$parent.appendChild(element)
+	if (options.parentElement) {
+		options.parentElement.appendChild(element)
 	}
 	return element
 }

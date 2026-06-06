@@ -4,7 +4,7 @@
  * @module goobits/select/keyboardHandler
  */
 
-import type { GooSelectKeyboardHost } from './types.ts'
+import type { GooSelectOption, GooSelectState } from './types.ts'
 
 /** Keyboard command event used by GooSelect navigation. */
 export interface GooSelectKeyCommand {
@@ -13,6 +13,29 @@ export interface GooSelectKeyCommand {
 }
 
 type KeyboardHandlerHost = GooSelectKeyboardHost
+
+type GooSelectPanelHost = {
+	hoveredId: string | null
+	navigate(dir: 1 | -1): void
+	getHoveredElement(): HTMLElement | null
+	findOptionById(id: string): GooSelectOption | null
+	openSubmenu($item: HTMLElement, opt: GooSelectOption): void
+	closeSubmenu(): void
+	handleTypeahead(char: string): void
+}
+
+/** Private host surface required by GooSelect keyboard helpers. */
+export type GooSelectKeyboardHost = {
+	state: GooSelectState
+	_opened: boolean
+	_panel: GooSelectPanelHost | null
+	_selectOptions: GooSelectOption[]
+	$trigger: HTMLElement | null
+	open: () => boolean
+	close: () => void
+	_selectOption: (opt: GooSelectOption) => void
+	_getContext: () => unknown
+}
 
 // ============================================================================
 // Key Mapping

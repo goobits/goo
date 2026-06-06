@@ -6,7 +6,7 @@ import type { GooPopoutAt, GooPopoutInstance, GooPopoutOptions } from './popout.
 
 type GooPopoutTarget = HTMLElement | string | GooPopoutAt | null | undefined
 
-type GooPopoutProps = Omit<GooPopoutOptions, '$content' | 'at' | 'onOpen' | 'onClose'> & {
+type GooPopoutProps = Omit<GooPopoutOptions, 'content' | 'at' | 'onOpen' | 'onClose'> & {
 	/** Target element, element id, or point configuration for the popout. */
 	for?: GooPopoutTarget
 
@@ -23,10 +23,10 @@ type GooPopoutProps = Omit<GooPopoutOptions, '$content' | 'at' | 'onOpen' | 'onC
 	instance?: GooPopoutInstance | null
 
 	/** Open callback. */
-	onopen?: (data: { $element: HTMLElement; instance: GooPopoutInstance }) => void
+	onopen?: (data: { element: HTMLElement; instance: GooPopoutInstance }) => void
 
 	/** Close callback. */
-	onclose?: (data: { $element: HTMLElement; instance: GooPopoutInstance }) => void
+	onclose?: (data: { element: HTMLElement; instance: GooPopoutInstance }) => void
 }
 
 let contentElement: HTMLDivElement | undefined = $state()
@@ -111,7 +111,7 @@ function mountPopout(): void {
 	contentElement.hidden = true
 	const targetId = getTargetId()
 	currentPopout = createGooPopout({
-		$content: contentElement,
+		content: contentElement,
 		at,
 		align,
 		offset,
@@ -173,8 +173,8 @@ $effect(() => {
 $effect(() => {
 	if (!mounted || !currentPopout) return
 	if (open === undefined) return
-	if (open && !currentPopout.opened) currentPopout.open()
-	if (!open && currentPopout.opened) currentPopout.close()
+	if (open && !currentPopout.isOpen()) currentPopout.open()
+	if (!open && currentPopout.isOpen()) currentPopout.close()
 })
 </script>
 

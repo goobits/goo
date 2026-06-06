@@ -78,13 +78,12 @@ export function createGooProgressRingTimer(options: GooProgressRingTimerOptions 
 	})
 
 	Object.defineProperties(timer, {
-		$element: { value: shell },
-		canvas: { get() { return ring.getCanvas() } },
 		duration: {
 			get() {
 				return getDuration()
 			}
 		},
+		element: { value: shell },
 		indeterminate: {
 			get() {
 				return indeterminateState
@@ -101,7 +100,6 @@ export function createGooProgressRingTimer(options: GooProgressRingTimerOptions 
 				setProgress(value)
 			}
 		},
-		ring: { value: ring },
 		stepIndex: {
 			get() {
 				return stepIndex
@@ -130,6 +128,7 @@ export function createGooProgressRingTimer(options: GooProgressRingTimerOptions 
 	timer.visible = false
 	timer.advance = advance
 	timer.destroy = destroy
+	timer.getCanvas = () => ring.getCanvas()
 	timer.hide = hide
 	timer.setProgress = setProgress
 	timer.show = show

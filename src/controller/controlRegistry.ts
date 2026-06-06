@@ -39,11 +39,32 @@ import * as textareaModule from '../textarea/GooTextarea.svelte'
 /** Control module structure */
 export type ControlModule = Record<string, unknown>
 
-/** Control factory or class type */
-export type ControlFactory = ((...args: unknown[]) => unknown) | (new (...args: unknown[]) => unknown)
+/** Primitive or object value accepted by control option bags. */
+export type ControlOptionValue =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | object
+  | ((...args: unknown[]) => unknown)
 
-/** Control options passed to constructor/factory */
-export type ControlOptions = Record<string, unknown>
+/** Component-specific option bag passed through `controlOptions`. */
+export type ControlOptionBag = Record<string, ControlOptionValue>
+
+/** Runtime options passed to constructor/factory functions. */
+export interface ControlOptions {
+	[option: string]: unknown
+}
+
+/** Control factory function type. */
+export type ControlFactory = (options: ControlOptions) => HTMLElement
+
+/** Control constructor type. */
+export type ControlConstructor = new (options: ControlOptions) => HTMLElement
+
+/** Control factory or class type. */
+export type ControlExport = ControlFactory | ControlConstructor
 
 /**
  * Control type config.
@@ -57,7 +78,7 @@ export interface ControlTypeConfig {
 	 * Extract the control class/factory from the module.
 	 * Defaults to module.default or first export.
 	 */
-	extract?: (module: ControlModule) => ControlFactory | null
+	extract?: (module: ControlModule) => ControlExport | null
 
 	/**
 	 * Build options to pass to the control constructor.

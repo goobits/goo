@@ -16,6 +16,10 @@ import type {
 
 type MountedControl = ReturnType<typeof mount>
 type ValueMode = 'number' | 'array' | 'minmax' | 'xy'
+type GooRangeSliderElement = GooSliderElement & {
+	setAnimate(index: number, animate: boolean): void
+	toPercent(value: number): number
+}
 
 const DEFAULT_MIN = 0
 const DEFAULT_MAX = 100
@@ -29,7 +33,7 @@ export function createRangeModuleField(options: GooRangeModuleOptions = {}): Goo
 	const sliderHost = document.createElement('div')
 	const inputHost = document.createElement('div')
 	let sliderInstance: MountedControl | null = null
-	let sliderElement: GooSliderElement | null = null
+	let sliderElement: GooRangeSliderElement | null = null
 	let inputElements: NumberInputFieldElement[] = []
 	let valueMode: ValueMode = detectValueMode(currentOptions.value)
 	let currentValues = normalizeValues(currentOptions.value, currentOptions.min)
@@ -97,7 +101,7 @@ export function createRangeModuleField(options: GooRangeModuleOptions = {}): Goo
 				},
 				set element(value) {
 					boundSliderElement = value
-					sliderElement = value
+					sliderElement = value as GooRangeSliderElement | null
 				},
 				oninput: (_value: number | number[], data: GooSliderEventData) => {
 					handleSliderEvent(data, 'input')
@@ -107,7 +111,7 @@ export function createRangeModuleField(options: GooRangeModuleOptions = {}): Goo
 				}
 			}
 		})
-		sliderElement = boundSliderElement ?? sliderHost.querySelector('.goo-slider') as GooSliderElement | null
+		sliderElement = (boundSliderElement ?? sliderHost.querySelector('.goo-slider')) as GooRangeSliderElement | null
 	}
 
 	function renderInputs(): void {
@@ -239,15 +243,9 @@ export function createRangeModuleField(options: GooRangeModuleOptions = {}): Goo
 		element.remove()
 	}
 	const rangeApi: GooRangeModuleRangeApi = {
-		$element: sliderHost,
-		get state() {
+		element: sliderHost,
+		getState() {
 			return state
-		},
-		set state(value) {
-			state = value
-		},
-		get thumbs() {
-			return sliderElement?.thumbs ?? []
 		},
 		get values() {
 			return getSliderValues()

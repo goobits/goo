@@ -78,7 +78,7 @@ function mountTooltip(): void {
 	currentTooltip = createGooTooltip({
 		for: targetElement,
 		content,
-		$content: children && contentElement ? contentElement : undefined,
+		contentElement: children && contentElement ? contentElement : undefined,
 		align,
 		offset,
 		showDelay,

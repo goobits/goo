@@ -22,7 +22,8 @@ import { DropdownPanel } from './_dropdownPanel.ts'
 import {
 	handleKeyboard,
 	handleTypeahead,
-	mapNativeKeyToCommand
+	mapNativeKeyToCommand,
+	type GooSelectKeyboardHost
 } from './_keyboardHandler.ts'
 import { normalizeOptions } from './_normalizeOptions.ts'
 import {
@@ -36,7 +37,6 @@ import { evaluate, getElementTextDirection } from './selectDom.ts'
 import type {
 	GooSelectElement,
 	GooSelectEventData,
-	GooSelectKeyboardHost,
 	GooSelectOpenOptions,
 	GooSelectOption,
 	GooSelectProps,
@@ -87,7 +87,7 @@ let {
 	...rest
 }: GooSelectProps = $props()
 
-const opened = $derived(Boolean(popout?.opened))
+const opened = $derived(Boolean(popout?.isOpen()))
 const selectedOption = $derived(findOptionById(normalizedOptions, selectedValue))
 const selectMenu = $derived(normalizeSelectMenu(menu))
 const triggerLabel = $derived(getOptionLabel(selectedOption) || placeholder)
@@ -241,13 +241,13 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 	applySelectMenuWidth(panel.$container, currentMenu, triggerWidth)
 
 	popout = createGooPopout({
-		$content: panel.$container,
-		$parent: parentElement || document.body,
+		content: panel.$container,
+		parentElement: parentElement || document.body,
 		role: null,
 		className: getSelectMenuPopoutClass(currentMenu),
 		clickToClose,
 		escapeToClose: true,
-		keepWithin: keepWithin || { $element: document.body, margin: 15 },
+		keepWithin: keepWithin || { element: document.body, margin: 15 },
 		showArrow: currentMenu.arrow,
 		showBackdrop: currentMenu.backdrop,
 		at: positionAt,
@@ -291,7 +291,7 @@ export function close({ quiet = false, fromPopout = false }: { quiet?: boolean; 
 	activeDescendant = ''
 	listboxId = ''
 
-	if (!fromPopout && popout?.opened) {
+	if (!fromPopout && popout?.isOpen()) {
 		popout.destroy()
 	}
 	popout = null
@@ -327,10 +327,6 @@ export function blur(): void {
 	triggerElement?.blur()
 }
 
-export function setBoundContext(context: unknown): void {
-	currentBoundContext = context
-}
-
 type GooSelectRuntimeElement = GooSelectElement & GooSelectKeyboardHost
 
 function assignSelectApi(select: GooSelectRuntimeElement): void {
@@ -362,19 +358,6 @@ function assignSelectApi(select: GooSelectRuntimeElement): void {
 			configurable: true,
 			get: () => selectedValue,
 			set: nextValue => setValue(String(nextValue), { silent: true })
-		},
-		opened: {
-			configurable: true,
-			get: () => opened
-		},
-		hovered: {
-			configurable: true,
-			get: () => panel?.hoveredId ?? null
-		},
-		options: {
-			configurable: true,
-			get: () => normalizedOptions,
-			set: nextOptions => setOptions(nextOptions)
 		}
 	})
 
@@ -385,13 +368,15 @@ function assignSelectApi(select: GooSelectRuntimeElement): void {
 	select.toggle = () => toggle()
 	select.setValue = (nextValue, { silent = false } = {}) => setValue(nextValue, { silent })
 	select.getValue = () => getValue()
+	select.isOpen = () => opened
+	select.getHoveredOptionId = () => panel?.hoveredId ?? null
+	select.getOptions = () => normalizedOptions
 	select.setOptions = nextOptions => setOptions(nextOptions)
 	select.setTriggerIcon = icon => setTriggerIcon(icon)
 	select.enable = () => enable()
 	select.disable = () => disable()
 	select.focus = () => focus()
 	select.blur = () => blur()
-	select.setBoundContext = context => setBoundContext(context)
 }
 
 function handleTriggerPointerDown(event: PointerEvent): void {

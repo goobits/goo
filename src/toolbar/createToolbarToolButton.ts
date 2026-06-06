@@ -1,5 +1,6 @@
 import { flushSync, mount, unmount } from 'svelte'
 
+import type { GooDisposableElement } from '../support/types/elementHandles.ts'
 import type { ToolbarToolButtonConfig } from './toolbarChromeModel.ts'
 import ToolbarToolButton from './ToolbarToolButton.svelte'
 
@@ -7,9 +8,7 @@ type ToolbarToolButtonApi = ReturnType<typeof mount> & {
 	getRootElement(): HTMLElement | undefined
 }
 
-export type ToolbarToolButtonElement = HTMLElement & {
-	destroy(): void
-}
+export type ToolbarToolButtonElement = GooDisposableElement
 
 export type CreateToolbarToolButtonOptions = ToolbarToolButtonConfig
 
@@ -27,6 +26,7 @@ export function createToolbarToolButton({
 			title
 		}
 	}) as ToolbarToolButtonApi
+	let destroyed = false
 
 	flushSync()
 	const button = component.getRootElement() as ToolbarToolButtonElement | undefined
@@ -36,6 +36,8 @@ export function createToolbarToolButton({
 	}
 
 	button.destroy = (): void => {
+		if (destroyed) return
+		destroyed = true
 		void unmount(component)
 	}
 

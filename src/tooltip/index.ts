@@ -2,7 +2,8 @@
 
 export { default as GooTooltip } from './GooTooltip.svelte'
 export {
-	GooTooltipRuntime,
+	gooTooltipRuntime,
+	type GooTooltipRuntimeApi,
 	type GooTooltipRuntimeOptions,
 	type GooTooltipRuntimeState
 } from './imperative.ts'

@@ -55,7 +55,7 @@ describe('GooFloatingWindow', () => {
 		await floatingWindow.ready
 		floatingWindow.flipHorizontal()
 
-		expect(floatingWindow.settings.hAlign).toBe('left')
+		expect(floatingWindow.getSettings().hAlign).toBe('left')
 		expect(element.style.left).toBe('470px')
 		expect(element.style.right).toBe('')
 	})

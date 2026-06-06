@@ -104,24 +104,10 @@ export interface GooDialogController {
 	readonly element: HTMLElement
 	/** Whether the dialog is currently open. */
 	readonly isOpen: boolean
-	/** Add a DOM event listener to the root dialog element. */
-	addEventListener(...args: Parameters<HTMLElement['addEventListener']>): void
 	/** Close the dialog. */
 	close(): Promise<void>
-	/** Dispatch a DOM event from the root dialog element. */
-	dispatchEvent(event: Event): boolean
-	/** Get an attribute from the root dialog element. */
-	getAttribute(name: string): string | null
 	/** Open the dialog and resolve with the user's action. */
 	open(): Promise<DialogResult>
-	/** Query inside the root dialog element. */
-	querySelector<T extends Element = Element>(selectors: string): T | null
-	/** Query all matching elements inside the root dialog element. */
-	querySelectorAll<T extends Element = Element>(selectors: string): NodeListOf<T>
-	/** Remove a DOM event listener from the root dialog element. */
-	removeEventListener(...args: Parameters<HTMLElement['removeEventListener']>): void
-	/** Set an attribute on the root dialog element. */
-	setAttribute(name: string, value: string): void
 	/** Replace dialog content. Strings render as text; pass a DOM node for rich content. */
 	setContent(content: string | Node): void
 }
@@ -664,70 +650,6 @@ class GooDialogControllerRuntime {
 	 */
 	get isOpen() {
 		return this._isOpen
-	}
-
-	/**
-	 * Query selector.
-	 *
-	 * @param selectors - selectors.
-	 */
-	querySelector<T extends Element = Element>(selectors: string): T | null {
-		return this.$element.querySelector<T>(selectors)
-	}
-
-	/**
-	 * Query selector all.
-	 *
-	 * @param selectors - selectors.
-	 */
-	querySelectorAll<T extends Element = Element>(selectors: string): NodeListOf<T> {
-		return this.$element.querySelectorAll<T>(selectors)
-	}
-
-	/**
-	 * Sets attribute.
-	 *
-	 * @param name - name.
-	 * @param value - value.
-	 */
-	setAttribute(name: string, value: string): void {
-		this.$element.setAttribute(name, value)
-	}
-
-	/**
-	 * Gets attribute.
-	 *
-	 * @param name - name.
-	 */
-	getAttribute(name: string): string | null {
-		return this.$element.getAttribute(name)
-	}
-
-	/**
-	 * Adds event listener.
-	 *
-	 * @param args - args.
-	 */
-	addEventListener(...args: Parameters<HTMLElement['addEventListener']>): void {
-		this.$element.addEventListener(...args)
-	}
-
-	/**
-	 * Removes event listener.
-	 *
-	 * @param args - args.
-	 */
-	removeEventListener(...args: Parameters<HTMLElement['removeEventListener']>): void {
-		this.$element.removeEventListener(...args)
-	}
-
-	/**
-	 * Dispatch event.
-	 *
-	 * @param event - event.
-	 */
-	dispatchEvent(event: Event): boolean {
-		return this.$element.dispatchEvent(event)
 	}
 
 	/**

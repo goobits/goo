@@ -1,5 +1,7 @@
 import type { Snippet } from 'svelte'
 
+import type { GooForwardedAttributes } from '../support/types/forwardedAttributes.ts'
+
 /** Native Goo button layout mode. */
 export type GooButtonLayout = 'inline' | 'stacked'
 
@@ -10,7 +12,7 @@ export type GooButtonType = 'button' | 'reset' | 'submit'
 export type GooButtonVariant = 'default' | 'primary' | 'secondary' | 'attention' | 'danger' | 'ghost' | 'link' | 'selected' | string
 
 /** Props accepted by the Svelte `GooButton` component. */
-export type GooButtonProps = {
+export type GooButtonProps = GooForwardedAttributes & {
 
 	/** Visual label rendered when no children are provided. */
 	value?: string
@@ -75,6 +77,4 @@ export type GooButtonProps = {
 	/** Toggle change callback. */
 	onchange?: (value: boolean, oldValue?: boolean) => void
 
-	/** Native button attributes forwarded to the rendered button. */
-	[key: string]: unknown
 }

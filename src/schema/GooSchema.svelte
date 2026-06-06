@@ -4,6 +4,7 @@ import {
 	createGooSchema,
 	type GooSchema,
 	type GooSchemaOptions,
+	type GooSchemaUpdateOptions,
 	type GooSchemaType
 } from './GooSchema.ts'
 
@@ -45,7 +46,7 @@ let {
 }: GooSchemaProps = $props()
 
 function getCreateKey(): string {
-	return JSON.stringify({ bare, className, showPanelHeader, style })
+	return JSON.stringify({ className, style })
 }
 
 function handleChange(event: Event): void {
@@ -93,6 +94,7 @@ function mountSchema(): void {
 
 function updateSchema(): void {
 	if (!schemaElement) return
+	const options: GooSchemaUpdateOptions = {}
 	if (schema !== lastSchema) {
 		schemaElement.setSchema(schema)
 		lastSchema = schema
@@ -102,20 +104,23 @@ function updateSchema(): void {
 		lastData = data
 	}
 	if (bare !== lastBare) {
-		schemaElement.bare = bare
 		lastBare = bare
+		options.bare = bare
 	}
 	if (showPanelHeader !== lastShowPanelHeader) {
-		schemaElement.showPanelHeader = showPanelHeader
 		lastShowPanelHeader = showPanelHeader
+		options.showPanelHeader = showPanelHeader
 	}
 	if (folderClassName !== lastFolderClassName) {
-		schemaElement.folderClassName = folderClassName
 		lastFolderClassName = folderClassName
+		options.folderClassName = folderClassName
 	}
 	if (controlTypes !== lastControlTypes) {
-		schemaElement.controlTypes = controlTypes
 		lastControlTypes = controlTypes
+		options.controlTypes = controlTypes
+	}
+	if (Object.keys(options).length) {
+		schemaElement.setOptions(options)
 	}
 }
 
@@ -135,16 +140,16 @@ export function getSchema(): GooSchemaType | undefined {
 	return schemaElement?.getSchema()
 }
 
-export function getController(path: string): unknown {
+export function getController(path: string): HTMLElement | undefined {
 	return schemaElement?.getController(path)
 }
 
-export function updateDisplay(): void {
-	schemaElement?.updateDisplay()
+export function refresh(): void {
+	schemaElement?.refresh()
 }
 
-export function reevaluateConditions(): void {
-	schemaElement?.reevaluateConditions()
+export function refreshConditions(): void {
+	schemaElement?.refreshConditions()
 }
 
 $effect(() => {

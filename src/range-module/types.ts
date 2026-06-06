@@ -59,9 +59,8 @@ export type GooRangeModuleElement = HTMLDivElement & {
 }
 
 export type GooRangeModuleRangeApi = {
-	$element: HTMLElement
-	state: GooRangeModuleState | 'load'
-	get thumbs(): GooSliderElement['thumbs']
+	element: HTMLElement
+	getState(): GooRangeModuleState | 'load'
 	get values(): number[]
 	getValue(): GooRangeModuleValue
 	setAnimate(index: number, animate: boolean): void

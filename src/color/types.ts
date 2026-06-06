@@ -1,5 +1,7 @@
 import type { Snippet } from 'svelte'
 
+import type { GooForwardedAttributes } from '../support/types/forwardedAttributes.ts'
+
 /** Data emitted by Goo color input/change events. */
 export interface GooColorEventData {
 
@@ -17,7 +19,7 @@ export interface GooColorEventData {
 }
 
 /** Props accepted by the Svelte `GooColor` component. */
-export type GooColorProps = {
+export type GooColorProps = GooForwardedAttributes & {
 
 	/** Current color value. */
 	value?: string
@@ -61,8 +63,6 @@ export type GooColorProps = {
 	/** Input callback fired while editing. */
 	oninput?: (value: string, data: GooColorEventData) => void
 
-	/** Native attributes forwarded to the color root. */
-	[key: string]: unknown
 }
 
 /** Native root element bound by `GooColor` for imperative updates. */

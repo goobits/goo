@@ -1,4 +1,11 @@
-export type { ControlTypeConfig, ControlTypeEntry, ControlTypeRegistry } from './controlRegistry.ts'
+export type {
+	ControlOptionBag,
+	ControlOptions,
+	ControlOptionValue,
+	ControlTypeConfig,
+	ControlTypeEntry,
+	ControlTypeRegistry
+} from './controlRegistry.ts'
 export {
 	defaultControlRegistry,
 	resolveControlTypeConfig

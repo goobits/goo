@@ -1,11 +1,13 @@
 import type { Snippet } from 'svelte'
 import type { HTMLInputAttributes, HTMLTextareaAttributes } from 'svelte/elements'
 
+import type { GooForwardedAttributes } from '../support/types/forwardedAttributes.ts'
+
 /** Native text input type supported by Goo input. */
 export type GooInputType = 'email' | 'password' | 'search' | 'tel' | 'text' | 'url' | string
 
 /** Props accepted by the Svelte `GooInput` component. */
-export type GooInputProps<T = string> = {
+export type GooInputProps<T = string> = GooForwardedAttributes & {
 
 	/** Current text value. */
 	value?: T
@@ -82,12 +84,10 @@ export type GooInputProps<T = string> = {
 	/** Keydown callback fired from the native input before Goo default handling. */
 	onkeydown?: (event: KeyboardEvent) => void
 
-	/** Native attributes forwarded to the rendered control. */
-	[key: string]: unknown
 }
 
 /** Props accepted by the Svelte `GooNumber` component. */
-export type GooNumberProps = {
+export type GooNumberProps = GooForwardedAttributes & {
 
 	/** Current numeric value. */
 	value?: number
@@ -146,6 +146,4 @@ export type GooNumberProps = {
 	/** Blur callback. */
 	onblur?: () => void
 
-	/** Native attributes forwarded to the rendered control. */
-	[key: string]: unknown
 }

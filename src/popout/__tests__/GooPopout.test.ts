@@ -16,13 +16,13 @@ describe('GooPopout', () => {
 		document.body.appendChild(target)
 		const content = document.createElement('div')
 		content.textContent = 'Menu'
-		const instance = createGooPopout({ at: target, $content: content, openImmediately: false })
+		const instance = createGooPopout({ at: target, content: content, openImmediately: false })
 
 		instance.open()
 
 		expect(document.querySelector('goo-popout')).toBeNull()
 		expect(document.querySelector('.goo-popout')).not.toBeNull()
-		expect(instance.opened).toBe(true)
+		expect(instance.isOpen()).toBe(true)
 
 		instance.destroy()
 		target.remove()
@@ -45,10 +45,10 @@ describe('GooPopout', () => {
 		try {
 			const instance = createGooPopout({
 				at: target,
-				$content: content,
+				content: content,
 				align: 'left to right',
 				offset: { x: 6, y: 0 },
-				keepWithin: { $element: document.documentElement, margin: 12 },
+				keepWithin: { element: document.documentElement, margin: 12 },
 				openImmediately: false
 			})
 
@@ -90,10 +90,10 @@ describe('GooPopout', () => {
 		try {
 			const instance = createGooPopout({
 				at: target,
-				$content: content,
+				content: content,
 				align: 'left to right',
 				offset: { x: 6, y: 0 },
-				keepWithin: { $element: document.documentElement, margin: 12 },
+				keepWithin: { element: document.documentElement, margin: 12 },
 				onPosition,
 				openImmediately: false
 			})
@@ -129,10 +129,10 @@ describe('GooPopout', () => {
 		try {
 			const instance = createGooPopout({
 				at: target,
-				$content: content,
+				content: content,
 				align: 'left to right',
 				offset: { x: 6, y: 0 },
-				keepWithin: { $element: document.documentElement, margin: 12 },
+				keepWithin: { element: document.documentElement, margin: 12 },
 				openImmediately: false
 			})
 
@@ -182,10 +182,10 @@ describe('GooPopout', () => {
 		try {
 			const instance = createGooPopout({
 				at: target,
-				$content: content,
+				content: content,
 				align: 'left to right',
 				offset: { x: 6, y: 0 },
-				keepWithin: { $element: document.documentElement, margin: 12 },
+				keepWithin: { element: document.documentElement, margin: 12 },
 				openImmediately: false
 			})
 
@@ -213,7 +213,7 @@ describe('GooPopout', () => {
 		const content = document.createElement('div')
 		const instance = createGooPopout({
 			at: target,
-			$content: content,
+			content: content,
 			chromeless: true,
 			openImmediately: false
 		})
@@ -232,7 +232,7 @@ describe('GooPopout', () => {
 		const target = document.createElement('button')
 		document.body.appendChild(target)
 		const content = document.createElement('div')
-		const instance = createGooPopout({ at: target, $content: content, openImmediately: false })
+		const instance = createGooPopout({ at: target, content: content, openImmediately: false })
 
 		instance.open()
 
@@ -251,7 +251,7 @@ describe('GooPopout', () => {
 		document.body.appendChild(target)
 		const instance = createGooPopout({
 			at: target,
-			$content: content,
+			content: content,
 			onOpen,
 			openImmediately: false
 		})
@@ -261,7 +261,7 @@ describe('GooPopout', () => {
 		await openPromise
 
 		expect(onOpen).not.toHaveBeenCalled()
-		expect(instance.opened).toBe(false)
+		expect(instance.isOpen()).toBe(false)
 
 		target.remove()
 	})
@@ -287,7 +287,7 @@ describe('GooPopout', () => {
 
 		instance?.open()
 
-		expect(instance?.opened).toBe(true)
+		expect(instance?.isOpen()).toBe(true)
 		expect(document.querySelector('.goo-popout[for="popout-target"]')).not.toBeNull()
 
 		instance?.destroy()

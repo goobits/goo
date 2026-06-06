@@ -1,6 +1,6 @@
 /// <reference path="../svelte.d.ts" />
 
-export type { GridPopoutTriggerElement, GridPopoutTriggerOptions } from './createGridPopoutTrigger.ts'
+export type { GridPopoutTriggerHandle, GridPopoutTriggerOptions } from './createGridPopoutTrigger.ts'
 export { createGridPopoutTrigger } from './createGridPopoutTrigger.ts'
 export { default as GridPickerSelectedMark } from './GridPickerSelectedMark.svelte'
 export { default as GridPopoutPicker } from './GridPopoutPicker.svelte'

@@ -1,5 +1,7 @@
 import type { Snippet } from 'svelte'
 
+import type { GooForwardedAttributes } from '../support/types/forwardedAttributes.ts'
+
 /** Supported Goo angle input units. */
 export type GooAngleInputUnit = 'degree' | 'radian'
 
@@ -20,7 +22,7 @@ export interface GooAngleInputEventData {
 }
 
 /** Props accepted by the Svelte `GooAngleInput` component. */
-export type GooAngleInputProps = {
+export type GooAngleInputProps = GooForwardedAttributes & {
 
 	/** Current angle value in the configured unit. */
 	value?: number | string
@@ -61,8 +63,6 @@ export type GooAngleInputProps = {
 	/** Input callback fired while dragging or typing. */
 	oninput?: (value: number, data: GooAngleInputEventData) => void
 
-	/** Native attributes forwarded to the angle input root. */
-	[key: string]: unknown
 }
 
 /** Native root element bound by `GooAngleInput` for imperative updates. */

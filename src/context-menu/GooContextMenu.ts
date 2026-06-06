@@ -5,7 +5,7 @@
  */
 
 import { createSelectField } from '../select/_createSelectField.ts'
-import type { GooSelectElement, GooSelectMenuOptions, GooSelectOption } from '../select/index.ts'
+import type { GooSelectElement, GooSelectMenuOptions, GooSelectOpenOptions, GooSelectOption } from '../select/index.ts'
 
 /**
  * Goo context menu option.
@@ -30,11 +30,7 @@ export interface GooContextMenuOptions {
 }
 
 /** Options accepted when opening a context menu. */
-export type GooContextMenuOpenOptions = {
-	align?: string
-	at?: { x: number; y: number }
-	autoFocus?: boolean
-	offset?: { x?: number; y?: number }
+export type GooContextMenuOpenOptions = GooSelectOpenOptions & {
 	x?: number
 	y?: number
 }

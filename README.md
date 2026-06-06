@@ -100,7 +100,7 @@ Prefer subpath imports in apps when you only need one surface.
 | `@goobits/goo/radio`                   | `GooRadio`, `GooRadioGroup`                                        | Radio controls                             |
 | `@goobits/goo/range-module`            | `createGooRangeModule`, `createRangeModuleField`                   | Slider with synced numeric input fields    |
 | `@goobits/goo/range-module/styles.css` | CSS                                                                | Range-module-only stylesheet               |
-| `@goobits/goo/schema`                  | `GooSchema`, `GooSchemaComponent`, schema builders                 | Schema-driven control generation           |
+| `@goobits/goo/schema`                  | `GooSchema`, `GooSchemaComponent`, schema types                    | Schema-driven control generation           |
 | `@goobits/goo/select`                  | `GooSelect`                                                        | Select/menu component with submenu support |
 | `@goobits/goo/select/styles.css`       | CSS                                                                | Select-only stylesheet                     |
 | `@goobits/goo/slider`                  | `GooSlider`                                                        | Single and multi-thumb sliders             |
@@ -342,7 +342,7 @@ Controllers return native elements with chainable public methods such as `name()
 
 Custom GooSchema controls register Svelte modules through `@goobits/goo/controller` control type maps. See `docs/svelte-controls.md` for the `controlSchema` contract, including self-contained editor controls that opt out of GooController row wrapping.
 
-Imperative schema callers can use `createGooSchema()` to receive a native element with `setSchema()`, `setData()`, `getSchema()`, `getData()`, `getController()`, `reevaluateConditions()`, `updateDisplay()`, and `destroy()`.
+Imperative schema callers can use `createGooSchema()` to receive a native element with `setSchema()`, `setData()`, `setOptions()`, `getSchema()`, `getData()`, `getController()`, `refreshConditions()`, `refresh()`, and `destroy()`.
 
 ## Overlay And Feedback
 
@@ -358,7 +358,7 @@ const prompt = await GooPrompt({
 })
 ```
 
-`createGooDialog()` returns a public controller handle with `element`, `open()`, `close()`, `setContent()`, DOM event methods, and query helpers. DOM references such as header/content/footer nodes are implementation details.
+`createGooDialog()` returns a public controller handle with `element`, `open()`, `close()`, and `setContent()`. Use `controller.element` for DOM events, attributes, and queries; header/content/footer nodes are implementation details.
 
 ### Popout
 
@@ -471,6 +471,7 @@ import { createGooProgressRingTimer } from '@goobits/goo/progress-ring'
 const timer = createGooProgressRingTimer({ parentNode: document.body, showText: true })
 timer.show()
 timer.setProgress(0.5)
+timer.element.dataset.loading = 'true'
 timer.hide()
 ```
 

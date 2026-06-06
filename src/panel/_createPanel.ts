@@ -22,7 +22,7 @@ export interface GooPanelOptions {
 	className?: string
 	style?: string
 	content?: string | HTMLElement | Node
-	$parent?: HTMLElement
+	parentElement?: HTMLElement
 	onchange?: (value: boolean, oldValue?: boolean) => void
 }
 
@@ -30,19 +30,15 @@ export interface GooPanelOptions {
  * Native element API exposed by mounted Goo panels.
  */
 export type GooPanelElement = HTMLDivElement & {
-	$header: HTMLElement | null
-	$title: HTMLElement | null
-	$toggle: HTMLElement | null
-	$content: HTMLElement | null
+	headerElement: HTMLElement | null
+	titleElement: HTMLElement | null
+	toggleElement: HTMLElement | null
+	contentElement: HTMLElement | null
 	open: boolean
 	closed: boolean
 	title: string
 	width: number
 	docked: boolean
-	content: HTMLElement | null
-	domElement: HTMLElement
-	folders: HTMLElement[]
-	controllers: HTMLElement[]
 	setOpen: (value: boolean, options?: { silent?: boolean }) => void
 	toggle: () => boolean
 	expand: () => void
@@ -99,10 +95,10 @@ export function createPanel(options: GooPanelOptions = {}): GooPanelElement {
 	}
 
 	const shouldAutoPlace = options.autoPlace ?? !options.docked
-	if (shouldAutoPlace && !options.$parent && !panel.parentElement) {
+	if (shouldAutoPlace && !options.parentElement && !panel.parentElement) {
 		document.body.appendChild(panel)
 	}
-	if (options.$parent) options.$parent.appendChild(panel)
+	if (options.parentElement) options.parentElement.appendChild(panel)
 
 	return panel
 }
