@@ -261,7 +261,6 @@ export function createRangeModuleField(options: GooRangeModuleOptions = {}): Goo
 	return element
 }
 
-export const createGooRangeModule = createRangeModuleField
 
 function buildRootClass(options: GooRangeModuleOptions): string {
 	const classes = [ 'goo-range-module', 'goo-range-module--goo' ]

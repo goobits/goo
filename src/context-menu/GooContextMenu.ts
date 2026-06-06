@@ -5,7 +5,14 @@
  */
 
 import { createSelectField } from '../select/_createSelectField.ts'
-import type { GooSelectElement, GooSelectMenuOptions, GooSelectOpenOptions, GooSelectOption, GooSelectOptionsInput } from '../select/index.ts'
+import type {
+	GooSelectActionContext,
+	GooSelectElement,
+	GooSelectMenuOptions,
+	GooSelectOpenOptions,
+	GooSelectOption,
+	GooSelectOptionsInput
+} from '../select/index.ts'
 
 /**
  * Goo context menu option.
@@ -21,7 +28,7 @@ export interface GooContextMenuOptions {
 	showSelectionIndicator?: boolean
 	menu?: GooSelectMenuOptions
 	className?: string
-	actionContext?: unknown
+	actionContext?: GooSelectActionContext
 	id?: string
 	selected?: string
 	value?: string

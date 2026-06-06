@@ -9,9 +9,10 @@ import {
 	type GooControlExport,
 	type GooControlOptions,
 	type GooControlTypeRegistry,
+	type GooSvelteControlModule,
 	resolveGooControlTypeConfig
 } from './controlRegistry.ts'
-import { createSvelteControlHost, type SvelteComponentType, type SvelteControlHost, type SvelteControlSchema } from './SvelteControl.svelte.ts'
+import { createSvelteControlHost, type SvelteControlHost } from './SvelteControl.svelte.ts'
 
 // ============================================================================
 // Types
@@ -87,7 +88,11 @@ export async function createControlFromRegistry(
 
 		// Handle Svelte components with controlSchema.
 		if (config.svelte) {
-			return createSvelteControl(module as unknown as SvelteGooControlModule, options, controlType)
+			if (!isSvelteGooControlModule(module)) {
+				log.warn(`Control type "${ controlType }" is marked as Svelte but did not load a default component.`)
+				return { status: 'error' }
+			}
+			return createSvelteControl(module, options, controlType)
 		}
 
 		if (!config.extract) {
@@ -135,12 +140,6 @@ export async function createControlFromRegistry(
 	}
 }
 
-/** Module structure for Svelte control components */
-interface SvelteGooControlModule {
-	default: SvelteComponentType
-	controlSchema?: SvelteControlSchema
-}
-
 /**
  * Create a control from a Svelte component module.
  * Uses a Svelte host with the component's controlSchema.
@@ -149,13 +148,13 @@ interface SvelteGooControlModule {
  * @param controlType - control type.
  */
 function createSvelteControl(
-	module: SvelteGooControlModule,
+	module: GooSvelteControlModule,
 	options: ControlCreationOptions,
 	controlType: string
 ): ControlCreationResult {
 	const controlOptions = buildSvelteGooControlOptions(controlType, options.controllerOptions)
 	const host = createSvelteControlHost({
-		component: module.default,
+		component: module.default as Parameters<typeof createSvelteControlHost>[0]['component'],
 		schema: module.controlSchema,
 		value: options.value,
 		options: controlOptions,
@@ -183,6 +182,13 @@ function createSvelteControl(
 	}
 
 	return { status: 'error' }
+}
+
+function isSvelteGooControlModule(module: unknown): module is GooSvelteControlModule {
+	return typeof module === 'object'
+		&& module !== null
+		&& 'default' in module
+		&& typeof (module as { default?: unknown }).default === 'function'
 }
 
 function buildSvelteGooControlOptions(controlType: string, controllerOptions: GooControlOptions): GooControlOptions {

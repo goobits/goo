@@ -6,7 +6,14 @@ export type {
 	GooControlOptionValue,
 	GooControlType,
 	GooControlTypeConfig,
-	GooControlTypeRegistry
+	GooControlTypeRegistry,
+	GooFactoryControlTypeConfig,
+	GooSvelteControlModule,
+	GooSvelteControlTypeConfig
+} from './controlRegistry.ts'
+export {
+	defineFactoryControlType,
+	defineSvelteControlType
 } from './controlRegistry.ts'
 export type {
 	ControllerOption,

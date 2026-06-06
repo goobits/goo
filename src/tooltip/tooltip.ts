@@ -380,5 +380,3 @@ export function tooltip(node: HTMLElement, options: GooTooltipActionOptions = {}
 		}
 	}
 }
-
-export default createGooTooltip

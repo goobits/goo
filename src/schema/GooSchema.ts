@@ -5,9 +5,9 @@
 
 import './GooSchema.css'
 
-import { resolveGooControlTypeConfig } from '../controller/controlRegistry.ts'
+import { type GooSvelteControlModule, resolveGooControlTypeConfig } from '../controller/controlRegistry.ts'
 import { createGooController } from '../controller/GooController.ts'
-import { createSvelteControlHost, type SvelteComponentType, type SvelteControlSchema } from '../controller/SvelteControl.svelte.ts'
+import { createSvelteControlHost } from '../controller/SvelteControl.svelte.ts'
 import { createFolder, type GooFolderElement } from '../folder/_createFolder.ts'
 import { createPanel } from '../panel/_createPanel.ts'
 import { schemaLog as log } from '../support/utils/logger.ts'
@@ -87,7 +87,7 @@ type GooSchemaInternal = GooSchema & {
 		object: GooSchemaData,
 		property: string,
 		controllerOptions: ControllerOptions,
-		module: { default: SvelteComponentType; controlSchema?: SvelteControlSchema },
+		module: GooSvelteControlModule,
 		parent: HTMLElement,
 		token: number
 	): Promise<void>
@@ -178,7 +178,7 @@ function attachSchemaApi(element: GooSchemaInternal): void {
 			object: Record<string, unknown>,
 			property: string,
 			controllerOptions: ControllerOptions,
-			module: { default: SvelteComponentType; controlSchema?: SvelteControlSchema },
+			module: GooSvelteControlModule,
 			parent: HTMLElement,
 			token: number
 		) => buildSelfContainedField(element, node, object, property, controllerOptions, module, parent, token)
@@ -290,8 +290,12 @@ async function buildField(
 	if (node.type) {
 		const controlConfig = resolveGooControlTypeConfig(node.type, controlTypes)
 		if (controlConfig?.svelte) {
-			const module = await controlConfig.load() as { default: SvelteComponentType; controlSchema?: SvelteControlSchema }
+			const module = await controlConfig.load()
 			if (token !== element._rebuildToken) return
+			if (!isGooSvelteControlModule(module)) {
+				log.warn(`Control type "${ node.type }" is marked as Svelte but did not load a default component.`)
+				return
+			}
 			if (module.controlSchema?.selfContained || isSelfContainedField(node)) {
 				await buildSelfContainedField(element, node, object, property, controllerOptions, module, parent, token)
 				return
@@ -322,7 +326,7 @@ async function buildSelfContainedField(
 	object: GooSchemaData,
 	property: string,
 	controllerOptions: ControllerOptions,
-	module: { default: SvelteComponentType; controlSchema?: SvelteControlSchema },
+	module: GooSvelteControlModule,
 	parent: HTMLElement,
 	token: number
 ): Promise<void> {
@@ -340,7 +344,7 @@ async function buildSelfContainedField(
 	}
 
 	const host = createSvelteControlHost({
-		component: module.default,
+		component: module.default as Parameters<typeof createSvelteControlHost>[0]['component'],
 		schema: module.controlSchema,
 		value: object[property],
 		options,
@@ -360,6 +364,13 @@ async function buildSelfContainedField(
 	} else {
 		parent.appendChild(hostElement)
 	}
+}
+
+function isGooSvelteControlModule(module: unknown): module is GooSvelteControlModule {
+	return typeof module === 'object'
+		&& module !== null
+		&& 'default' in module
+		&& typeof (module as { default?: unknown }).default === 'function'
 }
 
 function createGooSchemaElement(options: GooSchemaOptions = {}): GooSchema {

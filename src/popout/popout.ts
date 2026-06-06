@@ -1027,5 +1027,3 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 // =============================================================================
 // Export
 // =============================================================================
-
-export default createGooPopout

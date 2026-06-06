@@ -35,9 +35,18 @@ import { createSliderField } from '../slider/_createSliderField.ts'
 import * as sliderModule from '../slider/GooSlider.svelte'
 import { createTextareaField } from '../textarea/_createTextareaField.ts'
 import * as textareaModule from '../textarea/GooTextarea.svelte'
+import type { SvelteControlSchema } from './SvelteControl.svelte.ts'
 
 /** Control module structure loaded for a Goo controller type. */
 export type GooControlModule = Record<string, unknown>
+
+/** Svelte control module shape loaded for schema-native controls. */
+export type GooSvelteControlModule = GooControlModule & {
+	/** Svelte component mounted by the Goo control host after runtime validation. */
+	default: unknown
+	/** Optional binding metadata for value, callbacks, and option props. */
+	controlSchema?: SvelteControlSchema
+}
 
 /** Built-in Goo control ids understood by the default registry. */
 export type GooBuiltInControlType =
@@ -127,10 +136,38 @@ export interface GooControlTypeConfig {
 	layout?: 'inline' | 'stacked'
 }
 
+/** Explicit registry entry for a Svelte-backed control module. */
+export type GooSvelteControlTypeConfig = Omit<GooControlTypeConfig, 'extract' | 'load' | 'svelte'> & {
+	/** Lazy import function returning a Svelte control module. */
+	load: () => Promise<GooSvelteControlModule>
+	/** Marks the module as a Svelte component control. */
+	svelte: true
+}
+
+/** Explicit registry entry for a DOM factory-backed control module. */
+export type GooFactoryControlTypeConfig = Omit<GooControlTypeConfig, 'extract' | 'svelte'> & {
+	/** Extracts the DOM factory/class from the loaded module. */
+	extract: (module: GooControlModule) => GooControlExport | null
+	/** DOM factory controls are not mounted through the Svelte host. */
+	svelte?: false
+}
+
 /**
  * Goo control type registry for schema/controller extension points.
  */
 export type GooControlTypeRegistry = Record<string, GooControlTypeConfig>
+
+/** Create an explicit Svelte control registry entry. */
+export function defineSvelteControlType(
+	config: Omit<GooSvelteControlTypeConfig, 'svelte'> & { svelte?: true }
+): GooSvelteControlTypeConfig {
+	return { ...config, svelte: true }
+}
+
+/** Create an explicit DOM factory control registry entry. */
+export function defineFactoryControlType(config: GooFactoryControlTypeConfig): GooFactoryControlTypeConfig {
+	return config
+}
 
 function loadModule(module: object): Promise<GooControlModule> {
 	return Promise.resolve(module as GooControlModule)

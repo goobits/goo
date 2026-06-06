@@ -34,25 +34,26 @@ export type GooDialogType = 'alert' | 'confirm' | 'prompt' | 'notify' | 'overlay
 export type GooDialogDefaultFocus = 'ok' | 'cancel' | 'disregard'
 
 /** Values collected from dialog fields. */
-export type DialogValues = Record<string, unknown>
+export type DialogValues<TValues extends Record<string, unknown> = Record<string, unknown>> = TValues
 
 /** Field element map passed to dialog verification callbacks. */
 export type DialogFieldElements = Map<string, HTMLElement>
 
 /** Verification callback for prompt dialogs. */
-export type DialogVerifyHandler = (values: DialogValues, fieldElements: DialogFieldElements) => boolean | Promise<boolean>
+export type DialogVerifyHandler<TValues extends DialogValues = DialogValues> =
+	(values: TValues, fieldElements: DialogFieldElements) => boolean | Promise<boolean>
 
 /**
  * Dialog options for construction
  */
-export interface GooDialogOptions {
+export interface GooDialogOptions<TValues extends DialogValues = DialogValues> {
 	type?: GooDialogType
 	ariaLabel?: string
 	heading?: string
 	content?: string | Node
 	labels?: DialogLabels
 	fields?: DialogField[]
-	verify?: DialogVerifyHandler
+	verify?: DialogVerifyHandler<TValues>
 	showBackdrop?: boolean
 	showClose?: boolean
 	closeOnBackdrop?: boolean
@@ -62,20 +63,20 @@ export interface GooDialogOptions {
 	height?: string | number
 	className?: string
 	autoDismiss?: number
-	onOk?: (result: DialogResult) => void
-	onCancel?: (result: DialogResult) => void
+	onOk?: (result: DialogResult<TValues>) => void
+	onCancel?: (result: DialogResult<TValues>) => void
 	onClose?: () => void
 }
 
 /**
  * Dialog result
  */
-export interface DialogResult {
+export interface DialogResult<TValues extends DialogValues = DialogValues> {
 	ok?: boolean
 	cancel?: boolean
 	disregard?: boolean
 	applyToAll?: boolean
-	values?: DialogValues
+	values?: TValues
 }
 
 /**
@@ -114,7 +115,7 @@ const DEFAULT_LABELS: DialogLabels = {
 // ============================================================================
 
 /** Public handle returned by `createGooDialog`. */
-export interface GooDialogController {
+export interface GooDialogController<TValues extends DialogValues = DialogValues> {
 	/** Root dialog element. */
 	readonly element: HTMLElement
 	/** Whether the dialog is currently open. */
@@ -122,7 +123,7 @@ export interface GooDialogController {
 	/** Close the dialog. */
 	close(): Promise<void>
 	/** Open the dialog and resolve with the user's action. */
-	open(): Promise<DialogResult>
+	open(): Promise<DialogResult<TValues>>
 	/** Replace dialog content. Strings render as text; pass a DOM node for rich content. */
 	setContent(content: string | Node): void
 }
@@ -684,15 +685,15 @@ interface GooDialogControllerRuntime extends GooDialogController {}
 /**
  * Goo dialog instance.
  */
-export type GooDialogInstance = GooDialogController
+export type GooDialogInstance<TValues extends DialogValues = DialogValues> = GooDialogController<TValues>
 
 /**
  * Creates goo dialog.
  *
  * @param options - options.
  */
-export function createGooDialog(options: GooDialogOptions = {}): GooDialogController {
-	return new GooDialogControllerRuntime(options)
+export function createGooDialog<TValues extends DialogValues = DialogValues>(
+	options: GooDialogOptions<TValues> = {}
+): GooDialogController<TValues> {
+	return new GooDialogControllerRuntime(options as GooDialogOptions) as GooDialogController<TValues>
 }
-
-export default createGooDialog

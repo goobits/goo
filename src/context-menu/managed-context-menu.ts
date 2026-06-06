@@ -1,4 +1,4 @@
-import type { GooSelectOpenOptions, GooSelectOptionsInput } from '../select/index.ts'
+import type { GooSelectActionContext, GooSelectOpenOptions, GooSelectOptionsInput } from '../select/index.ts'
 import { createGooContextMenu, type GooContextMenuElement, type GooContextMenuOption } from './GooContextMenu.ts'
 
 export type ManagedGooContextMenuOpenAt = HTMLElement | { x: number; y: number }
@@ -44,7 +44,7 @@ export type ManagedGooContextMenu = {
 /** Options for the managed Goo context menu API. */
 export interface ManagedGooContextMenuOptions {
 	at?: ManagedGooContextMenuOpenAt
-	actionContext?: unknown
+	actionContext?: GooSelectActionContext
 	enableKeyboard?: boolean
 	id?: string
 	items?: ManagedGooContextMenuItems
@@ -62,7 +62,7 @@ export interface ManagedGooContextMenuOptions {
 
 type ManagedGooContextMenuOpenOptions = Omit<GooSelectOpenOptions, 'at'> & {
 	at?: ManagedGooContextMenuOpenAt
-	actionContext?: unknown
+	actionContext?: GooSelectActionContext
 	onClose?: () => void
 	onDestroy?: () => void
 	parentElement?: HTMLElement

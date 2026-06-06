@@ -7,6 +7,7 @@
 
 export { default as GooSelect } from './GooSelect.svelte'
 export type {
+	GooSelectActionContext,
 	GooSelectChangeHandler,
 	GooSelectCloseHandler,
 	GooSelectElement,
@@ -21,5 +22,7 @@ export type {
 	GooSelectOptionMap,
 	GooSelectOptionMapValue,
 	GooSelectOptionsInput,
-	GooSelectProps
+	GooSelectProps,
+	GooSelectRenderable,
+	GooSelectShortcut
 } from './types.ts'

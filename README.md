@@ -93,7 +93,7 @@ Use package subpaths in apps and shared packages so each caller names the surfac
 | `@goobits/goo/positioning`             | `positionElementAt`, `calculatePosition`, positioning types        | Shared positioning math                    |
 | `@goobits/goo/progress-ring`           | `GooProgressRing`, `createGooProgressRingTimer`                    | Progress ring and timer overlay            |
 | `@goobits/goo/radio`                   | `GooRadio`, `GooRadioGroup`                                        | Radio controls                             |
-| `@goobits/goo/range-module`            | `createGooRangeModule`, `createRangeModuleField`                   | Slider with synced numeric input fields    |
+| `@goobits/goo/range-module`            | `createRangeModuleField`                                           | Slider with synced numeric input fields    |
 | `@goobits/goo/schema`                  | `GooSchema`, `createGooSchema`, schema types                       | Schema-driven control generation           |
 | `@goobits/goo/select`                  | `GooSelect`                                                        | Select/menu component with submenu support |
 | `@goobits/goo/select/styles.css`       | CSS                                                                | Select-only stylesheet                     |
@@ -245,9 +245,9 @@ Use `createGooController()` and `createGooSchema()` for imperative controller/sc
 ### Range Module
 
 ```ts
-import { createGooRangeModule } from '@goobits/goo/range-module'
+import { createRangeModuleField } from '@goobits/goo/range-module'
 
-const range = createGooRangeModule({
+const range = createRangeModuleField({
 	value: 24,
 	min: 1,
 	max: 100,

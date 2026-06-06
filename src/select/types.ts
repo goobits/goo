@@ -8,15 +8,24 @@ import type { Snippet } from 'svelte'
 import type { GooPopoutOptions } from '../popout/popout.ts'
 import type { GooForwardedAttributes } from '../support/types/forwardedAttributes.ts'
 
+/** Host-owned action context passed through menu/select actions. */
+export type GooSelectActionContext = unknown
+
+/** Renderable label/icon content accepted by GooSelect options. */
+export type GooSelectRenderable = string | HTMLElement | (() => string | HTMLElement)
+
+/** Shortcut text accepted by GooSelect options. */
+export type GooSelectShortcut = string | string[] | (() => string | string[])
+
 /**
  * Single option in a GooSelect menu.
  */
 export interface GooSelectOption {
 	type?: 'option' | 'divider' | 'optgroup' | 'submenu'
-	label?: string | HTMLElement | (() => string | HTMLElement)
+	label?: GooSelectRenderable
 	id?: string
-	icon?: string | HTMLElement | (() => string | HTMLElement)
-	shortcut?: string | string[] | (() => string | string[])
+	icon?: GooSelectRenderable
+	shortcut?: GooSelectShortcut
 	isDisabled?: boolean | (() => boolean)
 	isSupported?: boolean | (() => boolean)
 	onChoose?: (id: string) => void
@@ -115,7 +124,7 @@ export type GooSelectProps = GooForwardedAttributes & {
 	tooltip?: string | (() => string)
 	title?: string
 	disabled?: boolean
-	actionContext?: unknown
+	actionContext?: GooSelectActionContext
 	triggerIcon?: string | HTMLElement | (() => HTMLElement)
 
 	/** Optional child content. */
@@ -212,7 +221,7 @@ export interface GooSelectOpenOptions {
 	clickToClose?: GooPopoutOptions['clickToClose']
 	keepWithin?: { element?: HTMLElement; margin?: number }
 	parentElement?: HTMLElement
-	actionContext?: unknown
+	actionContext?: GooSelectActionContext
 
 	/** Override the popout alignment string (e.g. `'left top to left bottom'`). */
 	align?: string
