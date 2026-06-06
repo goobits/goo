@@ -47,6 +47,7 @@ export type {
 	GooContextMenuOptions,
 	ManagedGooContextMenu,
 	ManagedGooContextMenuItem,
+	ManagedGooContextMenuObjectItem,
 	ManagedGooContextMenuOptions
 } from './context-menu/index.ts'
 export { createGooContextMenu, createManagedGooContextMenu, GooContextMenu } from './context-menu/index.ts'

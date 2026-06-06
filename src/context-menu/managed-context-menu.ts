@@ -1,8 +1,22 @@
 import type { GooSelectOpenOptions } from '../select/index.ts'
 import { createGooContextMenu, type GooContextMenuElement, type GooContextMenuOption } from './GooContextMenu.ts'
 
+/** Object item accepted by the managed Goo context menu API before normalization. */
+export type ManagedGooContextMenuObjectItem = Omit<
+	GooContextMenuOption,
+	'isDisabled' | 'isSupported' | 'onChoose' | 'options'
+> & {
+	isDisabled?: boolean | ((...args: unknown[]) => boolean)
+	isSupported?: boolean | ((...args: unknown[]) => boolean)
+	onChoose?: (...args: unknown[]) => void
+	onClick?: (...args: unknown[]) => void
+	options?: ManagedGooContextMenuItem[]
+	value?: string | number
+	[key: string]: unknown
+}
+
 /** Context menu item accepted by the managed Goo context menu API. */
-export type ManagedGooContextMenuItem = GooContextMenuOption | string | '-' | '---'
+export type ManagedGooContextMenuItem = ManagedGooContextMenuObjectItem | string | '-' | '---'
 
 /** Managed Goo context menu instance. */
 export type ManagedGooContextMenu = Omit<GooContextMenuElement, 'close' | 'open'> & {
