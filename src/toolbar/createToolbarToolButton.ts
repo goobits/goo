@@ -8,7 +8,7 @@ type ToolbarToolButtonApi = ReturnType<typeof mount> & {
 }
 
 export type ToolbarToolButtonElement = HTMLElement & {
-	destroyToolbarToolButton(): void
+	destroy(): void
 }
 
 export type CreateToolbarToolButtonOptions = ToolbarToolButtonConfig
@@ -35,7 +35,7 @@ export function createToolbarToolButton({
 		throw new Error('ToolbarToolButton failed to mount.')
 	}
 
-	button.destroyToolbarToolButton = (): void => {
+	button.destroy = (): void => {
 		void unmount(component)
 	}
 

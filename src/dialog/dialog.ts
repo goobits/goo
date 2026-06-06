@@ -98,25 +98,38 @@ const DEFAULT_LABELS: DialogLabels = {
 // GooDialog Controller
 // ============================================================================
 
+/** Public handle returned by `createGooDialog`. */
+export interface GooDialogController {
+	/** Root dialog element. */
+	readonly element: HTMLElement
+	/** Whether the dialog is currently open. */
+	readonly isOpen: boolean
+	/** Add a DOM event listener to the root dialog element. */
+	addEventListener(...args: Parameters<HTMLElement['addEventListener']>): void
+	/** Close the dialog. */
+	close(): Promise<void>
+	/** Dispatch a DOM event from the root dialog element. */
+	dispatchEvent(event: Event): boolean
+	/** Get an attribute from the root dialog element. */
+	getAttribute(name: string): string | null
+	/** Open the dialog and resolve with the user's action. */
+	open(): Promise<DialogResult>
+	/** Query inside the root dialog element. */
+	querySelector<T extends Element = Element>(selectors: string): T | null
+	/** Query all matching elements inside the root dialog element. */
+	querySelectorAll<T extends Element = Element>(selectors: string): NodeListOf<T>
+	/** Remove a DOM event listener from the root dialog element. */
+	removeEventListener(...args: Parameters<HTMLElement['removeEventListener']>): void
+	/** Set an attribute on the root dialog element. */
+	setAttribute(name: string, value: string): void
+	/** Replace dialog content. Strings render as text; pass a DOM node for rich content. */
+	setContent(content: string | Node): void
+}
+
 /**
- * Modal dialog component with support for alert, confirm, prompt types.
- * Provides a promise-based API for user interaction.
- *
- * @attr {string} type - Dialog type: 'alert', 'confirm', 'prompt', 'notify', 'overlay'
- * @attr {string} heading - Dialog title/heading text
- * @attr {boolean} showBackdrop - Whether to show backdrop overlay
- * @attr {boolean} showClose - Whether to show close button
- * @attr {boolean} closeOnBackdrop - Whether clicking backdrop closes dialog
- * @attr {boolean} closeOnEscape - Whether Escape key closes dialog
- * @attr {string} defaultFocus - Which button to focus: 'ok', 'cancel', 'disregard'
- * @attr {string} width - Dialog width (e.g., '400px' or 'auto')
- * @attr {string} height - Dialog height (e.g., '300px' or 'auto')
- * @attr {number} autoDismiss - Auto-dismiss after milliseconds (for notify type)
- *
- * @fires {CustomEvent} close - Fired when dialog is closed
- *
+ * Internal dialog implementation.
  */
-export class GooDialogController {
+class GooDialogControllerRuntime {
 	readonly $element: HTMLElement
 	state: GooDialogState
 
@@ -716,6 +729,26 @@ export class GooDialogController {
 	dispatchEvent(event: Event): boolean {
 		return this.$element.dispatchEvent(event)
 	}
+
+	/**
+	 * Root dialog element.
+	 */
+	get element(): HTMLElement {
+		return this.$element
+	}
+}
+
+interface GooDialogControllerRuntime extends GooDialogController {}
+
+/**
+ * Factory-compatible dialog controller export. Prefer `createGooDialog`.
+ *
+ * @param options - Dialog options.
+ * @returns Dialog controller handle.
+ */
+// eslint-disable-next-line @typescript-eslint/no-redeclare -- Public API intentionally exposes a value factory and matching handle type.
+export function GooDialogController(options: GooDialogOptions = {}): GooDialogController {
+	return createGooDialog(options)
 }
 
 // ============================================================================
@@ -733,7 +766,7 @@ export type GooDialogInstance = GooDialogController
  * @param options - options.
  */
 export function createGooDialog(options: GooDialogOptions = {}): GooDialogController {
-	return new GooDialogController(options)
+	return new GooDialogControllerRuntime(options)
 }
 
 export default createGooDialog

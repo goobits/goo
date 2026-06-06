@@ -15,7 +15,7 @@ test.describe('GooSchema', () => {
 
 	test('mounts the browser schema surface and exposes controller APIs', async({ page }) => {
 		await page.evaluate(() => {
-			const schema = (window as GooHarnessWindow).goo.createGooSchema({
+			const schema = (window as unknown as GooHarnessWindow).goo.createGooSchema({
 				schema: [ { path: 'size', min: 0, max: 100 } ],
 				data: { size: 12 }
 			})

@@ -51,7 +51,7 @@ describe('GooRangeModule', () => {
 		range.setValue({ min: 12, max: 32 })
 
 		expect(range.getValue()).toEqual({ min: 12, max: 32 })
-		expect(range.range.values).toEqual([ 12, 32 ])
+		expect(range.getRange().values).toEqual([ 12, 32 ])
 	})
 
 	it('preserves x/y object values for paired axes', async() => {
@@ -67,11 +67,11 @@ describe('GooRangeModule', () => {
 		await new Promise(resolve => setTimeout(resolve, 0))
 
 		expect(range.querySelectorAll('.goo-number')).toHaveLength(2)
-		expect(range.range.values).toEqual([ -4, 12 ])
+		expect(range.getRange().values).toEqual([ -4, 12 ])
 
 		range.setValue({ x: 8, y: -10 })
 
 		expect(range.getValue()).toEqual({ x: 8, y: -10 })
-		expect(range.range.values).toEqual([ 8, -10 ])
+		expect(range.getRange().values).toEqual([ 8, -10 ])
 	})
 })

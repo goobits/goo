@@ -8,7 +8,7 @@ import { untrack } from 'svelte'
 import type { Snippet } from 'svelte'
 
 import { addChild, clearChildren, hydrateChildren, removeChild } from '../support/utils/_childContainer.ts'
-import type { GooFolderElement, GooFolderOptions } from './_createFolder.ts'
+import type { GooFolderElement, GooFolderInternalElement, GooFolderOptions } from './_createFolder.ts'
 import './GooFolder.css'
 
 type GooFolderProps = GooFolderOptions & {
@@ -40,7 +40,7 @@ const contentId = `goo-folder-content-${ ++folderInstanceCount }`
 let rootEl: HTMLDivElement | undefined = $state()
 // The root <div> is augmented with the GooFolder API at runtime (assignApi);
 // expose the augmented type while binding the real element type.
-const root = $derived(rootEl as GooFolderElement | undefined)
+const root = $derived(rootEl as GooFolderInternalElement | undefined)
 let headerElement: HTMLElement | undefined = $state()
 let titleElement: HTMLElement | undefined = $state()
 let contentElement: HTMLElement | undefined = $state()
@@ -122,7 +122,7 @@ function assignApi(): void {
 	onelement?.(root)
 }
 
-let mountedRoot: GooFolderElement | undefined
+let mountedRoot: GooFolderInternalElement | undefined
 
 $effect(() => {
 	const nextRoot = root

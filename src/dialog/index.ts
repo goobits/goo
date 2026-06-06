@@ -12,9 +12,16 @@ export {
 export { createGooDialogTextContent, createTrustedGooDialogContent } from './dialogContent.ts'
 export {
 	GooAlert,
+	type GooAlertOptions,
 	GooConfirm,
+	type GooConfirmOptions,
+	type GooDialogPromise,
 	GooNotify,
+	type GooNotifyOptions,
 	GooOverlay,
-	GooPrompt } from './dialogs.ts'
+	type GooOverlayOptions,
+	GooPrompt,
+	type GooPromptOptions
+} from './dialogs.ts'
 export { default as GooDialog } from './GooDialog.svelte'
 export { dialogManager, GooDialogManager } from './GooDialogManager.ts'

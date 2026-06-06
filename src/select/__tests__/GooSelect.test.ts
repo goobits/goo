@@ -9,7 +9,7 @@ import type { GooSelectElement } from '../types.ts'
 
 describe('GooSelect', () => {
 	afterEach(() => {
-	document.querySelectorAll('.goo-popout').forEach(element => element.remove())
+		document.querySelectorAll('.goo-popout').forEach(element => element.remove())
 	})
 
 	it('renders a native select surface without custom element tags', () => {
@@ -289,7 +289,10 @@ describe('GooSelect', () => {
 			await tick()
 			expect(element.hovered).toBe(specialId)
 
-			expect(() => element._selectOption(element._selectOptions[0]!)).not.toThrow()
+			const option = Array.from(document.querySelectorAll<HTMLElement>('.goo-select__option'))
+				.find(nextOption => nextOption.dataset.id === specialId)
+			expect(option).not.toBeUndefined()
+			option?.click()
 			await delay(300)
 			expect(element.getValue()).toBe(specialId)
 		} finally {

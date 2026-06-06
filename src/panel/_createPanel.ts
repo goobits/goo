@@ -1,6 +1,7 @@
 import { flushSync, mount, unmount } from 'svelte'
 
 import { createFolder, type GooFolderElement, type GooFolderOptions } from '../folder/_createFolder.ts'
+import type { ChildContainerHost } from '../support/utils/_childContainer.ts'
 import GooPanelComponent from './GooPanel.svelte'
 
 /**
@@ -33,9 +34,6 @@ export type GooPanelElement = HTMLDivElement & {
 	$title: HTMLElement | null
 	$toggle: HTMLElement | null
 	$content: HTMLElement | null
-	_folders: HTMLElement[]
-	_controllers: HTMLElement[]
-	_pendingChildren: HTMLElement[]
 	open: boolean
 	closed: boolean
 	title: string
@@ -57,6 +55,9 @@ export type GooPanelElement = HTMLDivElement & {
 	clear: () => void
 	destroy: () => void
 }
+
+/** Internal mounted panel shape used by GooPanel.svelte and child container helpers. */
+export type GooPanelInternalElement = GooPanelElement & ChildContainerHost
 
 type MountedPanel = ReturnType<typeof mount>
 

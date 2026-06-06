@@ -59,8 +59,7 @@ function handleInput(event: Event): void {
 function destroySchema(): void {
 	schemaElement?.removeEventListener('change', handleChange)
 	schemaElement?.removeEventListener('input', handleInput)
-	schemaElement?._destroyElement()
-	schemaElement?.remove()
+	schemaElement?.destroy()
 	schemaElement = null
 	instance = null
 }

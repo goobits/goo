@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { isSelfContainedField } from '../fieldLayout.ts'
 import GooSchema from '../GooSchema.svelte'
-import { createGooSchema, GooSchema as GooSchemaElement } from '../index.ts'
+import { createGooSchema } from '../index.ts'
 
 describe('GooSchema', () => {
 	afterEach(() => {
@@ -22,7 +22,8 @@ describe('GooSchema', () => {
 
 		expect(document.querySelector('goo-schema')).toBeNull()
 		expect(schema.classList.contains('goo-schema')).toBe(true)
-		expect(schema).toBeInstanceOf(GooSchemaElement)
+		expect(schema).toBeInstanceOf(HTMLDivElement)
+		expect(typeof schema.destroy).toBe('function')
 		expect(schema.querySelector('.goo-controller')).not.toBeNull()
 		expect(schema.getController('size')).not.toBeUndefined()
 	})

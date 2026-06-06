@@ -5,7 +5,7 @@
 import { expect, test } from '@playwright/test'
 
 async function waitForGoo(page: import('@playwright/test').Page) {
-	await page.waitForFunction(() => window.gooReady === true)
+	await page.waitForFunction(() => (window as unknown as GooHarnessWindow).gooReady === true)
 }
 
 test.describe('Goo value setters', () => {
@@ -22,11 +22,12 @@ test.describe('Goo value setters', () => {
 		const results = await page.evaluate(async() => {
 			const container = document.getElementById('test-container')!
 			const waitFrame = () => new Promise(requestAnimationFrame)
+			const goo = (window as unknown as GooHarnessWindow).goo
 			const cases = [
-				{ name: 'goo-color', create: () => (window.goo as typeof window.goo & { createColor: () => HTMLElement }).createColor() as HTMLElement & { value: unknown }, value: '#ff0000' },
-				{ name: 'goo-slider', create: () => (window.goo as typeof window.goo & { createSlider: () => HTMLElement }).createSlider() as HTMLElement & { value: unknown }, value: 42 },
-				{ name: 'goo-input', create: () => (window.goo as typeof window.goo & { createInput: () => HTMLElement }).createInput() as HTMLElement & { value: unknown }, value: 'hello' },
-				{ name: 'goo-checkbox', create: () => window.goo.createCheckbox() as HTMLElement & { value: unknown }, value: true }
+				{ name: 'goo-color', create: () => goo.createColor() as HTMLElement & { value: unknown }, value: '#ff0000' },
+				{ name: 'goo-slider', create: () => goo.createSlider() as HTMLElement & { value: unknown }, value: 42 },
+				{ name: 'goo-input', create: () => goo.createInput() as HTMLElement & { value: unknown }, value: 'hello' },
+				{ name: 'goo-checkbox', create: () => goo.createCheckbox() as HTMLElement & { value: unknown }, value: true }
 			]
 			const output: Array<{ name: string; changeCount: number; inputCount: number }> = []
 
@@ -59,3 +60,13 @@ test.describe('Goo value setters', () => {
 		}
 	})
 })
+
+interface GooHarnessWindow extends Window {
+	gooReady?: boolean
+	goo: {
+		createCheckbox(): HTMLElement
+		createColor(): HTMLElement
+		createInput(): HTMLElement
+		createSlider(): HTMLElement
+	}
+}

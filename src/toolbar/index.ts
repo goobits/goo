@@ -14,11 +14,7 @@ export type {
 	ToolbarChromeIcon,
 	ToolbarToolButtonConfig
 } from './toolbarChromeModel.ts'
-export {
-	readFloatingToolbarGroups,
-	TOOLBAR_CHROME_ACTIVE_TOOL_ID,
-	TOOLBAR_CHROME_BANNER_APPS
-} from './toolbarChromeModel.ts'
+export { readFloatingToolbarGroups } from './toolbarChromeModel.ts'
 export type {
 	ToolbarButtonLayout,
 	ToolbarConfig,

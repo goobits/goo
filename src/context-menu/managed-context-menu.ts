@@ -1,18 +1,15 @@
-import type { GooSelectElement, GooSelectOpenOptions } from '../select/index.ts'
-import { createGooContextMenu, type GooContextMenuOption } from './GooContextMenu.ts'
+import type { GooSelectOpenOptions } from '../select/index.ts'
+import { createGooContextMenu, type GooContextMenuElement, type GooContextMenuOption } from './GooContextMenu.ts'
 
 /** Context menu item accepted by the managed Goo context menu API. */
 export type ManagedGooContextMenuItem = GooContextMenuOption | string | '-' | '---'
 
 /** Managed Goo context menu instance. */
-export type ManagedGooContextMenu = Omit<GooSelectElement, 'close' | 'open'> & {
-	$options: Element
+export type ManagedGooContextMenu = Omit<GooContextMenuElement, 'close' | 'open'> & {
 	close(options?: { quiet?: boolean }): void
-	hide(): void
 	menuOptions: GooContextMenuOption[]
 	on(eventName: string, handler: (...args: unknown[]) => void): () => void
 	open(options?: ManagedGooContextMenuOpenOptions): boolean
-	show(options?: ManagedGooContextMenuOpenOptions): boolean
 }
 
 /** Options for the managed Goo context menu API. */
@@ -38,19 +35,28 @@ type ManagedGooContextMenuOpenOptions = GooSelectOpenOptions & {
 	boundContext?: unknown
 	onClose?: () => void
 	onDestroy?: () => void
+	parentElement?: HTMLElement
 	x?: number
 	y?: number
 }
 
-type ManagedGooContextMenuFactory = {
-	(options?: ManagedGooContextMenuOptions): ManagedGooContextMenu
+/** Manager for registered Goo context menus. */
+export type GooContextMenuManager = {
+	/** Close the current context menu, if any. */
 	close: typeof close
-	currentMenu?: ManagedGooContextMenu
+	/** Return the current open context menu, if any. */
+	getCurrent(): ManagedGooContextMenu | undefined
+	/** Return a registered context menu by id. */
 	get: typeof get
-	id?: string
+	/** Return the current open context menu id, if any. */
+	getOpenedId(): string | undefined
+	/** Whether a context menu is currently open. */
+	isOpen(): boolean
+	/** Open a registered context menu by id or instance. */
 	open: typeof open
-	opened: boolean
+	/** Register a reusable context menu. */
 	register: typeof register
+	/** Registered context menus keyed by id. */
 	registeredMenus: typeof registeredMenus
 }
 
@@ -63,31 +69,20 @@ const contextMenuState: {
 }
 const registeredMenus: Record<string, ManagedGooContextMenu> = {}
 
-/** Create and immediately open a managed Goo context menu. */
-export const GooContextMenu = Object.assign(createManagedGooContextMenu, {
+/** Registered Goo context menu manager. */
+export const GooContextMenu: GooContextMenuManager = {
 	close,
+	getCurrent,
 	get,
+	getOpenedId,
+	isOpen,
 	open,
 	register,
 	registeredMenus
-}) as ManagedGooContextMenuFactory
+}
 
-Object.defineProperties(GooContextMenu, {
-	currentMenu: {
-		get() { return contextMenuState.currentMenu },
-		set(value: ManagedGooContextMenu | undefined) { contextMenuState.currentMenu = value }
-	},
-	id: {
-		get() { return contextMenuState.id },
-		set(value: string | undefined) { contextMenuState.id = value }
-	},
-	opened: {
-		get() { return contextMenuState.opened },
-		set(value: boolean) { contextMenuState.opened = value }
-	}
-})
-
-function createManagedGooContextMenu(options: ManagedGooContextMenuOptions = {}): ManagedGooContextMenu {
+/** Create and immediately open a managed Goo context menu. */
+export function createManagedGooContextMenu(options: ManagedGooContextMenuOptions = {}): ManagedGooContextMenu {
 	const {
 		at,
 		id = `ContextMenu-${ Date.now() }`,
@@ -96,7 +91,7 @@ function createManagedGooContextMenu(options: ManagedGooContextMenuOptions = {})
 	} = options
 	const contextMenu = createRegisteredContextMenu(id, items, options)
 
-	contextMenu.show({
+	contextMenu.open({
 		at: normalizeOpenAt(at),
 		parentElement
 	})
@@ -114,6 +109,18 @@ function register(
 
 function get(id: string): ManagedGooContextMenu | undefined {
 	return registeredMenus[id]
+}
+
+function getCurrent(): ManagedGooContextMenu | undefined {
+	return contextMenuState.currentMenu
+}
+
+function getOpenedId(): string | undefined {
+	return contextMenuState.id
+}
+
+function isOpen(): boolean {
+	return contextMenuState.opened
 }
 
 function open(idOrMenu: ManagedGooContextMenu | string, options: ManagedGooContextMenuOpenOptions = {}): void {
@@ -163,14 +170,6 @@ function createRegisteredContextMenu(
 
 	contextMenu.id = id
 	contextMenu.menuOptions = menuOptions
-	Object.defineProperty(contextMenu, '$options', {
-		configurable: true,
-		get() {
-			return document.querySelector('.goo-select__options') || contextMenu
-		}
-	})
-	contextMenu.hide = contextMenu.close.bind(contextMenu)
-	contextMenu.show = contextMenu.open.bind(contextMenu)
 	contextMenu.on = (eventName, handler) => {
 		const handlers = listeners.get(eventName) || new Set()
 		handlers.add(handler)
@@ -197,7 +196,6 @@ function createRegisteredContextMenu(
 			boundContext: openOptions.boundContext || config.boundContext
 		})
 	}
-	contextMenu.show = contextMenu.open
 
 	const setValue = contextMenu.setValue.bind(contextMenu)
 	contextMenu.setValue = (value, options = {}) => {

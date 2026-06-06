@@ -1,5 +1,6 @@
 import { flushSync, mount, unmount } from 'svelte'
 
+import type { ChildContainerHost } from '../support/utils/_childContainer.ts'
 import GooFolderComponent from './GooFolder.svelte'
 
 /**
@@ -26,9 +27,6 @@ export type GooFolderElement = HTMLDivElement & {
 	$title: HTMLElement | null
 	$content: HTMLElement | null
 	$chevron: HTMLElement | null
-	_controllers: HTMLElement[]
-	_folders: HTMLElement[]
-	_pendingChildren: HTMLElement[]
 	open: boolean
 	title: string
 	content: HTMLElement | null
@@ -43,6 +41,9 @@ export type GooFolderElement = HTMLDivElement & {
 	removeElement: (element: HTMLElement) => boolean
 	clear: () => void
 }
+
+/** Internal mounted folder shape used by GooFolder.svelte and child container helpers. */
+export type GooFolderInternalElement = GooFolderElement & ChildContainerHost
 
 type MountedFolder = ReturnType<typeof mount>
 

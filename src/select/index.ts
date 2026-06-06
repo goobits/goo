@@ -13,6 +13,5 @@ export type {
 	GooSelectMenuPlacement,
 	GooSelectOpenOptions,
 	GooSelectOption,
-	GooSelectProps,
-	GooSelectState
+	GooSelectProps
 } from './types.ts'

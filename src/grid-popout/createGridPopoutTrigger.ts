@@ -5,8 +5,8 @@ import GridPopoutPicker from './GridPopoutPicker.svelte'
 import type { GridPopoutItem } from './types.ts'
 
 export type GridPopoutTriggerElement = HTMLElement & {
-	destroyGridPopout(): void
-	setGridPopoutValue(value: string): void
+	destroy(): void
+	setValue(value: string): void
 }
 
 type GridPopoutPickerApi = ReturnType<typeof mount> & {
@@ -78,8 +78,8 @@ export function createGridPopoutTrigger({
 		})
 	}
 
-	trigger.destroyGridPopout = () => unmount(component)
-	trigger.setGridPopoutValue = value => component.setValue(value)
+	trigger.destroy = () => unmount(component)
+	trigger.setValue = value => component.setValue(value)
 
 	return trigger
 }

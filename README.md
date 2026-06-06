@@ -8,6 +8,7 @@ Reusable Svelte 5 UI components and small browser utilities. Goo is built around
 - Import from component subpaths such as `@goobits/goo/button`, `@goobits/goo/select`, and `@goobits/goo/toast`.
 - Theme with `--goo-theme-*` CSS variables.
 - Programmatic value setters should stay silent; user input should emit `change` or `input`.
+- Imperative factories return native HTML elements with documented Goo handle methods; avoid private underscore fields.
 
 ## Ownership Boundaries
 
@@ -56,7 +57,7 @@ The e2e command starts a local Vite server and runs Playwright under `xvfb-run`.
 <GooButton variant="primary">Save</GooButton>
 ```
 
-The root entrypoint also re-exports most component and utility modules:
+The root entrypoint also re-exports an explicit set of public component and utility modules:
 
 ```ts
 import { GooButton, GooSelect, createGooController } from '@goobits/goo'
@@ -77,7 +78,7 @@ Prefer subpath imports in apps when you only need one surface.
 | `@goobits/goo/checkbox`                | `GooCheckbox`                                                      | Checkbox component                         |
 | `@goobits/goo/color`                   | `GooColor`                                                         | Color field component                      |
 | `@goobits/goo/diff`                    | `DiffCanvas`, `compare`, `renderBinary`, `renderGradient`          | Image comparison UI and helpers            |
-| `@goobits/goo/context-menu`            | `createGooContextMenu`                                             | Imperative context menu                    |
+| `@goobits/goo/context-menu`            | `createGooContextMenu`, `GooContextMenu` manager                   | Imperative and registered context menus    |
 | `@goobits/goo/controller`              | `createGooController`, registry helpers                            | Object-bound control creation              |
 | `@goobits/goo/data-grid`               | `GooDataGrid`                                                      | Sortable tabular/grid UI                   |
 | `@goobits/goo/dialog`                  | dialog helpers, `GooDialog` surface                                | Alert, confirm, prompt, and field dialogs  |
@@ -111,6 +112,12 @@ Prefer subpath imports in apps when you only need one surface.
 | `@goobits/goo/turnstile`               | `GooTurnstileField`                                                | Cloudflare Turnstile field wrapper         |
 | `@goobits/goo/virtualGrid`             | `VirtualGrid`, selection/windowing helpers                         | Virtualized grid primitive                 |
 | `@goobits/goo/vortex`                  | `GooVortex`, `createGooVortex`                                     | Temporary positioned activity indicators   |
+
+## Public Handles
+
+Imperative Goo factories create ordinary HTML elements and attach a small public handle API. Use the documented methods such as `destroy()`, `setValue()`, `getValue()`, `updateDisplay()`, `updateOptions()`, `getRange()`, and `getController()` instead of reaching into underscore-prefixed implementation state or component-specific destroy aliases.
+
+`GooController`, `GooSchema`, and `GooDialogController` remain factory-compatible exports for existing call sites, but new imperative code should prefer `createGooController()`, `createGooSchema()`, and `createGooDialog()`. `GooSelect` internals such as keyboard and panel state are private to the package; public callers should use the component props, DOM events, or the exported element methods.
 
 ## Core Components
 
@@ -314,6 +321,8 @@ createGooController(model, 'color', { type: 'color' })
 createGooController(model, 'enabled')
 ```
 
+Controllers return native elements with chainable public methods such as `name()`, `min()`, `max()`, `step()`, `listen()`, `stopListening()`, `updateDisplay()`, `updateOptions()`, `setValue()`, `getValue()`, `addTo()`, and `destroy()`. Tests and host integrations should wait for the rendered inner control through public DOM/control state rather than `_controlPromise`.
+
 ### Schema
 
 ```svelte
@@ -333,6 +342,8 @@ createGooController(model, 'enabled')
 
 Custom GooSchema controls register Svelte modules through `@goobits/goo/controller` control type maps. See `docs/svelte-controls.md` for the `controlSchema` contract, including self-contained editor controls that opt out of GooController row wrapping.
 
+Imperative schema callers can use `createGooSchema()` to receive a native element with `setSchema()`, `setData()`, `getSchema()`, `getData()`, `getController()`, `reevaluateConditions()`, `updateDisplay()`, and `destroy()`.
+
 ## Overlay And Feedback
 
 ### Dialog
@@ -346,6 +357,8 @@ const prompt = await GooPrompt({
 	fields: [{ type: 'text', name: 'name', label: 'Name' }]
 })
 ```
+
+`createGooDialog()` returns a public controller handle with `element`, `open()`, `close()`, `setContent()`, DOM event methods, and query helpers. DOM references such as header/content/footer nodes are implementation details.
 
 ### Popout
 
@@ -398,6 +411,8 @@ targetElement.addEventListener('contextmenu', (event) => {
 	menu.open({ x: event.clientX, y: event.clientY })
 })
 ```
+
+Use `GooContextMenu.register()`, `GooContextMenu.open()`, and `GooContextMenu.close()` for app-wide registered menus. Use `createManagedGooContextMenu()` only when a caller needs to create and immediately open a managed menu instance.
 
 ### Tooltip
 

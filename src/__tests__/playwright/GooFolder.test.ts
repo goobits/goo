@@ -15,7 +15,7 @@ test.describe('GooFolder', () => {
 
 	test('nested folder header clicks toggle only the nested folder', async({ page }) => {
 		await page.evaluate(() => {
-			const parent = (window as GooHarnessWindow).goo.createFolder({ title: 'Parent' })
+			const parent = (window as unknown as GooHarnessWindow).goo.createFolder({ title: 'Parent' })
 			document.getElementById('test-container')!.appendChild(parent)
 			parent.addFolder('Child')
 		})

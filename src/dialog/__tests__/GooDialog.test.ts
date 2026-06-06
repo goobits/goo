@@ -63,8 +63,9 @@ describe('GooDialog', () => {
 
 		dialog.setContent('<button onclick=alert(1)>Run</button>')
 
-		expect(dialog.$content?.textContent).toBe('<button onclick=alert(1)>Run</button>')
-		expect(dialog.$content?.querySelector('button')).toBeNull()
+		const content = dialog.querySelector<HTMLElement>('.goo-dialog__content')
+		expect(content?.textContent).toBe('<button onclick=alert(1)>Run</button>')
+		expect(content?.querySelector('button')).toBeNull()
 	})
 
 	it('does not use rich DOM content as the dialog accessible name', () => {

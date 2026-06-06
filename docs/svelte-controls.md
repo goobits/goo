@@ -9,6 +9,8 @@ How to expose a Svelte editor as a GooSchema control.
 3. Register the control type in `controller/controlRegistry.ts`.
 4. Use the type name in your schema.
 
+GooController owns the row wrapper, binding lifecycle, and imperative handle. Svelte controls should expose props and callbacks only; do not depend on controller private fields such as `_controlPromise`, `_control`, or `_destroyElement`. Imperative controls should use stable handle names such as `destroy()`, `setValue()`, `getValue()`, and `getRange()`.
+
 ## Component + controlSchema
 
 ```svelte

@@ -1,7 +1,7 @@
 {
 	"name": "@goobits/goo",
 	"version": "0.1.0",
-	"description": "Modern UI components with CSS custom properties. Clean, accessible form elements.",
+	"description": "Svelte 5 UI primitives and imperative DOM handles for Goo-based apps.",
 	"type": "module",
 	"private": true,
 	"packageManager": "pnpm@10.13.1",
@@ -258,8 +258,8 @@
 		"checkbox",
 		"input",
 		"form",
-		"web-components",
-		"custom-elements"
+		"svelte",
+		"schema"
 	],
 	"repository": {
 		"type": "git",

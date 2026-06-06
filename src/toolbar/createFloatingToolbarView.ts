@@ -8,7 +8,7 @@ type FloatingToolbarViewApi = ReturnType<typeof mount> & {
 }
 
 export type FloatingToolbarElement = HTMLElement & {
-	destroyFloatingToolbarView(): void
+	destroy(): void
 }
 
 export type CreateFloatingToolbarViewOptions = {
@@ -33,7 +33,7 @@ export function createFloatingToolbarView({
 		throw new Error('FloatingToolbarView failed to mount.')
 	}
 
-	toolbar.destroyFloatingToolbarView = (): void => {
+	toolbar.destroy = (): void => {
 		void unmount(component)
 	}
 

@@ -171,7 +171,7 @@ export interface GooSelectKeyboardHost {
 }
 
 /** Native root element bound by `GooSelect` for imperative updates. */
-export type GooSelectElement = HTMLDivElement & GooSelectKeyboardHost & {
+export type GooSelectElement = HTMLDivElement & {
 
 	/** Current option id. */
 	value: string

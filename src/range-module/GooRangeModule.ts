@@ -9,6 +9,7 @@ import type {
 	GooRangeModuleElement,
 	GooRangeModuleEventData,
 	GooRangeModuleOptions,
+	GooRangeModuleRangeApi,
 	GooRangeModuleState,
 	GooRangeModuleValue
 } from './types.ts'
@@ -237,7 +238,7 @@ export function createRangeModuleField(options: GooRangeModuleOptions = {}): Goo
 		}
 		element.remove()
 	}
-	element.range = {
+	const rangeApi: GooRangeModuleRangeApi = {
 		$element: sliderHost,
 		get state() {
 			return state
@@ -256,6 +257,7 @@ export function createRangeModuleField(options: GooRangeModuleOptions = {}): Goo
 		setValue,
 		toPercent: value => sliderElement?.toPercent?.(value) ?? 0
 	}
+	element.getRange = () => rangeApi
 
 	render()
 	return element

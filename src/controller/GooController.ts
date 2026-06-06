@@ -104,30 +104,60 @@ export interface GooControllerOptions {
 	controlTypes?: ControlTypeRegistry
 }
 
-/**
-	 * @typedef {Object} GooControllerOptions
-	 * @property {Object} object - The object containing the property
-	 * @property {string} property - The property name to bind
-	 * @property {number} [min] - Minimum value (for number controls)
-	 * @property {number} [max] - Maximum value (for number controls)
-	 * @property {number} [step] - Step increment (for number controls)
-	 * @property {Array} [options] - Options array (for select controls)
-	 * @property {string} [type] - Force control type: 'number', 'range'/'slider', 'checkbox', 'select', 'color', 'button', 'text', 'angle', 'button-group'
-	 * @property {Function} [onchange] - Called when value changes
-	 * @property {HTMLElement} [$parent] - Parent element to append to
-	 */
-
 // ============================================================================
 // GooController Controller
 // ============================================================================
 
 /**
- * Controller that binds a UI control to an object property.
- * Provides a chainable object-binding API.
+ * Public controller element returned by `createGooController`.
  */
 export interface GooController extends HTMLElement {
-	$widget: HTMLElement | null
+	/** Mutable controller state. */
 	state: GooControllerState
+	/** Current bound value. */
+	value: unknown
+	/** The object currently bound to the controller. */
+	readonly object: Record<string, unknown> | undefined
+	/** The property currently bound to the controller. */
+	readonly property: string | undefined
+	/** The inner Goo control element. */
+	readonly control: HTMLElement | null
+	/** Emit an event through the controller's lightweight event emitter. */
+	emit: (event: string, data?: unknown) => void
+	/** Subscribe to an event on the controller's lightweight event emitter. */
+	on: (event: string, handler: (...args: unknown[]) => void) => () => void
+	/** Set the visible controller label. */
+	name(label: string): GooController
+	/** Set the numeric step option. */
+	step(step: number): GooController
+	/** Set the minimum numeric value option. */
+	min(min: number): GooController
+	/** Set the maximum numeric value option. */
+	max(max: number): GooController
+	/** Poll the bound object for external value changes. */
+	listen(interval?: number): GooController
+	/** Stop polling the bound object for external value changes. */
+	stopListening(): GooController
+	/** Sync the inner control display from the bound object. */
+	updateDisplay(): GooController
+	/** Disable the controller and its inner control. */
+	disable(): GooController
+	/** Enable the controller and its inner control. */
+	enable(): GooController
+	/** Update controller options without replacing the outer element. */
+	updateOptions(options: GooControllerOptions): GooController
+	/** Set the bound value without emitting change/input events. */
+	setValue(value: unknown): GooController
+	/** Read the current bound value. */
+	getValue(): unknown
+	/** Append this controller to a parent, using the parent's `add` API when available. */
+	addTo(parent: HTMLElement & { add?: (child: HTMLElement) => void }): GooController
+	/** Destroy this controller and remove it from the DOM. */
+	destroy(): void
+}
+
+interface GooControllerInternal extends GooController {
+	$widget: HTMLElement | null
 	_callbacks: {
 		onchange?: GooControllerOptions['onchange']
 		oninput?: GooControllerOptions['oninput']
@@ -159,14 +189,30 @@ export interface GooController extends HTMLElement {
 	_controlOptions: Record<string, unknown> | undefined
 	_dualRangeIsMinMax: boolean | undefined
 	_controlTypes: ControlTypeRegistry | undefined
-	emit: (event: string, data?: unknown) => void
-	on: (event: string, handler: (...args: unknown[]) => void) => () => void
+	_getExistingControl(): HTMLElement | null
+	_attachControl(control: HTMLElement): void
+	_createElement(): void
+	_createControl(): Promise<void>
+	_createControlInner(): Promise<void>
+	_getStoredOptions(): StoredOptions
+	_buildDefaultOptions(value: unknown, Control: unknown): Record<string, unknown>
+	_getAllOptions(): Record<string, unknown>
+	_createDualRange(value: unknown): Promise<void>
+	_handleDualChange(eventData: DualRangeEventData): void
+	_handleDualInput(eventData: DualRangeEventData): void
+	_destroyElement(): void
+	_handleChange(value: unknown): void
+	_handleInput(value: unknown): void
+	_emitChange(value: unknown, oldValue?: unknown): void
+	_emitInput(value: unknown): void
+	_stopListening(): void
+	_hydrateFromDOM(): void
 }
 
 /**
- * Goo controller.
+ * Runtime controller implementation mixed into native div elements.
  */
-export class GooController {
+class GooControllerRuntime {
 	/**
 	 * Controllers don't participate in forms directly.
 	 * @type {boolean}
@@ -179,14 +225,6 @@ export class GooController {
 	 */
 	static stateTypes = {
 		disabled: 'boolean' as const
-	}
-
-	/**
-	 * Create a GooController instance.
-	 * @param {GooControllerOptions} options - options.
-	 */
-	constructor(options: GooControllerOptions = {}) {
-		return createControllerElement(options)
 	}
 
 	// --------------------------------------------------------------------------
@@ -870,11 +908,42 @@ export class GooController {
 	}
 }
 
+interface GooControllerRuntime extends GooControllerInternal {}
+
+/**
+ * Create a Goo controller element.
+ * @param options - Controller options.
+ * @returns The created controller element.
+ */
+// eslint-disable-next-line @typescript-eslint/no-redeclare -- Public API intentionally exposes a value factory and matching handle type.
+export function GooController(options: GooControllerOptions = {}): GooController {
+	return createControllerElement(options)
+}
+
+Object.defineProperties(GooController, {
+	formAssociated: {
+		configurable: true,
+		value: GooControllerRuntime.formAssociated
+	},
+	stateTypes: {
+		configurable: true,
+		value: GooControllerRuntime.stateTypes
+	},
+	ssrTemplate: {
+		configurable: true,
+		value: GooControllerRuntime.ssrTemplate
+	}
+})
+
+const runtimeDescriptors = Object.getOwnPropertyDescriptors(GooControllerRuntime.prototype)
+delete runtimeDescriptors.constructor
+Object.defineProperties(GooController.prototype, runtimeDescriptors)
+
 // ============================================================================
 // Factory & Export
 // ============================================================================
 
-function initializeController(element: GooController, options: GooControllerOptions): void {
+function initializeController(element: GooControllerInternal, options: GooControllerOptions): void {
 	const { object, property } = options
 	const initialValue = object?.[property]
 	const controlType = detectControlType(initialValue, options)
@@ -969,7 +1038,7 @@ function resolveControllerLayout(
 	return options.layout ?? resolveControlTypeConfig(controlType, options.controlTypes)?.layout
 }
 
-function attachControllerMethods(element: GooController): void {
+function attachControllerMethods(element: GooControllerInternal): void {
 	const nativePrototype = Object.getPrototypeOf(element)
 	if (Object.getPrototypeOf(GooController.prototype) !== nativePrototype) {
 		Object.setPrototypeOf(GooController.prototype, nativePrototype)
@@ -979,7 +1048,7 @@ function attachControllerMethods(element: GooController): void {
 }
 
 function createControllerElement(options: GooControllerOptions = {}): GooController {
-	const element = document.createElement('div') as unknown as GooController
+	const element = document.createElement('div') as unknown as GooControllerInternal
 	element.className = 'goo-controller'
 	element.$widget = null
 	attachControllerMethods(element)

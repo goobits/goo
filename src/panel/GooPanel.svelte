@@ -6,7 +6,7 @@ import { type GooFolderElement, type GooFolderOptions } from '../folder/_createF
 import { addChild, clearChildren, hydrateChildren, removeChild } from '../support/utils/_childContainer.ts'
 import { clamp } from '../support/utils/numberUtils.ts'
 import { createPointerDrag } from '../support/utils/pointerDrag.ts'
-import type { GooPanelElement, GooPanelOptions } from './_createPanel.ts'
+import type { GooPanelElement, GooPanelInternalElement, GooPanelOptions } from './_createPanel.ts'
 import './GooPanel.css'
 
 type GooPanelProps = GooPanelOptions & {
@@ -40,7 +40,7 @@ let {
 let rootEl: HTMLDivElement | undefined = $state()
 // The root <div> is augmented with the GooPanel API at runtime (assignApi);
 // expose the augmented type while binding the real element type.
-const root = $derived(rootEl as GooPanelElement | undefined)
+const root = $derived(rootEl as GooPanelInternalElement | undefined)
 let headerElement: HTMLElement | undefined = $state()
 let titleElement: HTMLElement | undefined = $state()
 let toggleElement: HTMLElement | undefined = $state()

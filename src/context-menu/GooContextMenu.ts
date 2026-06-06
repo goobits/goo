@@ -29,6 +29,27 @@ export interface GooContextMenuOptions {
 	onclose?: () => void
 }
 
+/** Options accepted when opening a context menu. */
+export type GooContextMenuOpenOptions = {
+	align?: string
+	at?: { x: number; y: number }
+	autoFocus?: boolean
+	offset?: { x?: number; y?: number }
+	x?: number
+	y?: number
+}
+
+/** Native context menu element returned by `createGooContextMenu`. */
+export type GooContextMenuElement = GooSelectElement & {
+	/** Attach this context menu to an element's `contextmenu` event. */
+	attachTo(
+		element: HTMLElement,
+		handler?: (event: MouseEvent) => false | { options?: GooContextMenuOption[] } | void
+	): () => void
+	/** Open the menu at a point or target. */
+	open(options?: GooContextMenuOpenOptions): boolean
+}
+
 /**
  * Create a context menu instance.
  * This is a thin wrapper around GooSelect configured for context menu use.
@@ -53,7 +74,7 @@ export interface GooContextMenuOptions {
  *   menu.open({ at: { x: e.clientX, y: e.clientY } })
  * })
  */
-export function createGooContextMenu(options: GooContextMenuOptions = {}): GooSelectElement {
+export function createGooContextMenu(options: GooContextMenuOptions = {}): GooContextMenuElement {
 	const {
 		options: menuOptions = [],
 		enableKeyboard = true,
@@ -89,16 +110,9 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooSe
 	})
 
 	// Override open to accept position coordinates directly
-	type SelectWithOpen = GooSelectElement & { open: (opts?: Record<string, unknown>) => void }
-	const originalOpen = (select as SelectWithOpen).open.bind(select);
-	(select as SelectWithOpen).open = function openContextMenu(opts: {
-		x?: number
-		y?: number
-		at?: { x: number; y: number }
-		autoFocus?: boolean
-		align?: string
-		offset?: { x?: number; y?: number }
-	} = {}) {
+	const contextMenu = select as GooContextMenuElement
+	const originalOpen = contextMenu.open.bind(contextMenu)
+	contextMenu.open = function openContextMenu(opts: GooContextMenuOpenOptions = {}) {
 		const { x, y, at, ...restOpts } = opts
 
 		// Accept x/y directly or via at object
@@ -115,12 +129,7 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooSe
 	}
 
 	// Add convenience method for right-click handling
-	type SelectWithMethods = GooSelectElement & {
-		attachTo: (el: HTMLElement, handler?: (e: MouseEvent) => false | { options?: GooContextMenuOption[] } | void) => () => void
-		setOptions: (options: GooContextMenuOption[]) => void
-		open: (opts?: { x?: number; y?: number; align?: string; offset?: { x?: number; y?: number } }) => void
-	}
-	;(select as SelectWithMethods).attachTo = function attachTo($element: HTMLElement, handler?: (e: MouseEvent) => false | { options?: GooContextMenuOption[] } | void) {
+	contextMenu.attachTo = function attachTo($element, handler) {
 		const contextHandler = (e: MouseEvent) => {
 			e.preventDefault()
 			e.stopPropagation()
@@ -130,11 +139,11 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooSe
 				const result = handler(e)
 				if (result === false) return
 				if (result && typeof result === 'object' && 'options' in result && result.options) {
-					(select as SelectWithMethods).setOptions(result.options)
+					contextMenu.setOptions(result.options)
 				}
 			}
 
-			(select as SelectWithMethods).open({ x: e.clientX, y: e.clientY })
+			contextMenu.open({ x: e.clientX, y: e.clientY })
 		}
 
 		$element.addEventListener('contextmenu', contextHandler as EventListener)
@@ -145,5 +154,5 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooSe
 		}
 	}
 
-	return select as GooSelectElement
+	return contextMenu
 }

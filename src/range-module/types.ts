@@ -48,10 +48,10 @@ export type GooRangeModuleOptions = {
 }
 
 export type GooRangeModuleElement = HTMLDivElement & {
-	range: GooRangeModuleRangeApi
 	destroy(): void
 	disable(): void
 	enable(): void
+	getRange(): GooRangeModuleRangeApi
 	getValue(): GooRangeModuleValue
 	setOptions(options: Partial<GooRangeModuleOptions>): void
 	setValue(value: GooRangeModuleValue, options?: { silent?: boolean }): void

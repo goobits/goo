@@ -1,106 +1,97 @@
 /**
  * @fileoverview Convenience functions for common dialog types.
- * Provides alert, confirm, prompt, notify, and overlay helpers.
  * @module goobits/dialog/dialogs
  */
 
-import { createGooDialog } from './dialog.ts'
+import { createGooDialog, type DialogField, type DialogLabels, type DialogResult, type GooDialogInstance } from './dialog.ts'
 
-// ============================================================================
-// Types
-// ============================================================================
+/** Promise returned by dialog convenience helpers. */
+export type GooDialogPromise = Promise<DialogResult> & {
+	$dialog: GooDialogInstance
+	close(): void
+	destroy(): void
+}
 
-/**
- * Extended promise with dialog control methods.
- * @typedef {Promise<DialogResult> & { destroy: () => void, close: () => void, $dialog: import('./dialog.ts').GooDialogInstance }} DialogPromise
- */
+/** Options accepted by `GooAlert`. */
+export interface GooAlertOptions {
+	className?: string
+	content: string | Node
+	heading?: string
+	showClose?: boolean
+}
 
-// ============================================================================
-// Helper
-// ============================================================================
+/** Options accepted by `GooConfirm`. */
+export interface GooConfirmOptions {
+	className?: string
+	content: string | Node
+	defaultFocus?: 'ok' | 'cancel'
+	heading?: string
+	labels?: DialogLabels
+}
 
-/**
- * Wraps a dialog's open() promise with destroy/close methods.
- * @param {import('./dialog.ts').GooDialogInstance} dialog - The dialog instance
- * @returns {DialogPromise} Promise with destroy/close methods attached
- */
-function wrapDialogPromise(dialog) {
-	const promise = dialog.open()
-	return Object.assign(promise, {
-		destroy: () => dialog.close(),
-		close: () => dialog.close(),
-		$dialog: dialog
-	})
+/** Options accepted by `GooPrompt`. */
+export interface GooPromptOptions {
+	className?: string
+	content?: string | Node
+	defaultFocus?: 'ok' | 'cancel'
+	fields: DialogField[]
+	heading?: string
+	labels?: DialogLabels
+	verify?: (values: Record<string, unknown>, fieldElements: Map<string, HTMLElement>) => boolean | Promise<boolean>
+}
+
+/** Options accepted by `GooNotify`. */
+export interface GooNotifyOptions {
+	autoDismiss?: number
+	className?: string
+	content: string | Node
+	showClose?: boolean
+}
+
+/** Options accepted by `GooOverlay`. */
+export interface GooOverlayOptions {
+	ariaLabel?: string
+	className?: string
+	content: string | Node
+	heading?: string
+	showClose?: boolean
+}
+
+type ContentOptions = { content: string | Node }
+
+function wrapDialogPromise(dialog: GooDialogInstance): GooDialogPromise {
+	const promise = dialog.open() as GooDialogPromise
+	promise.destroy = () => dialog.close()
+	promise.close = () => dialog.close()
+	promise.$dialog = dialog
+	return promise
+}
+
+function normalizeContentOptions<T extends ContentOptions>(
+	options: T | T['content']
+): T {
+	if (typeof options === 'string' || isNode(options)) {
+		return { content: options } as T
+	}
+	return options as T
+}
+
+function isNode(value: unknown): value is Node {
+	return typeof Node !== 'undefined' && value instanceof Node
 }
 
 /**
- * @typedef {import('./dialog.ts').DialogResult} DialogResult
- * @typedef {import('./dialog.ts').DialogLabels} DialogLabels
- * @typedef {import('./dialog.ts').DialogField} DialogField
- */
-
-/**
- * @typedef {Object} AlertOptions
- * @property {string|Node} content - Alert message. Strings render as text; pass a DOM node for rich markup.
- * @property {string} [heading] - Dialog title
- * @property {string} [className] - Additional CSS class
- * @property {boolean} [showClose=true] - Show close button
- */
-
-/**
- * @typedef {Object} ConfirmOptions
- * @property {string|Node} content - Confirm message. Strings render as text; pass a DOM node for rich markup.
- * @property {string} [heading] - Dialog title
- * @property {DialogLabels} [labels] - Button labels
- * @property {'ok'|'cancel'} [defaultFocus='ok'] - Default focused button
- * @property {string} [className] - Additional CSS class
- */
-
-/**
- * @typedef {Object} PromptOptions
- * @property {string|Node} [content] - Optional message above fields. Strings render as text; pass a DOM node for rich markup.
- * @property {string} [heading] - Dialog title
- * @property {DialogField[]} fields - Form fields
- * @property {DialogLabels} [labels] - Button labels
- * @property {Function} [verify] - Validation function
- * @property {'ok'|'cancel'} [defaultFocus='ok'] - Default focused button
- * @property {string} [className] - Additional CSS class
- */
-
-/**
- * @typedef {Object} NotifyOptions
- * @property {string|Node} content - Notification message. Strings render as text; pass a DOM node for rich markup.
- * @property {number} [autoDismiss=5000] - Auto-dismiss after ms (0 = manual)
- * @property {boolean} [showClose=true] - Show close button
- * @property {string} [className] - Additional CSS class
- */
-
-/**
- * @typedef {Object} OverlayOptions
- * @property {string|Node} content - Overlay content. Strings render as text; pass a DOM node for rich markup.
- * @property {string} [ariaLabel] - Accessible label when no visible heading is rendered
- * @property {string} [heading] - Dialog title
- * @property {boolean} [showClose=true] - Show close button
- * @property {string} [className] - Additional CSS class
- */
-
-/**
  * Show a simple alert dialog.
- * @param {AlertOptions|string} options - Options or message string
- * @returns {Promise<DialogResult>}
- * @example
- * await GooAlert('File saved successfully!')
- * await GooAlert({ content: 'Error occurred', heading: 'Error' })
+ *
+ * @param options - Options or message string.
+ * @returns Promise with dialog control methods attached.
  */
-export function GooAlert(options) {
-	if (typeof options === 'string') {
-		options = { content: options }
-	}
-
+export function GooAlert(options: GooAlertOptions | string): GooDialogPromise {
+	const normalized = normalizeContentOptions<GooAlertOptions>(options)
 	const dialog = createGooDialog({
 		type: 'alert',
 		showClose: true,
-		...options
+		...normalized
 	})
 
 	return wrapDialogPromise(dialog)
@@ -108,26 +99,21 @@ export function GooAlert(options) {
 
 /**
  * Show a confirmation dialog with OK/Cancel buttons.
- * @param {ConfirmOptions|string} options - Options or message string
- * @returns {Promise<DialogResult>}
- * @example
- * const { ok } = await GooConfirm('Delete this file?')
- * if (ok) { ... }
+ *
+ * @param options - Options or message string.
+ * @returns Promise with dialog control methods attached.
  */
-export function GooConfirm(options) {
-	if (typeof options === 'string') {
-		options = { content: options }
-	}
-
+export function GooConfirm(options: GooConfirmOptions | string): GooDialogPromise {
+	const normalized = normalizeContentOptions<GooConfirmOptions>(options)
 	const dialog = createGooDialog({
 		type: 'confirm',
 		labels: {
 			ok: 'OK',
 			cancel: 'Cancel',
-			...options.labels
+			...normalized.labels
 		},
 		defaultFocus: 'ok',
-		...options
+		...normalized
 	})
 
 	return wrapDialogPromise(dialog)
@@ -135,21 +121,11 @@ export function GooConfirm(options) {
 
 /**
  * Show a prompt dialog with form fields.
- * @param {PromptOptions} options - Prompt options with fields
- * @returns {Promise<DialogResult>}
- * @example
- * const { ok, values } = await GooPrompt({
- *   heading: 'Enter Details',
- *   fields: [
- *     { type: 'text', name: 'name', label: 'Name', value: '' },
- *     { type: 'number', name: 'age', label: 'Age', min: 0, max: 120 }
- *   ]
- * })
- * if (ok) {
- *   console.log(values.name, values.age)
- * }
+ *
+ * @param options - Prompt options.
+ * @returns Promise with dialog control methods attached.
  */
-export function GooPrompt(options) {
+export function GooPrompt(options: GooPromptOptions): GooDialogPromise {
 	const dialog = createGooDialog({
 		type: 'prompt',
 		labels: {
@@ -165,25 +141,20 @@ export function GooPrompt(options) {
 }
 
 /**
- * Show a notification banner at the top of the screen.
- * @param {NotifyOptions|string} options - Options or message string
- * @returns {Promise<DialogResult>}
- * @example
- * GooNotify('Document saved!')
- * GooNotify({ content: 'Connection lost', autoDismiss: 0 })
+ * Show a notification banner.
+ *
+ * @param options - Options or message string.
+ * @returns Promise with dialog control methods attached.
  */
-export function GooNotify(options) {
-	if (typeof options === 'string') {
-		options = { content: options }
-	}
-
+export function GooNotify(options: GooNotifyOptions | string): GooDialogPromise {
+	const normalized = normalizeContentOptions<GooNotifyOptions>(options)
 	const dialog = createGooDialog({
 		type: 'notify',
 		showBackdrop: false,
 		showClose: true,
 		closeOnEscape: true,
-		autoDismiss: options.autoDismiss ?? 5000,
-		...options
+		autoDismiss: normalized.autoDismiss ?? 5000,
+		...normalized
 	})
 
 	return wrapDialogPromise(dialog)
@@ -191,20 +162,16 @@ export function GooNotify(options) {
 
 /**
  * Show a full-screen overlay dialog.
- * @param {OverlayOptions|string|Node} options - Options, message, or node
- * @returns {Promise<DialogResult>}
- * @example
- * const overlay = GooOverlay({ content: myCustomElement, heading: 'Settings' })
+ *
+ * @param options - Options, message, or node.
+ * @returns Promise with dialog control methods attached.
  */
-export function GooOverlay(options) {
-	if (typeof options === 'string' || (typeof Node !== 'undefined' && options instanceof Node)) {
-		options = { content: options }
-	}
-
+export function GooOverlay(options: GooOverlayOptions | string | Node): GooDialogPromise {
+	const normalized = normalizeContentOptions<GooOverlayOptions>(options)
 	const dialog = createGooDialog({
 		type: 'overlay',
 		showClose: true,
-		...options
+		...normalized
 	})
 
 	return wrapDialogPromise(dialog)

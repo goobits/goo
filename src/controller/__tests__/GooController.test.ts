@@ -4,7 +4,17 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import * as checkboxModule from '../../checkbox/GooCheckbox.svelte'
 import GooController from '../GooController.svelte'
-import { createGooController, GooController as GooControllerElement } from '../index.ts'
+import { createGooController, type GooController as GooControllerElement } from '../index.ts'
+
+async function waitForControllerControl(controller: GooControllerElement): Promise<HTMLElement> {
+	for (let attempt = 0; attempt < 10; attempt++) {
+		await Promise.resolve()
+		await tick()
+		const control = controller.control
+		if (control) return control
+	}
+	throw new Error('Expected controller control to be ready')
+}
 
 describe('GooController', () => {
 	afterEach(() => {
@@ -19,7 +29,7 @@ describe('GooController', () => {
 
 		expect(document.querySelector('goo-controller')).toBeNull()
 		expect(controller.classList.contains('goo-controller')).toBe(true)
-		expect(controller).toBeInstanceOf(GooControllerElement)
+		expect(typeof controller.destroy).toBe('function')
 		expect(controller.getValue()).toBe(12)
 
 		controller.setValue(24)
@@ -82,8 +92,7 @@ describe('GooController', () => {
 			label: 'Contiguous'
 		})
 		document.body.appendChild(controller)
-		await controller._controlPromise
-		await tick()
+		await waitForControllerControl(controller)
 
 		const checkbox = controller.querySelector('.goo-checkbox')
 
@@ -108,8 +117,7 @@ describe('GooController', () => {
 			}
 		})
 		document.body.appendChild(controller)
-		await controller._controlPromise
-		await tick()
+		await waitForControllerControl(controller)
 
 		expect(controller.classList.contains('goo-controller--stacked')).toBe(true)
 		expect(controller.querySelector('.goo-controller__header .goo-label')?.textContent).toBe('Fill Color')
@@ -132,8 +140,7 @@ describe('GooController', () => {
 			}
 		})
 		document.body.appendChild(controller)
-		await controller._controlPromise
-		await tick()
+		await waitForControllerControl(controller)
 
 		const label = controller.querySelector('.goo-controller__header .goo-label')
 		expect(label?.textContent).toBe('<img src=x onerror=alert( 1)>')
@@ -154,22 +161,26 @@ describe('GooController', () => {
 			]
 		})
 		document.body.appendChild(controller)
-		await controller._controlPromise
-		await tick()
+		await waitForControllerControl(controller)
 
 		expect(controller.classList.contains('goo-controller--stacked')).toBe(true)
 		expect(controller.querySelector('.goo-controller__header .goo-label')?.textContent).toBe('Anti aliasing')
 		expect(controller.querySelector('.goo-button-group')).not.toBeNull()
 	})
 
-	it('skips redundant display updates when the control already matches the model', () => {
+	it('skips redundant display updates when the control already matches the model', async() => {
 		const model = { size: 12 }
 		const controller = createGooController({ object: model, property: 'size', min: 0, max: 100 })
+		document.body.appendChild(controller)
+		const control = await waitForControllerControl(controller) as HTMLElement & {
+			setValue?: (value: unknown, options?: { silent?: boolean }) => void
+		}
+		const originalSetValue = control.setValue?.bind(control)
 		const setValue = vi.fn()
-		controller._control = Object.assign(document.createElement('div'), {
-			getValue: () => 12,
-			setValue
-		})
+		control.setValue = (value, options) => {
+			setValue(value, options)
+			originalSetValue?.(value, options)
+		}
 
 		controller.updateDisplay()
 
@@ -192,8 +203,7 @@ describe('GooController', () => {
 			}
 		})
 		document.body.appendChild(controller)
-		await controller._controlPromise
-		await tick()
+		await waitForControllerControl(controller)
 
 		const select = controller.querySelector<HTMLElement>('.goo-select') as HTMLElement & { open: (options?: { autoFocus?: boolean }) => boolean }
 		expect(select.open({ autoFocus: false })).toBe(true)
@@ -214,8 +224,7 @@ describe('GooController', () => {
 			modes: [ 'normal', 'multiply', 'screen', 'overlay' ]
 		})
 		document.body.appendChild(controller)
-		await controller._controlPromise
-		await tick()
+		await waitForControllerControl(controller)
 
 		const picker = controller.querySelector<HTMLElement>('.goo-blend-mode-picker')
 		expect(controller.classList.contains('goo-controller--stacked')).toBe(false)
@@ -255,8 +264,7 @@ describe('GooController', () => {
 			}
 		})
 		document.body.appendChild(controller)
-		await controller._controlPromise
-		await tick()
+		await waitForControllerControl(controller)
 
 		expect(receivedOptions).toMatchObject({
 			canCross: true,

@@ -149,7 +149,7 @@ $effect(() => {
 		return
 	}
 
-	assignSelectApi(selectElement)
+	assignSelectApi(selectElement as GooSelectRuntimeElement)
 	selectElement.setAttribute('value', selectedValue)
 	element = selectElement
 })
@@ -219,7 +219,7 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 		})
 		panel.$container.addEventListener('keydown', event => {
 			const command = mapNativeKeyToCommand(event)
-			if (command && selectElement) handleKeyboard(selectElement as GooSelectKeyboardHost, command)
+			if (command && selectElement) handleKeyboard(selectElement as unknown as GooSelectKeyboardHost, command)
 		})
 	} else {
 		panel.updateContext({
@@ -331,7 +331,9 @@ export function setBoundContext(context: unknown): void {
 	currentBoundContext = context
 }
 
-function assignSelectApi(select: GooSelectElement): void {
+type GooSelectRuntimeElement = GooSelectElement & GooSelectKeyboardHost
+
+function assignSelectApi(select: GooSelectRuntimeElement): void {
 	Object.defineProperties(select, {
 		state: {
 			configurable: true,
@@ -452,9 +454,9 @@ function handleKeydown(event: KeyboardEvent): void {
 
 	const command = mapNativeKeyToCommand(event)
 	if (command) {
-		handleKeyboard(selectElement as GooSelectKeyboardHost, command)
+		handleKeyboard(selectElement as unknown as GooSelectKeyboardHost, command)
 	} else if (event.key.length === 1) {
-		handleTypeahead(selectElement as GooSelectKeyboardHost, {
+		handleTypeahead(selectElement as unknown as GooSelectKeyboardHost, {
 			command: event.key,
 			cancel: () => event.preventDefault()
 		})
