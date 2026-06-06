@@ -7,8 +7,8 @@ export type GooProgressRingTimerType = 'progress' | 'time'
 /** Progress ring weighted-step configuration. */
 export type GooProgressRingSteps = number | number[]
 
-/** Imperative handle exposed by a mounted `GooProgressRing` component. */
-export type GooProgressRingHandle = {
+/** Imperative handle exposed internally by a mounted `GooProgressRing` component. */
+export type GooProgressRingComponentHandle = {
 	configure(options: {
 		colorStops?: Array<{ color: string; offset: number }>
 		fillStyle?: string
@@ -33,7 +33,6 @@ export type GooProgressRingTimerOptions = {
 	parentNode?: Element | string | null
 	progress?: number
 	range?: [number, number]
-	renderer?: GooProgressRingVariant
 	rotationSpeed?: number
 	showBackdrop?: boolean
 	showText?: boolean
@@ -52,7 +51,6 @@ export type GooProgressRingTimer = {
 	destroy(duration?: number): void
 	readonly duration: number
 	readonly element: HTMLElement
-	getCanvas(): HTMLCanvasElement | undefined
 	hide(options?: { immediate?: boolean }): void
 	indeterminate: boolean
 	progress: number

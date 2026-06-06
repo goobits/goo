@@ -20,7 +20,8 @@ describe('GooVortex', () => {
 		const element = host.querySelector('.goo-vortex') as HTMLElement | null
 		expect(element?.querySelector('[data-goo-vortex-message]')?.textContent).toBe('Loading')
 		expect(element?.querySelector('img')?.getAttribute('src')).toBe('/media/vortex.png')
-		expect(vortex.running['asset-1']).toBeTruthy()
+		expect(vortex.has('asset-1')).toBe(true)
+		expect(vortex.ids()).toEqual([ 'asset-1' ])
 
 		vortex.update('asset-1', 'Still loading')
 		flushSync()
@@ -32,7 +33,7 @@ describe('GooVortex', () => {
 
 		await vortex.destroy('asset-1')
 		flushSync()
-		expect(vortex.running['asset-1']).toBeUndefined()
+		expect(vortex.has('asset-1')).toBe(false)
 		expect(element?.dataset.state).toBe('exiting')
 
 		host.remove()

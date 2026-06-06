@@ -23,8 +23,24 @@ export type GooVortexOptions = {
 	randomize?: boolean
 }
 
+/** Public manager returned by `createGooVortex`. */
+export type GooVortexManager = {
+	/** Remove every active vortex. */
+	clear(): Promise<string[]>
+	/** Create and display a vortex. */
+	create(options: GooVortexCreateOptions): void
+	/** Destroy a vortex by id. */
+	destroy(id: string): Promise<string>
+	/** Whether a vortex id is currently active. */
+	has(id: string): boolean
+	/** Active vortex ids. */
+	ids(): string[]
+	/** Update a vortex message. */
+	update(idOrOptions: string | GooVortexUpdateOptions, message?: string): void
+}
+
 /** Imperative handle exposed by a mounted `GooVortex` component. */
-export type GooVortexHandle = {
+export type GooVortexComponentHandle = {
 
 	/** Center the vortex on a point, then play the entrance animation. 	 * @param point - point.
  */
@@ -43,7 +59,7 @@ export type GooVortexHandle = {
 }
 
 /** Active vortex instance tracked by a Goo vortex manager. */
-export type GooVortexItem = {
-	instance: GooVortexHandle
+export type GooVortexInstance = {
+	instance: GooVortexComponentHandle
 	time: number
 }

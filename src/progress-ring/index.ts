@@ -5,7 +5,7 @@ import { flushSync, mount, unmount } from 'svelte'
 import { clampProgress } from './_progressRingRenderer.ts'
 import GooProgressRingComponent from './GooProgressRing.svelte'
 import type {
-	GooProgressRingHandle,
+	GooProgressRingComponentHandle,
 	GooProgressRingSteps,
 	GooProgressRingTimer,
 	GooProgressRingTimerOptions,
@@ -14,7 +14,6 @@ import type {
 
 export { default as GooProgressRing } from './GooProgressRing.svelte'
 export type {
-	GooProgressRingHandle,
 	GooProgressRingSteps,
 	GooProgressRingTimer,
 	GooProgressRingTimerOptions,
@@ -59,7 +58,7 @@ export function createGooProgressRingTimer(options: GooProgressRingTimerOptions 
 
 	// Svelte's mount() does not surface a component's exported functions in its
 	// return type, so annotate the imperative handle the component exposes.
-	const ring = mount(GooProgressRingComponent, { target: shell }) as GooProgressRingHandle
+	const ring = mount(GooProgressRingComponent, { target: shell }) as GooProgressRingComponentHandle
 	parent.append(shell)
 
 	// Flush so the component's bind:this refs are set before we drive it imperatively.
@@ -128,7 +127,6 @@ export function createGooProgressRingTimer(options: GooProgressRingTimerOptions 
 	timer.visible = false
 	timer.advance = advance
 	timer.destroy = destroy
-	timer.getCanvas = () => ring.getCanvas()
 	timer.hide = hide
 	timer.setProgress = setProgress
 	timer.show = show
@@ -366,7 +364,7 @@ function normalizeSteps(steps?: GooProgressRingSteps): number[] | null {
 }
 
 function resolveVariant(options: GooProgressRingTimerOptions, shell: HTMLElement): GooProgressRingVariant {
-	const explicit = options.variant ?? options.renderer
+	const explicit = options.variant
 	if (explicit) {
 		return explicit
 	}

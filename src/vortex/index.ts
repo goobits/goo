@@ -4,25 +4,25 @@ import { mount, unmount } from 'svelte'
 
 import GooVortexComponent from './GooVortex.svelte'
 import type {
+	GooVortexComponentHandle,
 	GooVortexCreateOptions,
-	GooVortexHandle,
-	GooVortexItem,
+	GooVortexInstance,
+	GooVortexManager,
 	GooVortexOptions,
 	GooVortexUpdateOptions
 } from './types.ts'
 
 export type {
 	GooVortexCreateOptions,
-	GooVortexHandle,
-	GooVortexItem,
+	GooVortexManager,
 	GooVortexOptions,
 	GooVortexPoint,
 	GooVortexUpdateOptions
 } from './types.ts'
 
 /** Manager for positioned Goo vortex indicators. */
-export class GooVortex {
-	readonly running: Record<string, GooVortexItem> = {}
+export class GooVortex implements GooVortexManager {
+	#running: Record<string, GooVortexInstance> = {}
 
 	#imageUrls: string[]
 	#parent: HTMLElement
@@ -54,9 +54,9 @@ export class GooVortex {
 		const instance = mount(GooVortexComponent, {
 			target: this.#parent,
 			props: { message: options.message ?? '', src: this.#getImageUrl() }
-		}) as GooVortexHandle
+		}) as GooVortexComponentHandle
 
-		this.running[options.id] = { instance, time: Date.now() }
+		this.#running[options.id] = { instance, time: Date.now() }
 
 		window.setTimeout(() => {
 			instance.enter(options.point)
@@ -71,7 +71,7 @@ export class GooVortex {
 	update(idOrOptions: string | GooVortexUpdateOptions, message?: string): void {
 		const id = typeof idOrOptions === 'string' ? idOrOptions : idOrOptions.id
 		const nextMessage = typeof idOrOptions === 'string' ? message : idOrOptions.message
-		const item = this.running[id]
+		const item = this.#running[id]
 		if (!item || nextMessage === undefined) {
 			return
 		}
@@ -85,12 +85,12 @@ export class GooVortex {
 	 * @returns Promise that resolves with the id after exit is scheduled.
 	 */
 	destroy(id: string): Promise<string> {
-		const item = this.running[id]
+		const item = this.#running[id]
 		if (!item) {
 			return Promise.reject(`No vortex with id ${ id } running`)
 		}
 
-		delete this.running[id]
+		delete this.#running[id]
 
 		return new Promise(resolve => {
 			window.requestAnimationFrame(() => {
@@ -103,6 +103,21 @@ export class GooVortex {
 				resolve(id)
 			})
 		})
+	}
+
+	/** Remove every active vortex with exit animations. */
+	clear(): Promise<string[]> {
+		return Promise.all(this.ids().map(id => this.destroy(id)))
+	}
+
+	/** Whether a vortex id is currently active. */
+	has(id: string): boolean {
+		return id in this.#running
+	}
+
+	/** Active vortex ids. */
+	ids(): string[] {
+		return Object.keys(this.#running)
 	}
 
 	/**
@@ -128,6 +143,6 @@ export class GooVortex {
  * @param options - Vortex image and selection options.
  * @returns Goo vortex manager.
  */
-export function createGooVortex(parent: HTMLElement, options: GooVortexOptions = {}): GooVortex {
+export function createGooVortex(parent: HTMLElement, options: GooVortexOptions = {}): GooVortexManager {
 	return new GooVortex(parent, options)
 }

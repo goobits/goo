@@ -18,7 +18,7 @@ describe('GooProgressRing', () => {
 
 		expect(timer.element.tagName).toBe('DIV')
 		expect(timer.element.classList.contains('goo-progress-ring-timer')).toBe(true)
-		expect(timer.getCanvas()?.tagName.toLowerCase()).toBe('canvas')
+		expect(ringEl(timer).querySelector('canvas')).toBeTruthy()
 		expect(timer.progress).toBe(0.25)
 		expect(timer.visible).toBe(true)
 		expect(ringEl(timer).getAttribute('aria-label')).toBe('Progress')
@@ -122,7 +122,7 @@ describe('GooProgressRing', () => {
 		timer.destroy()
 	})
 
-	it('uses themed default renderer unless construction overrides it', () => {
+	it('uses themed default variant unless construction overrides it', () => {
 		const host = document.createElement('div')
 		host.style.setProperty('--goo-progress-ring-variant', 'rainbow')
 		document.body.append(host)
@@ -133,7 +133,7 @@ describe('GooProgressRing', () => {
 		})
 		const explicit = createGooProgressRingTimer({
 			parentNode: host,
-			renderer: 'basic',
+			variant: 'basic',
 			showBackdrop: false
 		})
 
