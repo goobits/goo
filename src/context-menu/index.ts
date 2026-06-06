@@ -6,7 +6,6 @@
 export type { GooContextMenuElement, GooContextMenuOpenOptions, GooContextMenuOption, GooContextMenuOptions } from './GooContextMenu.ts'
 export { createGooContextMenu } from './GooContextMenu.ts'
 export {
-	createManagedGooContextMenu,
 	GooContextMenu,
 	type GooContextMenuManager,
 	type ManagedGooContextMenu,

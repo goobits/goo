@@ -2,7 +2,7 @@ import { tick } from 'svelte'
 import { afterEach, describe, expect, it } from 'vitest'
 
 import { createGooContextMenu } from '../GooContextMenu.ts'
-import { createManagedGooContextMenu } from '../managed-context-menu.ts'
+import { GooContextMenu } from '../managed-context-menu.ts'
 
 describe('createGooContextMenu', () => {
 	afterEach(() => {
@@ -35,14 +35,12 @@ describe('createGooContextMenu', () => {
 	})
 
 	it('renders managed string labels as text instead of HTML', async() => {
-		const menu = createManagedGooContextMenu({
-			items: [
-				{
-					id: 'unsafe',
-					label: '<img src=x onerror=alert(1)>'
-				}
-			]
-		})
+		const menu = GooContextMenu.register('unsafe-menu', [
+			{
+				id: 'unsafe',
+				label: '<img src=x onerror=alert(1)>'
+			}
+		])
 		await tick()
 
 		expect(menu.open({ at: { x: 10, y: 10 }, autoFocus: false })).toBe(true)

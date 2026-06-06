@@ -106,24 +106,6 @@ export const GooContextMenu: GooContextMenuManager = {
 	register
 }
 
-/** Create and immediately open a managed Goo context menu. */
-export function createManagedGooContextMenu(options: ManagedGooContextMenuOptions = {}): ManagedGooContextMenu {
-	const {
-		at,
-		id = `ContextMenu-${ Date.now() }`,
-		items,
-		parentElement
-	} = options
-	const contextMenu = createRegisteredContextMenu(id, items, options)
-
-	contextMenu.open({
-		at: normalizeOpenAt(at),
-		parentElement
-	})
-
-	return contextMenu
-}
-
 function register(
 	id: string,
 	items: ManagedGooContextMenuItems,
@@ -295,10 +277,6 @@ function normalizeContextMenuItems(
 	}
 
 	return items.map(item => normalizeContextMenuItem(item, getMenu)).filter(Boolean) as GooContextMenuOption[]
-}
-
-function normalizeOpenAt(at: ManagedGooContextMenuOptions['at']): ManagedGooContextMenuOpenOptions['at'] {
-	return at
 }
 
 function isManagedContextMenuObjectItem(value: ManagedGooContextMenuObjectItem | string | number): value is ManagedGooContextMenuObjectItem {

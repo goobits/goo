@@ -14,7 +14,7 @@
 import { createAngleInputField } from '../angle-input/_createAngleInputField.ts'
 import * as angleInputModule from '../angle-input/GooAngleInput.svelte'
 import { createBlendModeField } from '../blend-mode/createBlendModeField.ts'
-import * as blendModeModule from '../blend-mode/index.ts'
+import * as blendModeModule from '../blend-mode/createBlendModeField.ts'
 import * as buttonModule from '../button/GooButton.svelte'
 import { createButtonGroupField } from '../button-group/_createButtonGroupField.ts'
 import * as buttonGroupModule from '../button-group/GooButtonGroup.svelte'

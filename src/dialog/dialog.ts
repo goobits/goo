@@ -662,17 +662,6 @@ class GooDialogControllerRuntime {
 
 interface GooDialogControllerRuntime extends GooDialogController {}
 
-/**
- * Factory-compatible dialog controller export. Prefer `createGooDialog`.
- *
- * @param options - Dialog options.
- * @returns Dialog controller handle.
- */
-// eslint-disable-next-line @typescript-eslint/no-redeclare -- Public API intentionally exposes a value factory and matching handle type.
-export function GooDialogController(options: GooDialogOptions = {}): GooDialogController {
-	return createGooDialog(options)
-}
-
 // ============================================================================
 // Registration & Export
 // ============================================================================
