@@ -45,15 +45,11 @@ export const controlSchema: SvelteControlSchema = {
 ## Register
 
 ```ts
-// controller/controlRegistry.ts
-import * as myPickerModule from '../editors/my-picker/index.ts'
+// host-control-types.ts
+import type { GooControlTypeRegistry } from '@goobits/goo/controller'
 
-function loadModule(module: object): Promise<ControlModule> {
-	return Promise.resolve(module as ControlModule)
-}
-
-export const defaultControlRegistry = {
-	'my-picker': { load: () => loadModule(myPickerModule), svelte: true }
+export const hostControlTypes: GooControlTypeRegistry = {
+	'my-picker': { load: () => import('./editors/my-picker/index.ts'), svelte: true }
 }
 ```
 
@@ -61,6 +57,8 @@ export const defaultControlRegistry = {
 
 ```ts
 const schema = [{ path: 'selectedOption', type: 'my-picker', options: ['A', 'B', 'C'] }]
+
+createGooSchema({ schema, data, controlTypes: hostControlTypes })
 ```
 
 ## SvelteControlSchema fields

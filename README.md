@@ -79,12 +79,12 @@ Prefer subpath imports in apps when you only need one surface.
 | `@goobits/goo/color`                   | `GooColor`                                                         | Color field component                      |
 | `@goobits/goo/diff`                    | `DiffCanvas`, `compare`, `renderBinary`, `renderGradient`          | Image comparison UI and helpers            |
 | `@goobits/goo/context-menu`            | `createGooContextMenu`, `GooContextMenu` manager                   | Imperative and registered context menus    |
-| `@goobits/goo/controller`              | `createGooController`, registry helpers                            | Object-bound control creation              |
+| `@goobits/goo/controller`              | `createGooController`, `GooControlTypeRegistry`                    | Object-bound control creation              |
 | `@goobits/goo/data-grid`               | `GooDataGrid`                                                      | Sortable tabular/grid UI                   |
 | `@goobits/goo/dialog`                  | dialog helpers, `GooDialog` surface                                | Alert, confirm, prompt, and field dialogs  |
 | `@goobits/goo/error-boundary`          | `GooErrorBoundary`                                                 | Svelte error boundary wrapper              |
 | `@goobits/goo/focus-trap`              | `GooFocusTrap`                                                     | Modal focus trap wrapper                   |
-| `@goobits/goo/floating-window`         | `createGooFloatingWindow`, `hideFocusedGooFloatingWindow`          | Floating window manager                    |
+| `@goobits/goo/floating-window`         | `createGooFloatingWindow`, `gooFloatingWindowRuntime`              | Floating window manager                    |
 | `@goobits/goo/folder`                  | `GooFolder`                                                        | Collapsible folder controls                |
 | `@goobits/goo/i18n`                    | `setLocale`, `translate`, `isRTL`, `onLocaleChange`                | Locale adapter utilities                   |
 | `@goobits/goo/icon`                    | `GooIcon`, `iconRegistry`, render helpers                          | Registry-backed icons                      |
@@ -108,11 +108,11 @@ Prefer subpath imports in apps when you only need one surface.
 | `@goobits/goo/table`                   | `GooTable`                                                         | Data-grid-backed table component           |
 | `@goobits/goo/textarea`                | `GooTextarea`                                                      | Textarea component                         |
 | `@goobits/goo/toast`                   | `GooToast`, `GooToaster`, `toast`, `toastStore`                    | Toast notification UI and store            |
-| `@goobits/goo/tooltip`                 | `GooTooltip`, `tooltip`, `createGooTooltip`                        | Tooltip component and action/helper        |
+| `@goobits/goo/tooltip`                 | `GooTooltip`, `tooltip`, `createGooTooltip`, `gooTooltipRuntime`   | Tooltip component and action/helper        |
 | `@goobits/goo/turnstile`               | `GooTurnstileField`                                                | Cloudflare Turnstile field wrapper         |
 | `@goobits/goo/virtualGrid`             | `VirtualGrid`, component types                                     | Virtualized grid primitive                 |
 | `@goobits/goo/virtualGrid/model`       | selection, item, marquee, and windowing helpers                    | Virtual grid model utilities               |
-| `@goobits/goo/vortex`                  | `GooVortex`, `createGooVortex`                                     | Temporary positioned activity indicators   |
+| `@goobits/goo/vortex`                  | `createGooVortex`, `GooVortexManager`                              | Temporary positioned activity indicators   |
 
 ## Public Handles
 
