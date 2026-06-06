@@ -6,7 +6,7 @@ How to expose a Svelte editor as a GooSchema control.
 
 1. Build the Svelte component with a value prop and change callback.
 2. Export a `controlSchema` describing the bindings.
-3. Register the control type in `controller/controlRegistry.ts`.
+3. Register the control type with an explicit config object.
 4. Use the type name in your schema.
 
 GooController owns the row wrapper, binding lifecycle, and imperative handle. Svelte controls should expose props and callbacks only; do not depend on controller private fields such as `_controlPromise`, `_control`, or `_destroyElement`. Imperative controls should use stable handle names such as `destroy()`, `setValue()`, `getValue()`, and `getRange()`.
@@ -53,6 +53,24 @@ export const hostControlTypes: GooControlTypeRegistry = {
 }
 ```
 
+Non-Svelte controls must provide an explicit factory/class extractor instead of
+relying on default exports or first-function module scans:
+
+```ts
+export const hostControlTypes: GooControlTypeRegistry = {
+	'my-field': {
+		load: () => import('./fields/myField.ts'),
+		extract: module => module.createMyField,
+		buildOptions: (value, options, onchange, oninput) => ({
+			...options,
+			value,
+			onchange,
+			oninput
+		})
+	}
+}
+```
+
 ## Use in schema
 
 ```ts
@@ -79,4 +97,4 @@ interface SvelteControlSchema {
 
 ## Built-in controls
 
-Built-in Goo controls are registered in `src/controller/controlRegistry.ts`. Use `type: 'range-module'` for a native Goo slider with synced numeric inputs. Rich editor-specific controls live in `@goobits/goo-editors` and should be registered by the host package or app through its control type map.
+Built-in Goo controls are registered in `src/controller/controlRegistry.ts`. Use `type: 'range-module'` for a native Goo slider with synced numeric inputs. Rich editor-specific controls live in `@goobits/goo-editors` and should be registered by the host package or app through its explicit control type map.
