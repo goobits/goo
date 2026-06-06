@@ -44,7 +44,6 @@
 			"svelte": "./src/range-module/index.ts",
 			"import": "./src/range-module/index.ts"
 		},
-		"./range-module/styles.css": "./src/range-module/GooRangeModule.css",
 		"./select": {
 			"types": "./src/select/index.ts",
 			"svelte": "./src/select/index.ts",
@@ -88,6 +87,10 @@
 		"./positioning": {
 			"types": "./src/support/positioning/index.ts",
 			"import": "./src/support/positioning/index.ts"
+		},
+		"./pointer": {
+			"types": "./src/support/utils/pointerDrag.ts",
+			"import": "./src/support/utils/pointerDrag.ts"
 		},
 		"./progress-ring": {
 			"types": "./src/progress-ring/index.ts",
@@ -203,8 +206,7 @@
 			"types": "./src/toolbar/index.ts",
 			"svelte": "./src/toolbar/index.ts",
 			"import": "./src/toolbar/index.ts"
-		},
-		"./toolbar/styles.css": "./src/toolbar/Toolbar.css"
+		}
 	},
 	"files": [
 		"src",

@@ -94,12 +94,12 @@ Prefer subpath imports in apps when you only need one surface.
 | `@goobits/goo/label`                   | `GooLabel`                                                         | Label component                            |
 | `@goobits/goo/number`                  | `formatNumber`, `clamp`, `toPercent`, `fromPercent`, `roundNumber` | Number utilities                           |
 | `@goobits/goo/panel`                   | `GooPanel`                                                         | Inspector panel shell                      |
+| `@goobits/goo/pointer`                 | `createPointerDrag`, `createPointerTap`, pointer event types       | Pointer drag and tap utilities             |
 | `@goobits/goo/popout`                  | `GooPopout`, `createGooPopout`, `gooPopoutRuntime`                 | Popout positioning and lifecycle           |
 | `@goobits/goo/positioning`             | `positionElementAt`, `calculatePosition`, positioning types        | Shared positioning math                    |
 | `@goobits/goo/progress-ring`           | `GooProgressRing`, `createGooProgressRingTimer`                    | Progress ring and timer overlay            |
 | `@goobits/goo/radio`                   | `GooRadio`, `GooRadioGroup`                                        | Radio controls                             |
 | `@goobits/goo/range-module`            | `createGooRangeModule`, `createRangeModuleField`                   | Slider with synced numeric input fields    |
-| `@goobits/goo/range-module/styles.css` | CSS                                                                | Range-module-only stylesheet               |
 | `@goobits/goo/schema`                  | `GooSchema`, `GooSchemaComponent`, schema types                    | Schema-driven control generation           |
 | `@goobits/goo/select`                  | `GooSelect`                                                        | Select/menu component with submenu support |
 | `@goobits/goo/select/styles.css`       | CSS                                                                | Select-only stylesheet                     |
