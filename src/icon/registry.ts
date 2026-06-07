@@ -202,5 +202,3 @@ export const iconRegistry = {
 		return Array.from(icons.keys())
 	}
 }
-
-export default iconRegistry

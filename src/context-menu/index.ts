@@ -17,4 +17,5 @@ export {
 	type ManagedGooContextMenuItems,
 	type ManagedGooContextMenuObjectItem,
 	type ManagedGooContextMenuOpenAt,
+	type ManagedGooContextMenuOpenOptions,
 	type ManagedGooContextMenuOptions } from './managed-context-menu.ts'

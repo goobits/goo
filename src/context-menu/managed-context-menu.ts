@@ -60,7 +60,8 @@ export interface ManagedGooContextMenuOptions {
 	value?: string | number
 }
 
-type ManagedGooContextMenuOpenOptions = Omit<GooSelectOpenOptions, 'at'> & {
+/** Options accepted when opening a managed Goo context menu. */
+export type ManagedGooContextMenuOpenOptions = Omit<GooSelectOpenOptions, 'at'> & {
 	at?: ManagedGooContextMenuOpenAt
 	actionContext?: GooSelectActionContext
 	onClose?: () => void
