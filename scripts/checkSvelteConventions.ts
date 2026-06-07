@@ -4,7 +4,12 @@ import { join } from 'node:path'
 const packageRoot = new URL('..', import.meta.url)
 const sourceRoot = new URL('src/', packageRoot)
 
-const checks = [
+type SvelteCheck = {
+	pattern: RegExp
+	message: string
+}
+
+const checks: SvelteCheck[] = [
 	{ pattern: /\bexport\s+let\b/, message: 'Use $props() instead of export let.' },
 	{ pattern: /\bcreateEventDispatcher\b/, message: 'Use typed callback props instead of createEventDispatcher.' },
 	{ pattern: /^\s*\$:\s/m, message: 'Use Svelte 5 runes instead of $: reactive labels.' },
@@ -12,7 +17,7 @@ const checks = [
 	{ pattern: /\bon:[a-zA-Z]/, message: 'Use callback props instead of on:event directives.' }
 ]
 
-const failures = []
+const failures: string[] = []
 
 for (const filePath of await collectSvelteFiles(sourceRoot)) {
 	const source = await readFile(filePath, 'utf8')
@@ -33,7 +38,7 @@ if (failures.length > 0) {
 	process.exitCode = 1
 }
 
-async function collectSvelteFiles(directoryUrl) {
+async function collectSvelteFiles(directoryUrl: URL): Promise<string[]> {
 	const entries = await readdir(directoryUrl, { withFileTypes: true })
 	const files = []
 
@@ -53,6 +58,6 @@ async function collectSvelteFiles(directoryUrl) {
 	return files
 }
 
-function stripStyleBlocks(source) {
+function stripStyleBlocks(source: string): string {
 	return source.replaceAll(/<style[\s\S]*?<\/style>/g, '')
 }

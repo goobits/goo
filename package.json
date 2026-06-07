@@ -217,7 +217,7 @@
 		"dev": "vite --host 127.0.0.1",
 		"test": "vitest run",
 		"check": "pnpm run lint:check && pnpm run check:svelte && pnpm run check:types",
-		"check:svelte": "node scripts/checkSvelteConventions.mjs && svelte-check --tsconfig ./tsconfig.json",
+		"check:svelte": "tsx scripts/checkSvelteConventions.ts && svelte-check --tsconfig ./tsconfig.json",
 		"check:types": "tsc --noEmit",
 		"lint": "eslint src/ --fix",
 		"lint:check": "eslint src/",
