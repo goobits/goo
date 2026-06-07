@@ -248,6 +248,35 @@ describe('GooSlider', () => {
 		expect(onchange).toHaveBeenCalledOnce()
 	})
 
+	it('animates track clicks but keeps thumb-origin drags immediate', async() => {
+		vi.useFakeTimers()
+		const { container } = render(GooSlider, {
+			props: {
+				value: 20
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const thumb = container.querySelector<HTMLElement>('.goo-slider__thumb')!
+		slider.setPointerCapture = vi.fn()
+		slider.releasePointerCapture = vi.fn()
+
+		slider.dispatchEvent(pointerEvent('pointerdown', { pointerId: 1, clientX: 160 }))
+		await tick()
+
+		expect(slider.classList.contains('goo-slider--animate')).toBe(true)
+		slider.dispatchEvent(pointerEvent('pointerup', { pointerId: 1, clientX: 160 }))
+		vi.runAllTimers()
+		await tick()
+		expect(slider.classList.contains('goo-slider--animate')).toBe(false)
+
+		thumb.dispatchEvent(pointerEvent('pointerdown', { pointerId: 2, clientX: 30 }))
+		await tick()
+
+		expect(slider.classList.contains('goo-slider--animate')).toBe(false)
+		thumb.dispatchEvent(pointerEvent('pointerup', { pointerId: 2, clientX: 30 }))
+		vi.useRealTimers()
+	})
+
 	it('ignores non-primary pointer drags', () => {
 		const oninput = vi.fn()
 		const onchange = vi.fn()

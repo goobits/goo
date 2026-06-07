@@ -145,10 +145,17 @@
 }
 
 .goo-data-grid__sort-indicator {
+	align-items: center;
 	color: color-mix(in srgb, var(--goo-data-grid-muted) 76%, transparent);
+	display: inline-flex;
 	flex: 0 0 auto;
-	font-size: 0.75em;
 	line-height: 1;
+}
+
+.goo-data-grid__sort-indicator svg {
+	display: block;
+	height: 0.875rem;
+	width: 0.875rem;
 }
 
 .goo-data-grid__cell {

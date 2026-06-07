@@ -27,6 +27,16 @@ describe('GooDialog', () => {
 		await expect(resultPromise).resolves.toEqual({ cancel: true })
 	})
 
+	it('renders one close control for simple alerts', () => {
+		const dialog = createGooDialog({
+			type: 'alert',
+			content: 'Hello'
+		})
+
+		expect(dialog.element.querySelector('.goo-dialog__close')).toBeNull()
+		expect(dialog.element.querySelectorAll('.goo-dialog__close-badge')).toHaveLength(1)
+	})
+
 	it('resolves confirm dialogs from footer actions', async() => {
 		const resultPromise = GooConfirm('Continue?').result
 		await nextFrame()

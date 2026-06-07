@@ -157,7 +157,7 @@ export function buildStandardLayout(
 	}
 
 	// Determine if we need a close button in the header
-	const needsHeaderClose = showClose && type !== 'confirm' && type !== 'prompt'
+	const needsHeaderClose = showClose && type !== 'alert' && type !== 'confirm' && type !== 'prompt'
 
 	// Header (only if heading exists OR we need a close button)
 	if (heading || needsHeaderClose) {

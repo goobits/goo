@@ -42,6 +42,25 @@ describe('GooDataGrid', () => {
 		expect(container.querySelector('.goo-data-grid__state')?.textContent).toContain('No people')
 	})
 
+	it('renders lucide sort icons for sortable headers', async() => {
+		const { container } = render(GooDataGrid, {
+			props: {
+				columns: [ { key: 'name', label: 'Name', sortable: true } ],
+				rows: [ { name: 'B' }, { name: 'A' } ],
+				sortable: true
+			}
+		})
+
+		const indicator = container.querySelector('.goo-data-grid__sort-indicator')!
+		expect(indicator.querySelector('svg')).not.toBeNull()
+		expect(indicator.textContent?.trim()).toBe('')
+
+		await fireEvent.click(container.querySelector('.goo-data-grid__sort-button')!)
+
+		expect(indicator.querySelector('svg')).not.toBeNull()
+		expect(container.querySelector('.goo-data-grid__header-cell')?.getAttribute('aria-sort')).toBe('ascending')
+	})
+
 	it('emits row activation callbacks', async() => {
 		const onrowactivate = vi.fn()
 		const { container } = render(GooDataGrid, {

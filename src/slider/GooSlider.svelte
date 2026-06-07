@@ -65,6 +65,7 @@ let activeIndex: number | null = $state(null)
 let activePointerId: number | null = $state(null)
 let zIndex = $state(0)
 let animate = $state(false)
+let animateTimer: ReturnType<typeof setTimeout> | undefined
 let currentPresetColor = $state('')
 let currentPresetHue = $state(0)
 let currentPresetSaturation = $state(100)
@@ -292,8 +293,12 @@ function handlePointerDown(event: PointerEvent): void {
 	if (event.button !== 0) return
 
 	event.preventDefault()
+	const startedOnThumb = isThumbTarget(event.target)
 	const index = findNearestThumbIndex(event)
 	if (index === null) return
+	if (!startedOnThumb) {
+		playPointerJumpAnimation()
+	}
 	activeIndex = index
 	activePointerId = event.pointerId
 	thumbElements[index]?.style.setProperty('z-index', String(++zIndex))
@@ -304,6 +309,7 @@ function handlePointerDown(event: PointerEvent): void {
 function handlePointerMove(event: PointerEvent): void {
 	if (effectiveDisabled || activeIndex === null || activePointerId !== event.pointerId) return
 	event.preventDefault()
+	if (animate) stopPointerJumpAnimation()
 	updateThumbFromPointer(activeIndex, event, 'input')
 }
 
@@ -437,6 +443,25 @@ function getPointerPercent(event: PointerEvent): number {
 		return 1 - clamp((event.clientY - rect.top) / (rect.height || 214), 0, 1)
 	}
 	return clamp((event.clientX - rect.left) / (rect.width || 214), 0, 1)
+}
+
+function isThumbTarget(target: EventTarget | null): boolean {
+	return target instanceof Element && Boolean(target.closest('.goo-slider__thumb'))
+}
+
+function playPointerJumpAnimation(): void {
+	clearTimeout(animateTimer)
+	animate = true
+	animateTimer = setTimeout(() => {
+		animate = false
+		animateTimer = undefined
+	}, 220)
+}
+
+function stopPointerJumpAnimation(): void {
+	clearTimeout(animateTimer)
+	animate = false
+	animateTimer = undefined
 }
 
 function getThumb(index: number, value: number): GooSliderThumb {

@@ -208,6 +208,27 @@
 	}
 }
 
+.goo-slider.goo-slider--active.goo-slider--animate.goo-slider--animate {
+	.goo-slider__thumb,
+	.goo-slider__coverage {
+		transition:
+			left var(--goo-slider-motion-normal),
+			bottom var(--goo-slider-motion-normal),
+			width var(--goo-slider-motion-normal),
+			height var(--goo-slider-motion-normal),
+			transform var(--goo-slider-motion-normal),
+			box-shadow var(--goo-slider-motion-fast),
+			background-color var(--goo-slider-motion-fast);
+		transition-timing-function: var(--goo-slider-transition-timing);
+	}
+
+	.goo-slider__track::before {
+		transition:
+			width var(--goo-slider-motion-normal),
+			height var(--goo-slider-motion-normal);
+	}
+}
+
 /* Vertical direction */
 .goo-slider.goo-slider--vertical.goo-slider--vertical {
 	display: inline-block;

@@ -1,6 +1,7 @@
 <script lang="ts" generics="T">
 import './GooDataGrid.css'
 
+import { ArrowDown, ArrowDownUp, ArrowUp } from '@lucide/svelte'
 import { tick } from 'svelte'
 
 import { calculateVirtualGridWindow, virtualGridSpacerHeight } from '../virtualGrid/virtualWindow.ts'
@@ -336,7 +337,13 @@ $effect(() => {
 								{/if}
 							</span>
 							<span class="goo-data-grid__sort-indicator" aria-hidden="true">
-								{columnSortDirection(columnIndex) === 'asc' ? '^' : columnSortDirection(columnIndex) === 'desc' ? 'v' : '-'}
+								{#if columnSortDirection(columnIndex) === 'asc'}
+									<ArrowUp size={14} />
+								{:else if columnSortDirection(columnIndex) === 'desc'}
+									<ArrowDown size={14} />
+								{:else}
+									<ArrowDownUp size={14} />
+								{/if}
 							</span>
 						</button>
 					{:else if column.header}
