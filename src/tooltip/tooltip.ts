@@ -30,6 +30,7 @@
 
 import './GooTooltip.css'
 
+import type { GooPopoutAt } from '../popout/index.ts'
 import { createGooPopout } from '../popout/index.ts'
 
 /** Infer popout instance type from factory return */
@@ -79,6 +80,9 @@ export interface GooTooltipOptions {
 
 	/** Callback when tooltip hides */
 	onhide?: (ctx: { element: HTMLElement }) => void
+
+	/** Additional class name applied to the tooltip popout. */
+	className?: string
 }
 
 /**
@@ -104,6 +108,9 @@ export interface GooTooltipInstance {
 	/** Update tooltip content 	 * @param content - content.
 	 */
 	setContent(content: string | HTMLElement): void
+
+	/** Update tooltip position when its target or anchor point moves. */
+	updatePosition(at?: GooPopoutAt | HTMLElement, align?: string): void
 }
 
 /** Options accepted by the Svelte `tooltip` action. */
@@ -131,6 +138,7 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 		trigger = 'both',
 		arrow = true,
 		interactive = false,
+		className = '',
 		onshow,
 		onhide
 	} = options
@@ -185,7 +193,7 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 				align,
 				offset,
 				showArrow: arrow,
-				className: 'goo-tooltip',
+				className: `goo-tooltip ${ className }`.trim(),
 				clickToClose: false, // Tooltip closes on mouse leave, not click
 				escapeToClose: true,
 				openImmediately: false, // We control timing
@@ -277,6 +285,10 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 		}
 	}
 
+	function updatePosition(at: GooPopoutAt | HTMLElement = target, nextAlign?: string) {
+		popout?.updatePosition(at, nextAlign)
+	}
+
 	// -------------------------------------------------------------------------
 	// Event Binding
 	// -------------------------------------------------------------------------
@@ -356,7 +368,8 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 		show,
 		hide,
 		destroy,
-		setContent
+		setContent,
+		updatePosition
 	}
 }
 

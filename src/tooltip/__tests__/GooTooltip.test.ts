@@ -4,10 +4,11 @@ import { afterEach, describe, expect, it } from 'vitest'
 
 import GooTooltip from '../GooTooltip.svelte'
 import type { GooTooltipInstance } from '../index.ts'
-import { createGooTooltip, tooltip } from '../index.ts'
+import { createGooTooltip, gooTooltipRuntime, tooltip } from '../index.ts'
 
 describe('GooTooltip', () => {
 	afterEach(() => {
+		gooTooltipRuntime.destroy()
 		document.querySelectorAll('.goo-popout').forEach(element => element.remove())
 		document.querySelectorAll('[aria-describedby]').forEach(element => element.removeAttribute('aria-describedby'))
 	})
@@ -69,5 +70,37 @@ describe('GooTooltip', () => {
 
 		lifecycle.destroy()
 		button.remove()
+	})
+
+	it('updates imperative manual tooltip content and position without recreating the popout', () => {
+		gooTooltipRuntime.show('12 x 24', {
+			direction: 'right',
+			position: { x: 10, y: 20 }
+		})
+
+		const firstPopout = document.querySelector('.goo-popout.goo-tooltip')
+		expect(firstPopout).not.toBeNull()
+
+		gooTooltipRuntime.show('18 x 30', {
+			direction: 'right',
+			position: { x: 30, y: 40 }
+		})
+
+		const popouts = document.querySelectorAll('.goo-popout.goo-tooltip')
+		expect(popouts).toHaveLength(1)
+		expect(popouts[0]).toBe(firstPopout)
+		expect(popouts[0].textContent).toContain('18 x 30')
+	})
+
+	it('shows an arrow for imperative manual tooltips', () => {
+		gooTooltipRuntime.show('100 x 80', {
+			className: 'goo-tooltip--cursor-tip',
+			direction: 'right',
+			position: { x: 100, y: 100 }
+		})
+
+		const arrow = document.querySelector('.goo-popout.goo-tooltip.goo-tooltip--cursor-tip .goo-popout__arrow')
+		expect(arrow).not.toBeNull()
+		expect(arrow?.classList.contains('left')).toBe(true)
 	})
 })

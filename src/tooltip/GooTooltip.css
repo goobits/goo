@@ -66,6 +66,16 @@
 	white-space: normal;
 }
 
+/* Cursor/drag tooltips sit over artwork and need a clearly visible pointer. */
+.goo-popout.goo-tooltip.goo-tooltip--cursor-tip {
+	--goo-tooltip-arrow-size: 8px;
+	--goo-popout-arrow-border: color-mix(in srgb, var(--goo-popout-bg) 80%, white 20%);
+}
+
+.goo-popout.goo-tooltip.goo-tooltip--cursor-tip .goo-popout__arrow {
+	filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
+}
+
 /* =============================================================================
    Variants (optional)
    ============================================================================= */

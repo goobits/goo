@@ -49,6 +49,7 @@ type TooltipState = {
 	content: TooltipContent
 	element: HTMLElement
 	instance: GooTooltipInstance
+	mode: 'attached' | 'manual'
 	options: GooTooltipRuntimeOptions
 }
 
@@ -89,6 +90,7 @@ function attachTooltip(
 		content: typeof value === 'string' ? value : '',
 		contentElement: value instanceof HTMLElement ? value : undefined,
 		align: alignFromDirection(options.direction),
+		className: options.className,
 		offset: normalizeOffset(options.offset),
 		showDelay: options.showDelay ?? 0,
 		trigger: resolveTrigger(options),
@@ -98,6 +100,7 @@ function attachTooltip(
 		content,
 		element: target,
 		instance,
+		mode: 'attached',
 		options
 	}
 
@@ -134,10 +137,13 @@ function show(
 		return
 	}
 
-	currentInstance?.hide()
+	if (currentInstance && currentInstance !== state.instance) {
+		currentInstance.hide()
+	}
 	currentState = state
 	currentInstance = state.instance
 	state.instance.setContent(value)
+	state.instance.updatePosition(state.element, alignFromDirection(state.options.direction))
 	state.instance.show()
 	enabled = true
 
@@ -173,10 +179,17 @@ function destroy(): void {
 
 function createShowState(content: TooltipContent, options: GooTooltipRuntimeOptions): TooltipState {
 	const target = options.element || resolveAnchor(options)
+	if (currentState && canReuseManualState(currentState, target, options)) {
+		currentState.content = content
+		currentState.options = options
+		return currentState
+	}
+
 	const instance = createGooTooltip({
 		for: target,
 		content: '',
 		align: alignFromDirection(options.direction),
+		className: options.className,
 		offset: normalizeOffset(options.offset),
 		trigger: 'manual',
 		interactive: options.interactive
@@ -186,6 +199,7 @@ function createShowState(content: TooltipContent, options: GooTooltipRuntimeOpti
 		content,
 		element: target,
 		instance,
+		mode: 'manual',
 		options
 	}
 }
@@ -280,6 +294,27 @@ function normalizeOffset(offset: GooTooltipRuntimeOptions['offset']): { x?: numb
 	}
 
 	return offset ?? { x: 0, y: 8 }
+}
+
+function canReuseManualState(
+	state: TooltipState,
+	target: HTMLElement,
+	options: GooTooltipRuntimeOptions
+): boolean {
+	if (state.mode !== 'manual' || state.element !== target) return false
+	return alignFromDirection(state.options.direction) === alignFromDirection(options.direction)
+		&& state.options.className === options.className
+		&& sameOffset(state.options.offset, options.offset)
+		&& state.options.interactive === options.interactive
+}
+
+function sameOffset(
+	left: GooTooltipRuntimeOptions['offset'],
+	right: GooTooltipRuntimeOptions['offset']
+): boolean {
+	const normalizedLeft = normalizeOffset(left)
+	const normalizedRight = normalizeOffset(right)
+	return normalizedLeft.x === normalizedRight.x && normalizedLeft.y === normalizedRight.y
 }
 
 function alignFromDirection(direction: GooTooltipRuntimeOptions['direction'] = 'top'): string {
