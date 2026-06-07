@@ -14,6 +14,7 @@ import GooDataGrid from '../data-grid/GooDataGrid.svelte'
 import { GooDataGrid as ExportedGooDataGrid } from '../data-grid/index.ts'
 import GooErrorBoundary from '../error-boundary/GooErrorBoundary.svelte'
 import { GooErrorBoundary as ExportedGooErrorBoundary } from '../error-boundary/index.ts'
+import * as GooRoot from '../index.ts'
 import GooInput from '../input/GooInput.svelte'
 import GooNumber from '../input/GooNumber.svelte'
 import { GooInput as ExportedGooInput, GooNumber as ExportedGooNumber } from '../input/index.ts'
@@ -48,5 +49,17 @@ describe('Goo component exports', () => {
 		expect(ExportedGooToast).toBe(GooToast)
 		expect(ExportedGooToaster).toBe(GooToaster)
 		expect(ExportedGooTurnstileField).toBe(GooTurnstileField)
+	})
+
+	it('keeps the root aggregate explicit and stable-only', () => {
+		expect(GooRoot.GooButton).toBe(GooButton)
+		expect(GooRoot.GooSelect).toBe(GooSelect)
+		expect(GooRoot.createGooController).toBeTypeOf('function')
+		expect(GooRoot.createGooSchema).toBeTypeOf('function')
+		expect(GooRoot.createGooDialog).toBeTypeOf('function')
+		expect('DiffCanvas' in GooRoot).toBe(false)
+		expect('GridPopoutPicker' in GooRoot).toBe(false)
+		expect('createFloatingToolbarView' in GooRoot).toBe(false)
+		expect('createGooVortex' in GooRoot).toBe(false)
 	})
 })

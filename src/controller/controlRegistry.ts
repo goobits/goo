@@ -101,24 +101,9 @@ export type GooControlConstructor = new (options: GooControlOptions) => HTMLElem
 /** Control factory or class type. */
 export type GooControlExport = GooControlFactory | GooControlConstructor
 
-/**
- * Goo control type configuration used by GooController and GooSchema extensions.
- */
-export interface GooControlTypeConfig {
-
-	/** Lazy import function returning the module */
-	load: () => Promise<GooControlModule>
-
-	/**
-	 * Extract the control class/factory from the module.
-	 * Required for non-Svelte controls.
-	 */
-	extract?: (module: GooControlModule) => GooControlExport | null
-
-	/**
-	 * Build options to pass to the control constructor.
-	 * Called with (value, controllerOptions, handleChange, handleInput)
-	 */
+/** Shared configuration for Goo control type registry entries. */
+export interface GooControlTypeConfigBase {
+	/** Build options to pass to the control constructor or component host. */
 	buildOptions?: (
 		value: unknown,
 		options: GooControlOptions,
@@ -137,20 +122,29 @@ export interface GooControlTypeConfig {
 }
 
 /** Explicit registry entry for a Svelte-backed control module. */
-export type GooSvelteControlTypeConfig = Omit<GooControlTypeConfig, 'extract' | 'load' | 'svelte'> & {
+export type GooSvelteControlTypeConfig = GooControlTypeConfigBase & {
 	/** Lazy import function returning a Svelte control module. */
 	load: () => Promise<GooSvelteControlModule>
 	/** Marks the module as a Svelte component control. */
 	svelte: true
+	/** Svelte controls are mounted directly and do not use module extractors. */
+	extract?: never
 }
 
 /** Explicit registry entry for a DOM factory-backed control module. */
-export type GooFactoryControlTypeConfig = Omit<GooControlTypeConfig, 'extract' | 'svelte'> & {
+export type GooFactoryControlTypeConfig = GooControlTypeConfigBase & {
+	/** Lazy import function returning the module. */
+	load: () => Promise<GooControlModule>
 	/** Extracts the DOM factory/class from the loaded module. */
 	extract: (module: GooControlModule) => GooControlExport | null
 	/** DOM factory controls are not mounted through the Svelte host. */
 	svelte?: false
 }
+
+/**
+ * Goo control type configuration used by GooController and GooSchema extensions.
+ */
+export type GooControlTypeConfig = GooSvelteControlTypeConfig | GooFactoryControlTypeConfig
 
 /**
  * Goo control type registry for schema/controller extension points.
@@ -173,6 +167,10 @@ function loadModule(module: object): Promise<GooControlModule> {
 	return Promise.resolve(module as GooControlModule)
 }
 
+function loadSvelteModule(module: object): Promise<GooSvelteControlModule> {
+	return Promise.resolve(module as GooSvelteControlModule)
+}
+
 /**
  * Registry of control types.
  *
@@ -181,44 +179,42 @@ function loadModule(module: object): Promise<GooControlModule> {
  */
 export const defaultControlRegistry: GooControlTypeRegistry = {
 	// Built-in controls
-	checkbox: { load: () => loadModule(checkboxModule), svelte: true, createField: createCheckboxField },
-	button: { load: () => loadModule(buttonModule), svelte: true },
-	range: { load: () => loadModule(sliderModule), svelte: true, createField: createSliderField },
-	slider: { load: () => loadModule(sliderModule), svelte: true, createField: createSliderField },
-	number: { load: () => loadModule(numberModule), svelte: true, createField: createNumberField },
-	select: { load: () => loadModule(selectModule), svelte: true, createField: createSelectField },
-	'blend-mode': {
+	checkbox: defineSvelteControlType({ load: () => loadSvelteModule(checkboxModule), createField: createCheckboxField }),
+	button: defineSvelteControlType({ load: () => loadSvelteModule(buttonModule) }),
+	range: defineSvelteControlType({ load: () => loadSvelteModule(sliderModule), createField: createSliderField }),
+	slider: defineSvelteControlType({ load: () => loadSvelteModule(sliderModule), createField: createSliderField }),
+	number: defineSvelteControlType({ load: () => loadSvelteModule(numberModule), createField: createNumberField }),
+	select: defineSvelteControlType({ load: () => loadSvelteModule(selectModule), createField: createSelectField }),
+	'blend-mode': defineFactoryControlType({
 		load: () => loadModule(blendModeModule),
 		extract: module => module.createBlendModeField as GooControlFactory,
 		createField: createBlendModeField
-	},
-	radio: { load: () => loadModule(radioModule), svelte: true, createField: createRadioGroupField },
-	radiogroup: { load: () => loadModule(radioModule), svelte: true, createField: createRadioGroupField },
-	'range-module': {
+	}),
+	radio: defineSvelteControlType({ load: () => loadSvelteModule(radioModule), createField: createRadioGroupField }),
+	radiogroup: defineSvelteControlType({ load: () => loadSvelteModule(radioModule), createField: createRadioGroupField }),
+	'range-module': defineFactoryControlType({
 		load: () => loadModule(rangeModule),
 		extract: module => module.createRangeModuleField as GooControlFactory,
 		createField: createRangeModuleField
-	},
-	text: { load: () => loadModule(inputModule), svelte: true, createField: createInputField },
-	email: { load: () => loadModule(inputModule), svelte: true, createField: createInputField },
-	password: { load: () => loadModule(inputModule), svelte: true, createField: createInputField },
-	url: { load: () => loadModule(inputModule), svelte: true, createField: createInputField },
-	color: { load: () => loadModule(colorModule), svelte: true, createField: createColorField },
-	angle: { load: () => loadModule(angleInputModule), svelte: true, createField: createAngleInputField },
-	textarea: { load: () => loadModule(textareaModule), svelte: true, createField: createTextareaField },
+	}),
+	text: defineSvelteControlType({ load: () => loadSvelteModule(inputModule), createField: createInputField }),
+	email: defineSvelteControlType({ load: () => loadSvelteModule(inputModule), createField: createInputField }),
+	password: defineSvelteControlType({ load: () => loadSvelteModule(inputModule), createField: createInputField }),
+	url: defineSvelteControlType({ load: () => loadSvelteModule(inputModule), createField: createInputField }),
+	color: defineSvelteControlType({ load: () => loadSvelteModule(colorModule), createField: createColorField }),
+	angle: defineSvelteControlType({ load: () => loadSvelteModule(angleInputModule), createField: createAngleInputField }),
+	textarea: defineSvelteControlType({ load: () => loadSvelteModule(textareaModule), createField: createTextareaField }),
 
-	'button-group': {
-		load: () => loadModule(buttonGroupModule),
-		svelte: true,
+	'button-group': defineSvelteControlType({
+		load: () => loadSvelteModule(buttonGroupModule),
 		createField: createButtonGroupField,
 		layout: 'stacked'
-	},
-	buttongroup: {
-		load: () => loadModule(buttonGroupModule),
-		svelte: true,
+	}),
+	buttongroup: defineSvelteControlType({
+		load: () => loadSvelteModule(buttonGroupModule),
 		createField: createButtonGroupField,
 		layout: 'stacked'
-	}
+	})
 }
 
 /**

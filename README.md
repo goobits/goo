@@ -63,7 +63,7 @@ Use package subpaths in apps and shared packages so each caller names the surfac
 
 | Subpath                                | Main exports                                                       | Purpose                                    |
 | -------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------ |
-| `@goobits/goo`                         | root barrel                                                        | Convenience aggregate for documented exports |
+| `@goobits/goo`                         | stable root aggregate                                              | Convenience aggregate for stable primitives  |
 | `@goobits/goo/angle-input`             | `GooAngleInput`                                                    | Angle entry field                          |
 | `@goobits/goo/button`                  | `GooButton`                                                        | Button component                           |
 | `@goobits/goo/button/styles.css`       | CSS                                                                | Button-only stylesheet                     |
@@ -109,8 +109,8 @@ Use package subpaths in apps and shared packages so each caller names the surfac
 
 ## Surface Stability
 
-- Stable: component subpaths, `controller`, `schema`, `dialog`, `toast`, `popout`, `tooltip`, `i18n`, `number`, `pointer`, and `positioning`.
-- Experimental: `diff`, `grid-popout`, `toolbar`, `virtualGrid/model`, and `vortex`; keep callers on documented exports and avoid reaching into source files.
+- Stable root: component primitives, `controller`, `schema`, `dialog`, `toast`, `popout`, `tooltip`, `i18n`, `number`, `pointer`, `positioning`, and `virtualGrid`.
+- Subpath-only experimental surfaces: `diff`, `grid-popout`, `toolbar`, `virtualGrid/model`, and `vortex`; keep callers on documented subpath exports and avoid reaching into source files.
 - Internal: `src/support/*` helpers unless they are exposed through a named package subpath.
 
 ## Public Handles
