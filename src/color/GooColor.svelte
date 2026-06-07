@@ -5,6 +5,7 @@ import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.ts'
 export const controlSchema: SvelteControlSchema = {
 	propMapping: {
 		alpha: 'alpha',
+		ariaLabel: 'ariaLabel',
 		nativePicker: 'nativePicker',
 		name: 'name'
 	}
@@ -36,6 +37,7 @@ let {
 	name,
 	id,
 	title,
+	ariaLabel,
 	disabled = false,
 	class: className = '',
 	style,
@@ -330,7 +332,7 @@ function wireInputEvents(
 				class="goo-color__swatch"
 				style:--swatch-color={swatchColor}
 				disabled={effectiveDisabled}
-				aria-label="Choose color"
+				aria-label={ariaLabel || 'Choose color'}
 				onclick={openPicker}
 			></button>
 			<input
@@ -340,6 +342,7 @@ function wireInputEvents(
 				value={hexValue}
 				disabled={effectiveDisabled}
 				tabindex={tabIndex}
+				aria-label={ariaLabel || 'Choose color'}
 				use:wirePickerEvents
 			/>
 		{:else}

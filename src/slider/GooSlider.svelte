@@ -8,6 +8,7 @@ export const controlSchema: SvelteControlSchema = {
 		canPush: 'canPush',
 		coverage: 'coverage',
 		direction: 'direction',
+		ariaLabel: 'ariaLabel',
 		label: 'label',
 		max: 'max',
 		min: 'min',
@@ -77,6 +78,7 @@ let {
 	step = 1,
 	unit = 'float',
 	label = '',
+	ariaLabel,
 	title,
 	name,
 	direction = 'horizontal',
@@ -535,7 +537,7 @@ function toPositiveNumber(nextValue: unknown, fallback: number): number {
 	aria-valuenow={isMulti ? undefined : ariaValueNow}
 	aria-valuetext={isMulti ? undefined : ariaValueText}
 	aria-orientation={direction === 'vertical' ? 'vertical' : 'horizontal'}
-	aria-label={label || undefined}
+	aria-label={ariaLabel || label || title || undefined}
 	title={title || label || undefined}
 	tabindex={isMulti ? undefined : tabIndex}
 	draggable="false"
@@ -568,7 +570,7 @@ function toPositiveNumber(nextValue: unknown, fallback: number): number {
 				aria-valuenow={isMulti ? thumbValue : undefined}
 				aria-valuetext={isMulti ? thumbValueText(thumbValue) : undefined}
 				aria-orientation={isMulti ? (direction === 'vertical' ? 'vertical' : 'horizontal') : undefined}
-				aria-label={isMulti ? `${label || 'Value'} ${index + 1}` : undefined}
+				aria-label={isMulti ? `${ariaLabel || label || 'Value'} ${index + 1}` : undefined}
 				aria-disabled={isMulti && effectiveDisabled ? 'true' : undefined}
 				onkeydown={isMulti ? event => moveThumbByKey(index, event) : undefined}
 			></div>

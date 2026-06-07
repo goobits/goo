@@ -39,6 +39,9 @@ export type GooColorProps = GooForwardedAttributes & {
 	/** Element title. */
 	title?: string
 
+	/** Accessible label for the color picker control. */
+	ariaLabel?: string
+
 	/** Whether the color input is disabled. */
 	disabled?: boolean
 

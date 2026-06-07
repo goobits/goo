@@ -102,6 +102,7 @@ Use package subpaths in apps and shared packages so each caller names the surfac
 | `@goobits/goo/textarea`                | `GooTextarea`                                                      | Textarea component                         |
 | `@goobits/goo/toast`                   | `GooToast`, `GooToaster`, `toast`                                  | Toast notification UI and service          |
 | `@goobits/goo/tooltip`                 | `GooTooltip`, `tooltip`, `createGooTooltip`, `gooTooltipRuntime`   | Tooltip component and action/helper        |
+| `@goobits/goo/toolbar`                 | `createFloatingToolbarView`, toolbar types                         | Transitional toolbar view helpers          |
 | `@goobits/goo/turnstile`               | `GooTurnstileField`                                                | Cloudflare Turnstile field wrapper         |
 | `@goobits/goo/virtualGrid`             | `VirtualGrid`, component types                                     | Virtualized grid primitive                 |
 | `@goobits/goo/virtualGrid/model`       | selection, item, marquee, and windowing helpers                    | Virtual grid model utilities               |
@@ -110,7 +111,9 @@ Use package subpaths in apps and shared packages so each caller names the surfac
 ## Surface Stability
 
 - Stable root: component primitives, `controller`, `schema`, `dialog`, `toast`, `popout`, `tooltip`, `i18n`, `number`, `pointer`, `positioning`, and `virtualGrid`.
-- Subpath-only experimental surfaces: `diff`, `grid-popout`, `toolbar`, `virtualGrid/model`, and `vortex`; keep callers on documented subpath exports and avoid reaching into source files.
+- Stable subpath-only: `diff`, `grid-popout`, and `virtualGrid/model`; keep these off the root aggregate because they are heavier or lower-level than Goo primitives.
+- Transitional subpath-only: `toolbar`; Sketchpad/tool chrome ownership should continue moving toward app or tool-kernel packages instead of growing Goo.
+- Experimental subpath-only: `vortex`; keep callers on the documented subpath and do not promote it to the root aggregate without a fresh API review.
 - Internal: `src/support/*` helpers unless they are exposed through a named package subpath.
 
 ## Public Handles

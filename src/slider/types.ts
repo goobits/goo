@@ -58,8 +58,11 @@ export type GooSliderProps = GooForwardedAttributes & {
 	/** Value unit for formatting. */
 	unit?: GooSliderUnit
 
-	/** Accessible label. */
+	/** Visible label text, also used as the accessible label fallback. */
 	label?: string
+
+	/** Accessible label for the slider when the visible label is unavailable or too terse. */
+	ariaLabel?: string
 
 	/** Tooltip title. */
 	title?: string

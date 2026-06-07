@@ -4,6 +4,7 @@ import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.ts'
 /** GooController binding metadata for the Svelte angle input component. */
 export const controlSchema: SvelteControlSchema = {
 	propMapping: {
+		ariaLabel: 'ariaLabel',
 		name: 'name',
 		unit: 'unit'
 	}
@@ -39,6 +40,7 @@ let {
 	name,
 	id,
 	title,
+	ariaLabel,
 	disabled = false,
 	class: className = '',
 	style,
@@ -290,7 +292,7 @@ function syncBoundValue(nextValue: number): void {
 		class="goo-angle-input__track"
 		class:is-dragging={activePointerId !== null}
 		tabindex="-1"
-		aria-label="Set angle"
+		aria-label={ariaLabel || 'Set angle'}
 		onpointerdown={handlePointerDown}
 		onpointermove={handlePointerMove}
 		onpointerup={handlePointerUp}

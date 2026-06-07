@@ -39,6 +39,9 @@ export type GooAngleInputProps = GooForwardedAttributes & {
 	/** Element title. */
 	title?: string
 
+	/** Accessible label for the circular angle control. */
+	ariaLabel?: string
+
 	/** Whether the angle input is disabled. */
 	disabled?: boolean
 
