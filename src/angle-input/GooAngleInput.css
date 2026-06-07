@@ -44,6 +44,11 @@
 	cursor: grabbing;
 }
 
+.goo-angle-input__track:focus-visible {
+	box-shadow: 0 0 0 2px var(--goo-theme-focus-ring, var(--goo-theme-accent, #3b82f6));
+	outline: none;
+}
+
 /* Center dot */
 .goo-angle-input__track::after {
 	content: '';
@@ -108,4 +113,10 @@
 
 .goo-angle-input.goo-angle-input--disabled .goo-angle-input__track {
 	cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.goo-angle-input__handle {
+		transition-duration: 0.01ms;
+	}
 }

@@ -52,3 +52,9 @@
 	opacity: 0.5;
 	pointer-events: none;
 }
+
+@media (prefers-reduced-motion: reduce) {
+	.goo-textarea__input {
+		transition-duration: 0.01ms;
+	}
+}

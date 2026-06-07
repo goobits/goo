@@ -444,4 +444,15 @@ goo-grid-popout-trigger.goo-grid-trigger--font :global(.goo-grid-trigger__icon) 
 		opacity: 1;
 	}
 }
+
+@media (prefers-reduced-motion: reduce) {
+	goo-grid-popout-trigger .goo-grid-trigger__arrow,
+	.goo-grid-popout-trigger__preview {
+		transition-duration: 0.01ms;
+	}
+
+	.goo-grid-popout-trigger__fade {
+		animation-duration: 0.01ms;
+	}
+}
 </style>

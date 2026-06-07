@@ -212,3 +212,9 @@ sketch-label.goo-config-field .goo-number {
 sketch-label.goo-config-field .goo-select.goo-config-select__container {
 	flex: 1 1 auto;
 }
+
+@media (prefers-reduced-motion: reduce) {
+	.goo-label {
+		transition-duration: 0.01ms;
+	}
+}

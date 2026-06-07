@@ -81,3 +81,10 @@
 .goo-checkbox:not(.goo-checkbox--disabled):hover .goo-checkbox__thumb {
 	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
+
+@media (prefers-reduced-motion: reduce) {
+	.goo-checkbox__track,
+	.goo-checkbox__thumb {
+		transition-duration: 0.01ms;
+	}
+}

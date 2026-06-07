@@ -68,3 +68,9 @@
 		outline-offset: 2px;
 	}
 }
+
+@media (prefers-reduced-motion: reduce) {
+	.goo-error-boundary__retry {
+		transition-duration: 0.01ms;
+	}
+}

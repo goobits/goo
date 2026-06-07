@@ -73,3 +73,9 @@
 	width: 100%;
 	z-index: 1;
 }
+
+@media (prefers-reduced-motion: reduce) {
+	.goo-progress-ring-timer[data-backdrop='true'] {
+		transition-duration: 0.01ms;
+	}
+}

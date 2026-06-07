@@ -77,3 +77,10 @@
 .goo-radio:not(.goo-radio--disabled):hover .goo-radio__circle {
 	border-color: var(--goo-radio-border-color-checked);
 }
+
+@media (prefers-reduced-motion: reduce) {
+	.goo-radio__circle,
+	.goo-radio__dot {
+		transition-duration: 0.01ms;
+	}
+}

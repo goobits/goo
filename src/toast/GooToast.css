@@ -151,3 +151,11 @@
 .goo-toast--error .goo-toast__progress {
 	color: var(--goo-theme-negative, #ef4444);
 }
+
+@media (prefers-reduced-motion: reduce) {
+	.goo-toast__action,
+	.goo-toast__dismiss,
+	.goo-toast__progress {
+		transition-duration: 0.01ms;
+	}
+}
