@@ -70,9 +70,12 @@ describe('GooNumber', () => {
 		})
 
 		const input = container.querySelector<HTMLInputElement>('.goo-number__content')
+		const unit = container.querySelector<HTMLElement>('.goo-number__unit')
 
 		expect(container.querySelector('goo-number')).toBeNull()
-		expect(input?.value).toBe('12%')
+		expect(input?.value).toBe('12')
+		expect(unit?.textContent).toBe('%')
+		expect(unit?.getAttribute('aria-hidden')).toBe('true')
 		expect(input?.getAttribute('aria-valuenow')).toBe('12')
 	})
 
@@ -119,8 +122,10 @@ describe('GooNumber', () => {
 		})
 
 		const input = container.querySelector<HTMLInputElement>('.goo-number__content')
+		const unit = container.querySelector<HTMLElement>('.goo-number__unit')
 
-		expect(input?.value).toBe('97.6%')
+		expect(input?.value).toBe('97.6')
+		expect(unit?.textContent).toBe('%')
 		expect(input?.getAttribute('aria-valuenow')).toBe('0.976')
 	})
 
@@ -136,8 +141,10 @@ describe('GooNumber', () => {
 		})
 
 		const input = container.querySelector<HTMLInputElement>('.goo-number__content')
+		const unit = container.querySelector<HTMLElement>('.goo-number__unit')
 
-		expect(input?.value).toBe('2px')
+		expect(input?.value).toBe('2')
+		expect(unit?.textContent).toBe('px')
 		expect(input?.getAttribute('aria-valuenow')).toBe('2')
 	})
 

@@ -19,7 +19,8 @@ describe('GooAngleInput', () => {
 		expect(container.querySelector('.goo-angle-input')?.getAttribute('unit')).toBe('degree')
 		expect(container.querySelector('.goo-angle-input__track')).not.toBeNull()
 		expect(container.querySelector('.goo-angle-input__handle')).not.toBeNull()
-		expect(container.querySelector<HTMLInputElement>('.goo-number__content')?.value).toBe('25°')
+		expect(container.querySelector<HTMLInputElement>('.goo-number__content')?.value).toBe('25')
+		expect(container.querySelector<HTMLElement>('.goo-number__unit')?.textContent).toBe('°')
 	})
 
 	it('binds the native root API for imperative updates', async() => {

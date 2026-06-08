@@ -97,6 +97,7 @@ const classes = $derived.by(() => {
 	if (className) values.push(className)
 	return values.filter(Boolean).join(' ')
 })
+const unitSuffix = $derived(getUnitSuffix(unit))
 
 export function setValue(nextValue: number, { silent = true }: { silent?: boolean } = {}): void {
 	const oldValue = currentValue
@@ -272,7 +273,21 @@ function parseInputValue(rawValue: string): number {
 
 function formatDisplayValue(nextValue: number): string {
 	if (!Number.isFinite(nextValue)) return ''
-	return String(formatNumber(nextValue, unit, { min, max, step }))
+	const formatted = String(formatNumber(nextValue, unit, { min, max, step }))
+	if (!unitSuffix || !formatted.endsWith(unitSuffix)) {
+		return formatted
+	}
+	return formatted.slice(0, -unitSuffix.length)
+}
+
+function getUnitSuffix(nextUnit: string): string {
+	if (!nextUnit || nextUnit === 'float' || nextUnit === 'int' || nextUnit === 'integer' || nextUnit === 'number') {
+		return ''
+	}
+	const suffix = formatNumber(0, nextUnit, { appendFormatSuffix: true, max: 1, min: 0, step: 1 })
+		.toString()
+		.replace(/^[-.\d]+/, '')
+	return suffix
 }
 
 function pulseValueChange(): void {
@@ -320,6 +335,9 @@ function pulseValueChange(): void {
 		onkeyup={(event) => event.stopPropagation()}
 		onwheel={handleWheel}
 	/>
+	{#if unitSuffix}
+		<span class="goo-number__unit" aria-hidden="true">{unitSuffix}</span>
+	{/if}
 	<div class="goo-number__arrows" aria-hidden="true">
 		<button
 			class="goo-number__arrow goo-number__arrow--up"
