@@ -48,6 +48,7 @@ let opened = $state(false)
 let popout: GooPopoutInstance | null = null
 let lastPopoutOpenAt = 0
 let suppressNextClick = false
+let lastOpenContentSignature = ''
 
 const currentSelected = $derived(currentSelectedOverride ?? selected)
 const currentItem = $derived(findItem(currentSelected) ?? items[0])
@@ -65,6 +66,21 @@ $effect(() => {
 
 $effect(() => {
 	return () => closePopout()
+})
+
+$effect(() => {
+	const signature = getContentSignature()
+	if (!opened) {
+		lastOpenContentSignature = ''
+		return
+	}
+	if (lastOpenContentSignature === signature) return
+
+	const content = popout?.element?.querySelector<HTMLElement>('.goo-grid-picker')
+	if (!content) return
+
+	renderOptions(content)
+	lastOpenContentSignature = signature
 })
 
 export function getRootElement(): HTMLElement | null {
@@ -196,11 +212,38 @@ function createContent(): HTMLElement {
 	content.setAttribute('role', 'listbox')
 	content.addEventListener('keydown', handlePopoutKeydown)
 
-	for (const item of items) {
-		content.appendChild(createOption(item))
-	}
+	renderOptions(content)
+	lastOpenContentSignature = getContentSignature()
 
 	return content
+}
+
+function renderOptions(content: HTMLElement): void {
+	content.replaceChildren(...items.map(item => createOption(item)))
+}
+
+function getContentSignature(): string {
+	return [
+		currentSelected,
+		items.map(item => {
+			const preview = getItemPreview(item)
+			return [
+				item.id,
+				item.ariaLabel ?? '',
+				item.title,
+				item.kicker ?? '',
+				item.iconClass ?? '',
+				item.iconSvg?.viewBox ?? '',
+				preview?.src ?? '',
+				preview?.alt ?? '',
+				preview?.background ?? '',
+				preview?.badge ?? '',
+				preview?.fit ?? '',
+				preview?.hue ?? '',
+				preview?.size ?? ''
+			].join('\u0001')
+		}).join('\u0002')
+	].join('\u0003')
 }
 
 function createOption(item: GridPopoutItem): HTMLElement {

@@ -221,6 +221,58 @@ describe('GridPopoutPicker', () => {
 		expect(optionPreview?.querySelector('img')).toBeNull()
 	})
 
+	it('updates open option previews when media arrives after the popout opens', async() => {
+		const placeholderItems: GridPopoutItem[] = [
+			{
+				id: 'brush',
+				kicker: 'Brush preset',
+				preview: {
+					alt: 'Brush preview',
+					background: 'dots',
+					src: ''
+				},
+				title: 'Brush'
+			}
+		]
+		const loadedItems: GridPopoutItem[] = [
+			{
+				...placeholderItems[0],
+				preview: {
+					...placeholderItems[0].preview!,
+					src: 'data:image/png;base64,preview'
+				}
+			}
+		]
+		const { getByRole, rerender } = render(GridPopoutPicker, {
+			props: {
+				ariaLabel: 'Brush',
+				items: placeholderItems,
+				popoutClass: 'goo-grid-popout--preset',
+				selected: 'brush'
+			}
+		})
+
+		const trigger = getByRole('button', { name: 'Brush' })
+		await fireEvent.click(trigger)
+
+		const option = getByRole('option', { name: 'Brush' })
+		const optionPreview = option.querySelector('.goo-grid-picker__preview.goo-preview')
+		expect(optionPreview).not.toBeNull()
+		expect(optionPreview?.querySelector('img')).toBeNull()
+
+		await rerender({
+			ariaLabel: 'Brush',
+			items: loadedItems,
+			popoutClass: 'goo-grid-popout--preset',
+			selected: 'brush'
+		})
+
+		const loadedOptionImage = getByRole('option', { name: 'Brush' })
+			.querySelector<HTMLImageElement>('.goo-grid-picker__preview.goo-preview img')
+		expect(loadedOptionImage?.getAttribute('src')).toBe('data:image/png;base64,preview')
+		expect(loadedOptionImage?.getAttribute('alt')).toBe('Brush preview')
+	})
+
 	it('keeps legacy previewUrl items working', () => {
 		const { getByRole } = render(GridPopoutPicker, {
 			props: {
