@@ -3,7 +3,7 @@
  * Shared Goo-styled trigger shell for controls that open a popout.
  */
 
-import { ChevronDown } from '@lucide/svelte'
+import ChevronDown from '@lucide/svelte/icons/chevron-down'
 
 import type { GridPopoutSvgIcon } from './types.ts'
 

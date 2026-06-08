@@ -1,10 +1,12 @@
 <script lang="ts" generics="T">
 import './GooDataGrid.css'
 
-import { ArrowDown, ArrowDownUp, ArrowUp } from '@lucide/svelte'
-import { tick } from 'svelte'
+import ArrowDown from '@lucide/svelte/icons/arrow-down'
+import ArrowDownUp from '@lucide/svelte/icons/arrow-down-up'
+import ArrowUp from '@lucide/svelte/icons/arrow-up'
+import { tick, untrack } from 'svelte'
 
-import { calculateVirtualGridWindow, virtualGridSpacerHeight } from '../virtualGrid/virtualWindow.ts'
+import { calculateVirtualGridWindow, virtualGridSpacerHeight, virtualGridWindowsEqual } from '../virtualGrid/virtualWindow.ts'
 import type { VirtualGridWindow } from '../virtualGrid/types.ts'
 import type {
 	GooDataGridCellValue,
@@ -94,18 +96,23 @@ let visibleRows = $derived.by(() => {
 let topSpacerHeight = $derived(virtualGridSpacerHeight(windowState.topRows, rowHeight, 0))
 let bottomSpacerHeight = $derived(virtualGridSpacerHeight(windowState.bottomRows, rowHeight, 0))
 
+function setWindowState(next: VirtualGridWindow): void {
+	if (untrack(() => virtualGridWindowsEqual(windowState, next))) return
+	windowState = next
+}
+
 function updateWindow(): void {
 	if (!effectiveScrollRoot) {
-		windowState = {
+		setWindowState({
 			bottomRows: 0,
 			endSlot: sortedRows.length,
 			startSlot: 0,
 			topRows: 0
-		}
+		})
 		return
 	}
 	const viewportHeight = effectiveScrollRoot.clientHeight || rowHeight * Math.min(sortedRows.length, 12)
-	windowState = calculateVirtualGridWindow({
+	setWindowState(calculateVirtualGridWindow({
 		columns: 1,
 		itemsTop: 0,
 		overscanRows,
@@ -115,7 +122,7 @@ function updateWindow(): void {
 		viewportHeight,
 		scrollTop: effectiveScrollRoot.scrollTop,
 		virtual: virtualEnabled
-	})
+	}))
 }
 
 function rowKey(row: T, rowIndex: number): GooDataGridRowKey {

@@ -2,7 +2,7 @@
 	import './VirtualGrid.css'
 
 	import type { VirtualGridProps, VirtualGridSlot, VirtualGridWindow } from './types.ts'
-	import { calculateVirtualGridWindow, virtualGridSpacerHeight } from './virtualWindow.ts'
+	import { calculateVirtualGridWindow, virtualGridSpacerHeight, virtualGridWindowsEqual } from './virtualWindow.ts'
 
 	const DEFAULT_OVERSCAN_ROWS = 8
 	const MOBILE_OVERSCAN_ROWS = 4
@@ -78,11 +78,7 @@
 	}
 
 	function setWindowState(next: VirtualGridWindow, force = false) {
-		if (!force
-			&& windowState.startSlot === next.startSlot
-			&& windowState.endSlot === next.endSlot
-			&& windowState.topRows === next.topRows
-			&& windowState.bottomRows === next.bottomRows) {
+		if (!force && virtualGridWindowsEqual(windowState, next)) {
 			return
 		}
 		windowState = next

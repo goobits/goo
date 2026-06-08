@@ -67,6 +67,14 @@ export function calculateVirtualGridWindow({
 	}
 }
 
+/** Return whether two virtual grid windows describe the same rendered slots and spacer rows. */
+export function virtualGridWindowsEqual(left: VirtualGridWindow, right: VirtualGridWindow): boolean {
+	return left.startSlot === right.startSlot
+		&& left.endSlot === right.endSlot
+		&& left.topRows === right.topRows
+		&& left.bottomRows === right.bottomRows
+}
+
 /**
  * Convert virtual spacer rows into pixel height.
  * @param rows - Spacer row count.

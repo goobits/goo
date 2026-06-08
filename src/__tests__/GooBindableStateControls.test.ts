@@ -47,7 +47,9 @@ describe('Goo bindable state controls', () => {
 		await tick()
 		expect(screen.getByTestId('dialog-open').textContent).toBe('true')
 
-		document.querySelector<HTMLButtonElement>('.goo-dialog__close')?.click()
+		const closeButton = document.querySelector<HTMLButtonElement>('.goo-dialog__close-badge')
+		expect(closeButton).toBeInstanceOf(HTMLButtonElement)
+		closeButton.click()
 		await delay(320)
 		await tick()
 		expect(screen.getByTestId('dialog-open').textContent).toBe('false')
