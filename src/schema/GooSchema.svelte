@@ -33,6 +33,17 @@ let lastShowPanelHeader: boolean | undefined
 let lastFolderClassName: string | undefined
 let lastControlTypes: GooSchemaOptions['controlTypes'] | undefined
 
+type GooSchemaPropsSnapshot = {
+	bare: boolean
+	className: string
+	controlTypes: GooSchemaOptions['controlTypes'] | undefined
+	data: GooSchemaData
+	folderClassName: string | undefined
+	schema: GooSchemaType
+	showPanelHeader: boolean
+	style: string | undefined
+}
+
 let {
 	schema,
 	data,
@@ -47,8 +58,21 @@ let {
 	oninput
 }: GooSchemaProps = $props()
 
-function getCreateKey(): string {
-	return JSON.stringify({ className, style })
+function snapshotProps(): GooSchemaPropsSnapshot {
+	return {
+		bare,
+		className,
+		controlTypes,
+		data,
+		folderClassName,
+		schema,
+		showPanelHeader,
+		style
+	}
+}
+
+function getCreateKey(snapshot: GooSchemaPropsSnapshot): string {
+	return JSON.stringify({ className: snapshot.className, style: snapshot.style })
 }
 
 function handleChange(event: Event): void {
@@ -75,59 +99,59 @@ function destroySchema(): void {
 	instance = null
 }
 
-function mountSchema(): void {
+function mountSchema(snapshot: GooSchemaPropsSnapshot): void {
 	const target = host
 	if (!target) return
 	destroySchema()
 	const nextSchemaElement = createGooSchema({
-		schema,
-		data,
-		bare,
-		showPanelHeader,
-		folderClassName,
-		controlTypes
+		schema: snapshot.schema,
+		data: snapshot.data,
+		bare: snapshot.bare,
+		showPanelHeader: snapshot.showPanelHeader,
+		folderClassName: snapshot.folderClassName,
+		controlTypes: snapshot.controlTypes
 	})
 	schemaElement = nextSchemaElement
-	if (className) schemaElement.classList.add(...className.split(' ').filter(Boolean))
-	if (style) schemaElement.setAttribute('style', style)
+	if (snapshot.className) schemaElement.classList.add(...snapshot.className.split(' ').filter(Boolean))
+	if (snapshot.style) schemaElement.setAttribute('style', snapshot.style)
 	schemaElement.addEventListener('change', handleChange)
 	schemaElement.addEventListener('input', handleInput)
 	target.replaceChildren(schemaElement)
 	instance = schemaElement
-	lastSchema = schema
-	lastData = data
-	lastBare = bare
-	lastShowPanelHeader = showPanelHeader
-	lastFolderClassName = folderClassName
-	lastControlTypes = controlTypes
+	lastSchema = snapshot.schema
+	lastData = snapshot.data
+	lastBare = snapshot.bare
+	lastShowPanelHeader = snapshot.showPanelHeader
+	lastFolderClassName = snapshot.folderClassName
+	lastControlTypes = snapshot.controlTypes
 }
 
-function updateSchema(): void {
+function updateSchema(snapshot: GooSchemaPropsSnapshot): void {
 	if (!schemaElement) return
 	const options: GooSchemaUpdateOptions = {}
-	if (schema !== lastSchema) {
-		schemaElement.setSchema(schema)
-		lastSchema = schema
+	if (snapshot.schema !== lastSchema) {
+		schemaElement.setSchema(snapshot.schema)
+		lastSchema = snapshot.schema
 	}
-	if (data !== lastData) {
-		schemaElement.setData(data)
-		lastData = data
+	if (snapshot.data !== lastData) {
+		schemaElement.setData(snapshot.data)
+		lastData = snapshot.data
 	}
-	if (bare !== lastBare) {
-		lastBare = bare
-		options.bare = bare
+	if (snapshot.bare !== lastBare) {
+		lastBare = snapshot.bare
+		options.bare = snapshot.bare
 	}
-	if (showPanelHeader !== lastShowPanelHeader) {
-		lastShowPanelHeader = showPanelHeader
-		options.showPanelHeader = showPanelHeader
+	if (snapshot.showPanelHeader !== lastShowPanelHeader) {
+		lastShowPanelHeader = snapshot.showPanelHeader
+		options.showPanelHeader = snapshot.showPanelHeader
 	}
-	if (folderClassName !== lastFolderClassName) {
-		lastFolderClassName = folderClassName
-		options.folderClassName = folderClassName
+	if (snapshot.folderClassName !== lastFolderClassName) {
+		lastFolderClassName = snapshot.folderClassName
+		options.folderClassName = snapshot.folderClassName
 	}
-	if (controlTypes !== lastControlTypes) {
-		lastControlTypes = controlTypes
-		options.controlTypes = controlTypes
+	if (snapshot.controlTypes !== lastControlTypes) {
+		lastControlTypes = snapshot.controlTypes
+		options.controlTypes = snapshot.controlTypes
 	}
 	if (Object.keys(options).length) {
 		schemaElement.setOptions(options)
@@ -164,9 +188,10 @@ export function refreshConditions(): void {
 
 $effect(() => {
 	if (!host) return
+	const snapshot = snapshotProps()
 	untrack(() => {
-		lastCreateKey = getCreateKey()
-		mountSchema()
+		lastCreateKey = getCreateKey(snapshot)
+		mountSchema(snapshot)
 	})
 	mounted = true
 	return () => {
@@ -177,13 +202,14 @@ $effect(() => {
 
 $effect(() => {
 	if (!mounted) return
-	const createKey = getCreateKey()
+	const snapshot = snapshotProps()
+	const createKey = getCreateKey(snapshot)
 	if (createKey !== lastCreateKey) {
 		lastCreateKey = createKey
-		mountSchema()
+		mountSchema(snapshot)
 		return
 	}
-	updateSchema()
+	updateSchema(snapshot)
 })
 </script>
 
