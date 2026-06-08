@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import BindableStateControlsHost from './BindableStateControlsHost.svelte'
 
 const nextAnimationFrame = () => new Promise(resolve => requestAnimationFrame(resolve))
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms)) // test-shape: timing-probe - documented test timing behavior.
 
 describe('Goo bindable state controls', () => {
 	afterEach(() => {

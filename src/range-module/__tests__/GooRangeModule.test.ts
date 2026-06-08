@@ -17,7 +17,7 @@ describe('GooRangeModule', () => {
 			value: 12
 		})
 		document.body.appendChild(range)
-		await new Promise(resolve => setTimeout(resolve, 0))
+		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
 
 		expect(range.querySelector('.goo-slider')).not.toBeNull()
 		expect(range.querySelector('.goo-number')).not.toBeNull()
@@ -44,7 +44,7 @@ describe('GooRangeModule', () => {
 			value: { min: 10, max: 30 }
 		})
 		document.body.appendChild(range)
-		await new Promise(resolve => setTimeout(resolve, 0))
+		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
 
 		expect(range.querySelectorAll('.goo-number')).toHaveLength(2)
 
@@ -64,7 +64,7 @@ describe('GooRangeModule', () => {
 			value: { x: -4, y: 12 }
 		})
 		document.body.appendChild(range)
-		await new Promise(resolve => setTimeout(resolve, 0))
+		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
 
 		expect(range.querySelectorAll('.goo-number')).toHaveLength(2)
 		expect(range.getRange().values).toEqual([ -4, 12 ])
