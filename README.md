@@ -35,6 +35,11 @@ Goo expects Svelte 5 from the consumer:
 }
 ```
 
+## Publishing
+
+`@goobits/goo` is publishable as a public package. Keep release metadata in
+`CHANGELOG.md`, run `pnpm run check`, and publish from the Goo package root.
+
 ## Local Development
 
 ```bash
