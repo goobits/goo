@@ -6,6 +6,11 @@ import { isSelfContainedField } from '../fieldLayout.ts'
 import GooSchema from '../GooSchema.svelte'
 import { createGooSchema } from '../index.ts'
 
+async function settleGooSchema(): Promise<void> {
+	await tick()
+	await Promise.resolve()
+}
+
 describe('GooSchema', () => {
 	afterEach(() => {
 		document.querySelectorAll('.goo-schema').forEach(element => element.remove())
@@ -18,7 +23,7 @@ describe('GooSchema', () => {
 			bare: true
 		})
 		document.body.appendChild(schema)
-		await new Promise(resolve => setTimeout(resolve, 50))
+		await settleGooSchema()
 
 		expect(document.querySelector('goo-schema')).toBeNull()
 		expect(schema.classList.contains('goo-schema')).toBe(true)
@@ -35,7 +40,7 @@ describe('GooSchema', () => {
 			showPanelHeader: false
 		})
 		document.body.appendChild(schema)
-		await new Promise(resolve => setTimeout(resolve, 50))
+		await settleGooSchema()
 
 		expect(schema.querySelector('.goo-panel')).not.toBeNull()
 		expect(schema.querySelector('.goo-panel__header')).toBeNull()
@@ -56,7 +61,7 @@ describe('GooSchema', () => {
 			folderClassName: 'goo-folder--inspector'
 		})
 		document.body.appendChild(schema)
-		await new Promise(resolve => setTimeout(resolve, 50))
+		await settleGooSchema()
 
 		const folder = schema.querySelector('.goo-folder')
 		expect(folder?.classList.contains('goo-folder--inspector')).toBe(true)
@@ -80,8 +85,7 @@ describe('GooSchema', () => {
 				}
 			}
 		})
-		await tick()
-		await new Promise(resolve => setTimeout(resolve, 50))
+		await settleGooSchema()
 
 		expect(container.querySelector('goo-schema')).toBeNull()
 		expect(container.querySelector('.goo-schema')).toBe(instance)
@@ -97,8 +101,7 @@ describe('GooSchema', () => {
 				bare: true
 			}
 		})
-		await tick()
-		await new Promise(resolve => setTimeout(resolve, 50))
+		await settleGooSchema()
 
 		expect(container.querySelector('.goo-schema__bare')).not.toBeNull()
 
@@ -108,8 +111,7 @@ describe('GooSchema', () => {
 			bare: false,
 			showPanelHeader: false
 		})
-		await tick()
-		await new Promise(resolve => setTimeout(resolve, 50))
+		await settleGooSchema()
 
 		expect(container.querySelector('.goo-panel')).not.toBeNull()
 		expect(container.querySelector('.goo-panel__header')).toBeNull()
@@ -124,8 +126,7 @@ describe('GooSchema', () => {
 				bare: true
 			}
 		})
-		await tick()
-		await new Promise(resolve => setTimeout(resolve, 50))
+		await settleGooSchema()
 
 		const firstController = container.querySelector('.goo-controller')
 		expect(firstController).not.toBeNull()
@@ -135,8 +136,7 @@ describe('GooSchema', () => {
 			data: { size: 24 },
 			bare: true
 		})
-		await tick()
-		await new Promise(resolve => setTimeout(resolve, 50))
+		await settleGooSchema()
 
 		expect(container.querySelector('.goo-controller')).toBe(firstController)
 	})
@@ -148,13 +148,13 @@ describe('GooSchema', () => {
 			bare: true
 		})
 		document.body.appendChild(schema)
-		await new Promise(resolve => setTimeout(resolve, 50))
+		await settleGooSchema()
 
 		const firstController = schema.getController('size')
 		expect(firstController).not.toBeUndefined()
 
 		schema.setData({ size: 24 })
-		await new Promise(resolve => setTimeout(resolve, 50))
+		await settleGooSchema()
 
 		expect(schema.getController('size')).toBe(firstController)
 		expect(schema.getData().size).toBe(24)
@@ -168,14 +168,14 @@ describe('GooSchema', () => {
 			bare: true
 		})
 		document.body.appendChild(schema)
-		await new Promise(resolve => setTimeout(resolve, 50))
+		await settleGooSchema()
 
 		const firstController = schema.getController('shape.size')
 		expect(firstController).not.toBeUndefined()
 
 		data.shape.size = 24
 		schema.setData(data)
-		await new Promise(resolve => setTimeout(resolve, 50))
+		await settleGooSchema()
 
 		expect(schema.getController('shape.size')).toBe(firstController)
 		expect(schema.getData().shape).toBe(data.shape)
@@ -210,7 +210,7 @@ describe('GooSchema', () => {
 			}
 		})
 		document.body.appendChild(schema)
-		await new Promise(resolve => setTimeout(resolve, 50))
+		await settleGooSchema()
 
 		expect(receivedOptions).toMatchObject({
 			canCross: true,
@@ -234,7 +234,7 @@ describe('GooSchema', () => {
 			bare: true
 		})
 		document.body.appendChild(schema)
-		await new Promise(resolve => setTimeout(resolve, 50))
+		await settleGooSchema()
 
 		expect(schema.getController('visibleSize')).not.toBeUndefined()
 		expect(schema.getController('hiddenSize')).toBeUndefined()
@@ -270,7 +270,7 @@ describe('GooSchema', () => {
 			}
 		})
 		document.body.appendChild(schema)
-		await new Promise(resolve => setTimeout(resolve, 50))
+		await settleGooSchema()
 
 		expect(receivedOptions).toMatchObject({
 			format: 'percent',
@@ -311,7 +311,7 @@ describe('GooSchema', () => {
 			}
 		})
 		document.body.appendChild(schema)
-		await new Promise(resolve => setTimeout(resolve, 50))
+		await settleGooSchema()
 
 		expect(receivedOptions).toMatchObject({
 			format: 'percent',
