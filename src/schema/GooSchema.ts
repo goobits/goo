@@ -126,8 +126,12 @@ function attachSchemaApi(element: GooSchemaInternal): void {
 			void element._rebuild()
 		},
 		setData: (data: GooSchemaData) => {
-			element._data = data
-			void element._rebuild()
+			mergeSchemaData(element._data, data)
+			if (schemaHasConditions(element.state.schema)) {
+				element._scheduleRebuild()
+				return
+			}
+			element.refresh()
 		},
 		setOptions: (options: GooSchemaUpdateOptions) => {
 			let shouldRebuild = false
@@ -183,6 +187,41 @@ function attachSchemaApi(element: GooSchemaInternal): void {
 			token: number
 		) => buildSelfContainedField(element, node, object, property, controllerOptions, module, parent, token)
 	})
+}
+
+function mergeSchemaData(target: GooSchemaData, source: GooSchemaData): void {
+	if (target === source) return
+	for (const key of Object.keys(target)) {
+		if (!(key in source)) {
+			delete target[key]
+		}
+	}
+	for (const [ key, value ] of Object.entries(source)) {
+		const current = target[key]
+		if (isPlainRecord(current) && isPlainRecord(value)) {
+			mergeSchemaData(current, value)
+		} else {
+			target[key] = value
+		}
+	}
+}
+
+function isPlainRecord(value: unknown): value is GooSchemaData {
+	return Boolean(value)
+		&& typeof value === 'object'
+		&& !Array.isArray(value)
+		&& Object.getPrototypeOf(value) === Object.prototype
+}
+
+function schemaHasConditions(schema: GooSchemaType): boolean {
+	const nodes = Array.isArray(schema) ? schema : schema.children
+	return nodes.some(nodeHasConditions)
+}
+
+function nodeHasConditions(node: GooSchemaNode): boolean {
+	if (node.if !== undefined || node.unless !== undefined) return true
+	if ('children' in node) return node.children.some(nodeHasConditions)
+	return false
 }
 
 async function rebuildSchema(element: GooSchemaInternal): Promise<void> {

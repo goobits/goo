@@ -78,7 +78,7 @@ describe('GridPopoutPicker', () => {
 		const { container, getByRole } = render(GridPopoutPicker, {
 			props: {
 				ariaLabel: 'Subtool',
-				class: 'goo-grid-trigger--subtool',
+				class: 'goo-grid-trigger--icon-grid',
 				dataParam: 'type',
 				id: 'UISubTool',
 				items,
@@ -90,7 +90,7 @@ describe('GridPopoutPicker', () => {
 
 		expect(container.querySelector('goo-grid-popout-trigger')).toBe(trigger)
 		expect(trigger.id).toBe('UISubTool')
-		expect(trigger.classList.contains('goo-grid-trigger--subtool')).toBe(true)
+		expect(trigger.classList.contains('goo-grid-trigger--icon-grid')).toBe(true)
 		expect(trigger.getAttribute('data-param')).toBe('type')
 		expect(trigger.textContent).toContain('Line')
 		expect(trigger.querySelector('.sketch-icon-line')).toBeTruthy()
@@ -104,7 +104,7 @@ describe('GridPopoutPicker', () => {
 				ariaLabel: 'Subtool',
 				items,
 				onchoose,
-				popoutClass: 'goo-grid-popout--subtool',
+				popoutClass: 'goo-grid-popout--icon-grid',
 				selected: 'line'
 			}
 		})

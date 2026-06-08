@@ -5,15 +5,12 @@
 
 .goo-folder {
 	/* Customizable via CSS custom properties */
-	--goo-folder-bg: var(--goo-theme-surface, transparent);
-	--goo-folder-header-bg: var(
-		--goo-theme-surface-raised,
-		color-mix(in srgb, var(--goo-theme-fg, #fff) 5%, transparent)
-	);
-	--goo-folder-header-bg-hover: color-mix(in srgb, var(--goo-theme-fg, #fff) 8%, var(--goo-folder-bg));
+	--goo-folder-bg: transparent;
+	--goo-folder-header-bg: transparent;
+	--goo-folder-header-bg-hover: color-mix(in srgb, var(--goo-theme-fg, #fff) 7%, transparent);
 	--goo-folder-border: var(--goo-theme-border, rgba(128, 128, 128, 0.2));
 	--goo-folder-fg: var(--goo-theme-fg, inherit);
-	--goo-folder-radius: var(--goo-theme-radius-lg, 0.6875rem);
+	--goo-folder-radius: var(--goo-theme-radius-md, 0.5rem);
 	--goo-folder-transition: var(--goo-theme-transition-normal, 0.2s ease);
 	--goo-folder-indent: 0px;
 
@@ -28,7 +25,6 @@
 .goo-folder .goo-folder {
 	--goo-folder-indent: 0;
 	margin-left: 8px;
-	border-left: 2px solid var(--goo-folder-border);
 	border-radius: 0;
 }
 
@@ -39,10 +35,11 @@
 	gap: 6px;
 	width: 100%;
 	margin: 0;
-	padding: var(--goo-theme-control-row-padding, 0.5rem 0.75rem);
+	min-height: 2rem;
+	padding: 0 var(--goo-theme-space-sm, 0.5rem);
 	background: var(--goo-folder-header-bg);
 	border: none;
-	border-radius: var(--goo-folder-radius) var(--goo-folder-radius) 0 0;
+	border-radius: var(--goo-folder-radius);
 	font: inherit;
 	color: inherit;
 	text-align: left;
@@ -58,8 +55,8 @@
 }
 
 .goo-folder__header:focus-visible {
-	outline: 2px solid var(--goo-theme-focus-ring, #007bff);
-	outline-offset: -2px;
+	box-shadow: 0 0 0 2px var(--goo-theme-focus-ring, #007bff);
+	outline: none;
 }
 
 /* Closed folder - round all corners on header */
@@ -93,7 +90,7 @@
 	font-size: var(--goo-theme-control-label-size, 0.8125rem);
 	font-weight: var(--goo-theme-control-label-weight, 600);
 	text-transform: uppercase;
-	letter-spacing: 0.5px;
+	letter-spacing: 0.04em;
 	color: var(--goo-theme-control-label-color, var(--goo-folder-fg));
 	white-space: nowrap;
 	overflow: hidden;
@@ -104,10 +101,10 @@
 .goo-folder__content {
 	display: none;
 	flex-direction: column;
-	gap: 2px;
-	padding: 4px;
+	gap: 0;
+	padding: 1px 0 5px;
 	background: var(--goo-folder-bg);
-	border-radius: 0 0 var(--goo-folder-radius) var(--goo-folder-radius);
+	border-radius: var(--goo-folder-radius);
 }
 
 /* Show content when open - use direct child selector for proper nesting */
@@ -117,12 +114,12 @@
 
 /* Inspector variant - compact section styling for dense property panels. */
 .goo-folder--inspector {
-	--goo-folder-inspector-active-bg: color-mix(in srgb, var(--goo-theme-accent) 14%, transparent);
+	--goo-folder-inspector-active-bg: var(--goo-theme-surface-sunken);
 	--goo-folder-inspector-accent: var(--goo-theme-accent, #3b82f6);
 
-	margin-block-end: var(--goo-theme-space-xs, 0.125rem);
-	border: 1px solid color-mix(in srgb, var(--goo-theme-border) 72%, transparent);
-	border-radius: var(--goo-theme-radius-lg, 0.6875rem);
+	margin-block-end: 0;
+	border: 1px solid transparent;
+	border-radius: var(--goo-theme-radius-md, 0.5rem);
 }
 
 .goo-folder--inspector::before {
@@ -130,36 +127,37 @@
 	position: absolute;
 	inset-block: 6px;
 	inset-inline-start: 0;
-	inline-size: 3px;
-	border-radius: 3px;
+	inline-size: 2px;
+	border-radius: 2px;
 	background: var(--goo-folder-inspector-accent);
 	opacity: 0;
 	pointer-events: none;
+	display: none;
 }
 
 .goo-folder--inspector.goo-folder--open {
 	background: var(--goo-folder-inspector-active-bg);
-	border-color: color-mix(in srgb, var(--goo-theme-accent) 32%, var(--goo-theme-border));
+	border-color: color-mix(in srgb, var(--goo-theme-border) 70%, transparent);
 }
 
 .goo-folder--inspector.goo-folder--open::before {
-	opacity: 1;
+	opacity: 0;
 }
 
 .goo-folder--inspector > .goo-folder__header {
 	gap: var(--goo-theme-space-sm, 0.5rem);
-	padding: var(--goo-theme-space-sm, 0.5rem) var(--goo-theme-space-sm, 0.5rem)
-		var(--goo-theme-space-sm, 0.5rem) var(--goo-theme-space-md, 0.75rem);
+	min-height: 2rem;
+	padding: 0 var(--goo-theme-space-sm, 0.5rem);
 	background: transparent;
-	border-radius: var(--goo-theme-radius-lg, 0.5rem);
+	border-radius: var(--goo-theme-radius-md, 0.5rem);
 }
 
 .goo-folder--inspector > .goo-folder__header:hover {
-	background: transparent;
+	background: color-mix(in srgb, var(--goo-theme-fg) 7%, transparent);
 }
 
 .goo-folder--inspector.goo-folder--open > .goo-folder__header {
-	border-radius: var(--goo-theme-radius-lg, 0.5rem) var(--goo-theme-radius-lg, 0.5rem) 0 0;
+	border-radius: var(--goo-theme-radius-md, 0.5rem);
 }
 
 .goo-folder--inspector > .goo-folder__header > .goo-folder__chevron {
@@ -169,18 +167,18 @@
 }
 
 .goo-folder--inspector > .goo-folder__header > .goo-folder__title {
-	font-size: var(--goo-theme-control-label-size, 0.8125rem);
+	font-size: var(--goo-theme-font-size-xs, 0.75rem);
 	font-weight: 600;
-	text-transform: none;
-	letter-spacing: normal;
-	color: var(--goo-theme-fg, var(--goo-folder-fg));
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--goo-theme-muted, var(--goo-folder-fg));
 }
 
 .goo-folder--inspector > .goo-folder__content {
 	gap: 0;
-	padding: 0;
+	padding: 1px 0 5px;
 	background: transparent;
-	border-radius: 0 0 var(--goo-theme-radius-lg, 0.5rem) var(--goo-theme-radius-lg, 0.5rem);
+	border-radius: var(--goo-theme-radius-md, 0.5rem);
 	overflow: visible;
 }
 

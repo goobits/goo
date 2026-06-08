@@ -188,8 +188,8 @@ export function refreshConditions(): void {
 
 $effect(() => {
 	if (!host) return
-	const snapshot = snapshotProps()
 	untrack(() => {
+		const snapshot = snapshotProps()
 		lastCreateKey = getCreateKey(snapshot)
 		mountSchema(snapshot)
 	})

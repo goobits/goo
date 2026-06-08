@@ -31,6 +31,22 @@ describe('GooFolder', () => {
 		expect(onchange).not.toHaveBeenCalled()
 	})
 
+	it('toggles open state when clicking the header', () => {
+		const folder = createFolder({ title: 'Settings', open: true })
+		document.body.appendChild(folder)
+
+		expect(folder.open).toBe(true)
+		expect(folder.headerElement?.getAttribute('aria-expanded')).toBe('true')
+
+		folder.headerElement?.click()
+		expect(folder.open).toBe(false)
+		expect(folder.headerElement?.getAttribute('aria-expanded')).toBe('false')
+
+		folder.headerElement?.click()
+		expect(folder.open).toBe(true)
+		expect(folder.headerElement?.getAttribute('aria-expanded')).toBe('true')
+	})
+
 	it('treats string content as text instead of HTML', () => {
 		const folder = createFolder({
 			title: 'Settings',

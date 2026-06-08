@@ -115,6 +115,72 @@ describe('GooSchema', () => {
 		expect(container.querySelector('.goo-panel__header')).toBeNull()
 	})
 
+	it('updates data without rebuilding unchanged controllers', async() => {
+		const schema = [ { path: 'size', min: 0, max: 100 } ]
+		const { container, rerender } = render(GooSchema, {
+			props: {
+				schema,
+				data: { size: 12 },
+				bare: true
+			}
+		})
+		await tick()
+		await new Promise(resolve => setTimeout(resolve, 50))
+
+		const firstController = container.querySelector('.goo-controller')
+		expect(firstController).not.toBeNull()
+
+		await rerender({
+			schema,
+			data: { size: 24 },
+			bare: true
+		})
+		await tick()
+		await new Promise(resolve => setTimeout(resolve, 50))
+
+		expect(container.querySelector('.goo-controller')).toBe(firstController)
+	})
+
+	it('keeps imperative schema controllers mounted across data updates', async() => {
+		const schema = createGooSchema({
+			schema: [ { path: 'size', min: 0, max: 100 } ],
+			data: { size: 12 },
+			bare: true
+		})
+		document.body.appendChild(schema)
+		await new Promise(resolve => setTimeout(resolve, 50))
+
+		const firstController = schema.getController('size')
+		expect(firstController).not.toBeUndefined()
+
+		schema.setData({ size: 24 })
+		await new Promise(resolve => setTimeout(resolve, 50))
+
+		expect(schema.getController('size')).toBe(firstController)
+		expect(schema.getData().size).toBe(24)
+	})
+
+	it('accepts same-object data updates without rebuilding nested controllers', async() => {
+		const data = { shape: { size: 12 } }
+		const schema = createGooSchema({
+			schema: [ { path: 'shape.size', min: 0, max: 100 } ],
+			data,
+			bare: true
+		})
+		document.body.appendChild(schema)
+		await new Promise(resolve => setTimeout(resolve, 50))
+
+		const firstController = schema.getController('shape.size')
+		expect(firstController).not.toBeUndefined()
+
+		data.shape.size = 24
+		schema.setData(data)
+		await new Promise(resolve => setTimeout(resolve, 50))
+
+		expect(schema.getController('shape.size')).toBe(firstController)
+		expect(schema.getData().shape).toBe(data.shape)
+	})
+
 	it('forwards rich range metadata to controller controls', async() => {
 		let receivedOptions: Record<string, unknown> | undefined
 		const schema = createGooSchema({
