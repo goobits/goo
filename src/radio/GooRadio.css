@@ -5,9 +5,9 @@
 .goo-radio {
 	--goo-radio-size: var(--goo-theme-control-height-sm, 1.5rem);
 	--goo-radio-dot-size: calc(var(--goo-theme-control-height-sm, 1.5rem) - 14px);
-	--goo-radio-border-color: var(--goo-theme-border, rgba(128, 128, 128, 0.3));
-	--goo-radio-border-color-checked: var(--goo-theme-accent, #3b82f6);
-	--goo-radio-dot-color: var(--goo-theme-accent, #3b82f6);
+	--goo-radio-border-color: var(--goo-theme-border-strong, rgba(128, 128, 128, 0.3));
+	--goo-radio-border-color-checked: var(--goo-theme-selected, var(--goo-theme-accent, #3b82f6));
+	--goo-radio-dot-color: var(--goo-theme-selected, var(--goo-theme-accent, #3b82f6));
 	--goo-radio-transition: var(--goo-theme-transition-fast, 0.15s ease);
 
 	display: inline-flex;
@@ -24,7 +24,7 @@
 }
 
 .goo-radio:focus-visible .goo-radio__circle {
-	box-shadow: 0 0 0 2px var(--goo-theme-focus-ring, rgba(59, 130, 246, 0.4));
+	box-shadow: 0 0 0 3px var(--goo-theme-focus-ring, rgba(59, 130, 246, 0.4));
 }
 
 /* Circle (outer ring) */

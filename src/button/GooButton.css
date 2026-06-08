@@ -5,10 +5,7 @@
 
 .goo-button {
 	/* Customizable via CSS custom properties */
-	--goo-button-bg: var(
-		--goo-theme-border-subtle,
-		color-mix(in srgb, var(--goo-theme-fg, #fff) 12%, transparent)
-	);
+	--goo-button-bg: var(--goo-theme-surface-raised, color-mix(in srgb, var(--goo-theme-fg, #fff) 6%, transparent));
 	--goo-button-bg-hover: var(
 		--goo-theme-border,
 		color-mix(in srgb, var(--goo-theme-fg, #fff) 18%, transparent)
@@ -18,7 +15,7 @@
 		color-mix(in srgb, var(--goo-theme-fg, #fff) 15%, transparent)
 	);
 	--goo-button-fg: var(--goo-theme-fg, rgba(255, 255, 255, 0.9));
-	--goo-button-radius: var(--goo-theme-radius-md, 0.25rem);
+	--goo-button-radius: var(--goo-theme-radius-md, 0.5rem);
 	--goo-button-focus: var(--goo-theme-accent, #3b82f6);
 
 	/* Base styles - flat background, no gradient */
@@ -32,7 +29,7 @@
 	justify-content: center;
 	gap: 0.5em;
 	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
-	font-weight: normal;
+	font-weight: 600;
 	line-height: 1;
 	height: var(--goo-theme-control-height-md, 2rem);
 	min-height: 0;
@@ -41,7 +38,7 @@
 	pointer-events: auto;
 	position: relative;
 	text-align: center;
-	text-transform: capitalize;
+	text-transform: none;
 	transition:
 		background 0.15s,
 		border-color 0.15s,
@@ -54,12 +51,15 @@
 	/* Keyboard focus state */
 	&:focus-visible {
 		z-index: 1;
-		box-shadow: 0 0 0 1px var(--goo-button-focus);
+		box-shadow:
+			0 0 0 1px var(--goo-button-focus),
+			0 0 0 3px color-mix(in srgb, var(--goo-button-focus) 24%, transparent);
 	}
 
 	/* Hover state */
 	&:hover:not([disabled]):not(.goo-button--disabled) {
 		background: var(--goo-button-bg-hover);
+		border-color: var(--goo-theme-border-strong, var(--goo-button-border));
 	}
 
 	/* Active/pressed state */

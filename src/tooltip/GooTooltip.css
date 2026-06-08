@@ -18,7 +18,7 @@
 		var(--goo-theme-border, rgba(255, 255, 255, 0.1))
 	);
 	--goo-popout-shadow: var(--goo-tooltip-shadow, drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3)));
-	--goo-popout-radius: var(--goo-tooltip-radius, var(--goo-theme-radius-sm, 4px));
+	--goo-popout-radius: var(--goo-tooltip-radius, var(--goo-theme-radius-md, 0.5rem));
 	--goo-popout-arrow-size: var(--goo-tooltip-arrow-size, 6px);
 	/* Arrow's outer triangle is the border ring; track the tip's border colour so
 	   it forms one continuous 1px outline around body + arrow. */
@@ -32,7 +32,7 @@
 
 	/* Tooltip-specific sizing */
 	max-width: var(--goo-tooltip-max-width, 250px);
-	padding: var(--goo-tooltip-padding, 6px 10px);
+	padding: var(--goo-tooltip-padding, 7px 10px);
 
 	/* Typography */
 	font-size: var(--goo-tooltip-font-size, var(--goo-theme-font-size-sm, 0.8125rem));

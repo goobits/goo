@@ -10,10 +10,10 @@
 		--goo-theme-surface-raised,
 		color-mix(in srgb, var(--goo-theme-fg, #fff) 5%, transparent)
 	);
-	--goo-folder-header-bg-hover: color-mix(in srgb, var(--goo-theme-fg, #fff) 8%, transparent);
+	--goo-folder-header-bg-hover: color-mix(in srgb, var(--goo-theme-fg, #fff) 8%, var(--goo-folder-bg));
 	--goo-folder-border: var(--goo-theme-border, rgba(128, 128, 128, 0.2));
 	--goo-folder-fg: var(--goo-theme-fg, inherit);
-	--goo-folder-radius: var(--goo-theme-radius-md, 4px);
+	--goo-folder-radius: var(--goo-theme-radius-lg, 0.6875rem);
 	--goo-folder-transition: var(--goo-theme-transition-normal, 0.2s ease);
 	--goo-folder-indent: 0px;
 
@@ -117,11 +117,12 @@
 
 /* Inspector variant - compact section styling for dense property panels. */
 .goo-folder--inspector {
-	--goo-folder-inspector-active-bg: color-mix(in srgb, var(--goo-theme-accent) 18%, transparent);
+	--goo-folder-inspector-active-bg: color-mix(in srgb, var(--goo-theme-accent) 14%, transparent);
 	--goo-folder-inspector-accent: var(--goo-theme-accent, #3b82f6);
 
 	margin-block-end: var(--goo-theme-space-xs, 0.125rem);
-	border-radius: var(--goo-theme-radius-lg, 0.5rem);
+	border: 1px solid color-mix(in srgb, var(--goo-theme-border) 72%, transparent);
+	border-radius: var(--goo-theme-radius-lg, 0.6875rem);
 }
 
 .goo-folder--inspector::before {
@@ -138,6 +139,7 @@
 
 .goo-folder--inspector.goo-folder--open {
 	background: var(--goo-folder-inspector-active-bg);
+	border-color: color-mix(in srgb, var(--goo-theme-accent) 32%, var(--goo-theme-border));
 }
 
 .goo-folder--inspector.goo-folder--open::before {

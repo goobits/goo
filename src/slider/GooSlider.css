@@ -1,18 +1,18 @@
 /* GooSlider - Modern range slider component */
 
 .goo-slider {
-	--goo-slider-track-bg: var(--goo-theme-border, rgba(128, 128, 128, 0.3));
+	--goo-slider-track-bg: color-mix(in srgb, var(--goo-theme-fg, #fff) 12%, var(--goo-theme-bg, #111));
 	--goo-slider-track-height: calc(var(--goo-theme-control-height-lg, 2.5rem) * 0.3);
 	--goo-slider-track-radius: 4px;
 	--goo-slider-thumb-size: calc(var(--goo-theme-control-height-lg, 2.5rem) * 0.35);
-	--goo-slider-thumb-bg: var(--goo-theme-fg, #fff);
-	--goo-slider-thumb-border: var(--goo-theme-bg, #1a1a1a);
-	--goo-slider-thumb-shadow: 0 0 0 2px var(--goo-slider-thumb-border);
+	--goo-slider-thumb-bg: color-mix(in srgb, var(--goo-theme-fg, #fff) 94%, var(--goo-theme-accent, #3b82f6));
+	--goo-slider-thumb-border: var(--goo-theme-surface, var(--goo-theme-bg, #1a1a1a));
+	--goo-slider-thumb-shadow: 0 0 0 2px var(--goo-slider-thumb-border), var(--goo-theme-shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.2));
 	--goo-slider-thumb-shadow-hover:
 		0 0 0 2px var(--goo-slider-thumb-border), 0 4px 12px rgba(0, 0, 0, 0.28);
 	--goo-slider-thumb-shadow-active:
 		0 0 0 3px var(--goo-slider-thumb-border), 0 6px 16px rgba(0, 0, 0, 0.32);
-	--goo-slider-coverage-bg: var(--goo-theme-accent, rgba(59, 130, 246, 0.4));
+	--goo-slider-coverage-bg: var(--goo-theme-selected, var(--goo-theme-accent, rgba(59, 130, 246, 0.4)));
 	--goo-slider-value-pct: 0%;
 	--goo-slider-track-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
 	--goo-slider-track-shadow-hover:
@@ -62,7 +62,8 @@
 	isolation: isolate;
 	transition:
 		box-shadow var(--goo-slider-motion-fast),
-		background-color var(--goo-slider-motion-fast);
+		background-color var(--goo-slider-motion-fast),
+		opacity var(--goo-slider-motion-fast);
 }
 
 .goo-slider:not(.goo-slider--disabled):hover .goo-slider__track {
@@ -116,14 +117,14 @@
 	&.goo-slider__thumb--active {
 		animation: none;
 		/* Combine centering with scale for active state */
-		transform: translateX(-50%) translateY(-50%) scale(1.2);
+		transform: translateX(-50%) translateY(-50%) scale(1.12);
 		box-shadow: var(--goo-slider-thumb-shadow-active);
 		z-index: 2;
 	}
 }
 
 .goo-slider:not(.goo-slider--disabled) .goo-slider__thumb:not(.goo-slider__thumb--active):hover {
-	transform: translateX(-50%) translateY(-50%) scale(1.08);
+	transform: translateX(-50%) translateY(-50%) scale(1.05);
 	box-shadow: var(--goo-slider-thumb-shadow-hover);
 }
 

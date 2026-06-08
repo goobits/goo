@@ -23,6 +23,7 @@
 	justify-content: space-between;
 	gap: var(--goo-range-module-header-gap, 0.5rem);
 	inline-size: 100%;
+	min-height: 1.75rem;
 	min-inline-size: 0;
 }
 

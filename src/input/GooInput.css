@@ -9,17 +9,14 @@
 		--goo-theme-surface-sunken,
 		color-mix(in srgb, var(--goo-theme-bg, #000) 30%, transparent)
 	);
-	--goo-input-bg-focus: var(
-		--goo-theme-surface,
-		color-mix(in srgb, var(--goo-theme-fg, #fff) 5%, transparent)
-	);
+	--goo-input-bg-focus: color-mix(in srgb, var(--goo-theme-fg, #fff) 6%, var(--goo-theme-bg, #000));
 	--goo-input-border: var(--goo-theme-border, rgba(128, 128, 128, 0.2));
 	--goo-input-border-focus: var(--goo-theme-accent, #3b82f6);
 	--goo-input-focus-ring: color-mix(in srgb, var(--goo-input-border-focus) 32%, transparent);
 	--goo-input-change-pulse: color-mix(in srgb, var(--goo-input-border-focus) 18%, transparent);
 	--goo-input-fg: var(--goo-theme-fg, rgba(255, 255, 255, 0.9));
 	--goo-input-fg-placeholder: var(--goo-theme-muted);
-	--goo-input-radius: var(--goo-theme-radius-sm, 0.25rem);
+	--goo-input-radius: var(--goo-theme-radius-md, 0.5rem);
 	--goo-input-height: var(--goo-theme-control-height-md, 2rem);
 	--goo-input-padding: var(--goo-theme-control-padding-md, 0 0.5rem);
 	--goo-input-motion-fast: var(--goo-theme-transition-fast, 0.15s ease);
@@ -90,7 +87,7 @@
 	padding: var(--goo-input-padding);
 	overflow: hidden;
 	white-space: nowrap;
-	opacity: 0.85;
+	opacity: 0.92;
 	min-height: 100%;
 	line-height: inherit;
 
@@ -148,7 +145,7 @@
 	line-height: inherit;
 	resize: both;
 	outline: none;
-	opacity: 0.85;
+	opacity: 0.92;
 
 	&:focus {
 		opacity: 1;

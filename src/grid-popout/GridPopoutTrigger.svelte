@@ -477,7 +477,7 @@ goo-grid-popout-trigger.goo-grid-trigger--preset {
 }
 
 goo-grid-popout-trigger.goo-grid-trigger--preset:hover {
-	background: var(--goo-theme-bg-hover, color-mix(in srgb, var(--goo-theme-fg) 8%, var(--goo-theme-bg)));
+	background: color-mix(in srgb, var(--goo-theme-fg) 8%, var(--goo-theme-bg));
 	border-color: var(--goo-theme-border-strong, var(--goo-theme-border));
 }
 

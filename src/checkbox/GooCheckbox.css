@@ -6,8 +6,8 @@
 	--goo-checkbox-width: calc(var(--goo-theme-control-height-sm, 1.5rem) * 1.8);
 	--goo-checkbox-height: var(--goo-theme-control-height-sm, 1.5rem);
 	--goo-checkbox-thumb-size: calc(var(--goo-theme-control-height-sm, 1.5rem) - 4px);
-	--goo-checkbox-track-color: var(--goo-theme-border, rgba(128, 128, 128, 0.3));
-	--goo-checkbox-track-color-checked: var(--goo-theme-accent, #3b82f6);
+	--goo-checkbox-track-color: color-mix(in srgb, var(--goo-theme-fg, #fff) 12%, var(--goo-theme-bg, #111));
+	--goo-checkbox-track-color-checked: var(--goo-theme-selected, var(--goo-theme-accent, #3b82f6));
 	--goo-checkbox-thumb-color: var(--goo-theme-fg, #fff);
 	--goo-checkbox-transition: var(--goo-theme-transition-normal, 0.2s ease);
 
@@ -21,9 +21,9 @@
 }
 
 .goo-checkbox:focus-visible {
-	outline: 2px solid var(--goo-theme-focus-ring, #3b82f6);
-	outline-offset: 2px;
-	border-radius: 4px;
+	outline: none;
+	border-radius: var(--goo-theme-radius-md, 0.5rem);
+	box-shadow: 0 0 0 3px var(--goo-theme-focus-ring, rgba(59, 130, 246, 0.4));
 }
 
 /* Track (background) */
@@ -32,6 +32,7 @@
 	width: var(--goo-checkbox-width);
 	height: var(--goo-checkbox-height);
 	background: var(--goo-checkbox-track-color);
+	border: 1px solid var(--goo-theme-border, rgba(128, 128, 128, 0.2));
 	border-radius: calc(var(--goo-checkbox-height) / 2);
 	transition: background var(--goo-checkbox-transition);
 }
@@ -46,7 +47,7 @@
 	height: var(--goo-checkbox-thumb-size);
 	background: var(--goo-checkbox-thumb-color);
 	border-radius: 50%;
-	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+	box-shadow: var(--goo-theme-shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.3));
 	transition: left var(--goo-checkbox-transition);
 }
 

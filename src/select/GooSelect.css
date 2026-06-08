@@ -21,8 +21,8 @@
 	--goo-select-fg-muted: var(--goo-theme-muted);
 	--goo-select-fg-disabled: var(--goo-theme-text-disabled, rgba(128, 128, 128, 0.25));
 	--goo-select-accent: var(--goo-theme-accent, #3b82f6);
-	--goo-select-radius: var(--goo-theme-radius-sm, 0.25rem);
-	--goo-select-radius-lg: var(--goo-theme-radius-md, 0.375rem);
+	--goo-select-radius: var(--goo-theme-radius-md, 0.5rem);
+	--goo-select-radius-lg: var(--goo-theme-radius-lg, 0.6875rem);
 	--goo-select-shadow:
 		var(--goo-theme-shadow-lg, 0 10px 40px -10px rgba(0, 0, 0, 0.4)),
 		0 0 0 1px var(--goo-select-border);
@@ -100,6 +100,7 @@
 
 .goo-select__trigger:hover {
 	background: var(--goo-select-bg-hover);
+	border-color: var(--goo-theme-border-strong, var(--goo-select-border));
 }
 
 .goo-select__trigger:focus {
@@ -109,7 +110,9 @@
 .goo-select__trigger:focus-visible {
 	outline: none;
 	border-color: var(--goo-select-border-focus);
-	box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+	box-shadow:
+		0 0 0 1px var(--goo-select-border-focus),
+		0 0 0 3px color-mix(in srgb, var(--goo-select-border-focus) 22%, transparent);
 }
 
 .goo-select--open .goo-select__trigger {

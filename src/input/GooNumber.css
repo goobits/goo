@@ -9,10 +9,7 @@
 		--goo-theme-surface-sunken,
 		color-mix(in srgb, var(--goo-theme-bg, #000) 30%, transparent)
 	);
-	--goo-number-bg-focus: var(
-		--goo-theme-surface,
-		color-mix(in srgb, var(--goo-theme-fg, #fff) 5%, transparent)
-	);
+	--goo-number-bg-focus: color-mix(in srgb, var(--goo-theme-fg, #fff) 6%, var(--goo-theme-bg, #000));
 	--goo-number-border: var(--goo-theme-border, rgba(128, 128, 128, 0.2));
 	--goo-number-border-focus: var(--goo-theme-accent, #3b82f6);
 	--goo-number-border-error: var(--goo-theme-warning, #fbbf24);
@@ -24,7 +21,7 @@
 		color-mix(in srgb, var(--goo-theme-fg, #fff) 7%, transparent)
 	);
 	--goo-number-arrows-hover: color-mix(in srgb, var(--goo-theme-fg, #fff) 10%, transparent);
-	--goo-number-radius: var(--goo-theme-radius-sm, 0.25rem);
+	--goo-number-radius: var(--goo-theme-radius-md, 0.5rem);
 	--goo-number-height: var(--goo-theme-control-height-md, 2rem);
 	--goo-number-arrows-width: calc(var(--goo-number-height) * 0.8);
 	--goo-number-motion-fast: var(--goo-theme-transition-fast, 0.15s ease);
@@ -38,7 +35,7 @@
 	color: var(--goo-number-fg);
 	cursor: text;
 	direction: ltr;
-	font-weight: normal;
+	font-weight: 500;
 	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
 	height: var(--goo-number-height);
 	line-height: var(--goo-number-height);
@@ -107,7 +104,7 @@
 	padding: 0 var(--goo-number-arrows-width) 0 0.5em;
 	overflow: hidden;
 	white-space: nowrap;
-	opacity: 0.85;
+	opacity: 0.92;
 	min-height: 100%;
 	line-height: inherit;
 
