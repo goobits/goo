@@ -105,7 +105,7 @@ export interface GooPointerDragHandle {
  */
 export function createPointerDrag<Environment extends object = Record<string, unknown>>(
 	target: HTMLElement,
-	onDrag: (event: GooPointerDragEvent<Environment>) => void,
+	onDrag: (event: GooPointerDragEvent<Environment>) => void | false,
 	options: GooPointerDragOptions = {}
 ): GooPointerDragHandle {
 	let activePointerId: number | null = null
@@ -113,11 +113,11 @@ export function createPointerDrag<Environment extends object = Record<string, un
 	let startClientY = 0
 	let env = {} as Environment
 
-	function emit(originalEvent: PointerEvent, state: GooPointerDragEvent<Environment>['state']): void {
+	function emit(originalEvent: PointerEvent, state: GooPointerDragEvent<Environment>['state']): void | false {
 		const x = originalEvent.clientX - startClientX
 		const y = originalEvent.clientY - startClientY
 		const rect = target.getBoundingClientRect()
-		onDrag({
+		return onDrag({
 			originalEvent,
 			target,
 			state,
@@ -161,12 +161,16 @@ export function createPointerDrag<Environment extends object = Record<string, un
 		startClientX = event.clientX
 		startClientY = event.clientY
 		env = {} as Environment
+		if (emit(event, 'start') === false) {
+			activePointerId = null
+			env = {} as Environment
+			return
+		}
 		try {
 			target.setPointerCapture?.(event.pointerId)
 		} catch {
 			// Pointer capture can fail in detached or simulated DOMs; dragging still works on the target.
 		}
-		emit(event, 'start')
 	}
 
 	function onPointerMove(event: PointerEvent): void {
