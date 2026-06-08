@@ -228,6 +228,7 @@ sketch-FilterFooter {
 	inline-size: 100%;
 }
 
+.goo-controller--palette,
 .goo-controller--file-picker,
 .goo-controller--filter-footer {
 	--goo-controller-padding: 0;
@@ -235,6 +236,7 @@ sketch-FilterFooter {
 	padding: 0;
 }
 
+.goo-controller--palette .goo-controller__widget,
 .goo-controller--file-picker .goo-controller__widget,
 .goo-controller--filter-footer .goo-controller__widget {
 	align-items: stretch;
