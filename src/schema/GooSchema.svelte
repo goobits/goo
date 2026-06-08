@@ -52,11 +52,19 @@ function getCreateKey(): string {
 }
 
 function handleChange(event: Event): void {
+	if (!isSchemaEvent(event)) return
 	onchange?.(event as GooSchemaEvent)
 }
 
 function handleInput(event: Event): void {
+	if (!isSchemaEvent(event)) return
 	oninput?.(event as GooSchemaEvent)
+}
+
+function isSchemaEvent(event: Event): event is GooSchemaEvent {
+	return event.target === schemaElement
+		&& event instanceof CustomEvent
+		&& typeof event.detail?.path === 'string'
 }
 
 function destroySchema(): void {
