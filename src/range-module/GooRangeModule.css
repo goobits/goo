@@ -2,7 +2,7 @@
 	box-sizing: border-box;
 	display: flex;
 	flex-direction: column;
-	gap: var(--goo-range-module-gap, 0.5rem);
+	gap: var(--goo-range-module-gap, 0.375rem);
 	inline-size: 100%;
 	max-inline-size: 100%;
 	min-inline-size: 0;
@@ -23,7 +23,7 @@
 	justify-content: space-between;
 	gap: var(--goo-range-module-header-gap, 0.5rem);
 	inline-size: 100%;
-	min-height: 1.75rem;
+	min-height: 1.5rem;
 	min-inline-size: 0;
 }
 
@@ -31,7 +31,7 @@
 	min-inline-size: 0;
 	overflow: hidden;
 	color: var(--goo-theme-control-label-color, var(--goo-theme-fg, #fff));
-	font-size: var(--goo-theme-control-label-size, 0.8125rem);
+	font-size: var(--goo-theme-control-label-size, 0.75rem);
 	font-weight: var(--goo-theme-control-label-weight, 600);
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -72,8 +72,8 @@
 }
 
 .goo-range-module--goo .goo-slider.goo-slider {
-	--goo-slider-track-height: 8px;
-	--goo-slider-track-radius: 4px;
+	--goo-slider-track-height: 6px;
+	--goo-slider-track-radius: 3px;
 
 	width: 100%;
 	min-inline-size: 0;

@@ -146,7 +146,7 @@
 
 .goo-folder--inspector > .goo-folder__header {
 	gap: var(--goo-theme-space-sm, 0.5rem);
-	min-height: 1.5rem;
+	min-height: 1.375rem;
 	padding: 0 0.125rem;
 	background: transparent;
 	border-radius: var(--goo-theme-radius-sm, 0.375rem);
@@ -161,22 +161,22 @@
 }
 
 .goo-folder--inspector > .goo-folder__header > .goo-folder__chevron {
-	width: 1rem;
-	height: 1rem;
-	color: var(--goo-theme-muted);
+	width: 0.875rem;
+	height: 0.875rem;
+	color: color-mix(in srgb, var(--goo-theme-muted, var(--goo-folder-fg)) 78%, var(--goo-folder-fg));
 }
 
 .goo-folder--inspector > .goo-folder__header > .goo-folder__title {
-	font-size: var(--goo-theme-font-size-xs, 0.75rem);
+	font-size: var(--goo-folder-inspector-title-size, 12px);
 	font-weight: 500;
 	text-transform: none;
 	letter-spacing: 0;
-	color: color-mix(in srgb, var(--goo-theme-muted, var(--goo-folder-fg)) 82%, var(--goo-folder-fg));
+	color: color-mix(in srgb, var(--goo-theme-muted, var(--goo-folder-fg)) 70%, var(--goo-folder-fg));
 }
 
 .goo-folder--inspector > .goo-folder__content {
 	gap: 0;
-	padding: 0 0 0.375rem;
+	padding: 0 0 0.25rem;
 	background: transparent;
 	border-radius: 0;
 	overflow: visible;
