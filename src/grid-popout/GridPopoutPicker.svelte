@@ -273,13 +273,15 @@ function createPreviewSurface(preview: GridPopoutPreview): HTMLElement {
 	if (preview.hue) surface.style.setProperty('--goo-preview-tint', preview.hue)
 	if (preview.fit) surface.style.setProperty('--goo-preview-fit', preview.fit)
 
-	const image = document.createElement('img')
-	image.className = 'goo-preview__media'
-	image.src = preview.src
-	image.alt = preview.alt ?? ''
-	image.draggable = false
-	image.loading = 'lazy'
-	surface.appendChild(image)
+	if (preview.src) {
+		const image = document.createElement('img')
+		image.className = 'goo-preview__media'
+		image.src = preview.src
+		image.alt = preview.alt ?? ''
+		image.draggable = false
+		image.loading = 'lazy'
+		surface.appendChild(image)
+	}
 
 	if (preview.badge) {
 		const badge = document.createElement('span')

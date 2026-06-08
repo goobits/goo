@@ -107,7 +107,7 @@ const currentPreview = $derived(valueOverride.preview ?? preview ?? getLegacyPre
 const currentPreviewAlt = $derived(valueOverride.previewAlt ?? previewAlt)
 const currentPreviewUrl = $derived(valueOverride.previewUrl ?? previewUrl)
 const currentTitle = $derived(valueOverride.title ?? title)
-const contentFadeClassName = $derived(contentFadeActive && !currentPreview?.src && !currentPreviewUrl
+const contentFadeClassName = $derived(contentFadeActive && !currentPreview && !currentPreviewUrl
 	? 'goo-grid-popout-trigger__fade'
 	: '')
 const iconClassName = $derived([
@@ -223,7 +223,7 @@ function getLegacyPreview(src: string, alt: string): GridPopoutPreview | undefin
 			{/if}
 			<span class="goo-grid-popout-trigger__title">{currentTitle}</span>
 		</grid-title>
-		{#if currentPreview?.src}
+		{#if currentPreview}
 			<GooPreview
 				class={previewClassName}
 				src={currentPreview.src}
