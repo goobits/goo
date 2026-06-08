@@ -122,6 +122,27 @@ export interface GooSchemaField {
 	/** Mode ids for blend-mode controls. */
 	modes?: readonly string[]
 
+	/** Accessible label forwarded to controls that render their own shell. */
+	ariaLabel?: string
+
+	/** Control host class forwarded to self-contained controls. */
+	class?: string
+
+	/** Data parameter forwarded to self-contained controls. */
+	dataParam?: string
+
+	/** DOM id forwarded to self-contained controls. */
+	id?: string
+
+	/** Rich item metadata for grid-style choice controls. */
+	items?: unknown[]
+
+	/** Popout class forwarded to popout-backed controls. */
+	popoutClass?: string
+
+	/** Tab index forwarded to self-contained controls. */
+	tabIndex?: number
+
 	/** Component-specific options forwarded to the selected control. */
 	controlOptions?: GooControlOptionBag
 

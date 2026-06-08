@@ -2,6 +2,8 @@ import { render } from '@testing-library/svelte'
 import { tick } from 'svelte'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { defineSvelteControlType } from '../../controller/index.ts'
+import GridPopoutPicker from '../../grid-popout/GridPopoutPicker.svelte'
 import { isSelfContainedField } from '../fieldLayout.ts'
 import GooSchema from '../GooSchema.svelte'
 import { createGooSchema } from '../index.ts'
@@ -10,6 +12,26 @@ async function settleGooSchema(): Promise<void> {
 	await tick()
 	await Promise.resolve()
 }
+
+const gridPopoutControlType = defineSvelteControlType({
+	load: () => Promise.resolve({
+		default: GridPopoutPicker,
+		controlSchema: {
+			valueKey: 'selected',
+			changeKey: 'onchoose',
+			selfContained: true,
+			propMapping: {
+				ariaLabel: 'ariaLabel',
+				class: 'class',
+				dataParam: 'dataParam',
+				id: 'id',
+				items: 'items',
+				popoutClass: 'popoutClass',
+				tabIndex: 'tabIndex'
+			}
+		}
+	})
+})
 
 describe('GooSchema', () => {
 	afterEach(() => {
@@ -201,6 +223,47 @@ describe('GooSchema', () => {
 
 		expect(schema.getController('size')).toBe(firstController)
 		expect(schema.getData().size).toBe(24)
+	})
+
+	it('forwards self-contained Svelte control metadata and refreshes display on data updates', async() => {
+		const schema = createGooSchema({
+			schema: [
+				{
+					path: 'type',
+					type: 'grid-popout',
+					ariaLabel: 'Subtool',
+					class: 'goo-grid-trigger--subtool',
+					dataParam: 'type',
+					id: 'UISubTool',
+					items: [
+						{ id: 'star', title: 'Star', iconClass: 'icon-star' },
+						{ id: 'ring', title: 'Ring', iconClass: 'icon-ring' }
+					],
+					layout: 'self-contained',
+					popoutClass: 'goo-grid-popout--icon-grid goo-grid-popout--subtool',
+					showLabel: false
+				}
+			],
+			data: { type: 'star' },
+			bare: true,
+			controlTypes: {
+				'grid-popout': gridPopoutControlType
+			}
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+
+		const trigger = schema.querySelector<HTMLElement>('#UISubTool')
+		expect(trigger).not.toBeNull()
+		expect(trigger?.getAttribute('data-param')).toBe('type')
+		expect(trigger?.classList.contains('goo-grid-trigger--subtool')).toBe(true)
+		expect(trigger?.textContent).toContain('Star')
+
+		schema.setData({ type: 'ring' })
+		await settleGooSchema()
+
+		expect(schema.querySelector('#UISubTool')).toBe(trigger)
+		expect(trigger?.textContent).toContain('Ring')
 	})
 
 	it('resets schema data to defaults without rebuilding unchanged controllers', async() => {

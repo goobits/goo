@@ -208,7 +208,12 @@ function attachSchemaApi(element: GooSchemaInternal): void {
 		},
 		refresh: () => {
 			for (const [ , controller ] of element._controllers) {
-				(controller as { refresh?: () => void }).refresh?.()
+				const refreshable = controller as { refresh?: () => void; updateDisplay?: () => void }
+				if (refreshable.refresh) {
+					refreshable.refresh()
+				} else {
+					refreshable.updateDisplay?.()
+				}
 			}
 			updateSchemaActionState(element)
 		},
@@ -434,7 +439,11 @@ async function buildSelfContainedField(
 		updateSchemaActionState(element)
 	}
 
-	const options = { ...controllerOptions }
+	const { controlOptions, ...controllerBaseOptions } = controllerOptions
+	const options = {
+		...controllerBaseOptions,
+		...controlOptions
+	}
 	if (!node.label || node.showLabel === false) {
 		delete options.label
 	}

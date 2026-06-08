@@ -336,9 +336,14 @@ function createPreviewSurface(preview: GridPopoutPreview): HTMLElement {
 	return surface
 }
 
-function createSvgIcon(icon: GridPopoutSvgIcon): SVGSVGElement {
+function createSvgIcon(icon: GridPopoutSvgIcon): HTMLElement {
+	const wrapper = document.createElement('span')
+	wrapper.className = 'icon'
+
 	const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-	svg.setAttribute('class', [ 'icon', icon.class ].filter(Boolean).join(' '))
+	if (icon.class) {
+		svg.setAttribute('class', icon.class)
+	}
 	for (const [ name, value ] of Object.entries(icon.attributes ?? {})) {
 		svg.setAttribute(name, value)
 	}
@@ -357,7 +362,8 @@ function createSvgIcon(icon: GridPopoutSvgIcon): SVGSVGElement {
 		svg.appendChild(element)
 	}
 
-	return svg
+	wrapper.appendChild(svg)
+	return wrapper
 }
 
 function handlePopoutKeydown(event: KeyboardEvent): void {
@@ -628,6 +634,12 @@ function escapeSelectorValue(value: string): string {
 	line-height: 1;
 	margin: 0;
 	width: 40px;
+}
+
+:global(goo-popout.goo-grid-popout--icon-grid .icon svg),
+:global(.goo-popout.goo-grid-popout--icon-grid .icon svg) {
+	height: 1em;
+	width: 1em;
 }
 
 :global(goo-popout.goo-grid-popout--preset),
