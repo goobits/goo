@@ -171,7 +171,7 @@
 	font-weight: 500;
 	text-transform: none;
 	letter-spacing: 0;
-	color: var(--goo-theme-muted, var(--goo-folder-fg));
+	color: color-mix(in srgb, var(--goo-theme-muted, var(--goo-folder-fg)) 82%, var(--goo-folder-fg));
 }
 
 .goo-folder--inspector > .goo-folder__content {

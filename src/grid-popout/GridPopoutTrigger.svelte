@@ -468,6 +468,8 @@ goo-grid-popout-trigger.goo-grid-trigger--font :global(.goo-grid-trigger__icon) 
 }
 
 goo-grid-popout-trigger.goo-grid-trigger--preset {
+	--goo-grid-trigger-arrow-inline-size: 34px;
+
 	background: var(--goo-theme-surface-raised, color-mix(in srgb, var(--goo-theme-fg) 5%, var(--goo-theme-bg)));
 	border: 1px solid var(--goo-theme-border-strong, var(--goo-theme-border));
 	border-radius: var(--goo-theme-radius-lg, 0.5rem);
@@ -484,13 +486,28 @@ goo-grid-popout-trigger.goo-grid-trigger--preset:hover {
 goo-grid-popout-trigger.goo-grid-trigger--preset :global(grid-title) {
 	inset-inline-start: 3.125rem;
 	width: calc(100% - 3.125rem - var(--goo-grid-trigger-arrow-inline-size));
+	align-items: flex-start;
+	text-align: left;
 }
 
 goo-grid-popout-trigger.goo-grid-trigger--preset :global(.goo-grid-popout-trigger__preview) {
 	height: 2rem !important;
-	margin-left: 0.5rem;
+	inset-inline-start: 0.5rem;
+	margin-left: 0;
+	min-height: 2rem;
 	padding: 0;
-	width: 2rem;
+	width: 2rem !important;
+}
+
+goo-grid-popout-trigger.goo-grid-trigger--preset :global(.goo-preview) {
+	--goo-preview-height: 2rem;
+
+	height: 2rem !important;
+	inset-inline-start: 0.5rem;
+	margin-left: 0;
+	min-height: 2rem;
+	padding: 0;
+	width: 2rem !important;
 }
 
 .goo-grid-popout-trigger__preview--next {

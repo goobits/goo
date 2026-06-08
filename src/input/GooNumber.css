@@ -137,11 +137,13 @@
 	border-left: 1px solid color-mix(in srgb, var(--goo-number-border) 72%, transparent);
 	border-radius: 0 var(--goo-number-radius) var(--goo-number-radius) 0;
 	cursor: pointer;
-	opacity: 0.64;
+	opacity: 0;
+	overflow: hidden;
 	z-index: 2;
 	transition:
 		opacity var(--goo-number-motion-fast),
-		background-color var(--goo-number-motion-fast);
+		background-color var(--goo-number-motion-fast),
+		width var(--goo-number-motion-fast);
 }
 
 /* Individual arrow buttons */
