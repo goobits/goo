@@ -64,7 +64,8 @@
 
 	/* Active/pressed state */
 	&:active:not([disabled]):not(.goo-button--disabled) {
-		transform: translateY(1px);
+		background: var(--goo-button-bg-hover);
+		border-color: var(--goo-theme-border-strong, var(--goo-button-border));
 	}
 
 	/* Primary variant - main call to action */
