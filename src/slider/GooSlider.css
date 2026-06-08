@@ -5,6 +5,7 @@
 	--goo-slider-track-height: calc(var(--goo-theme-control-height-lg, 2.5rem) * 0.3);
 	--goo-slider-track-radius: 4px;
 	--goo-slider-thumb-size: calc(var(--goo-theme-control-height-lg, 2.5rem) * 0.35);
+	--goo-slider-hit-area-size: max(2.75rem, var(--goo-theme-control-height-lg, 2.5rem));
 	--goo-slider-thumb-bg: color-mix(in srgb, var(--goo-theme-fg, #fff) 94%, var(--goo-theme-accent, #3b82f6));
 	--goo-slider-thumb-border: var(--goo-theme-surface, var(--goo-theme-bg, #1a1a1a));
 	--goo-slider-thumb-shadow: 0 0 0 2px var(--goo-slider-thumb-border), var(--goo-theme-shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.2));
@@ -29,11 +30,24 @@
 	color: var(--goo-theme-muted);
 
 	display: block;
+	position: relative;
 	cursor: pointer;
+	touch-action: none;
 	user-select: none;
 	-webkit-user-select: none;
+	-webkit-tap-highlight-color: transparent;
 	/* Ensure thumbs extending beyond track are visible */
 	overflow: visible;
+
+	&::before {
+		content: '';
+		position: absolute;
+		inset-block: 50% auto;
+		inset-inline: 0;
+		block-size: var(--goo-slider-hit-area-size);
+		transform: translateY(-50%);
+		pointer-events: auto;
+	}
 
 	&:active {
 		.goo-slider__thumb {
@@ -51,6 +65,7 @@
 .goo-slider__track {
 	display: block;
 	position: relative;
+	z-index: 1;
 	height: var(--goo-slider-track-height);
 	margin: 9px 6px;
 	background: var(--goo-slider-track-bg);
@@ -234,6 +249,14 @@
 .goo-slider.goo-slider--vertical.goo-slider--vertical {
 	display: inline-block;
 	height: 100%;
+
+	&::before {
+		inset-block: 0;
+		inset-inline: 50% auto;
+		inline-size: var(--goo-slider-hit-area-size);
+		block-size: auto;
+		transform: translateX(-50%);
+	}
 
 	.goo-slider__track {
 		width: var(--goo-slider-track-height);
