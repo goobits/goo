@@ -185,6 +185,42 @@ describe('GridPopoutPicker', () => {
 		expect(document.body.querySelector('.goo-popout')?.classList.contains('goo-grid-popout--preset')).toBe(true)
 	})
 
+	it('reserves Goo preview surfaces before preview media is available', async() => {
+		const { getByRole } = render(GridPopoutPicker, {
+			props: {
+				ariaLabel: 'Brush',
+				items: [
+					{
+						id: 'brush',
+						kicker: 'Brush preset',
+						preview: {
+							alt: 'Brush preview',
+							background: 'dots',
+							src: ''
+						},
+						title: 'Brush'
+					}
+				],
+				popoutClass: 'goo-grid-popout--preset',
+				selected: 'brush'
+			}
+		})
+
+		const trigger = getByRole('button', { name: 'Brush' })
+		const triggerPreview = trigger.querySelector('.goo-grid-popout-trigger__preview.goo-preview')
+
+		expect(triggerPreview).not.toBeNull()
+		expect(triggerPreview?.querySelector('img')).toBeNull()
+
+		await fireEvent.click(trigger)
+
+		const option = getByRole('option', { name: 'Brush' })
+		const optionPreview = option.querySelector('.goo-grid-picker__preview.goo-preview')
+
+		expect(optionPreview).not.toBeNull()
+		expect(optionPreview?.querySelector('img')).toBeNull()
+	})
+
 	it('keeps legacy previewUrl items working', () => {
 		const { getByRole } = render(GridPopoutPicker, {
 			props: {
