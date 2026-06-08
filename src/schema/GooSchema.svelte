@@ -34,6 +34,7 @@ let mounted = false
 let lastCreateKey = ''
 let lastSchema: GooSchemaType | undefined
 let lastData: GooSchemaData | undefined
+let lastDataKey = ''
 let lastDefaults: GooSchemaData | undefined
 let lastPresets: GooSchemaOptions['presets'] | undefined
 let lastActivePresetId: string | null | undefined
@@ -97,6 +98,14 @@ function snapshotProps(): GooSchemaPropsSnapshot {
 
 function getCreateKey(snapshot: GooSchemaPropsSnapshot): string {
 	return JSON.stringify({ className: snapshot.className, style: snapshot.style })
+}
+
+function getDataKey(nextData: GooSchemaData): string {
+	try {
+		return JSON.stringify(nextData)
+	} catch {
+		return ''
+	}
 }
 
 function handleChange(event: Event): void {
@@ -175,6 +184,7 @@ function mountSchema(snapshot: GooSchemaPropsSnapshot): void {
 	instance = schemaElement
 	lastSchema = snapshot.schema
 	lastData = snapshot.data
+	lastDataKey = getDataKey(snapshot.data)
 	lastDefaults = snapshot.defaults
 	lastPresets = snapshot.presets
 	lastActivePresetId = snapshot.activePresetId
@@ -188,13 +198,15 @@ function mountSchema(snapshot: GooSchemaPropsSnapshot): void {
 function updateSchema(snapshot: GooSchemaPropsSnapshot): void {
 	if (!schemaElement) return
 	const options: GooSchemaUpdateOptions = {}
+	const nextDataKey = getDataKey(snapshot.data)
 	if (snapshot.schema !== lastSchema) {
 		schemaElement.setSchema(snapshot.schema)
 		lastSchema = snapshot.schema
 	}
-	if (snapshot.data !== lastData) {
+	if (snapshot.data !== lastData || nextDataKey !== lastDataKey) {
 		schemaElement.setData(snapshot.data)
 		lastData = snapshot.data
+		lastDataKey = nextDataKey
 	}
 	if (snapshot.defaults !== lastDefaults) {
 		lastDefaults = snapshot.defaults

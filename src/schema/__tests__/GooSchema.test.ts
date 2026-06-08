@@ -140,7 +140,9 @@ describe('GooSchema', () => {
 		await settleGooSchema()
 
 		const firstController = container.querySelector('.goo-controller')
+		const slider = container.querySelector<HTMLElement>('.goo-slider')
 		expect(firstController).not.toBeNull()
+		expect(slider?.getAttribute('aria-valuenow')).toBe('12')
 
 		await rerender({
 			schema,
@@ -150,6 +152,36 @@ describe('GooSchema', () => {
 		await settleGooSchema()
 
 		expect(container.querySelector('.goo-controller')).toBe(firstController)
+		expect(slider?.getAttribute('aria-valuenow')).toBe('24')
+	})
+
+	it('refreshes wrapper controls when same-object data changes by value', async() => {
+		const schema = [ { path: 'size', min: 0, max: 100 } ]
+		const data = { size: 12 }
+		const { container, rerender } = render(GooSchema, {
+			props: {
+				schema,
+				data,
+				bare: true
+			}
+		})
+		await settleGooSchema()
+
+		const firstController = container.querySelector('.goo-controller')
+		const slider = container.querySelector<HTMLElement>('.goo-slider')
+		expect(firstController).not.toBeNull()
+		expect(slider?.getAttribute('aria-valuenow')).toBe('12')
+
+		data.size = 32
+		await rerender({
+			schema,
+			data,
+			bare: true
+		})
+		await settleGooSchema()
+
+		expect(container.querySelector('.goo-controller')).toBe(firstController)
+		expect(slider?.getAttribute('aria-valuenow')).toBe('32')
 	})
 
 	it('keeps imperative schema controllers mounted across data updates', async() => {
