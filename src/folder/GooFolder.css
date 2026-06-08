@@ -108,13 +108,16 @@
 	opacity: 0;
 	overflow: hidden;
 	padding: 0;
+	pointer-events: none;
 	background: var(--goo-folder-bg);
 	border-radius: var(--goo-folder-radius);
 	transform: translateY(-3px);
+	visibility: hidden;
 	transition:
 		max-height 180ms cubic-bezier(0.22, 1, 0.36, 1),
 		opacity 140ms ease,
-		transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+		transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+		visibility 0s linear 180ms;
 	will-change: max-height, opacity, transform;
 }
 
@@ -123,7 +126,14 @@
 	max-height: 80rem;
 	opacity: 1;
 	overflow: visible;
+	pointer-events: auto;
 	transform: translateY(0);
+	visibility: visible;
+	transition:
+		max-height 180ms cubic-bezier(0.22, 1, 0.36, 1),
+		opacity 140ms ease,
+		transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+		visibility 0s linear 0s;
 }
 
 /* Inspector variant - compact section styling for dense property panels. */
@@ -193,6 +203,10 @@
 	padding: 0 0 0.25rem;
 	background: transparent;
 	border-radius: 0;
+	overflow: hidden;
+}
+
+.goo-folder--inspector.goo-folder--open > .goo-folder__content {
 	overflow: visible;
 }
 
