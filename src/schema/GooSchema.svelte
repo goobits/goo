@@ -203,7 +203,7 @@ function updateSchema(snapshot: GooSchemaPropsSnapshot): void {
 		schemaElement.setSchema(snapshot.schema)
 		lastSchema = snapshot.schema
 	}
-	if (snapshot.data !== lastData || nextDataKey !== lastDataKey) {
+	if (nextDataKey !== lastDataKey) {
 		schemaElement.setData(snapshot.data)
 		lastData = snapshot.data
 		lastDataKey = nextDataKey
