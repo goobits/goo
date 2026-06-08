@@ -16,6 +16,11 @@ export type {
 	GooSchemaFolder,
 	GooSchemaNode,
 	GooSchemaOptions,
+	GooSchemaPreset,
+	GooSchemaPresetEvent,
+	GooSchemaPresetEventDetail,
+	GooSchemaResetEvent,
+	GooSchemaResetEventDetail,
 	GooSchemaType,
 	GooSchemaUpdateOptions } from './GooSchema.ts'
 export {

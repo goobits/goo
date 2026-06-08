@@ -6,11 +6,15 @@ import {
 	type GooSchemaData,
 	type GooSchemaEvent,
 	type GooSchemaOptions,
+	type GooSchemaPresetEvent,
+	type GooSchemaResetEvent,
 	type GooSchemaUpdateOptions,
 	type GooSchemaType
 } from './GooSchema.ts'
 
 type GooSchemaDomEventHandler = (event: GooSchemaEvent) => void
+type GooSchemaPresetDomEventHandler = (event: GooSchemaPresetEvent) => void
+type GooSchemaResetDomEventHandler = (event: GooSchemaResetEvent) => void
 
 type GooSchemaProps = GooSchemaOptions & {
 	schema: GooSchemaType
@@ -20,6 +24,8 @@ type GooSchemaProps = GooSchemaOptions & {
 	instance?: GooSchema | null
 	onchange?: GooSchemaDomEventHandler
 	oninput?: GooSchemaDomEventHandler
+	onpreset?: GooSchemaPresetDomEventHandler
+	onreset?: GooSchemaResetDomEventHandler
 }
 
 let host: HTMLDivElement | null = $state(null)
@@ -28,6 +34,10 @@ let mounted = false
 let lastCreateKey = ''
 let lastSchema: GooSchemaType | undefined
 let lastData: GooSchemaData | undefined
+let lastDefaults: GooSchemaData | undefined
+let lastPresets: GooSchemaOptions['presets'] | undefined
+let lastActivePresetId: string | null | undefined
+let lastShowReset: boolean | undefined
 let lastBare: boolean | undefined
 let lastShowPanelHeader: boolean | undefined
 let lastFolderClassName: string | undefined
@@ -38,15 +48,23 @@ type GooSchemaPropsSnapshot = {
 	className: string
 	controlTypes: GooSchemaOptions['controlTypes'] | undefined
 	data: GooSchemaData
+	defaults: GooSchemaData | undefined
 	folderClassName: string | undefined
+	presets: GooSchemaOptions['presets'] | undefined
+	activePresetId: string | null | undefined
 	schema: GooSchemaType
 	showPanelHeader: boolean
+	showReset: boolean | undefined
 	style: string | undefined
 }
 
 let {
 	schema,
 	data,
+	defaults,
+	presets,
+	activePresetId,
+	showReset,
 	bare = false,
 	showPanelHeader = true,
 	folderClassName,
@@ -55,7 +73,9 @@ let {
 	style,
 	instance = $bindable<GooSchema | null>(null),
 	onchange,
-	oninput
+	oninput,
+	onpreset,
+	onreset
 }: GooSchemaProps = $props()
 
 function snapshotProps(): GooSchemaPropsSnapshot {
@@ -64,9 +84,13 @@ function snapshotProps(): GooSchemaPropsSnapshot {
 		className,
 		controlTypes,
 		data,
+		defaults,
 		folderClassName,
+		presets,
+		activePresetId,
 		schema,
 		showPanelHeader,
+		showReset,
 		style
 	}
 }
@@ -85,15 +109,40 @@ function handleInput(event: Event): void {
 	oninput?.(event as GooSchemaEvent)
 }
 
+function handlePreset(event: Event): void {
+	if (!isSchemaPresetEvent(event)) return
+	onpreset?.(event)
+}
+
+function handleReset(event: Event): void {
+	if (!isSchemaResetEvent(event)) return
+	onreset?.(event)
+}
+
 function isSchemaEvent(event: Event): event is GooSchemaEvent {
 	return event.target === schemaElement
 		&& event instanceof CustomEvent
 		&& typeof event.detail?.path === 'string'
 }
 
+function isSchemaPresetEvent(event: Event): event is GooSchemaPresetEvent {
+	return event.target === schemaElement
+		&& event instanceof CustomEvent
+		&& typeof event.detail?.id === 'string'
+}
+
+function isSchemaResetEvent(event: Event): event is GooSchemaResetEvent {
+	return event.target === schemaElement
+		&& event instanceof CustomEvent
+		&& event.detail?.data !== undefined
+		&& event.detail?.defaults !== undefined
+}
+
 function destroySchema(): void {
 	schemaElement?.removeEventListener('change', handleChange)
 	schemaElement?.removeEventListener('input', handleInput)
+	schemaElement?.removeEventListener('preset', handlePreset)
+	schemaElement?.removeEventListener('reset', handleReset)
 	schemaElement?.destroy()
 	schemaElement = null
 	instance = null
@@ -106,6 +155,10 @@ function mountSchema(snapshot: GooSchemaPropsSnapshot): void {
 	const nextSchemaElement = createGooSchema({
 		schema: snapshot.schema,
 		data: snapshot.data,
+		defaults: snapshot.defaults,
+		presets: snapshot.presets,
+		activePresetId: snapshot.activePresetId,
+		showReset: snapshot.showReset,
 		bare: snapshot.bare,
 		showPanelHeader: snapshot.showPanelHeader,
 		folderClassName: snapshot.folderClassName,
@@ -116,10 +169,16 @@ function mountSchema(snapshot: GooSchemaPropsSnapshot): void {
 	if (snapshot.style) schemaElement.setAttribute('style', snapshot.style)
 	schemaElement.addEventListener('change', handleChange)
 	schemaElement.addEventListener('input', handleInput)
+	schemaElement.addEventListener('preset', handlePreset)
+	schemaElement.addEventListener('reset', handleReset)
 	target.replaceChildren(schemaElement)
 	instance = schemaElement
 	lastSchema = snapshot.schema
 	lastData = snapshot.data
+	lastDefaults = snapshot.defaults
+	lastPresets = snapshot.presets
+	lastActivePresetId = snapshot.activePresetId
+	lastShowReset = snapshot.showReset
 	lastBare = snapshot.bare
 	lastShowPanelHeader = snapshot.showPanelHeader
 	lastFolderClassName = snapshot.folderClassName
@@ -136,6 +195,22 @@ function updateSchema(snapshot: GooSchemaPropsSnapshot): void {
 	if (snapshot.data !== lastData) {
 		schemaElement.setData(snapshot.data)
 		lastData = snapshot.data
+	}
+	if (snapshot.defaults !== lastDefaults) {
+		lastDefaults = snapshot.defaults
+		options.defaults = snapshot.defaults
+	}
+	if (snapshot.presets !== lastPresets) {
+		lastPresets = snapshot.presets
+		options.presets = snapshot.presets
+	}
+	if (snapshot.activePresetId !== lastActivePresetId) {
+		lastActivePresetId = snapshot.activePresetId
+		options.activePresetId = snapshot.activePresetId
+	}
+	if (snapshot.showReset !== lastShowReset) {
+		lastShowReset = snapshot.showReset
+		options.showReset = snapshot.showReset
 	}
 	if (snapshot.bare !== lastBare) {
 		lastBare = snapshot.bare

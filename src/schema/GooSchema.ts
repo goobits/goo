@@ -22,6 +22,7 @@ import type {
 	GooSchemaFolder,
 	GooSchemaNode,
 	GooSchemaOptions,
+	GooSchemaPreset,
 	GooSchemaState,
 	GooSchemaType
 } from './types.ts'
@@ -35,6 +36,7 @@ export type {
 	GooSchemaNode,
 	GooSchemaOptions,
 	GooSchemaPanel,
+	GooSchemaPreset,
 	GooSchemaState,
 	GooSchemaType
 } from './types.ts'
@@ -46,16 +48,35 @@ export interface GooSchemaEventDetail {
 	data: GooSchemaData
 }
 
+/** Detail emitted by GooSchema reset events. */
+export interface GooSchemaResetEventDetail {
+	data: GooSchemaData
+	defaults: GooSchemaData
+}
+
+/** Detail emitted by GooSchema preset events. */
+export interface GooSchemaPresetEventDetail {
+	data: GooSchemaData
+	id: string
+	preset: GooSchemaPreset
+}
+
 /** Event names emitted by the GooSchema element. */
-export type GooSchemaEventName = 'change' | 'input'
+export type GooSchemaEventName = 'change' | 'input' | 'preset' | 'reset'
 
 /** DOM custom event emitted by the GooSchema Svelte wrapper and element. */
 export type GooSchemaEvent = CustomEvent<GooSchemaEventDetail>
 
+/** DOM custom event emitted when a schema reset is applied. */
+export type GooSchemaResetEvent = CustomEvent<GooSchemaResetEventDetail>
+
+/** DOM custom event emitted when a schema preset is applied. */
+export type GooSchemaPresetEvent = CustomEvent<GooSchemaPresetEventDetail>
+
 /** Mutable display and control options accepted by a mounted GooSchema handle. */
 export type GooSchemaUpdateOptions = Pick<
 	GooSchemaOptions,
-	'bare' | 'controlTypes' | 'folderClassName' | 'showPanelHeader'
+	'activePresetId' | 'bare' | 'controlTypes' | 'defaults' | 'folderClassName' | 'presets' | 'showPanelHeader' | 'showReset'
 >
 
 /** Public imperative handle returned by `createGooSchema`. */
@@ -75,9 +96,12 @@ type GooSchemaInternal = GooSchema & {
 	_changeHandler: GooSchemaChangeHandler | null
 	_controllers: Map<string, unknown>
 	_data: GooSchemaData
+	_onpreset: ((preset: GooSchemaPreset) => void) | null
+	_onreset: ((data: GooSchemaData) => void) | null
 	_rebuildPending: boolean
 	_rebuildToken: number
 	_root: HTMLElement | null
+	_toolbar: HTMLElement | null
 	state: GooSchemaState
 	_buildField(node: GooSchemaField, parent: HTMLElement, token: number): Promise<void>
 	_buildFolder(node: GooSchemaFolder, parent: HTMLElement, token: number): Promise<void>
@@ -99,6 +123,10 @@ function initializeSchema(element: GooSchemaInternal, options: GooSchemaOptions)
 	element.state = {
 		disabled: false,
 		schema: options.schema || [],
+		defaults: options.defaults,
+		presets: options.presets,
+		activePresetId: options.activePresetId,
+		showReset: options.showReset,
 		bare: options.bare ?? false,
 		showPanelHeader: options.showPanelHeader ?? true,
 		folderClassName: options.folderClassName,
@@ -106,16 +134,20 @@ function initializeSchema(element: GooSchemaInternal, options: GooSchemaOptions)
 	}
 	element._data = options.data || {}
 	element._changeHandler = options.onchange || null
+	element._onreset = options.onreset || null
+	element._onpreset = options.onpreset || null
 	element._controllers = new Map()
 	element._rebuildToken = 0
 	element._rebuildPending = false
 	element._root = null
+	element._toolbar = null
 }
 
 function attachSchemaApi(element: GooSchemaInternal): void {
 	Object.assign(element, {
 		destroy: () => {
 			element._root = null
+			element._toolbar = null
 			element._controllers.clear()
 			element.remove()
 		},
@@ -132,9 +164,26 @@ function attachSchemaApi(element: GooSchemaInternal): void {
 				return
 			}
 			element.refresh()
+			updateSchemaActionState(element)
 		},
 		setOptions: (options: GooSchemaUpdateOptions) => {
 			let shouldRebuild = false
+			if ('defaults' in options && element.state.defaults !== options.defaults) {
+				element.state.defaults = options.defaults
+				shouldRebuild = true
+			}
+			if ('presets' in options && element.state.presets !== options.presets) {
+				element.state.presets = options.presets
+				shouldRebuild = true
+			}
+			if ('activePresetId' in options && element.state.activePresetId !== options.activePresetId) {
+				element.state.activePresetId = options.activePresetId
+				shouldRebuild = true
+			}
+			if ('showReset' in options && element.state.showReset !== options.showReset) {
+				element.state.showReset = options.showReset
+				shouldRebuild = true
+			}
 			if ('bare' in options && element.state.bare !== options.bare) {
 				element.state.bare = options.bare
 				shouldRebuild = true
@@ -161,6 +210,7 @@ function attachSchemaApi(element: GooSchemaInternal): void {
 			for (const [ , controller ] of element._controllers) {
 				(controller as { refresh?: () => void }).refresh?.()
 			}
+			updateSchemaActionState(element)
 		},
 		_scheduleRebuild: () => {
 			if (element._rebuildPending) return
@@ -229,6 +279,7 @@ async function rebuildSchema(element: GooSchemaInternal): Promise<void> {
 
 	element.replaceChildren()
 	element._root = null
+	element._toolbar = null
 	element._controllers.clear()
 
 	const schema = element.state.schema
@@ -237,6 +288,7 @@ async function rebuildSchema(element: GooSchemaInternal): Promise<void> {
 	if (element.state.bare) {
 		element._root = document.createElement('div')
 		element._root.className = 'goo-schema__bare'
+		appendSchemaActions(element, element._root)
 		const nodes = Array.isArray(schema) ? schema : schema.children
 		await buildNodes(element, nodes, element._root, token)
 	} else if (Array.isArray(schema)) {
@@ -246,6 +298,7 @@ async function rebuildSchema(element: GooSchemaInternal): Promise<void> {
 			collapsible: false,
 			showHeader: element.state.showPanelHeader ?? true
 		}) as HTMLElement
+		appendSchemaActions(element, element._root)
 		await buildNodes(element, schema, element._root, token)
 	} else if (schema.type === 'panel') {
 		element._root = createPanel({
@@ -255,6 +308,7 @@ async function rebuildSchema(element: GooSchemaInternal): Promise<void> {
 			collapsible: true,
 			showHeader: schema.showHeader ?? element.state.showPanelHeader ?? true
 		}) as HTMLElement
+		appendSchemaActions(element, element._root)
 		await buildNodes(element, schema.children, element._root, token)
 	}
 
@@ -346,11 +400,13 @@ async function buildField(
 		const detail: GooSchemaEventDetail = { path: node.path, value, data: element._data }
 		element.dispatchEvent(new CustomEvent('change', { detail, bubbles: true }))
 		element._changeHandler?.(node.path, value)
+		updateSchemaActionState(element)
 	}
 
 	controllerOptions.oninput = (value: unknown) => {
 		const detail: GooSchemaEventDetail = { path: node.path, value, data: element._data }
 		element.dispatchEvent(new CustomEvent('input', { detail, bubbles: true }))
+		updateSchemaActionState(element)
 	}
 
 	const controller = createGooController(controllerOptions)
@@ -375,6 +431,7 @@ async function buildSelfContainedField(
 		const detail: GooSchemaEventDetail = { path: node.path, value, data: element._data }
 		element.dispatchEvent(new CustomEvent('change', { detail, bubbles: true }))
 		element._changeHandler?.(node.path, value)
+		updateSchemaActionState(element)
 	}
 
 	const options = { ...controllerOptions }
@@ -410,6 +467,123 @@ function isGooSvelteControlModule(module: unknown): module is GooSvelteControlMo
 		&& module !== null
 		&& 'default' in module
 		&& typeof (module as { default?: unknown }).default === 'function'
+}
+
+function appendSchemaActions(element: GooSchemaInternal, parent: HTMLElement): void {
+	if (!shouldRenderSchemaActions(element)) return
+
+	const toolbar = document.createElement('div')
+	toolbar.className = 'goo-schema__actions'
+
+	const presets = element.state.presets ?? []
+	if (presets.length) {
+		const select = document.createElement('select')
+		select.className = 'goo-schema__preset-select'
+		select.ariaLabel = 'Schema preset'
+
+		for (const preset of presets) {
+			const option = document.createElement('option')
+			option.value = preset.id
+			option.textContent = preset.label
+			option.selected = preset.id === element.state.activePresetId
+			select.appendChild(option)
+		}
+
+		select.addEventListener('change', () => {
+			const preset = presets.find(candidate => candidate.id === select.value)
+			if (!preset) return
+			applySchemaPreset(element, preset)
+		})
+		toolbar.appendChild(select)
+	}
+
+	if (element.state.showReset && element.state.defaults) {
+		const reset = document.createElement('button')
+		reset.className = 'goo-schema__reset'
+		reset.type = 'button'
+		reset.textContent = 'Reset'
+		reset.title = 'Reset to defaults'
+		reset.addEventListener('click', () => resetSchemaToDefaults(element))
+		toolbar.appendChild(reset)
+	}
+
+	const parentContainer = parent as HTMLElement & { add?: (el: HTMLElement) => void }
+	if (typeof parentContainer.add === 'function') {
+		parentContainer.add(toolbar)
+	} else {
+		parent.appendChild(toolbar)
+	}
+	element._toolbar = toolbar
+	updateSchemaActionState(element)
+}
+
+function shouldRenderSchemaActions(element: GooSchemaInternal): boolean {
+	return Boolean((element.state.presets?.length ?? 0) > 0 || (element.state.showReset && element.state.defaults))
+}
+
+function applySchemaPreset(element: GooSchemaInternal, preset: GooSchemaPreset): void {
+	const data = cloneSchemaData(preset.data)
+	element.setData(data)
+	const detail: GooSchemaPresetEventDetail = { id: preset.id, preset, data: element._data }
+	element.dispatchEvent(new CustomEvent('preset', { detail, bubbles: true }))
+	element._onpreset?.(preset)
+}
+
+function resetSchemaToDefaults(element: GooSchemaInternal): void {
+	const defaults = element.state.defaults
+	if (!defaults) return
+	const data = cloneSchemaData(defaults)
+	element.setData(data)
+	const detail: GooSchemaResetEventDetail = { data: element._data, defaults }
+	element.dispatchEvent(new CustomEvent('reset', { detail, bubbles: true }))
+	element._onreset?.(element._data)
+}
+
+function updateSchemaActionState(element: GooSchemaInternal): void {
+	const toolbar = element._toolbar
+	if (!toolbar) return
+
+	const reset = toolbar.querySelector<HTMLButtonElement>('.goo-schema__reset')
+	if (reset && element.state.defaults) {
+		reset.disabled = isSchemaDataEqual(element._data, element.state.defaults)
+	}
+
+	const select = toolbar.querySelector<HTMLSelectElement>('.goo-schema__preset-select')
+	if (select && element.state.activePresetId !== undefined && select.value !== element.state.activePresetId) {
+		select.value = element.state.activePresetId ?? ''
+	}
+}
+
+function cloneSchemaData(data: GooSchemaData): GooSchemaData {
+	return cloneSchemaValue(data) as GooSchemaData
+}
+
+function cloneSchemaValue(value: unknown): unknown {
+	if (Array.isArray(value)) return value.map(cloneSchemaValue)
+	if (isPlainRecord(value)) {
+		return Object.fromEntries(Object.entries(value).map(([ key, child ]) => [ key, cloneSchemaValue(child) ]))
+	}
+	return value
+}
+
+function isSchemaDataEqual(left: GooSchemaData, right: GooSchemaData): boolean {
+	return isSchemaValueEqual(left, right)
+}
+
+function isSchemaValueEqual(left: unknown, right: unknown): boolean {
+	if (Object.is(left, right)) return true
+	if (Array.isArray(left) || Array.isArray(right)) {
+		if (!Array.isArray(left) || !Array.isArray(right) || left.length !== right.length) return false
+		return left.every((value, index) => isSchemaValueEqual(value, right[index]))
+	}
+	if (isPlainRecord(left) || isPlainRecord(right)) {
+		if (!isPlainRecord(left) || !isPlainRecord(right)) return false
+		const leftKeys = Object.keys(left)
+		const rightKeys = Object.keys(right)
+		if (leftKeys.length !== rightKeys.length) return false
+		return leftKeys.every(key => key in right && isSchemaValueEqual(left[key], right[key]))
+	}
+	return false
 }
 
 function createGooSchemaElement(options: GooSchemaOptions = {}): GooSchema {

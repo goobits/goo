@@ -26,6 +26,20 @@ export type GooSchemaFieldLayout = 'inline' | 'stacked' | 'self-contained'
 export type GooSchemaValueFormat = 'percent' | 'number' | 'integer' | 'float' | string
 
 /**
+ * Named data snapshot that can be applied to a schema as a preset.
+ */
+export interface GooSchemaPreset {
+	/** Stable preset identifier. */
+	id: string
+
+	/** User-facing preset label. */
+	label: string
+
+	/** Data applied when this preset is selected. */
+	data: GooSchemaData
+}
+
+/**
  * Control field definition - binds to a data property.
  */
 export interface GooSchemaField {
@@ -189,8 +203,26 @@ export interface GooSchemaOptions {
 	/** Data object bound to schema fields. */
 	data?: GooSchemaData
 
+	/** Default data used by the reset action. */
+	defaults?: GooSchemaData
+
+	/** Named data presets the schema can apply. */
+	presets?: GooSchemaPreset[]
+
+	/** Currently selected preset id, if known by the caller. */
+	activePresetId?: string | null
+
+	/** Render a reset button when defaults are available. */
+	showReset?: boolean
+
 	/** Programmatic change handler. */
 	onchange?: GooSchemaChangeHandler
+
+	/** Programmatic reset handler. */
+	onreset?: (data: GooSchemaData) => void
+
+	/** Programmatic preset handler. */
+	onpreset?: (preset: GooSchemaPreset) => void
 
 	/** Render controls directly without panel wrapper. */
 	bare?: boolean
@@ -211,6 +243,18 @@ export interface GooSchemaOptions {
 export interface GooSchemaState {
 	disabled?: boolean
 	schema: GooSchemaType
+
+	/** Default data used by the reset action. */
+	defaults?: GooSchemaData
+
+	/** Named data presets the schema can apply. */
+	presets?: GooSchemaPreset[]
+
+	/** Currently selected preset id, if known by the caller. */
+	activePresetId?: string | null
+
+	/** Render a reset button when defaults are available. */
+	showReset?: boolean
 
 	/** Render controls directly without panel wrapper. */
 	bare?: boolean

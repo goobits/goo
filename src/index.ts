@@ -171,6 +171,11 @@ export type {
 	GooSchemaFolder,
 	GooSchemaNode,
 	GooSchemaOptions,
+	GooSchemaPreset,
+	GooSchemaPresetEvent,
+	GooSchemaPresetEventDetail,
+	GooSchemaResetEvent,
+	GooSchemaResetEventDetail,
 	GooSchemaType,
 	GooSchemaUpdateOptions
 } from './schema/index.ts'

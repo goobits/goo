@@ -70,13 +70,20 @@ describe('GooSchema', () => {
 
 	it('renders the Svelte wrapper and forwards change events', async() => {
 		const onchange = vi.fn()
+		const onpreset = vi.fn()
+		const onreset = vi.fn()
 		let instance: ReturnType<typeof createGooSchema> | null = null
 		const { container } = render(GooSchema, {
 			props: {
 				schema: [ { path: 'enabled', type: 'checkbox' } ],
 				data: { enabled: true },
+				defaults: { enabled: true },
+				presets: [ { id: 'off', label: 'Off', data: { enabled: false } } ],
+				showReset: true,
 				bare: true,
 				onchange,
+				onpreset,
+				onreset,
 				get instance() {
 					return instance
 				},
@@ -90,7 +97,11 @@ describe('GooSchema', () => {
 		expect(container.querySelector('goo-schema')).toBeNull()
 		expect(container.querySelector('.goo-schema')).toBe(instance)
 		instance?.dispatchEvent(new CustomEvent('change', { detail: { path: 'enabled', value: false, data: instance.getData() } }))
+		instance?.dispatchEvent(new CustomEvent('preset', { detail: { id: 'off', preset: { id: 'off', label: 'Off', data: { enabled: false } }, data: { enabled: false } } }))
+		instance?.dispatchEvent(new CustomEvent('reset', { detail: { data: { enabled: true }, defaults: { enabled: true } } }))
 		expect(onchange).toHaveBeenCalledOnce()
+		expect(onpreset).toHaveBeenCalledOnce()
+		expect(onreset).toHaveBeenCalledOnce()
 	})
 
 	it('remounts the Svelte wrapper when creation options change', async() => {
@@ -158,6 +169,73 @@ describe('GooSchema', () => {
 
 		expect(schema.getController('size')).toBe(firstController)
 		expect(schema.getData().size).toBe(24)
+	})
+
+	it('resets schema data to defaults without rebuilding unchanged controllers', async() => {
+		const onreset = vi.fn()
+		const schema = createGooSchema({
+			schema: [ { path: 'size', min: 0, max: 100 } ],
+			data: { size: 24 },
+			defaults: { size: 12 },
+			showReset: true,
+			bare: true,
+			onreset
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+
+		const controller = schema.getController('size')
+		const reset = schema.querySelector<HTMLButtonElement>('.goo-schema__reset')
+		expect(controller).not.toBeUndefined()
+		expect(reset).not.toBeNull()
+		expect(reset?.disabled).toBe(false)
+
+		reset?.click()
+		await settleGooSchema()
+
+		expect(schema.getController('size')).toBe(controller)
+		expect(schema.getData()).toEqual({ size: 12 })
+		expect(onreset).toHaveBeenCalledWith({ size: 12 })
+		expect(reset?.disabled).toBe(true)
+	})
+
+	it('applies named schema presets and emits preset events', async() => {
+		const onpreset = vi.fn()
+		const presetEvent = vi.fn()
+		const presets = [
+			{ id: 'small', label: 'Small', data: { shape: { size: 8 } } },
+			{ id: 'large', label: 'Large', data: { shape: { size: 32 } } }
+		]
+		const schema = createGooSchema({
+			schema: [ { path: 'shape.size', min: 0, max: 100 } ],
+			data: { shape: { size: 8 } },
+			presets,
+			activePresetId: 'small',
+			bare: true,
+			onpreset
+		})
+		schema.addEventListener('preset', presetEvent)
+		document.body.appendChild(schema)
+		await settleGooSchema()
+
+		const controller = schema.getController('shape.size')
+		const select = schema.querySelector<HTMLSelectElement>('.goo-schema__preset-select')
+		expect(controller).not.toBeUndefined()
+		expect(select?.value).toBe('small')
+
+		if (select) {
+			select.value = 'large'
+			select.dispatchEvent(new Event('change', { bubbles: true }))
+		}
+		await settleGooSchema()
+
+		expect(schema.getController('shape.size')).toBe(controller)
+		expect(schema.getData()).toEqual({ shape: { size: 32 } })
+		expect(onpreset).toHaveBeenCalledWith(presets[1])
+		expect(presetEvent.mock.calls[0]?.[0].detail).toMatchObject({
+			id: 'large',
+			data: { shape: { size: 32 } }
+		})
 	})
 
 	it('accepts same-object data updates without rebuilding nested controllers', async() => {
