@@ -4,4 +4,4 @@ export type { GridPopoutTriggerHandle, GridPopoutTriggerOptions } from './create
 export { createGridPopoutTrigger } from './createGridPopoutTrigger.ts'
 export { default as GridPopoutPicker } from './GridPopoutPicker.svelte'
 export { default as GridPopoutTrigger } from './GridPopoutTrigger.svelte'
-export type { GridPopoutItem, GridPopoutSvgElement, GridPopoutSvgIcon } from './types.ts'
+export type { GridPopoutItem, GridPopoutPreview, GridPopoutSvgElement, GridPopoutSvgIcon } from './types.ts'

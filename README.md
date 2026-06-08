@@ -93,6 +93,7 @@ Use package subpaths in apps and shared packages so each caller names the surfac
 | `@goobits/goo/label`                   | `GooLabel`                                                         | Label component                            |
 | `@goobits/goo/number`                  | `formatNumber`, `clamp`, `toPercent`, `fromPercent`, `roundNumber` | Number utilities                           |
 | `@goobits/goo/panel`                   | `GooPanel`                                                         | Inspector panel shell                      |
+| `@goobits/goo/preview`                 | `GooPreview`                                                       | Themed image/SVG/canvas preview surface    |
 | `@goobits/goo/pointer`                 | `createPointerDrag`, `createPointerTap`, pointer event types       | Pointer drag and tap utilities             |
 | `@goobits/goo/popout`                  | `GooPopout`, `createGooPopout`, `gooPopoutRuntime`                 | Popout positioning and lifecycle           |
 | `@goobits/goo/positioning`             | `positionElementAt`, `calculatePosition`, positioning types        | Shared positioning math                    |

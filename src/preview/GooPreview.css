@@ -1,0 +1,118 @@
+.goo-preview {
+	--goo-preview-height: 7.25rem;
+	--goo-preview-radius: var(--goo-theme-radius-lg, 0.5rem);
+	--goo-preview-tint: var(--goo-theme-accent, #8b5cf6);
+	--goo-preview-bg: var(--goo-theme-surface-sunken, #171821);
+	--goo-preview-border: var(--goo-theme-border-subtle, rgba(255, 255, 255, 0.12));
+	--goo-preview-dot: color-mix(in srgb, var(--goo-theme-fg, #fff) 14%, transparent);
+	--goo-preview-badge-bg: color-mix(in srgb, var(--goo-theme-bg, #111) 76%, transparent);
+	--goo-preview-badge-fg: var(--goo-theme-muted, rgba(255, 255, 255, 0.65));
+	background:
+		radial-gradient(120% 140% at 50% 0%, color-mix(in oklab, var(--goo-preview-tint), transparent 88%), transparent 62%),
+		var(--goo-preview-bg);
+	border: 1px solid var(--goo-preview-border);
+	border-radius: var(--goo-preview-radius);
+	box-sizing: border-box;
+	color: var(--goo-theme-fg, #fff);
+	display: grid;
+	min-height: var(--goo-preview-height);
+	overflow: hidden;
+	place-items: center;
+	position: relative;
+}
+
+.goo-preview::before {
+	content: "";
+	inset: 0;
+	opacity: 0.4;
+	pointer-events: none;
+	position: absolute;
+	z-index: 0;
+}
+
+.goo-preview--background-dots::before {
+	background: radial-gradient(circle, var(--goo-preview-dot) 1px, transparent 1.4px) 0 0 / 14px 14px;
+}
+
+.goo-preview--background-checker::before {
+	background:
+		linear-gradient(45deg, color-mix(in srgb, var(--goo-theme-fg, #fff) 7%, transparent) 25%, transparent 25%),
+		linear-gradient(-45deg, color-mix(in srgb, var(--goo-theme-fg, #fff) 7%, transparent) 25%, transparent 25%),
+		linear-gradient(45deg, transparent 75%, color-mix(in srgb, var(--goo-theme-fg, #fff) 7%, transparent) 75%),
+		linear-gradient(-45deg, transparent 75%, color-mix(in srgb, var(--goo-theme-fg, #fff) 7%, transparent) 75%);
+	background-position: 0 0, 0 6px, 6px -6px, -6px 0;
+	background-size: 12px 12px;
+}
+
+.goo-preview--background-plain::before {
+	display: none;
+}
+
+.goo-preview--sm {
+	--goo-preview-height: 2rem;
+	--goo-preview-radius: var(--goo-theme-radius-sm, 0.25rem);
+}
+
+.goo-preview--md {
+	--goo-preview-height: 4rem;
+}
+
+.goo-preview--lg {
+	--goo-preview-height: 7.25rem;
+}
+
+.goo-preview__media {
+	display: block;
+	grid-area: 1 / 1;
+	height: 100%;
+	max-height: 100%;
+	max-width: 100%;
+	min-height: 0;
+	object-fit: var(--goo-preview-fit, contain);
+	position: relative;
+	width: 100%;
+	z-index: 1;
+}
+
+.goo-preview__content {
+	align-items: center;
+	display: grid;
+	grid-area: 1 / 1;
+	height: 100%;
+	justify-items: center;
+	min-height: 0;
+	position: relative;
+	width: 100%;
+	z-index: 1;
+}
+
+.goo-preview__badge {
+	background: var(--goo-preview-badge-bg);
+	border-radius: var(--goo-theme-radius-full, 9999px);
+	bottom: var(--goo-theme-space-sm, 0.5rem);
+	color: var(--goo-preview-badge-fg);
+	font-family: var(--goo-theme-font-mono, ui-monospace, monospace);
+	font-size: 0.6875rem;
+	line-height: 1.2;
+	padding: 0.125rem 0.4375rem;
+	pointer-events: none;
+	position: absolute;
+	right: var(--goo-theme-space-sm, 0.5rem);
+	white-space: nowrap;
+	z-index: 2;
+}
+
+.goo-preview__title {
+	bottom: var(--goo-theme-space-sm, 0.5rem);
+	color: var(--goo-theme-muted, rgba(255, 255, 255, 0.65));
+	font-size: var(--goo-theme-font-size-xs, 0.75rem);
+	left: var(--goo-theme-space-sm, 0.5rem);
+	line-height: 1.2;
+	overflow: hidden;
+	pointer-events: none;
+	position: absolute;
+	right: var(--goo-theme-space-sm, 0.5rem);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	z-index: 2;
+}

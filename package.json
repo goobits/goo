@@ -123,6 +123,11 @@
 			"svelte": "./src/panel/index.ts",
 			"import": "./src/panel/index.ts"
 		},
+		"./preview": {
+			"types": "./src/preview/index.ts",
+			"svelte": "./src/preview/index.ts",
+			"import": "./src/preview/index.ts"
+		},
 		"./controller": {
 			"types": "./src/controller/index.ts",
 			"svelte": "./src/controller/index.ts",

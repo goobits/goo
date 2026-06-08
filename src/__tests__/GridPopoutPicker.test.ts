@@ -139,7 +139,53 @@ describe('GridPopoutPicker', () => {
 		expect(document.body.querySelector('.goo-popout')).toBeNull()
 	})
 
-	it('renders preview images in the trigger and options when provided', async() => {
+	it('renders Goo preview surfaces in the trigger and options when provided', async() => {
+		const { getByRole } = render(GridPopoutPicker, {
+			props: {
+				ariaLabel: 'Brush',
+				items: [
+					{
+						id: 'brush',
+						kicker: 'Brush preset',
+						preview: {
+							alt: 'Brush preview',
+							background: 'dots',
+							badge: '42 px',
+							hue: '#ba8cff',
+							src: 'data:image/png;base64,preview'
+						},
+						title: 'Brush'
+					}
+				],
+				popoutClass: 'goo-grid-popout--preset',
+				selected: 'brush'
+			}
+		})
+
+		const trigger = getByRole('button', { name: 'Brush' })
+		const triggerPreview = trigger.querySelector('.goo-grid-popout-trigger__preview.goo-preview')
+		const triggerImage = triggerPreview?.querySelector('img')
+
+		expect(triggerPreview?.classList.contains('goo-preview--background-dots')).toBe(true)
+		expect(triggerPreview?.getAttribute('style')).toContain('--goo-preview-tint: #ba8cff')
+		expect(triggerImage?.getAttribute('src')).toBe('data:image/png;base64,preview')
+		expect(triggerImage?.getAttribute('alt')).toBe('Brush preview')
+		expect(trigger.textContent).toContain('Brush preset')
+
+		await fireEvent.click(trigger)
+
+		const option = getByRole('option', { name: 'Brush' })
+		const optionPreview = option.querySelector('.goo-grid-picker__preview.goo-preview')
+		const optionImage = optionPreview?.querySelector('img')
+
+		expect(optionPreview?.classList.contains('goo-preview--background-dots')).toBe(true)
+		expect(optionImage?.getAttribute('src')).toBe('data:image/png;base64,preview')
+		expect(optionImage?.getAttribute('alt')).toBe('Brush preview')
+		expect(option.textContent).toContain('42 px')
+		expect(document.body.querySelector('.goo-popout')?.classList.contains('goo-grid-popout--preset')).toBe(true)
+	})
+
+	it('keeps legacy previewUrl items working', () => {
 		const { getByRole } = render(GridPopoutPicker, {
 			props: {
 				ariaLabel: 'Brush',
@@ -155,17 +201,11 @@ describe('GridPopoutPicker', () => {
 			}
 		})
 
-		const trigger = getByRole('button', { name: 'Brush' })
-		const triggerPreview = trigger.querySelector('img.icon')
+		const triggerPreview = getByRole('button', { name: 'Brush' })
+			.querySelector('.goo-grid-popout-trigger__preview.goo-preview img')
 
 		expect(triggerPreview?.getAttribute('src')).toBe('data:image/png;base64,preview')
 		expect(triggerPreview?.getAttribute('alt')).toBe('Brush preview')
-
-		await fireEvent.click(trigger)
-
-		const optionPreview = getByRole('option', { name: 'Brush' }).querySelector('img.icon')
-		expect(optionPreview?.getAttribute('src')).toBe('data:image/png;base64,preview')
-		expect(optionPreview?.getAttribute('alt')).toBe('Brush preview')
 	})
 
 	it('honors explicit icon-grid layout instead of forcing small lists to one column', async() => {

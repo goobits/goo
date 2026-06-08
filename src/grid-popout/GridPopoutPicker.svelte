@@ -4,10 +4,11 @@
  */
 
 import { createGooPopout, gooPopoutRuntime, type GooPopoutInstance } from '../popout/index.ts'
+import '../preview/GooPreview.css'
 
 import GridPopoutTrigger from './GridPopoutTrigger.svelte'
 import './gridPickerSelectedMark.css'
-import type { GridPopoutItem, GridPopoutSvgIcon } from './types.ts'
+import type { GridPopoutItem, GridPopoutPreview, GridPopoutSvgIcon } from './types.ts'
 import { createGridPickerSelectedMark } from './gridPickerSelectedMark.ts'
 
 const QUICK_REPEAT_TOGGLE_MS = 350
@@ -186,6 +187,7 @@ function getPopoutClassName(): string {
 function hasExplicitGridLayout(className: string): boolean {
 	return className.includes('goo-grid-popout--one-column') ||
 		className.includes('goo-grid-popout--icon-grid') ||
+		className.includes('goo-grid-popout--preset') ||
 		className.includes('goo-grid-popout--subtool')
 }
 
@@ -215,11 +217,21 @@ function createOption(item: GridPopoutItem): HTMLElement {
 	}
 
 	const title = document.createElement('grid-title')
-	title.textContent = item.title
+	if (item.kicker) {
+		const kicker = document.createElement('span')
+		kicker.className = 'goo-grid-picker__kicker'
+		kicker.textContent = item.kicker
+		title.appendChild(kicker)
+	}
+	const titleText = document.createElement('span')
+	titleText.className = 'goo-grid-picker__title'
+	titleText.textContent = item.title
+	title.appendChild(titleText)
 	option.appendChild(title)
 
-	if (item.previewUrl) {
-		option.appendChild(createPreviewImage(item))
+	const preview = getItemPreview(item)
+	if (preview) {
+		option.appendChild(createPreviewSurface(preview))
 	} else if (item.iconSvg) {
 		option.appendChild(createSvgIcon(item.iconSvg))
 	} else if (item.iconClass) {
@@ -238,14 +250,46 @@ function createOption(item: GridPopoutItem): HTMLElement {
 	return option
 }
 
-function createPreviewImage(item: GridPopoutItem): HTMLImageElement {
+function getItemPreview(item: GridPopoutItem): GridPopoutPreview | undefined {
+	if (item.preview) return item.preview
+	if (!item.previewUrl) return undefined
+	return {
+		alt: item.previewAlt ?? '',
+		background: 'checker',
+		fit: 'contain',
+		size: 'sm',
+		src: item.previewUrl
+	}
+}
+
+function createPreviewSurface(preview: GridPopoutPreview): HTMLElement {
+	const surface = document.createElement('span')
+	surface.className = [
+		'icon',
+		'goo-preview',
+		`goo-preview--${ preview.size ?? 'sm' }`,
+		`goo-preview--background-${ preview.background ?? 'checker' }`,
+		'goo-grid-picker__preview'
+	].filter(Boolean).join(' ')
+	if (preview.hue) surface.style.setProperty('--goo-preview-tint', preview.hue)
+	if (preview.fit) surface.style.setProperty('--goo-preview-fit', preview.fit)
+
 	const image = document.createElement('img')
-	image.className = 'icon'
-	image.src = item.previewUrl ?? ''
-	image.alt = item.previewAlt ?? ''
+	image.className = 'goo-preview__media'
+	image.src = preview.src
+	image.alt = preview.alt ?? ''
 	image.draggable = false
 	image.loading = 'lazy'
-	return image
+	surface.appendChild(image)
+
+	if (preview.badge) {
+		const badge = document.createElement('span')
+		badge.className = 'goo-preview__badge'
+		badge.textContent = preview.badge
+		surface.appendChild(badge)
+	}
+
+	return surface
 }
 
 function createSvgIcon(icon: GridPopoutSvgIcon): SVGSVGElement {
@@ -358,7 +402,9 @@ function escapeSelectorValue(value: string): string {
 	{id}
 	iconClass={currentItem?.iconClass ?? ''}
 	iconSvg={currentItem?.iconSvg}
+	kicker={currentItem?.kicker ?? ''}
 	{opened}
+	preview={currentItem ? getItemPreview(currentItem) : undefined}
 	previewAlt={currentItem?.previewAlt ?? currentItem?.title ?? ''}
 	previewUrl={currentItem?.previewUrl ?? ''}
 	tabIndex={tabIndex}
@@ -423,8 +469,20 @@ function escapeSelectorValue(value: string): string {
 
 :global(goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) grid-title),
 :global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) grid-title) {
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
 	line-height: 1.2;
 	order: 2;
+}
+
+:global(goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .goo-grid-picker__kicker),
+:global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .goo-grid-picker__kicker) {
+	color: var(--goo-theme-muted);
+	font-size: 0.625rem;
+	font-weight: 600;
+	letter-spacing: 0.07em;
+	text-transform: uppercase;
 }
 
 :global(goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .icon),
@@ -544,6 +602,46 @@ function escapeSelectorValue(value: string): string {
 	line-height: 1;
 	margin: 0;
 	width: 40px;
+}
+
+:global(goo-popout.goo-grid-popout--preset),
+:global(.goo-popout.goo-grid-popout--preset) {
+	inline-size: min(34rem, calc(100vw - 2rem));
+	max-width: none;
+}
+
+:global(goo-popout.goo-grid-popout--preset .goo-grid-picker),
+:global(.goo-popout.goo-grid-popout--preset .goo-grid-picker) {
+	gap: var(--goo-theme-space-sm);
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+:global(goo-popout.goo-grid-popout--preset sketch-grid-item),
+:global(.goo-popout.goo-grid-popout--preset sketch-grid-item) {
+	align-items: stretch;
+	flex-direction: column;
+	min-height: 6.9rem;
+	padding: var(--goo-theme-space-xs);
+}
+
+:global(goo-popout.goo-grid-popout--preset grid-title),
+:global(.goo-popout.goo-grid-popout--preset grid-title) {
+	max-width: 100%;
+	order: 2;
+	overflow: hidden;
+	text-align: left;
+}
+
+:global(goo-popout.goo-grid-popout--preset .goo-grid-picker__preview),
+:global(.goo-popout.goo-grid-popout--preset .goo-grid-picker__preview) {
+	aspect-ratio: 12 / 5;
+	flex: none;
+	height: auto;
+	margin: 0;
+	min-height: auto;
+	order: 1;
+	padding: 0;
+	width: 100%;
 }
 
 </style>

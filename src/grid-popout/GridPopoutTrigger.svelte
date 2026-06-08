@@ -5,7 +5,8 @@
 
 import ChevronDown from '@lucide/svelte/icons/chevron-down'
 
-import type { GridPopoutSvgIcon } from './types.ts'
+import { GooPreview } from '../preview/index.ts'
+import type { GridPopoutPreview, GridPopoutSvgIcon } from './types.ts'
 
 const CONTENT_FADE_MS = 140
 
@@ -13,6 +14,8 @@ interface TriggerValue {
 	ariaLabel?: string
 	iconClass?: string
 	iconSvg?: GridPopoutSvgIcon
+	kicker?: string
+	preview?: GridPopoutPreview
 	previewAlt?: string
 	previewUrl?: string
 	title?: string
@@ -26,7 +29,9 @@ interface Props {
 	id?: string
 	iconClass?: string
 	iconSvg?: GridPopoutSvgIcon
+	kicker?: string
 	opened?: boolean
+	preview?: GridPopoutPreview
 	previewAlt?: string
 	previewClass?: string
 	previewSize?: number
@@ -50,7 +55,9 @@ let {
 	id,
 	iconClass = '',
 	iconSvg,
+	kicker = '',
 	opened = false,
+	preview,
 	previewAlt = '',
 	previewClass = '',
 	previewSize = 40,
@@ -95,10 +102,12 @@ const currentOpened = $derived(openedOverride ?? opened)
 const currentAriaLabel = $derived(valueOverride.ariaLabel ?? ariaLabel)
 const currentIconClass = $derived(valueOverride.iconClass ?? iconClass)
 const currentIconSvg = $derived(valueOverride.iconSvg ?? iconSvg)
+const currentKicker = $derived(valueOverride.kicker ?? kicker)
+const currentPreview = $derived(valueOverride.preview ?? preview ?? getLegacyPreview(valueOverride.previewUrl ?? previewUrl, valueOverride.previewAlt ?? previewAlt))
 const currentPreviewAlt = $derived(valueOverride.previewAlt ?? previewAlt)
 const currentPreviewUrl = $derived(valueOverride.previewUrl ?? previewUrl)
 const currentTitle = $derived(valueOverride.title ?? title)
-const contentFadeClassName = $derived(contentFadeActive && !currentPreviewUrl
+const contentFadeClassName = $derived(contentFadeActive && !currentPreview?.src && !currentPreviewUrl
 	? 'goo-grid-popout-trigger__fade'
 	: '')
 const iconClassName = $derived([
@@ -137,7 +146,8 @@ $effect(() => {
 	const contentSignature = [
 		currentIconClass,
 		currentIconSvg ? JSON.stringify(currentIconSvg) : '',
-		currentPreviewUrl,
+		currentPreview ? JSON.stringify(currentPreview) : currentPreviewUrl,
+		currentKicker,
 		currentTitle
 	].join('\0')
 
@@ -174,6 +184,17 @@ function clearContentFadeTimer(): void {
 	clearTimeout(contentFadeTimer)
 	contentFadeTimer = undefined
 }
+
+function getLegacyPreview(src: string, alt: string): GridPopoutPreview | undefined {
+	if (!src) return undefined
+	return {
+		alt,
+		background: 'checker',
+		fit: 'contain',
+		size: 'sm',
+		src
+	}
+}
 </script>
 
 <goo-grid-popout-trigger
@@ -196,15 +217,22 @@ function clearContentFadeTimer(): void {
 		<ChevronDown aria-hidden="true" focusable="false" />
 	</span>
 	<span class="goo-grid-popout-trigger__content">
-		<grid-title class={titleClassName}>{currentTitle}</grid-title>
-		{#if currentPreviewUrl}
-			<img
+		<grid-title class={titleClassName}>
+			{#if currentKicker}
+				<span class="goo-grid-popout-trigger__kicker">{currentKicker}</span>
+			{/if}
+			<span class="goo-grid-popout-trigger__title">{currentTitle}</span>
+		</grid-title>
+		{#if currentPreview?.src}
+			<GooPreview
 				class={previewClassName}
-				src={currentPreviewUrl}
-				alt={currentPreviewAlt}
-				width={previewSize}
-				height={previewSize}
-				draggable="false"
+				src={currentPreview.src}
+				alt={currentPreview.alt ?? currentPreviewAlt}
+				background={currentPreview.background ?? 'checker'}
+				badge={currentPreview.badge}
+				fit={currentPreview.fit ?? 'contain'}
+				hue={currentPreview.hue}
+				size={currentPreview.size ?? 'sm'}
 			/>
 		{:else if currentIconSvg}
 			<svg
@@ -283,8 +311,11 @@ goo-grid-popout-trigger[aria-disabled="true"] {
 goo-grid-popout-trigger :global(grid-title) {
 	align-items: center;
 	display: flex;
+	flex-direction: column;
 	color: var(--goo-theme-fg);
+	gap: 1px;
 	height: 60px;
+	justify-content: center;
 	inset-inline-start: 65px;
 	line-height: 1.2;
 	overflow: hidden;
@@ -296,8 +327,21 @@ goo-grid-popout-trigger :global(grid-title) {
 	width: calc(100% - 65px - var(--goo-grid-trigger-arrow-inline-size));
 }
 
-goo-grid-popout-trigger :global(grid-title span) {
-	border-bottom: 1px solid var(--goo-theme-fg);
+.goo-grid-popout-trigger__kicker {
+	color: var(--goo-theme-muted);
+	font-size: 0.625rem;
+	font-weight: 600;
+	letter-spacing: 0.07em;
+	text-transform: uppercase;
+}
+
+.goo-grid-popout-trigger__title {
+	color: var(--goo-theme-fg);
+	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
+	font-weight: 600;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	width: 100%;
 }
 
 goo-grid-popout-trigger :global(.icon),
@@ -421,6 +465,32 @@ goo-grid-popout-trigger.goo-grid-trigger--font :global(.goo-grid-trigger__icon) 
 	object-fit: cover;
 	transition: opacity 140ms ease-out;
 	will-change: opacity;
+}
+
+goo-grid-popout-trigger.goo-grid-trigger--preset {
+	background: var(--goo-theme-surface-raised, color-mix(in srgb, var(--goo-theme-fg) 5%, var(--goo-theme-bg)));
+	border: 1px solid var(--goo-theme-border-strong, var(--goo-theme-border));
+	border-radius: var(--goo-theme-radius-lg, 0.5rem);
+	height: 2.875rem;
+	line-height: 1.2;
+	overflow: hidden;
+}
+
+goo-grid-popout-trigger.goo-grid-trigger--preset:hover {
+	background: var(--goo-theme-bg-hover, color-mix(in srgb, var(--goo-theme-fg) 8%, var(--goo-theme-bg)));
+	border-color: var(--goo-theme-border-strong, var(--goo-theme-border));
+}
+
+goo-grid-popout-trigger.goo-grid-trigger--preset :global(grid-title) {
+	inset-inline-start: 3.125rem;
+	width: calc(100% - 3.125rem - var(--goo-grid-trigger-arrow-inline-size));
+}
+
+goo-grid-popout-trigger.goo-grid-trigger--preset :global(.goo-grid-popout-trigger__preview) {
+	height: 2rem !important;
+	margin-left: 0.5rem;
+	padding: 0;
+	width: 2rem;
 }
 
 .goo-grid-popout-trigger__preview--next {

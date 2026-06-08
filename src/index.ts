@@ -138,6 +138,8 @@ export type { GooPanelElement, GooPanelOptions } from './panel/index.ts'
 export { GooPanel } from './panel/index.ts'
 export type { GooPopoutAt, GooPopoutInstance, GooPopoutManager, GooPopoutOptions } from './popout/index.ts'
 export { createGooPopout, GooPopout, gooPopoutRuntime } from './popout/index.ts'
+export type { GooPreviewBackground, GooPreviewFit, GooPreviewProps, GooPreviewSize } from './preview/index.ts'
+export { GooPreview } from './preview/index.ts'
 export type {
 	GooProgressRingSteps,
 	GooProgressRingTimer,
