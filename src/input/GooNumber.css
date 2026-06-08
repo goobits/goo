@@ -5,12 +5,9 @@
 
 .goo-number {
 	/* Customizable via CSS custom properties */
-	--goo-number-bg: var(
-		--goo-theme-surface-sunken,
-		color-mix(in srgb, var(--goo-theme-bg, #000) 30%, transparent)
-	);
+	--goo-number-bg: transparent;
 	--goo-number-bg-focus: var(--goo-theme-surface-sunken, var(--goo-theme-bg, #000));
-	--goo-number-border: var(--goo-theme-border-subtle, var(--goo-theme-border, rgba(128, 128, 128, 0.2)));
+	--goo-number-border: transparent;
 	--goo-number-border-focus: var(--goo-theme-accent, #3b82f6);
 	--goo-number-border-error: var(--goo-theme-warning, #fbbf24);
 	--goo-number-focus-ring: color-mix(in srgb, var(--goo-number-border-focus) 32%, transparent);
@@ -22,8 +19,8 @@
 	);
 	--goo-number-arrows-hover: color-mix(in srgb, var(--goo-theme-fg, #fff) 10%, transparent);
 	--goo-number-radius: var(--goo-theme-radius-md, 0.5rem);
-	--goo-number-height: var(--goo-theme-control-height-md, 1.875rem);
-	--goo-number-arrows-width: calc(var(--goo-number-height) * 0.72);
+	--goo-number-height: 1.5rem;
+	--goo-number-arrows-width: 0;
 	--goo-number-motion-fast: var(--goo-theme-transition-fast, 0.15s ease);
 	--goo-number-motion-normal: var(--goo-theme-transition-normal, 0.2s ease);
 
@@ -33,7 +30,7 @@
 	border-radius: var(--goo-number-radius);
 	box-shadow:
 		0 0 0 1px var(--goo-number-border),
-		inset 0 1px 0 color-mix(in srgb, var(--goo-theme-fg, #fff) 3%, transparent);
+		inset 0 1px 0 transparent;
 	color: var(--goo-number-fg);
 	cursor: text;
 	direction: ltr;
@@ -60,8 +57,11 @@
 
 /* Hover state - show arrows */
 .goo-number:hover {
+	background: color-mix(in srgb, var(--goo-theme-fg, #fff) 7%, transparent);
+
 	.goo-number__arrows {
 		opacity: 1;
+		width: calc(var(--goo-number-height) * 0.68);
 	}
 }
 
@@ -76,6 +76,7 @@
 
 	.goo-number__arrows {
 		opacity: 1;
+		width: calc(var(--goo-number-height) * 0.68);
 	}
 }
 
