@@ -91,6 +91,21 @@
 	max-inline-size: none;
 }
 
+.goo-controller .goo-config-primitive,
+.goo-controller .goo-button-group-field,
+.goo-controller .goo-button-group {
+	box-sizing: border-box;
+	inline-size: 100%;
+	max-inline-size: none;
+	min-inline-size: 0;
+}
+
+.goo-controller .goo-button-group > .goo-button.goo-button--icon-only {
+	aspect-ratio: auto;
+	flex: 1 1 0;
+	min-inline-size: 0;
+}
+
 /* Number type - compact input */
 .goo-controller.goo-controller--number .goo-controller__widget {
 	flex: 0 0 auto;
@@ -228,6 +243,7 @@ sketch-FilterFooter {
 	inline-size: 100%;
 }
 
+.goo-controller--full-bleed,
 .goo-controller--palette,
 .goo-controller--file-picker,
 .goo-controller--filter-footer {
@@ -236,6 +252,13 @@ sketch-FilterFooter {
 	padding: 0;
 }
 
+.goo-controller--full-bleed {
+	--goo-controller-bg-hover: transparent;
+
+	border-bottom: 0;
+}
+
+.goo-controller--full-bleed .goo-controller__widget,
 .goo-controller--palette .goo-controller__widget,
 .goo-controller--file-picker .goo-controller__widget,
 .goo-controller--filter-footer .goo-controller__widget {

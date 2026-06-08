@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { defineSvelteControlType } from '../../controller/index.ts'
 import GridPopoutPicker from '../../grid-popout/GridPopoutPicker.svelte'
-import { isSelfContainedField } from '../fieldLayout.ts'
+import { isFullBleedField, isSelfContainedField } from '../fieldLayout.ts'
 import GooSchema from '../GooSchema.svelte'
 import { createGooSchema } from '../index.ts'
 
@@ -495,11 +495,51 @@ describe('GooSchema', () => {
 		expect((schema.getController('opacity') as HTMLElement).getAttribute('data-label')).toBe('')
 	})
 
+	it('marks full-bleed schema fields on their controller row', async() => {
+		const schema = createGooSchema({
+			schema: [
+				{
+					path: 'cropPane',
+					type: 'dom-control',
+					layout: 'full-bleed'
+				}
+			],
+			data: { cropPane: false },
+			bare: true,
+			controlTypes: {
+				'dom-control': {
+					load: () => Promise.resolve({}),
+					extract: () => () => Object.assign(document.createElement('div'), {
+						getValue: () => false,
+						setValue: vi.fn()
+					})
+				}
+			}
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+
+		expect(schema.getController('cropPane')?.classList.contains('goo-controller--full-bleed')).toBe(true)
+	})
+
 	it('recognizes self-contained field layout metadata', () => {
 		expect(isSelfContainedField({
 			path: 'mode',
 			type: 'standalone',
 			layout: 'self-contained'
+		})).toBe(true)
+	})
+
+	it('recognizes full-bleed field layout metadata', () => {
+		expect(isFullBleedField({
+			path: 'cropPane',
+			type: 'dom-control',
+			layout: 'full-bleed'
+		})).toBe(true)
+		expect(isFullBleedField({
+			path: 'cropPane',
+			type: 'dom-control',
+			fullBleed: true
 		})).toBe(true)
 	})
 })

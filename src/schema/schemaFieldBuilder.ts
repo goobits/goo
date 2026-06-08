@@ -78,6 +78,7 @@ const SCHEMA_FIELD_KEYS = new Set([
 	'valueFormat',
 	'showLabel',
 	'ticks',
+	'fullBleed',
 
 	// Framework-reserved keys: never forwarded as control options because they
 	// are the binding target / wired handlers set by GooSchema. Excluding them

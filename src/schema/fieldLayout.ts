@@ -14,6 +14,10 @@ export function isSelfContainedField(node: GooSchemaField): boolean {
 	return node.selfContained === true || node.layout === 'self-contained'
 }
 
+export function isFullBleedField(node: GooSchemaField): boolean {
+	return node.fullBleed === true || node.layout === 'full-bleed'
+}
+
 export function normalizeFieldLayout(layout: GooSchemaFieldLayout | undefined): GooSchemaFieldLayout | undefined {
 	return layout
 }

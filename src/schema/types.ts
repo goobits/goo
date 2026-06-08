@@ -21,7 +21,7 @@ export type GooSchemaCondition = string | {
 	notEquals?: unknown
 }
 
-export type GooSchemaFieldLayout = 'inline' | 'stacked' | 'self-contained'
+export type GooSchemaFieldLayout = 'inline' | 'stacked' | 'self-contained' | 'full-bleed'
 
 export type GooSchemaValueFormat = 'percent' | 'number' | 'integer' | 'float' | string
 
@@ -112,6 +112,9 @@ export interface GooSchemaField {
 
 	/** Let controls that support full-width rendering consume the schema hint. */
 	fullWidth?: boolean
+
+	/** Render the GooController row edge-to-edge without controller padding or dividers. */
+	fullBleed?: boolean
 
 	/** Show range tick marks when the control supports ticks. */
 	ticks?: boolean

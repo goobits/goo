@@ -12,7 +12,7 @@ import { createFolder, type GooFolderElement } from '../folder/_createFolder.ts'
 import { createPanel } from '../panel/_createPanel.ts'
 import { schemaLog as log } from '../support/utils/logger.ts'
 import { shouldRenderSchemaNode } from './fieldConditions.ts'
-import { isSelfContainedField } from './fieldLayout.ts'
+import { isFullBleedField, isSelfContainedField } from './fieldLayout.ts'
 import { resolvePath } from './pathUtils.ts'
 import { buildControllerOptions, type ControllerOptions } from './schemaFieldBuilder.ts'
 import type {
@@ -383,6 +383,9 @@ async function buildField(
 	const controllerOptions = buildControllerOptions(node, object, property, object[property])
 	if (controlTypes) {
 		controllerOptions.controlTypes = controlTypes
+	}
+	if (isFullBleedField(node)) {
+		controllerOptions.className = mergeClassNames(controllerOptions.className, 'goo-controller--full-bleed')
 	}
 
 	if (node.type) {
