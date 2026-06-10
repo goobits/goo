@@ -268,7 +268,7 @@ function isPlainRecord(value: unknown): value is GooSchemaData {
 		&& Object.getPrototypeOf(value) === Object.prototype
 }
 
-function schemaHasConditions(schema: GooSchemaType): boolean {
+export function schemaHasConditions(schema: GooSchemaType): boolean {
 	const nodes = Array.isArray(schema) ? schema : schema.children
 	return nodes.some(nodeHasConditions)
 }

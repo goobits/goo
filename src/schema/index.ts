@@ -24,5 +24,6 @@ export type {
 	GooSchemaType,
 	GooSchemaUpdateOptions } from './GooSchema.ts'
 export {
-	createGooSchema
+	createGooSchema,
+	schemaHasConditions
 } from './GooSchema.ts'

@@ -6,7 +6,7 @@ import { defineSvelteControlType } from '../../controller/index.ts'
 import GridPopoutPicker from '../../grid-popout/GridPopoutPicker.svelte'
 import { isFullBleedField, isSelfContainedField } from '../fieldLayout.ts'
 import GooSchema from '../GooSchema.svelte'
-import { createGooSchema } from '../index.ts'
+import { createGooSchema, schemaHasConditions } from '../index.ts'
 
 async function settleGooSchema(): Promise<void> {
 	await tick()
@@ -541,5 +541,21 @@ describe('GooSchema', () => {
 			type: 'dom-control',
 			fullBleed: true
 		})).toBe(true)
+	})
+
+	it('detects conditional schema nodes through the public helper', () => {
+		expect(schemaHasConditions([
+			{
+				type: 'folder',
+				title: 'Advanced',
+				children: [
+					{ path: 'enabled', type: 'checkbox' },
+					{ path: 'size', type: 'range', if: { path: 'enabled', equals: true } }
+				]
+			}
+		])).toBe(true)
+		expect(schemaHasConditions([
+			{ path: 'size', type: 'range' }
+		])).toBe(false)
 	})
 })
