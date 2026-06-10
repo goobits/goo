@@ -44,7 +44,9 @@ let {
 	unit = '',
 	inputId,
 	ariaLabel,
+	'aria-label': ariaLabelAttribute,
 	name = '',
+	title,
 	disabled = false,
 	size,
 	class: className = '',
@@ -98,6 +100,24 @@ const classes = $derived.by(() => {
 	return values.filter(Boolean).join(' ')
 })
 const unitSuffix = $derived(getUnitSuffix(unit))
+const inputAccessibleName = $derived(
+	trimmedTextValue(ariaLabel)
+	|| trimmedTextValue(ariaLabelAttribute)
+	|| trimmedTextValue(title)
+	|| trimmedTextValue(name)
+	|| undefined
+)
+const ariaValueMin = $derived(Number.isFinite(min) ? min : undefined)
+const ariaValueMax = $derived(Number.isFinite(max) ? max : undefined)
+const rootStyle = $derived.by(() => {
+	const values = []
+	if (style) values.push(style)
+	if (unitSuffix) {
+		const unitWidth = Math.max(unitSuffix.length * 0.62, 0.55)
+		values.push(`--goo-number-unit-width: ${ unitWidth.toFixed(2) }em`)
+	}
+	return values.join('; ')
+})
 
 export function setValue(nextValue: number, { silent = true }: { silent?: boolean } = {}): void {
 	const oldValue = currentValue
@@ -290,6 +310,10 @@ function getUnitSuffix(nextUnit: string): string {
 	return suffix
 }
 
+function trimmedTextValue(value: unknown): string {
+	return typeof value === 'string' ? value.trim() : ''
+}
+
 function pulseValueChange(): void {
 	const element = numberElement
 	if (!element) return
@@ -309,7 +333,8 @@ function pulseValueChange(): void {
 	{...rest}
 	bind:this={numberElement}
 	class={classes}
-	{style}
+	style={rootStyle}
+	{title}
 	{...hostAttributes}
 	onpointerdown={(event) => event.stopPropagation()}
 >
@@ -319,9 +344,9 @@ function pulseValueChange(): void {
 		type="text"
 		role="spinbutton"
 		id={inputId}
-		aria-label={ariaLabel}
-		aria-valuemin={min}
-		aria-valuemax={max}
+		aria-label={inputAccessibleName}
+		aria-valuemin={ariaValueMin}
+		aria-valuemax={ariaValueMax}
 		aria-valuenow={currentValue}
 		inputmode="decimal"
 		{name}

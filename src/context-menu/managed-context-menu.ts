@@ -340,7 +340,11 @@ function normalizeAction(
 	id: string
 ): GooContextMenuOption['onChoose'] {
 	if (!action) return undefined
-	return value => action.call(getMenu(), value || id)
+	return function(value) {
+		const menu = getMenu()
+		const context = this && this !== menu.element ? this : menu
+		return action.call(context as ManagedGooContextMenu, value || id)
+	}
 }
 
 function normalizeIcon(icon: unknown): GooContextMenuOption['icon'] {

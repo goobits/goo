@@ -148,6 +148,21 @@ describe('GooNumber', () => {
 		expect(input?.getAttribute('aria-valuenow')).toBe('2')
 	})
 
+	it('sizes unit suffix spacing from the rendered suffix', () => {
+		const { container } = render(GooNumber, {
+			props: {
+				value: 12,
+				unit: '%',
+				style: 'width: 48px'
+			}
+		})
+
+		const root = container.querySelector<HTMLElement>('.goo-number')
+
+		expect(root?.style.width).toBe('48px')
+		expect(root?.style.getPropertyValue('--goo-number-unit-width')).toBe('0.62em')
+	})
+
 	it('emits number input and change callbacks', async() => {
 		const oninput = vi.fn()
 		const onchange = vi.fn()

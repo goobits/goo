@@ -14,7 +14,7 @@
 	--goo-number-change-pulse: color-mix(in srgb, var(--goo-number-border-focus) 18%, transparent);
 	--goo-number-fg: var(--goo-theme-fg, rgba(255, 255, 255, 0.9));
 	--goo-number-unit-fg: color-mix(in srgb, var(--goo-number-fg) 58%, transparent);
-	--goo-number-unit-width: 1.35rem;
+	--goo-number-unit-width: 0px;
 	--goo-number-arrows-bg: var(
 		--goo-theme-surface-raised,
 		color-mix(in srgb, var(--goo-theme-fg, #fff) 7%, transparent)
@@ -22,7 +22,7 @@
 	--goo-number-arrows-hover: color-mix(in srgb, var(--goo-theme-fg, #fff) 10%, transparent);
 	--goo-number-radius: var(--goo-theme-radius-md, 0.5rem);
 	--goo-number-height: 1.5rem;
-	--goo-number-arrows-width: 0;
+	--goo-number-arrows-width: 0px;
 	--goo-number-motion-fast: var(--goo-theme-transition-fast, 0.15s ease);
 	--goo-number-motion-normal: var(--goo-theme-transition-normal, 0.2s ease);
 
@@ -107,6 +107,7 @@
 	border-radius: inherit;
 	outline: none;
 	padding: 0 calc(var(--goo-number-arrows-width) + var(--goo-number-unit-padding, 0px)) 0 0.5rem;
+	text-align: right;
 	overflow: hidden;
 	white-space: nowrap;
 	opacity: 0.92;
@@ -131,10 +132,10 @@
 	z-index: 1;
 	display: inline-flex;
 	align-items: center;
-	justify-content: flex-end;
+	justify-content: flex-start;
 	width: var(--goo-number-unit-width);
 	height: 100%;
-	padding-right: 0.45rem;
+	padding-right: 0;
 	box-sizing: border-box;
 	color: var(--goo-number-unit-fg);
 	font: inherit;
@@ -255,14 +256,15 @@
 
 	.goo-number__content {
 		padding: 0 0.5em 0 calc(var(--goo-number-arrows-width) + var(--goo-number-unit-padding, 0px));
+		text-align: left;
 	}
 
 	.goo-number__unit {
 		left: var(--goo-number-arrows-width);
 		right: auto;
-		justify-content: flex-start;
+		justify-content: flex-end;
 		padding-right: 0;
-		padding-left: 0.45rem;
+		padding-left: 0;
 	}
 
 	.goo-number__arrows {
@@ -295,7 +297,7 @@
 	min-width: 60px;
 
 	.goo-number__content {
-		padding: 0 var(--goo-number-arrows-width) 0 0.375em;
+		padding: 0 calc(var(--goo-number-arrows-width) + var(--goo-number-unit-padding, 0px)) 0 0.375em;
 	}
 
 	&[unit]:not([unit='']):not([unit='float']):not([unit='int']):not([unit='integer']):not([unit='number']) .goo-number__content {

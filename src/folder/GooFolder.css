@@ -69,16 +69,23 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 16px;
-	height: 16px;
+	order: 2;
+	width: 1.5rem;
+	height: 1.5rem;
+	margin-inline-start: auto;
 	flex-shrink: 0;
+	border-radius: var(--goo-theme-radius-sm, 0.375rem);
+	color: var(--goo-theme-muted, currentColor);
 	transition:
+		background-color var(--goo-folder-transition),
 		color var(--goo-folder-transition),
 		transform var(--goo-folder-transition);
 }
 
 .goo-folder__chevron-icon {
 	display: block;
+	width: 1rem;
+	height: 1rem;
 }
 
 /* Rotate chevron when open - use direct child selectors for proper nesting */
@@ -88,7 +95,9 @@
 
 /* Title */
 .goo-folder__title {
+	order: 1;
 	flex: 1;
+	min-width: 0;
 	font-size: var(--goo-theme-font-size-xs, 0.75rem);
 	font-weight: 500;
 	text-transform: none;
@@ -97,6 +106,12 @@
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+}
+
+.goo-folder__header:hover > .goo-folder__chevron,
+.goo-folder__header:focus-visible > .goo-folder__chevron {
+	background: color-mix(in srgb, var(--goo-theme-fg, currentColor) 8%, transparent);
+	color: var(--goo-theme-fg, currentColor);
 }
 
 /* Content container */
@@ -185,8 +200,8 @@
 }
 
 .goo-folder--inspector > .goo-folder__header > .goo-folder__chevron {
-	width: 0.875rem;
-	height: 0.875rem;
+	width: 1.5rem;
+	height: 1.5rem;
 	color: color-mix(in srgb, var(--goo-theme-muted, var(--goo-folder-fg)) 78%, var(--goo-folder-fg));
 }
 

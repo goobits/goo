@@ -3,7 +3,7 @@
  * Shared Goo-styled trigger shell for controls that open a popout.
  */
 
-import ChevronDown from '@lucide/svelte/icons/chevron-down'
+import ChevronRight from '@lucide/svelte/icons/chevron-right'
 
 import { GooPreview } from '../preview/index.ts'
 import type { GridPopoutPreview, GridPopoutSvgIcon } from './types.ts'
@@ -214,7 +214,7 @@ function getLegacyPreview(src: string, alt: string): GridPopoutPreview | undefin
 	onkeydown={onkeydown}
 >
 	<span class="goo-grid-trigger__arrow">
-		<ChevronDown aria-hidden="true" focusable="false" />
+		<ChevronRight aria-hidden="true" focusable="false" />
 	</span>
 	<span class="goo-grid-popout-trigger__content">
 		<grid-title class={titleClassName}>
@@ -373,18 +373,30 @@ goo-grid-popout-trigger :global(img.goo-grid-trigger__icon) {
 
 goo-grid-popout-trigger .goo-grid-trigger__arrow {
 	align-items: center;
+	border-radius: var(--goo-theme-radius-sm, 0.375rem);
+	color: var(--goo-theme-muted, currentColor);
 	display: inline-flex;
 	font-size: var(--goo-grid-trigger-arrow-size);
-	height: 100%;
+	height: 1.5rem;
 	justify-content: center;
 	line-height: 1;
 	min-width: var(--goo-grid-trigger-arrow-inline-size);
 	position: absolute;
 	inset-inline-end: 0;
-	top: 0;
+	top: 50%;
+	transform: translateY(-50%);
 	transform-origin: center;
-	transition: 150ms transform;
+	transition:
+		background-color var(--goo-theme-transition-fast, 150ms ease),
+		color var(--goo-theme-transition-fast, 150ms ease),
+		transform 150ms ease;
 	width: var(--goo-grid-trigger-arrow-inline-size);
+}
+
+goo-grid-popout-trigger:hover .goo-grid-trigger__arrow,
+goo-grid-popout-trigger:focus .goo-grid-trigger__arrow {
+	background: color-mix(in srgb, var(--goo-theme-fg, currentColor) 8%, transparent);
+	color: var(--goo-theme-fg, currentColor);
 }
 
 goo-grid-popout-trigger.goo-grid-trigger--opened {
@@ -403,11 +415,11 @@ goo-grid-popout-trigger .goo-grid-trigger__arrow :global(svg) {
 }
 
 goo-grid-popout-trigger.goo-grid-trigger--opened .goo-grid-trigger__arrow {
-	transform: rotate(-90deg);
+	transform: translateY(-50%) rotate(90deg);
 }
 
 :global([dir="rtl"]) goo-grid-popout-trigger.goo-grid-trigger--opened .goo-grid-trigger__arrow {
-	transform: rotate(90deg);
+	transform: translateY(-50%) rotate(90deg);
 }
 
 :global([dir="rtl"]) goo-grid-popout-trigger :global(.icon),
@@ -468,7 +480,7 @@ goo-grid-popout-trigger.goo-grid-trigger--font :global(.goo-grid-trigger__icon) 
 }
 
 goo-grid-popout-trigger.goo-grid-trigger--preset {
-	--goo-grid-trigger-arrow-inline-size: 34px;
+	--goo-grid-trigger-arrow-inline-size: 1.5rem;
 
 	background: var(--goo-theme-surface-raised, color-mix(in srgb, var(--goo-theme-fg) 5%, var(--goo-theme-bg)));
 	border: 1px solid var(--goo-theme-border-strong, var(--goo-theme-border));

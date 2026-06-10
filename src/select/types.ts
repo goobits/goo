@@ -121,6 +121,7 @@ export type GooSelectProps = GooForwardedAttributes & {
 	size?: string
 	name?: string
 	placeholder?: string
+	ariaLabel?: string
 	tooltip?: string | (() => string)
 	title?: string
 	disabled?: boolean

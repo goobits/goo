@@ -71,6 +71,8 @@ let {
 	showHeader = true,
 	menu,
 	placeholder = 'Select...',
+	ariaLabel,
+	'aria-label': ariaLabelAttribute,
 	tooltip,
 	title,
 	disabled = false,
@@ -92,6 +94,7 @@ const opened = $derived(Boolean(popout?.isOpen()))
 const selectedOption = $derived(findOptionById(normalizedOptions, selectedValue))
 const selectMenu = $derived(normalizeSelectMenu(menu))
 const triggerLabel = $derived(getOptionLabel(selectedOption) || placeholder)
+const triggerAccessibleName = $derived(readTriggerAccessibleName())
 const showPlaceholder = $derived(!selectedOption)
 // Named `selectState` (not `state`) so the `$state` rune token is not parsed as
 // Svelte store-style access to a `state` variable by svelte-check.
@@ -512,6 +515,20 @@ function getOptionLabel(option: GooSelectOption | null): string {
 	return String(label ?? option.id ?? '')
 }
 
+function readTriggerAccessibleName(): string {
+	return textValue(ariaLabel)
+		|| textValue(ariaLabelAttribute)
+		|| textValue(title)
+		|| (typeof tooltip === 'string' ? textValue(tooltip) : '')
+		|| textValue(triggerLabel)
+		|| textValue(placeholder)
+		|| 'Select'
+}
+
+function textValue(value: unknown): string {
+	return typeof value === 'string' ? value.trim() : ''
+}
+
 function getTriggerIconClasses(icon: unknown): string {
 	if (typeof icon !== 'string') return ''
 	const trimmed = icon.trim()
@@ -541,6 +558,7 @@ function getTriggerIconClasses(icon: unknown): string {
 			aria-expanded={opened ? 'true' : 'false'}
 			aria-controls={opened && listboxId ? listboxId : undefined}
 			aria-activedescendant={opened && activeDescendant ? activeDescendant : undefined}
+			aria-label={triggerAccessibleName}
 			disabled={effectiveDisabled}
 			title={typeof tooltip === 'string' ? tooltip : title}
 			onpointerdown={handleTriggerPointerDown}

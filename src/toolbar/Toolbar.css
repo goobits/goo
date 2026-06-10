@@ -94,6 +94,10 @@
 	pointer-events: none;
 }
 
+.goo-floating-toolbar__tool[hidden] {
+	display: none;
+}
+
 .goo-floating-toolbar__tool--selected {
 	background: var(--goo-theme-accent);
 	border-radius: var(--goo-theme-radius-sm);
