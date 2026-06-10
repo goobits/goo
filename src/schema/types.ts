@@ -119,8 +119,8 @@ export interface GooSchemaField {
 	/** Show range tick marks when the control supports ticks. */
 	ticks?: boolean
 
-	/** Options for select/button-group controls. */
-	options?: Array<string | { label: string; id?: string; icon?: string }>
+		/** Options for select/button-group controls. */
+		options?: Array<string | { label?: string; id?: string; key?: string; value?: string; icon?: string }>
 
 	/** Mode ids for blend-mode controls. */
 	modes?: readonly string[]
@@ -157,6 +157,9 @@ export interface GooSchemaField {
 
 	/** Layout mode for goo-controller. */
 	layout?: GooSchemaFieldLayout
+
+	/** Disable the generated field/control. */
+	disabled?: boolean
 
 	/** Render directly without a GooController row wrapper. */
 	selfContained?: boolean
