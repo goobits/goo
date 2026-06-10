@@ -1,0 +1,17 @@
+{
+  "id": "1780951234994-tighten-goo-number-unit-suffix-spacing-21f226",
+  "title": "Tighten Goo number unit suffix spacing",
+  "owner": "developer",
+  "summary": "Make GooNumber unit suffixes reserve only their rendered suffix width and align numeric text into the suffix so values read like 15% or 12px instead of separated columns. Preserves caller style props and covers suffix width in tests.\\n\\nBrowser check: brush-api first unit number measured textAlign=right, paddingRight=14.26px, unitWidth=1.24em, gapPx=0.01.\\n\\nCo-authored-by: Miko Meow <101564+mudcube@users.noreply.github.com>",
+  "paths": [
+    "src/input/GooNumber.svelte",
+    "src/input/GooNumber.css",
+    "src/input/__tests__/GooInput.test.ts"
+  ],
+  "verification": [
+    "pnpm --dir packages/@goobits/goo exec vitest run src/input/__tests__/GooInput.test.ts"
+  ],
+  "fingerprints": null,
+  "createdAt": "1780951234994",
+  "doneAt": "1781066381093"
+}
