@@ -112,10 +112,15 @@
 		const tile = itemsEl.querySelector<HTMLElement>(tileSelector)
 		if (tile) tileHeight = tile.getBoundingClientRect().height || defaultTileHeight
 
+		refreshItemsTop()
+		setWindowState(nextWindow(scrollRoot.scrollTop, scrollRoot.clientHeight), true)
+	}
+
+	function refreshItemsTop() {
+		if (!itemsEl || !scrollRoot) return
 		const rootRect = scrollRoot.getBoundingClientRect()
 		const itemsRect = itemsEl.getBoundingClientRect()
 		itemsTop = itemsRect.top - rootRect.top + scrollRoot.scrollTop
-		setWindowState(nextWindow(scrollRoot.scrollTop, scrollRoot.clientHeight), true)
 	}
 
 	function scheduleMeasure() {
@@ -125,6 +130,11 @@
 
 	function handleScroll() {
 		if (!scrollRoot) return
+		// The grid can sit at any offset inside a shared scroll root (e.g. stacked
+		// under other sections), and that offset is only known once layout settles.
+		// Recompute it each scroll so the visible window tracks correctly instead of
+		// pinning to the first rows when the initial measurement was stale.
+		refreshItemsTop()
 		setWindowState(nextWindow(scrollRoot.scrollTop, scrollRoot.clientHeight))
 		deferContentDuringScroll()
 	}
@@ -150,6 +160,13 @@
 
 	$effect(() => {
 		if (!scrollRoot) return
+		// Virtualization constantly resizes the spacer rows, which changes content
+		// height above the viewport. The browser's scroll anchoring tries to keep an
+		// anchor node in place by adjusting scrollTop, and when the grid is one of
+		// several blocks in a shared scroll container that feedback runs the scroll
+		// to the top or bottom. Disable anchoring on the scroll root while mounted.
+		const previousOverflowAnchor = scrollRoot.style.overflowAnchor
+		scrollRoot.style.overflowAnchor = 'none'
 		scheduleMeasure()
 		itemsEl?.addEventListener('virtualgridnavigate', handleVirtualNavigate)
 		scrollRoot.addEventListener('scroll', handleScroll, { passive: true })
@@ -164,6 +181,7 @@
 			itemsEl?.removeEventListener('virtualgridnavigate', handleVirtualNavigate)
 			scrollRoot.removeEventListener('scroll', handleScroll)
 			resizeObserver.disconnect()
+			scrollRoot.style.overflowAnchor = previousOverflowAnchor
 		}
 	})
 
