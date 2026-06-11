@@ -159,8 +159,6 @@ export type {
 	GooRangeModuleValue
 } from './range-module/index.ts'
 export { createRangeModuleField } from './range-module/index.ts'
-export type { GooXyPadElement, GooXyPadEventData, GooXyPadProps, GooXyPadState, GooXyPadValue } from './xy-pad/index.ts'
-export { GooXyPad } from './xy-pad/index.ts'
 export type {
 	GooSchemaChangeHandler,
 	GooSchemaControlType,
@@ -286,3 +284,5 @@ export type { GooTurnstileFieldProps, GooTurnstileSize, GooTurnstileTheme } from
 export { GooTurnstileField } from './turnstile/index.ts'
 export type { VirtualGridProps, VirtualGridSlot, VirtualGridWindow } from './virtualGrid/index.ts'
 export { VirtualGrid } from './virtualGrid/index.ts'
+export type { GooXyPadElement, GooXyPadEventData, GooXyPadProps, GooXyPadState, GooXyPadValue } from './xy-pad/index.ts'
+export { GooXyPad } from './xy-pad/index.ts'

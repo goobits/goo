@@ -5,6 +5,7 @@
  */
 
 .goo-angle-input {
+	--goo-angle-number-value-width: 1ch;
 	--goo-angle-bg: var(
 		--goo-theme-border,
 		color-mix(in srgb, var(--goo-theme-fg, #fff) 10%, transparent)
@@ -85,7 +86,6 @@
 /* Number input wrapper - rounded left edge wraps around dial */
 .goo-angle-input .goo-number {
 	--goo-number-arrows-width: 0px;
-	--goo-angle-number-value-width: 4ch;
 
 	box-shadow: inset 0 0 0 1px var(--goo-angle-border);
 	background: var(--goo-angle-input-bg);
@@ -114,6 +114,17 @@
 	right: auto;
 	width: auto;
 	padding: 0 0.35rem 0 0;
+}
+
+.goo-angle-input__value-measure {
+	position: absolute;
+	left: -9999px;
+	font-family: inherit;
+	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
+	font-weight: 500;
+	visibility: hidden;
+	white-space: pre;
+	pointer-events: none;
 }
 
 /* Disabled state */
