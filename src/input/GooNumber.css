@@ -67,6 +67,9 @@
 	.goo-number__arrows {
 		opacity: 1;
 		pointer-events: auto;
+	}
+
+	.goo-number__arrow::before {
 		transform: translateX(0);
 	}
 }
@@ -85,6 +88,9 @@
 	.goo-number__arrows {
 		opacity: 1;
 		pointer-events: auto;
+	}
+
+	.goo-number__arrow::before {
 		transform: translateX(0);
 	}
 }
@@ -121,7 +127,9 @@
 	opacity: 0.92;
 	min-height: 100%;
 	line-height: inherit;
-	transition: padding-inline-end var(--goo-number-motion-fast);
+	transition:
+		padding-inline-end var(--goo-number-motion-fast),
+		padding-inline-start var(--goo-number-motion-fast);
 
 	&:focus {
 		opacity: 1;
@@ -179,12 +187,10 @@
 	opacity: 0;
 	overflow: hidden;
 	pointer-events: none;
-	transform: translateX(100%);
 	z-index: 2;
 	transition:
 		opacity var(--goo-number-motion-fast),
-		background-color var(--goo-number-motion-fast),
-		transform var(--goo-number-motion-fast);
+		background-color var(--goo-number-motion-fast);
 }
 
 /* Individual arrow buttons */
@@ -224,7 +230,10 @@
 		border-left: 4px solid transparent;
 		border-right: 4px solid transparent;
 		opacity: 0.6;
-		transition: opacity var(--goo-number-motion-fast);
+		transform: translateX(4px);
+		transition:
+			opacity var(--goo-number-motion-fast),
+			transform var(--goo-number-motion-fast);
 	}
 
 	&:hover::before {
@@ -290,13 +299,16 @@
 		border-left: none;
 		border-right: 1px solid var(--goo-number-border);
 		border-radius: var(--goo-number-radius) 0 0 var(--goo-number-radius);
-		transform: translateX(-100%);
+	}
+
+	.goo-number__arrow::before {
+		transform: translateX(-4px);
 	}
 
 	.goo-number:hover,
 	.goo-number.goo-number--focused,
 	.goo-number:focus-within {
-		.goo-number__arrows {
+		.goo-number__arrow::before {
 			transform: translateX(0);
 		}
 	}
