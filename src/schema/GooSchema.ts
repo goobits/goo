@@ -442,6 +442,13 @@ async function buildSelfContainedField(
 		updateSchemaActionState(element)
 	}
 
+	const handleInput = (value: unknown) => {
+		object[property] = value
+		const detail: GooSchemaEventDetail = { path: node.path, value, data: element._data }
+		element.dispatchEvent(new CustomEvent('input', { detail, bubbles: true }))
+		updateSchemaActionState(element)
+	}
+
 	const { controlOptions, ...controllerBaseOptions } = controllerOptions
 	const options = {
 		...controllerBaseOptions,
@@ -457,6 +464,7 @@ async function buildSelfContainedField(
 		value: object[property],
 		options,
 		onchange: handleChange,
+		oninput: handleInput,
 		object,
 		property
 	})

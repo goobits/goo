@@ -7,6 +7,7 @@ import GridPopoutPicker from '../../grid-popout/GridPopoutPicker.svelte'
 import { isFullBleedField, isSelfContainedField } from '../fieldLayout.ts'
 import GooSchema from '../GooSchema.svelte'
 import { createGooSchema, schemaHasConditions } from '../index.ts'
+import SelfContainedInputControl from './SelfContainedInputControl.svelte'
 
 async function settleGooSchema(): Promise<void> {
 	await tick()
@@ -29,6 +30,18 @@ const gridPopoutControlType = defineSvelteControlType({
 				popoutClass: 'popoutClass',
 				tabIndex: 'tabIndex'
 			}
+		}
+	})
+})
+
+const selfContainedInputControlType = defineSvelteControlType({
+	load: () => Promise.resolve({
+		default: SelfContainedInputControl,
+		controlSchema: {
+			valueKey: 'value',
+			changeKey: 'onchange',
+			inputKey: 'oninput',
+			selfContained: true
 		}
 	})
 })
@@ -124,6 +137,30 @@ describe('GooSchema', () => {
 		expect(onchange).toHaveBeenCalledOnce()
 		expect(onpreset).toHaveBeenCalledOnce()
 		expect(onreset).toHaveBeenCalledOnce()
+	})
+
+	it('forwards input events from self-contained Svelte controls', async() => {
+		const oninput = vi.fn()
+		const data = { size: 12 }
+		const { container } = render(GooSchema, {
+			props: {
+				schema: [ { path: 'size', type: 'self-contained-input' } ],
+				data,
+				bare: true,
+				controlTypes: {
+					'self-contained-input': selfContainedInputControlType
+				},
+				oninput
+			}
+		})
+		await settleGooSchema()
+
+		container.querySelector<HTMLButtonElement>('.self-contained-input-control')?.click()
+		await tick()
+
+		expect(oninput).toHaveBeenCalledOnce()
+		expect(oninput.mock.calls[0]?.[0].detail).toMatchObject({ path: 'size', value: 13 })
+		expect(data.size).toBe(13)
 	})
 
 	it('remounts the Svelte wrapper when creation options change', async() => {
