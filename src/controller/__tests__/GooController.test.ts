@@ -214,6 +214,34 @@ describe('GooController', () => {
 		expect(popout.querySelector('.goo-select__options--width-content')).not.toBeNull()
 	})
 
+	it('mounts Svelte controls when the bound value is missing', async() => {
+		const model: Record<string, unknown> = {}
+		const angle = createGooController({
+			object: model,
+			property: 'angle',
+			type: 'angle',
+			unit: 'degree'
+		})
+		const select = createGooController({
+			object: model,
+			property: 'choice',
+			type: 'select',
+			options: [
+				{ label: 'First', value: 'first' },
+				{ label: 'Second', value: 'second' }
+			]
+		})
+		document.body.append(angle, select)
+
+		await waitForControllerControl(angle)
+		await waitForControllerControl(select)
+
+		expect(angle.querySelector('.goo-angle-input')).not.toBeNull()
+		expect(select.querySelector('.goo-select')).not.toBeNull()
+		expect(model.angle).toBeUndefined()
+		expect(model.choice).toBeUndefined()
+	})
+
 	it('renders blend-mode controls as compact select pickers', async() => {
 		const model = { blendMode: 'overlay' }
 		const controller = createGooController({

@@ -35,8 +35,8 @@ export interface SvelteControlSchema {
 }
 
 /**
-	 * Svelte control host options.
-	 */
+ * Svelte control host options.
+ */
 export interface SvelteControlHostOptions {
 	component: SvelteComponentType
 	schema?: SvelteControlSchema
@@ -121,7 +121,12 @@ export function createSvelteControlHost(opts: SvelteControlHostOptions): SvelteC
 
 	function updateValue(nextValue: unknown): void {
 		currentValue = nextValue
-		componentProps[valueKey] = transformValue(nextValue, currentOptions)
+		const transformedValue = transformValue(nextValue, currentOptions)
+		if (transformedValue === undefined) {
+			delete componentProps[valueKey]
+			return
+		}
+		componentProps[valueKey] = transformedValue
 	}
 
 	function resetProps(nextProps: Record<string, unknown>): void {
@@ -132,14 +137,17 @@ export function createSvelteControlHost(opts: SvelteControlHostOptions): SvelteC
 	}
 
 	function buildProps(): Record<string, unknown> {
+		const transformedValue = transformValue(currentValue, currentOptions)
 		const props: Record<string, unknown> = {
-			[valueKey]: transformValue(currentValue, currentOptions),
 			disabled,
 			[changeKey]: (output: unknown) => {
 				const nextValue = transformOutput(output, currentOptions)
 				updateValue(nextValue)
 				onchange(nextValue)
 			}
+		}
+		if (transformedValue !== undefined) {
+			props[valueKey] = transformedValue
 		}
 
 		if (oninput) {
