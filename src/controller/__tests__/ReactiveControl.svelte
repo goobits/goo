@@ -2,14 +2,16 @@
 	import { reactiveControlTracker } from './_reactiveControlTracker.ts'
 
 	interface Props {
-		value?: number
-		onchange?: (value: number) => void
+		value?: unknown
+		onchange?: (value: unknown) => void
 	}
 
 	let {
 		value = 0,
 		onchange
 	}: Props = $props()
+
+	const label = $derived(typeof value === 'object' ? JSON.stringify(value) : String(value))
 
 	$effect(() => {
 		reactiveControlTracker.mountCount += 1
@@ -19,7 +21,7 @@
 <button
 	type="button"
 	class="reactive-control"
-	onclick={() => onchange?.(value + 1)}
+	onclick={() => onchange?.(typeof value === 'number' ? value + 1 : value)}
 >
-	{value}
+	{label}
 </button>

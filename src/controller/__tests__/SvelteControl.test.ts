@@ -31,4 +31,32 @@ describe('createSvelteControlHost', () => {
 
 		host.destroy()
 	})
+
+	it('updates mounted Svelte controls when object values mutate in place', async() => {
+		const object = {
+			preview: {
+				width: 36,
+				roundness: 0.2
+			}
+		}
+		const host = createSvelteControlHost({
+			component: ReactiveControl,
+			value: object.preview,
+			options: {},
+			object,
+			property: 'preview',
+			onchange: vi.fn()
+		})
+		const element = host.create()
+		document.body.appendChild(element)
+
+		object.preview.width = 80
+		host.updateDisplay()
+		await tick()
+
+		expect(element.querySelector('.reactive-control')?.textContent?.trim()).toBe('{"width":80,"roundness":0.2}')
+		expect(reactiveControlTracker.mountCount).toBe(1)
+
+		host.destroy()
+	})
 })

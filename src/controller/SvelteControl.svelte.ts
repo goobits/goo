@@ -117,16 +117,24 @@ export function createSvelteControlHost(opts: SvelteControlHostOptions): SvelteC
 	let instance: MountedControl | null = null
 	const componentProps = $state<Record<string, unknown>>({})
 	let currentValue = value
+	let currentValueKey = getMutableValueKey(value)
 	let currentOptions = options
 
 	function updateValue(nextValue: unknown): void {
+		const nextValueKey = getMutableValueKey(nextValue)
+		const shouldCloneProp = Object.is(nextValue, currentValue)
+			&& nextValueKey !== currentValueKey
+			&& isMutableControlValue(nextValue)
 		currentValue = nextValue
+		currentValueKey = nextValueKey
 		const transformedValue = transformValue(nextValue, currentOptions)
 		if (transformedValue === undefined) {
 			delete componentProps[valueKey]
 			return
 		}
-		componentProps[valueKey] = transformedValue
+		componentProps[valueKey] = shouldCloneProp && Object.is(transformedValue, nextValue)
+			? cloneControlValue(transformedValue)
+			: transformedValue
 	}
 
 	function resetProps(nextProps: Record<string, unknown>): void {
@@ -205,7 +213,8 @@ export function createSvelteControlHost(opts: SvelteControlHostOptions): SvelteC
 		updateDisplay() {
 			if (!object || property === undefined) return
 			const nextValue = object[property]
-			if (nextValue !== currentValue) {
+			const nextValueKey = getMutableValueKey(nextValue)
+			if (!Object.is(nextValue, currentValue) || nextValueKey !== currentValueKey) {
 				this.setValue(nextValue, { silent: true })
 			}
 		},
@@ -221,4 +230,32 @@ export function createSvelteControlHost(opts: SvelteControlHostOptions): SvelteC
 	}
 
 	return host
+}
+
+function getMutableValueKey(value: unknown): string {
+	if (!isMutableControlValue(value)) return ''
+	try {
+		return JSON.stringify(value)
+	} catch {
+		return ''
+	}
+}
+
+function isMutableControlValue(value: unknown): value is Record<string, unknown> | unknown[] {
+	return Boolean(value) && typeof value === 'object'
+}
+
+function cloneControlValue<T>(value: T): T {
+	if (Array.isArray(value)) return value.map(item => cloneControlValue(item)) as T
+	if (!isPlainControlRecord(value)) return value
+	return Object.fromEntries(
+		Object.entries(value).map(([ key, item ]) => [ key, cloneControlValue(item) ])
+	) as T
+}
+
+function isPlainControlRecord(value: unknown): value is Record<string, unknown> {
+	return Boolean(value)
+		&& typeof value === 'object'
+		&& !Array.isArray(value)
+		&& Object.getPrototypeOf(value) === Object.prototype
 }
