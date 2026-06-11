@@ -31,6 +31,7 @@ let contentElement: HTMLInputElement | undefined = $state()
 let currentValue = $state(0)
 let lastCommittedValue = $state(0)
 let textValue = $state('')
+let changePulseClass = $state('')
 let holdTimeout: ReturnType<typeof setTimeout> | null = null
 let repeatInterval: ReturnType<typeof setInterval> | null = null
 let changePulseTimeout: ReturnType<typeof setTimeout> | null = null
@@ -96,6 +97,7 @@ onDestroy(() => {
 const classes = $derived.by(() => {
 	const values = [ 'goo-number' ]
 	if (disabled) values.push('goo-number--disabled')
+	if (changePulseClass) values.push('goo-number--changed', changePulseClass)
 	if (className) values.push(className)
 	return values.filter(Boolean).join(' ')
 })
@@ -176,14 +178,12 @@ function handleFocus(event: Event): void {
 	if (disabled) return
 
 	lastCommittedValue = currentValue
-	numberElement?.classList.add('goo-number--focused')
 	onfocus?.()
 	numberElement?.dispatchEvent(new CustomEvent('focus', { detail: { value: currentValue, target: numberElement } }))
 }
 
 function handleBlur(event: Event): void {
 	event.stopPropagation()
-	numberElement?.classList.remove('goo-number--focused')
 	if (disabled) return
 
 	const oldValue = lastCommittedValue
@@ -315,15 +315,12 @@ function trimmedTextValue(value: unknown): string {
 }
 
 function pulseValueChange(): void {
-	const element = numberElement
-	if (!element) return
-
-	element.classList.remove('goo-number--changed')
-	void element.offsetWidth
-	element.classList.add('goo-number--changed')
+	changePulseClass = changePulseClass === 'goo-number--changed-a'
+		? 'goo-number--changed-b'
+		: 'goo-number--changed-a'
 	if (changePulseTimeout) clearTimeout(changePulseTimeout)
 	changePulseTimeout = setTimeout(() => {
-		element.classList.remove('goo-number--changed')
+		changePulseClass = ''
 		changePulseTimeout = null
 	}, 340)
 }

@@ -24,6 +24,12 @@
 	--goo-number-height: 1.5rem;
 	--goo-number-arrows-width: calc(var(--goo-number-height) * 0.68);
 	--goo-number-stepper-space: 0px;
+	--goo-number-edge-padding: 0.5rem;
+	--goo-number-leading-padding: var(--goo-number-edge-padding);
+	--goo-number-trailing-padding: calc(var(--goo-number-stepper-space) + var(--goo-number-unit-padding, 0px));
+	--goo-number-unit-left: auto;
+	--goo-number-unit-right: var(--goo-number-stepper-space);
+	--goo-number-arrow-slide: 4px;
 	--goo-number-motion-fast: var(--goo-theme-transition-fast, 0.15s ease);
 	--goo-number-motion-normal: var(--goo-theme-transition-normal, 0.2s ease);
 
@@ -58,33 +64,22 @@
 	pointer-events: none;
 }
 
-/* Hover state - show arrows */
-.goo-number:hover {
+.goo-number:is(:hover, :focus-within) {
 	--goo-number-stepper-space: var(--goo-number-arrows-width);
 
 	background: color-mix(in srgb, var(--goo-theme-fg, #fff) 7%, transparent);
-
-	.goo-number__arrows {
-		opacity: 1;
-		pointer-events: auto;
-	}
-
-	.goo-number__arrow::before {
-		transform: translateX(0);
-	}
 }
 
 /* Focus state */
-.goo-number.goo-number--focused,
 .goo-number:focus-within {
-	--goo-number-stepper-space: var(--goo-number-arrows-width);
-
 	background: var(--goo-number-bg-focus);
 	box-shadow:
 		0 0 0 1px var(--goo-number-border-focus),
 		0 0 0 2px var(--goo-number-focus-ring);
 	z-index: 2;
+}
 
+.goo-number:is(:hover, :focus-within) {
 	.goo-number__arrows {
 		opacity: 1;
 		pointer-events: auto;
@@ -95,8 +90,12 @@
 	}
 }
 
-.goo-number.goo-number--changed::after {
-	animation: goo-number-value-pulse 260ms ease-out;
+.goo-number.goo-number--changed-a::after {
+	animation: goo-number-value-pulse-a 260ms ease-out;
+}
+
+.goo-number.goo-number--changed-b::after {
+	animation: goo-number-value-pulse-b 260ms ease-out;
 }
 
 /* Disabled state */
@@ -119,8 +118,9 @@
 	font: inherit;
 	border-radius: inherit;
 	outline: none;
-	padding: 0 calc(var(--goo-number-arrows-width) + var(--goo-number-unit-padding, 0px)) 0 0.5rem;
-	padding-inline-end: calc(var(--goo-number-stepper-space) + var(--goo-number-unit-padding, 0px));
+	padding: 0;
+	padding-inline-start: var(--goo-number-leading-padding);
+	padding-inline-end: var(--goo-number-trailing-padding);
 	text-align: right;
 	overflow: hidden;
 	white-space: nowrap;
@@ -145,8 +145,8 @@
 .goo-number__unit {
 	position: absolute;
 	top: 0;
-	right: var(--goo-number-arrows-width);
-	right: var(--goo-number-stepper-space);
+	left: var(--goo-number-unit-left);
+	right: var(--goo-number-unit-right);
 	z-index: 1;
 	display: inline-flex;
 	align-items: center;
@@ -230,7 +230,7 @@
 		border-left: 4px solid transparent;
 		border-right: 4px solid transparent;
 		opacity: 0.6;
-		transform: translateX(4px);
+		transform: translateX(var(--goo-number-arrow-slide));
 		transition:
 			opacity var(--goo-number-motion-fast),
 			transform var(--goo-number-motion-fast);
@@ -260,7 +260,21 @@
 	background: var(--goo-number-border);
 }
 
-@keyframes goo-number-value-pulse {
+@keyframes goo-number-value-pulse-a {
+	0% {
+		opacity: 0;
+	}
+
+	25% {
+		opacity: 1;
+	}
+
+	100% {
+		opacity: 0;
+	}
+}
+
+@keyframes goo-number-value-pulse-b {
 	0% {
 		opacity: 0;
 	}
@@ -276,18 +290,19 @@
 
 /* RTL support */
 [dir='rtl'] .goo-number {
+	--goo-number-leading-padding: calc(var(--goo-number-stepper-space) + var(--goo-number-unit-padding, 0px));
+	--goo-number-trailing-padding: var(--goo-number-edge-padding);
+	--goo-number-unit-left: var(--goo-number-stepper-space);
+	--goo-number-unit-right: auto;
+	--goo-number-arrow-slide: -4px;
+
 	text-align: right;
 
 	.goo-number__content {
-		padding: 0 0.5em 0 calc(var(--goo-number-arrows-width) + var(--goo-number-unit-padding, 0px));
-		padding-inline-start: calc(var(--goo-number-stepper-space) + var(--goo-number-unit-padding, 0px));
 		text-align: left;
 	}
 
 	.goo-number__unit {
-		left: var(--goo-number-arrows-width);
-		left: var(--goo-number-stepper-space);
-		right: auto;
 		justify-content: flex-end;
 		padding-right: 0;
 		padding-left: 0;
@@ -302,15 +317,7 @@
 	}
 
 	.goo-number__arrow::before {
-		transform: translateX(-4px);
-	}
-
-	.goo-number:hover,
-	.goo-number.goo-number--focused,
-	.goo-number:focus-within {
-		.goo-number__arrow::before {
-			transform: translateX(0);
-		}
+		transform: translateX(var(--goo-number-arrow-slide));
 	}
 }
 
@@ -330,19 +337,10 @@
 .goo-number[size='compact'] {
 	--goo-number-height: var(--goo-theme-control-height-sm, 1.5rem);
 	--goo-number-arrows-width: calc(var(--goo-number-height) * 0.7);
+	--goo-number-edge-padding: 0.375em;
 	font-size: var(--goo-theme-font-size-xs, 0.75rem);
 	width: auto;
 	min-width: 60px;
-
-	.goo-number__content {
-		padding: 0 calc(var(--goo-number-arrows-width) + var(--goo-number-unit-padding, 0px)) 0 0.375em;
-		padding-inline-end: calc(var(--goo-number-stepper-space) + var(--goo-number-unit-padding, 0px));
-	}
-
-	&[unit]:not([unit='']):not([unit='float']):not([unit='int']):not([unit='integer']):not([unit='number']) .goo-number__content {
-		padding-right: calc(var(--goo-number-arrows-width) + var(--goo-number-unit-width));
-		padding-inline-end: calc(var(--goo-number-stepper-space) + var(--goo-number-unit-width));
-	}
 
 	.goo-number__arrow::before {
 		border-left-width: 3px;
