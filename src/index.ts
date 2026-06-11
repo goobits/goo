@@ -159,6 +159,8 @@ export type {
 	GooRangeModuleValue
 } from './range-module/index.ts'
 export { createRangeModuleField } from './range-module/index.ts'
+export type { GooXyPadElement, GooXyPadEventData, GooXyPadProps, GooXyPadState, GooXyPadValue } from './xy-pad/index.ts'
+export { GooXyPad } from './xy-pad/index.ts'
 export type {
 	GooSchemaChangeHandler,
 	GooSchemaControlType,

@@ -61,6 +61,7 @@ const SCHEMA_FIELD_KEYS = new Set([
 	'max',
 	'step',
 	'dual',
+	'xy',
 	'coverage',
 	'preset',
 	'presetColor',
@@ -123,6 +124,17 @@ export function detectFieldType(
 
 	// Dual-thumb slider when dual is specified
 	if (node.dual) return 'range-dual'
+
+	// Explicit 2D point control when requested by schema authors
+	if (node.xy) return 'xy-pad'
+
+	// 2D point control for {x, y} values
+	if (value && typeof value === 'object' && !Array.isArray(value)
+		&& typeof (value as { x?: number; y?: number }).x === 'number'
+		&& typeof (value as { x?: number; y?: number }).y === 'number'
+		&& Object.keys(value).length === 2) {
+		return 'xy-pad'
+	}
 
 	// Number with min/max = range (maps to slider), otherwise number input
 	if (typeof value === 'number') {

@@ -77,8 +77,11 @@ export interface GooSchemaField {
 	/** Push neighboring thumbs when crossing is disabled. */
 	canPush?: boolean
 
-	/** Dual-thumb slider for [min, max] pairs. Data must be [min, max] array or {min, max} object. */
+	/** Dual-thumb slider for [min, max] pairs. Data must be [min, max] array or {min,max} object. */
 	dual?: boolean
+
+	/** 2D point controls bind to `{x,y}` values and use this label for the pad and number fields. */
+	xy?: boolean
 
 	/** Show coverage bar. */
 	coverage?: boolean

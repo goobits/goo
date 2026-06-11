@@ -35,6 +35,7 @@ import { createSliderField } from '../slider/_createSliderField.ts'
 import * as sliderModule from '../slider/GooSlider.svelte'
 import { createTextareaField } from '../textarea/_createTextareaField.ts'
 import * as textareaModule from '../textarea/GooTextarea.svelte'
+import * as xyPadModule from '../xy-pad/GooXyPad.svelte'
 import type { SvelteControlSchema } from './SvelteControl.svelte.ts'
 
 /** Control module structure loaded for a Goo controller type. */
@@ -70,6 +71,7 @@ export type GooBuiltInControlType =
   | 'text'
   | 'textarea'
   | 'url'
+  | 'xy-pad'
 
 /** Built-in or host-registered Goo control id. */
 export type GooControlType = GooBuiltInControlType | (string & {})
@@ -204,6 +206,10 @@ export const defaultControlRegistry: GooControlTypeRegistry = {
 	color: defineSvelteControlType({ load: () => loadSvelteModule(colorModule), createField: createColorField }),
 	angle: defineSvelteControlType({ load: () => loadSvelteModule(angleInputModule), createField: createAngleInputField }),
 	textarea: defineSvelteControlType({ load: () => loadSvelteModule(textareaModule), createField: createTextareaField }),
+	'xy-pad': defineSvelteControlType({
+		load: () => loadSvelteModule(xyPadModule),
+		layout: 'stacked'
+	}),
 
 	'button-group': defineSvelteControlType({
 		load: () => loadSvelteModule(buttonGroupModule),

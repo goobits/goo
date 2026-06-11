@@ -144,6 +144,12 @@ export function detectControlType(value: unknown, options: ControllerSetupOption
 		&& Object.keys(value).length === 2) {
 		return 'range-dual'
 	}
+	if (value && typeof value === 'object' && !Array.isArray(value)
+		&& typeof (value as { x?: number; y?: number }).x === 'number'
+		&& typeof (value as { x?: number; y?: number }).y === 'number'
+		&& Object.keys(value).length === 2) {
+		return 'xy-pad'
+	}
 
 	// Number with min/max = range, otherwise number input
 	if (typeof value === 'number') {
