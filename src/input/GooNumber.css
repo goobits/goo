@@ -23,6 +23,7 @@
 	--goo-number-radius: var(--goo-theme-radius-md, 0.5rem);
 	--goo-number-height: 1.5rem;
 	--goo-number-arrows-width: calc(var(--goo-number-height) * 0.68);
+	--goo-number-stepper-space: 0px;
 	--goo-number-motion-fast: var(--goo-theme-transition-fast, 0.15s ease);
 	--goo-number-motion-normal: var(--goo-theme-transition-normal, 0.2s ease);
 
@@ -59,6 +60,8 @@
 
 /* Hover state - show arrows */
 .goo-number:hover {
+	--goo-number-stepper-space: var(--goo-number-arrows-width);
+
 	background: color-mix(in srgb, var(--goo-theme-fg, #fff) 7%, transparent);
 
 	.goo-number__arrows {
@@ -71,6 +74,8 @@
 /* Focus state */
 .goo-number.goo-number--focused,
 .goo-number:focus-within {
+	--goo-number-stepper-space: var(--goo-number-arrows-width);
+
 	background: var(--goo-number-bg-focus);
 	box-shadow:
 		0 0 0 1px var(--goo-number-border-focus),
@@ -109,12 +114,14 @@
 	border-radius: inherit;
 	outline: none;
 	padding: 0 calc(var(--goo-number-arrows-width) + var(--goo-number-unit-padding, 0px)) 0 0.5rem;
+	padding-inline-end: calc(var(--goo-number-stepper-space) + var(--goo-number-unit-padding, 0px));
 	text-align: right;
 	overflow: hidden;
 	white-space: nowrap;
 	opacity: 0.92;
 	min-height: 100%;
 	line-height: inherit;
+	transition: padding-inline-end var(--goo-number-motion-fast);
 
 	&:focus {
 		opacity: 1;
@@ -131,6 +138,7 @@
 	position: absolute;
 	top: 0;
 	right: var(--goo-number-arrows-width);
+	right: var(--goo-number-stepper-space);
 	z-index: 1;
 	display: inline-flex;
 	align-items: center;
@@ -143,7 +151,10 @@
 	font: inherit;
 	line-height: inherit;
 	pointer-events: none;
-	transition: color var(--goo-number-motion-fast);
+	transition:
+		color var(--goo-number-motion-fast),
+		left var(--goo-number-motion-fast),
+		right var(--goo-number-motion-fast);
 }
 
 .goo-number[unit]:not([unit='']):not([unit='float']):not([unit='int']):not([unit='integer']):not([unit='number']) {
@@ -168,7 +179,7 @@
 	opacity: 0;
 	overflow: hidden;
 	pointer-events: none;
-	transform: translateX(25%);
+	transform: translateX(100%);
 	z-index: 2;
 	transition:
 		opacity var(--goo-number-motion-fast),
@@ -260,11 +271,13 @@
 
 	.goo-number__content {
 		padding: 0 0.5em 0 calc(var(--goo-number-arrows-width) + var(--goo-number-unit-padding, 0px));
+		padding-inline-start: calc(var(--goo-number-stepper-space) + var(--goo-number-unit-padding, 0px));
 		text-align: left;
 	}
 
 	.goo-number__unit {
 		left: var(--goo-number-arrows-width);
+		left: var(--goo-number-stepper-space);
 		right: auto;
 		justify-content: flex-end;
 		padding-right: 0;
@@ -277,7 +290,7 @@
 		border-left: none;
 		border-right: 1px solid var(--goo-number-border);
 		border-radius: var(--goo-number-radius) 0 0 var(--goo-number-radius);
-		transform: translateX(-25%);
+		transform: translateX(-100%);
 	}
 
 	.goo-number:hover,
@@ -311,10 +324,12 @@
 
 	.goo-number__content {
 		padding: 0 calc(var(--goo-number-arrows-width) + var(--goo-number-unit-padding, 0px)) 0 0.375em;
+		padding-inline-end: calc(var(--goo-number-stepper-space) + var(--goo-number-unit-padding, 0px));
 	}
 
 	&[unit]:not([unit='']):not([unit='float']):not([unit='int']):not([unit='integer']):not([unit='number']) .goo-number__content {
 		padding-right: calc(var(--goo-number-arrows-width) + var(--goo-number-unit-width));
+		padding-inline-end: calc(var(--goo-number-stepper-space) + var(--goo-number-unit-width));
 	}
 
 	.goo-number__arrow::before {
