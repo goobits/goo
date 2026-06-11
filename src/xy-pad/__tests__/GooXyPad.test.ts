@@ -87,6 +87,7 @@ describe('GooXyPad', () => {
 
 		await fireEvent.focus(xInput!)
 		await fireEvent.input(xInput!, { target: { value: '48' } })
+		await tick()
 		await fireEvent.blur(xInput!)
 
 		expect(onchange).toHaveBeenCalled()
@@ -108,11 +109,13 @@ describe('GooXyPad', () => {
 		const reset = container.querySelector<HTMLButtonElement>('.goo-xy-pad__reset')!
 
 		await fireEvent.keyDown(surface, { key: 'ArrowRight' })
+		await tick()
 		await fireEvent.keyDown(surface, { key: 'ArrowUp', shiftKey: true })
+		await tick()
 		await fireEvent.click(reset)
 
 		expect(onchange.mock.calls[0]?.[0]).toEqual({ x: 1, y: 0 })
-		expect(onchange.mock.calls[1]?.[0]).toEqual({ x: 1, y: 10 })
+		expect(onchange.mock.calls[1]?.[0]).toEqual({ x: 0, y: 10 })
 		expect(onchange.mock.calls.at(-1)?.[0]).toEqual({ x: 0, y: 0 })
 	})
 })

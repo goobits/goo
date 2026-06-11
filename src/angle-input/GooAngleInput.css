@@ -84,6 +84,9 @@
 
 /* Number input wrapper - rounded left edge wraps around dial */
 .goo-angle-input .goo-number {
+	--goo-number-arrows-width: 0px;
+	--goo-angle-number-value-width: 4ch;
+
 	box-shadow: inset 0 0 0 1px var(--goo-angle-border);
 	background: var(--goo-angle-input-bg);
 	width: 100%;
@@ -101,8 +104,16 @@
 
 /* Content area */
 .goo-angle-input .goo-number .goo-number__content {
+	padding: 0 0 0 0.5rem;
 	text-align: left;
 	z-index: -1;
+}
+
+.goo-angle-input .goo-number .goo-number__unit {
+	left: calc(var(--goo-angle-track-size) + 0.5rem + var(--goo-angle-number-value-width));
+	right: auto;
+	width: auto;
+	padding: 0 0.35rem 0 0;
 }
 
 /* Disabled state */

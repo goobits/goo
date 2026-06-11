@@ -59,9 +59,13 @@ let rootElement: HTMLDivElement | undefined = $state()
 let surfaceElement: HTMLButtonElement | undefined = $state()
 const xyPadElement = $derived(rootElement as GooXyPadElement | undefined)
 let activePointerId = $state<number | null>(null)
+let latestValue = $state<GooXyPadValue>(normalizeValue(value))
 let currentValue = $state<GooXyPadValue>(normalizeValue(value))
-let effectiveDisabled = $state(Boolean(disabled))
-let skipNextValueSync = false
+let effectiveDisabled = $state(false)
+let lastExternalValue: GooXyPadValue = normalizeValue(value)
+let pendingInternalValue = $state<GooXyPadValue | null>(null)
+let pendingExternalFallback = $state<GooXyPadValue | null>(null)
+let ignoreNumberEvents = $state(false)
 
 const range = $derived(Math.max(max - min, Number.EPSILON))
 const xPct = $derived(toPercent(currentValue.x))
@@ -80,12 +84,25 @@ const hostAttributes = $derived<Record<string, string | number | undefined>>({
 const padLabel = $derived(ariaLabel || ariaLabelAttribute || label || title || 'Set X Y value')
 
 $effect(() => {
-	const nextValue = normalizeValue(value)
-	if (skipNextValueSync && sameValue(nextValue, currentValue)) {
-		skipNextValueSync = false
+	const nextExternalValue = normalizeValue(value)
+	if (pendingInternalValue) {
+		if (sameValue(nextExternalValue, pendingInternalValue)) {
+			lastExternalValue = cloneValue(nextExternalValue)
+			return
+		}
+		if (pendingExternalFallback && sameValue(nextExternalValue, pendingExternalFallback)) {
+			pendingInternalValue = null
+			pendingExternalFallback = null
+			return
+		}
+		pendingInternalValue = null
+		pendingExternalFallback = null
+	}
+	if (sameValue(nextExternalValue, lastExternalValue)) {
 		return
 	}
-	currentValue = nextValue
+	lastExternalValue = cloneValue(nextExternalValue)
+	commitCurrentValue(nextExternalValue)
 })
 
 $effect(() => {
@@ -103,8 +120,8 @@ $effect(() => {
 
 export function setValue(nextValue: GooXyPadValue | number[] | null | undefined, { silent = true }: { silent?: boolean } = {}): void {
 	const normalized = normalizeValue(nextValue)
-	const changed = !sameValue(normalized, currentValue)
-	currentValue = normalized
+	const changed = !sameValue(normalized, latestValue)
+	commitCurrentValue(normalized)
 	syncBoundValue(normalized)
 	if (!silent && changed) {
 		emitXyPadEvent('change')
@@ -112,7 +129,7 @@ export function setValue(nextValue: GooXyPadValue | number[] | null | undefined,
 }
 
 export function getValue(): GooXyPadValue {
-	return cloneValue(currentValue)
+	return cloneValue(latestValue)
 }
 
 export function focus(): void {
@@ -126,7 +143,7 @@ export function blur(): void {
 function assignXyPadApi(xyPad: GooXyPadElement): void {
 	Object.defineProperty(xyPad, 'value', {
 		configurable: true,
-		get: () => cloneValue(currentValue),
+		get: () => cloneValue(latestValue),
 		set: value => setValue(value, { silent: true })
 	})
 	xyPad.setValue = (nextValue, { silent = true } = {}) => setValue(nextValue, { silent })
@@ -187,22 +204,19 @@ function handleKeydown(event: KeyboardEvent): void {
 	const multiplier = event.shiftKey ? 10 : event.altKey ? 0.1 : 1
 	const delta = (step || DEFAULT_STEP) * multiplier
 	let nextValue: GooXyPadValue | null = null
-	if (event.key === 'ArrowLeft') nextValue = { ...currentValue, x: currentValue.x - delta }
-	if (event.key === 'ArrowRight') nextValue = { ...currentValue, x: currentValue.x + delta }
-	if (event.key === 'ArrowDown') nextValue = { ...currentValue, y: currentValue.y - delta }
-	if (event.key === 'ArrowUp') nextValue = { ...currentValue, y: currentValue.y + delta }
+	if (event.key === 'ArrowLeft') nextValue = { ...latestValue, x: latestValue.x - delta }
+	if (event.key === 'ArrowRight') nextValue = { ...latestValue, x: latestValue.x + delta }
+	if (event.key === 'ArrowDown') nextValue = { ...latestValue, y: latestValue.y - delta }
+	if (event.key === 'ArrowUp') nextValue = { ...latestValue, y: latestValue.y + delta }
 	if (event.key === 'Home') nextValue = { x: centerValue, y: centerValue }
 	if (!nextValue) return
 	event.preventDefault()
 	updateValue(nextValue, 'change', event)
 }
 
-function handleNumberInput(axis: keyof GooXyPadValue, nextValue: number): void {
-	updateValue({ ...currentValue, [axis]: nextValue }, 'input')
-}
-
 function handleNumberChange(axis: keyof GooXyPadValue, nextValue: number): void {
-	updateValue({ ...currentValue, [axis]: nextValue }, 'change')
+	if (ignoreNumberEvents) return
+	updateValue({ ...latestValue, [axis]: nextValue }, 'change')
 }
 
 function resetToCenter(): void {
@@ -213,8 +227,8 @@ function resetToCenter(): void {
 
 function updateValue(nextValue: GooXyPadValue, state: GooXyPadEventData['state'], event?: Event): void {
 	const normalized = normalizeValue(nextValue)
-	const changed = !sameValue(normalized, currentValue)
-	currentValue = normalized
+	const changed = !sameValue(normalized, latestValue)
+	commitCurrentValue(normalized)
 	syncBoundValue(normalized)
 	if (changed || state !== 'input') {
 		emitXyPadEvent(state, event)
@@ -223,7 +237,7 @@ function updateValue(nextValue: GooXyPadValue, state: GooXyPadEventData['state']
 
 function emitXyPadEvent(state: GooXyPadEventData['state'], event?: Event): void {
 	if (!xyPadElement) return
-	const nextValue = cloneValue(currentValue)
+	const nextValue = cloneValue(latestValue)
 	const data: GooXyPadEventData = {
 		element: xyPadElement,
 		event,
@@ -271,8 +285,18 @@ function cloneValue(nextValue: GooXyPadValue): GooXyPadValue {
 	return { x: nextValue.x, y: nextValue.y }
 }
 
+function commitCurrentValue(nextValue: GooXyPadValue): void {
+	latestValue = nextValue
+	ignoreNumberEvents = true
+	currentValue = nextValue
+	setTimeout(() => {
+		ignoreNumberEvents = false
+	}, 0)
+}
+
 function syncBoundValue(nextValue: GooXyPadValue): void {
-	skipNextValueSync = true
+	pendingInternalValue = cloneValue(nextValue)
+	pendingExternalFallback = cloneValue(lastExternalValue)
 	value = cloneValue(nextValue)
 }
 </script>
@@ -310,7 +334,7 @@ function syncBoundValue(nextValue: GooXyPadValue): void {
 		<span class="goo-xy-pad__dot" aria-hidden="true"></span>
 	</button>
 	{#if showInputs}
-		<div class="goo-xy-pad__inputs">
+		<div class="goo-xy-pad__inputs" oninput={(event) => event.stopPropagation()} onchange={(event) => event.stopPropagation()}>
 			<label class="goo-xy-pad__input">
 				<span class="goo-xy-pad__input-label">X</span>
 				<GooNumber
@@ -322,7 +346,6 @@ function syncBoundValue(nextValue: GooXyPadValue): void {
 					disabled={effectiveDisabled}
 					tabIndex={tabIndex}
 					ariaLabel={`${ label || 'Value' } X`}
-					oninput={(nextValue) => handleNumberInput('x', nextValue)}
 					onchange={(nextValue) => handleNumberChange('x', nextValue)}
 				/>
 			</label>
@@ -337,7 +360,6 @@ function syncBoundValue(nextValue: GooXyPadValue): void {
 					disabled={effectiveDisabled}
 					tabIndex={tabIndex}
 					ariaLabel={`${ label || 'Value' } Y`}
-					oninput={(nextValue) => handleNumberInput('y', nextValue)}
 					onchange={(nextValue) => handleNumberChange('y', nextValue)}
 				/>
 			</label>
