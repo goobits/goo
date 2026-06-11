@@ -5,7 +5,6 @@
  */
 
 .goo-angle-input {
-	--goo-angle-number-value-width: 1ch;
 	--goo-angle-bg: var(
 		--goo-theme-border,
 		color-mix(in srgb, var(--goo-theme-fg, #fff) 10%, transparent)
@@ -87,8 +86,10 @@
 .goo-angle-input .goo-number {
 	--goo-number-arrows-width: 0px;
 
+	align-items: center;
 	box-shadow: inset 0 0 0 1px var(--goo-angle-border);
 	background: var(--goo-angle-input-bg);
+	display: flex;
 	width: 100%;
 	padding-left: var(--goo-angle-track-size);
 	position: relative; /* Required for z-index to work */
@@ -102,29 +103,27 @@
 	display: none;
 }
 
+.goo-angle-input__number {
+	inline-size: 100%;
+	min-inline-size: 0;
+}
+
 /* Content area */
 .goo-angle-input .goo-number .goo-number__content {
+	field-sizing: content;
+	inline-size: auto;
+	min-inline-size: 1ch;
+	max-inline-size: 4ch;
 	padding: 0 0 0 0.5rem;
 	text-align: left;
 	z-index: -1;
 }
 
 .goo-angle-input .goo-number .goo-number__unit {
-	left: calc(var(--goo-angle-track-size) + 0.5rem + var(--goo-angle-number-value-width));
-	right: auto;
+	position: static;
 	width: auto;
-	padding: 0 0.35rem 0 0;
-}
-
-.goo-angle-input__value-measure {
-	position: absolute;
-	left: -9999px;
-	font-family: inherit;
-	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
-	font-weight: 500;
-	visibility: hidden;
-	white-space: pre;
-	pointer-events: none;
+	height: auto;
+	padding: 0 0.35rem 0 0.1rem;
 }
 
 /* Disabled state */

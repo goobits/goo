@@ -27,14 +27,12 @@ let angleRoot: HTMLDivElement | undefined = $state()
 // (assignAngleInputApi); expose the augmented type while binding the real one.
 const angleInputElement = $derived(angleRoot as GooAngleInputElement | undefined)
 let trackElement: HTMLButtonElement | undefined = $state()
-let valueMeasureElement: HTMLSpanElement | undefined = $state()
 let activePointerId = $state<number | null>(null)
 let currentValue = $state(0)
 let lastCommittedValue = $state(0)
 let currentUnit: GooAngleInputUnit = $state('degree')
 let effectiveDisabled = $state(false)
 let skipNextValueSync = false
-let measureFrame: number | null = null
 
 let {
 	value = $bindable<number | string>(0),
@@ -99,27 +97,6 @@ $effect(() => {
 
 	assignAngleInputApi(angleInputElement)
 	element = angleInputElement
-})
-
-$effect(() => {
-	if (!angleRoot || !valueMeasureElement) return
-	void degrees
-	if (measureFrame !== null) {
-		cancelAnimationFrame(measureFrame)
-	}
-	measureFrame = requestAnimationFrame(() => {
-		measureFrame = null
-		if (!angleRoot || !valueMeasureElement) return
-		const width = Math.ceil(valueMeasureElement.getBoundingClientRect().width)
-		angleRoot.style.setProperty('--goo-angle-number-value-width', `${ Math.max(1, width) }px`)
-	})
-
-	return () => {
-		if (measureFrame !== null) {
-			cancelAnimationFrame(measureFrame)
-			measureFrame = null
-		}
-	}
 })
 
 export function setValue(nextValue: number | string, { silent = true }: { silent?: boolean } = {}): void {
@@ -347,7 +324,6 @@ function syncBoundValue(nextValue: number): void {
 	{#if children}
 		{@render children()}
 	{/if}
-	<span bind:this={valueMeasureElement} class="goo-angle-input__value-measure" aria-hidden="true">{degrees}</span>
 	{#if name}
 		<input type="hidden" data-goo-angle-input-field {name} value={currentValue} disabled={effectiveDisabled} />
 	{/if}
