@@ -303,4 +303,22 @@ describe('GooController', () => {
 			min: 0
 		})
 	})
+
+	it('auto-detects xy pad controls for point values', async() => {
+		const model = { scatter: { x: 0, y: 0 } }
+		const controller = createGooController({
+			object: model,
+			property: 'scatter',
+			label: 'Scatter',
+			min: -100,
+			max: 100,
+			step: 1,
+			unit: 'px'
+		})
+		document.body.appendChild(controller)
+		await waitForControllerControl(controller)
+
+		expect(controller.classList.contains('goo-controller--stacked')).toBe(true)
+		expect(controller.querySelector('.goo-xy-pad')).not.toBeNull()
+	})
 })

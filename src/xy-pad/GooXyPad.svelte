@@ -29,15 +29,6 @@ const DEFAULT_MIN = -100
 const DEFAULT_MAX = 100
 const DEFAULT_STEP = 1
 
-let rootElement: HTMLDivElement | undefined = $state()
-let surfaceElement: HTMLButtonElement | undefined = $state()
-const xyPadElement = $derived(rootElement as GooXyPadElement | undefined)
-let activePointerId = $state<number | null>(null)
-let currentValue = $state<GooXyPadValue>({ x: 0, y: 0 })
-let lastCommittedValue = $state<GooXyPadValue>({ x: 0, y: 0 })
-let effectiveDisabled = $state(false)
-let skipNextValueSync = false
-
 let {
 	value = $bindable<GooXyPadValue | number[] | null>({ x: 0, y: 0 }),
 	min = DEFAULT_MIN,
@@ -64,6 +55,14 @@ let {
 	...rest
 }: GooXyPadProps = $props()
 
+let rootElement: HTMLDivElement | undefined = $state()
+let surfaceElement: HTMLButtonElement | undefined = $state()
+const xyPadElement = $derived(rootElement as GooXyPadElement | undefined)
+let activePointerId = $state<number | null>(null)
+let currentValue = $state<GooXyPadValue>(normalizeValue(value))
+let effectiveDisabled = $state(Boolean(disabled))
+let skipNextValueSync = false
+
 const range = $derived(Math.max(max - min, Number.EPSILON))
 const xPct = $derived(toPercent(currentValue.x))
 const yPct = $derived(100 - toPercent(currentValue.y))
@@ -87,7 +86,6 @@ $effect(() => {
 		return
 	}
 	currentValue = nextValue
-	lastCommittedValue = nextValue
 })
 
 $effect(() => {
@@ -109,7 +107,6 @@ export function setValue(nextValue: GooXyPadValue | number[] | null | undefined,
 	currentValue = normalized
 	syncBoundValue(normalized)
 	if (!silent && changed) {
-		lastCommittedValue = normalized
 		emitXyPadEvent('change')
 	}
 }
@@ -173,7 +170,6 @@ function finishPointerDrag(event: PointerEvent, { commit }: { commit: boolean })
 	activePointerId = null
 	surfaceElement?.releasePointerCapture?.(event.pointerId)
 	if (commit) {
-		lastCommittedValue = cloneValue(currentValue)
 		emitXyPadEvent('change', event)
 	}
 }
@@ -220,9 +216,6 @@ function updateValue(nextValue: GooXyPadValue, state: GooXyPadEventData['state']
 	const changed = !sameValue(normalized, currentValue)
 	currentValue = normalized
 	syncBoundValue(normalized)
-	if (state !== 'input') {
-		lastCommittedValue = normalized
-	}
 	if (changed || state !== 'input') {
 		emitXyPadEvent(state, event)
 	}
@@ -263,7 +256,7 @@ function toSteppedValue(nextValue: unknown): number {
 	const numericValue = Number(nextValue)
 	const finiteValue = Number.isFinite(numericValue) ? numericValue : 0
 	const snappedValue = snap > 0 && Math.abs(finiteValue) <= snap ? 0 : finiteValue
-	return clamp(roundToStep(snappedValue, step || DEFAULT_STEP), min, max)
+	return clamp(roundToStep(snappedValue, step || DEFAULT_STEP, min), min, max)
 }
 
 function toPercent(nextValue: number): number {
@@ -304,6 +297,7 @@ function syncBoundValue(nextValue: GooXyPadValue): void {
 		aria-label={padLabel}
 		aria-valuemin={min}
 		aria-valuemax={max}
+		aria-valuenow={currentValue.x}
 		aria-valuetext={`X ${ currentValue.x }, Y ${ currentValue.y }`}
 		role="slider"
 		style={`--goo-xy-pad-dot-x: ${ xPct }%; --goo-xy-pad-dot-y: ${ yPct }%;`}

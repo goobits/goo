@@ -446,6 +446,19 @@ describe('GooSchema', () => {
 		})
 	})
 
+	it('auto-detects xy pad controls for point fields', async() => {
+		const schema = createGooSchema({
+			schema: [ { path: 'scatter', min: -100, max: 100, step: 1, unit: 'px' } ],
+			data: { scatter: { x: 0, y: 0 } },
+			bare: true
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+
+		const controller = schema.getController('scatter')
+		expect(controller?.querySelector('.goo-xy-pad')).not.toBeNull()
+	})
+
 	it('supports condition objects for field visibility', async() => {
 		const schema = createGooSchema({
 			schema: [
