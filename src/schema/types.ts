@@ -119,8 +119,8 @@ export interface GooSchemaField {
 	/** Show range tick marks when the control supports ticks. */
 	ticks?: boolean
 
-		/** Options for select/button-group controls. */
-		options?: Array<string | { label?: string; id?: string; key?: string; value?: string; icon?: string }>
+	/** Options for select/button-group controls. */
+	options?: Array<string | { label?: string; id?: string; key?: string; value?: string; icon?: string }>
 
 	/** Mode ids for blend-mode controls. */
 	modes?: readonly string[]

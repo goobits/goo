@@ -103,6 +103,22 @@ describe('GooSchema', () => {
 		expect(folder?.classList.contains('shape-folder')).toBe(true)
 	})
 
+	it('materializes missing field parents from defaults', async() => {
+		const data: Record<string, unknown> = {}
+		const schema = createGooSchema({
+			schema: [ { path: 'style.fillOpacity', min: 0, max: 1 } ],
+			data,
+			defaults: { style: { fillOpacity: 0.75 } },
+			bare: true
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+
+		expect(schema.querySelector('.goo-controller')).not.toBeNull()
+		expect(data).toEqual({ style: { fillOpacity: 0.75 } })
+		expect(schema.getController('style.fillOpacity')).not.toBeUndefined()
+	})
+
 	it('renders the Svelte wrapper and forwards change events', async() => {
 		const onchange = vi.fn()
 		const onpreset = vi.fn()

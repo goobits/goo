@@ -13,7 +13,7 @@ import { createPanel } from '../panel/_createPanel.ts'
 import { schemaLog as log } from '../support/utils/logger.ts'
 import { shouldRenderSchemaNode } from './fieldConditions.ts'
 import { isFullBleedField, isSelfContainedField } from './fieldLayout.ts'
-import { resolvePath } from './pathUtils.ts'
+import { getByPath, resolvePath, setByPath } from './pathUtils.ts'
 import { buildControllerOptions, type ControllerOptions } from './schemaFieldBuilder.ts'
 import type {
 	GooSchemaChangeHandler,
@@ -371,7 +371,7 @@ async function buildField(
 	token: number
 ): Promise<void> {
 	if (token !== element._rebuildToken) return
-	const resolved = resolvePath(element._data, node.path)
+	const resolved = resolveFieldPath(element, node.path)
 
 	if (resolved === null) {
 		log.warn(`Path "${ node.path }" could not be resolved`)
@@ -421,6 +421,20 @@ async function buildField(
 	controller.name(controllerOptions.label)
 	element._controllers.set(node.path, controller)
 	controller.addTo(parent)
+}
+
+function resolveFieldPath(
+	element: GooSchemaInternal,
+	path: string
+): { object: GooSchemaData; property: string } | null {
+	const resolved = resolvePath(element._data, path)
+	if (resolved) return resolved
+
+	const defaultValue = element.state.defaults ? getByPath(element.state.defaults, path) : undefined
+	if (defaultValue === undefined) return null
+
+	setByPath(element._data, path, cloneSchemaValue(defaultValue))
+	return resolvePath(element._data, path)
 }
 
 async function buildSelfContainedField(
