@@ -102,6 +102,7 @@ type GooSchemaInternal = GooSchema & {
 	_rebuildToken: number
 	_root: HTMLElement | null
 	_toolbar: HTMLElement | null
+	_visibilitySignature: string
 	state: GooSchemaState
 	_buildField(node: GooSchemaField, parent: HTMLElement, token: number): Promise<void>
 	_buildFolder(node: GooSchemaFolder, parent: HTMLElement, token: number): Promise<void>
@@ -141,6 +142,7 @@ function initializeSchema(element: GooSchemaInternal, options: GooSchemaOptions)
 	element._rebuildPending = false
 	element._root = null
 	element._toolbar = null
+	element._visibilitySignature = ''
 }
 
 function attachSchemaApi(element: GooSchemaInternal): void {
@@ -159,12 +161,7 @@ function attachSchemaApi(element: GooSchemaInternal): void {
 		},
 		setData: (data: GooSchemaData) => {
 			mergeSchemaData(element._data, data)
-			if (schemaHasConditions(element.state.schema)) {
-				element._scheduleRebuild()
-				return
-			}
-			element.refresh()
-			updateSchemaActionState(element)
+			updateSchemaAfterDataMutation(element)
 		},
 		setOptions: (options: GooSchemaUpdateOptions) => {
 			let shouldRebuild = false
@@ -321,6 +318,7 @@ async function rebuildSchema(element: GooSchemaInternal): Promise<void> {
 	if (element._root) {
 		element.appendChild(element._root)
 	}
+	element._visibilitySignature = getSchemaVisibilitySignature(element)
 }
 
 async function buildNodes(
@@ -408,13 +406,13 @@ async function buildField(
 		const detail: GooSchemaEventDetail = { path: node.path, value, data: element._data }
 		element.dispatchEvent(new CustomEvent('change', { detail, bubbles: true }))
 		element._changeHandler?.(node.path, value)
-		updateSchemaActionState(element)
+		updateSchemaAfterValueMutation(element)
 	}
 
 	controllerOptions.oninput = (value: unknown) => {
 		const detail: GooSchemaEventDetail = { path: node.path, value, data: element._data }
 		element.dispatchEvent(new CustomEvent('input', { detail, bubbles: true }))
-		updateSchemaActionState(element)
+		updateSchemaAfterValueMutation(element)
 	}
 
 	const controller = createGooController(controllerOptions)
@@ -453,14 +451,14 @@ async function buildSelfContainedField(
 		const detail: GooSchemaEventDetail = { path: node.path, value, data: element._data }
 		element.dispatchEvent(new CustomEvent('change', { detail, bubbles: true }))
 		element._changeHandler?.(node.path, value)
-		updateSchemaActionState(element)
+		updateSchemaAfterValueMutation(element)
 	}
 
 	const handleInput = (value: unknown) => {
 		object[property] = value
 		const detail: GooSchemaEventDetail = { path: node.path, value, data: element._data }
 		element.dispatchEvent(new CustomEvent('input', { detail, bubbles: true }))
-		updateSchemaActionState(element)
+		updateSchemaAfterValueMutation(element)
 	}
 
 	const { controlOptions, ...controllerBaseOptions } = controllerOptions
@@ -469,7 +467,7 @@ async function buildSelfContainedField(
 		...controlOptions
 	}
 	if (!node.label || node.showLabel === false) {
-		delete options.label
+		delete (options as Partial<typeof options>).label
 	}
 
 	const host = createSvelteControlHost({
@@ -586,6 +584,46 @@ function updateSchemaActionState(element: GooSchemaInternal): void {
 	if (select && element.state.activePresetId !== undefined && select.value !== element.state.activePresetId) {
 		select.value = element.state.activePresetId ?? ''
 	}
+}
+
+function updateSchemaAfterValueMutation(element: GooSchemaInternal): void {
+	updateSchemaAfterDataMutation(element)
+}
+
+function updateSchemaAfterDataMutation(element: GooSchemaInternal): void {
+	if (schemaHasConditions(element.state.schema)) {
+		const nextVisibilitySignature = getSchemaVisibilitySignature(element)
+		if (nextVisibilitySignature !== element._visibilitySignature) {
+			element._scheduleRebuild()
+			return
+		}
+		element.refresh()
+		updateSchemaActionState(element)
+		return
+	}
+	element.refresh()
+	updateSchemaActionState(element)
+}
+
+function getSchemaVisibilitySignature(element: GooSchemaInternal): string {
+	const schema = element.state.schema
+	const nodes = Array.isArray(schema) ? schema : schema.children
+	return nodes.map(node => getNodeVisibilitySignature(node, element._data)).filter(Boolean).join('|')
+}
+
+function getNodeVisibilitySignature(node: GooSchemaNode, data: GooSchemaData): string {
+	if (!shouldRenderSchemaNode(node, data)) return ''
+	if ('children' in node && node.type === 'folder') {
+		const children = node.children
+			.map(child => getNodeVisibilitySignature(child, data))
+			.filter(Boolean)
+			.join(',')
+		return `folder:${ node.title }:${ node.className ?? '' }:[${ children }]`
+	}
+	if ('path' in node) {
+		return `field:${ node.path }:${ node.type ?? '' }:${ node.label ?? '' }`
+	}
+	return ''
 }
 
 function cloneSchemaData(data: GooSchemaData): GooSchemaData {
