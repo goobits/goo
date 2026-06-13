@@ -3,6 +3,7 @@ import { untrack } from 'svelte'
 import {
 	createGooSchema,
 	type GooSchema,
+	type GooSchemaChangeHandler,
 	type GooSchemaData,
 	type GooSchemaEvent,
 	type GooSchemaOptions,
@@ -26,6 +27,7 @@ type GooSchemaProps = GooSchemaOptions & {
 	oninput?: GooSchemaDomEventHandler
 	onpreset?: GooSchemaPresetDomEventHandler
 	onreset?: GooSchemaResetDomEventHandler
+	valuechange?: GooSchemaChangeHandler
 }
 
 let host: HTMLDivElement | null = $state(null)
@@ -57,6 +59,7 @@ type GooSchemaPropsSnapshot = {
 	showPanelHeader: boolean
 	showReset: boolean | undefined
 	style: string | undefined
+	valuechange: GooSchemaChangeHandler | undefined
 }
 
 let {
@@ -76,7 +79,8 @@ let {
 	onchange,
 	oninput,
 	onpreset,
-	onreset
+	onreset,
+	valuechange
 }: GooSchemaProps = $props()
 
 function snapshotProps(): GooSchemaPropsSnapshot {
@@ -92,7 +96,8 @@ function snapshotProps(): GooSchemaPropsSnapshot {
 		schema,
 		showPanelHeader,
 		showReset,
-		style
+		style,
+		valuechange
 	}
 }
 
@@ -171,7 +176,8 @@ function mountSchema(snapshot: GooSchemaPropsSnapshot): void {
 		bare: snapshot.bare,
 		showPanelHeader: snapshot.showPanelHeader,
 		folderClassName: snapshot.folderClassName,
-		controlTypes: snapshot.controlTypes
+		controlTypes: snapshot.controlTypes,
+		onchange: snapshot.valuechange
 	})
 	schemaElement = nextSchemaElement
 	if (snapshot.className) schemaElement.classList.add(...snapshot.className.split(' ').filter(Boolean))
