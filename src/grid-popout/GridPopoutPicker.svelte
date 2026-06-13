@@ -482,7 +482,7 @@ function escapeSelectorValue(value: string): string {
 :global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .goo-grid-picker) {
 	display: grid;
 	gap: 6px;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
+	grid-template-columns: var(--goo-grid-popout-columns, repeat(2, minmax(0, 1fr)));
 	justify-items: stretch;
 }
 
@@ -554,8 +554,8 @@ function escapeSelectorValue(value: string): string {
 	padding: var(--goo-theme-space-sm, 0.5rem);
 }
 
-:global(goo-popout.goo-grid-popout--one-column .goo-grid-picker),
-:global(.goo-popout.goo-grid-popout--one-column .goo-grid-picker) {
+:global(goo-popout.goo-grid-popout.goo-grid-popout--one-column .goo-grid-picker),
+:global(.goo-popout.goo-grid-popout.goo-grid-popout--one-column .goo-grid-picker) {
 	grid-template-columns: minmax(0, 1fr);
 }
 
@@ -569,8 +569,8 @@ function escapeSelectorValue(value: string): string {
 	padding: var(--goo-theme-space-sm, 0.5rem);
 }
 
-:global(goo-popout.goo-grid-popout--small .goo-grid-picker),
-:global(.goo-popout.goo-grid-popout--small .goo-grid-picker) {
+:global(goo-popout.goo-grid-popout.goo-grid-popout--small .goo-grid-picker),
+:global(.goo-popout.goo-grid-popout.goo-grid-popout--small .goo-grid-picker) {
 	gap: 4px;
 }
 
@@ -648,10 +648,13 @@ function escapeSelectorValue(value: string): string {
 	max-width: none;
 }
 
-:global(goo-popout.goo-grid-popout--preset .goo-grid-picker),
-:global(.goo-popout.goo-grid-popout--preset .goo-grid-picker) {
+:global(goo-popout.goo-grid-popout.goo-grid-popout--preset .goo-grid-picker),
+:global(.goo-popout.goo-grid-popout.goo-grid-popout--preset .goo-grid-picker) {
 	gap: var(--goo-theme-space-sm);
-	grid-template-columns: repeat(2, minmax(0, 1fr));
+	grid-template-columns: var(
+		--goo-grid-popout-preset-columns,
+		var(--goo-grid-popout-columns, repeat(2, minmax(0, 1fr)))
+	);
 }
 
 :global(goo-popout.goo-grid-popout--preset sketch-grid-item),
