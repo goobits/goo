@@ -22,6 +22,7 @@ export interface GooAlertOptions {
 	className?: string
 	content: string | Node
 	heading?: string
+	showBackdrop?: boolean
 	showClose?: boolean
 }
 
@@ -32,6 +33,7 @@ export interface GooConfirmOptions {
 	defaultFocus?: Extract<GooDialogDefaultFocus, 'ok' | 'cancel'>
 	heading?: string
 	labels?: DialogLabels
+	showBackdrop?: boolean
 }
 
 /** Options accepted by `GooPrompt`. */
@@ -59,6 +61,7 @@ export interface GooOverlayOptions {
 	className?: string
 	content: string | Node
 	heading?: string
+	showBackdrop?: boolean
 	showClose?: boolean
 }
 
