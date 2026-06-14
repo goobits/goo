@@ -54,6 +54,7 @@
 	font-size: var(--goo-theme-icon-lg);
 	height: 44px;
 	line-height: 44px !important;
+	margin: 0;
 	position: relative;
 	transition:
 		background 140ms ease,
@@ -114,7 +115,8 @@
 .goo-floating-toolbar hr {
 	background: color-mix(in srgb, var(--goo-theme-fg) 20%, var(--goo-theme-bg));
 	border: 0;
-	margin: 6px 8px 5px;
+	height: 1px;
+	margin: 0 8px;
 }
 
 .goo-toolbar-tool-button {
