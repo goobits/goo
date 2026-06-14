@@ -1,0 +1,106 @@
+/**
+ * @goobits/goo — dark default theme tokens.
+ *
+ * Ships canonical values for all 64 `--goo-theme-*` tokens so that standalone
+ * consumers (no host bridge) get a coherent dark theme instead of relying on
+ * the per-component inline `var(--x, <fallback>)` defaults, which historically
+ * drifted between files.
+ *
+ * Wrapped in `@layer goo.theme` on purpose: an app that already sets these
+ * tokens on an UNLAYERED `:root` (the runtime bridge) always wins over this
+ * layered rule, so importing this file is zero-churn for bridged apps and a
+ * safety net for everyone else. The values here match the majority inline
+ * fallback for each token after canonicalization.
+ */
+
+@layer goo.theme {
+	:root {
+		/* Brand / accent */
+		--goo-theme-accent: #3b82f6;
+		--goo-theme-accent-fg: #fff;
+		--goo-theme-secondary: #2563eb;
+		--goo-theme-selected: #3b82f6;
+		--goo-theme-selected-fg: #fff;
+		--goo-theme-focus-ring: #3b82f6;
+
+		/* Surfaces & base colors */
+		--goo-theme-bg: #111;
+		--goo-theme-fg: #fff;
+		--goo-theme-muted: rgba(255, 255, 255, 0.65);
+		--goo-theme-muted-fg: #a6a8af;
+		--goo-theme-surface: #1a1a2e;
+		--goo-theme-surface-raised: rgba(45, 45, 50, 0.98);
+		--goo-theme-surface-sunken: #171821;
+
+		/* Borders */
+		--goo-theme-border: rgba(128, 128, 128, 0.2);
+		--goo-theme-border-strong: rgba(128, 128, 128, 0.3);
+		--goo-theme-border-subtle: rgba(255, 255, 255, 0.1);
+
+		/* Status colors */
+		--goo-theme-positive: #22c55e;
+		--goo-theme-positive-fg: #fff;
+		--goo-theme-warning: #fbbf24;
+		--goo-theme-warning-fg: #000;
+		--goo-theme-negative: #ef4444;
+		--goo-theme-negative-fg: #fff;
+
+		/* Control surfaces */
+		--goo-theme-control-bg: #24262d;
+		--goo-theme-control-border: rgba(255, 255, 255, 0.12);
+		--goo-theme-control-divider: rgba(128, 128, 128, 0.1);
+		--goo-theme-control-label-color: rgba(255, 255, 255, 0.9);
+		--goo-theme-control-label-color-hover: #fff;
+		--goo-theme-control-label-size: 0.8125rem;
+		--goo-theme-control-label-weight: 600;
+		--goo-theme-control-range-tick-color: rgba(255, 255, 255, 0.2);
+		--goo-theme-control-row-padding: 0.5rem 0.75rem;
+		--goo-theme-text-disabled: rgba(128, 128, 128, 0.5);
+		--goo-theme-disabled-opacity: 0.5;
+
+		/* Control sizing */
+		--goo-theme-control-height-sm: 1.5rem;
+		--goo-theme-control-height-md: 2rem;
+		--goo-theme-control-height-lg: 2.5rem;
+		--goo-theme-control-padding-sm: 0 0.5rem;
+		--goo-theme-control-padding-md: 0 0.75rem;
+		--goo-theme-control-padding-lg: 0.5rem 0.75rem;
+
+		/* Typography */
+		--goo-theme-font-sans: system-ui, sans-serif;
+		--goo-theme-font-mono: ui-monospace, monospace;
+		--goo-theme-font-size-xs: 0.75rem;
+		--goo-theme-font-size-sm: 0.8125rem;
+		--goo-theme-font-size-md: 0.9375rem;
+		--goo-theme-font-size-lg: 1.125rem;
+		--goo-theme-font-size-xl: 1.1875rem;
+
+		/* Icons */
+		--goo-theme-icon-xs: 0.75rem;
+		--goo-theme-icon-md: 1rem;
+		--goo-theme-icon-lg: 1.25rem;
+
+		/* Radii */
+		--goo-theme-radius-sm: 0.25rem;
+		--goo-theme-radius-md: 0.5rem;
+		--goo-theme-radius-lg: 0.6875rem;
+		--goo-theme-radius-xl: 0.875rem;
+		--goo-theme-radius-full: 9999px;
+
+		/* Spacing */
+		--goo-theme-space-xs: 0.25rem;
+		--goo-theme-space-sm: 0.5rem;
+		--goo-theme-space-md: 1rem;
+		--goo-theme-space-lg: 1.5rem;
+		--goo-theme-space-xl: 2rem;
+
+		/* Shadows */
+		--goo-theme-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+		--goo-theme-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+		--goo-theme-shadow-lg: 0 10px 40px -10px rgba(0, 0, 0, 0.4);
+
+		/* Motion */
+		--goo-theme-transition-fast: 0.15s ease;
+		--goo-theme-transition-normal: 0.2s ease;
+	}
+}

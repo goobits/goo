@@ -55,7 +55,7 @@
 }
 
 .goo-folder__header:focus-visible {
-	box-shadow: 0 0 0 2px var(--goo-theme-focus-ring, #007bff);
+	box-shadow: 0 0 0 2px var(--goo-theme-focus-ring, #3b82f6);
 	outline: none;
 }
 
@@ -74,7 +74,7 @@
 	height: 1.5rem;
 	margin-inline-start: auto;
 	flex-shrink: 0;
-	border-radius: var(--goo-theme-radius-sm, 0.375rem);
+	border-radius: var(--goo-theme-radius-sm, 0.25rem);
 	color: var(--goo-theme-muted, currentColor);
 	transition:
 		background-color var(--goo-folder-transition),
@@ -188,7 +188,7 @@
 	min-height: 1.375rem;
 	padding: 0 0.125rem;
 	background: transparent;
-	border-radius: var(--goo-theme-radius-sm, 0.375rem);
+	border-radius: var(--goo-theme-radius-sm, 0.25rem);
 }
 
 .goo-folder--inspector > .goo-folder__header:hover {
@@ -196,7 +196,7 @@
 }
 
 .goo-folder--inspector.goo-folder--open > .goo-folder__header {
-	border-radius: var(--goo-theme-radius-sm, 0.375rem);
+	border-radius: var(--goo-theme-radius-sm, 0.25rem);
 }
 
 .goo-folder--inspector > .goo-folder__header > .goo-folder__chevron {

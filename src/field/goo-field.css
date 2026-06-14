@@ -1,0 +1,51 @@
+/**
+ * Shared field primitives for Goo text/number inputs.
+ *
+ * The value-pulse keyframes were previously duplicated byte-for-byte across
+ * GooInput.css and GooNumber.css. They are hoisted here once. GooNumber keeps
+ * two distinct animation names (-a / -b) because it retriggers the pulse by
+ * alternating between them on consecutive value changes; GooInput retriggers
+ * via DOM reflow and only needs the canonical name.
+ */
+
+@keyframes goo-field-value-pulse {
+	0% {
+		opacity: 0;
+	}
+
+	25% {
+		opacity: 1;
+	}
+
+	100% {
+		opacity: 0;
+	}
+}
+
+@keyframes goo-number-value-pulse-a {
+	0% {
+		opacity: 0;
+	}
+
+	25% {
+		opacity: 1;
+	}
+
+	100% {
+		opacity: 0;
+	}
+}
+
+@keyframes goo-number-value-pulse-b {
+	0% {
+		opacity: 0;
+	}
+
+	25% {
+		opacity: 1;
+	}
+
+	100% {
+		opacity: 0;
+	}
+}

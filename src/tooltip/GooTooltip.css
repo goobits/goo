@@ -89,7 +89,7 @@
 
 /* Warning tooltip */
 .goo-popout.goo-tooltip--warning {
-	--goo-popout-bg: var(--goo-theme-warning, #f59e0b);
+	--goo-popout-bg: var(--goo-theme-warning, #fbbf24);
 	--goo-popout-fg: var(--goo-theme-warning-fg, #000);
 	--goo-popout-border: transparent;
 }

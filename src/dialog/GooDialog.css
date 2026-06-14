@@ -181,7 +181,7 @@
 	--goo-button-fg: var(--goo-theme-accent-fg, #fff);
 	--goo-button-hover-bg: color-mix(
 		in srgb,
-		var(--goo-theme-accent, #2563eb) 88%,
+		var(--goo-theme-accent, #3b82f6) 88%,
 		var(--goo-theme-fg, white)
 	);
 }

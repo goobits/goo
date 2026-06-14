@@ -17,6 +17,7 @@ export const controlSchema: SvelteControlSchema = {
 
 <script lang="ts">
 import { onDestroy } from 'svelte'
+import '../field/goo-field.css'
 import './GooNumber.css'
 
 import { formatNumber } from '../support/utils/formatNumber.ts'

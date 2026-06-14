@@ -13,6 +13,7 @@
 			"svelte": "./src/index.ts",
 			"import": "./src/index.ts"
 		},
+		"./theme.css": "./src/theme/goo-defaults.css",
 		"./button": {
 			"types": "./src/button/index.ts",
 			"svelte": "./src/button/index.ts",

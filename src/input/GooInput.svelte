@@ -17,6 +17,7 @@ export const controlSchema: SvelteControlSchema = {
 
 <script lang="ts" generics="T = string">
 import { onDestroy } from 'svelte'
+import '../field/goo-field.css'
 import './GooInput.css'
 
 import type { GooInputProps } from './types.ts'
