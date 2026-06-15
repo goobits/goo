@@ -41,6 +41,7 @@
 
 	/* Non-interactive by default */
 	pointer-events: none;
+	z-index: var(--goo-tooltip-z-index, 2147483647);
 }
 
 /* Interactive tooltips can receive pointer events */

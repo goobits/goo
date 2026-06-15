@@ -203,6 +203,30 @@
 }
 
 /* =============================================================================
+   Floating Chrome Variant
+   ============================================================================= */
+
+.goo-popout--floating-chrome {
+	--goo-popout-bg: color-mix(in srgb, var(--goo-theme-bg) 82%, transparent);
+	--goo-popout-border: color-mix(in srgb, var(--goo-theme-fg) 18%, transparent);
+	--goo-popout-radius: var(--goo-theme-radius-lg);
+
+	backdrop-filter: blur(18px) saturate(1.35);
+	background: var(--goo-popout-bg);
+	background-image: linear-gradient(
+		135deg,
+		color-mix(in srgb, var(--goo-theme-fg) 14%, transparent),
+		color-mix(in srgb, var(--goo-theme-bg) 72%, transparent)
+	);
+	box-shadow:
+		0 16px 44px rgb(0 0 0 / 22%),
+		inset 0 1px 0 color-mix(in srgb, var(--goo-theme-fg) 20%, transparent);
+	color: var(--goo-theme-fg);
+	filter: none;
+	overflow: hidden;
+}
+
+/* =============================================================================
    Application-Specific Styles
    ============================================================================= */
 

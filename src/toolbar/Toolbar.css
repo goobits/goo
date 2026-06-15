@@ -16,6 +16,7 @@
 	display: none;
 	margin: 0;
 	outline: none;
+	overflow: hidden;
 	position: absolute;
 	right: 0;
 	text-align: center;
@@ -48,6 +49,7 @@
 	appearance: none;
 	background: transparent;
 	border: 0;
+	border-radius: 0;
 	color: inherit;
 	cursor: pointer;
 	display: block;
@@ -57,9 +59,9 @@
 	margin: 0;
 	position: relative;
 	transition:
-		background 140ms ease,
-		color 140ms ease,
-		opacity 140ms ease;
+		background 240ms ease,
+		color 240ms ease,
+		opacity 180ms ease;
 	width: 100%;
 }
 
@@ -101,7 +103,7 @@
 
 .goo-floating-toolbar__tool--selected {
 	background: var(--goo-theme-accent);
-	border-radius: var(--goo-theme-radius-sm);
+	border-radius: 0;
 }
 
 .goo-floating-toolbar__tool--selected::before {
@@ -116,7 +118,8 @@
 	background: color-mix(in srgb, var(--goo-theme-fg) 20%, var(--goo-theme-bg));
 	border: 0;
 	height: 1px;
-	margin: 0 8px;
+	margin: 0;
+	width: 100%;
 }
 
 .goo-toolbar-tool-button {
