@@ -118,9 +118,17 @@
 
 	function refreshItemsTop() {
 		if (!itemsEl || !scrollRoot) return
-		const rootRect = scrollRoot.getBoundingClientRect()
-		const itemsRect = itemsEl.getBoundingClientRect()
-		itemsTop = itemsRect.top - rootRect.top + scrollRoot.scrollTop
+		itemsTop = offsetTopInDocument(itemsEl) - offsetTopInDocument(scrollRoot)
+	}
+
+	function offsetTopInDocument(element: HTMLElement): number {
+		let top = 0
+		let node: HTMLElement | null = element
+		while (node) {
+			top += node.offsetTop
+			node = node.offsetParent as HTMLElement | null
+		}
+		return top
 	}
 
 	function scheduleMeasure() {
