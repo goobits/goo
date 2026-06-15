@@ -10,7 +10,8 @@
 		"verbatimModuleSyntax": true,
 		"types": ["vitest/globals"],
 		"baseUrl": ".",
-		"ignoreDeprecations": "6.0"
+		"ignoreDeprecations": "6.0",
+		"noEmit": true
 	},
 	"include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.js", "src/**/*.svelte"],
 	"exclude": ["node_modules", "dist", "src/**/*.test.ts", "src/**/__tests__/**"]
