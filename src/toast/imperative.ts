@@ -1,7 +1,7 @@
 import { mount, unmount } from 'svelte'
 
 import GooToaster from './GooToaster.svelte'
-import { toast } from './toast-service.svelte.ts'
+import { toast } from './ToastStore.svelte.ts'
 import type { ToastOptions } from './types.ts'
 
 /** Handle returned by imperative Goo toast helpers. */

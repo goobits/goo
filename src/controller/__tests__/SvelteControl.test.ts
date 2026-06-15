@@ -1,7 +1,7 @@
 import { tick } from 'svelte'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { createSvelteControlHost } from '../SvelteControl.svelte.ts'
+import { createSvelteControlHost } from '../svelteControl.svelte.ts'
 import { reactiveControlTracker } from './_reactiveControlTracker.ts'
 import ReactiveControl from './ReactiveControl.svelte'
 

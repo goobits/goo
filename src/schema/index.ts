@@ -22,8 +22,8 @@ export type {
 	GooSchemaResetEvent,
 	GooSchemaResetEventDetail,
 	GooSchemaType,
-	GooSchemaUpdateOptions } from './GooSchema.ts'
+	GooSchemaUpdateOptions } from './gooSchema.ts'
 export {
 	createGooSchema,
 	schemaHasConditions
-} from './GooSchema.ts'
+} from './gooSchema.ts'

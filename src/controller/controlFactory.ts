@@ -12,7 +12,7 @@ import {
 	type GooSvelteControlModule,
 	resolveGooControlTypeConfig
 } from './controlRegistry.ts'
-import { createSvelteControlHost, type SvelteControlHost } from './SvelteControl.svelte.ts'
+import { createSvelteControlHost, type SvelteControlHost } from './svelteControl.svelte.ts'
 
 // ============================================================================
 // Types

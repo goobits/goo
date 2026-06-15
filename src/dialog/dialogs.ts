@@ -3,7 +3,7 @@
  * @module goobits/dialog/dialogs
  */
 
-import { createGooDialog, type DialogField, type DialogLabels, type DialogResult, type DialogVerifyHandler, type GooDialogDefaultFocus, type GooDialogInstance } from './dialog.ts'
+import { createGooDialog, type DialogField, type DialogLabels, type DialogResult, type DialogVerifyHandler, type GooDialogDefaultFocus, type GooDialogInstance } from './GooDialogControllerRuntime.ts'
 
 /** Task returned by dialog convenience helpers. */
 export type GooDialogTask = {

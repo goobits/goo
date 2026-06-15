@@ -116,8 +116,6 @@ export function appendContent($target: HTMLElement, content: string | HTMLElemen
 		$target.appendChild(content)
 	} else if (content instanceof Node) {
 		$target.appendChild(content)
-	} else {
-		console.warn('[GooDialog] Unexpected content type:', typeof content, content)
 	}
 }
 

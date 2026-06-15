@@ -1,4 +1,4 @@
-export { createRangeModuleField } from './GooRangeModule.ts'
+export { createRangeModuleField } from './gooRangeModule.ts'
 export type {
 	GooRangeModuleElement,
 	GooRangeModuleEventData,

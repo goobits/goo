@@ -30,4 +30,4 @@ export type {
 export {
 	createGooController
 } from './GooController.ts'
-export type { SvelteControlSchema } from './SvelteControl.svelte.ts'
+export type { SvelteControlSchema } from './svelteControl.svelte.ts'

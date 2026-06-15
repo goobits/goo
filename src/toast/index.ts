@@ -14,8 +14,8 @@ export {
 	createGooProgressToast,
 	type GooProgressToastHandle,
 	type GooProgressToastOptions
-} from './progress-toast.ts'
-export { toast } from './toast-service.svelte.ts'
+} from './progressToast.ts'
+export { toast } from './ToastStore.svelte.ts'
 export type {
 	GooToasterProps,
 	GooToastProps,

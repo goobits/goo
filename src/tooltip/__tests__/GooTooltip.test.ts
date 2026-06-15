@@ -3,8 +3,7 @@ import { tick } from 'svelte'
 import { afterEach, describe, expect, it } from 'vitest'
 
 import GooTooltip from '../GooTooltip.svelte'
-import type { GooTooltipInstance } from '../index.ts'
-import { createGooTooltip, gooTooltipRuntime, tooltip } from '../index.ts'
+import { createGooTooltip, gooTooltipRuntime, tooltip, type GooTooltipInstance } from '../index.ts'
 
 describe('GooTooltip', () => {
 	afterEach(() => {

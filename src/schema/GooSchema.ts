@@ -7,7 +7,7 @@ import './GooSchema.css'
 
 import { type GooSvelteControlModule, resolveGooControlTypeConfig } from '../controller/controlRegistry.ts'
 import { createGooController } from '../controller/GooController.ts'
-import { createSvelteControlHost } from '../controller/SvelteControl.svelte.ts'
+import { createSvelteControlHost } from '../controller/svelteControl.svelte.ts'
 import { createFolder, type GooFolderElement } from '../folder/_createFolder.ts'
 import { createPanel } from '../panel/_createPanel.ts'
 import { schemaLog as log } from '../support/utils/logger.ts'

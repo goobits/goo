@@ -1,5 +1,5 @@
 <script module lang="ts">
-import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.ts'
+import type { SvelteControlSchema } from '../controller/svelteControl.svelte.ts'
 
 /** GooController binding metadata for the Svelte angle input component. */
 export const controlSchema: SvelteControlSchema = {

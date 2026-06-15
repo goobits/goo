@@ -1,5 +1,5 @@
 import type { GooSelectActionContext, GooSelectOpenOptions, GooSelectOptionsInput } from '../select/index.ts'
-import { createGooContextMenu, type GooContextMenuElement, type GooContextMenuOption } from './GooContextMenu.ts'
+import { createGooContextMenu, type GooContextMenuElement, type GooContextMenuOption } from './gooContextMenu.ts'
 
 export type ManagedGooContextMenuOpenAt = HTMLElement | { x: number; y: number }
 export type ManagedGooContextMenuItems = ManagedGooContextMenuItem[] | Record<string, ManagedGooContextMenuObjectItem | string | number>

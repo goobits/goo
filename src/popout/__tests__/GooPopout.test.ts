@@ -3,8 +3,7 @@ import { tick } from 'svelte'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import GooPopout from '../GooPopout.svelte'
-import type { GooPopoutInstance } from '../index.ts'
-import { createGooPopout } from '../index.ts'
+import { createGooPopout, type GooPopoutInstance } from '../index.ts'
 
 describe('GooPopout', () => {
 	afterEach(() => {

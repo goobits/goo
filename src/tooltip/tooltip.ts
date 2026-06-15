@@ -30,8 +30,7 @@
 
 import './GooTooltip.css'
 
-import type { GooPopoutAt } from '../popout/index.ts'
-import { createGooPopout } from '../popout/index.ts'
+import { createGooPopout, type GooPopoutAt } from '../popout/index.ts'
 
 /** Infer popout instance type from factory return */
 type GooPopoutInstance = ReturnType<typeof createGooPopout>

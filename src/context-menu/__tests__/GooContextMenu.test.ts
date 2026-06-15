@@ -1,8 +1,8 @@
 import { tick } from 'svelte'
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { createGooContextMenu } from '../GooContextMenu.ts'
-import { GooContextMenu } from '../managed-context-menu.ts'
+import { createGooContextMenu } from '../gooContextMenu.ts'
+import { GooContextMenu } from '../managedContextMenu.ts'
 
 describe('createGooContextMenu', () => {
 	afterEach(() => {

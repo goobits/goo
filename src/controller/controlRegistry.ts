@@ -27,7 +27,7 @@ import * as inputModule from '../input/GooInput.svelte'
 import * as numberModule from '../input/GooNumber.svelte'
 import { createRadioGroupField } from '../radio/_createRadioGroupField.ts'
 import * as radioModule from '../radio/GooRadioGroup.svelte'
-import { createRangeModuleField } from '../range-module/GooRangeModule.ts'
+import { createRangeModuleField } from '../range-module/gooRangeModule.ts'
 import * as rangeModule from '../range-module/index.ts'
 import { createSelectField } from '../select/_createSelectField.ts'
 import * as selectModule from '../select/GooSelect.svelte'
@@ -36,7 +36,7 @@ import * as sliderModule from '../slider/GooSlider.svelte'
 import { createTextareaField } from '../textarea/_createTextareaField.ts'
 import * as textareaModule from '../textarea/GooTextarea.svelte'
 import * as xyPadModule from '../xy-pad/GooXyPad.svelte'
-import type { SvelteControlSchema } from './SvelteControl.svelte.ts'
+import type { SvelteControlSchema } from './svelteControl.svelte.ts'
 
 /** Control module structure loaded for a Goo controller type. */
 export type GooControlModule = Record<string, unknown>

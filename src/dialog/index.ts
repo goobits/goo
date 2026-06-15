@@ -11,7 +11,7 @@ export {
 	type GooDialogDefaultFocus,
 	type GooDialogInstance,
 	type GooDialogOptions,
-	type GooDialogType } from './dialog.ts'
+	type GooDialogType } from './GooDialogControllerRuntime.ts'
 export { createGooDialogTextContent, createTrustedGooDialogContent } from './dialogContent.ts'
 export {
 	GooAlert,
