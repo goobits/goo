@@ -56,10 +56,10 @@ export function createFolder(options: GooFolderOptions = {}): GooFolderElement {
 		target,
 		props: {
 			...options,
-			onelement: nextElement => {
+			onelement: (nextElement: GooFolderElement | null) => {
 				element = nextElement
 			},
-			createFolder: childOptions => createFolder(childOptions)
+			createFolder: (childOptions: GooFolderOptions) => createFolder(childOptions)
 		}
 	})
 	flushSync()

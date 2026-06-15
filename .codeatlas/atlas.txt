@@ -1,0 +1,1516 @@
+
+  CodeAtlas
+══════════════════════════════════════════════════
+
+○ public  ◐ internal  ● private
+
+│ __tests__/_pointerEvents.ts
+├── ○ T TestPointerEventOptions
+│   ├── ○ pointerId
+│   ├── ○ pointerType
+│   ├── ○ clientX
+│   ├── ○ clientY
+│   ├── ○ button
+│   └── ○ buttons
+└── ○ f pointerEvent
+
+│ angle-input/GooAngleInput.svelte
+├── ○ c controlSchema
+├── ○ f setValue
+├── ○ f getValue
+├── ○ f focus
+└── ○ f blur
+
+│ angle-input/_createAngleInputField.ts
+└── ○ f createAngleInputField
+
+│ angle-input/types.ts
+├── ○ T GooAngleInputEventData
+    ├── ○ angleInput
+    ├── ○ value
+    ├── ○ state
+    └── ○ event
+
+│ blend-mode/createBlendModeField.ts
+└── ○ f createBlendModeField
+
+│ button-group/GooButtonGroup.svelte
+├── ○ c controlSchema
+├── ○ f setValue
+└── ○ f getValue
+
+│ button-group/_createButtonGroupField.ts
+└── ○ f createButtonGroupField
+
+│ button-group/_model.ts
+├── ○ f normalizeButtonGroupOptions
+├── ○ f normalizeButtonGroupValue
+└── ○ f readButtonGroupValue
+
+│ button-group/types.ts
+├── ○ T ButtonGroupOption
+│   ├── ○ value
+│   ├── ○ key
+│   ├── ○ id
+│   ├── ○ label
+│   ├── ○ icon
+│   ├── ○ tooltip
+│   ├── ○ ariaLabel
+│   ├── ○ hideLabel
+│   └── ○ className
+├── ○ T NormalizedButtonGroupOption
+    ├── ○ key
+    ├── ○ value
+    ├── ○ icon
+    ├── ○ tooltip
+    ├── ○ ariaLabel
+    ├── ○ hideLabel
+    └── ○ className
+
+│ checkbox/GooCheckbox.svelte
+└── ○ c controlSchema
+
+│ checkbox/_createCheckboxField.ts
+└── ○ f createCheckboxField
+
+│ color/GooColor.svelte
+├── ○ c controlSchema
+├── ○ f setValue
+├── ○ f getValue
+├── ○ f focus
+└── ○ f blur
+
+│ color/_createColorField.ts
+└── ○ f createColorField
+
+│ color/_cssColor.ts
+├── ○ f parseCssColorOrNull
+├── ○ f rgbToHex
+└── ○ f rgbaToCssHex
+
+│ color/types.ts
+├── ○ T GooColorEventData
+    ├── ○ color
+    ├── ○ value
+    ├── ○ state
+    └── ○ event
+
+│ context-menu/gooContextMenu.ts
+├── ○ T GooContextMenuOptions
+│   ├── ○ options
+│   ├── ○ enableKeyboard
+│   ├── ○ showSelectionIndicator
+│   ├── ○ menu
+│   ├── ○ className
+│   ├── ○ actionContext
+│   ├── ○ id
+│   ├── ○ selected
+│   ├── ○ value
+│   ├── ○ onopen
+│   └── ○ onclose
+└── ○ f createGooContextMenu
+
+│ context-menu/managedContextMenu.ts
+├── ○ T ManagedGooContextMenuOptions
+    ├── ○ at
+    ├── ○ actionContext
+    ├── ○ enableKeyboard
+    ├── ○ id
+    ├── ○ items
+    ├── ○ menu
+    ├── ○ onChange
+    ├── ○ onClose
+    ├── ○ onOpen
+    ├── ○ parentElement
+    ├── ○ selected
+    ├── ○ showPopoutArrow
+    ├── ○ showPopoutBackdrop
+    ├── ○ showSelectionIndicator
+    └── ○ value
+
+│ controller/GooController.svelte
+├── ○ f refresh
+├── ○ f getValue
+├── ○ f setValue
+├── ○ f disable
+└── ○ f enable
+
+│ controller/GooController.ts
+├── ○ T GooControllerState
+│   └── ○ disabled
+├── ○ T ControllerOption
+│   ├── ○ id
+│   ├── ○ value
+│   ├── ○ label
+│   ├── ○ icon
+│   └── ○ key
+├── ○ T GooControllerBinding
+│   ├── ○ object
+│   └── ○ property
+├── ○ T GooControllerChangeDetail
+│   ├── ○ value
+│   ├── ○ oldValue
+│   └── ○ target
+├── ○ T GooControllerInputDetail
+│   ├── ○ value
+│   └── ○ target
+├── ○ T GooControllerOptions
+│   ├── ○ object
+│   ├── ○ property
+│   ├── ○ min
+│   ├── ○ max
+│   ├── ○ step
+│   ├── ○ options
+│   ├── ○ type
+│   ├── ○ onchange
+│   ├── ○ oninput
+│   ├── ○ parentElement
+│   ├── ○ label
+│   ├── ○ inputId
+│   ├── ○ name
+│   ├── ○ unit
+│   ├── ○ preset
+│   ├── ○ presetColor
+│   ├── ○ presetHue
+│   ├── ○ menu
+│   ├── ○ shape
+│   ├── ○ coverage
+│   ├── ○ showCoverage
+│   ├── ○ disabled
+│   ├── ○ className
+│   ├── ○ controlOptions
+│   ├── ○ layout
+│   └── ○ controlTypes
+├── ○ T GooController
+│   ├── ○ getBinding
+│   ├── ○ getControlElement
+│   ├── ○ isDisabled
+│   ├── ○ name
+│   ├── ○ step
+│   ├── ○ min
+│   ├── ○ max
+│   ├── ○ listen
+│   ├── ○ stopListening
+│   ├── ○ refresh
+│   ├── ○ disable
+│   ├── ○ enable
+│   ├── ○ updateOptions
+│   ├── ○ setValue
+│   ├── ○ getValue
+│   ├── ○ addTo
+│   ├── ○ destroy
+│   ├── ○ on
+│   └── ○ off
+└── ○ f createGooController
+
+│ controller/controlFactory.ts
+├── ○ T ControlCreationOptions
+│   ├── ○ value
+│   ├── ○ controllerOptions
+│   ├── ○ onchange
+│   ├── ○ oninput
+│   ├── ○ buildOptions
+│   └── ○ controlTypes
+└── ○ f createControlFromRegistry
+
+│ controller/controlRegistry.ts
+├── ○ T GooControlOptions
+├── ○ T GooControlTypeConfigBase
+│   ├── ○ buildOptions
+│   ├── ○ createField
+│   ├── ○ svelte
+│   └── ○ layout
+├── ○ f defineSvelteControlType
+├── ○ f defineFactoryControlType
+└── ○ f resolveGooControlTypeConfig
+
+│ controller/controlSetup.ts
+├── ○ T ControlOption
+│   ├── ○ id
+│   ├── ○ value
+│   ├── ○ label
+│   ├── ○ icon
+│   └── ○ key
+├── ○ T ControllerSetupOptions
+│   ├── ○ type
+│   ├── ○ min
+│   ├── ○ max
+│   ├── ○ step
+│   ├── ○ options
+│   ├── ○ unit
+│   ├── ○ preset
+│   ├── ○ presetColor
+│   ├── ○ presetHue
+│   ├── ○ coverage
+│   ├── ○ showCoverage
+│   └── ○ label
+├── ○ T StoredOptions
+│   ├── ○ min
+│   ├── ○ max
+│   ├── ○ step
+│   ├── ○ selectOptions
+│   ├── ○ inputId
+│   ├── ○ name
+│   ├── ○ unit
+│   ├── ○ preset
+│   ├── ○ presetColor
+│   ├── ○ presetHue
+│   ├── ○ showCoverage
+│   ├── ○ buttonLabel
+│   ├── ○ controlOptions
+│   ├── ○ menu
+│   ├── ○ shape
+│   └── ○ layout
+├── ○ T DualRangeEventData
+│   ├── ○ index
+│   └── ○ value
+├── ○ f humanizePropertyName
+├── ○ f detectControlType
+├── ○ T FormattedSelectOption
+│   ├── ○ id
+│   └── ○ label
+├── ○ f formatSelectOptions
+├── ○ f buildControlOptions
+├── ○ f getAllOptions
+├── ○ T DualRangeOptions
+│   ├── ○ value
+│   ├── ○ min
+│   ├── ○ max
+│   ├── ○ step
+│   ├── ○ preset
+│   ├── ○ presetColor
+│   ├── ○ presetHue
+│   ├── ○ onchange
+│   └── ○ oninput
+├── ○ f buildDualRangeOptions
+├── ○ T DualRangeMinMax
+│   ├── ○ min
+│   └── ○ max
+└── ○ f handleDualRangeUpdate
+
+│ controller/svelteControl.svelte.ts
+├── ○ T SvelteControlSchema
+│   ├── ○ propMapping
+│   ├── ○ valueKey
+│   ├── ○ changeKey
+│   ├── ○ inputKey
+│   ├── ○ transformValue
+│   ├── ○ transformOutput
+│   └── ○ selfContained
+├── ○ T SvelteControlHostOptions
+│   ├── ○ component
+│   ├── ○ schema
+│   ├── ○ value
+│   ├── ○ options
+│   ├── ○ onchange
+│   ├── ○ oninput
+│   ├── ○ disabled
+│   ├── ○ object
+│   └── ○ property
+├── ○ T SvelteControlHost
+│   ├── ○ element
+│   ├── ○ create
+│   ├── ○ setValue
+│   ├── ○ setOptions
+│   ├── ○ getValue
+│   ├── ○ updateDisplay
+│   └── ○ destroy
+└── ○ f createSvelteControlHost
+
+│ data-grid/types.ts
+├── ○ T GooDataGridSortState
+│   ├── ○ key
+│   └── ○ direction
+├── ○ T GooDataGridHeaderSlot
+│   └── ○ column
+├── ○ T GooDataGridCellSlot
+│   ├── ○ column
+│   ├── ○ row
+│   └── ○ rowIndex
+├── ○ T GooDataGridColumn
+│   ├── ○ key
+│   ├── ○ label
+│   ├── ○ ariaLabel
+│   ├── ○ align
+│   ├── ○ width
+│   ├── ○ class
+│   ├── ○ sortable
+│   ├── ○ sortValue
+│   ├── ○ value
+│   ├── ○ format
+│   ├── ○ header
+│   └── ○ cell
+├── ○ T GooDataGridProps
+    ├── ○ rows
+    ├── ○ columns
+    ├── ○ ariaLabel
+    ├── ○ class
+    ├── ○ density
+    ├── ○ emptyLabel
+    ├── ○ loadingLabel
+    ├── ○ loading
+    ├── ○ sortable
+    ├── ○ defaultSort
+    ├── ○ sort
+    ├── ○ virtual
+    ├── ○ scrollRoot
+    ├── ○ rowHeight
+    ├── ○ overscanRows
+    ├── ○ getRowKey
+    ├── ○ onrowclick
+    ├── ○ onrowactivate
+    └── ○ onsortchange
+
+│ dialog/GooDialogControllerRuntime.ts
+├── ○ T GooDialogOptions
+│   ├── ○ type
+│   ├── ○ ariaLabel
+│   ├── ○ heading
+│   ├── ○ content
+│   ├── ○ labels
+│   ├── ○ fields
+│   ├── ○ verify
+│   ├── ○ showBackdrop
+│   ├── ○ showClose
+│   ├── ○ closeOnBackdrop
+│   ├── ○ closeOnEscape
+│   ├── ○ defaultFocus
+│   ├── ○ width
+│   ├── ○ height
+│   ├── ○ className
+│   ├── ○ autoDismiss
+│   ├── ○ onOk
+│   ├── ○ onCancel
+│   └── ○ onClose
+├── ○ T DialogResult
+│   ├── ○ ok
+│   ├── ○ cancel
+│   ├── ○ disregard
+│   ├── ○ applyToAll
+│   └── ○ values
+├── ○ T GooDialogState
+│   ├── ○ ariaLabel
+│   ├── ○ type
+│   ├── ○ heading
+│   ├── ○ showBackdrop
+│   ├── ○ showClose
+│   ├── ○ closeOnBackdrop
+│   ├── ○ closeOnEscape
+│   ├── ○ defaultFocus
+│   ├── ○ width
+│   ├── ○ height
+│   └── ○ autoDismiss
+├── ○ T GooDialogController
+│   ├── ○ element
+│   ├── ○ isOpen
+│   ├── ○ close
+│   ├── ○ open
+│   └── ○ setContent
+└── ○ f createGooDialog
+
+│ dialog/GooDialogManager.ts
+├── ○ T ManagedDialog
+    └── ○ close
+
+│ dialog/createGooField.ts
+├── ○ f createGooField
+└── ○ f createGooFields
+
+│ dialog/dialogBuilder.ts
+├── ○ T DialogLabels
+│   ├── ○ ok
+│   ├── ○ cancel
+│   ├── ○ disregard
+│   └── ○ applyToAll
+├── ○ T DialogState
+│   ├── ○ type
+│   ├── ○ heading
+│   └── ○ showClose
+├── ○ T DialogElements
+│   ├── ○ $header
+│   ├── ○ $title
+│   ├── ○ $content
+│   ├── ○ $fields
+│   ├── ○ $footer
+│   ├── ○ $okBtn
+│   ├── ○ $cancelBtn
+│   ├── ○ $disregardBtn
+│   ├── ○ $closeBtn
+│   ├── ○ $closeBadge
+│   └── ○ $applyToAll
+├── ○ T FooterElements
+│   ├── ○ $okBtn
+│   ├── ○ $cancelBtn
+│   ├── ○ $disregardBtn
+│   └── ○ $applyToAll
+├── ○ f createCloseIcon
+├── ○ f appendContent
+├── ○ f buildStandardLayout
+├── ○ f buildNotifyLayout
+├── ○ f buildOverlayLayout
+├── ○ f buildFields
+├── ○ f buildFooter
+└── ○ f createFocusTrapSentinels
+
+│ dialog/dialogContent.ts
+├── ○ f createGooDialogTextContent
+└── ○ f createTrustedGooDialogContent
+
+│ dialog/dialogs.ts
+├── ○ T GooAlertOptions
+│   ├── ○ className
+│   ├── ○ content
+│   ├── ○ heading
+│   └── ○ showClose
+├── ○ T GooConfirmOptions
+│   ├── ○ className
+│   ├── ○ content
+│   ├── ○ defaultFocus
+│   ├── ○ heading
+│   └── ○ labels
+├── ○ T GooPromptOptions
+│   ├── ○ className
+│   ├── ○ content
+│   ├── ○ defaultFocus
+│   ├── ○ fields
+│   ├── ○ heading
+│   ├── ○ labels
+│   └── ○ verify
+├── ○ T GooNotifyOptions
+│   ├── ○ autoDismiss
+│   ├── ○ className
+│   ├── ○ content
+│   └── ○ showClose
+├── ○ T GooOverlayOptions
+│   ├── ○ ariaLabel
+│   ├── ○ className
+│   ├── ○ content
+│   ├── ○ heading
+│   └── ○ showClose
+├── ○ f GooAlert
+├── ○ f GooConfirm
+├── ○ f GooPrompt
+├── ○ f GooNotify
+└── ○ f GooOverlay
+
+│ diff/compare.ts
+├── ○ T DiffResult
+│   ├── ○ diffs
+│   ├── ○ diffCount
+│   ├── ○ contentCount
+│   ├── ○ totalCount
+│   ├── ○ maxDiff
+│   ├── ○ matchPercent
+│   ├── ○ bounds
+│   ├── ○ width
+│   └── ○ height
+├── ○ T DiffOptions
+│   ├── ○ threshold
+│   └── ○ alphaThreshold
+└── ○ f compare
+
+│ diff/render.ts
+├── ○ f renderGradient
+└── ○ f renderBinary
+
+│ floating-window/floatingWindow.ts
+└── ○ f createGooFloatingWindow
+
+│ floating-window/types.ts
+├── ○ T GooFloatingWindowSettings
+│   ├── ○ bottom
+│   ├── ○ closeable
+│   ├── ○ display
+│   ├── ○ format
+│   ├── ○ hAlign
+│   ├── ○ index
+│   ├── ○ left
+│   ├── ○ right
+│   ├── ○ top
+│   └── ○ vAlign
+├── ○ T GooFloatingWindowStorage
+│   ├── ○ get
+│   └── ○ set
+├── ○ T GooFloatingWindowOptions
+│   ├── ○ containment
+│   ├── ○ element
+│   ├── ○ handle
+│   ├── ○ id
+│   ├── ○ onDrag
+│   ├── ○ position
+│   └── ○ storage
+├── ○ T GooFloatingWindow
+│   ├── ○ element
+│   ├── ○ ready
+│   ├── ○ destroy
+│   ├── ○ focus
+│   ├── ○ hide
+│   ├── ○ isOpen
+│   ├── ○ refresh
+│   ├── ○ setContainment
+│   ├── ○ setPosition
+│   ├── ○ show
+│   └── ○ toggle
+├── ○ T GooFloatingWindowRuntime
+    └── ○ hideFocused
+
+│ folder/_createFolder.ts
+├── ○ T GooFolderOptions
+│   ├── ○ title
+│   ├── ○ open
+│   ├── ○ tabIndex
+│   ├── ○ disabled
+│   ├── ○ class
+│   ├── ○ className
+│   ├── ○ style
+│   ├── ○ content
+│   ├── ○ onadd
+│   └── ○ onchange
+└── ○ f createFolder
+
+│ goobits-logger.d.ts
+├── ○ T Logger
+│   ├── ○ child
+│   ├── ○ debug
+│   ├── ○ error
+│   ├── ○ info
+│   └── ○ warn
+└── ○ f createLogger
+
+│ grid-popout/GridPopoutPicker.svelte
+├── ○ f getRootElement
+├── ○ f setValue
+└── ○ f close
+
+│ grid-popout/GridPopoutTrigger.svelte
+├── ○ f getRootElement
+├── ○ f setOpened
+└── ○ f setValue
+
+│ grid-popout/createGridPopoutTrigger.ts
+└── ○ f createGridPopoutTrigger
+
+│ grid-popout/gridPickerSelectedMark.ts
+└── ○ f createGridPickerSelectedMark
+
+│ grid-popout/types.ts
+├── ○ T GridPopoutSvgElement
+│   ├── ○ attributes
+│   └── ○ tag
+├── ○ T GridPopoutSvgIcon
+│   ├── ○ attributes
+│   ├── ○ class
+│   ├── ○ elements
+│   ├── ○ paths
+│   └── ○ viewBox
+├── ○ T GridPopoutPreview
+│   ├── ○ alt
+│   ├── ○ background
+│   ├── ○ badge
+│   ├── ○ fit
+│   ├── ○ hue
+│   ├── ○ size
+│   └── ○ src
+├── ○ T GridPopoutItem
+    ├── ○ ariaLabel
+    ├── ○ iconClass
+    ├── ○ iconSvg
+    ├── ○ id
+    ├── ○ kicker
+    ├── ○ preview
+    ├── ○ previewAlt
+    ├── ○ previewUrl
+    └── ○ title
+
+│ icon/index.ts
+├── ○ f renderIconPlaceholderHtml
+├── ○ f renderIconHtml
+└── ○ f renderIconPlaceholders
+
+│ icon/types.ts
+├── ○ T GooIconProps
+    ├── ○ value
+    ├── ○ size
+    ├── ○ disabled
+    ├── ○ class
+    ├── ○ style
+    └── ○ label
+
+│ input/GooInput.svelte
+├── ○ c controlSchema
+├── ○ f setValue
+├── ○ f getValue
+├── ○ f focus
+├── ○ f blur
+└── ○ f select
+
+│ input/GooNumber.svelte
+├── ○ c controlSchema
+├── ○ f setValue
+├── ○ f getValue
+├── ○ f focus
+├── ○ f blur
+└── ○ f select
+
+│ input/_createInputField.ts
+├── ○ f createInputField
+└── ○ f createNumberField
+
+│ label/types.ts
+├── ○ T GooLabelProps
+    ├── ○ for
+    ├── ○ required
+    ├── ○ disabled
+    ├── ○ class
+    ├── ○ style
+    └── ○ children
+
+│ panel/_createPanel.ts
+├── ○ T GooPanelOptions
+│   ├── ○ title
+│   ├── ○ open
+│   ├── ○ closed
+│   ├── ○ draggable
+│   ├── ○ collapsible
+│   ├── ○ showHeader
+│   ├── ○ docked
+│   ├── ○ width
+│   ├── ○ position
+│   ├── ○ autoPlace
+│   ├── ○ class
+│   ├── ○ className
+│   ├── ○ style
+│   ├── ○ content
+│   ├── ○ parentElement
+│   └── ○ onchange
+└── ○ f createPanel
+
+│ popout/popout.ts
+├── ○ T GooPopoutManager
+│   ├── ○ closeAll
+│   ├── ○ closeOutside
+│   └── ○ getActive
+├── ○ T PopoutKeepWithin
+│   ├── ○ element
+│   ├── ○ margin
+│   └── ○ fullScreen
+├── ○ T GooPopoutAt
+│   ├── ○ element
+│   ├── ○ point
+│   ├── ○ x
+│   ├── ○ y
+│   ├── ○ align
+│   └── ○ offset
+├── ○ T GooPopoutOptions
+│   ├── ○ content
+│   ├── ○ parentElement
+│   ├── ○ ariaLabel
+│   ├── ○ role
+│   ├── ○ at
+│   ├── ○ align
+│   ├── ○ offset
+│   ├── ○ keepWithin
+│   ├── ○ className
+│   ├── ○ dataset
+│   ├── ○ attributes
+│   ├── ○ showArrow
+│   ├── ○ showBackdrop
+│   ├── ○ clickToClose
+│   ├── ○ escapeToClose
+│   ├── ○ dragToMove
+│   ├── ○ openImmediately
+│   ├── ○ rtl
+│   ├── ○ initialFocus
+│   ├── ○ fullScreen
+│   ├── ○ chromeless
+│   ├── ○ onOpen
+│   ├── ○ onClose
+│   ├── ○ onPosition
+│   └── ○ onDestroy
+├── ○ T GooPopoutPointerEvent
+│   ├── ○ originalEvent
+│   ├── ○ target
+│   ├── ○ clientX
+│   ├── ○ clientY
+│   ├── ○ isTouch
+│   ├── ○ preventDefault
+│   └── ○ stopPropagation
+├── ○ T GooPopoutInstance
+│   ├── ○ element
+│   ├── ○ contentElement
+│   ├── ○ arrowElement
+│   ├── ○ position
+│   ├── ○ isOpen
+│   ├── ○ open
+│   ├── ○ close
+│   ├── ○ toggle
+│   ├── ○ destroy
+│   ├── ○ reposition
+│   └── ○ updatePosition
+└── ○ f createGooPopout
+
+│ progress-ring/GooProgressRing.svelte
+├── ○ f configure
+├── ○ f setProgress
+├── ○ f setIndeterminate
+└── ○ f getCanvas
+
+│ progress-ring/_progressRingRenderer.ts
+├── ○ S ProgressRingRenderer
+│   ├── ○ connect
+│   ├── ○ disconnect
+│   ├── ○ canvas
+│   ├── ○ indeterminate
+│   ├── ○ indeterminate
+│   ├── ○ progress
+│   ├── ○ showText
+│   ├── ○ showText
+│   ├── ○ configure
+│   └── ○ setProgress
+└── ○ f clampProgress
+
+│ progress-ring/index.ts
+└── ○ f createGooProgressRingTimer
+
+│ radio/GooRadioGroup.svelte
+└── ○ c controlSchema
+
+│ radio/_createRadioGroupField.ts
+└── ○ f createRadioGroupField
+
+│ radio/_model.ts
+└── ○ f normalizeRadioOptions
+
+│ radio/types.ts
+├── ○ T GooRadioOption
+    ├── ○ value
+    └── ○ label
+
+│ range-module/gooRangeModule.ts
+└── ○ f createRangeModuleField
+
+│ schema/GooSchema.svelte
+├── ○ f setData
+├── ○ f getData
+├── ○ f setSchema
+├── ○ f getSchema
+├── ○ f getController
+├── ○ f refresh
+└── ○ f refreshConditions
+
+│ schema/fieldConditions.ts
+└── ○ f shouldRenderSchemaNode
+
+│ schema/fieldLayout.ts
+├── ○ f getControllerFieldLayout
+├── ○ f isSelfContainedField
+├── ○ f isFullBleedField
+└── ○ f normalizeFieldLayout
+
+│ schema/fieldValueFormat.ts
+└── ○ f applyFieldValueFormatOptions
+
+│ schema/gooSchema.ts
+├── ○ T GooSchemaEventDetail
+│   ├── ○ path
+│   ├── ○ value
+│   └── ○ data
+├── ○ T GooSchemaResetEventDetail
+│   ├── ○ data
+│   └── ○ defaults
+├── ○ T GooSchemaPresetEventDetail
+│   ├── ○ data
+│   ├── ○ id
+│   └── ○ preset
+├── ○ T GooSchema
+│   ├── ○ destroy
+│   ├── ○ getController
+│   ├── ○ getData
+│   ├── ○ getSchema
+│   ├── ○ refresh
+│   ├── ○ refreshConditions
+│   ├── ○ setData
+│   ├── ○ setOptions
+│   └── ○ setSchema
+├── ○ f schemaHasConditions
+└── ○ f createGooSchema
+
+│ schema/pathUtils.ts
+├── ○ f getByPath
+├── ○ f setByPath
+├── ○ f resolvePath
+└── ○ f pathToLabel
+
+│ schema/schemaFieldBuilder.ts
+├── ○ T NormalizedSelectOption
+│   ├── ○ id
+│   ├── ○ label
+│   └── ○ icon
+├── ○ T ControllerOptions
+│   ├── ○ object
+│   ├── ○ property
+│   ├── ○ label
+│   ├── ○ type
+│   ├── ○ controlTypes
+│   ├── ○ min
+│   ├── ○ max
+│   ├── ○ step
+│   ├── ○ coverage
+│   ├── ○ preset
+│   ├── ○ presetColor
+│   ├── ○ presetHue
+│   ├── ○ shape
+│   ├── ○ dual
+│   ├── ○ unit
+│   ├── ○ options
+│   ├── ○ layout
+│   └── ○ controlOptions
+├── ○ f detectFieldType
+├── ○ f normalizeSelectOptions
+└── ○ f buildControllerOptions
+
+│ schema/types.ts
+├── ○ T GooSchemaPreset
+│   ├── ○ id
+│   ├── ○ label
+│   └── ○ data
+├── ○ T GooSchemaField
+│   ├── ○ path
+│   ├── ○ type
+│   ├── ○ label
+│   ├── ○ min
+│   ├── ○ max
+│   ├── ○ step
+│   ├── ○ input
+│   ├── ○ canCross
+│   ├── ○ canPush
+│   ├── ○ dual
+│   ├── ○ xy
+│   ├── ○ coverage
+│   ├── ○ preset
+│   ├── ○ presetColor
+│   ├── ○ presetHue
+│   ├── ○ shape
+│   ├── ○ unit
+│   ├── ○ displayUnit
+│   ├── ○ format
+│   ├── ○ valueFormat
+│   ├── ○ showLabel
+│   ├── ○ fullWidth
+│   ├── ○ fullBleed
+│   ├── ○ ticks
+│   ├── ○ options
+│   ├── ○ modes
+│   ├── ○ ariaLabel
+│   ├── ○ class
+│   ├── ○ dataParam
+│   ├── ○ id
+│   ├── ○ items
+│   ├── ○ popoutClass
+│   ├── ○ tabIndex
+│   ├── ○ controlOptions
+│   ├── ○ if
+│   ├── ○ unless
+│   ├── ○ layout
+│   ├── ○ disabled
+│   └── ○ selfContained
+├── ○ T GooSchemaFolder
+│   ├── ○ type
+│   ├── ○ title
+│   ├── ○ className
+│   ├── ○ open
+│   ├── ○ children
+│   ├── ○ if
+│   └── ○ unless
+├── ○ T GooSchemaPanel
+│   ├── ○ type
+│   ├── ○ title
+│   ├── ○ docked
+│   ├── ○ width
+│   ├── ○ showHeader
+│   └── ○ children
+├── ○ T GooSchemaOptions
+│   ├── ○ schema
+│   ├── ○ data
+│   ├── ○ defaults
+│   ├── ○ presets
+│   ├── ○ activePresetId
+│   ├── ○ showReset
+│   ├── ○ onchange
+│   ├── ○ onreset
+│   ├── ○ onpreset
+│   ├── ○ bare
+│   ├── ○ showPanelHeader
+│   ├── ○ folderClassName
+│   └── ○ controlTypes
+├── ○ T GooSchemaState
+    ├── ○ disabled
+    ├── ○ schema
+    ├── ○ defaults
+    ├── ○ presets
+    ├── ○ activePresetId
+    ├── ○ showReset
+    ├── ○ bare
+    ├── ○ showPanelHeader
+    ├── ○ folderClassName
+    └── ○ controlTypes
+
+│ select/GooSelect.svelte
+├── ○ c controlSchema
+├── ○ f setValue
+├── ○ f getValue
+├── ○ f setOptions
+├── ○ f setTriggerIcon
+├── ○ f open
+├── ○ f close
+├── ○ f toggle
+├── ○ f enable
+├── ○ f disable
+├── ○ f focus
+└── ○ f blur
+
+│ select/_createSelectField.ts
+└── ○ f createSelectField
+
+│ select/_dropdownPanel.ts
+├── ○ T DropdownPanelContext
+│   ├── ○ showSelectionIndicator
+│   ├── ○ value
+│   ├── ○ getContext
+│   ├── ○ onSelect
+│   └── ○ onHoverChange
+├── ○ S DropdownPanel
+    ├── ○ updateContext
+    ├── ○ render
+    ├── ○ getNavigableOptions
+    ├── ○ setHovered
+    ├── ○ navigate
+    ├── ○ setSelectedVisual
+    ├── ○ animateSelection
+    ├── ○ openSubmenu
+    ├── ○ closeSubmenu
+    ├── ○ findOptionById
+    ├── ○ getHoveredElement
+    ├── ○ getOptionElementById
+    ├── ○ getOptionElementAtPoint
+    ├── ○ hoverOptionElement
+    ├── ○ selectOptionElement
+    ├── ○ handleTypeahead
+    ├── ○ resetTypeahead
+    └── ○ destroy
+
+│ select/_keyboardHandler.ts
+├── ○ T GooSelectKeyCommand
+│   ├── ○ command
+│   └── ○ cancel
+├── ○ f mapNativeKeyToCommand
+├── ○ f handleKeyboard
+└── ○ f handleTypeahead
+
+│ select/_normalizeOptions.ts
+├── ○ f labelToId
+├── ○ f normalizeOption
+└── ○ f normalizeOptions
+
+│ select/_selectMenu.ts
+├── ○ f normalizeSelectMenu
+├── ○ f getSelectMenuAlign
+├── ○ f getSelectMenuOffset
+├── ○ f getSelectMenuPopoutClass
+└── ○ f applySelectMenuWidth
+
+│ select/_submenuPopout.ts
+├── ○ S SubmenuPopoutController
+    ├── ○ isOpen
+    ├── ○ containsElement
+    ├── ○ open
+    └── ○ close
+
+│ select/selectDom.ts
+├── ○ f evaluate
+├── ○ f getElementTextDirection
+├── ○ f formatKey
+├── ○ f createShortcut
+└── ○ f createIcon
+
+│ select/types.ts
+├── ○ T GooSelectOption
+│   ├── ○ type
+│   ├── ○ label
+│   ├── ○ id
+│   ├── ○ icon
+│   ├── ○ shortcut
+│   ├── ○ isDisabled
+│   ├── ○ isSupported
+│   ├── ○ onChoose
+│   ├── ○ options
+│   └── ○ title
+├── ○ T GooSelectState
+│   ├── ○ value
+│   ├── ○ placeholder
+│   ├── ○ enableKeyboard
+│   ├── ○ showSelectionIndicator
+│   ├── ○ showHeader
+│   └── ○ disabled
+├── ○ T GooSelectEventData
+│   ├── ○ select
+│   ├── ○ value
+│   └── ○ oldValue
+├── ○ T GooSelectOpenOptions
+    ├── ○ autoFocus
+    ├── ○ at
+    ├── ○ clickToClose
+    ├── ○ keepWithin
+    ├── ○ parentElement
+    ├── ○ actionContext
+    ├── ○ align
+    └── ○ offset
+
+│ slider/GooSlider.svelte
+├── ○ c controlSchema
+├── ○ f setValue
+└── ○ f getValue
+
+│ slider/_createSliderField.ts
+└── ○ f createSliderField
+
+│ slider/sliderUtils.ts
+├── ○ T GooSliderThumb
+│   ├── ○ element
+│   ├── ○ index
+│   ├── ○ left
+│   └── ○ value
+├── ○ T GooSliderState
+│   ├── ○ min
+│   ├── ○ max
+│   ├── ○ step
+│   ├── ○ unit
+│   └── ○ direction
+├── ○ f parseFloatArray
+├── ○ f parseFloatOr
+├── ○ f buildGradientCSS
+├── ○ f toFormattedValue
+├── ○ f getTrackLength
+└── ○ f setThumbPosition
+
+│ slider/types.ts
+├── ○ T GooSliderEventData
+    ├── ○ slider
+    ├── ○ state
+    ├── ○ thumb
+    ├── ○ index
+    ├── ○ value
+    └── ○ event
+
+│ spinner/_spinnerAttrs.ts
+└── ○ f resolveSpinnerAttrs
+
+│ spinner/index.ts
+└── ○ f renderGooSpinnerHtml
+
+│ support/i18n/index.ts
+├── ○ T LocaleConfig
+│   ├── ○ rtl
+│   ├── ○ locale
+│   └── ○ translate
+├── ○ f setLocale
+├── ○ f isRTL
+├── ○ f getLocale
+├── ○ f translate
+└── ○ f onLocaleChange
+
+│ support/positioning/calculatePosition.ts
+├── ○ f calculatePosition
+├── ○ f applyPosition
+├── ○ f applyArrowPosition
+└── ○ f parseAlignment
+
+│ support/positioning/positionContainment.ts
+├── ○ T Rect
+│   ├── ○ x
+│   ├── ○ y
+│   ├── ○ width
+│   └── ○ height
+├── ○ T ContainmentConfig
+│   ├── ○ $element
+│   └── ○ margin
+├── ○ f getOppositeEdge
+└── ○ f applyContainment
+
+│ support/positioning/positionElementAt.ts
+└── ○ f positionElementAt
+
+│ support/positioning/types.ts
+├── ○ T AlignmentConfig
+│   ├── ○ edge
+│   ├── ○ position
+│   ├── ○ toEdge
+│   └── ○ toPosition
+├── ○ T PositionOptions
+│   ├── ○ element
+│   ├── ○ x
+│   ├── ○ y
+│   ├── ○ align
+│   ├── ○ offset
+│   ├── ○ keepWithin
+│   └── ○ rtl
+├── ○ T PositionResult
+│   ├── ○ x
+│   ├── ○ y
+│   ├── ○ direction
+│   ├── ○ flippedX
+│   ├── ○ flippedY
+│   ├── ○ maxWidth
+│   ├── ○ maxHeight
+│   ├── ○ arrowPosition
+│   └── ○ arrowOffset
+├── ○ T PositionElementAtOptions
+    ├── ○ at
+    ├── ○ align
+    ├── ○ offset
+    ├── ○ keepWithin
+    ├── ○ $arrow
+    └── ○ rtl
+
+│ support/utils/MyComponent.ts
+├── ○ T Emitter
+│   ├── ○ on
+│   ├── ○ off
+│   └── ○ emit
+├── ○ f createEmitter
+└── ○ f emitter
+
+│ support/utils/_childContainer.ts
+├── ○ T ChildContainerHost
+│   ├── ○ contentElement
+│   ├── ○ _folders
+│   ├── ○ _controllers
+│   └── ○ _pendingChildren
+├── ○ f trackChild
+├── ○ f addChild
+├── ○ f removeChild
+├── ○ f clearChildren
+├── ○ f hydrateChildren
+└── ○ f resetChildren
+
+│ support/utils/focusUtils.ts
+├── ○ f getFocusableElements
+├── ○ f focusFirst
+├── ○ f focusLast
+└── ○ f createFocusTrapSentinels
+
+│ support/utils/formatNumber.ts
+├── ○ T FormatNumberOptions
+│   ├── ○ max
+│   ├── ○ min
+│   ├── ○ step
+│   └── ○ appendFormatSuffix
+└── ○ f formatNumber
+
+│ support/utils/numberUtils.ts
+├── ○ f toPercent
+└── ○ f fromPercent
+
+│ support/utils/pointerDrag.ts
+├── ○ T GooPoint
+│   ├── ○ x
+│   └── ○ y
+├── ○ T GooPointerTargetEvent
+│   ├── ○ originalEvent
+│   ├── ○ target
+│   ├── ○ clientX
+│   ├── ○ clientY
+│   ├── ○ pointerId
+│   ├── ○ pointerType
+│   ├── ○ isTouch
+│   ├── ○ point
+│   ├── ○ asClientXY
+│   ├── ○ elementFromPoint
+│   ├── ○ elementFromPoint
+│   ├── ○ preventDefault
+│   └── ○ stopPropagation
+├── ○ T GooPointerDragEvent
+│   ├── ○ state
+│   ├── ○ START
+│   ├── ○ DOWN
+│   ├── ○ CHANGE
+│   ├── ○ END
+│   ├── ○ CANCEL
+│   ├── ○ startClientX
+│   ├── ○ startClientY
+│   ├── ○ start
+│   ├── ○ x
+│   ├── ○ y
+│   ├── ○ elementX
+│   ├── ○ elementY
+│   ├── ○ env
+│   ├── ○ delta
+│   └── ○ hasMoved
+├── ○ T GooPointerTapEvent
+├── ○ T GooPointerDragOptions
+│   └── ○ ignoreTouch
+├── ○ T GooPointerTapOptions
+│   └── ○ threshold
+├── ○ T GooPointerDragHandle
+│   └── ○ detach
+├── ○ f createPointerDrag
+└── ○ f createPointerTap
+
+│ textarea/GooTextarea.svelte
+├── ○ c controlSchema
+├── ○ f setValue
+├── ○ f getValue
+├── ○ f focus
+├── ○ f blur
+└── ○ f select
+
+│ textarea/_createTextareaField.ts
+└── ○ f createTextareaField
+
+│ toast/ToastStore.svelte.ts
+└── ○ f _resetToastStoreForTests
+
+│ toast/imperative.ts
+├── ○ T GooToastHandle
+│   ├── ○ id
+│   ├── ○ close
+│   └── ○ setMessage
+├── ○ f ensureGooToaster
+├── ○ f destroyGooToaster
+├── ○ f showGooToast
+├── ○ f showGooToastSuccess
+├── ○ f showGooToastWarning
+└── ○ f showGooToastError
+
+│ toast/progressToast.ts
+├── ○ T GooProgressToastOptions
+│   ├── ○ cancelButton
+│   ├── ○ closeDelay
+│   ├── ○ dataset
+│   └── ○ messages
+└── ○ f createGooProgressToast
+
+│ toolbar/FloatingToolbarView.svelte
+└── ○ f getRootElement
+
+│ toolbar/ToolbarToolButton.svelte
+└── ○ f getRootElement
+
+│ toolbar/createFloatingToolbarView.ts
+└── ○ f createFloatingToolbarView
+
+│ toolbar/createToolbarToolButton.ts
+└── ○ f createToolbarToolButton
+
+│ toolbar/mountFunctionIcon.ts
+└── ○ f mountFunctionIcon
+
+│ toolbar/toolbarChromeModel.ts
+└── ○ f readFloatingToolbarGroups
+
+│ toolbar/toolbarLayoutModel.ts
+├── ○ f toToolbarButtonLayout
+├── ○ f isToolbarHorizontalPosition
+├── ○ f getToolbarLayoutSignature
+└── ○ f chooseToolbarLayout
+
+│ tooltip/imperative.ts
+├── ○ T GooTooltipRuntimeOptions
+│   ├── ○ autoHide
+│   ├── ○ className
+│   ├── ○ direction
+│   ├── ○ element
+│   ├── ○ event
+│   ├── ○ interactive
+│   ├── ○ offset
+│   ├── ○ position
+│   ├── ○ showDelay
+│   ├── ○ showOnClick
+│   └── ○ showOnHover
+├── ○ T GooTooltipRuntimeHandle
+│   ├── ○ element
+│   ├── ○ destroy
+│   ├── ○ hide
+│   └── ○ show
+├── ○ T GooTooltipRuntimeApi
+    ├── ○ attach
+    ├── ○ destroy
+    ├── ○ enabled
+    ├── ○ hide
+    ├── ○ ping
+    └── ○ show
+
+│ tooltip/tooltip.ts
+├── ○ T GooTooltipOptions
+│   ├── ○ for
+│   ├── ○ content
+│   ├── ○ contentElement
+│   ├── ○ align
+│   ├── ○ offset
+│   ├── ○ showDelay
+│   ├── ○ hideDelay
+│   ├── ○ trigger
+│   ├── ○ arrow
+│   ├── ○ interactive
+│   ├── ○ onshow
+│   ├── ○ onhide
+│   └── ○ className
+├── ○ T GooTooltipInstance
+│   ├── ○ element
+│   ├── ○ visible
+│   ├── ○ show
+│   ├── ○ hide
+│   ├── ○ destroy
+│   ├── ○ setContent
+│   └── ○ updatePosition
+├── ○ f createGooTooltip
+└── ○ f tooltip
+
+│ turnstile/_scriptLoader.ts
+├── ○ f ensureTurnstileScript
+└── ○ f _resetTurnstileLoaderForTests
+
+│ virtualGrid/gridKeyboard.ts
+├── ○ f isGridArrowKey
+└── ○ f nextGridIndex
+
+│ virtualGrid/gridMarquee.ts
+├── ○ T RectXYWH
+│   ├── ○ x
+│   ├── ○ y
+│   ├── ○ width
+│   └── ○ height
+├── ○ T GridMarqueeOptions
+│   ├── ○ getInitialSelection
+│   ├── ○ apply
+│   ├── ○ itemSelector
+│   ├── ○ keyAttribute
+│   └── ○ overlayClass
+├── ○ f rectIntersects
+└── ○ f gridMarquee
+
+│ virtualGrid/gridSelection.ts
+├── ○ T GridSelectionState
+│   ├── ○ selection
+│   └── ○ lastClicked
+├── ○ T GridClickModifiers
+│   ├── ○ shift
+│   └── ○ meta
+├── ○ f nextGridClickSelection
+├── ○ f nextGridMarqueeSelection
+└── ○ f sameGridSelection
+
+│ virtualGrid/itemAdapter.ts
+├── ○ f getGridItem
+├── ○ f getGridItemElement
+├── ○ f getSelectedGridItem
+├── ○ f setGridItemSelected
+├── ○ f getGridColumns
+├── ○ f getGridRowHeight
+├── ○ f scrollToGridItem
+└── ○ f getVisibleGridIndexes
+
+│ virtualGrid/types.ts
+├── ○ T VirtualGridWindow
+│   ├── ○ startSlot
+│   ├── ○ endSlot
+│   ├── ○ topRows
+│   └── ○ bottomRows
+├── ○ T VirtualGridSlot
+│   ├── ○ slot
+│   ├── ○ item
+│   ├── ○ leading
+│   └── ○ deferContent
+├── ○ T VirtualGridProps
+    ├── ○ items
+    ├── ○ scrollRoot
+    ├── ○ includeLeadingSlot
+    ├── ○ className
+    ├── ○ role
+    ├── ○ ariaLabel
+    ├── ○ ariaRowCount
+    ├── ○ ariaMultiselectable
+    ├── ○ tileSelector
+    ├── ○ overscanRows
+    ├── ○ mobileOverscanRows
+    ├── ○ defaultTileHeight
+    ├── ○ defaultRowGap
+    ├── ○ deferContentSettleMs
+    ├── ○ onvirtualnavigate
+    ├── ○ onclick
+    ├── ○ onkeydown
+    ├── ○ oncontextmenu
+    ├── ○ ondblclick
+    └── ○ children
+
+│ virtualGrid/virtualWindow.ts
+├── ○ T VirtualGridWindowOptions
+│   ├── ○ columns
+│   ├── ○ itemsTop
+│   ├── ○ overscanRows
+│   ├── ○ rowGap
+│   ├── ○ tileHeight
+│   ├── ○ totalItems
+│   ├── ○ viewportHeight
+│   ├── ○ scrollTop
+│   └── ○ virtual
+├── ○ f calculateVirtualGridWindow
+├── ○ f virtualGridWindowsEqual
+└── ○ f virtualGridSpacerHeight
+
+│ vortex/GooVortex.svelte
+├── ○ f setMessage
+├── ○ f positionAt
+├── ○ f enter
+└── ○ f exit
+
+│ vortex/index.ts
+└── ○ f createGooVortex
+
+│ xy-pad/GooXyPad.svelte
+├── ○ c controlSchema
+├── ○ f setValue
+├── ○ f getValue
+├── ○ f focus
+└── ○ f blur
+
+│ xy-pad/types.ts
+├── ○ T GooXyPadValue
+│   ├── ○ x
+│   └── ○ y
+├── ○ T GooXyPadEventData
+│   ├── ○ element
+│   ├── ○ event
+│   ├── ○ state
+│   └── ○ value
+├── ○ T GooXyPadProps
+    ├── ○ value
+    ├── ○ min
+    ├── ○ max
+    ├── ○ step
+    ├── ○ unit
+    ├── ○ label
+    ├── ○ name
+    ├── ○ id
+    ├── ○ title
+    ├── ○ ariaLabel
+    ├── ○ disabled
+    ├── ○ class
+    ├── ○ style
+    ├── ○ tabIndex
+    ├── ○ snap
+    ├── ○ showInputs
+    ├── ○ resettable
+    ├── ○ element
+    ├── ○ onchange
+    ├── ○ oninput
+    └── ○ children
+
+──────────────────────────────────────────────────
+
+✓ 251 files scanned
+  → 116 with public exports
+  → 383 public symbols
+  → 84 dependencies tracked
+
+Tip: Use 'codeatlas map' for visual dependency diagram

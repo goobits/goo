@@ -66,7 +66,7 @@ export function createSelectField(options: SelectFieldOptions = {}): GooSelectEl
 				id: options.id,
 				class: options.class ?? options.className,
 				style: options.style,
-				onchange: (value, data) => {
+				onchange: (value: string, data: GooSelectEventData) => {
 					currentValue = value
 					options.onchange?.(value, data)
 				},
@@ -90,25 +90,41 @@ export function createSelectField(options: SelectFieldOptions = {}): GooSelectEl
 
 	field.setValue = (value, { silent = false } = {}) => {
 		currentValue = value
-		;(component().setValue as ((value: string, opts?: { silent?: boolean }) => void) | undefined)?.(value, { silent })
+		;(component().setValue as ((value: string, opts?: { silent?: boolean }) => void) | undefined)?.(
+			value,
+			{ silent }
+		)
 	}
 	field.getValue = () => currentValue
 	field.isOpen = () => (component().isOpen as (() => boolean) | undefined)?.() ?? false
-	field.getHoveredOptionId = () => (component().getHoveredOptionId as (() => string | null) | undefined)?.() ?? null
-	field.getOptions = () => (component().getOptions as (() => GooSelectOption[]) | undefined)?.() ?? normalizeOptions(options.options)
-	field.setOptions = nextOptions => {
+	field.getHoveredOptionId = () =>
+		(component().getHoveredOptionId as (() => string | null) | undefined)?.() ?? null
+	field.getOptions = () =>
+		(component().getOptions as (() => GooSelectOption[]) | undefined)?.() ??
+		normalizeOptions(options.options)
+	field.setOptions = (nextOptions) => {
 		options.options = nextOptions
-		;(component().setOptions as ((nextOptions: typeof options.options) => void) | undefined)?.(nextOptions)
+		;(component().setOptions as ((nextOptions: typeof options.options) => void) | undefined)?.(
+			nextOptions
+		)
 	}
-	field.setTriggerIcon = icon => {
+	field.setTriggerIcon = (icon) => {
 		options.triggerIcon = icon ?? undefined
-		;(component().setTriggerIcon as ((icon: typeof options.triggerIcon | null) => void) | undefined)?.(icon)
+		;(
+			component().setTriggerIcon as ((icon: typeof options.triggerIcon | null) => void) | undefined
+		)?.(icon)
 	}
 	field.open = (openOptions?: GooSelectOpenOptions) => {
-		return (component().open as ((openOptions?: GooSelectOpenOptions) => boolean) | undefined)?.(openOptions) ?? false
+		return (
+			(component().open as ((openOptions?: GooSelectOpenOptions) => boolean) | undefined)?.(
+				openOptions
+			) ?? false
+		)
 	}
 	field.close = (closeOptions = {}) => {
-		;(component().close as ((closeOptions?: { quiet?: boolean }) => void) | undefined)?.(closeOptions)
+		;(component().close as ((closeOptions?: { quiet?: boolean }) => void) | undefined)?.(
+			closeOptions
+		)
 	}
 	field.toggle = () => {
 		;(component().toggle as (() => void) | undefined)?.()

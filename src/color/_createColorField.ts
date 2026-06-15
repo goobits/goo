@@ -51,11 +51,11 @@ export function createColorField(options: ColorFieldOptions = {}): ColorFieldEle
 				class: options.class ?? options.className,
 				style: options.style,
 				tabIndex: options.tabIndex,
-				oninput: (value, data) => {
+				oninput: (value: string, data: GooColorEventData) => {
 					currentValue = value
 					options.oninput?.(data)
 				},
-				onchange: (value, data) => {
+				onchange: (value: string, data: GooColorEventData) => {
 					currentValue = value
 					options.onchange?.(data)
 				}
@@ -71,7 +71,7 @@ export function createColorField(options: ColorFieldOptions = {}): ColorFieldEle
 		}
 	})
 	field.getValue = () => currentValue
-	field.setValue = value => {
+	field.setValue = (value) => {
 		currentValue = value
 		render()
 	}

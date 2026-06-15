@@ -84,11 +84,11 @@ export function createSliderField(options: SliderFieldOptions = {}): SliderField
 				class: options.class ?? options.className,
 				style: options.style,
 				tabIndex: options.tabIndex,
-				oninput: (value, data) => {
+				oninput: (value: GooSliderValue, data: GooSliderEventData) => {
 					currentValue = value
 					options.oninput?.(data)
 				},
-				onchange: (value, data) => {
+				onchange: (value: GooSliderValue, data: GooSliderEventData) => {
 					currentValue = value
 					options.onchange?.(data)
 				}
@@ -104,7 +104,7 @@ export function createSliderField(options: SliderFieldOptions = {}): SliderField
 		}
 	})
 	field.getValue = () => currentValue as number | number[]
-	field.setValue = value => {
+	field.setValue = (value) => {
 		currentValue = value
 		render()
 	}

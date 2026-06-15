@@ -3,6 +3,8 @@ import { mount, unmount } from 'svelte'
 import GooButtonGroup from './GooButtonGroup.svelte'
 import type { ButtonGroupOptions, GooButtonGroupLayout } from './types.ts'
 
+type ButtonGroupValue = string | string[] | null
+
 export type ButtonGroupFieldOptions = {
 	allowMultiple?: boolean
 	allowToggle?: boolean
@@ -10,23 +12,25 @@ export type ButtonGroupFieldOptions = {
 	className?: string
 	disabled?: boolean
 	layout?: GooButtonGroupLayout
-	onchange?: (value: string | string[] | null) => void
+	onchange?: (value: ButtonGroupValue) => void
 	options?: ButtonGroupOptions
 	size?: string
 	style?: string
 	tabIndex?: number
-	value?: string | string[] | null
+	value?: ButtonGroupValue
 }
 
 type MountedButtonGroup = ReturnType<typeof mount>
 
 export type ButtonGroupFieldElement = HTMLDivElement & {
-	getValue(): string | string[] | null
-	setValue(value: string | string[] | null): void
-	value: string | string[] | null
+	getValue(): ButtonGroupValue
+	setValue(value: ButtonGroupValue): void
+	value: ButtonGroupValue
 }
 
-export function createButtonGroupField(options: ButtonGroupFieldOptions = {}): ButtonGroupFieldElement {
+export function createButtonGroupField(
+	options: ButtonGroupFieldOptions = {}
+): ButtonGroupFieldElement {
 	const field = document.createElement('div') as ButtonGroupFieldElement
 	field.className = 'goo-button-group-field'
 
@@ -53,7 +57,7 @@ export function createButtonGroupField(options: ButtonGroupFieldOptions = {}): B
 				style: options.style,
 				tabIndex: options.tabIndex,
 				class: options.class ?? options.className,
-				onchange: value => {
+				onchange: (value: ButtonGroupValue) => {
 					selectedValue = value
 					options.onchange?.(value)
 				}
@@ -65,13 +69,13 @@ export function createButtonGroupField(options: ButtonGroupFieldOptions = {}): B
 		value: {
 			configurable: true,
 			get: () => selectedValue,
-			set: (value: string | string[] | null) => {
+			set: (value: ButtonGroupValue) => {
 				field.setValue(value)
 			}
 		}
 	})
 	field.getValue = () => selectedValue
-	field.setValue = value => {
+	field.setValue = (value) => {
 		selectedValue = value
 		render()
 	}

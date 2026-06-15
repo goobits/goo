@@ -61,11 +61,11 @@ export function createTextareaField(options: TextareaFieldOptions = {}): Textare
 				style: options.style,
 				tabIndex: options.tabIndex,
 				title: options.title,
-				oninput: (value, oldValue) => {
+				oninput: (value: string, oldValue?: string) => {
 					currentValue = value
 					options.oninput?.(value, oldValue)
 				},
-				onchange: (value, oldValue) => {
+				onchange: (value: string, oldValue?: string) => {
 					currentValue = value
 					options.onchange?.(value, oldValue)
 				}
@@ -81,7 +81,7 @@ export function createTextareaField(options: TextareaFieldOptions = {}): Textare
 		}
 	})
 	field.getValue = () => currentValue
-	field.setValue = value => {
+	field.setValue = (value) => {
 		currentValue = String(value)
 		render()
 	}
