@@ -14,6 +14,8 @@
 	--goo-slider-thumb-shadow-active:
 		0 0 0 3px var(--goo-slider-thumb-border), 0 6px 16px rgba(0, 0, 0, 0.32);
 	--goo-slider-coverage-bg: var(--goo-theme-selected, var(--goo-theme-accent, rgba(59, 130, 246, 0.4)));
+	--goo-slider-variance-coverage-edge-bg: color-mix(in srgb, var(--goo-slider-coverage-bg) 28%, transparent);
+	--goo-slider-variance-coverage-base-bg: color-mix(in srgb, var(--goo-slider-coverage-bg) 88%, var(--goo-theme-fg, #fff) 12%);
 	--goo-slider-value-pct: 0%;
 	--goo-slider-track-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
 	--goo-slider-track-shadow-hover:
@@ -183,6 +185,24 @@
 		bottom var(--goo-slider-motion-normal),
 		width var(--goo-slider-motion-normal),
 		height var(--goo-slider-motion-normal);
+}
+
+.goo-slider.goo-slider--variance .goo-slider__coverage {
+	background: linear-gradient(
+		to right,
+		var(--goo-slider-variance-coverage-edge-bg) 0%,
+		var(--goo-slider-variance-coverage-base-bg) 50%,
+		var(--goo-slider-variance-coverage-edge-bg) 100%
+	);
+}
+
+.goo-slider.goo-slider--variance.goo-slider--vertical .goo-slider__coverage {
+	background: linear-gradient(
+		to top,
+		var(--goo-slider-variance-coverage-edge-bg) 0%,
+		var(--goo-slider-variance-coverage-base-bg) 50%,
+		var(--goo-slider-variance-coverage-edge-bg) 100%
+	);
 }
 
 /* Labeled mode - header with label and number input */

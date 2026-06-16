@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+
 import { fireEvent, render } from '@testing-library/svelte'
 import { tick } from 'svelte'
 import { describe, expect, it, vi } from 'vitest'
@@ -5,6 +7,8 @@ import { describe, expect, it, vi } from 'vitest'
 import { pointerEvent } from '../../__tests__/_pointerEvents.ts'
 import GooSlider from '../GooSlider.svelte'
 import type { GooSliderElement } from '../types.ts'
+
+const sliderCss = readFileSync('src/slider/GooSlider.css', 'utf8')
 
 describe('GooSlider', () => {
 	it('renders a native slider surface without custom element tags', () => {
@@ -232,6 +236,13 @@ describe('GooSlider', () => {
 		expect(thumbs[0]?.dataset.role).toBe('variance')
 		expect(thumbs[1]?.dataset.role).toBe('base')
 		expect(thumbs[2]?.dataset.role).toBe('variance')
+	})
+
+	it('styles variance coverage as a mirrored gradient in both directions', () => {
+		expect(sliderCss).toContain('.goo-slider.goo-slider--variance .goo-slider__coverage')
+		expect(sliderCss).toContain('linear-gradient(\n\t\tto right')
+		expect(sliderCss).toContain('.goo-slider.goo-slider--variance.goo-slider--vertical .goo-slider__coverage')
+		expect(sliderCss).toContain('linear-gradient(\n\t\tto top')
 	})
 
 	it('moves variance side controls symmetrically when one side changes', async() => {
