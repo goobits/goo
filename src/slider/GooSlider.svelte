@@ -539,6 +539,28 @@ function getThumbStyle(nextValue: number): string {
 	return direction === 'vertical' ? `bottom: ${ pct }%;` : `left: ${ pct }%;`
 }
 
+function isVarianceThumb(index: number): boolean {
+	return variance && currentValues.length >= 3 && index >= 0 && index <= 2
+}
+
+function getVarianceThumbRole(index: number): 'base' | 'variance' | undefined {
+	if (!isVarianceThumb(index)) return undefined
+	return index === 1 ? 'base' : 'variance'
+}
+
+function getVarianceThumbSide(index: number): 'low' | 'base' | 'high' | undefined {
+	if (!isVarianceThumb(index)) return undefined
+	if (index === 0) return 'low'
+	if (index === 1) return 'base'
+	return 'high'
+}
+
+function getThumbAriaLabel(index: number): string {
+	const baseLabel = ariaLabel || label || title || 'Value'
+	const side = getVarianceThumbSide(index)
+	return side ? `${ baseLabel } ${ side }` : `${ baseLabel } ${ index + 1 }`
+}
+
 function getCoverageStyles(): string[] {
 	if (variance && currentValues.length >= 3) {
 		const pct0 = getDisplayPercent(currentValues[0] ?? numericMin)
@@ -646,10 +668,13 @@ function toPositiveNumber(nextValue: unknown, fallback: number): number {
 				bind:this={thumbElements[index]}
 				class="goo-slider__thumb"
 				class:goo-slider__thumb--active={activeIndex === index}
-				class:goo-slider__thumb--variance-base={variance && currentValues.length >= 3 && index === 1}
-				class:goo-slider__thumb--variance-control={variance && currentValues.length >= 3 && index !== 1}
+				class:goo-slider__thumb--variance-base={getVarianceThumbRole(index) === 'base'}
+				class:goo-slider__thumb--variance-control={getVarianceThumbRole(index) === 'variance'}
+				class:goo-slider__thumb--variance-low={getVarianceThumbSide(index) === 'low'}
+				class:goo-slider__thumb--variance-high={getVarianceThumbSide(index) === 'high'}
 				data-index={index}
-				data-role={variance && currentValues.length >= 3 ? (index === 1 ? 'base' : 'variance') : undefined}
+				data-role={getVarianceThumbRole(index)}
+				data-side={getVarianceThumbSide(index)}
 				style={getThumbStyle(thumbValue)}
 				role={isMulti ? 'slider' : undefined}
 				tabindex={isMulti && !effectiveDisabled ? tabIndex : undefined}
@@ -658,7 +683,7 @@ function toPositiveNumber(nextValue: unknown, fallback: number): number {
 				aria-valuenow={isMulti ? thumbValue : undefined}
 				aria-valuetext={isMulti ? thumbValueText(thumbValue) : undefined}
 				aria-orientation={isMulti ? (direction === 'vertical' ? 'vertical' : 'horizontal') : undefined}
-				aria-label={isMulti ? `${ariaLabel || label || 'Value'} ${index + 1}` : undefined}
+				aria-label={isMulti ? getThumbAriaLabel(index) : undefined}
 				aria-disabled={isMulti && effectiveDisabled ? 'true' : undefined}
 				onkeydown={isMulti ? event => moveThumbByKey(index, event) : undefined}
 			></div>

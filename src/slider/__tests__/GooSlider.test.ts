@@ -233,9 +233,17 @@ describe('GooSlider', () => {
 		expect(thumbs[0]?.classList.contains('goo-slider__thumb--variance-control')).toBe(true)
 		expect(thumbs[1]?.classList.contains('goo-slider__thumb--variance-base')).toBe(true)
 		expect(thumbs[2]?.classList.contains('goo-slider__thumb--variance-control')).toBe(true)
+		expect(thumbs[0]?.classList.contains('goo-slider__thumb--variance-low')).toBe(true)
+		expect(thumbs[2]?.classList.contains('goo-slider__thumb--variance-high')).toBe(true)
 		expect(thumbs[0]?.dataset.role).toBe('variance')
 		expect(thumbs[1]?.dataset.role).toBe('base')
 		expect(thumbs[2]?.dataset.role).toBe('variance')
+		expect(thumbs[0]?.dataset.side).toBe('low')
+		expect(thumbs[1]?.dataset.side).toBe('base')
+		expect(thumbs[2]?.dataset.side).toBe('high')
+		expect(thumbs[0]?.getAttribute('aria-label')).toBe('Value low')
+		expect(thumbs[1]?.getAttribute('aria-label')).toBe('Value base')
+		expect(thumbs[2]?.getAttribute('aria-label')).toBe('Value high')
 	})
 
 	it('styles variance coverage as a mirrored gradient in both directions', () => {
@@ -243,6 +251,10 @@ describe('GooSlider', () => {
 		expect(sliderCss).toContain('linear-gradient(\n\t\tto right')
 		expect(sliderCss).toContain('.goo-slider.goo-slider--variance.goo-slider--vertical .goo-slider__coverage')
 		expect(sliderCss).toContain('linear-gradient(\n\t\tto top')
+		expect(sliderCss).toContain('.goo-slider.goo-slider--variance .goo-slider__thumb--variance-low')
+		expect(sliderCss).toContain('.goo-slider.goo-slider--variance .goo-slider__thumb--variance-high')
+		expect(sliderCss).toContain('.goo-slider.goo-slider--variance.goo-slider--vertical .goo-slider__thumb--variance-low')
+		expect(sliderCss).toContain('.goo-slider.goo-slider--variance.goo-slider--vertical .goo-slider__thumb--variance-high')
 	})
 
 	it('moves variance side controls symmetrically when one side changes', async() => {
@@ -300,6 +312,84 @@ describe('GooSlider', () => {
 		await fireEvent.keyDown(thumbs[0]!, { key: 'ArrowRight' })
 
 		expect(slider.getValue()).toEqual([ 50, 50, 50 ])
+	})
+
+	it('keeps variance high control mirrored when dragged toward the base', async() => {
+		const { container } = render(GooSlider, {
+			props: {
+				value: [ 40, 50, 60 ],
+				min: 0,
+				max: 100,
+				step: 10,
+				variance: true
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const thumbs = container.querySelectorAll<HTMLElement>('.goo-slider__thumb')
+
+		await fireEvent.keyDown(thumbs[2]!, { key: 'ArrowLeft' })
+
+		expect(slider.getValue()).toEqual([ 50, 50, 50 ])
+	})
+
+	it('expands variance controls symmetrically up to range edges', async() => {
+		const { container } = render(GooSlider, {
+			props: {
+				value: [ 10, 50, 90 ],
+				min: 0,
+				max: 100,
+				step: 10,
+				variance: true
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const thumbs = container.querySelectorAll<HTMLElement>('.goo-slider__thumb')
+
+		await fireEvent.keyDown(thumbs[2]!, { key: 'ArrowRight' })
+
+		expect(slider.getValue()).toEqual([ 0, 50, 100 ])
+	})
+
+	it('does not emit when variance side movement is clamped at a range edge', async() => {
+		const onchange = vi.fn()
+		const { container } = render(GooSlider, {
+			props: {
+				value: [ 0, 10, 20 ],
+				min: 0,
+				max: 100,
+				step: 10,
+				variance: true,
+				onchange
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const thumbs = container.querySelectorAll<HTMLElement>('.goo-slider__thumb')
+
+		await fireEvent.keyDown(thumbs[0]!, { key: 'ArrowLeft' })
+
+		expect(slider.getValue()).toEqual([ 0, 10, 20 ])
+		expect(onchange).not.toHaveBeenCalled()
+	})
+
+	it('does not emit when variance base movement is clamped by side controls', async() => {
+		const onchange = vi.fn()
+		const { container } = render(GooSlider, {
+			props: {
+				value: [ 0, 10, 20 ],
+				min: 0,
+				max: 100,
+				step: 10,
+				variance: true,
+				onchange
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const thumbs = container.querySelectorAll<HTMLElement>('.goo-slider__thumb')
+
+		await fireEvent.keyDown(thumbs[1]!, { key: 'ArrowLeft' })
+
+		expect(slider.getValue()).toEqual([ 0, 10, 20 ])
+		expect(onchange).not.toHaveBeenCalled()
 	})
 
 	it('prevents the variance base from moving past the mirrored side controls', async() => {

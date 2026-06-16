@@ -39,6 +39,18 @@ export default {
 			props: { title: 'Variance', value: [ 30, 50, 70 ], variance: true }
 		},
 		{
+			title: 'Variance collapsed',
+			props: { title: 'Variance collapsed', value: [ 50, 50, 50 ], variance: true }
+		},
+		{
+			title: 'Variance near edge',
+			props: { title: 'Variance near edge', value: [ 0, 15, 30 ], variance: true }
+		},
+		{
+			title: 'Vertical variance',
+			props: { title: 'Vertical variance', value: [ 25, 50, 75 ], variance: true, direction: 'vertical', style: 'height: 120px;' }
+		},
+		{
 			title: 'Disabled',
 			props: { title: 'Disabled', value: 30, disabled: true }
 		},

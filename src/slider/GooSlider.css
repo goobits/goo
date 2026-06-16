@@ -146,29 +146,47 @@
 }
 
 .goo-slider.goo-slider--variance .goo-slider__thumb--variance-control {
-	width: calc(var(--goo-slider-thumb-size) * 0.72);
-	height: calc(var(--goo-slider-thumb-size) * 0.72);
-	background: var(--goo-theme-surface-raised, var(--goo-theme-bg, #1a1a1a));
+	width: calc(var(--goo-slider-thumb-size) * 0.8);
+	height: calc(var(--goo-slider-thumb-size) * 0.62);
+	background: color-mix(in srgb, var(--goo-slider-thumb-bg) 18%, var(--goo-theme-surface-raised, var(--goo-theme-bg, #1a1a1a)));
 	border: 2px solid var(--goo-slider-thumb-bg);
-	border-radius: 3px;
+	border-radius: 2px;
 	box-shadow: var(--goo-slider-thumb-shadow);
-	rotate: 45deg;
-	transform: translateX(-50%) translateY(-50%) rotate(45deg);
+	transform: translateX(-50%) translateY(-50%);
+}
+
+.goo-slider.goo-slider--variance .goo-slider__thumb--variance-low {
+	clip-path: polygon(0 0, 100% 50%, 0 100%, 26% 50%);
+}
+
+.goo-slider.goo-slider--variance .goo-slider__thumb--variance-high {
+	clip-path: polygon(100% 0, 0 50%, 100% 100%, 74% 50%);
 }
 
 .goo-slider.goo-slider--variance .goo-slider__thumb--variance-control.goo-slider__thumb--active {
-	scale: 1.12;
-	transform: translateX(-50%) translateY(-50%) rotate(45deg) scale(1.12);
+	transform: translateX(-50%) translateY(-50%) scale(1.12);
 }
 
 .goo-slider.goo-slider--variance:not(.goo-slider--disabled)
 	.goo-slider__thumb--variance-control:not(.goo-slider__thumb--active):hover {
-	scale: 1.08;
-	transform: translateX(-50%) translateY(-50%) rotate(45deg) scale(1.08);
+	transform: translateX(-50%) translateY(-50%) scale(1.08);
 }
 
 .goo-slider.goo-slider--variance .goo-slider__thumb--variance-base {
 	z-index: 3;
+}
+
+.goo-slider.goo-slider--variance.goo-slider--vertical .goo-slider__thumb--variance-control {
+	width: calc(var(--goo-slider-thumb-size) * 0.62);
+	height: calc(var(--goo-slider-thumb-size) * 0.8);
+}
+
+.goo-slider.goo-slider--variance.goo-slider--vertical .goo-slider__thumb--variance-low {
+	clip-path: polygon(0 100%, 50% 0, 100% 100%, 50% 74%);
+}
+
+.goo-slider.goo-slider--variance.goo-slider--vertical .goo-slider__thumb--variance-high {
+	clip-path: polygon(0 0, 100% 0, 50% 100%, 50% 26%);
 }
 
 .goo-slider__coverage {
