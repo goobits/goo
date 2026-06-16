@@ -97,6 +97,9 @@ export type GooSliderProps = GooForwardedAttributes & {
 	/** Show coverage fill. */
 	coverage?: boolean
 
+	/** Keep a three-thumb range as `[low, base, high]` with low/high mirrored around base. */
+	variance?: boolean
+
 	/** Whether the slider is disabled. */
 	disabled?: boolean
 

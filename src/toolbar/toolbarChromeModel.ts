@@ -8,6 +8,11 @@ export type ToolbarToolButtonConfig = {
 }
 
 export type FloatingToolbarToolConfig = {
+	affordanceId?: string
+	affordanceKind?: 'modifier' | 'quick-tool'
+	affordanceModifier?: string
+	affordanceOwnerIds?: readonly string[]
+	affordanceQuickToolId?: string
 	disabled?: boolean
 	exec: string
 	icon: ToolbarChromeIcon

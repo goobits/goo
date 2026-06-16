@@ -91,6 +91,13 @@
 	width: var(--goo-theme-icon-lg);
 }
 
+.goo-floating-toolbar__glyph {
+	font-size: 0.7rem;
+	font-weight: 700;
+	letter-spacing: 0;
+	line-height: 1;
+}
+
 .goo-floating-toolbar__tool.disabled {
 	cursor: default;
 	opacity: 0.25;
@@ -106,11 +113,17 @@
 	border-radius: 0;
 }
 
+.goo-floating-toolbar__tool[aria-pressed='true'] {
+	background: var(--goo-theme-accent);
+	color: var(--goo-theme-accent-fg);
+}
+
 .goo-floating-toolbar__tool--selected::before {
 	color: var(--goo-theme-accent-fg);
 }
 
-.goo-floating-toolbar__tool--selected > * {
+.goo-floating-toolbar__tool--selected > *,
+.goo-floating-toolbar__tool[aria-pressed='true'] > * {
 	color: var(--goo-theme-accent-fg);
 }
 

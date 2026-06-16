@@ -89,6 +89,7 @@ export function createRangeModuleField(options: GooRangeModuleOptions = {}): Goo
 				canCross: currentOptions.canCross,
 				canPush: currentOptions.canPush,
 				coverage: currentOptions.coverage,
+				variance: currentOptions.variance,
 				disabled: currentOptions.disabled,
 				gradient: currentOptions.gradient,
 				class: currentOptions.class ?? currentOptions.className,
@@ -142,17 +143,22 @@ export function createRangeModuleField(options: GooRangeModuleOptions = {}): Goo
 	function handleSliderEvent(data: GooSliderEventData, nextState: GooRangeModuleState): void {
 		state = nextState
 		currentValues = getSliderValues()
-		syncInputs(data.index)
+		syncInputs(currentOptions.variance ? undefined : data.index)
 		emit(nextState, data.index, data.value, data.event)
 	}
 
 	function handleNumberInput(index: number, value: number, nextState: GooRangeModuleState): void {
 		state = nextState
-		const values = currentValues.slice()
+		const previousValues = currentValues
+		const values = previousValues.slice()
 		values[index] = value
-		currentValues = values
+		currentValues = currentOptions.variance
+			? getVarianceValues(values, index, currentOptions.min ?? DEFAULT_MIN, currentOptions.max ?? DEFAULT_MAX, previousValues)
+			: values
 		sliderElement?.setValue(toSliderValue(currentValues), { silent: true })
-		emit(nextState, index, value)
+		currentValues = getSliderValues()
+		syncInputs()
+		emit(nextState, index, currentValues[index] ?? value)
 	}
 
 	function emit(nextState: GooRangeModuleState, index: number, value: number, originalEvent?: Event): void {
@@ -284,6 +290,33 @@ function normalizeValues(value: GooRangeModuleValue | undefined, fallbackMin = D
 		return value.map(nextValue => toFiniteNumber(nextValue, fallbackMin))
 	}
 	return [ toFiniteNumber(value, fallbackMin) ]
+}
+
+function getVarianceValues(values: number[], index: number, min: number, max: number, previousValues: number[]): number[] {
+	if (values.length < 3) return values
+
+	const baseValue = values[1] ?? min
+	const previousBase = previousValues[1] ?? baseValue
+	const previousRadius = Math.max(
+		0,
+		Math.min(previousBase - (previousValues[0] ?? previousBase), (previousValues[2] ?? previousBase) - previousBase)
+	)
+	const radius = index === 1
+		? previousRadius
+		: Math.max(0, Math.abs((values[index] ?? baseValue) - baseValue))
+	const maxRadius = Math.max(0, (max - min) / 2)
+	const base = clampNumber(baseValue, min + Math.min(radius, maxRadius), max - Math.min(radius, maxRadius))
+	const fittedRadius = Math.min(radius, maxRadius, base - min, max - base)
+
+	return [
+		base - fittedRadius,
+		base,
+		base + fittedRadius
+	]
+}
+
+function clampNumber(value: number, min: number, max: number): number {
+	return Math.min(max, Math.max(min, value))
 }
 
 function toSliderValue(values: number[]): GooSliderValue {

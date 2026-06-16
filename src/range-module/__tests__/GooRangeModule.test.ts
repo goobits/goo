@@ -1,3 +1,4 @@
+import { fireEvent } from '@testing-library/svelte'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { createRangeModuleField } from '../GooRangeModule.ts'
@@ -73,5 +74,66 @@ describe('GooRangeModule', () => {
 
 		expect(range.getValue()).toEqual({ x: 8, y: -10 })
 		expect(range.getRange().values).toEqual([ 8, -10 ])
+	})
+
+	it('forwards variance mode to three-thumb range sliders', async() => {
+		const range = createRangeModuleField({
+			max: 100,
+			min: 0,
+			step: 1,
+			value: [ 30, 50, 70 ],
+			variance: true
+		})
+		document.body.appendChild(range)
+		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
+
+		expect(range.querySelectorAll('.goo-number')).toHaveLength(3)
+		expect(range.querySelector('.goo-slider')?.hasAttribute('variance')).toBe(true)
+		expect(range.querySelectorAll('.goo-slider__thumb--variance-control')).toHaveLength(2)
+		expect(range.querySelector('.goo-slider__thumb--variance-base')).not.toBeNull()
+		expect(range.getValue()).toEqual([ 30, 50, 70 ])
+		expect(range.getRange().values).toEqual([ 30, 50, 70 ])
+	})
+
+	it('mirrors variance number edits through the opposite side control', async() => {
+		const oninput = vi.fn()
+		const range = createRangeModuleField({
+			max: 100,
+			min: 0,
+			oninput,
+			step: 1,
+			value: [ 30, 50, 70 ],
+			variance: true
+		})
+		document.body.appendChild(range)
+		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
+
+		const inputs = range.querySelectorAll<HTMLInputElement>('.goo-number__content')
+		await fireEvent.input(inputs[2]!, { target: { value: '60' } })
+		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
+
+		expect(range.getValue()).toEqual([ 40, 50, 60 ])
+		expect(range.getRange().values).toEqual([ 40, 50, 60 ])
+		expect([ ...range.querySelectorAll<HTMLInputElement>('.goo-number__content') ].map(input => input.value)).toEqual([ '40', '50', '60' ])
+		expect(oninput.mock.calls[0]?.[0]).toEqual([ 40, 50, 60 ])
+	})
+
+	it('syncs all number fields after variance slider edits', async() => {
+		const range = createRangeModuleField({
+			max: 100,
+			min: 0,
+			step: 5,
+			value: [ 30, 50, 70 ],
+			variance: true
+		})
+		document.body.appendChild(range)
+		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
+
+		const thumbs = range.querySelectorAll<HTMLElement>('.goo-slider__thumb')
+		await fireEvent.keyDown(thumbs[2]!, { key: 'ArrowRight' })
+		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
+
+		expect(range.getRange().values).toEqual([ 25, 50, 75 ])
+		expect([ ...range.querySelectorAll<HTMLInputElement>('.goo-number__content') ].map(input => input.value)).toEqual([ '25', '50', '75' ])
 	})
 })

@@ -19,6 +19,7 @@ export type GooRangeModuleOptions = {
 	class?: string
 	className?: string
 	coverage?: boolean
+	variance?: boolean
 	direction?: GooSliderDirection
 	disabled?: boolean
 	easingFn?: (pct: number) => number

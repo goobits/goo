@@ -16,6 +16,7 @@ export type SliderFieldOptions = {
 	class?: string
 	className?: string
 	coverage?: boolean
+	variance?: boolean
 	direction?: GooSliderDirection
 	disabled?: boolean
 	gradient?: string[]
@@ -79,6 +80,7 @@ export function createSliderField(options: SliderFieldOptions = {}): SliderField
 				canCross: options.canCross,
 				canPush: options.canPush,
 				coverage: options.coverage,
+				variance: options.variance,
 				disabled: options.disabled,
 				gradient: options.gradient,
 				class: options.class ?? options.className,

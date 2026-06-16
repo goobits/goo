@@ -7,6 +7,7 @@ export const controlSchema: SvelteControlSchema = {
 		canCross: 'canCross',
 		canPush: 'canPush',
 		coverage: 'coverage',
+		variance: 'variance',
 		direction: 'direction',
 		ariaLabel: 'ariaLabel',
 		label: 'label',
@@ -91,6 +92,7 @@ let {
 	canCross = false,
 	canPush = false,
 	coverage = false,
+	variance = false,
 	disabled = false,
 	gradient,
 	class: className = '',
@@ -142,6 +144,7 @@ const classes = $derived.by(() => {
 	const usesDefaultShape = !shape || shape === 'default'
 	if (direction === 'vertical') values.push('goo-slider--vertical')
 	if (coverage) values.push('goo-slider--coverage')
+	if (variance) values.push('goo-slider--variance')
 	if (!coverage && currentValues.length === 1 && !preset && usesDefaultShape && !hasCustomGradient) values.push('goo-slider--value-fill')
 	if (effectiveDisabled) values.push('goo-slider--disabled')
 	if (preset && sliderPresetConfigs[preset]?.className) values.push(sliderPresetConfigs[preset].className)
@@ -186,6 +189,7 @@ const hostAttributes = $derived<Record<string, string | number | undefined>>({
 	'can-cross': canCross ? '' : undefined,
 	'can-push': canPush ? '' : undefined,
 	coverage: coverage ? '' : undefined,
+	variance: variance ? '' : undefined,
 	disabled: effectiveDisabled ? '' : undefined
 })
 
@@ -366,9 +370,24 @@ function updateThumbFromPointer(index: number, event: PointerEvent, state: 'chan
 }
 
 function updateThumbValue(index: number, nextValue: number, state: 'change' | 'input', event?: Event): void {
-	const values = currentValues.slice()
-	const canPushNeighbors = !canCross && canPush
 	let formatted = formatValue(nextValue)
+
+	const values = variance
+		? getVarianceValues(currentValues, index, formatted)
+		: getConstrainedValues(currentValues, index, formatted)
+
+	if (values.length === currentValues.length && values.every((value, valueIndex) => Object.is(value, currentValues[valueIndex]))) {
+		return
+	}
+
+	currentValues = values
+	value = getValue()
+	emitSliderEvent(index, state, event)
+}
+
+function getConstrainedValues(sourceValues: number[], index: number, formatted: number): number[] {
+	const values = sourceValues.slice()
+	const canPushNeighbors = !canCross && canPush
 
 	if (!canCross && !canPushNeighbors) {
 		const next = values[index + 1]
@@ -387,13 +406,44 @@ function updateThumbValue(index: number, nextValue: number, state: 'change' | 'i
 		}
 	}
 
-	if (values.length === currentValues.length && values.every((value, valueIndex) => Object.is(value, currentValues[valueIndex]))) {
-		return
+	return values
+}
+
+function getVarianceValues(sourceValues: number[], index: number, formatted: number): number[] {
+	if (sourceValues.length < 3) {
+		return getConstrainedValues(sourceValues, index, formatted)
 	}
 
-	currentValues = values
-	value = getValue()
-	emitSliderEvent(index, state, event)
+	const currentBase = sourceValues[1] ?? numericMin
+	const currentRadius = getVarianceRadius(sourceValues, currentBase)
+
+	if (index === 1) {
+		return getCenteredVarianceValues(formatted, currentRadius)
+	}
+
+	const sideRadius = index === 0
+		? Math.max(0, currentBase - formatted)
+		: Math.max(0, formatted - currentBase)
+	return getCenteredVarianceValues(currentBase, sideRadius)
+}
+
+function getCenteredVarianceValues(baseValue: number, radiusValue: number): number[] {
+	const rangeRadius = Math.max(0, (numericMax - numericMin) / 2)
+	const radius = Math.min(Math.max(0, radiusValue), rangeRadius)
+	const base = formatValue(clamp(baseValue, numericMin + radius, numericMax - radius))
+	const maxRadiusForBase = Math.min(base - numericMin, numericMax - base)
+	const fittedRadius = Math.min(radius, maxRadiusForBase)
+	return [
+		formatValue(base - fittedRadius),
+		base,
+		formatValue(base + fittedRadius)
+	]
+}
+
+function getVarianceRadius(values: number[], base: number): number {
+	const low = values[0] ?? base
+	const high = values[2] ?? base
+	return Math.max(0, Math.min(base - low, high - base))
 }
 
 function emitSliderEvent(index: number, state: 'change' | 'input', event?: Event): void {
@@ -490,6 +540,16 @@ function getThumbStyle(nextValue: number): string {
 }
 
 function getCoverageStyles(): string[] {
+	if (variance && currentValues.length >= 3) {
+		const pct0 = getDisplayPercent(currentValues[0] ?? numericMin)
+		const pct1 = getDisplayPercent(currentValues[2] ?? currentValues[0] ?? numericMin)
+		const left = Math.min(pct0, pct1) * 100
+		const width = Math.abs(pct1 - pct0) * 100
+		if (direction === 'vertical') {
+			return [ `bottom: ${ left }%; height: ${ width }%;` ]
+		}
+		return [ `left: ${ left }%; width: ${ width }%;` ]
+	}
 	if (currentValues.length === 2) {
 		const pct0 = getDisplayPercent(currentValues[0])
 		const pct1 = getDisplayPercent(currentValues[1])
@@ -586,7 +646,10 @@ function toPositiveNumber(nextValue: unknown, fallback: number): number {
 				bind:this={thumbElements[index]}
 				class="goo-slider__thumb"
 				class:goo-slider__thumb--active={activeIndex === index}
+				class:goo-slider__thumb--variance-base={variance && currentValues.length >= 3 && index === 1}
+				class:goo-slider__thumb--variance-control={variance && currentValues.length >= 3 && index !== 1}
 				data-index={index}
+				data-role={variance && currentValues.length >= 3 ? (index === 1 ? 'base' : 'variance') : undefined}
 				style={getThumbStyle(thumbValue)}
 				role={isMulti ? 'slider' : undefined}
 				tabindex={isMulti && !effectiveDisabled ? tabIndex : undefined}

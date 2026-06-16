@@ -143,6 +143,32 @@
 	box-shadow: var(--goo-slider-thumb-shadow-hover);
 }
 
+.goo-slider.goo-slider--variance .goo-slider__thumb--variance-control {
+	width: calc(var(--goo-slider-thumb-size) * 0.72);
+	height: calc(var(--goo-slider-thumb-size) * 0.72);
+	background: var(--goo-theme-surface-raised, var(--goo-theme-bg, #1a1a1a));
+	border: 2px solid var(--goo-slider-thumb-bg);
+	border-radius: 3px;
+	box-shadow: var(--goo-slider-thumb-shadow);
+	rotate: 45deg;
+	transform: translateX(-50%) translateY(-50%) rotate(45deg);
+}
+
+.goo-slider.goo-slider--variance .goo-slider__thumb--variance-control.goo-slider__thumb--active {
+	scale: 1.12;
+	transform: translateX(-50%) translateY(-50%) rotate(45deg) scale(1.12);
+}
+
+.goo-slider.goo-slider--variance:not(.goo-slider--disabled)
+	.goo-slider__thumb--variance-control:not(.goo-slider__thumb--active):hover {
+	scale: 1.08;
+	transform: translateX(-50%) translateY(-50%) rotate(45deg) scale(1.08);
+}
+
+.goo-slider.goo-slider--variance .goo-slider__thumb--variance-base {
+	z-index: 3;
+}
+
 .goo-slider__coverage {
 	position: absolute;
 	top: 0;
