@@ -216,6 +216,97 @@ describe('GooSlider', () => {
 		expect(onchange).toHaveBeenCalled()
 	})
 
+	it('renders ticks and labeled marks on the slider track', () => {
+		const { container } = render(GooSlider, {
+			props: {
+				value: 50,
+				min: 0,
+				max: 100,
+				ticks: 2,
+				marks: [
+					{ value: 25, label: 'Low' },
+					{ value: 75, label: 'High' }
+				]
+			}
+		})
+		const marks = container.querySelectorAll<HTMLElement>('.goo-slider__mark')
+
+		expect(marks).toHaveLength(5)
+		expect(container.querySelector('.goo-slider__mark-label')?.textContent).toBe('Low')
+		expect([ ...marks ].map(mark => mark.style.left)).toContain('75%')
+	})
+
+	it('snaps values to explicit snap points', async() => {
+		const { container } = render(GooSlider, {
+			props: {
+				value: 12,
+				min: 0,
+				max: 100,
+				snap: [ 0, 10, 100 ]
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+
+		await tick()
+
+		expect(slider.getValue()).toBe(10)
+	})
+
+	it('uses explicit mode="variance" without the legacy variance boolean', () => {
+		const { container } = render(GooSlider, {
+			props: {
+				value: [ 30, 50, 70 ],
+				mode: 'variance'
+			}
+		})
+
+		expect(container.querySelector('.goo-slider')?.hasAttribute('variance')).toBe(true)
+		expect(container.querySelectorAll('.goo-slider__thumb--variance-control')).toHaveLength(2)
+	})
+
+	it('maps log-scaled values to track percentage', () => {
+		const { container } = render(GooSlider, {
+			props: {
+				value: 10,
+				min: 1,
+				max: 100,
+				scale: 'log'
+			}
+		})
+		const thumb = container.querySelector<HTMLElement>('.goo-slider__thumb')!
+
+		expect(thumb.style.left).toBe('50%')
+	})
+
+	it('enforces minimum distance between range thumbs', async() => {
+		const { container } = render(GooSlider, {
+			props: {
+				value: [ 20, 35 ],
+				min: 0,
+				max: 100,
+				step: 5,
+				minDistance: 15
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const thumbs = container.querySelectorAll<HTMLElement>('.goo-slider__thumb')
+
+		await fireEvent.keyDown(thumbs[1]!, { key: 'ArrowLeft' })
+
+		expect(slider.getValue()).toEqual([ 20, 35 ])
+	})
+
+	it('renders value bubbles when enabled', () => {
+		const { container } = render(GooSlider, {
+			props: {
+				value: 42,
+				valueBubble: true
+			}
+		})
+
+		expect(container.querySelector('.goo-slider__value-bubble')?.textContent).toBe('42')
+	})
+
 	it('renders variance handles with side-control roles', () => {
 		const { container } = render(GooSlider, {
 			props: {
@@ -252,6 +343,7 @@ describe('GooSlider', () => {
 		expect(sliderCss).toContain('.goo-slider.goo-slider--variance.goo-slider--vertical .goo-slider__coverage')
 		expect(sliderCss).toContain('linear-gradient(\n\t\tto top')
 		expect(sliderCss).toContain('rotate(45deg)')
+		expect(sliderCss).toContain('translateX(-50%) translateY(50%) rotate(45deg)')
 		expect(sliderCss).not.toContain('clip-path: polygon')
 	})
 

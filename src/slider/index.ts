@@ -11,9 +11,15 @@ export type {
 	GooSliderDirection,
 	GooSliderElement,
 	GooSliderEventData,
+	GooSliderMark,
+	GooSliderMode,
 	GooSliderPreset,
 	GooSliderProps,
+	GooSliderScale,
 	GooSliderShape,
+	GooSliderSnap,
+	GooSliderTickConfig,
 	GooSliderUnit,
-	GooSliderValue
+	GooSliderValue,
+	GooSliderValueBubble
 } from './types.ts'

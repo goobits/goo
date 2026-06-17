@@ -15,6 +15,27 @@ export type GooSliderUnit = '%' | 'degree' | 'em' | 'float' | 'int' | 'integer' 
 /** Slider direction. */
 export type GooSliderDirection = 'horizontal' | 'vertical'
 
+/** Slider semantic mode. Existing value-shape inference is preserved when omitted. */
+export type GooSliderMode = 'range' | 'value' | 'variance'
+
+/** Slider scale mapping used to convert values to track percentages. */
+export type GooSliderScale = 'exponential' | 'linear' | 'log'
+
+/** Tick/mark configuration for the slider track. */
+export type GooSliderTickConfig = boolean | number
+
+/** Slider mark config. Numeric entries are ticks; object entries can render labels. */
+export type GooSliderMark = number | {
+	label?: string
+	value: number
+}
+
+/** Slider snap config. `true` snaps to marks/ticks; arrays snap to explicit values. */
+export type GooSliderSnap = boolean | number[]
+
+/** Value bubble visibility. */
+export type GooSliderValueBubble = boolean | 'active' | 'always'
+
 /** Slider value input accepted by the Svelte component. */
 export type GooSliderValue = number | number[] | string | { min: number; max: number }
 
@@ -73,6 +94,9 @@ export type GooSliderProps = GooForwardedAttributes & {
 	/** Slider direction. */
 	direction?: GooSliderDirection
 
+	/** Explicit slider mode. When omitted, the slider infers mode from `value` and `variance`. */
+	mode?: GooSliderMode
+
 	/** Preset track style. */
 	preset?: GooSliderPreset
 
@@ -99,6 +123,27 @@ export type GooSliderProps = GooForwardedAttributes & {
 
 	/** Keep a three-thumb range as `[low, base, high]` with low/high mirrored around base. */
 	variance?: boolean
+
+	/** Optional ticks on the slider track. `true` renders 10 intervals. */
+	ticks?: GooSliderTickConfig
+
+	/** Optional explicit track marks. Object marks can include visible labels. */
+	marks?: GooSliderMark[]
+
+	/** Optional snapping to marks/ticks or explicit snap values. */
+	snap?: GooSliderSnap
+
+	/** First-class value-to-track scale. Custom easing props still override rendered mapping. */
+	scale?: GooSliderScale
+
+	/** Minimum allowed distance between neighboring range thumbs. */
+	minDistance?: number | string
+
+	/** Maximum allowed distance between neighboring range thumbs. */
+	maxDistance?: number | string
+
+	/** Show value bubbles on hover/focus/drag, or always when set to `'always'`. */
+	valueBubble?: GooSliderValueBubble
 
 	/** Whether the slider is disabled. */
 	disabled?: boolean

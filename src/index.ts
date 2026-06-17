@@ -205,12 +205,18 @@ export type {
 	GooSliderDirection,
 	GooSliderElement,
 	GooSliderEventData,
+	GooSliderMark,
+	GooSliderMode,
 	GooSliderPreset,
 	GooSliderProps,
+	GooSliderScale,
 	GooSliderShape,
+	GooSliderSnap,
 	GooSliderThumb,
+	GooSliderTickConfig,
 	GooSliderUnit,
-	GooSliderValue
+	GooSliderValue,
+	GooSliderValueBubble
 } from './slider/index.ts'
 export { GooSlider, sliderPresetConfigs, sliderPresets, sliderShapes } from './slider/index.ts'
 export type { GooSpinnerProps, GooSpinnerRenderOptions, GooSpinnerSize, GooSpinnerVariant } from './spinner/index.ts'

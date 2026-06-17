@@ -1,4 +1,16 @@
-import type { GooSliderDirection, GooSliderElement, GooSliderPreset, GooSliderShape, GooSliderUnit } from '../slider/types.ts'
+import type {
+	GooSliderDirection,
+	GooSliderElement,
+	GooSliderMark,
+	GooSliderMode,
+	GooSliderPreset,
+	GooSliderScale,
+	GooSliderShape,
+	GooSliderSnap,
+	GooSliderTickConfig,
+	GooSliderUnit,
+	GooSliderValueBubble
+} from '../slider/types.ts'
 
 export type GooRangeModuleValue = number | number[] | { min: number; max: number } | { x: number; y: number }
 export type GooRangeModuleState = 'input' | 'change' | 'set'
@@ -27,8 +39,12 @@ export type GooRangeModuleOptions = {
 	gradient?: string[]
 	input?: boolean
 	label?: string
+	marks?: GooSliderMark[]
 	max?: number
+	maxDistance?: number | string
 	min?: number
+	minDistance?: number | string
+	mode?: GooSliderMode
 	name?: string
 	onchange?: (value: GooRangeModuleValue, data: GooRangeModuleEventData) => void
 	onChange?: (value: GooRangeModuleValue, data: GooRangeModuleEventData) => void
@@ -38,14 +54,18 @@ export type GooRangeModuleOptions = {
 	presetColor?: string
 	presetHue?: number
 	presetSaturation?: number
+	scale?: GooSliderScale
 	shape?: GooSliderShape
 	showInputs?: boolean
+	snap?: GooSliderSnap
 	step?: number
 	style?: string
 	tabIndex?: number
+	ticks?: GooSliderTickConfig
 	title?: string
 	unit?: GooSliderUnit
 	value?: GooRangeModuleValue
+	valueBubble?: GooSliderValueBubble
 }
 
 export type GooRangeModuleElement = HTMLDivElement & {

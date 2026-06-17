@@ -35,8 +35,12 @@ export default {
 			props: { title: 'Dual', value: [ 20, 80 ], canPush: true }
 		},
 		{
+			title: 'Constrained range',
+			props: { title: 'Constrained range', value: [ 20, 70 ], minDistance: 20, maxDistance: 60 }
+		},
+		{
 			title: 'Variance',
-			props: { title: 'Variance', value: [ 30, 50, 70 ], variance: true }
+			props: { title: 'Variance', value: [ 30, 50, 70 ], mode: 'variance' }
 		},
 		{
 			title: 'Variance collapsed',
@@ -53,6 +57,31 @@ export default {
 		{
 			title: 'Vertical variance',
 			props: { title: 'Vertical variance', value: [ 25, 50, 75 ], variance: true, direction: 'vertical', style: 'height: 120px;' }
+		},
+		{
+			title: 'Ticks and labels',
+			props: {
+				title: 'Ticks and labels',
+				value: 50,
+				ticks: 4,
+				marks: [
+					{ value: 0, label: '0' },
+					{ value: 50, label: '50' },
+					{ value: 100, label: '100' }
+				]
+			}
+		},
+		{
+			title: 'Snap points',
+			props: { title: 'Snap points', value: 50, marks: [ 0, 25, 50, 75, 100 ], snap: true }
+		},
+		{
+			title: 'Log scale',
+			props: { title: 'Log scale', value: 10, min: 1, max: 100, scale: 'log', ticks: 2, valueBubble: true }
+		},
+		{
+			title: 'Value bubble',
+			props: { title: 'Value bubble', value: 42, valueBubble: 'always' }
 		},
 		{
 			title: 'Disabled',

@@ -4,10 +4,16 @@ import GooSlider from './GooSlider.svelte'
 import type {
 	GooSliderDirection,
 	GooSliderEventData,
+	GooSliderMark,
+	GooSliderMode,
 	GooSliderPreset,
+	GooSliderScale,
 	GooSliderShape,
+	GooSliderSnap,
+	GooSliderTickConfig,
 	GooSliderUnit,
-	GooSliderValue
+	GooSliderValue,
+	GooSliderValueBubble
 } from './types.ts'
 
 export type SliderFieldOptions = {
@@ -21,8 +27,12 @@ export type SliderFieldOptions = {
 	disabled?: boolean
 	gradient?: string[]
 	label?: string
+	marks?: GooSliderMark[]
 	max?: number
+	maxDistance?: number | string
 	min?: number
+	minDistance?: number | string
+	mode?: GooSliderMode
 	name?: string
 	onchange?: (data: GooSliderEventData) => void
 	oninput?: (data: GooSliderEventData) => void
@@ -30,13 +40,17 @@ export type SliderFieldOptions = {
 	presetColor?: string
 	presetHue?: number
 	presetSaturation?: number
+	scale?: GooSliderScale
 	shape?: GooSliderShape
+	snap?: GooSliderSnap
 	step?: number
 	style?: string
 	tabIndex?: number
+	ticks?: GooSliderTickConfig
 	title?: string
 	unit?: GooSliderUnit
 	value?: GooSliderValue
+	valueBubble?: GooSliderValueBubble
 }
 
 type MountedControl = ReturnType<typeof mount>
@@ -72,6 +86,7 @@ export function createSliderField(options: SliderFieldOptions = {}): SliderField
 				title: options.title,
 				name: options.name,
 				direction: options.direction,
+				mode: options.mode,
 				preset: options.preset,
 				presetColor: options.presetColor,
 				presetHue: options.presetHue,
@@ -81,6 +96,13 @@ export function createSliderField(options: SliderFieldOptions = {}): SliderField
 				canPush: options.canPush,
 				coverage: options.coverage,
 				variance: options.variance,
+				ticks: options.ticks,
+				marks: options.marks,
+				snap: options.snap,
+				scale: options.scale,
+				minDistance: options.minDistance,
+				maxDistance: options.maxDistance,
+				valueBubble: options.valueBubble,
 				disabled: options.disabled,
 				gradient: options.gradient,
 				class: options.class ?? options.className,

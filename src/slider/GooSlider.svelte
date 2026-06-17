@@ -11,16 +11,24 @@ export const controlSchema: SvelteControlSchema = {
 		direction: 'direction',
 		ariaLabel: 'ariaLabel',
 		label: 'label',
+		marks: 'marks',
 		max: 'max',
+		maxDistance: 'maxDistance',
 		min: 'min',
+		minDistance: 'minDistance',
+		mode: 'mode',
 		name: 'name',
 		preset: 'preset',
 		presetColor: 'presetColor',
 		presetHue: 'presetHue',
 		presetSaturation: 'presetSaturation',
+		scale: 'scale',
 		shape: 'shape',
+		snap: 'snap',
 		step: 'step',
-		unit: 'unit'
+		ticks: 'ticks',
+		unit: 'unit',
+		valueBubble: 'valueBubble'
 	}
 }
 </script>
@@ -29,14 +37,23 @@ export const controlSchema: SvelteControlSchema = {
 import './GooSlider.css'
 
 import { formatNumber } from '../support/utils/formatNumber.ts'
-import { clamp, toPercent } from '../support/utils/numberUtils.ts'
-import { parseFloatArray, toFormattedValue, type GooSliderThumb } from './sliderUtils.ts'
+import { clamp } from '../support/utils/numberUtils.ts'
+import {
+	getVarianceValues as getSharedVarianceValues,
+	normalizeSliderMarks,
+	parseFloatArray,
+	snapSliderValue,
+	toFormattedValue,
+	toScaledPercent,
+	type GooSliderThumb
+} from './sliderUtils.ts'
 import { sliderPresetConfigs, sliderShapes } from './sliderPresets.ts'
 import type {
 	GooSliderDirection,
 	GooSliderElement,
 	GooSliderEventData,
 	GooSliderProps,
+	GooSliderScale,
 	GooSliderUnit,
 	GooSliderValue
 } from './types.ts'
@@ -45,6 +62,7 @@ type SliderRuntimeState = {
 	direction: GooSliderDirection
 	max: number
 	min: number
+	scale: GooSliderScale
 	step: number
 	unit: string
 }
@@ -84,6 +102,7 @@ let {
 	title,
 	name,
 	direction = 'horizontal',
+	mode,
 	preset,
 	presetColor = '',
 	presetHue = 0,
@@ -93,6 +112,13 @@ let {
 	canPush = false,
 	coverage = false,
 	variance = false,
+	ticks,
+	marks,
+	snap,
+	scale = 'linear',
+	minDistance,
+	maxDistance,
+	valueBubble = false,
 	disabled = false,
 	gradient,
 	class: className = '',
@@ -114,9 +140,13 @@ const runtimeState = $derived<SliderRuntimeState>({
 	direction,
 	max: numericMax,
 	min: numericMin,
+	scale,
 	step: numericStep,
 	unit
 })
+const effectiveMode = $derived(mode ?? (variance ? 'variance' : (currentValues.length > 1 ? 'range' : 'value')))
+const isVarianceMode = $derived(effectiveMode === 'variance')
+const sliderMarks = $derived(normalizeSliderMarks(ticks, marks, numericMin, numericMax))
 const hiddenValue = $derived(formatSliderValue(currentValues))
 const ariaValueNow = $derived(currentValues[0] ?? numericMin)
 const ariaValueText = $derived(thumbValueText(ariaValueNow))
@@ -144,7 +174,10 @@ const classes = $derived.by(() => {
 	const usesDefaultShape = !shape || shape === 'default'
 	if (direction === 'vertical') values.push('goo-slider--vertical')
 	if (coverage) values.push('goo-slider--coverage')
-	if (variance) values.push('goo-slider--variance')
+	if (isVarianceMode) values.push('goo-slider--variance')
+	if (sliderMarks.length) values.push('goo-slider--marked')
+	if (valueBubble) values.push('goo-slider--value-bubble')
+	if (valueBubble === 'always') values.push('goo-slider--value-bubble-always')
 	if (!coverage && currentValues.length === 1 && !preset && usesDefaultShape && !hasCustomGradient) values.push('goo-slider--value-fill')
 	if (effectiveDisabled) values.push('goo-slider--disabled')
 	if (preset && sliderPresetConfigs[preset]?.className) values.push(sliderPresetConfigs[preset].className)
@@ -182,6 +215,7 @@ const hostAttributes = $derived<Record<string, string | number | undefined>>({
 	max: numericMax,
 	step: numericStep,
 	unit,
+	mode: effectiveMode,
 	preset: preset || undefined,
 	'preset-color': currentPresetColor || undefined,
 	'preset-hue': currentPresetHue,
@@ -189,7 +223,9 @@ const hostAttributes = $derived<Record<string, string | number | undefined>>({
 	'can-cross': canCross ? '' : undefined,
 	'can-push': canPush ? '' : undefined,
 	coverage: coverage ? '' : undefined,
-	variance: variance ? '' : undefined,
+	variance: isVarianceMode ? '' : undefined,
+	scale: scale !== 'linear' ? scale : undefined,
+	ticks: ticks ? '' : undefined,
 	disabled: effectiveDisabled ? '' : undefined
 })
 
@@ -283,7 +319,7 @@ function assignSliderApi(slider: GooSliderRuntimeElement): void {
 	slider.setAnimate = (_index, nextAnimate) => {
 		animate = nextAnimate
 	}
-	slider.toPercent = nextValue => toPercent(nextValue, numericMin, numericMax)
+	slider.toPercent = nextValue => toScaledPercent(nextValue, numericMin, numericMax, scale)
 	slider.enable = () => {
 		effectiveDisabled = false
 	}
@@ -373,8 +409,12 @@ function updateThumbFromPointer(index: number, event: PointerEvent, state: 'chan
 function updateThumbValue(index: number, nextValue: number, state: 'change' | 'input', event?: Event): void {
 	let formatted = formatValue(nextValue)
 
-	const values = variance
-		? getVarianceValues(currentValues, index, formatted)
+	const values = isVarianceMode
+		? getSharedVarianceValues(currentValues, index, formatted, {
+			min: numericMin,
+			max: numericMax,
+			formatValue
+		})
 		: getConstrainedValues(currentValues, index, formatted)
 
 	if (values.length === currentValues.length && values.every((value, valueIndex) => Object.is(value, currentValues[valueIndex]))) {
@@ -398,6 +438,8 @@ function getConstrainedValues(sourceValues: number[], index: number, formatted: 
 	}
 
 	values[index] = formatted
+	applyDistanceConstraints(values, index)
+	formatted = values[index] ?? formatted
 	if (canPushNeighbors) {
 		for (let previous = index - 1; previous >= 0; previous--) {
 			if (values[previous] > formatted) values[previous] = formatted
@@ -410,39 +452,22 @@ function getConstrainedValues(sourceValues: number[], index: number, formatted: 
 	return values
 }
 
-function getVarianceValues(sourceValues: number[], index: number, formatted: number): number[] {
-	if (sourceValues.length < 3) {
-		return getConstrainedValues(sourceValues, index, formatted)
+function applyDistanceConstraints(values: number[], index: number): void {
+	if (canCross || values.length < 2) return
+	const minGap = Math.max(0, toFiniteNumber(minDistance, 0))
+	const maxGap = toFiniteNumber(maxDistance, Number.POSITIVE_INFINITY)
+	const previous = values[index - 1]
+	const next = values[index + 1]
+	let nextValue = values[index] ?? numericMin
+	if (previous !== undefined) {
+		nextValue = Math.max(nextValue, previous + minGap)
+		if (Number.isFinite(maxGap)) nextValue = Math.min(nextValue, previous + maxGap)
 	}
-
-	const currentBase = sourceValues[1] ?? numericMin
-	const currentRadius = getVarianceRadius(sourceValues, currentBase)
-
-	if (index === 1) {
-		return getEdgeCompressedVarianceValues(formatted, currentRadius)
+	if (next !== undefined) {
+		nextValue = Math.min(nextValue, next - minGap)
+		if (Number.isFinite(maxGap)) nextValue = Math.max(nextValue, next - maxGap)
 	}
-
-	const sideRadius = index === 0
-		? Math.max(0, currentBase - formatted)
-		: Math.max(0, formatted - currentBase)
-	return getEdgeCompressedVarianceValues(currentBase, sideRadius)
-}
-
-function getEdgeCompressedVarianceValues(baseValue: number, radiusValue: number): number[] {
-	const rangeRadius = Math.max(0, numericMax - numericMin)
-	const radius = Math.min(Math.max(0, radiusValue), rangeRadius)
-	const base = formatValue(clamp(baseValue, numericMin, numericMax))
-	return [
-		formatValue(Math.max(numericMin, base - radius)),
-		base,
-		formatValue(Math.min(numericMax, base + radius))
-	]
-}
-
-function getVarianceRadius(values: number[], base: number): number {
-	const low = values[0] ?? base
-	const high = values[2] ?? base
-	return Math.max(0, base - low, high - base)
+	values[index] = formatValue(nextValue)
 }
 
 function emitSliderEvent(index: number, state: 'change' | 'input', event?: Event): void {
@@ -474,7 +499,7 @@ function findNearestThumbIndex(event: PointerEvent): number | null {
 	let nearestIndex = 0
 	let nearestDistance = Number.MAX_SAFE_INTEGER
 	for (let index = 0; index < currentValues.length; index++) {
-		const valuePct = toPercent(currentValues[index], numericMin, numericMax)
+		const valuePct = toScaledPercent(currentValues[index], numericMin, numericMax, scale)
 		const distance = Math.abs(pointerPct - valuePct)
 		if (distance < nearestDistance) {
 			nearestDistance = distance
@@ -532,7 +557,7 @@ function getTrackLength(): number {
 }
 
 function getDisplayPercent(nextValue: number): number {
-	const pct = toPercent(nextValue, numericMin, numericMax)
+	const pct = toScaledPercent(nextValue, numericMin, numericMax, scale)
 	return clamp(easingFn ? easingFn(pct) : pct, 0, 1)
 }
 
@@ -541,8 +566,15 @@ function getThumbStyle(nextValue: number): string {
 	return direction === 'vertical' ? `bottom: ${ pct }%;` : `left: ${ pct }%;`
 }
 
+function getMarkStyle(nextValue: number): string {
+	const pct = getDisplayPercent(nextValue) * 100
+	return direction === 'vertical'
+		? `bottom: ${ pct }%;`
+		: `left: ${ pct }%;`
+}
+
 function isVarianceThumb(index: number): boolean {
-	return variance && currentValues.length >= 3 && index >= 0 && index <= 2
+	return isVarianceMode && currentValues.length >= 3 && index >= 0 && index <= 2
 }
 
 function getVarianceThumbRole(index: number): 'base' | 'variance' | undefined {
@@ -564,7 +596,7 @@ function getThumbAriaLabel(index: number): string {
 }
 
 function getCoverageStyles(): string[] {
-	if (variance && currentValues.length >= 3) {
+	if (isVarianceMode && currentValues.length >= 3) {
 		const pct0 = getDisplayPercent(currentValues[0] ?? numericMin)
 		const pct1 = getDisplayPercent(currentValues[2] ?? currentValues[0] ?? numericMin)
 		const left = Math.min(pct0, pct1) * 100
@@ -594,7 +626,8 @@ function getCoverageStyles(): string[] {
 }
 
 function formatValue(nextValue: number | string): number {
-	return clamp(toFormattedValue(toFiniteNumber(nextValue, numericMin), false, runtimeState), numericMin, numericMax)
+	const formatted = clamp(toFormattedValue(toFiniteNumber(nextValue, numericMin), false, runtimeState), numericMin, numericMax)
+	return clamp(snapSliderValue(formatted, snap, sliderMarks), numericMin, numericMax)
 }
 
 function normalizeValueArray(nextValue: GooSliderValue | undefined, fallback = 50): number[] {
@@ -660,6 +693,17 @@ function toPositiveNumber(nextValue: unknown, fallback: number): number {
 	aria-disabled={effectiveDisabled ? 'true' : undefined}
 >
 	<div bind:this={trackElement} class="goo-slider__track" style={trackStyle}>
+		{#each sliderMarks as mark}
+			<div
+				class="goo-slider__mark"
+				class:goo-slider__mark--labeled={mark.label}
+				style={getMarkStyle(mark.value)}
+			>
+				{#if mark.label}
+					<span class="goo-slider__mark-label">{mark.label}</span>
+				{/if}
+			</div>
+		{/each}
 		{#each getCoverageStyles() as coverageStyle}
 			<div class="goo-slider__coverage" style={coverageStyle}></div>
 		{/each}
@@ -688,7 +732,11 @@ function toPositiveNumber(nextValue: unknown, fallback: number): number {
 				aria-label={isMulti ? getThumbAriaLabel(index) : undefined}
 				aria-disabled={isMulti && effectiveDisabled ? 'true' : undefined}
 				onkeydown={isMulti ? event => moveThumbByKey(index, event) : undefined}
-			></div>
+			>
+				{#if valueBubble}
+					<span class="goo-slider__value-bubble">{thumbValueText(thumbValue)}</span>
+				{/if}
+			</div>
 		{/each}
 	</div>
 	{#if children}

@@ -4,6 +4,7 @@ import { mount, unmount } from 'svelte'
 
 import { createNumberField, type NumberInputFieldElement } from '../input/_createInputField.ts'
 import GooSlider from '../slider/GooSlider.svelte'
+import { getVarianceValues } from '../slider/sliderUtils.ts'
 import type { GooSliderElement, GooSliderEventData, GooSliderValue } from '../slider/types.ts'
 import type {
 	GooRangeModuleElement,
@@ -81,6 +82,7 @@ export function createRangeModuleField(options: GooRangeModuleOptions = {}): Goo
 				title: currentOptions.title,
 				name: currentOptions.name,
 				direction: currentOptions.direction,
+				mode: currentOptions.mode,
 				preset: currentOptions.preset,
 				presetColor: currentOptions.presetColor,
 				presetHue: currentOptions.presetHue,
@@ -90,6 +92,13 @@ export function createRangeModuleField(options: GooRangeModuleOptions = {}): Goo
 				canPush: currentOptions.canPush,
 				coverage: currentOptions.coverage,
 				variance: currentOptions.variance,
+				ticks: currentOptions.ticks,
+				marks: currentOptions.marks,
+				snap: currentOptions.snap,
+				scale: currentOptions.scale,
+				minDistance: currentOptions.minDistance,
+				maxDistance: currentOptions.maxDistance,
+				valueBubble: currentOptions.valueBubble,
 				disabled: currentOptions.disabled,
 				gradient: currentOptions.gradient,
 				class: currentOptions.class ?? currentOptions.className,
@@ -152,8 +161,11 @@ export function createRangeModuleField(options: GooRangeModuleOptions = {}): Goo
 		const previousValues = currentValues
 		const values = previousValues.slice()
 		values[index] = value
-		currentValues = currentOptions.variance
-			? getVarianceValues(values, index, currentOptions.min ?? DEFAULT_MIN, currentOptions.max ?? DEFAULT_MAX, previousValues)
+		currentValues = currentOptions.variance || currentOptions.mode === 'variance'
+			? getVarianceValues(previousValues, index, value, {
+				min: currentOptions.min ?? DEFAULT_MIN,
+				max: currentOptions.max ?? DEFAULT_MAX
+			})
 			: values
 		sliderElement?.setValue(toSliderValue(currentValues), { silent: true })
 		currentValues = getSliderValues()
@@ -290,33 +302,6 @@ function normalizeValues(value: GooRangeModuleValue | undefined, fallbackMin = D
 		return value.map(nextValue => toFiniteNumber(nextValue, fallbackMin))
 	}
 	return [ toFiniteNumber(value, fallbackMin) ]
-}
-
-function getVarianceValues(values: number[], index: number, min: number, max: number, previousValues: number[]): number[] {
-	if (values.length < 3) return values
-
-	const baseValue = values[1] ?? min
-	const previousBase = previousValues[1] ?? baseValue
-	const previousRadius = Math.max(
-		0,
-		Math.min(previousBase - (previousValues[0] ?? previousBase), (previousValues[2] ?? previousBase) - previousBase)
-	)
-	const radius = index === 1
-		? previousRadius
-		: Math.max(0, Math.abs((values[index] ?? baseValue) - baseValue))
-	const maxRadius = Math.max(0, (max - min) / 2)
-	const base = clampNumber(baseValue, min + Math.min(radius, maxRadius), max - Math.min(radius, maxRadius))
-	const fittedRadius = Math.min(radius, maxRadius, base - min, max - base)
-
-	return [
-		base - fittedRadius,
-		base,
-		base + fittedRadius
-	]
-}
-
-function clampNumber(value: number, min: number, max: number): number {
-	return Math.min(max, Math.max(min, value))
 }
 
 function toSliderValue(values: number[]): GooSliderValue {

@@ -4,7 +4,7 @@
  */
 
 import { formatNumber } from '../support/utils/formatNumber.ts'
-import { roundToStep } from '../support/utils/numberUtils.ts'
+import { clamp, roundToStep } from '../support/utils/numberUtils.ts'
 
 // ============================================================================
 // Types
@@ -29,6 +29,16 @@ export interface GooSliderState {
 	step: number
 	unit: string
 	direction: 'horizontal' | 'vertical'
+	scale?: GooSliderScale
+}
+
+/** Slider scale mapping used by the primitive. */
+export type GooSliderScale = 'exponential' | 'linear' | 'log'
+
+/** Normalized slider mark used for rendering and snapping. */
+export type NormalizedSliderMark = {
+	label?: string
+	value: number
 }
 
 // ============================================================================
@@ -97,7 +107,7 @@ export function buildGradientCSS(colors: string[] | undefined): string {
  */
 export function toFormattedValue(value: number, isPercent: boolean, state: GooSliderState): number {
 	if (isPercent) {
-		value = value * (state.max - state.min) + state.min
+		value = fromScaledPercent(value, state.min, state.max, state.scale)
 	}
 
 	if (state.unit === 'float') {
@@ -109,6 +119,125 @@ export function toFormattedValue(value: number, isPercent: boolean, state: GooSl
 		max: state.max,
 		min: state.min
 	}) as number
+}
+
+/** Convert a value into a 0-1 track percentage for the selected scale. */
+export function toScaledPercent(value: number, min: number, max: number, scale: GooSliderScale = 'linear'): number {
+	if (max === min) return 0
+	if (scale === 'log' && min > 0 && max > 0) {
+		return clamp((Math.log(value) - Math.log(min)) / (Math.log(max) - Math.log(min)), 0, 1)
+	}
+	if (scale === 'exponential') {
+		return clamp(Math.sqrt((value - min) / (max - min)), 0, 1)
+	}
+	return clamp((value - min) / (max - min), 0, 1)
+}
+
+/** Convert a 0-1 track percentage into a value for the selected scale. */
+export function fromScaledPercent(percent: number, min: number, max: number, scale: GooSliderScale = 'linear'): number {
+	const pct = clamp(percent, 0, 1)
+	if (scale === 'log' && min > 0 && max > 0) {
+		return Math.exp(Math.log(min) + pct * (Math.log(max) - Math.log(min)))
+	}
+	if (scale === 'exponential') {
+		return min + (pct ** 2) * (max - min)
+	}
+	return min + pct * (max - min)
+}
+
+/** Build track marks from slider ticks and explicit mark options. */
+export function normalizeSliderMarks(
+	ticks: boolean | number | undefined,
+	marks: Array<number | NormalizedSliderMark> | undefined,
+	min: number,
+	max: number
+): NormalizedSliderMark[] {
+	const normalized = new Map<number, NormalizedSliderMark>()
+	if (ticks) {
+		const segments = typeof ticks === 'number' && Number.isFinite(ticks) ? Math.max(1, Math.floor(ticks)) : 10
+		for (let index = 0; index <= segments; index++) {
+			const value = min + (index / segments) * (max - min)
+			normalized.set(value, { value })
+		}
+	}
+	for (const mark of marks ?? []) {
+		const nextMark = typeof mark === 'number' ? { value: mark } : mark
+		if (Number.isFinite(nextMark.value)) normalized.set(nextMark.value, nextMark)
+	}
+	return [ ...normalized.values() ].sort((left, right) => left.value - right.value)
+}
+
+/** Snap a formatted value to explicit snap points or normalized track marks. */
+export function snapSliderValue(
+	value: number,
+	snap: boolean | number[] | undefined,
+	marks: NormalizedSliderMark[]
+): number {
+	if (!snap) return value
+	const points = Array.isArray(snap)
+		? snap.filter(Number.isFinite)
+		: marks.map(mark => mark.value)
+	if (!points.length) return value
+	let best = points[0] ?? value
+	let bestDistance = Math.abs(value - best)
+	for (const point of points) {
+		const distance = Math.abs(value - point)
+		if (distance < bestDistance) {
+			best = point
+			bestDistance = distance
+		}
+	}
+	return best
+}
+
+/** Return edge-compressed variance values around a base and radius. */
+export function getEdgeCompressedVarianceValues(
+	baseValue: number,
+	radiusValue: number,
+	min: number,
+	max: number,
+	formatValue: (value: number) => number = value => clamp(value, min, max)
+): number[] {
+	const rangeRadius = Math.max(0, max - min)
+	const radius = Math.min(Math.max(0, radiusValue), rangeRadius)
+	const base = formatValue(clamp(baseValue, min, max))
+	return [
+		formatValue(Math.max(min, base - radius)),
+		base,
+		formatValue(Math.min(max, base + radius))
+	]
+}
+
+/** Read the persisted variance radius from possibly edge-compressed values. */
+export function getVarianceRadius(values: number[], base: number): number {
+	const low = values[0] ?? base
+	const high = values[2] ?? base
+	return Math.max(0, base - low, high - base)
+}
+
+/** Update `[low, base, high]` variance values with edge compression. */
+export function getVarianceValues(
+	sourceValues: number[],
+	index: number,
+	formatted: number,
+	options: {
+		formatValue?: (value: number) => number
+		max: number
+		min: number
+	}
+): number[] {
+	if (sourceValues.length < 3) return sourceValues.slice()
+
+	const currentBase = sourceValues[1] ?? options.min
+	const currentRadius = getVarianceRadius(sourceValues, currentBase)
+	const formatValue = options.formatValue
+	if (index === 1) {
+		return getEdgeCompressedVarianceValues(formatted, currentRadius, options.min, options.max, formatValue)
+	}
+	const sideRadius = index === 0
+		? Math.max(0, currentBase - formatted)
+		: Math.max(0, formatted - currentBase)
+	return getEdgeCompressedVarianceValues(currentBase, sideRadius, options.min, options.max, formatValue)
 }
 
 /**

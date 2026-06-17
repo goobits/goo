@@ -136,4 +136,40 @@ describe('GooRangeModule', () => {
 		expect(range.getRange().values).toEqual([ 25, 50, 75 ])
 		expect([ ...range.querySelectorAll<HTMLInputElement>('.goo-number__content') ].map(input => input.value)).toEqual([ '25', '50', '75' ])
 	})
+
+	it('uses shared edge-compressed variance math for number edits', async() => {
+		const range = createRangeModuleField({
+			max: 100,
+			min: 0,
+			step: 10,
+			value: [ 0, 10, 20 ],
+			variance: true
+		})
+		document.body.appendChild(range)
+		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
+
+		const inputs = range.querySelectorAll<HTMLInputElement>('.goo-number__content')
+		await fireEvent.input(inputs[1]!, { target: { value: '0' } })
+		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
+
+		expect(range.getValue()).toEqual([ 0, 0, 10 ])
+		expect(range.getRange().values).toEqual([ 0, 0, 10 ])
+	})
+
+	it('passes slider primitive options through', async() => {
+		const range = createRangeModuleField({
+			max: 100,
+			min: 0,
+			mode: 'variance',
+			ticks: 2,
+			value: [ 25, 50, 75 ],
+			valueBubble: true
+		})
+		document.body.appendChild(range)
+		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
+
+		expect(range.querySelector('.goo-slider')?.getAttribute('mode')).toBe('variance')
+		expect(range.querySelectorAll('.goo-slider__mark')).toHaveLength(3)
+		expect(range.querySelector('.goo-slider__value-bubble')).not.toBeNull()
+	})
 })

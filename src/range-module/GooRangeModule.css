@@ -82,31 +82,3 @@
 .goo-range-module--goo .goo-slider__track {
 	margin-inline: 0;
 }
-
-.goo-range-module--goo .goo-slider:not(.goo-slider--vertical) .goo-slider__track::after {
-	--goo-range-module-tick-color: var(--goo-theme-control-range-tick-color);
-
-	content: '';
-	position: absolute;
-	top: -5px;
-	left: 4.5px;
-	width: calc(100% - 9px);
-	height: 4px;
-	background:
-		linear-gradient(var(--goo-range-module-tick-color), var(--goo-range-module-tick-color)) 0
-			0 / 1px 4px no-repeat,
-		linear-gradient(var(--goo-range-module-tick-color), var(--goo-range-module-tick-color)) 50%
-			0 / 1px 4px no-repeat,
-		linear-gradient(var(--goo-range-module-tick-color), var(--goo-range-module-tick-color)) 100%
-			0 / 1px 4px no-repeat,
-		repeating-linear-gradient(
-				to right,
-				transparent 0,
-				transparent calc(10% - 1px),
-				var(--goo-range-module-tick-color) calc(10% - 1px),
-				var(--goo-range-module-tick-color) 10%
-			)
-			0 1px / 100% 3px no-repeat;
-	pointer-events: none;
-	z-index: 0;
-}
