@@ -47,6 +47,10 @@ export default {
 			props: { title: 'Variance near edge', value: [ 0, 15, 30 ], variance: true }
 		},
 		{
+			title: 'Variance edge compressed',
+			props: { title: 'Variance edge compressed', value: [ 80, 100, 100 ], variance: true }
+		},
+		{
 			title: 'Vertical variance',
 			props: { title: 'Vertical variance', value: [ 25, 50, 75 ], variance: true, direction: 'vertical', style: 'height: 120px;' }
 		},

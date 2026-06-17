@@ -297,8 +297,9 @@ function handlePointerDown(event: PointerEvent): void {
 	if (event.button !== 0) return
 
 	event.preventDefault()
-	const startedOnThumb = isThumbTarget(event.target)
-	const index = findNearestThumbIndex(event)
+	const targetIndex = getThumbTargetIndex(event.target)
+	const startedOnThumb = targetIndex !== null
+	const index = targetIndex ?? findNearestThumbIndex(event)
 	if (index === null) return
 	if (!startedOnThumb) {
 		playPointerJumpAnimation()
@@ -418,32 +419,30 @@ function getVarianceValues(sourceValues: number[], index: number, formatted: num
 	const currentRadius = getVarianceRadius(sourceValues, currentBase)
 
 	if (index === 1) {
-		return getCenteredVarianceValues(formatted, currentRadius)
+		return getEdgeCompressedVarianceValues(formatted, currentRadius)
 	}
 
 	const sideRadius = index === 0
 		? Math.max(0, currentBase - formatted)
 		: Math.max(0, formatted - currentBase)
-	return getCenteredVarianceValues(currentBase, sideRadius)
+	return getEdgeCompressedVarianceValues(currentBase, sideRadius)
 }
 
-function getCenteredVarianceValues(baseValue: number, radiusValue: number): number[] {
-	const rangeRadius = Math.max(0, (numericMax - numericMin) / 2)
+function getEdgeCompressedVarianceValues(baseValue: number, radiusValue: number): number[] {
+	const rangeRadius = Math.max(0, numericMax - numericMin)
 	const radius = Math.min(Math.max(0, radiusValue), rangeRadius)
-	const base = formatValue(clamp(baseValue, numericMin + radius, numericMax - radius))
-	const maxRadiusForBase = Math.min(base - numericMin, numericMax - base)
-	const fittedRadius = Math.min(radius, maxRadiusForBase)
+	const base = formatValue(clamp(baseValue, numericMin, numericMax))
 	return [
-		formatValue(base - fittedRadius),
+		formatValue(Math.max(numericMin, base - radius)),
 		base,
-		formatValue(base + fittedRadius)
+		formatValue(Math.min(numericMax, base + radius))
 	]
 }
 
 function getVarianceRadius(values: number[], base: number): number {
 	const low = values[0] ?? base
 	const high = values[2] ?? base
-	return Math.max(0, Math.min(base - low, high - base))
+	return Math.max(0, base - low, high - base)
 }
 
 function emitSliderEvent(index: number, state: 'change' | 'input', event?: Event): void {
@@ -495,8 +494,11 @@ function getPointerPercent(event: PointerEvent): number {
 	return clamp((event.clientX - rect.left) / (rect.width || 214), 0, 1)
 }
 
-function isThumbTarget(target: EventTarget | null): boolean {
-	return target instanceof Element && Boolean(target.closest('.goo-slider__thumb'))
+function getThumbTargetIndex(target: EventTarget | null): number | null {
+	if (!(target instanceof Element)) return null
+	const thumb = target.closest<HTMLElement>('.goo-slider__thumb')
+	const index = Number(thumb?.dataset.index)
+	return Number.isInteger(index) && index >= 0 && index < currentValues.length ? index : null
 }
 
 function playPointerJumpAnimation(): void {

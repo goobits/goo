@@ -251,10 +251,8 @@ describe('GooSlider', () => {
 		expect(sliderCss).toContain('linear-gradient(\n\t\tto right')
 		expect(sliderCss).toContain('.goo-slider.goo-slider--variance.goo-slider--vertical .goo-slider__coverage')
 		expect(sliderCss).toContain('linear-gradient(\n\t\tto top')
-		expect(sliderCss).toContain('.goo-slider.goo-slider--variance .goo-slider__thumb--variance-low')
-		expect(sliderCss).toContain('.goo-slider.goo-slider--variance .goo-slider__thumb--variance-high')
-		expect(sliderCss).toContain('.goo-slider.goo-slider--variance.goo-slider--vertical .goo-slider__thumb--variance-low')
-		expect(sliderCss).toContain('.goo-slider.goo-slider--variance.goo-slider--vertical .goo-slider__thumb--variance-high')
+		expect(sliderCss).toContain('rotate(45deg)')
+		expect(sliderCss).not.toContain('clip-path: polygon')
 	})
 
 	it('moves variance side controls symmetrically when one side changes', async() => {
@@ -371,7 +369,7 @@ describe('GooSlider', () => {
 		expect(onchange).not.toHaveBeenCalled()
 	})
 
-	it('does not emit when variance base movement is clamped by side controls', async() => {
+	it('lets the variance base reach the range edge while compressing only the edge side', async() => {
 		const onchange = vi.fn()
 		const { container } = render(GooSlider, {
 			props: {
@@ -388,11 +386,11 @@ describe('GooSlider', () => {
 
 		await fireEvent.keyDown(thumbs[1]!, { key: 'ArrowLeft' })
 
-		expect(slider.getValue()).toEqual([ 0, 10, 20 ])
-		expect(onchange).not.toHaveBeenCalled()
+		expect(slider.getValue()).toEqual([ 0, 0, 10 ])
+		expect(onchange.mock.calls[0]?.[0]).toEqual([ 0, 0, 10 ])
 	})
 
-	it('prevents the variance base from moving past the mirrored side controls', async() => {
+	it('preserves variance radius on the free side as the base reaches the edge', async() => {
 		const { container } = render(GooSlider, {
 			props: {
 				value: [ 30, 50, 70 ],
@@ -405,11 +403,61 @@ describe('GooSlider', () => {
 		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
 		const thumbs = container.querySelectorAll<HTMLElement>('.goo-slider__thumb')
 
-		await fireEvent.keyDown(thumbs[1]!, { key: 'ArrowRight' })
-		await fireEvent.keyDown(thumbs[1]!, { key: 'ArrowRight' })
-		await fireEvent.keyDown(thumbs[1]!, { key: 'ArrowRight' })
+		await fireEvent.keyDown(thumbs[1]!, { key: 'End' })
 
-		expect(slider.getValue()).toEqual([ 60, 80, 100 ])
+		expect(slider.getValue()).toEqual([ 80, 100, 100 ])
+	})
+
+	it('restores the compressed variance side when the base moves back from the edge', async() => {
+		const { container } = render(GooSlider, {
+			props: {
+				value: [ 80, 100, 100 ],
+				min: 0,
+				max: 100,
+				step: 10,
+				variance: true
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const thumbs = container.querySelectorAll<HTMLElement>('.goo-slider__thumb')
+
+		await fireEvent.keyDown(thumbs[1]!, { key: 'ArrowLeft' })
+		await fireEvent.keyDown(thumbs[1]!, { key: 'ArrowLeft' })
+		await fireEvent.keyDown(thumbs[1]!, { key: 'ArrowLeft' })
+
+		expect(slider.getValue()).toEqual([ 50, 70, 90 ])
+	})
+
+	it('drags the clicked variance base even when it overlaps an edge control', () => {
+		const { container } = render(GooSlider, {
+			props: {
+				value: [ 0, 0, 20 ],
+				min: 0,
+				max: 100,
+				step: 1,
+				variance: true
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const track = container.querySelector<HTMLElement>('.goo-slider__track')!
+		const thumbs = container.querySelectorAll<HTMLElement>('.goo-slider__thumb')
+		track.getBoundingClientRect = () => ({
+			x: 0,
+			y: 0,
+			width: 100,
+			height: 20,
+			top: 0,
+			right: 100,
+			bottom: 20,
+			left: 0,
+			toJSON: () => ({})
+		})
+		slider.setPointerCapture = vi.fn()
+
+		thumbs[1]!.dispatchEvent(pointerEvent('pointerdown', { pointerId: 3, clientX: 0 }))
+		slider.dispatchEvent(pointerEvent('pointermove', { pointerId: 3, clientX: 10 }))
+
+		expect(slider.getValue()).toEqual([ 0, 10, 30 ])
 	})
 
 	it('disables the hidden form value when the slider is disabled', () => {
