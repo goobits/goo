@@ -99,11 +99,11 @@ Use package subpaths in apps and shared packages so each caller names the surfac
 | `@goobits/goo/positioning`             | `positionElementAt`, `calculatePosition`, positioning types        | Shared positioning math                    |
 | `@goobits/goo/progress-ring`           | `GooProgressRing`, `createGooProgressRingTimer`                    | Progress ring and timer overlay            |
 | `@goobits/goo/radio`                   | `GooRadio`, `GooRadioGroup`                                        | Radio controls                             |
-| `@goobits/goo/range-module`            | `createRangeModuleField`                                           | Slider with synced numeric input fields    |
 | `@goobits/goo/schema`                  | `GooSchema`, `createGooSchema`, schema types                       | Schema-driven control generation           |
 | `@goobits/goo/select`                  | `GooSelect`                                                        | Select/menu component with submenu support |
 | `@goobits/goo/select/styles.css`       | CSS                                                                | Select-only stylesheet                     |
 | `@goobits/goo/slider`                  | `GooSlider`                                                        | Single and multi-thumb sliders             |
+| `@goobits/goo/slider-field`            | `createSliderField`                                                | Slider with synced numeric input fields    |
 | `@goobits/goo/spinner`                 | `GooSpinner`, `renderGooSpinnerHtml`                               | Spinner component and HTML renderer        |
 | `@goobits/goo/textarea`                | `GooTextarea`                                                      | Textarea component                         |
 | `@goobits/goo/toast`                   | `GooToast`, `GooToaster`, `toast`                                  | Toast notification UI and service          |
@@ -124,7 +124,7 @@ Use package subpaths in apps and shared packages so each caller names the surfac
 
 ## Public Handles
 
-Imperative Goo factories create ordinary HTML elements and attach a small public handle API. Use the documented methods such as `destroy()`, `setValue()`, `getValue()`, `updateDisplay()`, `updateOptions()`, `getRange()`, and `getController()` instead of reaching into underscore-prefixed implementation state or component-specific destroy aliases.
+Imperative Goo factories create ordinary HTML elements and attach a small public handle API. Use the documented methods such as `destroy()`, `setValue()`, `getValue()`, `updateDisplay()`, `updateOptions()`, `getSlider()`, and `getController()` instead of reaching into underscore-prefixed implementation state or component-specific destroy aliases.
 
 Use `createGooController()` and `createGooSchema()` for imperative controller/schema handles. Use the `GooSchema` Svelte component for markup. Use `createGooDialog()` for imperative dialogs. `GooSelect` internals such as keyboard and panel state are private to the package; public callers should use the component props, DOM events, or the exported element methods.
 
@@ -251,12 +251,12 @@ Use `createGooController()` and `createGooSchema()` for imperative controller/sc
 <GooSlider preset="opacity" presetColor="#ff0000" />
 ```
 
-### Range Module
+### Slider Field
 
 ```ts
-import { createRangeModuleField } from '@goobits/goo/range-module'
+import { createSliderField } from '@goobits/goo/slider-field'
 
-const range = createRangeModuleField({
+const field = createSliderField({
 	value: 24,
 	min: 1,
 	max: 100,
@@ -267,7 +267,7 @@ const range = createRangeModuleField({
 	}
 })
 
-document.body.appendChild(range)
+document.body.appendChild(field)
 ```
 
 ### Angle Input
@@ -342,7 +342,7 @@ Controllers return native elements with chainable public methods such as `name()
 	const schema = [
 		{ path: 'name', type: 'text', label: 'Name' },
 		{ path: 'enabled', type: 'checkbox', label: 'Enabled' },
-		{ path: 'size', type: 'range-module', min: 1, max: 100, label: 'Size' }
+		{ path: 'size', type: 'slider-field', min: 1, max: 100, label: 'Size' }
 	]
 </script>
 

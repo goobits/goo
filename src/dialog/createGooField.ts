@@ -11,7 +11,7 @@ import { resolveGooControlTypeConfig } from '../controller/controlRegistry.ts'
 import type { NumberInputFieldOptions, TextInputFieldOptions } from '../input/_createInputField.ts'
 import type { RadioGroupFieldOptions } from '../radio/_createRadioGroupField.ts'
 import type { SelectFieldOptions } from '../select/_createSelectField.ts'
-import type { SliderFieldOptions } from '../slider/_createSliderField.ts'
+import type { SliderPrimitiveFieldOptions } from '../slider/_createSliderPrimitiveField.ts'
 import type { TextareaFieldOptions } from '../textarea/_createTextareaField.ts'
 
 type InputFieldType = 'text' | 'email' | 'password' | 'url'
@@ -26,7 +26,7 @@ export type GooFieldConfig =
 	| ({ type: 'color' } & ColorFieldOptions)
 	| ({ type: RadioFieldType } & RadioGroupFieldOptions)
 	| ({ type: 'select' } & SelectFieldOptions)
-	| ({ type: 'range' } & SliderFieldOptions)
+	| ({ type: 'range' } & SliderPrimitiveFieldOptions)
 	| ({ type: 'angle' } & AngleInputFieldOptions)
 	| ({ type: 'buttongroup' } & ButtonGroupFieldOptions)
 

@@ -12,20 +12,20 @@ import type {
 	GooSliderValueBubble
 } from '../slider/types.ts'
 
-export type GooRangeModuleValue = number | number[] | { min: number; max: number } | { x: number; y: number }
-export type GooRangeModuleState = 'input' | 'change' | 'set'
+export type GooSliderFieldValue = number | number[] | { min: number; max: number } | { x: number; y: number }
+export type GooSliderFieldState = 'input' | 'change' | 'set'
 
-export type GooRangeModuleEventData = {
-	element: GooRangeModuleElement
+export type GooSliderFieldEventData = {
+	element: GooSliderFieldElement
 	index: number
 	slider: GooSliderElement | null
-	state: GooRangeModuleState
+	state: GooSliderFieldState
 	value: number
 	values: number[]
 	originalEvent?: Event
 }
 
-export type GooRangeModuleOptions = {
+export type GooSliderFieldOptions = {
 	canCross?: boolean
 	canPush?: boolean
 	class?: string
@@ -46,10 +46,10 @@ export type GooRangeModuleOptions = {
 	minDistance?: number | string
 	mode?: GooSliderMode
 	name?: string
-	onchange?: (value: GooRangeModuleValue, data: GooRangeModuleEventData) => void
-	onChange?: (value: GooRangeModuleValue, data: GooRangeModuleEventData) => void
-	oninput?: (value: GooRangeModuleValue, data: GooRangeModuleEventData) => void
-	onInput?: (value: GooRangeModuleValue, data: GooRangeModuleEventData) => void
+	onchange?: (value: GooSliderFieldValue, data: GooSliderFieldEventData) => void
+	onChange?: (value: GooSliderFieldValue, data: GooSliderFieldEventData) => void
+	oninput?: (value: GooSliderFieldValue, data: GooSliderFieldEventData) => void
+	onInput?: (value: GooSliderFieldValue, data: GooSliderFieldEventData) => void
 	preset?: GooSliderPreset
 	presetColor?: string
 	presetHue?: number
@@ -64,27 +64,26 @@ export type GooRangeModuleOptions = {
 	ticks?: GooSliderTickConfig
 	title?: string
 	unit?: GooSliderUnit
-	value?: GooRangeModuleValue
+	value?: GooSliderFieldValue
 	valueBubble?: GooSliderValueBubble
 }
 
-export type GooRangeModuleElement = HTMLDivElement & {
+export type GooSliderFieldElement = HTMLDivElement & {
 	destroy(): void
 	disable(): void
 	enable(): void
-	getRange(): GooRangeModuleRangeApi
-	getValue(): GooRangeModuleValue
-	setOptions(options: Partial<GooRangeModuleOptions>): void
-	setValue(value: GooRangeModuleValue, options?: { silent?: boolean }): void
-	value: GooRangeModuleValue
+	getSlider(): GooSliderFieldSliderApi
+	getValue(): GooSliderFieldValue
+	setOptions(options: Partial<GooSliderFieldOptions>): void
+	setValue(value: GooSliderFieldValue, options?: { silent?: boolean }): void
+	value: GooSliderFieldValue
 }
 
-export type GooRangeModuleRangeApi = {
+export type GooSliderFieldSliderApi = {
 	element: HTMLElement
-	getState(): GooRangeModuleState | 'load'
+	getState(): GooSliderFieldState | 'load'
 	get values(): number[]
-	getValue(): GooRangeModuleValue
-	setAnimate(index: number, animate: boolean): void
-	setValue(value: GooRangeModuleValue, options?: { silent?: boolean }): void
+	getValue(): GooSliderFieldValue
+	setValue(value: GooSliderFieldValue, options?: { silent?: boolean }): void
 	toPercent(value: number): number
 }

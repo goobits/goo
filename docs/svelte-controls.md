@@ -9,7 +9,7 @@ How to expose a Svelte editor as a GooSchema control.
 3. Register the control type with an explicit config object.
 4. Use the type name in your schema.
 
-GooController owns the row wrapper, binding lifecycle, and imperative handle. Svelte controls should expose props and callbacks only; do not depend on controller private fields such as `_controlPromise`, `_control`, or `_destroyElement`. Imperative controls should use stable handle names such as `destroy()`, `setValue()`, `getValue()`, and `getRange()`.
+GooController owns the row wrapper, binding lifecycle, and imperative handle. Svelte controls should expose props and callbacks only; do not depend on controller private fields such as `_controlPromise`, `_control`, or `_destroyElement`. Imperative controls should use stable handle names such as `destroy()`, `setValue()`, `getValue()`, and `getSlider()`.
 
 ## Component + controlSchema
 
@@ -97,11 +97,11 @@ interface SvelteControlSchema {
 
 ## Built-in controls
 
-Built-in Goo controls are registered in `src/controller/controlRegistry.ts`. Use `type: 'range-module'` for a native Goo slider with synced numeric inputs. Rich editor-specific controls live in `@goobits/goo-editors` and should be registered by the host package or app through its explicit control type map.
+Built-in Goo controls are registered in `src/controller/controlRegistry.ts`. Use `type: 'slider-field'` for a native Goo slider with synced numeric inputs. Rich editor-specific controls live in `@goobits/goo-editors` and should be registered by the host package or app through its explicit control type map.
 
 ## Slider Feature Ownership
 
-`GooSlider` owns primitive slider behavior. `GooRangeModule` composes `GooSlider`
+`GooSlider` owns primitive slider behavior. `GooSliderField` composes `GooSlider`
 with a label and synced number fields, and should pass slider behavior through
 instead of duplicating it.
 
@@ -109,10 +109,10 @@ instead of duplicating it.
 | --- | --- | --- |
 | Single value | `GooSlider` | `mode="value"` is explicit; omitted mode still infers from value shape. |
 | Range values | `GooSlider` | `mode="range"` or a two-value array. |
-| Variance values | `GooSlider` | `mode="variance"` or legacy `variance: true`. Edge compression is shared with `GooRangeModule`. |
-| Ticks / marks / labels | `GooSlider` | Use `ticks` and `marks`; `GooRangeModule` passes them through. |
+| Variance values | `GooSlider` | `mode="variance"` or legacy `variance: true`. Edge compression is shared with `GooSliderField`. |
+| Ticks / marks / labels | `GooSlider` | Use `ticks` and `marks`; `GooSliderField` passes them through. |
 | Snap points | `GooSlider` | Use `snap: true` for marks/ticks or `snap: number[]` for explicit points. |
 | Scale mapping | `GooSlider` | `scale="linear"`, `"log"`, or `"exponential"`. Custom easing remains available for bespoke mappings. |
 | Thumb distance constraints | `GooSlider` | Use `minDistance` and `maxDistance` for neighboring range thumbs. |
 | Value bubble | `GooSlider` | Use `valueBubble: true` for active/hover/focus or `"always"` for persistent display. |
-| Labels and number inputs | `GooRangeModule` | Field composition only; it does not own slider math or track rendering. |
+| Labels and number inputs | `GooSliderField` | Field composition only; it does not own slider math or track rendering. |

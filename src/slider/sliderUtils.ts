@@ -5,20 +5,11 @@
 
 import { formatNumber } from '../support/utils/formatNumber.ts'
 import { clamp, roundToStep } from '../support/utils/numberUtils.ts'
+import type { GooSliderScale } from './types.ts'
 
 // ============================================================================
 // Types
 // ============================================================================
-
-/**
- * Thumb object representing a draggable handle.
- */
-export interface GooSliderThumb {
-	element: HTMLElement
-	index: number
-	left: number
-	value: number
-}
 
 /**
  * Minimal slider state interface for utility functions.
@@ -31,9 +22,6 @@ export interface GooSliderState {
 	direction: 'horizontal' | 'vertical'
 	scale?: GooSliderScale
 }
-
-/** Slider scale mapping used by the primitive. */
-export type GooSliderScale = 'exponential' | 'linear' | 'log'
 
 /** Normalized slider mark used for rendering and snapping. */
 export type NormalizedSliderMark = {

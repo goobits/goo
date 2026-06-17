@@ -27,12 +27,12 @@ import * as inputModule from '../input/GooInput.svelte'
 import * as numberModule from '../input/GooNumber.svelte'
 import { createRadioGroupField } from '../radio/_createRadioGroupField.ts'
 import * as radioModule from '../radio/GooRadioGroup.svelte'
-import { createRangeModuleField } from '../range-module/GooRangeModule.ts'
-import * as rangeModule from '../range-module/index.ts'
 import { createSelectField } from '../select/_createSelectField.ts'
 import * as selectModule from '../select/GooSelect.svelte'
-import { createSliderField } from '../slider/_createSliderField.ts'
+import { createSliderPrimitiveField } from '../slider/_createSliderPrimitiveField.ts'
 import * as sliderModule from '../slider/GooSlider.svelte'
+import { createSliderField } from '../slider-field/GooSliderField.ts'
+import * as sliderFieldModule from '../slider-field/index.ts'
 import { createTextareaField } from '../textarea/_createTextareaField.ts'
 import * as textareaModule from '../textarea/GooTextarea.svelte'
 import * as xyPadModule from '../xy-pad/GooXyPad.svelte'
@@ -65,9 +65,9 @@ export type GooBuiltInControlType =
   | 'radiogroup'
   | 'range'
   | 'range-dual'
-  | 'range-module'
   | 'select'
   | 'slider'
+  | 'slider-field'
   | 'text'
   | 'textarea'
   | 'url'
@@ -183,8 +183,8 @@ export const defaultControlRegistry: GooControlTypeRegistry = {
 	// Built-in controls
 	checkbox: defineSvelteControlType({ load: () => loadSvelteModule(checkboxModule), createField: createCheckboxField }),
 	button: defineSvelteControlType({ load: () => loadSvelteModule(buttonModule) }),
-	range: defineSvelteControlType({ load: () => loadSvelteModule(sliderModule), createField: createSliderField }),
-	slider: defineSvelteControlType({ load: () => loadSvelteModule(sliderModule), createField: createSliderField }),
+	range: defineSvelteControlType({ load: () => loadSvelteModule(sliderModule), createField: createSliderPrimitiveField }),
+	slider: defineSvelteControlType({ load: () => loadSvelteModule(sliderModule), createField: createSliderPrimitiveField }),
 	number: defineSvelteControlType({ load: () => loadSvelteModule(numberModule), createField: createNumberField }),
 	select: defineSvelteControlType({ load: () => loadSvelteModule(selectModule), createField: createSelectField }),
 	'blend-mode': defineFactoryControlType({
@@ -194,10 +194,10 @@ export const defaultControlRegistry: GooControlTypeRegistry = {
 	}),
 	radio: defineSvelteControlType({ load: () => loadSvelteModule(radioModule), createField: createRadioGroupField }),
 	radiogroup: defineSvelteControlType({ load: () => loadSvelteModule(radioModule), createField: createRadioGroupField }),
-	'range-module': defineFactoryControlType({
-		load: () => loadModule(rangeModule),
-		extract: module => module.createRangeModuleField as GooControlFactory,
-		createField: createRangeModuleField
+	'slider-field': defineFactoryControlType({
+		load: () => loadModule(sliderFieldModule),
+		extract: module => module.createSliderField as GooControlFactory,
+		createField: createSliderField
 	}),
 	text: defineSvelteControlType({ load: () => loadSvelteModule(inputModule), createField: createInputField }),
 	email: defineSvelteControlType({ load: () => loadSvelteModule(inputModule), createField: createInputField }),

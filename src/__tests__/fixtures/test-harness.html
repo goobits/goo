@@ -36,7 +36,7 @@
 		import { createCheckboxField } from '../../checkbox/_createCheckboxField.ts'
 		import { createColorField } from '../../color/_createColorField.ts'
 		import { createInputField } from '../../input/_createInputField.ts'
-		import { createSliderField } from '../../slider/_createSliderField.ts'
+		import { createSliderPrimitiveField } from '../../slider/_createSliderPrimitiveField.ts'
 		import { createGooController } from '@goobits/goo/controller'
 		import { createGooSchema } from '@goobits/goo/schema'
 
@@ -46,7 +46,7 @@
 			createCheckbox: createCheckboxField,
 			createColor: createColorField,
 			createInput: createInputField,
-			createSlider: createSliderField,
+			createSlider: createSliderPrimitiveField,
 			createGooController,
 			createGooSchema
 		}

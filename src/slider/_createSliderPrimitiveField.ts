@@ -3,6 +3,7 @@ import { mount, unmount } from 'svelte'
 import GooSlider from './GooSlider.svelte'
 import type {
 	GooSliderDirection,
+	GooSliderElement,
 	GooSliderEventData,
 	GooSliderMark,
 	GooSliderMode,
@@ -16,7 +17,7 @@ import type {
 	GooSliderValueBubble
 } from './types.ts'
 
-export type SliderFieldOptions = {
+export type SliderPrimitiveFieldOptions = {
 	canCross?: boolean
 	canPush?: boolean
 	class?: string
@@ -55,24 +56,34 @@ export type SliderFieldOptions = {
 
 type MountedControl = ReturnType<typeof mount>
 
-export type SliderFieldElement = HTMLDivElement & {
+export type SliderPrimitiveFieldElement = HTMLDivElement & {
+	destroy(): void
 	getValue(): number | number[]
 	setValue(value: GooSliderValue): void
 	value: number | number[]
 }
 
-export function createSliderField(options: SliderFieldOptions = {}): SliderFieldElement {
-	const field = document.createElement('div') as SliderFieldElement
-	field.className = 'goo-slider-field'
+export function createSliderPrimitiveField(options: SliderPrimitiveFieldOptions = {}): SliderPrimitiveFieldElement {
+	const field = document.createElement('div') as SliderPrimitiveFieldElement
+	field.className = 'goo-slider-primitive-field'
 	let currentValue: GooSliderValue = options.value ?? 50
 	let instance: MountedControl | null = null
+	let sliderElement: GooSliderElement | null = null
+	let destroyed = false
 
-	function render(): void {
+	function unmountSlider(): void {
 		if (instance) {
 			unmount(instance)
 			instance = null
-			field.replaceChildren()
 		}
+		sliderElement = null
+		field.replaceChildren()
+	}
+
+	function render(): void {
+		if (destroyed) return
+
+		unmountSlider()
 
 		instance = mount(GooSlider, {
 			target: field,
@@ -108,6 +119,12 @@ export function createSliderField(options: SliderFieldOptions = {}): SliderField
 				class: options.class ?? options.className,
 				style: options.style,
 				tabIndex: options.tabIndex,
+				get element() {
+					return sliderElement
+				},
+				set element(value) {
+					sliderElement = value
+				},
 				oninput: (value, data) => {
 					currentValue = value
 					options.oninput?.(data)
@@ -129,8 +146,16 @@ export function createSliderField(options: SliderFieldOptions = {}): SliderField
 	})
 	field.getValue = () => currentValue as number | number[]
 	field.setValue = value => {
+		if (destroyed) return
 		currentValue = value
-		render()
+		sliderElement?.setValue(value, { silent: true })
+		currentValue = sliderElement?.getValue() ?? currentValue
+	}
+	field.destroy = () => {
+		if (destroyed) return
+		destroyed = true
+		unmountSlider()
+		field.remove()
 	}
 
 	render()

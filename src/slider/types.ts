@@ -1,7 +1,6 @@
 import type { Snippet } from 'svelte'
 
 import type { GooForwardedAttributes } from '../support/types/forwardedAttributes.ts'
-import type { GooSliderThumb } from './sliderUtils.ts'
 
 /** Available preset types for Goo slider track styling. */
 export type GooSliderPreset = 'opacity' | 'hue' | 'saturation' | 'lightness' | 'brightness' | 'bipolar' | 'size'
@@ -14,6 +13,14 @@ export type GooSliderUnit = '%' | 'degree' | 'em' | 'float' | 'int' | 'integer' 
 
 /** Slider direction. */
 export type GooSliderDirection = 'horizontal' | 'vertical'
+
+/** Thumb object representing a draggable slider handle. */
+export type GooSliderThumb = {
+	element: HTMLElement
+	index: number
+	left: number
+	value: number
+}
 
 /** Slider semantic mode. Existing value-shape inference is preserved when omitted. */
 export type GooSliderMode = 'range' | 'value' | 'variance'
@@ -189,29 +196,40 @@ export type GooSliderElement = HTMLDivElement & {
 	/** Current values as an array. */
 	values: number[]
 
-	/** Set value or values. 	 * @param value - value.
- * @param options - options.
- */
+	/** Current thumb handles as DOM-backed API objects. */
+	thumbs: GooSliderThumb[]
+
+	/** Set value or values.
+	 * @param value - Next slider value.
+	 * @param options - Update options.
+	 */
 	setValue(value: GooSliderValue, options?: { silent?: boolean }): void
 
 	/** Get current value or values. */
 	getValue(): number | number[]
 
-	/** Update opacity preset color. 	 * @param color - color.
+	/** Update opacity preset color.
+	 * @param color - CSS color value.
 	 */
 	setPresetColor(color: string): void
 
-	/** Update saturation/lightness preset hue. 	 * @param hue - hue.
+	/** Update saturation/lightness preset hue.
+	 * @param hue - Hue value in degrees.
 	 */
 	setPresetHue(hue: number): void
 
-	/** Update lightness preset saturation. 	 * @param saturation - saturation.
+	/** Update lightness preset saturation.
+	 * @param saturation - Saturation percentage.
 	 */
 	setPresetSaturation(saturation: number): void
 
-	/** Set custom track gradient colors. 	 * @param colors - colors.
+	/** Set custom track gradient colors.
+	 * @param colors - CSS color stops.
 	 */
 	setGradient(colors: string[]): void
+
+	/** Convert a value to its rendered track percent. */
+	toPercent(value: number): number
 
 	/** Enable the slider. */
 	enable(): void

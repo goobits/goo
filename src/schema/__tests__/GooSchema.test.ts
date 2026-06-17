@@ -413,7 +413,7 @@ describe('GooSchema', () => {
 			schema: [
 				{
 					path: 'size',
-					type: 'range-module',
+					type: 'slider-field',
 					min: 0,
 					max: 100,
 					canCross: true,
@@ -423,7 +423,7 @@ describe('GooSchema', () => {
 			data: { size: 12 },
 			bare: true,
 			controlTypes: {
-				'range-module': {
+				'slider-field': {
 					load: () => Promise.resolve({}),
 					extract: () => options => {
 						receivedOptions = options as Record<string, unknown>
@@ -485,7 +485,7 @@ describe('GooSchema', () => {
 			schema: [
 				{
 					path: 'opacity',
-					type: 'range-module',
+					type: 'slider-field',
 					format: 'percent',
 					min: 0,
 					max: 1,
@@ -496,7 +496,7 @@ describe('GooSchema', () => {
 			data: { opacity: 0.5 },
 			bare: true,
 			controlTypes: {
-				'range-module': {
+				'slider-field': {
 					load: () => Promise.resolve({}),
 					extract: () => options => {
 						receivedOptions = options as Record<string, unknown>
@@ -524,7 +524,7 @@ describe('GooSchema', () => {
 			schema: [
 				{
 					path: 'opacity',
-					type: 'range-module',
+					type: 'slider-field',
 					valueFormat: 'percent',
 					displayUnit: '%',
 					showLabel: false,
@@ -537,7 +537,7 @@ describe('GooSchema', () => {
 			data: { opacity: 0.5 },
 			bare: true,
 			controlTypes: {
-				'range-module': {
+				'slider-field': {
 					load: () => Promise.resolve({}),
 					extract: () => options => {
 						receivedOptions = options as Record<string, unknown>

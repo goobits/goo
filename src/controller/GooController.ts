@@ -7,7 +7,7 @@
 import './GooController.css'
 
 import type { GooSelectMenuOptions } from '../select/types.ts'
-import { createSliderField } from '../slider/_createSliderField.ts'
+import { createSliderPrimitiveField } from '../slider/_createSliderPrimitiveField.ts'
 import type { GooSliderPreset, GooSliderShape } from '../slider/types.ts'
 import { emitter } from '../support/utils/emitter.ts'
 import { log } from '../support/utils/logger.ts'
@@ -496,7 +496,7 @@ class GooControllerRuntime {
 		// Store format for handlers
 		this._dualRangeIsMinMax = isMinMaxFormat
 
-		this._control = createSliderField(sliderOptions) as GooControlElement
+		this._control = createSliderPrimitiveField(sliderOptions) as GooControlElement
 		this.$widget.appendChild(this._control)
 	}
 

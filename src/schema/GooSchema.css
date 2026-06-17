@@ -106,7 +106,7 @@
 :is(.goo-schema, .goo-schema__bare)
 	.goo-folder
 	.goo-folder__content
-	> .goo-controller.goo-controller--range-module {
+	> .goo-controller.goo-controller--slider-field {
 	--goo-controller-padding: 0.5rem 0;
 }
 

@@ -5,6 +5,7 @@ import { tick } from 'svelte'
 import { describe, expect, it, vi } from 'vitest'
 
 import { pointerEvent } from '../../__tests__/_pointerEvents.ts'
+import { createSliderPrimitiveField } from '../_createSliderPrimitiveField.ts'
 import GooSlider from '../GooSlider.svelte'
 import type { GooSliderElement } from '../types.ts'
 
@@ -62,6 +63,25 @@ describe('GooSlider', () => {
 		element?.setValue(70)
 
 		expect(element?.getValue()).toBe(70)
+	})
+
+	it('updates primitive field values without remounting the slider', async() => {
+		const field = createSliderPrimitiveField({ value: 25, min: 0, max: 100 })
+		document.body.appendChild(field)
+		await tick()
+
+		const slider = field.querySelector<GooSliderElement>('.goo-slider')!
+		field.setValue(70)
+		await tick()
+
+		expect(field.querySelector('.goo-slider')).toBe(slider)
+		expect(field.getValue()).toBe(70)
+
+		field.destroy()
+		field.destroy()
+		field.setValue(20)
+
+		expect(field.querySelector('.goo-slider')).toBeNull()
 	})
 
 	it('emits Svelte callbacks with numeric values', async() => {
@@ -614,6 +634,87 @@ describe('GooSlider', () => {
 
 		expect(slider.classList.contains('goo-slider--animate')).toBe(false)
 		thumb.dispatchEvent(pointerEvent('pointerup', { pointerId: 2, clientX: 30 }))
+		vi.useRealTimers()
+	})
+
+	it('settles snapped drag jumps with a snap animation', async() => {
+		vi.useFakeTimers()
+		const { container } = render(GooSlider, {
+			props: {
+				value: 0,
+				min: 0,
+				max: 100,
+				snap: [ 0, 50, 100 ]
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const track = container.querySelector<HTMLElement>('.goo-slider__track')!
+		const thumb = container.querySelector<HTMLElement>('.goo-slider__thumb')!
+		track.getBoundingClientRect = () => ({
+			x: 0,
+			y: 0,
+			width: 100,
+			height: 20,
+			top: 0,
+			right: 100,
+			bottom: 20,
+			left: 0,
+			toJSON: () => ({})
+		})
+		slider.setPointerCapture = vi.fn()
+		slider.releasePointerCapture = vi.fn()
+
+		thumb.dispatchEvent(pointerEvent('pointerdown', { pointerId: 4, clientX: 0 }))
+		slider.dispatchEvent(pointerEvent('pointermove', { pointerId: 4, clientX: 60 }))
+		await tick()
+
+		expect(slider.getValue()).toBe(50)
+		expect(slider.classList.contains('goo-slider--snap-animate')).toBe(true)
+		expect(slider.classList.contains('goo-slider--animate')).toBe(false)
+
+		vi.runAllTimers()
+		await tick()
+
+		expect(slider.classList.contains('goo-slider--snap-animate')).toBe(false)
+		slider.dispatchEvent(pointerEvent('pointerup', { pointerId: 4, clientX: 60 }))
+		vi.useRealTimers()
+	})
+
+	it('cleans active pointer capture and timers when unmounted mid-drag', async() => {
+		vi.useFakeTimers()
+		const { container, unmount } = render(GooSlider, {
+			props: {
+				value: 0,
+				min: 0,
+				max: 100,
+				snap: [ 0, 50, 100 ]
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const track = container.querySelector<HTMLElement>('.goo-slider__track')!
+		const thumb = container.querySelector<HTMLElement>('.goo-slider__thumb')!
+		track.getBoundingClientRect = () => ({
+			x: 0,
+			y: 0,
+			width: 100,
+			height: 20,
+			top: 0,
+			right: 100,
+			bottom: 20,
+			left: 0,
+			toJSON: () => ({})
+		})
+		slider.setPointerCapture = vi.fn()
+		slider.releasePointerCapture = vi.fn()
+
+		thumb.dispatchEvent(pointerEvent('pointerdown', { pointerId: 8, clientX: 0 }))
+		slider.dispatchEvent(pointerEvent('pointermove', { pointerId: 8, clientX: 60 }))
+		await tick()
+
+		unmount()
+		vi.runAllTimers()
+
+		expect(slider.releasePointerCapture).toHaveBeenCalledExactlyOnceWith(8)
 		vi.useRealTimers()
 	})
 

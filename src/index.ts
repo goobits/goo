@@ -151,15 +151,6 @@ export { createGooProgressRingTimer, GooProgressRing } from './progress-ring/ind
 export type { GooRadioGroupLayout, GooRadioGroupProps, GooRadioOption, GooRadioOptions, GooRadioProps } from './radio/index.ts'
 export { GooRadio, GooRadioGroup } from './radio/index.ts'
 export type {
-	GooRangeModuleElement,
-	GooRangeModuleEventData,
-	GooRangeModuleOptions,
-	GooRangeModuleRangeApi,
-	GooRangeModuleState,
-	GooRangeModuleValue
-} from './range-module/index.ts'
-export { createRangeModuleField } from './range-module/index.ts'
-export type {
 	GooSchemaChangeHandler,
 	GooSchemaControlType,
 	GooSchemaData,
@@ -219,6 +210,15 @@ export type {
 	GooSliderValueBubble
 } from './slider/index.ts'
 export { GooSlider, sliderPresetConfigs, sliderPresets, sliderShapes } from './slider/index.ts'
+export type {
+	GooSliderFieldElement,
+	GooSliderFieldEventData,
+	GooSliderFieldOptions,
+	GooSliderFieldSliderApi,
+	GooSliderFieldState,
+	GooSliderFieldValue
+} from './slider-field/index.ts'
+export { createSliderField } from './slider-field/index.ts'
 export type { GooSpinnerProps, GooSpinnerRenderOptions, GooSpinnerSize, GooSpinnerVariant } from './spinner/index.ts'
 export { GooSpinner, renderGooSpinnerHtml } from './spinner/index.ts'
 export type { LocaleConfig } from './support/i18n/index.ts'

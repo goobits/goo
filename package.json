@@ -41,17 +41,16 @@
 			"svelte": "./src/radio/index.ts",
 			"import": "./src/radio/index.ts"
 		},
-		"./range-module": {
-			"types": "./src/range-module/index.ts",
-			"svelte": "./src/range-module/index.ts",
-			"import": "./src/range-module/index.ts"
-		},
 		"./select": {
 			"types": "./src/select/index.ts",
 			"svelte": "./src/select/index.ts",
 			"import": "./src/select/index.ts"
 		},
 		"./select/styles.css": "./src/select/GooSelect.css",
+		"./slider-field": {
+			"types": "./src/slider-field/index.ts",
+			"import": "./src/slider-field/index.ts"
+		},
 		"./slider": {
 			"types": "./src/slider/index.ts",
 			"svelte": "./src/slider/index.ts",

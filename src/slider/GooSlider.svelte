@@ -36,6 +36,8 @@ export const controlSchema: SvelteControlSchema = {
 <script lang="ts">
 import './GooSlider.css'
 
+import { onDestroy } from 'svelte'
+
 import { formatNumber } from '../support/utils/formatNumber.ts'
 import { clamp } from '../support/utils/numberUtils.ts'
 import {
@@ -44,8 +46,7 @@ import {
 	parseFloatArray,
 	snapSliderValue,
 	toFormattedValue,
-	toScaledPercent,
-	type GooSliderThumb
+	toScaledPercent
 } from './sliderUtils.ts'
 import { sliderPresetConfigs, sliderShapes } from './sliderPresets.ts'
 import type {
@@ -54,6 +55,7 @@ import type {
 	GooSliderEventData,
 	GooSliderProps,
 	GooSliderScale,
+	GooSliderThumb,
 	GooSliderUnit,
 	GooSliderValue
 } from './types.ts'
@@ -65,12 +67,6 @@ type SliderRuntimeState = {
 	scale: GooSliderScale
 	step: number
 	unit: string
-}
-
-type GooSliderRuntimeElement = GooSliderElement & {
-	readonly thumbs: GooSliderThumb[]
-	setAnimate(index: number, animate: boolean): void
-	toPercent(value: number): number
 }
 
 let sliderRoot: HTMLDivElement | undefined = $state()
@@ -85,6 +81,8 @@ let activePointerId: number | null = $state(null)
 let zIndex = $state(0)
 let animate = $state(false)
 let animateTimer: ReturnType<typeof setTimeout> | undefined
+let snapAnimate = $state(false)
+let snapAnimateTimer: ReturnType<typeof setTimeout> | undefined
 let currentPresetColor = $state('')
 let currentPresetHue = $state(0)
 let currentPresetSaturation = $state(100)
@@ -183,6 +181,7 @@ const classes = $derived.by(() => {
 	if (preset && sliderPresetConfigs[preset]?.className) values.push(sliderPresetConfigs[preset].className)
 	if (shape && shape !== 'default') values.push(sliderShapes[shape as keyof typeof sliderShapes]?.className ?? 'goo-slider--wedge')
 	if (animate) values.push('goo-slider--animate')
+	if (snapAnimate) values.push('goo-slider--snap-animate')
 	if (activeIndex !== null) values.push('goo-slider--active')
 	if (className) values.push(className)
 	return values.filter(Boolean).join(' ')
@@ -262,8 +261,13 @@ $effect(() => {
 		return
 	}
 
-	assignSliderApi(sliderElement as GooSliderRuntimeElement)
+	assignSliderApi(sliderElement)
 	element = sliderElement
+})
+
+onDestroy(() => {
+	cleanupSliderRuntime()
+	element = null
 })
 
 export function setValue(nextValue: GooSliderValue, { silent = true }: { silent?: boolean } = {}): void {
@@ -285,7 +289,7 @@ export function getValue(): number | number[] {
 	return valuesToSliderValue(currentValues, numericMin)
 }
 
-function assignSliderApi(slider: GooSliderRuntimeElement): void {
+function assignSliderApi(slider: GooSliderElement): void {
 	Object.defineProperties(slider, {
 		value: {
 			configurable: true,
@@ -315,9 +319,6 @@ function assignSliderApi(slider: GooSliderRuntimeElement): void {
 	}
 	slider.setGradient = colors => {
 		currentGradient = colors
-	}
-	slider.setAnimate = (_index, nextAnimate) => {
-		animate = nextAnimate
 	}
 	slider.toPercent = nextValue => toScaledPercent(nextValue, numericMin, numericMax, scale)
 	slider.enable = () => {
@@ -366,9 +367,7 @@ function finishPointerDrag(event: PointerEvent, { commit }: { commit: boolean })
 	if (activeIndex === null || activePointerId !== event.pointerId) return
 	event.preventDefault()
 	const index = activeIndex
-	activeIndex = null
-	activePointerId = null
-	sliderElement?.releasePointerCapture?.(event.pointerId)
+	clearActivePointer()
 	if (commit) {
 		emitSliderEvent(index, 'change', event)
 	}
@@ -407,6 +406,7 @@ function updateThumbFromPointer(index: number, event: PointerEvent, state: 'chan
 }
 
 function updateThumbValue(index: number, nextValue: number, state: 'change' | 'input', event?: Event): void {
+	const unsnapped = formatValue(nextValue, { snapValue: false })
 	let formatted = formatValue(nextValue)
 
 	const values = isVarianceMode
@@ -419,6 +419,10 @@ function updateThumbValue(index: number, nextValue: number, state: 'change' | 'i
 
 	if (values.length === currentValues.length && values.every((value, valueIndex) => Object.is(value, currentValues[valueIndex]))) {
 		return
+	}
+
+	if (state === 'input' && activePointerId !== null && !Object.is(unsnapped, formatted)) {
+		playSnapAnimation()
 	}
 
 	currentValues = values
@@ -541,6 +545,39 @@ function stopPointerJumpAnimation(): void {
 	animateTimer = undefined
 }
 
+function playSnapAnimation(): void {
+	clearTimeout(snapAnimateTimer)
+	snapAnimate = true
+	snapAnimateTimer = setTimeout(() => {
+		snapAnimate = false
+		snapAnimateTimer = undefined
+	}, 140)
+}
+
+function stopSnapAnimation(): void {
+	clearTimeout(snapAnimateTimer)
+	snapAnimate = false
+	snapAnimateTimer = undefined
+}
+
+function clearActivePointer(): void {
+	if (activePointerId !== null) {
+		try {
+			sliderElement?.releasePointerCapture?.(activePointerId)
+		} catch {
+			// Pointer capture may already be gone when the component is destroyed.
+		}
+	}
+	activeIndex = null
+	activePointerId = null
+}
+
+function cleanupSliderRuntime(): void {
+	clearActivePointer()
+	stopPointerJumpAnimation()
+	stopSnapAnimation()
+}
+
 function getThumb(index: number, value: number): GooSliderThumb {
 	const pct = getDisplayPercent(value)
 	return {
@@ -625,19 +662,20 @@ function getCoverageStyles(): string[] {
 	return []
 }
 
-function formatValue(nextValue: number | string): number {
+function formatValue(nextValue: number | string, { snapValue = true }: { snapValue?: boolean } = {}): number {
 	const formatted = clamp(toFormattedValue(toFiniteNumber(nextValue, numericMin), false, runtimeState), numericMin, numericMax)
-	return clamp(snapSliderValue(formatted, snap, sliderMarks), numericMin, numericMax)
+	const nextFormatted = snapValue ? snapSliderValue(formatted, snap, sliderMarks) : formatted
+	return clamp(nextFormatted, numericMin, numericMax)
 }
 
 function normalizeValueArray(nextValue: GooSliderValue | undefined, fallback = 50): number[] {
 	if (nextValue === undefined || nextValue === null) return [ fallback ]
 	if (typeof nextValue === 'object' && !Array.isArray(nextValue)) {
 		const range = nextValue as { min?: unknown; max?: unknown }
-		return [ toFiniteNumber(range.min, numericMin), toFiniteNumber(range.max, numericMax) ].map(formatValue)
+		return [ toFiniteNumber(range.min, numericMin), toFiniteNumber(range.max, numericMax) ].map(value => formatValue(value))
 	}
 	const values = parseFloatArray(nextValue)
-	return values.length ? values.map(formatValue) : [ fallback ]
+	return values.length ? values.map(value => formatValue(value)) : [ fallback ]
 }
 
 function valuesToSliderValue(values: number[], fallback: number): number | number[] {

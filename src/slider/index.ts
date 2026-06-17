@@ -6,7 +6,6 @@ export {
 	sliderPresets,
 	sliderShapes
 } from './sliderPresets.ts'
-export type { GooSliderThumb } from './sliderUtils.ts'
 export type {
 	GooSliderDirection,
 	GooSliderElement,
@@ -18,6 +17,7 @@ export type {
 	GooSliderScale,
 	GooSliderShape,
 	GooSliderSnap,
+	GooSliderThumb,
 	GooSliderTickConfig,
 	GooSliderUnit,
 	GooSliderValue,
