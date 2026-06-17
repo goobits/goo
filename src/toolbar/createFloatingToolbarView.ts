@@ -8,12 +8,15 @@ type FloatingToolbarViewApi = ReturnType<typeof mount> & {
 	getRootElement(): HTMLElement | undefined
 }
 
+/** Floating Toolbar Element typed model for floating toolbars. */
 export type FloatingToolbarElement = GooDisposableElement
 
+/** Create Floating Toolbar View Options typed model for floating toolbars. */
 export type CreateFloatingToolbarViewOptions = {
 	toolGroups: FloatingToolbarGroups
 }
 
+/** Creates floating toolbar view for floating toolbars. */
 export function createFloatingToolbarView({
 	toolGroups
 }: CreateFloatingToolbarViewOptions): FloatingToolbarElement {

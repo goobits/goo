@@ -4,6 +4,7 @@ import { gooTooltipRuntime as UITooltip } from '../tooltip/index.ts'
 import GridPopoutPicker from './GridPopoutPicker.svelte'
 import type { GridPopoutItem } from './types.ts'
 
+/** Grid Popout Trigger Handle typed model for runtime integration. */
 export type GridPopoutTriggerHandle = {
 	readonly element: HTMLElement
 	destroy(): void
@@ -17,6 +18,7 @@ type GridPopoutPickerApi = ReturnType<typeof mount> & {
 
 type GridPopoutTooltip = string | (() => string | undefined)
 
+/** Grid Popout Trigger Options typed model for runtime integration. */
 export type GridPopoutTriggerOptions = {
 	ariaLabel?: string
 	className?: string

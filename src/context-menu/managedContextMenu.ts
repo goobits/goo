@@ -9,16 +9,22 @@ import {
 	type GooContextMenuOption
 } from './gooContextMenu.ts'
 
+/** Managed Goo Context Menu Open At typed model for managed context menus. */
 export type ManagedGooContextMenuOpenAt = HTMLElement | { x: number; y: number }
+/** Managed Goo Context Menu Items typed model for managed context menus. */
 export type ManagedGooContextMenuItems =
 	| ManagedGooContextMenuItem[]
 	| Record<string, ManagedGooContextMenuObjectItem | string | number>
+/** Managed Goo Context Menu Item Predicate typed model for managed context menus. */
 export type ManagedGooContextMenuItemPredicate = (
 	this: ManagedGooContextMenu,
 	id: string
 ) => boolean
+/** Managed Goo Context Menu Item Action typed model for managed context menus. */
 export type ManagedGooContextMenuItemAction = (this: ManagedGooContextMenu, id: string) => void
+/** Managed Goo Context Menu Event Name typed model for managed context menus. */
 export type ManagedGooContextMenuEventName = 'open' | 'close'
+/** Managed Goo Context Menu Event Handler typed model for managed context menus. */
 export type ManagedGooContextMenuEventHandler = (this: ManagedGooContextMenu) => void
 
 /** Object item accepted by the managed Goo context menu API before normalization. */

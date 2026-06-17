@@ -297,7 +297,7 @@ export class DropdownPanel {
 	}
 
 	/**
-	 * Apply hover behavior for an option element.
+	 * Symbol symbol used by Goo controls.
 	 * @param item - item.
 	 */
 	hoverOptionElement(item: HTMLElement): void {

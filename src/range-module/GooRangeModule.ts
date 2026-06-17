@@ -25,6 +25,7 @@ const DEFAULT_MIN = 0
 const DEFAULT_MAX = 100
 const DEFAULT_STEP = 1
 
+/** Creates range module field for range-module controls. */
 export function createRangeModuleField(options: GooRangeModuleOptions = {}): GooRangeModuleElement {
 	let currentOptions = { ...options }
 	const element = document.createElement('div') as GooRangeModuleElement

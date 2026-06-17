@@ -8,10 +8,13 @@ type ToolbarToolButtonApi = ReturnType<typeof mount> & {
 	getRootElement(): HTMLElement | undefined
 }
 
+/** Toolbar Tool Button Element typed model for floating toolbars. */
 export type ToolbarToolButtonElement = GooDisposableElement
 
+/** Create Toolbar Tool Button Options typed model for floating toolbars. */
 export type CreateToolbarToolButtonOptions = ToolbarToolButtonConfig
 
+/** Creates toolbar tool button for floating toolbars. */
 export function createToolbarToolButton({
 	icon,
 	id,

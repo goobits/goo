@@ -4,6 +4,7 @@
  * @module goobits/i18n
  */
 
+/** Locale Config request or option shape for runtime integration. */
 export interface LocaleConfig {
 
 	/** Right-to-left text direction */

@@ -41,7 +41,7 @@ export interface GooSliderState {
  * @returns Array of parsed numbers
  */
 export function parseFloatArray(input: number | string | number[] | null | undefined): number[] {
-	if (input == null) return []
+	if (input === null || input === undefined) return []
 	if (typeof input === 'number') return [ input ]
 
 	if (typeof input === 'string') {

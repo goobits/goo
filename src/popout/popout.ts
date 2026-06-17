@@ -332,7 +332,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		setupEventHandlers()
 		observeOpenLayoutChanges()
 
-		$element.offsetHeight // Force reflow
+		void $element.offsetHeight // Force reflow
 
 		await animateIn($element)
 		if (!$element || destroying || !opened) return
@@ -937,7 +937,10 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 			const point = atConfig.point
 			const pointX = point?.x ?? atConfig.x
 			const pointY = point?.y ?? atConfig.y
-			if (pointX != null || pointY != null) {
+			if (
+				(pointX !== null && pointX !== undefined) ||
+				(pointY !== null && pointY !== undefined)
+			) {
 				targetElement = null
 				targetPoint = { x: pointX ?? 0, y: pointY ?? 0 }
 			}

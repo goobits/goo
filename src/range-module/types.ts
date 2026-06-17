@@ -1,8 +1,11 @@
 import type { GooSliderDirection, GooSliderElement, GooSliderPreset, GooSliderShape, GooSliderUnit } from '../slider/types.ts'
 
+/** Goo Range Module Value typed model for range-module controls. */
 export type GooRangeModuleValue = number | number[] | { min: number; max: number } | { x: number; y: number }
+/** Goo Range Module State typed model for range-module controls. */
 export type GooRangeModuleState = 'input' | 'change' | 'set'
 
+/** Goo Range Module Event Data typed model for range-module controls. */
 export type GooRangeModuleEventData = {
 	element: GooRangeModuleElement
 	index: number
@@ -13,6 +16,7 @@ export type GooRangeModuleEventData = {
 	originalEvent?: Event
 }
 
+/** Goo Range Module Options typed model for range-module controls. */
 export type GooRangeModuleOptions = {
 	canCross?: boolean
 	canPush?: boolean
@@ -47,6 +51,7 @@ export type GooRangeModuleOptions = {
 	value?: GooRangeModuleValue
 }
 
+/** Goo Range Module Element typed model for range-module controls. */
 export type GooRangeModuleElement = HTMLDivElement & {
 	destroy(): void
 	disable(): void
@@ -58,6 +63,7 @@ export type GooRangeModuleElement = HTMLDivElement & {
 	value: GooRangeModuleValue
 }
 
+/** Goo Range Module Range Api typed model for range-module controls. */
 export type GooRangeModuleRangeApi = {
 	element: HTMLElement
 	getState(): GooRangeModuleState | 'load'
