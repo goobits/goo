@@ -417,10 +417,6 @@ class GooDialogControllerRuntime {
 		})
 	}
 
-	_cancelOpenFrames(): void {
-		this._cleanupOpenResources()
-	}
-
 	_cleanupElementListeners(): void {
 		this._elementLifecycle.destroy()
 	}

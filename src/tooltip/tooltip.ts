@@ -234,12 +234,14 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 	}
 
 	function scheduleShow() {
+		cancelShow()
 		cancelHide()
 		if (isDestroyed || popout?.isOpen()) return
 		showCleanup = lifecycle.timeout(show, showDelay)
 	}
 
 	function scheduleHide() {
+		cancelHide()
 		cancelShow()
 		if (isDestroyed || !popout?.isOpen()) return
 		hideCleanup = lifecycle.timeout(hide, hideDelay)
@@ -280,6 +282,7 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 	// -------------------------------------------------------------------------
 
 	function setContent(newContent: string | HTMLElement) {
+		if (isDestroyed) return
 		if (typeof newContent === 'string') {
 			if (contentElement) {
 				contentElement.textContent = newContent
@@ -301,6 +304,7 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 	}
 
 	function updatePosition(at: GooPopoutAt | HTMLElement = target, nextAlign?: string) {
+		if (isDestroyed) return
 		popout?.updatePosition(at, nextAlign)
 	}
 

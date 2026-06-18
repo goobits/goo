@@ -51,8 +51,8 @@ export function gridMarquee(node: HTMLElement, opts: GridMarqueeOptions) {
 	const lifecycle = createLifecycleBag()
 	let trackingLifecycle = createLifecycleBag()
 	let activeLifecycle = createLifecycleBag()
-	lifecycle.add(trackingLifecycle)
-	lifecycle.add(activeLifecycle)
+	let cleanupTrackingLifecycle = lifecycle.add(trackingLifecycle)
+	let cleanupActiveLifecycle = lifecycle.add(activeLifecycle)
 	let tracking = false
 	let active = false
 	let dragged = false
@@ -84,9 +84,7 @@ export function gridMarquee(node: HTMLElement, opts: GridMarqueeOptions) {
 		mode = e.shiftKey || e.metaKey || e.ctrlKey ? 'additive' : 'replace'
 		initial = opts.getInitialSelection()
 
-		trackingLifecycle.destroy()
-		trackingLifecycle = createLifecycleBag()
-		lifecycle.add(trackingLifecycle)
+		resetTrackingLifecycle()
 		trackingLifecycle.listen(document, 'pointermove', trackMove)
 		trackingLifecycle.listen(document, 'pointerup', trackingEnd, true)
 		trackingLifecycle.listen(document, 'pointercancel', trackingEnd, true)
@@ -109,14 +107,12 @@ export function gridMarquee(node: HTMLElement, opts: GridMarqueeOptions) {
 	function tearDownTracking() {
 		if (!tracking) return
 		tracking = false
-		trackingLifecycle.destroy()
+		cleanupTrackingLifecycle()
 	}
 
 	function promote(e: PointerEvent) {
 		tearDownTracking()
-		activeLifecycle.destroy()
-		activeLifecycle = createLifecycleBag()
-		lifecycle.add(activeLifecycle)
+		resetActiveLifecycle()
 		active = true
 		dragged = true
 		node.setPointerCapture?.(e.pointerId)
@@ -203,19 +199,19 @@ export function gridMarquee(node: HTMLElement, opts: GridMarqueeOptions) {
 		if (e && node.hasPointerCapture?.(e.pointerId)) node.releasePointerCapture(e.pointerId)
 		overlay?.remove()
 		overlay = null
-		activeLifecycle.destroy()
+		cleanupActiveLifecycle()
 		scrollAncestor = null
 		cachedItems = null
 
 		if (dragged) {
+			const clickBlockLifecycle = createLifecycleBag()
+			const cleanupClickBlockLifecycle = lifecycle.add(clickBlockLifecycle)
 			const block = (ev: MouseEvent) => {
 				ev.stopPropagation()
-				clickBlockLifecycle.destroy()
+				cleanupClickBlockLifecycle()
 			}
-			const clickBlockLifecycle = createLifecycleBag()
-			lifecycle.add(clickBlockLifecycle)
 			clickBlockLifecycle.listen(window, 'click', block, true)
-			clickBlockLifecycle.timeout(() => clickBlockLifecycle.destroy(), 50)
+			clickBlockLifecycle.timeout(cleanupClickBlockLifecycle, 50)
 		}
 	}
 
@@ -227,6 +223,18 @@ export function gridMarquee(node: HTMLElement, opts: GridMarqueeOptions) {
 			end()
 			lifecycle.destroy()
 		}
+	}
+
+	function resetTrackingLifecycle(): void {
+		cleanupTrackingLifecycle()
+		trackingLifecycle = createLifecycleBag()
+		cleanupTrackingLifecycle = lifecycle.add(trackingLifecycle)
+	}
+
+	function resetActiveLifecycle(): void {
+		cleanupActiveLifecycle()
+		activeLifecycle = createLifecycleBag()
+		cleanupActiveLifecycle = lifecycle.add(activeLifecycle)
 	}
 }
 

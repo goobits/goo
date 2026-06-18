@@ -8,6 +8,7 @@ import { createGooTooltip, gooTooltipRuntime, tooltip } from '../index.ts'
 
 describe('GooTooltip', () => {
 	afterEach(() => {
+		vi.useRealTimers()
 		gooTooltipRuntime.destroy()
 		document.querySelectorAll('.goo-popout').forEach(element => element.remove())
 		document.querySelectorAll('[aria-describedby]').forEach(element => element.removeAttribute('aria-describedby'))
@@ -122,6 +123,32 @@ describe('GooTooltip', () => {
 
 		expect(removeEventListenerSpy).toHaveBeenCalledWith('mouseenter', expect.any(Function))
 		expect(removeEventListenerSpy).toHaveBeenCalledWith('mouseleave', expect.any(Function))
+		button.remove()
+	})
+
+	it('replaces pending show timers and ignores public updates after destroy', () => {
+		vi.useFakeTimers()
+		const button = document.createElement('button')
+		document.body.appendChild(button)
+		const instance = createGooTooltip({
+			for: button,
+			content: 'Save',
+			showDelay: 50
+		})
+
+		button.dispatchEvent(new MouseEvent('mouseenter'))
+		button.dispatchEvent(new MouseEvent('mouseenter'))
+
+		expect(vi.getTimerCount()).toBe(1)
+
+		instance.destroy()
+		instance.setContent('Ignored')
+		instance.updatePosition(button)
+		instance.show()
+		vi.runAllTimers()
+
+		expect(document.querySelector('.goo-popout.goo-tooltip')).toBeNull()
+		expect(button.getAttribute('aria-describedby')).toBeNull()
 		button.remove()
 	})
 })
