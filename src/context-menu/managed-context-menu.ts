@@ -115,6 +115,7 @@ function register(
 	items: ManagedGooContextMenuItems,
 	options: ManagedGooContextMenuOptions = {}
 ): ManagedGooContextMenu {
+	registeredMenus[id]?.destroy()
 	return registeredMenus[id] = createRegisteredContextMenu(id, items, { ...options, id })
 }
 

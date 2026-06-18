@@ -8,6 +8,7 @@ describe('createGooContextMenu', () => {
 	afterEach(() => {
 		GooContextMenu.get('unsafe-menu')?.destroy()
 		GooContextMenu.get('managed-destroy')?.destroy()
+		GooContextMenu.get('replace-menu')?.destroy()
 		document.querySelectorAll('.goo-popout').forEach(element => element.remove())
 	})
 
@@ -84,5 +85,20 @@ describe('createGooContextMenu', () => {
 
 		menu.element.dispatchEvent(new CustomEvent('open'))
 		expect(onOpen).not.toHaveBeenCalled()
+	})
+
+	it('destroys an existing managed menu before replacing its id', () => {
+		const firstMenu = GooContextMenu.register('replace-menu', [
+			{ id: 'first', label: 'First' }
+		])
+		const removeEventListener = vi.spyOn(firstMenu.element, 'removeEventListener')
+
+		const secondMenu = GooContextMenu.register('replace-menu', [
+			{ id: 'second', label: 'Second' }
+		])
+
+		expect(removeEventListener).toHaveBeenCalledWith('change', expect.any(Function))
+		expect(GooContextMenu.get('replace-menu')).toBe(secondMenu)
+		expect(firstMenu.open({ at: { x: 10, y: 10 }, autoFocus: false })).toBe(false)
 	})
 })
