@@ -276,7 +276,7 @@ class GooControllerRuntime {
 	 */
 	_getExistingControl() {
 		if (!this.$widget) return null
-		const control = this.$widget.children[0] as HTMLElement | undefined
+		const control = this.$widget.children[0] as GooControlElement | undefined
 		if (!control) return null
 		if (this.$widget.children.length > 1) {
 			this.$widget.replaceChildren(control)
@@ -292,7 +292,7 @@ class GooControllerRuntime {
 	 */
 	_attachControl(control: HTMLElement) {
 		if (!this.$widget) return
-		this._control = control
+		this._control = control as GooControlElement
 		if (this.$widget.children.length !== 1 || this.$widget.children[0] !== control) {
 			this.$widget.replaceChildren(control)
 		}
