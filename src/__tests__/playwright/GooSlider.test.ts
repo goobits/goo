@@ -59,6 +59,64 @@ test.describe('GooSlider', () => {
 		expect(verticalControlStyle.clipPath).toBe('none')
 		expect(verticalControlStyle.transform).toContain('matrix')
 	})
+
+	test('animates snapped drag settling and preserves variance edge compression', async({ page }) => {
+		await page.evaluate(() => {
+			const goo = (window as unknown as GooHarnessWindow).goo
+			const container = document.getElementById('test-container')!
+			const snapSlider = goo.createSlider({
+				value: 0,
+				min: 0,
+				max: 100,
+				snap: [ 0, 50, 100 ],
+				style: 'width: 220px;'
+			})
+			snapSlider.dataset.testid = 'snap-slider'
+			container.appendChild(snapSlider)
+
+			const varianceSlider = goo.createSlider({
+				value: [ 30, 50, 70 ],
+				min: 0,
+				max: 100,
+				mode: 'variance',
+				style: 'width: 220px; margin-top: 32px;'
+			})
+			varianceSlider.dataset.testid = 'variance-slider'
+			container.appendChild(varianceSlider)
+		})
+
+		const snapField = page.locator('[data-testid="snap-slider"]')
+		const snapSlider = snapField.locator('.goo-slider')
+		const snapThumb = snapSlider.locator('.goo-slider__thumb')
+		const snapTrackBox = await snapSlider.locator('.goo-slider__track').boundingBox()
+		const snapThumbBox = await snapThumb.boundingBox()
+		expect(snapTrackBox).not.toBeNull()
+		expect(snapThumbBox).not.toBeNull()
+
+		await page.mouse.move(snapThumbBox!.x + snapThumbBox!.width / 2, snapThumbBox!.y + snapThumbBox!.height / 2)
+		await page.mouse.down()
+		await page.mouse.move(snapTrackBox!.x + snapTrackBox!.width * 0.6, snapTrackBox!.y + snapTrackBox!.height / 2)
+
+		expect(await snapSlider.evaluate(element => element.classList.contains('goo-slider--snap-animate'))).toBe(true)
+		expect(await snapField.evaluate(element => (element as unknown as { getValue(): number }).getValue())).toBe(50)
+		await page.waitForTimeout(180)
+		expect(await snapSlider.evaluate(element => element.classList.contains('goo-slider--snap-animate'))).toBe(false)
+		await page.mouse.up()
+
+		const varianceField = page.locator('[data-testid="variance-slider"]')
+		const varianceSlider = varianceField.locator('.goo-slider')
+		const varianceTrackBox = await varianceSlider.locator('.goo-slider__track').boundingBox()
+		const varianceBaseBox = await varianceSlider.locator('.goo-slider__thumb--variance-base').boundingBox()
+		expect(varianceTrackBox).not.toBeNull()
+		expect(varianceBaseBox).not.toBeNull()
+
+		await page.mouse.move(varianceBaseBox!.x + varianceBaseBox!.width / 2, varianceBaseBox!.y + varianceBaseBox!.height / 2)
+		await page.mouse.down()
+		await page.mouse.move(varianceTrackBox!.x, varianceTrackBox!.y + varianceTrackBox!.height / 2)
+		await page.mouse.up()
+
+		expect(await varianceField.evaluate(element => (element as unknown as { getValue(): number[] }).getValue())).toEqual([ 0, 0, 20 ])
+	})
 })
 
 interface GooHarnessWindow extends Window {

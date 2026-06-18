@@ -29,6 +29,26 @@ export type NormalizedSliderMark = {
 	value: number
 }
 
+/** Options for constraining one thumb against neighboring thumbs. */
+export type SliderConstrainedValueOptions = {
+	canCross?: boolean
+	canPush?: boolean
+	formatValue: (value: number) => number
+	maxDistance?: number
+	min: number
+	minDistance?: number
+}
+
+/** Options for deriving slider coverage fill styles. */
+export type SliderCoverageStyleOptions = {
+	coverage?: boolean
+	direction: 'horizontal' | 'vertical'
+	getDisplayPercent: (value: number) => number
+	isVarianceMode?: boolean
+	min: number
+	values: number[]
+}
+
 // ============================================================================
 // Parsing Utilities
 // ============================================================================
@@ -176,6 +196,136 @@ export function snapSliderValue(
 		}
 	}
 	return best
+}
+
+/** Apply crossing, push, and distance constraints to a thumb update. */
+export function getConstrainedSliderValues(
+	sourceValues: number[],
+	index: number,
+	formatted: number,
+	options: SliderConstrainedValueOptions
+): number[] {
+	const values = sourceValues.slice()
+	const canPushNeighbors = !options.canCross && options.canPush
+
+	if (!options.canCross && !canPushNeighbors) {
+		const next = values[index + 1]
+		const previous = values[index - 1]
+		if (next !== undefined && formatted > next) formatted = next
+		if (previous !== undefined && formatted < previous) formatted = previous
+	}
+
+	values[index] = formatted
+	applyDistanceConstraints(values, index, options)
+	formatted = values[index] ?? formatted
+	if (canPushNeighbors) {
+		for (let previous = index - 1; previous >= 0; previous--) {
+			if (values[previous] > formatted) values[previous] = formatted
+		}
+		for (let next = index + 1; next < values.length; next++) {
+			if (values[next] < formatted) values[next] = formatted
+		}
+	}
+
+	return values
+}
+
+function applyDistanceConstraints(values: number[], index: number, options: SliderConstrainedValueOptions): void {
+	if (options.canCross || values.length < 2) return
+	const minGap = Math.max(0, options.minDistance ?? 0)
+	const maxGap = options.maxDistance ?? Number.POSITIVE_INFINITY
+	const previous = values[index - 1]
+	const next = values[index + 1]
+	let nextValue = values[index] ?? options.min
+	if (previous !== undefined) {
+		nextValue = Math.max(nextValue, previous + minGap)
+		if (Number.isFinite(maxGap)) nextValue = Math.min(nextValue, previous + maxGap)
+	}
+	if (next !== undefined) {
+		nextValue = Math.min(nextValue, next - minGap)
+		if (Number.isFinite(maxGap)) nextValue = Math.max(nextValue, next - maxGap)
+	}
+	values[index] = options.formatValue(nextValue)
+}
+
+/** Find the thumb nearest to a pointer percentage. */
+export function getNearestSliderThumbIndex(
+	values: number[],
+	pointerPct: number,
+	min: number,
+	max: number,
+	scale: GooSliderScale = 'linear'
+): number | null {
+	if (!values.length) return null
+
+	let nearestIndex = 0
+	let nearestDistance = Number.MAX_SAFE_INTEGER
+	for (let index = 0; index < values.length; index++) {
+		const valuePct = toScaledPercent(values[index], min, max, scale)
+		const distance = Math.abs(pointerPct - valuePct)
+		if (distance < nearestDistance) {
+			nearestDistance = distance
+			nearestIndex = index
+		}
+	}
+	return nearestIndex
+}
+
+/** Convert a pointer coordinate into a clamped track percent. */
+export function getSliderPointerPercent(
+	coordinates: { clientX: number; clientY: number },
+	rect: Pick<DOMRect, 'height' | 'left' | 'top' | 'width'>,
+	direction: 'horizontal' | 'vertical'
+): number {
+	if (direction === 'vertical') {
+		return 1 - clamp((coordinates.clientY - rect.top) / (rect.height || 214), 0, 1)
+	}
+	return clamp((coordinates.clientX - rect.left) / (rect.width || 214), 0, 1)
+}
+
+/** Return the inline position style for a slider value. */
+export function getSliderPositionStyle(
+	value: number,
+	direction: 'horizontal' | 'vertical',
+	getDisplayPercent: (value: number) => number
+): string {
+	const pct = getDisplayPercent(value) * 100
+	return direction === 'vertical' ? `bottom: ${ pct }%;` : `left: ${ pct }%;`
+}
+
+/** Return inline coverage styles for range, variance, and value-fill sliders. */
+export function getSliderCoverageStyles({
+	coverage,
+	direction,
+	getDisplayPercent,
+	isVarianceMode,
+	min,
+	values
+}: SliderCoverageStyleOptions): string[] {
+	if (isVarianceMode && values.length >= 3) {
+		return getRangeCoverageStyle(
+			getDisplayPercent(values[0] ?? min),
+			getDisplayPercent(values[2] ?? values[0] ?? min),
+			direction
+		)
+	}
+	if (values.length === 2) {
+		return getRangeCoverageStyle(getDisplayPercent(values[0]), getDisplayPercent(values[1]), direction)
+	}
+	if (coverage) {
+		const pct = getDisplayPercent(values[0] ?? min) * 100
+		return direction === 'vertical' ? [ `bottom: 0; height: ${ pct }%;` ] : [ `left: 0; width: ${ pct }%;` ]
+	}
+	return []
+}
+
+function getRangeCoverageStyle(pct0: number, pct1: number, direction: 'horizontal' | 'vertical'): string[] {
+	const left = Math.min(pct0, pct1) * 100
+	const width = Math.abs(pct1 - pct0) * 100
+	if (direction === 'vertical') {
+		return [ `bottom: ${ left }%; height: ${ width }%;` ]
+	}
+	return [ `left: ${ left }%; width: ${ width }%;` ]
 }
 
 /** Return edge-compressed variance values around a base and radius. */

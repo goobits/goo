@@ -3,6 +3,7 @@ import './GooSliderField.css'
 import { mount, unmount } from 'svelte'
 
 import { createNumberField, type NumberInputFieldElement } from '../input/_createInputField.ts'
+import { getSliderProps } from '../slider/_sliderProps.ts'
 import GooSlider from '../slider/GooSlider.svelte'
 import { getVarianceValues } from '../slider/sliderUtils.ts'
 import type { GooSliderElement, GooSliderEventData, GooSliderValue } from '../slider/types.ts'
@@ -68,39 +69,11 @@ export function createSliderField(options: GooSliderFieldOptions = {}): GooSlide
 		sliderInstance = mount(GooSlider, {
 			target: sliderHost,
 			props: {
-				value: toSliderValue(currentValues),
-				min: currentOptions.min ?? DEFAULT_MIN,
-				max: currentOptions.max ?? DEFAULT_MAX,
-				step: currentOptions.step ?? DEFAULT_STEP,
-				unit: currentOptions.unit,
-				label: currentOptions.label,
-				title: currentOptions.title,
-				name: currentOptions.name,
-				direction: currentOptions.direction,
-				mode: currentOptions.mode,
-				preset: currentOptions.preset,
-				presetColor: currentOptions.presetColor,
-				presetHue: currentOptions.presetHue,
-				presetSaturation: currentOptions.presetSaturation,
-				shape: currentOptions.shape,
-				canCross: currentOptions.canCross,
-				canPush: currentOptions.canPush,
-				coverage: currentOptions.coverage,
-				variance: currentOptions.variance,
-				ticks: currentOptions.ticks,
-				marks: currentOptions.marks,
-				snap: currentOptions.snap,
-				scale: currentOptions.scale,
-				minDistance: currentOptions.minDistance,
-				maxDistance: currentOptions.maxDistance,
-				valueBubble: currentOptions.valueBubble,
-				disabled: currentOptions.disabled,
-				gradient: currentOptions.gradient,
-				class: currentOptions.class ?? currentOptions.className,
-				style: currentOptions.style,
-				tabIndex: currentOptions.tabIndex,
-				easingFn: currentOptions.easingFn,
-				easingFnInvert: currentOptions.easingFnInvert,
+				...getSliderProps({ ...currentOptions, value: toSliderValue(currentValues) }, {
+					min: DEFAULT_MIN,
+					max: DEFAULT_MAX,
+					step: DEFAULT_STEP
+				}),
 				get element() {
 					return boundSliderElement
 				},

@@ -41,6 +41,11 @@ import { onDestroy } from 'svelte'
 import { formatNumber } from '../support/utils/formatNumber.ts'
 import { clamp } from '../support/utils/numberUtils.ts'
 import {
+	getConstrainedSliderValues,
+	getNearestSliderThumbIndex,
+	getSliderCoverageStyles,
+	getSliderPointerPercent,
+	getSliderPositionStyle,
 	getVarianceValues as getSharedVarianceValues,
 	normalizeSliderMarks,
 	parseFloatArray,
@@ -415,7 +420,14 @@ function updateThumbValue(index: number, nextValue: number, state: 'change' | 'i
 			max: numericMax,
 			formatValue
 		})
-		: getConstrainedValues(currentValues, index, formatted)
+		: getConstrainedSliderValues(currentValues, index, formatted, {
+			canCross,
+			canPush,
+			formatValue,
+			maxDistance: toFiniteNumber(maxDistance, Number.POSITIVE_INFINITY),
+			min: numericMin,
+			minDistance: toFiniteNumber(minDistance, 0)
+		})
 
 	if (values.length === currentValues.length && values.every((value, valueIndex) => Object.is(value, currentValues[valueIndex]))) {
 		return
@@ -428,50 +440,6 @@ function updateThumbValue(index: number, nextValue: number, state: 'change' | 'i
 	currentValues = values
 	value = getValue()
 	emitSliderEvent(index, state, event)
-}
-
-function getConstrainedValues(sourceValues: number[], index: number, formatted: number): number[] {
-	const values = sourceValues.slice()
-	const canPushNeighbors = !canCross && canPush
-
-	if (!canCross && !canPushNeighbors) {
-		const next = values[index + 1]
-		const previous = values[index - 1]
-		if (next !== undefined && formatted > next) formatted = next
-		if (previous !== undefined && formatted < previous) formatted = previous
-	}
-
-	values[index] = formatted
-	applyDistanceConstraints(values, index)
-	formatted = values[index] ?? formatted
-	if (canPushNeighbors) {
-		for (let previous = index - 1; previous >= 0; previous--) {
-			if (values[previous] > formatted) values[previous] = formatted
-		}
-		for (let next = index + 1; next < values.length; next++) {
-			if (values[next] < formatted) values[next] = formatted
-		}
-	}
-
-	return values
-}
-
-function applyDistanceConstraints(values: number[], index: number): void {
-	if (canCross || values.length < 2) return
-	const minGap = Math.max(0, toFiniteNumber(minDistance, 0))
-	const maxGap = toFiniteNumber(maxDistance, Number.POSITIVE_INFINITY)
-	const previous = values[index - 1]
-	const next = values[index + 1]
-	let nextValue = values[index] ?? numericMin
-	if (previous !== undefined) {
-		nextValue = Math.max(nextValue, previous + minGap)
-		if (Number.isFinite(maxGap)) nextValue = Math.min(nextValue, previous + maxGap)
-	}
-	if (next !== undefined) {
-		nextValue = Math.min(nextValue, next - minGap)
-		if (Number.isFinite(maxGap)) nextValue = Math.max(nextValue, next - maxGap)
-	}
-	values[index] = formatValue(nextValue)
 }
 
 function emitSliderEvent(index: number, state: 'change' | 'input', event?: Event): void {
@@ -497,30 +465,13 @@ function emitSliderEvent(index: number, state: 'change' | 'input', event?: Event
 }
 
 function findNearestThumbIndex(event: PointerEvent): number | null {
-	if (!currentValues.length) return null
-
-	const pointerPct = getPointerPercent(event)
-	let nearestIndex = 0
-	let nearestDistance = Number.MAX_SAFE_INTEGER
-	for (let index = 0; index < currentValues.length; index++) {
-		const valuePct = toScaledPercent(currentValues[index], numericMin, numericMax, scale)
-		const distance = Math.abs(pointerPct - valuePct)
-		if (distance < nearestDistance) {
-			nearestDistance = distance
-			nearestIndex = index
-		}
-	}
-	return nearestIndex
+	return getNearestSliderThumbIndex(currentValues, getPointerPercent(event), numericMin, numericMax, scale)
 }
 
 function getPointerPercent(event: PointerEvent): number {
 	if (!trackElement) return 0
 
-	const rect = trackElement.getBoundingClientRect()
-	if (direction === 'vertical') {
-		return 1 - clamp((event.clientY - rect.top) / (rect.height || 214), 0, 1)
-	}
-	return clamp((event.clientX - rect.left) / (rect.width || 214), 0, 1)
+	return getSliderPointerPercent(event, trackElement.getBoundingClientRect(), direction)
 }
 
 function getThumbTargetIndex(target: EventTarget | null): number | null {
@@ -599,15 +550,11 @@ function getDisplayPercent(nextValue: number): number {
 }
 
 function getThumbStyle(nextValue: number): string {
-	const pct = getDisplayPercent(nextValue) * 100
-	return direction === 'vertical' ? `bottom: ${ pct }%;` : `left: ${ pct }%;`
+	return getSliderPositionStyle(nextValue, direction, getDisplayPercent)
 }
 
 function getMarkStyle(nextValue: number): string {
-	const pct = getDisplayPercent(nextValue) * 100
-	return direction === 'vertical'
-		? `bottom: ${ pct }%;`
-		: `left: ${ pct }%;`
+	return getSliderPositionStyle(nextValue, direction, getDisplayPercent)
 }
 
 function isVarianceThumb(index: number): boolean {
@@ -633,33 +580,14 @@ function getThumbAriaLabel(index: number): string {
 }
 
 function getCoverageStyles(): string[] {
-	if (isVarianceMode && currentValues.length >= 3) {
-		const pct0 = getDisplayPercent(currentValues[0] ?? numericMin)
-		const pct1 = getDisplayPercent(currentValues[2] ?? currentValues[0] ?? numericMin)
-		const left = Math.min(pct0, pct1) * 100
-		const width = Math.abs(pct1 - pct0) * 100
-		if (direction === 'vertical') {
-			return [ `bottom: ${ left }%; height: ${ width }%;` ]
-		}
-		return [ `left: ${ left }%; width: ${ width }%;` ]
-	}
-	if (currentValues.length === 2) {
-		const pct0 = getDisplayPercent(currentValues[0])
-		const pct1 = getDisplayPercent(currentValues[1])
-		const left = Math.min(pct0, pct1) * 100
-		const width = Math.abs(pct1 - pct0) * 100
-		if (direction === 'vertical') {
-			return [ `bottom: ${ left }%; height: ${ width }%;` ]
-		}
-		return [ `left: ${ left }%; width: ${ width }%;` ]
-	}
-	if (coverage) {
-		if (direction === 'vertical') {
-			return [ `bottom: 0; height: ${ getDisplayPercent(currentValues[0] ?? numericMin) * 100 }%;` ]
-		}
-		return [ `left: 0; width: ${ getDisplayPercent(currentValues[0] ?? numericMin) * 100 }%;` ]
-	}
-	return []
+	return getSliderCoverageStyles({
+		coverage,
+		direction,
+		getDisplayPercent,
+		isVarianceMode,
+		min: numericMin,
+		values: currentValues
+	})
 }
 
 function formatValue(nextValue: number | string, { snapValue = true }: { snapValue?: boolean } = {}): number {

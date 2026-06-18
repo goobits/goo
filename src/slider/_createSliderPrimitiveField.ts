@@ -1,5 +1,6 @@
 import { mount, unmount } from 'svelte'
 
+import { getSliderProps } from './_sliderProps.ts'
 import GooSlider from './GooSlider.svelte'
 import type {
 	GooSliderDirection,
@@ -88,37 +89,7 @@ export function createSliderPrimitiveField(options: SliderPrimitiveFieldOptions 
 		instance = mount(GooSlider, {
 			target: field,
 			props: {
-				value: currentValue,
-				min: options.min,
-				max: options.max,
-				step: options.step,
-				unit: options.unit,
-				label: options.label,
-				title: options.title,
-				name: options.name,
-				direction: options.direction,
-				mode: options.mode,
-				preset: options.preset,
-				presetColor: options.presetColor,
-				presetHue: options.presetHue,
-				presetSaturation: options.presetSaturation,
-				shape: options.shape,
-				canCross: options.canCross,
-				canPush: options.canPush,
-				coverage: options.coverage,
-				variance: options.variance,
-				ticks: options.ticks,
-				marks: options.marks,
-				snap: options.snap,
-				scale: options.scale,
-				minDistance: options.minDistance,
-				maxDistance: options.maxDistance,
-				valueBubble: options.valueBubble,
-				disabled: options.disabled,
-				gradient: options.gradient,
-				class: options.class ?? options.className,
-				style: options.style,
-				tabIndex: options.tabIndex,
+				...getSliderProps({ ...options, value: currentValue }),
 				get element() {
 					return sliderElement
 				},
