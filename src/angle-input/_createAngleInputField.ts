@@ -90,8 +90,12 @@ export function createAngleInputField(options: AngleInputFieldOptions = {}): Ang
 	field.setValue = value => {
 		if (destroyed) return
 		currentValue = parseAngleValue(value)
-		angleElement?.setValue(currentValue, { silent: true })
-		currentValue = angleElement?.getValue() ?? currentValue
+		if (angleElement?.setValue) {
+			angleElement.setValue(currentValue, { silent: true })
+			currentValue = angleElement.getValue()
+		} else {
+			render()
+		}
 	}
 	field.destroy = () => {
 		if (destroyed) return

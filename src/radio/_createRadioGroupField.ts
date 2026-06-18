@@ -88,8 +88,12 @@ export function createRadioGroupField(options: RadioGroupFieldOptions = {}): Rad
 	field.setValue = value => {
 		if (destroyed) return
 		currentValue = String(value)
-		radioElement?.setValue?.(currentValue, { silent: true })
-		currentValue = radioElement?.getValue?.() ?? currentValue
+		if (radioElement?.setValue) {
+			radioElement.setValue(currentValue, { silent: true })
+			currentValue = radioElement.getValue?.() ?? currentValue
+		} else {
+			render()
+		}
 	}
 	field.destroy = () => {
 		if (destroyed) return

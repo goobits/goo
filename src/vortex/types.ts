@@ -60,6 +60,9 @@ export type GooVortexComponentHandle = {
 
 /** Active vortex instance tracked by a Goo vortex manager. */
 export type GooVortexInstance = {
+	destroyFrame: number | null
+	destroyTimer: number | null
+	enterTimer: number | null
 	instance: GooVortexComponentHandle
 	time: number
 }

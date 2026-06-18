@@ -49,6 +49,7 @@ let popout: GooPopoutInstance | null = null
 let lastPopoutOpenAt = 0
 let suppressNextClick = false
 let lastOpenContentSignature = ''
+let documentKeydownBound = false
 
 const currentSelected = $derived(currentSelectedOverride ?? selected)
 const currentItem = $derived(findItem(currentSelected) ?? items[0])
@@ -171,17 +172,30 @@ function openPopout(): void {
 		onDestroy() {
 			opened = false
 			popout = null
-			document.removeEventListener('keydown', handleDocumentKeydown, true)
+			unbindDocumentKeydown()
 		},
 		onOpen({ element }) {
 			focusSelectedOption(element)
 		}
 	})
-	document.addEventListener('keydown', handleDocumentKeydown, true)
+	bindDocumentKeydown()
 }
 
 function closePopout(): void {
+	unbindDocumentKeydown()
 	void popout?.close()
+}
+
+function bindDocumentKeydown(): void {
+	if (documentKeydownBound) return
+	documentKeydownBound = true
+	document.addEventListener('keydown', handleDocumentKeydown, true)
+}
+
+function unbindDocumentKeydown(): void {
+	if (!documentKeydownBound) return
+	documentKeydownBound = false
+	document.removeEventListener('keydown', handleDocumentKeydown, true)
 }
 
 function handleDocumentKeydown(event: KeyboardEvent): void {

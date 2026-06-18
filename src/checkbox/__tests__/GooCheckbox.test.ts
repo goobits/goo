@@ -63,6 +63,23 @@ describe('GooCheckbox', () => {
 		expect(thumb.style.left).toBe('')
 	})
 
+	it('clears pending drag settle timers when unmounted', () => {
+		vi.useFakeTimers()
+		const clearTimeoutSpy = vi.spyOn(window, 'clearTimeout')
+		const { container, unmount } = render(GooCheckbox)
+		const checkbox = container.querySelector<HTMLDivElement>('.goo-checkbox')!
+
+		checkbox.dispatchEvent(pointerEvent('pointerdown', { pointerId: 6, clientX: 0 }))
+		checkbox.dispatchEvent(pointerEvent('pointermove', { pointerId: 6, clientX: 8 }))
+		checkbox.dispatchEvent(pointerEvent('pointerup', { pointerId: 6, clientX: 8 }))
+
+		unmount()
+
+		expect(clearTimeoutSpy).toHaveBeenCalled()
+		clearTimeoutSpy.mockRestore()
+		vi.useRealTimers()
+	})
+
 	it('prevents default browser handling for custom keyboard activation', () => {
 		const { container } = render(GooCheckbox)
 		const checkbox = container.querySelector<HTMLDivElement>('.goo-checkbox')!

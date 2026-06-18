@@ -85,8 +85,12 @@ export function createButtonGroupField(options: ButtonGroupFieldOptions = {}): B
 	field.setValue = value => {
 		if (destroyed) return
 		selectedValue = value
-		instance?.setValue?.(value)
-		selectedValue = instance?.getValue?.() ?? selectedValue
+		if (instance?.setValue) {
+			instance.setValue(value)
+			selectedValue = instance.getValue?.() ?? selectedValue
+		} else {
+			render()
+		}
 	}
 	field.destroy = () => {
 		if (destroyed) return

@@ -52,4 +52,18 @@ describe('GooPanel', () => {
 		expect(panel.contentElement?.textContent).toBe('<img src=x onerror=alert(1)>')
 		expect(panel.contentElement?.querySelector('img')).toBeNull()
 	})
+
+	it('detaches drag listeners when destroyed', () => {
+		const panel = createPanel({ title: 'Controls', draggable: true, autoPlace: false })
+		document.body.appendChild(panel)
+		const header = panel.headerElement!
+		const removeEventListenerSpy = vi.spyOn(header, 'removeEventListener')
+
+		panel.destroy()
+
+		expect(removeEventListenerSpy).toHaveBeenCalledWith('pointerdown', expect.any(Function))
+		expect(removeEventListenerSpy).toHaveBeenCalledWith('pointermove', expect.any(Function))
+		expect(removeEventListenerSpy).toHaveBeenCalledWith('pointerup', expect.any(Function))
+		expect(removeEventListenerSpy).toHaveBeenCalledWith('pointercancel', expect.any(Function))
+	})
 })

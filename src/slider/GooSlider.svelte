@@ -40,6 +40,7 @@ import { onDestroy } from 'svelte'
 
 import { formatNumber } from '../support/utils/formatNumber.ts'
 import { clamp } from '../support/utils/numberUtils.ts'
+import { createPointerDrag, type GooPointerDragEvent, type GooPointerDragHandle } from '../support/utils/pointerDrag.ts'
 import {
 	getConstrainedSliderValues,
 	getNearestSliderThumbIndex,
@@ -88,6 +89,7 @@ let animate = $state(false)
 let animateTimer: ReturnType<typeof setTimeout> | undefined
 let snapAnimate = $state(false)
 let snapAnimateTimer: ReturnType<typeof setTimeout> | undefined
+let pointerDragHandle: GooPointerDragHandle | null = null
 let currentPresetColor = $state('')
 let currentPresetHue = $state(0)
 let currentPresetSaturation = $state(100)
@@ -270,6 +272,17 @@ $effect(() => {
 	element = sliderElement
 })
 
+$effect(() => {
+	const target = sliderElement
+	if (!target) return
+	pointerDragHandle?.detach()
+	pointerDragHandle = createPointerDrag(target, handlePointerDrag)
+	return () => {
+		pointerDragHandle?.detach()
+		pointerDragHandle = null
+	}
+})
+
 onDestroy(() => {
 	cleanupSliderRuntime()
 	element = null
@@ -334,47 +347,39 @@ function assignSliderApi(slider: GooSliderElement): void {
 	}
 }
 
-function handlePointerDown(event: PointerEvent): void {
-	if (effectiveDisabled || !sliderElement) return
-	if (event.button !== 0) return
-
+function handlePointerDrag(event: GooPointerDragEvent): void | false {
 	event.preventDefault()
-	const targetIndex = getThumbTargetIndex(event.target)
-	const startedOnThumb = targetIndex !== null
-	const index = targetIndex ?? findNearestThumbIndex(event)
-	if (index === null) return
-	if (!startedOnThumb) {
-		playPointerJumpAnimation()
+
+	if (event.START) {
+		if (effectiveDisabled || !sliderElement) return false
+		const targetIndex = getThumbTargetIndex(event.originalEvent.target)
+		const startedOnThumb = targetIndex !== null
+		const index = targetIndex ?? findNearestThumbIndex(event.originalEvent)
+		if (index === null) return false
+		if (!startedOnThumb) {
+			playPointerJumpAnimation()
+		}
+		activeIndex = index
+		activePointerId = event.pointerId
+		thumbElements[index]?.style.setProperty('z-index', String(++zIndex))
+		updateThumbFromPointer(index, event.originalEvent, 'input')
+		return
 	}
-	activeIndex = index
-	activePointerId = event.pointerId
-	thumbElements[index]?.style.setProperty('z-index', String(++zIndex))
-	sliderElement.setPointerCapture?.(event.pointerId)
-	updateThumbFromPointer(index, event, 'input')
-}
 
-function handlePointerMove(event: PointerEvent): void {
-	if (effectiveDisabled || activeIndex === null || activePointerId !== event.pointerId) return
-	event.preventDefault()
-	if (animate) stopPointerJumpAnimation()
-	updateThumbFromPointer(activeIndex, event, 'input')
-}
-
-function handlePointerUp(event: PointerEvent): void {
-	finishPointerDrag(event, { commit: true })
-}
-
-function handlePointerCancel(event: PointerEvent): void {
-	finishPointerDrag(event, { commit: false })
-}
-
-function finishPointerDrag(event: PointerEvent, { commit }: { commit: boolean }): void {
 	if (activeIndex === null || activePointerId !== event.pointerId) return
-	event.preventDefault()
+
+	if (event.CHANGE) {
+		if (!effectiveDisabled) {
+			if (animate) stopPointerJumpAnimation()
+			updateThumbFromPointer(activeIndex, event.originalEvent, 'input')
+		}
+		return
+	}
+
 	const index = activeIndex
 	clearActivePointer()
-	if (commit) {
-		emitSliderEvent(index, 'change', event)
+	if (!event.CANCEL) {
+		emitSliderEvent(index, 'change', event.originalEvent)
 	}
 }
 
@@ -512,18 +517,13 @@ function stopSnapAnimation(): void {
 }
 
 function clearActivePointer(): void {
-	if (activePointerId !== null) {
-		try {
-			sliderElement?.releasePointerCapture?.(activePointerId)
-		} catch {
-			// Pointer capture may already be gone when the component is destroyed.
-		}
-	}
 	activeIndex = null
 	activePointerId = null
 }
 
 function cleanupSliderRuntime(): void {
+	pointerDragHandle?.detach()
+	pointerDragHandle = null
 	clearActivePointer()
 	stopPointerJumpAnimation()
 	stopSnapAnimation()
@@ -650,10 +650,6 @@ function toPositiveNumber(nextValue: unknown, fallback: number): number {
 	tabindex={isMulti ? undefined : tabIndex}
 	draggable="false"
 	style={rootStyle || undefined}
-	onpointerdown={handlePointerDown}
-	onpointermove={handlePointerMove}
-	onpointerup={handlePointerUp}
-	onpointercancel={handlePointerCancel}
 	onkeydown={isMulti ? undefined : handleKeydown}
 	{...hostAttributes}
 	aria-disabled={effectiveDisabled ? 'true' : undefined}

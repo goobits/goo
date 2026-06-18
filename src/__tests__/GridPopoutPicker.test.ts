@@ -1,5 +1,5 @@
 import { fireEvent, render, waitFor } from '@testing-library/svelte'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import GridPopoutPicker from '../grid-popout/GridPopoutPicker.svelte'
 import type { GridPopoutItem } from '../grid-popout/types.ts'
@@ -74,6 +74,11 @@ const items: GridPopoutItem[] = [
 ]
 
 describe('GridPopoutPicker', () => {
+	afterEach(() => {
+		vi.useRealTimers()
+		document.body.querySelectorAll('.goo-popout').forEach(element => element.remove())
+	})
+
 	it('renders the Goo-owned trigger host with the selected option', () => {
 		const { container, getByRole } = render(GridPopoutPicker, {
 			props: {
@@ -311,5 +316,43 @@ describe('GridPopoutPicker', () => {
 		const popout = document.body.querySelector('.goo-popout')
 		expect(popout?.classList.contains('goo-grid-popout--icon-grid')).toBe(true)
 		expect(popout?.classList.contains('goo-grid-popout--one-column')).toBe(false)
+	})
+
+	it('clears pending trigger fade work when unmounted', async() => {
+		vi.useFakeTimers()
+		const cancelAnimationFrameSpy = vi.spyOn(globalThis, 'cancelAnimationFrame')
+		const { rerender, unmount } = render(GridPopoutPicker, {
+			props: {
+				ariaLabel: 'Subtool',
+				items,
+				selected: 'line'
+			}
+		})
+
+		await rerender({
+			ariaLabel: 'Subtool',
+			items,
+			selected: 'warp'
+		})
+		unmount()
+
+		expect(cancelAnimationFrameSpy).toHaveBeenCalled()
+	})
+
+	it('removes the document keydown listener as soon as the popout closes', async() => {
+		const removeEventListenerSpy = vi.spyOn(document, 'removeEventListener')
+		const { getByRole } = render(GridPopoutPicker, {
+			props: {
+				ariaLabel: 'Subtool',
+				items,
+				selected: 'line'
+			}
+		})
+		const trigger = getByRole('button', { name: 'Subtool' })
+
+		await fireEvent.click(trigger)
+		await fireEvent.keyDown(document, { key: 'Escape' })
+
+		expect(removeEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function), true)
 	})
 })

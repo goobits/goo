@@ -48,6 +48,7 @@ class GooVortex implements GooVortexManager {
 			window.console.warn('Missing vortex id')
 			return
 		}
+		this.#remove(options.id)
 
 		// Svelte's mount() does not surface a component's exported functions in its
 		// return type, so annotate the imperative handle the component exposes.
@@ -56,9 +57,18 @@ class GooVortex implements GooVortexManager {
 			props: { message: options.message ?? '', src: this.#getImageUrl() }
 		}) as GooVortexComponentHandle
 
-		this.#running[options.id] = { instance, time: Date.now() }
+		const item: GooVortexInstance = {
+			destroyFrame: null,
+			destroyTimer: null,
+			enterTimer: null,
+			instance,
+			time: Date.now()
+		}
+		this.#running[options.id] = item
 
-		window.setTimeout(() => {
+		item.enterTimer = window.setTimeout(() => {
+			item.enterTimer = null
+			if (this.#running[options.id] !== item) return
 			instance.enter(options.point)
 		}, 1)
 	}
@@ -91,13 +101,16 @@ class GooVortex implements GooVortexManager {
 		}
 
 		delete this.#running[id]
+		this.#clearItemTimers(item)
 
 		return new Promise(resolve => {
-			window.requestAnimationFrame(() => {
+			item.destroyFrame = window.requestAnimationFrame(() => {
+				item.destroyFrame = null
 				item.instance.exit()
 
-				window.setTimeout(() => {
-					unmount(item.instance)
+				item.destroyTimer = window.setTimeout(() => {
+					item.destroyTimer = null
+					void unmount(item.instance)
 				}, 750)
 
 				resolve(id)
@@ -134,6 +147,29 @@ class GooVortex implements GooVortexManager {
 
 		const index = Math.floor(Math.random() * this.#imageUrls.length)
 		return this.#imageUrls[index] ?? this.#imageUrls[0]
+	}
+
+	#clearItemTimers(item: GooVortexInstance): void {
+		if (item.enterTimer !== null) {
+			window.clearTimeout(item.enterTimer)
+			item.enterTimer = null
+		}
+		if (item.destroyFrame !== null) {
+			window.cancelAnimationFrame(item.destroyFrame)
+			item.destroyFrame = null
+		}
+		if (item.destroyTimer !== null) {
+			window.clearTimeout(item.destroyTimer)
+			item.destroyTimer = null
+		}
+	}
+
+	#remove(id: string): void {
+		const item = this.#running[id]
+		if (!item) return
+		delete this.#running[id]
+		this.#clearItemTimers(item)
+		void unmount(item.instance)
 	}
 }
 

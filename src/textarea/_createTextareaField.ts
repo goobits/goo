@@ -95,8 +95,12 @@ export function createTextareaField(options: TextareaFieldOptions = {}): Textare
 	field.setValue = value => {
 		if (destroyed) return
 		currentValue = String(value)
-		instance?.setValue?.(currentValue, { silent: true })
-		currentValue = instance?.getValue?.() ?? currentValue
+		if (instance?.setValue) {
+			instance.setValue(currentValue, { silent: true })
+			currentValue = instance.getValue?.() ?? currentValue
+		} else {
+			render()
+		}
 	}
 	field.destroy = () => {
 		if (destroyed) return

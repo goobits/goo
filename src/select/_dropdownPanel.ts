@@ -70,6 +70,11 @@ export class DropdownPanel {
 	#submenuPopout: SubmenuPopoutController
 	#typeaheadBuffer = ''
 	#typeaheadTimer: ReturnType<typeof setTimeout> | null = null
+	#selectionAnimationCleanup: (() => void) | null = null
+	#selectionAnimationToken = 0
+	#handleContainerMouseEnter = () => this.#cancelSubmenuTimer()
+	#handleContainerMouseLeave = (event: MouseEvent) =>
+		this.#scheduleSubmenuClose(event.relatedTarget)
 
 	constructor(ctx: DropdownPanelContext) {
 		this.#ctx = ctx
@@ -86,10 +91,8 @@ export class DropdownPanel {
 				onMouseLeave: event => this.#scheduleSubmenuClose(event.relatedTarget)
 			}
 		)
-		this.$container.addEventListener('mouseenter', () => this.#cancelSubmenuTimer())
-		this.$container.addEventListener('mouseleave', event =>
-			this.#scheduleSubmenuClose(event.relatedTarget)
-		)
+		this.$container.addEventListener('mouseenter', this.#handleContainerMouseEnter)
+		this.$container.addEventListener('mouseleave', this.#handleContainerMouseLeave)
 	}
 
 	// --------------------------------------------------------------------------
@@ -201,8 +204,12 @@ export class DropdownPanel {
 	 * @param $item - item.
 	 */
 	animateSelection($item: HTMLElement): Promise<void> {
+		this.#cancelSelectionAnimation()
 		return new Promise<void>(resolve => {
 			const duration = 60 // ms per step
+			const token = ++this.#selectionAnimationToken
+			const timers: Array<ReturnType<typeof setTimeout>> = []
+			let settled = false
 
 			// Mark as animating
 			$item.dataset.isChosen = 'true'
@@ -210,8 +217,20 @@ export class DropdownPanel {
 
 			let step = 0
 			const totalSteps = 3
+			const cleanup = () => {
+				for (const timer of timers) clearTimeout(timer)
+				timers.length = 0
+				$item.classList.remove('goo-select__option--flash')
+				$item.dataset.isChosen = ''
+				this.$container.dataset.isChoosingOption = ''
+				if (this.#selectionAnimationCleanup === cleanup) {
+					this.#selectionAnimationCleanup = null
+				}
+			}
+			this.#selectionAnimationCleanup = cleanup
 
 			const nextStep = () => {
+				if (token !== this.#selectionAnimationToken) return
 				const isHighlighted = step % 2 === 0
 
 				if (isHighlighted) {
@@ -222,16 +241,21 @@ export class DropdownPanel {
 
 				step++
 				if (step <= totalSteps) {
-					setTimeout(nextStep, duration)
+					timers.push(setTimeout(nextStep, duration))
 				} else {
 					// Cleanup
-					$item.classList.remove('goo-select__option--flash')
-					$item.dataset.isChosen = ''
-					this.$container.dataset.isChoosingOption = ''
+					settled = true
+					cleanup()
 					resolve()
 				}
 			}
 
+			const cancel = cleanup
+			this.#selectionAnimationCleanup = () => {
+				if (settled) return
+				++this.#selectionAnimationToken
+				cancel()
+			}
 			nextStep()
 		})
 	}
@@ -361,7 +385,10 @@ export class DropdownPanel {
 	 * Clean up resources.
 	 */
 	destroy() {
+		this.#cancelSelectionAnimation()
 		this.closeSubmenu()
+		this.$container.removeEventListener('mouseenter', this.#handleContainerMouseEnter)
+		this.$container.removeEventListener('mouseleave', this.#handleContainerMouseLeave)
 		clearTimeout(this.#submenuTimer!)
 		clearTimeout(this.#typeaheadTimer!)
 		this.#typeaheadBuffer = ''
@@ -549,6 +576,11 @@ export class DropdownPanel {
 	#cancelSubmenuTimer(): void {
 		clearTimeout(this.#submenuTimer!)
 		this.#submenuTimer = null
+	}
+
+	#cancelSelectionAnimation(): void {
+		this.#selectionAnimationCleanup?.()
+		this.#selectionAnimationCleanup = null
 	}
 
 	#scheduleSubmenuClose(relatedTarget: EventTarget | null = null): void {

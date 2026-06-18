@@ -11,6 +11,11 @@ let message = $state(initialMessage)
 // Named `animationState` (not `state`) so the `$state` rune token is not parsed
 // as Svelte store-style access to a `state` variable by svelte-check.
 let animationState = $state('')
+let enterTimer: number | null = null
+
+$effect(() => {
+	return () => clearEnterTimer()
+})
 
 export function setMessage(next: string): void {
 	message = next
@@ -27,13 +32,22 @@ export function enter(point: GooVortexPoint): void {
 	if (root) root.style.display = 'block'
 	positionAt(point)
 	animationState = 'entering'
-	window.setTimeout(() => {
+	clearEnterTimer()
+	enterTimer = window.setTimeout(() => {
 		if (animationState === 'entering') animationState = 'running'
+		enterTimer = null
 	}, 750)
 }
 
 export function exit(): void {
+	clearEnterTimer()
 	animationState = 'exiting'
+}
+
+function clearEnterTimer(): void {
+	if (enterTimer === null) return
+	window.clearTimeout(enterTimer)
+	enterTimer = null
 }
 </script>
 

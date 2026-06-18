@@ -61,6 +61,8 @@ let currentBoundContext = $state<unknown>()
 let listboxId = $state('')
 let activeDescendant = $state('')
 let triggerPointerId: number | null = null
+let selectLifecycleToken = 0
+let focusFrame = 0
 
 let {
 	options = [],
@@ -159,6 +161,8 @@ $effect(() => {
 })
 
 $effect(() => () => {
+	selectLifecycleToken += 1
+	clearFocusFrame()
 	stopTriggerPointerSelection()
 	panel?.destroy()
 	popout?.destroy()
@@ -262,8 +266,10 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 		onClose: () => close({ fromPopout: true }),
 		onOpen: () => {
 			if (!autoFocus) return
-			requestAnimationFrame(() => {
-				if (!panel) return
+			clearFocusFrame()
+			focusFrame = requestAnimationFrame(() => {
+				focusFrame = 0
+				if (!panel || !opened) return
 				const toFocus = selectedValue || panel.getNavigableOptions()[0]?.dataset.id
 				if (toFocus) panel.setHovered(toFocus)
 			})
@@ -289,6 +295,7 @@ export function close({ quiet = false, fromPopout = false }: { quiet?: boolean; 
 	if (!selectElement || !opened) return
 
 	stopTriggerPointerSelection()
+	clearFocusFrame()
 	panel?.closeSubmenu()
 	panel?.resetTypeahead()
 	if (panel) panel.hoveredId = null
@@ -467,10 +474,20 @@ function selectOption(option: GooSelectOption, item?: HTMLElement | null): void 
 
 	const optionElement = item ?? panel?.getOptionElementById(selectedValue)
 	if (optionElement && panel) {
-		panel.animateSelection(optionElement).then(() => finishSelection(option, oldValue))
+		const token = selectLifecycleToken
+		panel.animateSelection(optionElement).then(() => {
+			if (token !== selectLifecycleToken || !selectElement) return
+			finishSelection(option, oldValue)
+		})
 	} else {
 		finishSelection(option, oldValue)
 	}
+}
+
+function clearFocusFrame(): void {
+	if (!focusFrame) return
+	cancelAnimationFrame(focusFrame)
+	focusFrame = 0
 }
 
 function finishSelection(option: GooSelectOption, oldValue: string): void {

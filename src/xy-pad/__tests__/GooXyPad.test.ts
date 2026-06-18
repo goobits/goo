@@ -44,6 +44,31 @@ describe('GooXyPad', () => {
 		expect(element?.getValue()).toEqual({ x: 20, y: -15 })
 	})
 
+	it('clears pending number-event suppression timers when unmounted', async() => {
+		vi.useFakeTimers()
+		const clearTimeoutSpy = vi.spyOn(window, 'clearTimeout')
+		let element: GooXyPadElement | null = null
+		const { unmount } = render(GooXyPad, {
+			props: {
+				value: { x: 1, y: 2 },
+				get element() {
+					return element
+				},
+				set element(value) {
+					element = value
+				}
+			}
+		})
+		await tick()
+
+		element?.setValue({ x: 20, y: -15 })
+		unmount()
+
+		expect(clearTimeoutSpy).toHaveBeenCalled()
+		clearTimeoutSpy.mockRestore()
+		vi.useRealTimers()
+	})
+
 	it('emits input while dragging and change on release', () => {
 		const oninput = vi.fn()
 		const onchange = vi.fn()

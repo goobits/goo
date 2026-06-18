@@ -120,8 +120,12 @@ export function createInputField<T = string>(options: TextInputFieldOptions<T> =
 	field.setValue = value => {
 		if (destroyed) return
 		currentValue = value
-		instance?.setValue?.(value, { silent: true })
-		currentValue = (instance?.getValue?.() ?? currentValue) as T
+		if (instance?.setValue) {
+			instance.setValue(value, { silent: true })
+			currentValue = (instance.getValue?.() ?? currentValue) as T
+		} else {
+			render()
+		}
 	}
 	field.destroy = () => {
 		if (destroyed) return
@@ -194,8 +198,12 @@ export function createNumberField(options: NumberInputFieldOptions = {}): Number
 	field.setValue = value => {
 		if (destroyed) return
 		currentValue = Number(value)
-		instance?.setValue?.(currentValue, { silent: true })
-		currentValue = instance?.getValue?.() ?? currentValue
+		if (instance?.setValue) {
+			instance.setValue(currentValue, { silent: true })
+			currentValue = instance.getValue?.() ?? currentValue
+		} else {
+			render()
+		}
 	}
 	field.destroy = () => {
 		if (destroyed) return

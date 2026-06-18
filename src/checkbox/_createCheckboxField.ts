@@ -98,8 +98,12 @@ export function createCheckboxField(options: CheckboxFieldOptions = {}): Checkbo
 	field.setValue = value => {
 		if (destroyed) return
 		currentValue = Boolean(value)
-		checkboxElement?.setValue?.(currentValue, { silent: true })
-		currentValue = checkboxElement?.getValue?.() ?? currentValue
+		if (checkboxElement?.setValue) {
+			checkboxElement.setValue(currentValue, { silent: true })
+			currentValue = checkboxElement.getValue?.() ?? currentValue
+		} else {
+			render()
+		}
 	}
 	field.toggle = value => {
 		if (destroyed) return false

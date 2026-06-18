@@ -98,7 +98,12 @@ export function createSelectField(options: SelectFieldOptions = {}): GooSelectEl
 	field.setValue = (value, { silent = false } = {}) => {
 		if (destroyed) return
 		currentValue = value
-		;(component().setValue as ((value: string, opts?: { silent?: boolean }) => void) | undefined)?.(value, { silent })
+		const setValue = component().setValue as ((value: string, opts?: { silent?: boolean }) => void) | undefined
+		if (setValue) {
+			setValue(value, { silent })
+		} else {
+			render()
+		}
 	}
 	field.getValue = () => currentValue
 	field.isOpen = () => !destroyed && ((component().isOpen as (() => boolean) | undefined)?.() ?? false)
@@ -107,12 +112,22 @@ export function createSelectField(options: SelectFieldOptions = {}): GooSelectEl
 	field.setOptions = nextOptions => {
 		if (destroyed) return
 		options.options = nextOptions
-		;(component().setOptions as ((nextOptions: typeof options.options) => void) | undefined)?.(nextOptions)
+		const setOptions = component().setOptions as ((nextOptions: typeof options.options) => void) | undefined
+		if (setOptions) {
+			setOptions(nextOptions)
+		} else {
+			render()
+		}
 	}
 	field.setTriggerIcon = icon => {
 		if (destroyed) return
 		options.triggerIcon = icon ?? undefined
-		;(component().setTriggerIcon as ((icon: typeof options.triggerIcon | null) => void) | undefined)?.(icon)
+		const setTriggerIcon = component().setTriggerIcon as ((icon: typeof options.triggerIcon | null) => void) | undefined
+		if (setTriggerIcon) {
+			setTriggerIcon(icon)
+		} else {
+			render()
+		}
 	}
 	field.open = (openOptions?: GooSelectOpenOptions) => {
 		if (destroyed) return false

@@ -90,8 +90,12 @@ export function createColorField(options: ColorFieldOptions = {}): ColorFieldEle
 	field.setValue = value => {
 		if (destroyed) return
 		currentValue = value
-		colorElement?.setValue(value, { silent: true })
-		currentValue = colorElement?.getValue() ?? currentValue
+		if (colorElement?.setValue) {
+			colorElement.setValue(value, { silent: true })
+			currentValue = colorElement.getValue()
+		} else {
+			render()
+		}
 	}
 	field.destroy = () => {
 		if (destroyed) return

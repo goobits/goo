@@ -16,7 +16,8 @@ type FieldFactoryCase<TValue> = {
 		getValue(): TValue
 		setValue(value: TValue): void
 	}
-	nextValue: TValue
+	mountedValue: TValue
+	preReadyValue: TValue
 }
 
 describe('Goo field factories', () => {
@@ -28,19 +29,23 @@ describe('Goo field factories', () => {
 		const cases: FieldFactoryCase<unknown>[] = [
 			{
 				create: () => createInputField({ value: 'alpha' }),
-				nextValue: 'bravo'
+				mountedValue: 'charlie',
+				preReadyValue: 'bravo'
 			},
 			{
 				create: () => createNumberField({ value: 4 }),
-				nextValue: 8
+				mountedValue: 12,
+				preReadyValue: 8
 			},
 			{
 				create: () => createTextareaField({ value: 'draft' }),
-				nextValue: 'done'
+				mountedValue: 'sent',
+				preReadyValue: 'done'
 			},
 			{
 				create: () => createCheckboxField({ value: false }),
-				nextValue: true
+				mountedValue: false,
+				preReadyValue: true
 			},
 			{
 				create: () => createRadioGroupField({
@@ -50,7 +55,8 @@ describe('Goo field factories', () => {
 					],
 					value: 'one'
 				}),
-				nextValue: 'two'
+				mountedValue: 'one',
+				preReadyValue: 'two'
 			},
 			{
 				create: () => createButtonGroupField({
@@ -60,36 +66,42 @@ describe('Goo field factories', () => {
 					],
 					value: 'left'
 				}),
-				nextValue: 'right'
+				mountedValue: 'left',
+				preReadyValue: 'right'
 			},
 			{
 				create: () => createColorField({ value: '#000000' }),
-				nextValue: '#00ff00'
+				mountedValue: '#0000ff',
+				preReadyValue: '#00ff00'
 			},
 			{
 				create: () => createAngleInputField({ value: 0 }),
-				nextValue: 90
+				mountedValue: 180,
+				preReadyValue: 90
 			},
 			{
 				create: () => createSelectField({
 					options: { a: 'A', b: 'B' },
 					value: 'a'
 				}),
-				nextValue: 'b'
+				mountedValue: 'a',
+				preReadyValue: 'b'
 			}
 		]
 
 		for (const entry of cases) {
 			const field = entry.create()
 			document.body.appendChild(field)
+			field.setValue(entry.preReadyValue)
 			await tick()
 			const child = field.firstElementChild
+			expect(field.getValue()).toEqual(entry.preReadyValue)
 
-			field.setValue(entry.nextValue)
+			field.setValue(entry.mountedValue)
 			await tick()
 
 			expect(field.firstElementChild).toBe(child)
-			expect(field.getValue()).toEqual(entry.nextValue)
+			expect(field.getValue()).toEqual(entry.mountedValue)
 
 			field.destroy()
 			field.destroy()

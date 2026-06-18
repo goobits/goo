@@ -505,6 +505,35 @@ describe('GooSchema', () => {
 		expect(schema.getController('opacity')).not.toBeUndefined()
 	})
 
+	it('does not rebuild after destroy when a rebuild was already queued', async() => {
+		const destroyControl = vi.fn()
+		const schema = createGooSchema({
+			schema: [ { path: 'size', type: 'destroyable-control' } ],
+			data: { size: 12 },
+			bare: true,
+			controlTypes: {
+				'destroyable-control': {
+					load: () => Promise.resolve({}),
+					extract: () => () => Object.assign(document.createElement('div'), {
+						destroy: destroyControl,
+						getValue: () => 12,
+						setValue: vi.fn()
+					})
+				}
+			}
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+
+		schema.setOptions({ showReset: true })
+		schema.destroy()
+		await settleGooSchema()
+
+		expect(destroyControl).toHaveBeenCalledOnce()
+		expect(schema.querySelector('.goo-controller')).toBeNull()
+		expect(schema.getController('size')).toBeUndefined()
+	})
+
 	it('auto-detects xy pad controls for point fields', async() => {
 		const schema = createGooSchema({
 			schema: [ { path: 'scatter', min: -100, max: 100, step: 1, unit: 'px' } ],

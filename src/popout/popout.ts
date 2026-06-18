@@ -694,11 +694,11 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		// Click outside to close
 		if (clickToClose) {
 			// Delay to prevent immediate close from triggering click
-			setTimeout(() => {
-				if (!opened) return
+			const clickToCloseTimer = setTimeout(() => {
+				if (!opened || destroying || !$element) return
 
 				const handlePointerDown = (event: PointerEvent) => {
-					if (!opened) return
+					if (!opened || destroying) return
 
 					const pointerEvent = toGooPointerEvent(event)
 					const clickedElement = pointerEvent.target as HTMLElement
@@ -720,6 +720,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 					})
 				})
 			}, 100)
+			cleanupHandlers.push(() => clearTimeout(clickToCloseTimer))
 		}
 
 		// Escape to close
@@ -768,8 +769,8 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 
 		// Focus handling based on initialFocus option
 		if (initialFocus !== 'none') {
-			requestAnimationFrame(() => {
-				if (!$element) return
+			const focusFrame = requestAnimationFrame(() => {
+				if (!$element || destroying) return
 
 				if (initialFocus === 'content') {
 					// Try to focus first focusable element in content
@@ -785,6 +786,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 				// 'popout' mode or fallback if no focusable content found
 				$element.focus({ preventScroll: true })
 			})
+			cleanupHandlers.push(() => cancelAnimationFrame(focusFrame))
 		}
 	}
 

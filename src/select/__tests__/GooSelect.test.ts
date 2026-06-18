@@ -3,12 +3,14 @@ import { tick } from 'svelte'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { pointerEvent } from '../../__tests__/_pointerEvents.ts'
+import { DropdownPanel } from '../_dropdownPanel.ts'
 import GooSelect from '../GooSelect.svelte'
 import { createIcon } from '../selectDom.ts'
 import type { GooSelectElement } from '../types.ts'
 
 describe('GooSelect', () => {
 	afterEach(() => {
+		vi.useRealTimers()
 		document.querySelectorAll('.goo-popout').forEach(element => element.remove())
 	})
 
@@ -714,6 +716,56 @@ describe('GooSelect', () => {
 		expect(submenu).not.toBeNull()
 		expect(submenu.textContent).toContain('Child')
 		expect(element.getHoveredOptionId()).toBe('more')
+	})
+
+	it('clears panel selection animation timers when destroyed', () => {
+		vi.useFakeTimers()
+		const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout')
+		const panel = new DropdownPanel({
+			showSelectionIndicator: true,
+			value: 'a',
+			getContext: () => null,
+			onSelect: vi.fn(),
+			onHoverChange: vi.fn()
+		})
+		const option = document.createElement('div')
+		panel.$container.appendChild(option)
+
+		void panel.animateSelection(option)
+		panel.destroy()
+
+		expect(clearTimeoutSpy).toHaveBeenCalled()
+		expect(panel.$container.dataset.isChoosingOption).toBe('')
+		expect(option.dataset.isChosen).toBe('')
+		expect(option.classList.contains('goo-select__option--flash')).toBe(false)
+	})
+
+	it('does not finish an animated selection after unmount', async() => {
+		vi.useFakeTimers()
+		const onchange = vi.fn()
+		const { container, unmount } = render(GooSelect, {
+			props: {
+				value: 'a',
+				options: [
+					{ id: 'a', label: 'A' },
+					{ id: 'b', label: 'B' }
+				],
+				onchange
+			}
+		})
+		const element = container.querySelector<GooSelectElement>('.goo-select')!
+
+		expect(element.open({ autoFocus: false })).toBe(true)
+		await tick()
+
+		const option = document.querySelector<HTMLElement>('.goo-select__option[data-id="b"]')!
+		option.dispatchEvent(pointerEvent('pointerup', { pointerId: 12 }))
+		await tick()
+		unmount()
+		vi.advanceTimersByTime(500)
+		await Promise.resolve()
+
+		expect(onchange).not.toHaveBeenCalled()
 	})
 
 	it('opens submenu options under a pen pointer dragged from the trigger', async() => {
