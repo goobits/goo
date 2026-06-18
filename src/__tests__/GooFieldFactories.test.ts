@@ -11,7 +11,7 @@ import { createSelectField } from '../select/_createSelectField.ts'
 import { createTextareaField } from '../textarea/_createTextareaField.ts'
 
 type FieldFactoryCase<TValue> = {
-	create(): {
+	create(): HTMLElement & {
 		destroy(): void
 		getValue(): TValue
 		setValue(value: TValue): void
@@ -72,10 +72,7 @@ describe('Goo field factories', () => {
 			},
 			{
 				create: () => createSelectField({
-					options: [
-						{ label: 'A', value: 'a' },
-						{ label: 'B', value: 'b' }
-					],
+					options: { a: 'A', b: 'B' },
 					value: 'a'
 				}),
 				nextValue: 'b'

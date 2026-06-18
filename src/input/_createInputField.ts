@@ -36,7 +36,7 @@ export type NumberInputFieldOptions = Omit<TextInputFieldOptions<number>, 'multi
 }
 
 type MountedTextInput<T> = ReturnType<typeof mount> & {
-	getValue?: () => T
+	getValue?: () => unknown
 	setValue?: (value: T, options?: { silent?: boolean }) => void
 }
 
@@ -121,7 +121,7 @@ export function createInputField<T = string>(options: TextInputFieldOptions<T> =
 		if (destroyed) return
 		currentValue = value
 		instance?.setValue?.(value, { silent: true })
-		currentValue = instance?.getValue?.() ?? currentValue
+		currentValue = (instance?.getValue?.() ?? currentValue) as T
 	}
 	field.destroy = () => {
 		if (destroyed) return
