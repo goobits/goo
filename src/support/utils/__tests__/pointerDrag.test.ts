@@ -104,6 +104,26 @@ describe('createPointerDrag', () => {
 		expect(onDrag).not.toHaveBeenCalled()
 	})
 
+	it('cancels active drags and releases pointer capture on detach', () => {
+		const target = document.createElement('div')
+		target.setPointerCapture = vi.fn()
+		target.releasePointerCapture = vi.fn()
+		const states: string[] = []
+		const handle = createPointerDrag(target, event => {
+			states.push(event.state)
+		})
+
+		target.dispatchEvent(pointerEvent('pointerdown', { clientX: 10, clientY: 20, pointerId: 7 }))
+		target.dispatchEvent(pointerEvent('pointermove', { clientX: 15, clientY: 25, pointerId: 7 }))
+
+		handle.detach()
+		handle.detach()
+		target.dispatchEvent(pointerEvent('pointerup', { clientX: 15, clientY: 25, pointerId: 7 }))
+
+		expect(states).toEqual([ 'start', 'move', 'cancel' ])
+		expect(target.releasePointerCapture).toHaveBeenCalledExactlyOnceWith(7)
+	})
+
 	it('emits pointer taps when movement stays below the threshold', () => {
 		const target = document.createElement('button')
 		const onTap = vi.fn()

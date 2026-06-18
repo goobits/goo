@@ -446,6 +446,65 @@ describe('GooSchema', () => {
 		})
 	})
 
+	it('destroys child controllers when the schema is destroyed', async() => {
+		const destroyControl = vi.fn()
+		const schema = createGooSchema({
+			schema: [ { path: 'size', type: 'destroyable-control' } ],
+			data: { size: 12 },
+			bare: true,
+			controlTypes: {
+				'destroyable-control': {
+					load: () => Promise.resolve({}),
+					extract: () => () => Object.assign(document.createElement('div'), {
+						destroy: destroyControl,
+						getValue: () => 12,
+						setValue: vi.fn()
+					})
+				}
+			}
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+
+		expect(schema.getController('size')).not.toBeUndefined()
+
+		schema.destroy()
+		schema.destroy()
+
+		expect(destroyControl).toHaveBeenCalledOnce()
+	})
+
+	it('destroys previous child controllers when rebuilding schema', async() => {
+		const destroyControl = vi.fn()
+		const schema = createGooSchema({
+			schema: [ { path: 'size', type: 'destroyable-control' } ],
+			data: { size: 12, opacity: 0.5 },
+			bare: true,
+			controlTypes: {
+				'destroyable-control': {
+					load: () => Promise.resolve({}),
+					extract: () => () => Object.assign(document.createElement('div'), {
+						destroy: destroyControl,
+						getValue: () => 12,
+						setValue: vi.fn()
+					})
+				}
+			}
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+
+		const firstController = schema.getController('size')
+		expect(firstController).not.toBeUndefined()
+
+		schema.setSchema([ { path: 'opacity', type: 'destroyable-control' } ])
+		await settleGooSchema()
+
+		expect(destroyControl).toHaveBeenCalledOnce()
+		expect(schema.getController('size')).toBeUndefined()
+		expect(schema.getController('opacity')).not.toBeUndefined()
+	})
+
 	it('auto-detects xy pad controls for point fields', async() => {
 		const schema = createGooSchema({
 			schema: [ { path: 'scatter', min: -100, max: 100, step: 1, unit: 'px' } ],

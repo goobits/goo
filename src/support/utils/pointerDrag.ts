@@ -109,9 +109,11 @@ export function createPointerDrag<Environment extends object = Record<string, un
 	options: GooPointerDragOptions = {}
 ): GooPointerDragHandle {
 	let activePointerId: number | null = null
+	let lastPointerEvent: PointerEvent | null = null
 	let startClientX = 0
 	let startClientY = 0
 	let env = {} as Environment
+	let detached = false
 
 	function emit(originalEvent: PointerEvent, state: GooPointerDragEvent<Environment>['state']): void | false {
 		const x = originalEvent.clientX - startClientX
@@ -154,15 +156,18 @@ export function createPointerDrag<Environment extends object = Record<string, un
 	}
 
 	function onPointerDown(event: PointerEvent): void {
+		if (detached) return
 		if (activePointerId !== null) return
 		if (!isPrimaryPointerStart(event)) return
 		if (options.ignoreTouch && event.pointerType === 'touch') return
 		activePointerId = event.pointerId
+		lastPointerEvent = event
 		startClientX = event.clientX
 		startClientY = event.clientY
 		env = {} as Environment
 		if (emit(event, 'start') === false) {
 			activePointerId = null
+			lastPointerEvent = null
 			env = {} as Environment
 			return
 		}
@@ -175,19 +180,36 @@ export function createPointerDrag<Environment extends object = Record<string, un
 
 	function onPointerMove(event: PointerEvent): void {
 		if (event.pointerId !== activePointerId) return
+		lastPointerEvent = event
 		emit(event, 'move')
 	}
 
 	function finish(event: PointerEvent, state: 'end' | 'cancel'): void {
 		if (event.pointerId !== activePointerId) return
+		lastPointerEvent = event
 		emit(event, state)
+		clearActivePointer()
+	}
+
+	function clearActivePointer(): void {
+		const pointerId = activePointerId
+		activePointerId = null
+		lastPointerEvent = null
+		env = {} as Environment
+		if (pointerId === null) return
 		try {
-			target.releasePointerCapture?.(event.pointerId)
+			target.releasePointerCapture?.(pointerId)
 		} catch {
 			// Ignore capture release failures for the same reason as capture setup.
 		}
-		activePointerId = null
-		env = {} as Environment
+	}
+
+	function cancelActivePointer(): void {
+		if (activePointerId === null) return
+		if (lastPointerEvent) {
+			emit(lastPointerEvent, 'cancel')
+		}
+		clearActivePointer()
 	}
 
 	function onPointerUp(event: PointerEvent): void {
@@ -205,10 +227,13 @@ export function createPointerDrag<Environment extends object = Record<string, un
 
 	return {
 		detach() {
+			if (detached) return
+			detached = true
 			target.removeEventListener('pointerdown', onPointerDown)
 			target.removeEventListener('pointermove', onPointerMove)
 			target.removeEventListener('pointerup', onPointerUp)
 			target.removeEventListener('pointercancel', onPointerCancel)
+			cancelActivePointer()
 		}
 	}
 }
@@ -229,8 +254,10 @@ export function createPointerTap(
 	let startClientX = 0
 	let startClientY = 0
 	const threshold = options.threshold ?? 8
+	let detached = false
 
 	function onPointerDown(event: PointerEvent): void {
+		if (detached) return
 		if (activePointerId !== null) return
 		if (!isPrimaryPointerStart(event)) return
 		if (options.ignoreTouch && event.pointerType === 'touch') return
@@ -256,6 +283,9 @@ export function createPointerTap(
 
 	return {
 		detach() {
+			if (detached) return
+			detached = true
+			activePointerId = null
 			target.removeEventListener('pointerdown', onPointerDown)
 			target.removeEventListener('pointerup', onPointerUp)
 			target.removeEventListener('pointercancel', onPointerCancel)

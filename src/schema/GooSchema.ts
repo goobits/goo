@@ -7,7 +7,7 @@ import './GooSchema.css'
 
 import { type GooSvelteControlModule, resolveGooControlTypeConfig } from '../controller/controlRegistry.ts'
 import { createGooController } from '../controller/GooController.ts'
-import { createSvelteControlHost } from '../controller/SvelteControl.svelte.ts'
+import { createSvelteControlHost, type SvelteControlHost } from '../controller/SvelteControl.svelte.ts'
 import { createFolder, type GooFolderElement } from '../folder/_createFolder.ts'
 import { createPanel } from '../panel/_createPanel.ts'
 import { schemaLog as log } from '../support/utils/logger.ts'
@@ -92,9 +92,13 @@ export interface GooSchema extends HTMLElement {
 	setSchema(schema: GooSchemaType): void
 }
 
+type GooSchemaController = (HTMLElement | SvelteControlHost) & {
+	destroy?: () => void
+}
+
 type GooSchemaInternal = GooSchema & {
 	_changeHandler: GooSchemaChangeHandler | null
-	_controllers: Map<string, unknown>
+	_controllers: Map<string, GooSchemaController>
 	_data: GooSchemaData
 	_onpreset: ((preset: GooSchemaPreset) => void) | null
 	_onreset: ((data: GooSchemaData) => void) | null
@@ -146,9 +150,9 @@ function initializeSchema(element: GooSchemaInternal, options: GooSchemaOptions)
 function attachSchemaApi(element: GooSchemaInternal): void {
 	Object.assign(element, {
 		destroy: () => {
+			destroySchemaControllers(element)
 			element._root = null
 			element._toolbar = null
-			element._controllers.clear()
 			element.remove()
 		},
 		getController: (path: string) => element._controllers.get(path) as HTMLElement | undefined,
@@ -282,10 +286,10 @@ function nodeHasConditions(node: GooSchemaNode): boolean {
 async function rebuildSchema(element: GooSchemaInternal): Promise<void> {
 	const token = ++element._rebuildToken
 
+	destroySchemaControllers(element)
 	element.replaceChildren()
 	element._root = null
 	element._toolbar = null
-	element._controllers.clear()
 
 	const schema = element.state.schema
 	if (!schema || !element._data) return
@@ -484,7 +488,10 @@ async function buildSelfContainedField(
 	})
 
 	const hostElement = host.create()
-	if (token !== element._rebuildToken) return
+	if (token !== element._rebuildToken) {
+		host.destroy()
+		return
+	}
 
 	element._controllers.set(node.path, host)
 
@@ -494,6 +501,13 @@ async function buildSelfContainedField(
 	} else {
 		parent.appendChild(hostElement)
 	}
+}
+
+function destroySchemaControllers(element: GooSchemaInternal): void {
+	for (const controller of element._controllers.values()) {
+		controller.destroy?.()
+	}
+	element._controllers.clear()
 }
 
 function isGooSvelteControlModule(module: unknown): module is GooSvelteControlModule {

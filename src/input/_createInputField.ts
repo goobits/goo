@@ -35,15 +35,25 @@ export type NumberInputFieldOptions = Omit<TextInputFieldOptions<number>, 'multi
 	value?: number
 }
 
-type MountedControl = ReturnType<typeof mount>
+type MountedTextInput<T> = ReturnType<typeof mount> & {
+	getValue?: () => T
+	setValue?: (value: T, options?: { silent?: boolean }) => void
+}
+
+type MountedNumberInput = ReturnType<typeof mount> & {
+	getValue?: () => number
+	setValue?: (value: number, options?: { silent?: boolean }) => void
+}
 
 export type TextInputFieldElement<T = string> = HTMLDivElement & {
+	destroy(): void
 	getValue(): T
 	setValue(value: T): void
 	value: T
 }
 
 export type NumberInputFieldElement = HTMLDivElement & {
+	destroy(): void
 	getValue(): number
 	setValue(value: number): void
 	value: number
@@ -53,14 +63,21 @@ export function createInputField<T = string>(options: TextInputFieldOptions<T> =
 	const field = document.createElement('div') as TextInputFieldElement<T>
 	field.className = 'goo-input-field'
 	let currentValue = options.value ?? ('' as T)
-	let instance: MountedControl | null = null
+	let instance: MountedTextInput<T> | null = null
+	let destroyed = false
 
-	function render(): void {
+	function unmountInput(): void {
 		if (instance) {
 			unmount(instance)
 			instance = null
-			field.replaceChildren()
 		}
+		field.replaceChildren()
+	}
+
+	function render(): void {
+		if (destroyed) return
+
+		unmountInput()
 
 		instance = mount(GooInput, {
 			target: field,
@@ -101,8 +118,16 @@ export function createInputField<T = string>(options: TextInputFieldOptions<T> =
 	})
 	field.getValue = () => currentValue
 	field.setValue = value => {
+		if (destroyed) return
 		currentValue = value
-		render()
+		instance?.setValue?.(value, { silent: true })
+		currentValue = instance?.getValue?.() ?? currentValue
+	}
+	field.destroy = () => {
+		if (destroyed) return
+		destroyed = true
+		unmountInput()
+		field.remove()
 	}
 
 	render()
@@ -113,14 +138,21 @@ export function createNumberField(options: NumberInputFieldOptions = {}): Number
 	const field = document.createElement('div') as NumberInputFieldElement
 	field.className = 'goo-number-field'
 	let currentValue = Number(options.value ?? 0)
-	let instance: MountedControl | null = null
+	let instance: MountedNumberInput | null = null
+	let destroyed = false
 
-	function render(): void {
+	function unmountNumber(): void {
 		if (instance) {
 			unmount(instance)
 			instance = null
-			field.replaceChildren()
 		}
+		field.replaceChildren()
+	}
+
+	function render(): void {
+		if (destroyed) return
+
+		unmountNumber()
 
 		instance = mount(GooNumber, {
 			target: field,
@@ -160,8 +192,16 @@ export function createNumberField(options: NumberInputFieldOptions = {}): Number
 	})
 	field.getValue = () => currentValue
 	field.setValue = value => {
+		if (destroyed) return
 		currentValue = Number(value)
-		render()
+		instance?.setValue?.(currentValue, { silent: true })
+		currentValue = instance?.getValue?.() ?? currentValue
+	}
+	field.destroy = () => {
+		if (destroyed) return
+		destroyed = true
+		unmountNumber()
+		field.remove()
 	}
 
 	render()

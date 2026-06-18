@@ -34,6 +34,7 @@ import {
  * Controls may implement some or all of these methods.
  */
 interface GooControlElement extends HTMLElement {
+	destroy?: () => void
 	getValue?: () => unknown
 	setValue?: (value: unknown, options?: { silent?: boolean }) => void
 	setOptions?: (options: Record<string, unknown>) => void
@@ -388,10 +389,16 @@ class GooControllerRuntime {
 		})
 
 		// Check if component was destroyed during async creation
-		if (!this.$widget) return
+		if (!this.$widget) {
+			destroyControlResult(result)
+			return
+		}
 
 		// Ignore stale async results
-		if (token !== this._controlToken) return
+		if (token !== this._controlToken) {
+			destroyControlResult(result)
+			return
+		}
 
 		if (this._getExistingControl()) return
 
@@ -530,6 +537,7 @@ class GooControllerRuntime {
 	 */
 	_destroyElement() {
 		this._stopListening()
+		this._control?.destroy?.()
 		this.$widget = null
 		this._control = null
 		this._controlToken += 1
@@ -968,6 +976,12 @@ class GooControllerRuntime {
 
 		// Create control (SSR or empty widget)
 		this._createControl()
+	}
+}
+
+function destroyControlResult(result: Awaited<ReturnType<typeof createControlFromRegistry>>): void {
+	if (result.status === 'created') {
+		(result.control as GooControlElement).destroy?.()
 	}
 }
 

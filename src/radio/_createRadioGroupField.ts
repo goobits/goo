@@ -20,7 +20,13 @@ export type RadioGroupFieldOptions = {
 
 type MountedRadioGroup = ReturnType<typeof mount>
 
+type RadioGroupControlElement = HTMLDivElement & {
+	getValue?: () => string
+	setValue?: (value: string, options?: { silent?: boolean }) => void
+}
+
 export type RadioGroupFieldElement = HTMLDivElement & {
+	destroy(): void
 	getValue(): string
 	setValue(value: string): void
 	value: string
@@ -32,13 +38,22 @@ export function createRadioGroupField(options: RadioGroupFieldOptions = {}): Rad
 
 	let currentValue = String(options.value ?? '')
 	let instance: MountedRadioGroup | null = null
+	let radioElement: RadioGroupControlElement | null = null
+	let destroyed = false
 
-	function render(): void {
+	function unmountRadioGroup(): void {
 		if (instance) {
 			unmount(instance)
 			instance = null
-			field.replaceChildren()
 		}
+		radioElement = null
+		field.replaceChildren()
+	}
+
+	function render(): void {
+		if (destroyed) return
+
+		unmountRadioGroup()
 
 		instance = mount(GooRadioGroup, {
 			target: field,
@@ -59,6 +74,7 @@ export function createRadioGroupField(options: RadioGroupFieldOptions = {}): Rad
 				}
 			}
 		})
+		radioElement = field.querySelector('.goo-radio-group') as RadioGroupControlElement | null
 	}
 
 	Object.defineProperty(field, 'value', {
@@ -70,8 +86,16 @@ export function createRadioGroupField(options: RadioGroupFieldOptions = {}): Rad
 	})
 	field.getValue = () => currentValue
 	field.setValue = value => {
+		if (destroyed) return
 		currentValue = String(value)
-		render()
+		radioElement?.setValue?.(currentValue, { silent: true })
+		currentValue = radioElement?.getValue?.() ?? currentValue
+	}
+	field.destroy = () => {
+		if (destroyed) return
+		destroyed = true
+		unmountRadioGroup()
+		field.remove()
 	}
 
 	render()

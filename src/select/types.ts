@@ -161,6 +161,9 @@ export interface GooSelectEventData {
 /** Native root element bound by `GooSelect` for imperative updates. */
 export type GooSelectElement = HTMLDivElement & {
 
+	/** Destroy the mounted select and remove it from the DOM. */
+	destroy(): void
+
 	/** Current option id. */
 	value: string
 

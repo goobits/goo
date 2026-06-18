@@ -304,6 +304,64 @@ describe('GooController', () => {
 		})
 	})
 
+	it('destroys the mounted control when the controller is destroyed', async() => {
+		const model = { size: 12 }
+		const destroyControl = vi.fn()
+		const controller = createGooController({
+			object: model,
+			property: 'size',
+			type: 'custom-destroyable',
+			controlTypes: {
+				'custom-destroyable': {
+					load: () => Promise.resolve({}),
+					extract: () => () => Object.assign(document.createElement('div'), {
+						destroy: destroyControl,
+						getValue: () => model.size,
+						setValue: vi.fn()
+					})
+				}
+			}
+		})
+		document.body.appendChild(controller)
+		await waitForControllerControl(controller)
+
+		controller.destroy()
+		controller.destroy()
+
+		expect(destroyControl).toHaveBeenCalledOnce()
+	})
+
+	it('destroys stale async controls created after the controller was removed', async() => {
+		const model = { size: 12 }
+		const destroyControl = vi.fn()
+		let resolveModule: ((module: object) => void) | undefined
+		const controller = createGooController({
+			object: model,
+			property: 'size',
+			type: 'slow-control',
+			controlTypes: {
+				'slow-control': {
+					load: () => new Promise(resolve => {
+						resolveModule = resolve
+					}),
+					extract: () => () => Object.assign(document.createElement('div'), {
+						destroy: destroyControl,
+						getValue: () => model.size,
+						setValue: vi.fn()
+					})
+				}
+			}
+		})
+		document.body.appendChild(controller)
+
+		controller.destroy()
+		resolveModule?.({})
+		await tick()
+		await Promise.resolve()
+
+		expect(destroyControl).toHaveBeenCalledOnce()
+	})
+
 	it('auto-detects xy pad controls for point values', async() => {
 		const model = { scatter: { x: 0, y: 0 } }
 		const controller = createGooController({

@@ -18,9 +18,13 @@ export type ButtonGroupFieldOptions = {
 	value?: string | string[] | null
 }
 
-type MountedButtonGroup = ReturnType<typeof mount>
+type MountedButtonGroup = ReturnType<typeof mount> & {
+	getValue?: () => string | string[] | null
+	setValue?: (value: string | string[] | null) => void
+}
 
 export type ButtonGroupFieldElement = HTMLDivElement & {
+	destroy(): void
 	getValue(): string | string[] | null
 	setValue(value: string | string[] | null): void
 	value: string | string[] | null
@@ -32,13 +36,20 @@ export function createButtonGroupField(options: ButtonGroupFieldOptions = {}): B
 
 	let selectedValue = options.value ?? null
 	let instance: MountedButtonGroup | null = null
+	let destroyed = false
 
-	function render(): void {
+	function unmountButtonGroup(): void {
 		if (instance) {
 			unmount(instance)
 			instance = null
-			field.replaceChildren()
 		}
+		field.replaceChildren()
+	}
+
+	function render(): void {
+		if (destroyed) return
+
+		unmountButtonGroup()
 
 		instance = mount(GooButtonGroup, {
 			target: field,
@@ -72,8 +83,16 @@ export function createButtonGroupField(options: ButtonGroupFieldOptions = {}): B
 	})
 	field.getValue = () => selectedValue
 	field.setValue = value => {
+		if (destroyed) return
 		selectedValue = value
-		render()
+		instance?.setValue?.(value)
+		selectedValue = instance?.getValue?.() ?? selectedValue
+	}
+	field.destroy = () => {
+		if (destroyed) return
+		destroyed = true
+		unmountButtonGroup()
+		field.remove()
 	}
 
 	render()
