@@ -13,6 +13,7 @@ import type {
 	GooSelectOption,
 	GooSelectOptionsInput
 } from '../select/index.ts'
+import { createLifecycleBag } from '../support/utils/lifecycleBag.ts'
 
 /**
  * Goo context menu option.
@@ -116,7 +117,7 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 	const contextMenu = select as GooContextMenuElement
 	const originalOpen = contextMenu.open.bind(contextMenu)
 	const originalDestroy = contextMenu.destroy.bind(contextMenu)
-	const attachCleanups = new Set<() => void>()
+	const attachments = createLifecycleBag()
 	contextMenu.open = function openContextMenu(opts: GooContextMenuOpenOptions = {}) {
 		const { x, y, at, ...restOpts } = opts
 
@@ -152,24 +153,11 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 		}
 
 		$element.addEventListener('contextmenu', contextHandler as EventListener)
-
-		let attached = true
-		const cleanup = () => {
-			if (!attached) return
-			attached = false
-			$element.removeEventListener('contextmenu', contextHandler as EventListener)
-			attachCleanups.delete(cleanup)
-		}
-
-		attachCleanups.add(cleanup)
-		return cleanup
+		return attachments.add(() => $element.removeEventListener('contextmenu', contextHandler as EventListener))
 	}
 
 	contextMenu.destroy = function destroyContextMenu() {
-		for (const cleanup of Array.from(attachCleanups)) {
-			cleanup()
-		}
-		attachCleanups.clear()
+		attachments.destroy()
 		originalDestroy()
 	}
 

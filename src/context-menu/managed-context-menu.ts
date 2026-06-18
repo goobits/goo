@@ -1,4 +1,5 @@
 import type { GooSelectActionContext, GooSelectOpenOptions, GooSelectOptionsInput } from '../select/index.ts'
+import { createLifecycleBag } from '../support/utils/lifecycleBag.ts'
 import { createGooContextMenu, type GooContextMenuElement, type GooContextMenuOption } from './GooContextMenu.ts'
 
 export type ManagedGooContextMenuOpenAt = HTMLElement | { x: number; y: number }
@@ -181,7 +182,7 @@ function createRegisteredContextMenu(
 	let onDestroyCallback: (() => void) | undefined
 	let isOpen = false
 	let destroyed = false
-	let handleChange: (event: Event) => void = () => undefined
+	const lifecycle = createLifecycleBag()
 	const handle: ManagedGooContextMenu = {
 		element: contextMenu,
 		id,
@@ -194,9 +195,7 @@ function createRegisteredContextMenu(
 		destroy() {
 			if (destroyed) return
 			destroyed = true
-			contextMenu.removeEventListener('change', handleChange)
-			contextMenu.removeEventListener('open', markOpen)
-			contextMenu.removeEventListener('close', markClosed)
+			lifecycle.destroy()
 			listeners.clear()
 			onDestroyCallback = undefined
 			if (contextMenuState.currentMenu === handle) {
@@ -245,14 +244,14 @@ function createRegisteredContextMenu(
 	}
 	handleRef.current = handle
 
-	handleChange = event => {
+	const handleChange = (event: Event) => {
 		const value = (event as CustomEvent<{ value?: string }>).detail?.value ?? contextMenu.getValue?.()
 		config.onChange?.call(handle, String(value))
 		markClosed()
 	}
-	contextMenu.addEventListener('change', handleChange)
-	contextMenu.addEventListener('open', markOpen)
-	contextMenu.addEventListener('close', markClosed)
+	lifecycle.listen(contextMenu, 'change', handleChange)
+	lifecycle.listen(contextMenu, 'open', markOpen)
+	lifecycle.listen(contextMenu, 'close', markClosed)
 
 	return handle
 

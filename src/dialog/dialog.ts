@@ -7,6 +7,7 @@ import './GooDialog.css'
 
 import type { CheckboxFieldElement } from '../checkbox/_createCheckboxField.ts'
 import { focusFirst, focusLast, getFocusableElements } from '../support/utils/focusUtils.ts'
+import { createLifecycleBag, type GooLifecycleBag } from '../support/utils/lifecycleBag.ts'
 import {
 	appendContent,
 	buildFields,
@@ -167,10 +168,8 @@ class GooDialogControllerRuntime {
 	declare _autoDismissTimer: ReturnType<typeof setTimeout> | null
 	declare _previousActiveElement: HTMLElement | null
 	declare _destroyed: boolean
-	declare _elementCleanups: Array<() => void>
-	declare _openCleanups: Array<() => void>
-	declare _openFrames: number[]
-	declare _closeTimer: ReturnType<typeof setTimeout> | null
+	declare _elementLifecycle: GooLifecycleBag
+	declare _openLifecycle: GooLifecycleBag
 	declare _closePromise: Promise<void> | null
 
 	// Callback functions
@@ -218,10 +217,8 @@ class GooDialogControllerRuntime {
 		this._autoDismissTimer = null
 		this._previousActiveElement = null
 		this._destroyed = false
-		this._elementCleanups = []
-		this._openCleanups = []
-		this._openFrames = []
-		this._closeTimer = null
+		this._elementLifecycle = createLifecycleBag()
+		this._openLifecycle = createLifecycleBag()
 		this._closePromise = null
 		this._createElement()
 	}
@@ -401,8 +398,7 @@ class GooDialogControllerRuntime {
 		listener: EventListener,
 		options?: boolean | AddEventListenerOptions
 	) {
-		target.addEventListener(type, listener, options)
-		this._elementCleanups.push(() => target.removeEventListener(type, listener, options))
+		this._elementLifecycle.listen(target, type, listener, options)
 	}
 
 	_listenOpen(
@@ -411,41 +407,27 @@ class GooDialogControllerRuntime {
 		listener: EventListener,
 		options?: boolean | AddEventListenerOptions
 	) {
-		target.addEventListener(type, listener, options)
-		this._openCleanups.push(() => target.removeEventListener(type, listener, options))
+		this._openLifecycle.listen(target, type, listener, options)
 	}
 
 	_requestOpenFrame(callback: () => void): void {
-		const frame = requestAnimationFrame(() => {
-			this._openFrames = this._openFrames.filter(value => value !== frame)
+		this._openLifecycle.frame(() => {
 			if (!this._isOpen || this._destroyed) return
 			callback()
 		})
-		this._openFrames.push(frame)
 	}
 
 	_cancelOpenFrames(): void {
-		for (const frame of this._openFrames) {
-			cancelAnimationFrame(frame)
-		}
-		this._openFrames = []
+		this._cleanupOpenResources()
 	}
 
 	_cleanupElementListeners(): void {
-		for (const cleanup of this._elementCleanups.splice(0)) {
-			cleanup()
-		}
+		this._elementLifecycle.destroy()
 	}
 
 	_cleanupOpenResources(): void {
-		this._cancelOpenFrames()
-		for (const cleanup of this._openCleanups.splice(0)) {
-			cleanup()
-		}
-		if (this._closeTimer) {
-			clearTimeout(this._closeTimer)
-			this._closeTimer = null
-		}
+		this._openLifecycle.destroy()
+		this._openLifecycle = createLifecycleBag()
 	}
 
 	/**
@@ -701,7 +683,7 @@ class GooDialogControllerRuntime {
 	async _close() {
 		this._isOpen = false
 		this._clearAutoDismiss()
-		this._cancelOpenFrames()
+		this._cleanupOpenResources()
 
 		// Resolve the promise if not already resolved (e.g., when called via widget.destroy())
 		// This ensures .then()/.finally() handlers are triggered
@@ -719,10 +701,7 @@ class GooDialogControllerRuntime {
 
 		// Wait for animation
 		await new Promise<void>(resolve => {
-			this._closeTimer = setTimeout(() => {
-				this._closeTimer = null
-				resolve()
-			}, TRANSITION_DURATION)
+			this._openLifecycle.timeout(resolve, TRANSITION_DURATION)
 		})
 
 		// Cleanup

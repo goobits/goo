@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { createGooProgressRingTimer, type GooProgressRingTimer } from '../index.ts'
 
@@ -9,6 +9,10 @@ function ringEl(timer: GooProgressRingTimer): HTMLElement {
 }
 
 describe('GooProgressRing', () => {
+	afterEach(() => {
+		vi.useRealTimers()
+	})
+
 	it('creates a timer with a visible progress ring', () => {
 		const timer = createGooProgressRingTimer({
 			progress: 0.25,
@@ -143,5 +147,29 @@ describe('GooProgressRing', () => {
 		themed.destroy()
 		explicit.destroy()
 		host.remove()
+	})
+
+	it('ignores public updates after destroy', () => {
+		vi.useFakeTimers()
+		const timer = createGooProgressRingTimer({
+			progress: 0.25,
+			showBackdrop: false,
+			useAutoHide: false
+		})
+		const element = timer.element
+
+		timer.destroy()
+		timer.setProgress(0.75)
+		timer.show()
+		timer.hide()
+		timer.advance()
+		timer.indeterminate = true
+		timer.steps = 4
+		vi.runAllTimers()
+
+		expect(timer.progress).toBe(0.25)
+		expect(timer.indeterminate).toBe(false)
+		expect(timer.steps).toBeNull()
+		expect(element.isConnected).toBe(false)
 	})
 })

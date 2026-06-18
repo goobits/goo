@@ -77,9 +77,9 @@ describe('createGooContextMenu', () => {
 		menu.on('open', onOpen)
 		menu.destroy()
 
-		expect(removeEventListener).toHaveBeenCalledWith('change', expect.any(Function))
-		expect(removeEventListener).toHaveBeenCalledWith('open', expect.any(Function))
-		expect(removeEventListener).toHaveBeenCalledWith('close', expect.any(Function))
+		expect(removeEventListener).toHaveBeenCalledWith('change', expect.any(Function), undefined)
+		expect(removeEventListener).toHaveBeenCalledWith('open', expect.any(Function), undefined)
+		expect(removeEventListener).toHaveBeenCalledWith('close', expect.any(Function), undefined)
 		expect(GooContextMenu.get('managed-destroy')).toBeUndefined()
 		expect(menu.open({ at: { x: 10, y: 10 }, autoFocus: false })).toBe(false)
 
@@ -97,7 +97,7 @@ describe('createGooContextMenu', () => {
 			{ id: 'second', label: 'Second' }
 		])
 
-		expect(removeEventListener).toHaveBeenCalledWith('change', expect.any(Function))
+		expect(removeEventListener).toHaveBeenCalledWith('change', expect.any(Function), undefined)
 		expect(GooContextMenu.get('replace-menu')).toBe(secondMenu)
 		expect(firstMenu.open({ at: { x: 10, y: 10 }, autoFocus: false })).toBe(false)
 	})

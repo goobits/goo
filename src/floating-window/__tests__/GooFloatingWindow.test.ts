@@ -114,6 +114,49 @@ describe('GooFloatingWindow', () => {
 		expect(element.classList.contains('opened')).toBe(true)
 	})
 
+	it('does not restore or mutate after destroy', async() => {
+		const container = createContainer()
+		const element = createElement(container)
+		let resolveGet: (value: unknown) => void = () => undefined
+		const set = vi.fn()
+		const floatingWindow = createGooFloatingWindow({
+			containment: container,
+			display: 'none',
+			element,
+			id: 'late-restore',
+			position: 'top left',
+			storage: {
+				get: vi.fn(() => new Promise(resolve => {
+					resolveGet = resolve
+				})),
+				set
+			}
+		})
+
+		floatingWindow.destroy()
+		resolveGet({
+			display: 'block',
+			format: '%',
+			hAlign: 'left',
+			left: 0.5,
+			top: 0.5,
+			vAlign: 'top'
+		})
+		await floatingWindow.ready
+
+		floatingWindow.show()
+		floatingWindow.focus()
+		floatingWindow.setPosition('bottom right')
+		floatingWindow.setContainment(container)
+		floatingWindow.refresh()
+		floatingWindow.toggle()
+
+		expect(floatingWindow.isOpen()).toBe(false)
+		expect(element.classList.contains('opened')).toBe(false)
+		expect(element.dataset.gooFloatingWindow).toBeUndefined()
+		expect(set).not.toHaveBeenCalled()
+	})
+
 	function createContainer(): HTMLElement {
 		const container = document.createElement('div')
 		document.body.appendChild(container)

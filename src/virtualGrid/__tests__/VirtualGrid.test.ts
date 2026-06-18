@@ -1,6 +1,8 @@
 import { render } from '@testing-library/svelte'
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
+import { pointerEvent } from '../../__tests__/_pointerEvents.ts'
+import { gridMarquee } from '../gridMarquee.ts'
 import Harness from './VirtualGridHarness.svelte'
 
 describe('VirtualGrid', () => {
@@ -17,6 +19,7 @@ describe('VirtualGrid', () => {
 	})
 
 	afterEach(() => {
+		vi.useRealTimers()
 		vi.stubGlobal('ResizeObserver', originalResizeObserver)
 	})
 
@@ -74,5 +77,31 @@ describe('VirtualGrid', () => {
 
 		expect(() => unmount()).not.toThrow()
 		scrollRoot.remove()
+	})
+
+	it('tears down marquee tracking and click-block work when destroyed', () => {
+		vi.useFakeTimers()
+		const node = document.createElement('div')
+		node.setPointerCapture = vi.fn()
+		node.releasePointerCapture = vi.fn()
+		document.body.appendChild(node)
+		const removeDocumentListener = vi.spyOn(document, 'removeEventListener')
+		const removeWindowListener = vi.spyOn(window, 'removeEventListener')
+		const marquee = gridMarquee(node, {
+			apply: vi.fn(),
+			getInitialSelection: () => new Set()
+		})
+
+		node.dispatchEvent(pointerEvent('pointerdown', { clientX: 0, clientY: 0, pointerId: 4 }))
+		document.dispatchEvent(pointerEvent('pointermove', { clientX: 10, clientY: 10, pointerId: 4 }))
+		node.dispatchEvent(pointerEvent('pointerup', { clientX: 10, clientY: 10, pointerId: 4 }))
+		marquee.destroy()
+		vi.runAllTimers()
+
+		expect(removeDocumentListener).toHaveBeenCalledWith('pointermove', expect.any(Function), undefined)
+		expect(removeDocumentListener).toHaveBeenCalledWith('pointerup', expect.any(Function), true)
+		expect(removeDocumentListener).toHaveBeenCalledWith('pointercancel', expect.any(Function), true)
+		expect(removeWindowListener).toHaveBeenCalledWith('click', expect.any(Function), true)
+		node.remove()
 	})
 })

@@ -8,6 +8,7 @@
 import './GooPopout.css'
 
 import { applyArrowPosition, applyPosition, calculatePosition, type PositionResult } from '../support/positioning/index.ts'
+import { createLifecycleBag } from '../support/utils/lifecycleBag.ts'
 import { createPointerDrag } from '../support/utils/pointerDrag.ts'
 
 // =============================================================================
@@ -240,7 +241,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 	let $backdrop: HTMLElement | null = null
 	let opened = false
 	let destroying = false
-	const cleanupHandlers: Array<(() => void) | { detach?: () => void }> = []
+	let lifecycle = createLifecycleBag()
 	let parentPopout: GooPopoutRuntime | null = null
 	let childPopout: GooPopoutRuntime | null = null
 	let currentPosition: ReturnType<typeof calculatePosition> | null = null
@@ -311,6 +312,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 	 */
 	async function open() {
 		if (opened || destroying) return
+		if (lifecycle.destroyed) lifecycle = createLifecycleBag()
 		if (initialFocus !== 'none') {
 			previousActiveElement =
 				document.activeElement instanceof HTMLElement ? document.activeElement : null
@@ -385,15 +387,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		destroying = true
 		const removedElement = $element
 
-		// Cleanup handlers
-		for (const cleanup of cleanupHandlers) {
-			if (typeof cleanup === 'function') {
-				cleanup()
-			} else if (cleanup?.detach) {
-				cleanup.detach()
-			}
-		}
-		cleanupHandlers.length = 0
+		lifecycle.destroy()
 		cancelScheduledReposition()
 		cancelActiveAnimation()
 
@@ -417,6 +411,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 
 		activePopouts.delete(instance)
 		destroying = false
+		lifecycle = createLifecycleBag()
 
 		// Callback
 		if (onDestroy) onDestroy()
@@ -589,7 +584,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 			if (targetElement) {
 				resizeObserver.observe(targetElement)
 			}
-			cleanupHandlers.push(() => resizeObserver.disconnect())
+			lifecycle.add(resizeObserver)
 		}
 
 		if (typeof MutationObserver === 'function') {
@@ -598,7 +593,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 				childList: true,
 				subtree: true
 			})
-			cleanupHandlers.push(() => mutationObserver.disconnect())
+			lifecycle.add(mutationObserver)
 		}
 	}
 
@@ -701,7 +696,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		// Click outside to close
 		if (clickToClose) {
 			// Delay to prevent immediate close from triggering click
-			const clickToCloseTimer = setTimeout(() => {
+			lifecycle.timeout(() => {
 				if (!opened || destroying || !$element) return
 
 				const handlePointerDown = (event: PointerEvent) => {
@@ -720,14 +715,8 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 					}
 				}
 
-				document.addEventListener('pointerdown', handlePointerDown, { capture: true })
-				cleanupHandlers.push(() => {
-					document.removeEventListener('pointerdown', handlePointerDown, {
-						capture: true
-					})
-				})
+				lifecycle.listen(document, 'pointerdown', handlePointerDown, { capture: true })
 			}, 100)
-			cleanupHandlers.push(() => clearTimeout(clickToCloseTimer))
 		}
 
 		// Escape to close
@@ -738,16 +727,14 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 					close()
 				}
 			}
-			$element.addEventListener('keydown', handleKeydown)
-			cleanupHandlers.push(() => $element?.removeEventListener('keydown', handleKeydown))
+			lifecycle.listen($element, 'keydown', handleKeydown)
 		}
 
 		// Reposition on resize
 		const handleResize = () => {
 			if (opened) reposition()
 		}
-		window.addEventListener('resize', handleResize)
-		cleanupHandlers.push(() => window.removeEventListener('resize', handleResize))
+		lifecycle.listen(window, 'resize', handleResize)
 
 		// Prevent scroll propagation
 		const handleWheel = (e: WheelEvent) => {
@@ -766,8 +753,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 			}
 			e.stopPropagation()
 		}
-		$element.addEventListener('wheel', handleWheel, { passive: false })
-		cleanupHandlers.push(() => $element?.removeEventListener('wheel', handleWheel))
+		lifecycle.listen($element, 'wheel', handleWheel, { passive: false })
 
 		// Drag to move
 		if (dragToMove) {
@@ -776,7 +762,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 
 		// Focus handling based on initialFocus option
 		if (initialFocus !== 'none') {
-			const focusFrame = requestAnimationFrame(() => {
+			lifecycle.frame(() => {
 				if (!$element || destroying) return
 
 				if (initialFocus === 'content') {
@@ -793,7 +779,6 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 				// 'popout' mode or fallback if no focusable content found
 				$element.focus({ preventScroll: true })
 			})
-			cleanupHandlers.push(() => cancelAnimationFrame(focusFrame))
 		}
 	}
 
@@ -879,7 +864,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 			{ ignoreTouch: true }
 		)
 
-		cleanupHandlers.push(handler)
+		lifecycle.add(handler)
 	}
 
 	function toGooPointerEvent(event: PointerEvent): GooPopoutPointerEvent {

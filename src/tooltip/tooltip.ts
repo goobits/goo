@@ -32,6 +32,7 @@ import './GooTooltip.css'
 
 import type { GooPopoutAt } from '../popout/index.ts'
 import { createGooPopout } from '../popout/index.ts'
+import { createLifecycleBag } from '../support/utils/lifecycleBag.ts'
 
 /** Infer popout instance type from factory return */
 type GooPopoutInstance = ReturnType<typeof createGooPopout>
@@ -146,11 +147,11 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 	// State
 	let popout: GooPopoutInstance | null = null
 	let contentElement: HTMLElement | null = null
-	let showTimeout: ReturnType<typeof setTimeout> | null = null
-	let hideTimeout: ReturnType<typeof setTimeout> | null = null
 	let isDestroyed = false
+	let showCleanup = noop
+	let hideCleanup = noop
 	let interactiveCleanup: (() => void) | null = null
-	const cleanups: Array<() => void> = []
+	const lifecycle = createLifecycleBag()
 
 	// Generate unique ID for a11y
 	const tooltipId = `goo-tooltip-${ Math.random().toString(36).slice(2, 9) }`
@@ -235,27 +236,23 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 	function scheduleShow() {
 		cancelHide()
 		if (isDestroyed || popout?.isOpen()) return
-		showTimeout = setTimeout(show, showDelay)
+		showCleanup = lifecycle.timeout(show, showDelay)
 	}
 
 	function scheduleHide() {
 		cancelShow()
 		if (isDestroyed || !popout?.isOpen()) return
-		hideTimeout = setTimeout(hide, hideDelay)
+		hideCleanup = lifecycle.timeout(hide, hideDelay)
 	}
 
 	function cancelShow() {
-		if (showTimeout) {
-			clearTimeout(showTimeout)
-			showTimeout = null
-		}
+		showCleanup()
+		showCleanup = noop
 	}
 
 	function cancelHide() {
-		if (hideTimeout) {
-			clearTimeout(hideTimeout)
-			hideTimeout = null
-		}
+		hideCleanup()
+		hideCleanup = noop
 	}
 
 	function bindInteractivePopout() {
@@ -266,11 +263,11 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 		element.dataset.interactive = 'true'
 		element.addEventListener('mouseenter', cancelHide)
 		element.addEventListener('mouseleave', scheduleHide)
-		interactiveCleanup = () => {
+		interactiveCleanup = lifecycle.add(() => {
 			element.removeEventListener('mouseenter', cancelHide)
 			element.removeEventListener('mouseleave', scheduleHide)
 			delete element.dataset.interactive
-		}
+		})
 	}
 
 	function clearInteractivePopout() {
@@ -314,34 +311,28 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 	if (trigger === 'hover' || trigger === 'both') {
 		const onEnter = () => scheduleShow()
 		const onLeave = () => scheduleHide()
-		target.addEventListener('mouseenter', onEnter)
-		target.addEventListener('mouseleave', onLeave)
-		cleanups.push(() => target.removeEventListener('mouseenter', onEnter))
-		cleanups.push(() => target.removeEventListener('mouseleave', onLeave))
+		lifecycle.listen(target, 'mouseenter', onEnter)
+		lifecycle.listen(target, 'mouseleave', onLeave)
 	}
 
 	if (trigger === 'focus' || trigger === 'both') {
 		const onFocus = () => scheduleShow()
 		const onBlur = () => scheduleHide()
-		target.addEventListener('focus', onFocus)
-		target.addEventListener('blur', onBlur)
-		cleanups.push(() => target.removeEventListener('focus', onFocus))
-		cleanups.push(() => target.removeEventListener('blur', onBlur))
+		lifecycle.listen(target, 'focus', onFocus)
+		lifecycle.listen(target, 'blur', onBlur)
 	}
 
 	// Hide on scroll (tooltip doesn't follow target)
 	const onScroll = () => {
 		if (popout?.isOpen()) hide()
 	}
-	window.addEventListener('scroll', onScroll, { capture: true, passive: true })
-	cleanups.push(() => window.removeEventListener('scroll', onScroll, { capture: true } as EventListenerOptions))
+	lifecycle.listen(window, 'scroll', onScroll, { capture: true, passive: true })
 
 	// Hide on window blur (user switched tabs/windows)
 	const onWindowBlur = () => {
 		if (popout?.isOpen()) hide()
 	}
-	window.addEventListener('blur', onWindowBlur)
-	cleanups.push(() => window.removeEventListener('blur', onWindowBlur))
+	lifecycle.listen(window, 'blur', onWindowBlur)
 
 	// -------------------------------------------------------------------------
 	// Cleanup
@@ -355,11 +346,7 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 		cancelHide()
 		clearInteractivePopout()
 
-		// Clean up event listeners
-		for (const cleanup of cleanups) {
-			cleanup()
-		}
-		cleanups.length = 0
+		lifecycle.destroy()
 
 		// Remove a11y attribute
 		target.removeAttribute('aria-describedby')
@@ -391,6 +378,8 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 		updatePosition
 	}
 }
+
+function noop(): void {}
 
 /**
  * Svelte action that attaches Goo tooltip behavior to an element.

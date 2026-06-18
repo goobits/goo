@@ -2,6 +2,7 @@
 
 import { flushSync, mount, unmount } from 'svelte'
 
+import { createLifecycleBag } from '../support/utils/lifecycleBag.ts'
 import { clampProgress } from './_progressRingRenderer.ts'
 import GooProgressRingComponent from './GooProgressRing.svelte'
 import type {
@@ -49,8 +50,9 @@ export function createGooProgressRingTimer(options: GooProgressRingTimerOptions 
 	let steps = normalizeSteps(options.steps)
 	let timeStart = Date.now()
 	let rafId = 0
-	let hideTimerId = 0
 	let destroyed = false
+	let hideTimerCleanup = noop
+	const lifecycle = createLifecycleBag()
 
 	shell.dataset.backdrop = String(showBackdrop)
 	shell.classList.toggle('backdrop', showBackdrop)
@@ -109,6 +111,7 @@ export function createGooProgressRingTimer(options: GooProgressRingTimerOptions 
 				return steps ? [ ...steps ] : null
 			},
 			set(value: GooProgressRingSteps | null) {
+				if (destroyed) return
 				steps = normalizeSteps(value ?? undefined)
 				stepIndex = Math.min(stepIndex, Math.max(0, (steps?.length ?? 1) - 1))
 				renderOnce()
@@ -121,8 +124,8 @@ export function createGooProgressRingTimer(options: GooProgressRingTimerOptions 
 		}
 	})
 
-	shell.addEventListener('touchdown', cancelEvent)
-	shell.addEventListener('mousedown', cancelEvent)
+	lifecycle.listen(shell, 'touchdown', cancelEvent)
+	lifecycle.listen(shell, 'mousedown', cancelEvent)
 
 	timer.visible = false
 	timer.advance = advance
@@ -148,7 +151,8 @@ export function createGooProgressRingTimer(options: GooProgressRingTimerOptions 
 
 		destroyed = true
 		stopRenderLoop()
-		window.clearTimeout(hideTimerId)
+		hideTimerCleanup()
+		lifecycle.destroy()
 
 		const teardown = () => {
 			unmount(ring)
@@ -166,6 +170,7 @@ export function createGooProgressRingTimer(options: GooProgressRingTimerOptions 
 	}
 
 	function hide({ immediate = false }: { immediate?: boolean } = {}): void {
+		if (destroyed) return
 		if (!timer.visible && shell.style.visibility === 'hidden') {
 			return
 		}
@@ -176,16 +181,17 @@ export function createGooProgressRingTimer(options: GooProgressRingTimerOptions 
 		shell.classList.remove('visible')
 		shell.style.pointerEvents = 'none'
 		stopRenderLoop()
-		window.clearTimeout(hideTimerId)
+		hideTimerCleanup()
 
 		if (immediate) {
 			hideElement()
 		} else {
-			hideTimerId = window.setTimeout(hideElement, 500)
+			hideTimerCleanup = lifecycle.timeout(hideElement, 500)
 		}
 	}
 
 	function show(view?: 'cover'): void {
+		if (destroyed) return
 		timer.visible = true
 		shell.dataset.visible = 'true'
 		shell.dataset.cover = String(view === 'cover')
@@ -197,6 +203,7 @@ export function createGooProgressRingTimer(options: GooProgressRingTimerOptions 
 	}
 
 	function setProgress(value: number): void {
+		if (destroyed) return
 		if (!Number.isFinite(value)) {
 			return
 		}
@@ -211,6 +218,7 @@ export function createGooProgressRingTimer(options: GooProgressRingTimerOptions 
 	}
 
 	function advance(): void {
+		if (destroyed) return
 		if (!steps) {
 			setProgress(1)
 			return
@@ -228,6 +236,7 @@ export function createGooProgressRingTimer(options: GooProgressRingTimerOptions 
 	}
 
 	function setIndeterminate(indeterminate: boolean): void {
+		if (destroyed) return
 		indeterminateState = indeterminate
 		ring.setIndeterminate(indeterminate)
 		if (indeterminate) {
@@ -238,6 +247,7 @@ export function createGooProgressRingTimer(options: GooProgressRingTimerOptions 
 	}
 
 	function renderOnce(): { format: string; percent: number; value: number | string } {
+		if (destroyed) return getDisplayObject()
 		const display = getDisplayObject()
 		ring.setProgress(display.percent, display)
 		if (display.percent >= 1 && useAutoHide) {
@@ -266,6 +276,7 @@ export function createGooProgressRingTimer(options: GooProgressRingTimerOptions 
 	}
 
 	function hideElement(): void {
+		if (destroyed) return
 		if (!timer.visible) {
 			shell.style.visibility = 'hidden'
 		}
@@ -328,6 +339,8 @@ export function createGooProgressRingTimer(options: GooProgressRingTimerOptions 
 		return clampProgress(completed + progress * steps[stepIndex])
 	}
 }
+
+function noop(): void {}
 
 function resolveParent(parentNode: Element | string | null | undefined): Element {
 	if (typeof parentNode === 'string') {

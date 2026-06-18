@@ -1,3 +1,5 @@
+import { createLifecycleBag } from '../support/utils/lifecycleBag.ts'
+
 /**
  * Rect XYWH.
  */
@@ -46,6 +48,11 @@ export function rectIntersects(a: RectXYWH, b: RectXYWH): boolean {
  * @param opts - opts.
  */
 export function gridMarquee(node: HTMLElement, opts: GridMarqueeOptions) {
+	const lifecycle = createLifecycleBag()
+	let trackingLifecycle = createLifecycleBag()
+	let activeLifecycle = createLifecycleBag()
+	lifecycle.add(trackingLifecycle)
+	lifecycle.add(activeLifecycle)
 	let tracking = false
 	let active = false
 	let dragged = false
@@ -77,9 +84,12 @@ export function gridMarquee(node: HTMLElement, opts: GridMarqueeOptions) {
 		mode = e.shiftKey || e.metaKey || e.ctrlKey ? 'additive' : 'replace'
 		initial = opts.getInitialSelection()
 
-		document.addEventListener('pointermove', trackMove)
-		document.addEventListener('pointerup', trackingEnd, true)
-		document.addEventListener('pointercancel', trackingEnd, true)
+		trackingLifecycle.destroy()
+		trackingLifecycle = createLifecycleBag()
+		lifecycle.add(trackingLifecycle)
+		trackingLifecycle.listen(document, 'pointermove', trackMove)
+		trackingLifecycle.listen(document, 'pointerup', trackingEnd, true)
+		trackingLifecycle.listen(document, 'pointercancel', trackingEnd, true)
 	}
 
 	function trackMove(e: PointerEvent) {
@@ -99,13 +109,14 @@ export function gridMarquee(node: HTMLElement, opts: GridMarqueeOptions) {
 	function tearDownTracking() {
 		if (!tracking) return
 		tracking = false
-		document.removeEventListener('pointermove', trackMove)
-		document.removeEventListener('pointerup', trackingEnd, true)
-		document.removeEventListener('pointercancel', trackingEnd, true)
+		trackingLifecycle.destroy()
 	}
 
 	function promote(e: PointerEvent) {
 		tearDownTracking()
+		activeLifecycle.destroy()
+		activeLifecycle = createLifecycleBag()
+		lifecycle.add(activeLifecycle)
 		active = true
 		dragged = true
 		node.setPointerCapture?.(e.pointerId)
@@ -120,13 +131,15 @@ export function gridMarquee(node: HTMLElement, opts: GridMarqueeOptions) {
 		overlay.style.pointerEvents = 'none'
 		node.appendChild(overlay)
 
-		node.addEventListener('pointermove', move)
-		node.addEventListener('pointerup', end)
-		node.addEventListener('pointercancel', end)
+		activeLifecycle.listen(node, 'pointermove', move)
+		activeLifecycle.listen(node, 'pointerup', end)
+		activeLifecycle.listen(node, 'pointercancel', end)
 
 		readItemsIntoCache()
 		scrollAncestor = findScrollableAncestor(node)
-		scrollAncestor?.addEventListener('scroll', invalidateItemCache, { passive: true })
+		if (scrollAncestor) {
+			activeLifecycle.listen(scrollAncestor, 'scroll', invalidateItemCache, { passive: true })
+		}
 
 		pendingX = e.clientX
 		pendingY = e.clientY
@@ -190,34 +203,29 @@ export function gridMarquee(node: HTMLElement, opts: GridMarqueeOptions) {
 		if (e && node.hasPointerCapture?.(e.pointerId)) node.releasePointerCapture(e.pointerId)
 		overlay?.remove()
 		overlay = null
-		node.removeEventListener('pointermove', move)
-		node.removeEventListener('pointerup', end)
-		node.removeEventListener('pointercancel', end)
-		scrollAncestor?.removeEventListener('scroll', invalidateItemCache)
+		activeLifecycle.destroy()
 		scrollAncestor = null
 		cachedItems = null
 
 		if (dragged) {
-			const cleanup = () => {
-				window.removeEventListener('click', block, true)
-				clearTimeout(timer)
-			}
 			const block = (ev: MouseEvent) => {
 				ev.stopPropagation()
-				cleanup()
+				clickBlockLifecycle.destroy()
 			}
-			const timer = setTimeout(cleanup, 50)
-			window.addEventListener('click', block, true)
+			const clickBlockLifecycle = createLifecycleBag()
+			lifecycle.add(clickBlockLifecycle)
+			clickBlockLifecycle.listen(window, 'click', block, true)
+			clickBlockLifecycle.timeout(() => clickBlockLifecycle.destroy(), 50)
 		}
 	}
 
-	node.addEventListener('pointerdown', pointerdown)
+	lifecycle.listen(node, 'pointerdown', pointerdown)
 
 	return {
 		destroy() {
-			node.removeEventListener('pointerdown', pointerdown)
 			tearDownTracking()
 			end()
+			lifecycle.destroy()
 		}
 	}
 }
