@@ -91,4 +91,55 @@ describe('GooDialog', () => {
 		expect(dialog.element.getAttribute('aria-label')).toBe('Open document')
 		expect(dialog.element.getAttribute('aria-labelledby')).toBeNull()
 	})
+
+	it('tears down owned element listeners when destroyed', async() => {
+		const dialog = createGooDialog({
+			type: 'alert',
+			content: 'Hello'
+		})
+		const closeBadge = dialog.element.querySelector<HTMLElement>('.goo-dialog__close-badge')!
+		const removeEventListenerSpy = vi.spyOn(closeBadge, 'removeEventListener')
+
+		await dialog.destroy()
+
+		expect(removeEventListenerSpy).toHaveBeenCalledWith('click', expect.any(Function), undefined)
+	})
+
+	it('cancels pending open frames when destroyed during opening', async() => {
+		const cancelAnimationFrameSpy = vi.spyOn(globalThis, 'cancelAnimationFrame')
+		const dialog = createGooDialog({
+			type: 'alert',
+			content: 'Hello'
+		})
+		const resultPromise = dialog.open()
+
+		await dialog.destroy()
+
+		expect(cancelAnimationFrameSpy).toHaveBeenCalled()
+		await expect(resultPromise).resolves.toEqual({ cancel: true })
+	})
+
+	it('does not finish async verification after closing', async() => {
+		let resolveVerify: ((value: boolean) => void) | undefined
+		const onOk = vi.fn()
+		const dialog = createGooDialog({
+			type: 'prompt',
+			content: 'Name?',
+			fields: [ { type: 'text', name: 'name' } ],
+			onOk,
+			verify: () => new Promise<boolean>(resolve => {
+				resolveVerify = resolve
+			})
+		})
+		const resultPromise = dialog.open()
+		await nextFrame()
+
+		dialog.element.querySelector<HTMLElement>('.goo-dialog__ok-btn')?.click()
+		await dialog.close()
+		resolveVerify?.(true)
+		await Promise.resolve()
+
+		expect(onOk).not.toHaveBeenCalled()
+		await expect(resultPromise).resolves.toEqual({ cancel: true })
+	})
 })
