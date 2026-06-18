@@ -1,11 +1,13 @@
 import { tick } from 'svelte'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { createGooContextMenu } from '../GooContextMenu.ts'
 import { GooContextMenu } from '../managed-context-menu.ts'
 
 describe('createGooContextMenu', () => {
 	afterEach(() => {
+		GooContextMenu.get('unsafe-menu')?.destroy()
+		GooContextMenu.get('managed-destroy')?.destroy()
 		document.querySelectorAll('.goo-popout').forEach(element => element.remove())
 	})
 
@@ -49,5 +51,38 @@ describe('createGooContextMenu', () => {
 		const label = document.querySelector('.goo-context-menu-popout .goo-select__label')
 		expect(label?.textContent).toBe('<img src=x onerror=alert(1)>')
 		expect(label?.querySelector('img')).toBeNull()
+	})
+
+	it('detaches owned contextmenu listeners when destroyed', () => {
+		const menu = createGooContextMenu()
+		const host = document.createElement('div')
+		const removeEventListener = vi.spyOn(host, 'removeEventListener')
+		const cleanup = menu.attachTo(host)
+
+		menu.destroy()
+		cleanup()
+
+		expect(removeEventListener).toHaveBeenCalledOnce()
+		expect(removeEventListener).toHaveBeenCalledWith('contextmenu', expect.any(Function))
+	})
+
+	it('destroys managed menu listeners and unregisters the handle', () => {
+		const menu = GooContextMenu.register('managed-destroy', [
+			{ id: 'delete', label: 'Delete' }
+		])
+		const removeEventListener = vi.spyOn(menu.element, 'removeEventListener')
+		const onOpen = vi.fn()
+
+		menu.on('open', onOpen)
+		menu.destroy()
+
+		expect(removeEventListener).toHaveBeenCalledWith('change', expect.any(Function))
+		expect(removeEventListener).toHaveBeenCalledWith('open', expect.any(Function))
+		expect(removeEventListener).toHaveBeenCalledWith('close', expect.any(Function))
+		expect(GooContextMenu.get('managed-destroy')).toBeUndefined()
+		expect(menu.open({ at: { x: 10, y: 10 }, autoFocus: false })).toBe(false)
+
+		menu.element.dispatchEvent(new CustomEvent('open'))
+		expect(onOpen).not.toHaveBeenCalled()
 	})
 })

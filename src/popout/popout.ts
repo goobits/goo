@@ -246,6 +246,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 	let currentPosition: ReturnType<typeof calculatePosition> | null = null
 	let previousActiveElement: HTMLElement | null = null
 	let repositionFrame = 0
+	let animationCleanup: (() => void) | null = null
 	const resolvedRtl =
 		rtl ?? (document.documentElement?.dir === 'rtl' || document.body?.dir === 'rtl')
 	const fallbackAlign = alignInput ?? (resolvedRtl ? 'right to left' : 'left to right')
@@ -394,6 +395,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		}
 		cleanupHandlers.length = 0
 		cancelScheduledReposition()
+		cancelActiveAnimation()
 
 		// Remove from parent chain
 		if (parentPopout) {
@@ -484,6 +486,11 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		if (!repositionFrame) return
 		cancelAnimationFrame(repositionFrame)
 		repositionFrame = 0
+	}
+
+	function cancelActiveAnimation() {
+		animationCleanup?.()
+		animationCleanup = null
 	}
 
 	async function stabilizeOpeningLayout() {
@@ -982,16 +989,37 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 	 * @returns {Promise<void>}
 	 */
 	function animateIn(el: HTMLElement): Promise<void> {
+		cancelActiveAnimation()
 		return new Promise(resolve => {
+			let frame = 0
+			let timer: ReturnType<typeof setTimeout> | null = null
+			let finished = false
+			const finish = () => {
+				if (finished) return
+				finished = true
+				if (frame) cancelAnimationFrame(frame)
+				if (timer) clearTimeout(timer)
+				frame = 0
+				timer = null
+				if (animationCleanup === finish) animationCleanup = null
+				resolve()
+			}
+			animationCleanup = finish
+
 			el.style.transition = 'opacity 150ms ease-out, transform 150ms ease-out'
 			el.style.transform = 'translateY(-4px)'
 			el.style.opacity = '0'
 
-			requestAnimationFrame(() => {
+			frame = requestAnimationFrame(() => {
+				frame = 0
+				if (destroying || !$element) {
+					finish()
+					return
+				}
 				el.style.transform = 'translateY(0)'
 				el.style.opacity = '1'
 
-				setTimeout(resolve, 150)
+				timer = setTimeout(finish, 150)
 			})
 		})
 	}
@@ -1002,16 +1030,28 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 	 * @returns {Promise<void>}
 	 */
 	function animateOut(el: HTMLElement | null): Promise<void> {
+		cancelActiveAnimation()
 		return new Promise<void>(resolve => {
 			if (!el) {
 				resolve()
 				return
 			}
+			let timer: ReturnType<typeof setTimeout> | null = null
+			let finished = false
+			const finish = () => {
+				if (finished) return
+				finished = true
+				if (timer) clearTimeout(timer)
+				timer = null
+				if (animationCleanup === finish) animationCleanup = null
+				resolve()
+			}
+			animationCleanup = finish
 
 			el.style.transition = 'opacity 150ms ease-out'
 			el.style.opacity = '0'
 
-			setTimeout(resolve, 150)
+			timer = setTimeout(finish, 150)
 		})
 	}
 

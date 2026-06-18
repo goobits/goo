@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import GooToast from '../GooToast.svelte'
 import GooToaster from '../GooToaster.svelte'
 import { toast } from '../index.ts'
+import { createGooProgressToast } from '../progress-toast.ts'
 import { _resetToastStoreForTests, toastStore } from '../toast-service.svelte.ts'
 import type { Toast } from '../types.ts'
 
@@ -212,5 +213,35 @@ describe('GooToaster', () => {
 
 		const items = container.querySelectorAll('.goo-toast')
 		expect(items.length).toBe(2)
+	})
+})
+
+describe('GooProgressToast', () => {
+	afterEach(() => {
+		vi.useRealTimers()
+		document.querySelectorAll('.goo-progress-toast').forEach(element => element.remove())
+	})
+
+	it('clears close timers and owned listeners when destroyed', () => {
+		vi.useFakeTimers()
+		const progressToast = createGooProgressToast({
+			cancelButton: 'Cancel',
+			closeDelay: 1000
+		})
+		const cancelButton = progressToast.element.querySelector('button')!
+		const removeEventListener = vi.spyOn(cancelButton, 'removeEventListener')
+
+		progressToast.complete()
+		expect(vi.getTimerCount()).toBe(1)
+
+		progressToast.destroy()
+		progressToast.setProgress(0.5)
+		progressToast.setMessage('Ignored')
+		progressToast.cancel()
+		progressToast.error()
+
+		expect(removeEventListener).toHaveBeenCalledWith('click', expect.any(Function))
+		expect(vi.getTimerCount()).toBe(0)
+		expect(progressToast.element.isConnected).toBe(false)
 	})
 })

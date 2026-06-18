@@ -1,8 +1,10 @@
 import { fireEvent, render, waitFor } from '@testing-library/svelte'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { createGridPopoutTrigger } from '../grid-popout/createGridPopoutTrigger.ts'
 import GridPopoutPicker from '../grid-popout/GridPopoutPicker.svelte'
 import type { GridPopoutItem } from '../grid-popout/types.ts'
+import { gooTooltipRuntime } from '../tooltip/index.ts'
 
 vi.mock('@goobits/goo/popout', () => ({
 	gooPopoutRuntime: {
@@ -354,5 +356,28 @@ describe('GridPopoutPicker', () => {
 		await fireEvent.keyDown(document, { key: 'Escape' })
 
 		expect(removeEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function), true)
+	})
+
+	it('destroys tooltip handles owned by imperative grid popout triggers', () => {
+		const tooltipHandle = {
+			element: document.createElement('span'),
+			destroy: vi.fn(),
+			hide: vi.fn(),
+			show: vi.fn()
+		}
+		const attachSpy = vi
+			.spyOn(gooTooltipRuntime, 'attach')
+			.mockReturnValue(tooltipHandle)
+
+		const trigger = createGridPopoutTrigger({
+			ariaLabel: 'Subtool',
+			items,
+			tooltip: 'Choose tool'
+		})
+
+		trigger.destroy()
+
+		expect(tooltipHandle.destroy).toHaveBeenCalledOnce()
+		attachSpy.mockRestore()
 	})
 })

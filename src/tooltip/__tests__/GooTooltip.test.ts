@@ -1,6 +1,6 @@
 import { render } from '@testing-library/svelte'
 import { tick } from 'svelte'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import GooTooltip from '../GooTooltip.svelte'
 import type { GooTooltipInstance } from '../index.ts'
@@ -102,5 +102,26 @@ describe('GooTooltip', () => {
 		const arrow = document.querySelector('.goo-popout.goo-tooltip.goo-tooltip--cursor-tip .goo-popout__arrow')
 		expect(arrow).not.toBeNull()
 		expect(arrow?.classList.contains('left')).toBe(true)
+	})
+
+	it('removes interactive popout listeners when destroyed', () => {
+		const button = document.createElement('button')
+		document.body.appendChild(button)
+		const instance = createGooTooltip({
+			for: button,
+			content: 'Save',
+			interactive: true,
+			trigger: 'manual'
+		})
+
+		instance.show()
+		const popout = document.querySelector<HTMLElement>('.goo-popout.goo-tooltip')!
+		const removeEventListenerSpy = vi.spyOn(popout, 'removeEventListener')
+
+		instance.destroy()
+
+		expect(removeEventListenerSpy).toHaveBeenCalledWith('mouseenter', expect.any(Function))
+		expect(removeEventListenerSpy).toHaveBeenCalledWith('mouseleave', expect.any(Function))
+		button.remove()
 	})
 })

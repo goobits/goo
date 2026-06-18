@@ -33,6 +33,7 @@ export type ManagedGooContextMenu = {
 	readonly id: string
 	readonly menuOptions: GooContextMenuOption[]
 	close(options?: { quiet?: boolean }): void
+	destroy(): void
 	getValue(): string
 	isOpen(): boolean
 	on(eventName: ManagedGooContextMenuEventName, handler: ManagedGooContextMenuEventHandler): () => void
@@ -178,17 +179,41 @@ function createRegisteredContextMenu(
 	})
 	let onDestroyCallback: (() => void) | undefined
 	let isOpen = false
+	let destroyed = false
+	let handleChange: (event: Event) => void = () => undefined
 	const handle: ManagedGooContextMenu = {
 		element: contextMenu,
 		id,
 		menuOptions,
 		close(options = {}) {
+			if (destroyed) return
 			contextMenu.close(options)
 			markClosed()
+		},
+		destroy() {
+			if (destroyed) return
+			destroyed = true
+			contextMenu.removeEventListener('change', handleChange)
+			contextMenu.removeEventListener('open', markOpen)
+			contextMenu.removeEventListener('close', markClosed)
+			listeners.clear()
+			onDestroyCallback = undefined
+			if (contextMenuState.currentMenu === handle) {
+				contextMenuState.currentMenu = undefined
+				contextMenuState.id = undefined
+				contextMenuState.opened = false
+			}
+			isOpen = false
+			contextMenu.close({ quiet: true })
+			contextMenu.destroy()
+			if (registeredMenus[id] === handle) {
+				delete registeredMenus[id]
+			}
 		},
 		getValue: () => contextMenu.getValue(),
 		isOpen: () => contextMenu.isOpen(),
 		on(eventName, handler) {
+			if (destroyed) return () => undefined
 			const handlers = listeners.get(eventName) || new Set()
 			handlers.add(handler)
 			listeners.set(eventName, handlers)
@@ -198,14 +223,19 @@ function createRegisteredContextMenu(
 			}
 		},
 		open(options = {}) {
+			if (destroyed) return false
 			onDestroyCallback = options.onDestroy || options.onClose
 			return contextMenu.open({
 				...options,
 				actionContext: options.actionContext || config.actionContext
 			})
 		},
-		setOptions: options => contextMenu.setOptions(options),
+		setOptions: options => {
+			if (destroyed) return
+			contextMenu.setOptions(options)
+		},
 		setValue(value, options = {}) {
+			if (destroyed) return
 			const stringValue = String(value)
 			const option = findContextMenuOption(menuOptions, stringValue)
 			option?.onChoose?.(stringValue)
@@ -214,17 +244,19 @@ function createRegisteredContextMenu(
 	}
 	handleRef.current = handle
 
-	contextMenu.addEventListener('change', event => {
+	handleChange = event => {
 		const value = (event as CustomEvent<{ value?: string }>).detail?.value ?? contextMenu.getValue?.()
 		config.onChange?.call(handle, String(value))
 		markClosed()
-	})
+	}
+	contextMenu.addEventListener('change', handleChange)
 	contextMenu.addEventListener('open', markOpen)
 	contextMenu.addEventListener('close', markClosed)
 
 	return handle
 
 	function markOpen(): void {
+		if (destroyed) return
 		if (isOpen) return
 
 		isOpen = true
@@ -236,6 +268,7 @@ function createRegisteredContextMenu(
 	}
 
 	function markClosed(): void {
+		if (destroyed) return
 		if (!isOpen && !contextMenuState.opened) return
 
 		isOpen = false

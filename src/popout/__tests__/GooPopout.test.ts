@@ -9,6 +9,7 @@ import { createGooPopout } from '../index.ts'
 describe('GooPopout', () => {
 	afterEach(() => {
 		document.querySelectorAll('.goo-popout').forEach(element => element.remove())
+		vi.useRealTimers()
 	})
 
 	it('creates native popout elements without custom tags', () => {
@@ -293,6 +294,33 @@ describe('GooPopout', () => {
 		instance?.destroy()
 		target.remove()
 	})
+
+	it('does not remount from a queued prop-change microtask after unmount', async() => {
+		const firstTarget = document.createElement('button')
+		const secondTarget = document.createElement('button')
+		firstTarget.id = 'first-popout-target'
+		secondTarget.id = 'second-popout-target'
+		document.body.append(firstTarget, secondTarget)
+		const { rerender, unmount } = render(GooPopout, {
+			props: {
+				target: 'first-popout-target',
+				open: true
+			}
+		})
+		await tick()
+
+		await rerender({
+			target: 'second-popout-target',
+			open: true
+		})
+		unmount()
+		await Promise.resolve()
+		await delay(180)
+
+		expect(document.querySelector('.goo-popout')).toBeNull()
+		firstTarget.remove()
+		secondTarget.remove()
+	})
 })
 
 function rect(x: number, y: number, width: number, height: number): DOMRect {
@@ -311,4 +339,8 @@ function rect(x: number, y: number, width: number, height: number): DOMRect {
 
 function nextAnimationFrame(): Promise<void> {
 	return new Promise(resolve => requestAnimationFrame(() => resolve()))
+}
+
+function delay(ms: number): Promise<void> {
+	return new Promise(resolve => setTimeout(resolve, ms)) // test-shape: timing-probe - waits for popout close animation.
 }

@@ -115,6 +115,8 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 	// Override open to accept position coordinates directly
 	const contextMenu = select as GooContextMenuElement
 	const originalOpen = contextMenu.open.bind(contextMenu)
+	const originalDestroy = contextMenu.destroy.bind(contextMenu)
+	const attachCleanups = new Set<() => void>()
 	contextMenu.open = function openContextMenu(opts: GooContextMenuOpenOptions = {}) {
 		const { x, y, at, ...restOpts } = opts
 
@@ -151,10 +153,24 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 
 		$element.addEventListener('contextmenu', contextHandler as EventListener)
 
-		// Return cleanup function
-		return () => {
+		let attached = true
+		const cleanup = () => {
+			if (!attached) return
+			attached = false
 			$element.removeEventListener('contextmenu', contextHandler as EventListener)
+			attachCleanups.delete(cleanup)
 		}
+
+		attachCleanups.add(cleanup)
+		return cleanup
+	}
+
+	contextMenu.destroy = function destroyContextMenu() {
+		for (const cleanup of Array.from(attachCleanups)) {
+			cleanup()
+		}
+		attachCleanups.clear()
+		originalDestroy()
 	}
 
 	return contextMenu

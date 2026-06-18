@@ -1,9 +1,11 @@
 import { render } from '@testing-library/svelte'
-import { beforeAll, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
 import Harness from './VirtualGridHarness.svelte'
 
 describe('VirtualGrid', () => {
+	const originalResizeObserver = globalThis.ResizeObserver
+
 	beforeAll(() => {
 		// jsdom has no matchMedia; VirtualGrid probes it for constrained devices on init.
 		vi.stubGlobal('matchMedia', (query: string) => ({
@@ -12,6 +14,10 @@ describe('VirtualGrid', () => {
 			addEventListener() {},
 			removeEventListener() {}
 		}))
+	})
+
+	afterEach(() => {
+		vi.stubGlobal('ResizeObserver', originalResizeObserver)
 	})
 
 	it('defaults the container to role="presentation" with no semantic aria', () => {
@@ -39,5 +45,34 @@ describe('VirtualGrid', () => {
 		expect(grid.getAttribute('aria-label')).toBe('Documents')
 		expect(grid.getAttribute('aria-rowcount')).toBe('42')
 		expect(grid.getAttribute('aria-multiselectable')).toBe('true')
+	})
+
+	it('removes listeners from the same mounted elements when unmounted', () => {
+		const scrollRoot = document.createElement('div')
+		document.body.appendChild(scrollRoot)
+		const rootRemoveEventListenerSpy = vi.spyOn(scrollRoot, 'removeEventListener')
+		const { container, unmount } = render(Harness, {
+			props: { scrollRoot }
+		})
+		const grid = container.querySelector<HTMLElement>('.goo-virtual-grid')!
+		const gridRemoveEventListenerSpy = vi.spyOn(grid, 'removeEventListener')
+
+		unmount()
+
+		expect(gridRemoveEventListenerSpy).toHaveBeenCalledWith('virtualgridnavigate', expect.any(Function))
+		expect(rootRemoveEventListenerSpy).toHaveBeenCalledWith('scroll', expect.any(Function))
+		scrollRoot.remove()
+	})
+
+	it('mounts and unmounts when ResizeObserver is unavailable', () => {
+		vi.stubGlobal('ResizeObserver', undefined)
+		const scrollRoot = document.createElement('div')
+		document.body.appendChild(scrollRoot)
+		const { unmount } = render(Harness, {
+			props: { scrollRoot }
+		})
+
+		expect(() => unmount()).not.toThrow()
+		scrollRoot.remove()
 	})
 })

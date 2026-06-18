@@ -149,6 +149,7 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 	let showTimeout: ReturnType<typeof setTimeout> | null = null
 	let hideTimeout: ReturnType<typeof setTimeout> | null = null
 	let isDestroyed = false
+	let interactiveCleanup: (() => void) | null = null
 	const cleanups: Array<() => void> = []
 
 	// Generate unique ID for a11y
@@ -211,11 +212,7 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 		target.setAttribute('aria-describedby', tooltipId)
 
 		// Interactive: keep open when hovering tooltip itself
-		if (interactive && popout.element) {
-			popout.element.dataset.interactive = 'true'
-			popout.element.addEventListener('mouseenter', cancelHide)
-			popout.element.addEventListener('mouseleave', scheduleHide)
-		}
+		bindInteractivePopout()
 
 		if (onshow && popout.element) {
 			onshow({ element: popout.element })
@@ -227,6 +224,7 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 		if (isDestroyed || !popout?.isOpen()) return
 
 		popout.close()
+		clearInteractivePopout()
 		target.removeAttribute('aria-describedby')
 
 		if (onhide && popout.element) {
@@ -258,6 +256,26 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 			clearTimeout(hideTimeout)
 			hideTimeout = null
 		}
+	}
+
+	function bindInteractivePopout() {
+		clearInteractivePopout()
+		if (!interactive || !popout?.element) return
+
+		const element = popout.element
+		element.dataset.interactive = 'true'
+		element.addEventListener('mouseenter', cancelHide)
+		element.addEventListener('mouseleave', scheduleHide)
+		interactiveCleanup = () => {
+			element.removeEventListener('mouseenter', cancelHide)
+			element.removeEventListener('mouseleave', scheduleHide)
+			delete element.dataset.interactive
+		}
+	}
+
+	function clearInteractivePopout() {
+		interactiveCleanup?.()
+		interactiveCleanup = null
 	}
 
 	// -------------------------------------------------------------------------
@@ -335,6 +353,7 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 
 		cancelShow()
 		cancelHide()
+		clearInteractivePopout()
 
 		// Clean up event listeners
 		for (const cleanup of cleanups) {

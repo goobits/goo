@@ -65,8 +65,8 @@ export function createGridPopoutTrigger({
 		throw new Error('GridPopoutPicker failed to mount.')
 	}
 
-	if (tooltip) {
-		UITooltip.attach(trigger, () => {
+	const tooltipHandle = tooltip
+		? UITooltip.attach(trigger, () => {
 			if (trigger.classList.contains('goo-grid-trigger--opened')) {
 				return
 			}
@@ -77,7 +77,7 @@ export function createGridPopoutTrigger({
 			showOnClick: true,
 			showOnHover: true
 		})
-	}
+		: undefined
 
 	const handle: GridPopoutTriggerHandle = {
 		get element() {
@@ -86,6 +86,7 @@ export function createGridPopoutTrigger({
 		destroy() {
 			if (destroyed) return
 			destroyed = true
+			tooltipHandle?.destroy()
 			void unmount(component)
 		},
 		setValue(value) {
