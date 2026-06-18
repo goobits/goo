@@ -122,11 +122,15 @@ export interface GooDialogController<TValues extends DialogValues = DialogValues
 	readonly isOpen: boolean
 	/** Close the dialog. */
 	close(): Promise<void>
+	/** Close and permanently tear down dialog-owned resources. */
+	destroy(): Promise<void>
 	/** Open the dialog and resolve with the user's action. */
 	open(): Promise<DialogResult<TValues>>
 	/** Replace dialog content. Strings render as text; pass a DOM node for rich content. */
 	setContent(content: string | Node): void
 }
+
+type DestroyableElement = HTMLElement & { destroy?: () => void }
 
 /**
  * Internal dialog implementation.
@@ -162,6 +166,12 @@ class GooDialogControllerRuntime {
 	declare _isOpen: boolean
 	declare _autoDismissTimer: ReturnType<typeof setTimeout> | null
 	declare _previousActiveElement: HTMLElement | null
+	declare _destroyed: boolean
+	declare _elementCleanups: Array<() => void>
+	declare _openCleanups: Array<() => void>
+	declare _openFrames: number[]
+	declare _closeTimer: ReturnType<typeof setTimeout> | null
+	declare _closePromise: Promise<void> | null
 
 	// Callback functions
 	declare _onOk: ((result: DialogResult) => void) | undefined
@@ -206,6 +216,13 @@ class GooDialogControllerRuntime {
 		this._$backdrop = null
 		this._isOpen = false
 		this._autoDismissTimer = null
+		this._previousActiveElement = null
+		this._destroyed = false
+		this._elementCleanups = []
+		this._openCleanups = []
+		this._openFrames = []
+		this._closeTimer = null
+		this._closePromise = null
 		this._createElement()
 	}
 
@@ -299,7 +316,13 @@ class GooDialogControllerRuntime {
 	 * Destroy element.
 	 */
 	_destroyElement() {
+		this._cleanupElementListeners()
+		this._cleanupOpenResources()
 		this._clearAutoDismiss()
+		for (const $field of this._fieldElements.values()) {
+			($field as DestroyableElement).destroy?.()
+		}
+		this.$applyToAll?.destroy?.()
 		this.$header = null
 		this.$title = null
 		this.$content = null
@@ -343,29 +366,86 @@ class GooDialogControllerRuntime {
 	_bindEvents() {
 		// Close buttons
 		if (this.$closeBtn) {
-			this.$closeBtn.addEventListener('click', () => this._handleCancel())
+			this._listen(this.$closeBtn, 'click', () => this._handleCancel())
 		}
 		if (this.$closeBadge) {
-			this.$closeBadge.addEventListener('click', () => this._handleCancel())
+			this._listen(this.$closeBadge, 'click', () => this._handleCancel())
 		}
 
 		// Footer buttons
 		if (this.$okBtn) {
-			this.$okBtn.addEventListener('click', () => this._handleOk())
+			this._listen(this.$okBtn, 'click', () => this._handleOk())
 		}
 		if (this.$cancelBtn) {
-			this.$cancelBtn.addEventListener('click', () => this._handleCancel())
+			this._listen(this.$cancelBtn, 'click', () => this._handleCancel())
 		}
 		if (this.$disregardBtn) {
-			this.$disregardBtn.addEventListener('click', () => this._handleDisregard())
+			this._listen(this.$disregardBtn, 'click', () => this._handleDisregard())
 		}
 
 		// Keyboard
-		this.$element.addEventListener('keydown', e => this._handleKeydown(e))
+		this._listen(this.$element, 'keydown', e => this._handleKeydown(e as KeyboardEvent))
 
 		// Focus trap
-		this._$focusTrapStart?.addEventListener('focus', () => this._focusLast())
-		this._$focusTrapEnd?.addEventListener('focus', () => this._focusFirst())
+		if (this._$focusTrapStart) {
+			this._listen(this._$focusTrapStart, 'focus', () => this._focusLast())
+		}
+		if (this._$focusTrapEnd) {
+			this._listen(this._$focusTrapEnd, 'focus', () => this._focusFirst())
+		}
+	}
+
+	_listen(
+		target: EventTarget,
+		type: string,
+		listener: EventListener,
+		options?: boolean | AddEventListenerOptions
+	) {
+		target.addEventListener(type, listener, options)
+		this._elementCleanups.push(() => target.removeEventListener(type, listener, options))
+	}
+
+	_listenOpen(
+		target: EventTarget,
+		type: string,
+		listener: EventListener,
+		options?: boolean | AddEventListenerOptions
+	) {
+		target.addEventListener(type, listener, options)
+		this._openCleanups.push(() => target.removeEventListener(type, listener, options))
+	}
+
+	_requestOpenFrame(callback: () => void): void {
+		const frame = requestAnimationFrame(() => {
+			this._openFrames = this._openFrames.filter(value => value !== frame)
+			if (!this._isOpen || this._destroyed) return
+			callback()
+		})
+		this._openFrames.push(frame)
+	}
+
+	_cancelOpenFrames(): void {
+		for (const frame of this._openFrames) {
+			cancelAnimationFrame(frame)
+		}
+		this._openFrames = []
+	}
+
+	_cleanupElementListeners(): void {
+		for (const cleanup of this._elementCleanups.splice(0)) {
+			cleanup()
+		}
+	}
+
+	_cleanupOpenResources(): void {
+		this._cancelOpenFrames()
+		for (const cleanup of this._openCleanups.splice(0)) {
+			cleanup()
+		}
+		if (this._closeTimer) {
+			clearTimeout(this._closeTimer)
+			this._closeTimer = null
+		}
 	}
 
 	/**
@@ -373,7 +453,7 @@ class GooDialogControllerRuntime {
 	 *
 	 * @param e - e.
 	 */
-	_handleKeydown(e) {
+	_handleKeydown(e: KeyboardEvent) {
 		// Only the topmost dialog reacts to keys, so stacked dialogs close one at a time.
 		if (dialogManager.getTopDialog() !== this) return
 
@@ -403,10 +483,12 @@ class GooDialogControllerRuntime {
 	 * Handles ok.
 	 */
 	async _handleOk() {
+		if (this._destroyed || !this._isOpen) return
 		// Validate if verify function provided
 		if (this._verify) {
 			const values = this._getFieldValues()
 			const valid = await Promise.resolve(this._verify(values, this._fieldElements))
+			if (this._destroyed || !this._isOpen) return
 			if (!valid) return
 		}
 
@@ -426,6 +508,7 @@ class GooDialogControllerRuntime {
 	 * Handles cancel.
 	 */
 	_handleCancel() {
+		if (this._destroyed || !this._isOpen) return
 		const result: DialogResult = { cancel: true }
 		if (this._onCancel) this._onCancel(result)
 		this._resolve?.(result)
@@ -437,6 +520,7 @@ class GooDialogControllerRuntime {
 	 * Handles disregard.
 	 */
 	_handleDisregard() {
+		if (this._destroyed || !this._isOpen) return
 		const result: DialogResult = {
 			disregard: true,
 			applyToAll: (this.$applyToAll as unknown as { checked: boolean })?.checked ?? false,
@@ -527,6 +611,7 @@ class GooDialogControllerRuntime {
 	 */
 	_startAutoDismiss() {
 		if (this.state.autoDismiss > 0) {
+			this._clearAutoDismiss()
 			this._autoDismissTimer = setTimeout(() => {
 				this._handleCancel()
 			}, this.state.autoDismiss)
@@ -552,9 +637,10 @@ class GooDialogControllerRuntime {
 	 * @returns {Promise<DialogResult>}
 	 */
 	open() {
-		if (this._isOpen) return Promise.resolve({ cancel: true })
+		if (this._destroyed || this._isOpen) return Promise.resolve({ cancel: true })
 
 		return new Promise(resolve => {
+			this._cleanupOpenResources()
 			this._resolve = resolve
 			this._isOpen = true
 
@@ -571,16 +657,13 @@ class GooDialogControllerRuntime {
 				this._$backdrop.style.setProperty('--goo-dialog-z-index', String(dialogManager.getZIndex(this)))
 
 				if (this.state.closeOnBackdrop) {
-					this._$backdrop.addEventListener('click', () => this._handleCancel())
+					this._listenOpen(this._$backdrop, 'click', () => this._handleCancel())
 				}
 
 				document.body.appendChild(this._$backdrop)
 
 				// Animate backdrop in
-				requestAnimationFrame(() => {
-					if (!this._isOpen || !this._$backdrop) return
-					this._$backdrop.classList.add('goo-dialog-backdrop--visible')
-				})
+				this._requestOpenFrame(() => this._$backdrop?.classList.add('goo-dialog-backdrop--visible'))
 			}
 
 			// Set z-index
@@ -590,8 +673,8 @@ class GooDialogControllerRuntime {
 			document.body.appendChild(this.$element)
 
 			// Animate in
-			requestAnimationFrame(() => {
-				if (!this._isOpen || !document.body.contains(this.$element)) return
+			this._requestOpenFrame(() => {
+				if (!document.body.contains(this.$element)) return
 				this.$element.setAttribute('open', '')
 				this._setInitialFocus()
 				this._startAutoDismiss()
@@ -604,10 +687,21 @@ class GooDialogControllerRuntime {
 	 * @returns {Promise<void>}
 	 */
 	async close() {
+		if (this._closePromise) return this._closePromise
 		if (!this._isOpen) return
 
+		this._closePromise = this._close()
+		try {
+			await this._closePromise
+		} finally {
+			this._closePromise = null
+		}
+	}
+
+	async _close() {
 		this._isOpen = false
 		this._clearAutoDismiss()
+		this._cancelOpenFrames()
 
 		// Resolve the promise if not already resolved (e.g., when called via widget.destroy())
 		// This ensures .then()/.finally() handlers are triggered
@@ -624,12 +718,18 @@ class GooDialogControllerRuntime {
 		}
 
 		// Wait for animation
-		await new Promise(r => setTimeout(r, TRANSITION_DURATION))
+		await new Promise<void>(resolve => {
+			this._closeTimer = setTimeout(() => {
+				this._closeTimer = null
+				resolve()
+			}, TRANSITION_DURATION)
+		})
 
 		// Cleanup
 		this.$element.removeAttribute('open')
 		this.$element.classList.remove('goo-dialog--hiding')
 		this.$element.remove()
+		this._cleanupOpenResources()
 
 		if (this._$backdrop) {
 			this._$backdrop.remove()
@@ -646,6 +746,23 @@ class GooDialogControllerRuntime {
 
 		// Callback
 		if (this._onClose) this._onClose()
+	}
+
+	/**
+	 * Close and permanently tear down dialog-owned resources.
+	 * @returns {Promise<void>}
+	 */
+	async destroy() {
+		if (this._destroyed) return
+		this._destroyed = true
+		await this.close()
+		this._destroyElement()
+		this.$element.remove()
+		this._$backdrop?.remove()
+		this._$backdrop = null
+		dialogManager.unregister(this)
+		this._resolve?.({ cancel: true })
+		this._resolve = null
 	}
 
 	/**
