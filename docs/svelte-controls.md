@@ -11,6 +11,13 @@ How to expose a Svelte editor as a GooSchema control.
 
 GooController owns the row wrapper, binding lifecycle, and imperative handle. Svelte controls should expose props and callbacks only; do not depend on controller private fields such as `_controlPromise`, `_control`, or `_destroyElement`. Imperative controls should use stable handle names such as `destroy()`, `setValue()`, `getValue()`, and `getSlider()`.
 
+## Lifecycle Guardrails
+
+- Components should clean up timers, animation frames, observers, popouts, tooltips, document/window listeners, and pointer capture from `$effect` teardown or `onDestroy`.
+- Imperative wrappers should make `destroy()` idempotent and clear every resource the wrapper created, including listeners registered by convenience methods like `attachTo(...)`.
+- After `destroy()`, public methods should no-op or return `false`; they should not recreate Svelte mounts or mutate detached DOM.
+- Tests for controls that use fake timers, global spies, or body-mounted UI should restore timers/globals and remove mounted popouts/tooltips in `afterEach`.
+
 ## Component + controlSchema
 
 ```svelte

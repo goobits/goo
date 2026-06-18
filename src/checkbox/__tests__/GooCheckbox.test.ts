@@ -1,11 +1,15 @@
 import { fireEvent, render } from '@testing-library/svelte'
 import { tick } from 'svelte'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { pointerEvent } from '../../__tests__/_pointerEvents.ts'
 import GooCheckbox from '../GooCheckbox.svelte'
 
 describe('GooCheckbox', () => {
+	afterEach(() => {
+		vi.useRealTimers()
+	})
+
 	it('toggles without entering the transitionless dragging state', async() => {
 		const onchange = vi.fn()
 		const { container } = render(GooCheckbox, {

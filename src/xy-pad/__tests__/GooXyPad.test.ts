@@ -1,12 +1,16 @@
 import { fireEvent, render } from '@testing-library/svelte'
 import { tick } from 'svelte'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { pointerEvent } from '../../__tests__/_pointerEvents.ts'
 import GooXyPad from '../GooXyPad.svelte'
 import type { GooXyPadElement } from '../types.ts'
 
 describe('GooXyPad', () => {
+	afterEach(() => {
+		vi.useRealTimers()
+	})
+
 	it('renders a native XY pad with precision number fields', () => {
 		const { container } = render(GooXyPad, {
 			props: {

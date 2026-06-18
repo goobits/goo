@@ -128,6 +128,14 @@ Imperative Goo factories create ordinary HTML elements and attach a small public
 
 Use `createGooController()` and `createGooSchema()` for imperative controller/schema handles. Use the `GooSchema` Svelte component for markup. Use `createGooDialog()` for imperative dialogs. `GooSelect` internals such as keyboard and panel state are private to the package; public callers should use the component props, DOM events, or the exported element methods.
 
+## Lifecycle Contract
+
+- Every imperative handle that attaches DOM listeners, timers, animation frames, observers, popouts, tooltips, or mounted Svelte children must expose an idempotent `destroy()`.
+- `destroy()` owns all resources created by that handle, including convenience helpers such as `attachTo(...)`; callers may still use returned cleanup functions, but forgetting one should not leak.
+- Public mutators such as `setValue()`, `setOptions()`, `open()`, `close()`, and progress/update methods should no-op after destroy rather than remounting or mutating detached DOM.
+- Prefer shared lifecycle helpers such as `createPointerDrag` for pointer sequences and capture cleanup. When a component creates timers or animation frames, store their ids and clear them on unmount/destroy.
+- Tests that use fake timers, animation-frame spies, observers, global listeners, or body-mounted popouts/tooltips must restore those globals in `afterEach` or `finally`.
+
 ## Core Components
 
 ### Button

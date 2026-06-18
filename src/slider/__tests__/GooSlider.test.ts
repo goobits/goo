@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 
 import { fireEvent, render } from '@testing-library/svelte'
 import { tick } from 'svelte'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { pointerEvent } from '../../__tests__/_pointerEvents.ts'
 import { createSliderPrimitiveField } from '../_createSliderPrimitiveField.ts'
@@ -12,6 +12,10 @@ import type { GooSliderElement } from '../types.ts'
 const sliderCss = readFileSync('src/slider/GooSlider.css', 'utf8')
 
 describe('GooSlider', () => {
+	afterEach(() => {
+		vi.useRealTimers()
+	})
+
 	it('renders a native slider surface without custom element tags', () => {
 		const { container } = render(GooSlider, {
 			props: {
