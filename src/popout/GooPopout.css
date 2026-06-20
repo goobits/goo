@@ -5,19 +5,28 @@
 
 .goo-popout {
 	/* Theme variables - uses --goo-theme-* tokens */
-	--goo-popout-bg: var(--goo-theme-surface-raised, rgba(45, 45, 50, 0.98));
+	--goo-popout-bg: color-mix(in srgb, var(--goo-theme-bg, #2d2d32) 84%, transparent);
 	--goo-popout-fg: var(--goo-theme-fg, rgba(255, 255, 255, 0.9));
-	--goo-popout-border: var(--goo-theme-border, rgba(128, 128, 128, 0.2));
+	--goo-popout-border: color-mix(in srgb, var(--goo-theme-fg, #fff) 18%, transparent);
 	--goo-popout-arrow-border: color-mix(
 		in srgb,
-		var(--goo-theme-fg, #fff) 15%,
+		var(--goo-theme-fg, #fff) 18%,
 		var(--goo-theme-bg, #2d2d32)
 	);
 	--goo-popout-shadow: drop-shadow(0 0 0.5px var(--goo-popout-border))
-		drop-shadow(0 1px 4px rgba(0, 0, 0, 0.25)) drop-shadow(0 8px 16px rgba(0, 0, 0, 0.25));
+		drop-shadow(0 18px 42px rgb(0 0 0 / 28%))
+		drop-shadow(0 4px 14px rgb(0 0 0 / 18%));
 	--goo-popout-radius: var(--goo-theme-radius-lg, 0.6875rem);
 	--goo-popout-arrow-size: 8px;
 
+	backdrop-filter: blur(18px) saturate(1.35);
+	background-image: linear-gradient(
+		135deg,
+		color-mix(in srgb, var(--goo-theme-fg, #fff) 12%, transparent),
+		color-mix(in srgb, var(--goo-theme-bg, #2d2d32) 76%, transparent)
+	);
+	box-shadow: inset 0 1px 0 color-mix(in srgb, var(--goo-theme-fg, #fff) 18%, transparent);
+	color: var(--goo-popout-fg);
 	position: fixed;
 	z-index: 100000;
 	display: block;
@@ -25,13 +34,15 @@
 	border: 1px solid var(--goo-popout-border);
 	border-radius: var(--goo-popout-radius);
 	filter: var(--goo-popout-shadow);
-	color: var(--goo-popout-fg);
 	outline: none;
+	overflow: visible;
 }
 
 .goo-popout:focus-visible {
 	outline: none;
-	box-shadow: 0 0 0 3px color-mix(in srgb, var(--goo-theme-accent, #3b82f6) 24%, transparent);
+	box-shadow:
+		inset 0 1px 0 color-mix(in srgb, var(--goo-theme-fg, #fff) 18%, transparent),
+		0 0 0 3px color-mix(in srgb, var(--goo-theme-accent, #3b82f6) 24%, transparent);
 }
 
 /* =============================================================================
@@ -62,12 +73,15 @@
 }
 
 .goo-popout__content::-webkit-scrollbar-thumb {
-	background: var(--goo-theme-muted);
-	border-radius: 3px;
+	background: color-mix(in srgb, var(--goo-theme-muted, var(--goo-theme-fg, #fff)) 72%, transparent);
+	background-clip: padding-box;
+	border: 2px solid transparent;
+	border-radius: 999px;
 }
 
 .goo-popout__content::-webkit-scrollbar-thumb:hover {
-	background: var(--goo-theme-fg, rgba(255, 255, 255, 0.5));
+	background: color-mix(in srgb, var(--goo-theme-fg, #fff) 46%, transparent);
+	background-clip: padding-box;
 }
 
 /* =============================================================================
@@ -194,6 +208,9 @@
 
 .goo-popout--chromeless {
 	background: transparent;
+	background-image: none;
+	backdrop-filter: none;
+	box-shadow: none;
 	border-radius: 0;
 	filter: none;
 }
@@ -208,22 +225,7 @@
 
 .goo-popout--floating-chrome {
 	--goo-popout-bg: color-mix(in srgb, var(--goo-theme-bg) 82%, transparent);
-	--goo-popout-border: color-mix(in srgb, var(--goo-theme-fg) 18%, transparent);
 	--goo-popout-radius: var(--goo-theme-radius-lg);
-
-	backdrop-filter: blur(18px) saturate(1.35);
-	background: var(--goo-popout-bg);
-	background-image: linear-gradient(
-		135deg,
-		color-mix(in srgb, var(--goo-theme-fg) 14%, transparent),
-		color-mix(in srgb, var(--goo-theme-bg) 72%, transparent)
-	);
-	box-shadow:
-		0 16px 44px rgb(0 0 0 / 22%),
-		inset 0 1px 0 color-mix(in srgb, var(--goo-theme-fg) 20%, transparent);
-	color: var(--goo-theme-fg);
-	filter: none;
-	overflow: visible;
 }
 
 /* =============================================================================
