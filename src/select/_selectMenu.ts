@@ -53,12 +53,13 @@ export function getSelectMenuOffset(menu: NormalizedGooSelectMenu): { x?: number
 	return menu.variant === 'attached' ? { x: 0, y: 0 } : { x: 0, y: 4 }
 }
 
-export function getSelectMenuPopoutClass(menu: NormalizedGooSelectMenu): string {
+export function getSelectMenuPopoutClass(menu: NormalizedGooSelectMenu, openClassName?: string): string {
 	return [
 		'goo-select-popout',
 		menu.variant === 'attached' ? 'goo-select-popout--menu-attached' : '',
 		menu.outline ? 'goo-select-popout--outlined' : '',
-		menu.popoutClassName
+		menu.popoutClassName,
+		openClassName
 	].filter(Boolean).join(' ')
 }
 

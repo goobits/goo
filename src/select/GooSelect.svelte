@@ -208,7 +208,8 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 		parentElement,
 		actionContext: contextOverride,
 		align: alignOverride,
-		offset: offsetOverride
+		offset: offsetOverride,
+		popoutClassName
 	} = options
 	if (contextOverride) {
 		currentBoundContext = contextOverride
@@ -252,7 +253,7 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 		content: panel.$container,
 		parentElement: parentElement || document.body,
 		role: null,
-		className: getSelectMenuPopoutClass(currentMenu),
+		className: getSelectMenuPopoutClass(currentMenu, popoutClassName),
 		clickToClose,
 		escapeToClose: true,
 		keepWithin: keepWithin || { element: document.body, margin: 15 },

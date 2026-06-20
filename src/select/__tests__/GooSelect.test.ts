@@ -117,6 +117,27 @@ describe('GooSelect', () => {
 		expect(document.querySelectorAll('.goo-select__option').length).toBe(2)
 	})
 
+	it('appends open-time popout class names', async() => {
+		const { container } = render(GooSelect, {
+			props: {
+				value: 'a',
+				options: [
+					{ id: 'a', label: 'A' },
+					{ id: 'b', label: 'B' }
+				]
+			}
+		})
+		const element = container.querySelector<GooSelectElement>('.goo-select')!
+
+		expect(element.open({
+			autoFocus: false,
+			popoutClassName: 'sketch-contextual-menu-popout'
+		})).toBe(true)
+		await tick()
+
+		expect(document.querySelector('.goo-popout.goo-select-popout.sketch-contextual-menu-popout')).not.toBeNull()
+	})
+
 	it('does not render inline HTML icon strings', () => {
 		const icon = createIcon(' <img src=x onerror=alert(1)>')
 
