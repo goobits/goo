@@ -45,6 +45,7 @@ export function normalizeOption(opt: unknown): GooSelectOption | null {
 		type: (optObj.type as GooSelectOption['type']) || 'option',
 		label: (optObj.label || optObj.title || '') as GooSelectOption['label'],
 		id: (optObj.id as string) || labelToId(optObj.label as string || optObj.title as string || ''),
+		tone: optObj.tone as GooSelectOption['tone'],
 		icon: optObj.icon as GooSelectOption['icon'],
 		shortcut: optObj.shortcut as GooSelectOption['shortcut'],
 		isDisabled: optObj.isDisabled as GooSelectOption['isDisabled'],

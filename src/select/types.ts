@@ -24,6 +24,8 @@ export interface GooSelectOption {
 	type?: 'option' | 'divider' | 'optgroup' | 'submenu'
 	label?: GooSelectRenderable
 	id?: string
+	/** Visual tone. `'danger'` styles the row as destructive (negative color). */
+	tone?: 'danger'
 	icon?: GooSelectRenderable
 	shortcut?: GooSelectShortcut
 	isDisabled?: boolean | (() => boolean)

@@ -164,6 +164,26 @@ describe('GooSelect', () => {
 		expect(selected.querySelector('.goo-select__check svg')).not.toBeNull()
 	})
 
+	it('marks destructive options with the danger modifier', async() => {
+		const { container } = render(GooSelect, {
+			props: {
+				value: 'a',
+				options: [
+					{ id: 'a', label: 'A' },
+					{ id: 'remove', label: 'Delete', tone: 'danger' }
+				]
+			}
+		})
+		const element = container.querySelector<GooSelectElement>('.goo-select')!
+
+		expect(element.open({ autoFocus: false })).toBe(true)
+		await tick()
+
+		const danger = document.querySelector<HTMLElement>('.goo-select__option[data-id="remove"]')!
+		expect(danger.classList.contains('goo-select__option--danger')).toBe(true)
+		expect(document.querySelector<HTMLElement>('.goo-select__option[data-id="a"]')?.classList.contains('goo-select__option--danger')).toBe(false)
+	})
+
 	it('can hide the selection indicator without disabling option choice', async() => {
 		const onchange = vi.fn()
 		const { container } = render(GooSelect, {
