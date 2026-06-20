@@ -1,7 +1,12 @@
 import './GooBlendMode.css'
 
 import { createSelectField, type SelectFieldOptions } from '../select/_createSelectField.ts'
-import type { GooSelectElement, GooSelectOption } from '../select/types.ts'
+import type {
+	GooSelectElement,
+	GooSelectOption,
+	GooSelectOptionMap,
+	GooSelectOptionsInput
+} from '../select/types.ts'
 
 export type BlendModeFieldOption = string | {
 	id?: string | number
@@ -35,7 +40,7 @@ export function createBlendModeField(options: BlendModeFieldOptions = {}): GooSe
 	})
 }
 
-function normalizeBlendModeOptions(options: unknown): readonly GooSelectOption[] | Record<string, unknown> {
+function normalizeBlendModeOptions(options: unknown): GooSelectOptionsInput {
 	if (!Array.isArray(options)) return isRecord(options) ? options : []
 	const optionList = options as readonly BlendModeFieldOption[]
 	return optionList.map(option => {
@@ -52,7 +57,7 @@ function normalizeBlendModeOptions(options: unknown): readonly GooSelectOption[]
 	})
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
+function isRecord(value: unknown): value is GooSelectOptionMap {
 	return Boolean(value) && typeof value === 'object'
 }
 

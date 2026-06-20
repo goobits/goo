@@ -278,6 +278,79 @@ describe('GooSchema', () => {
 		expect(schema.getData().size).toBe(24)
 	})
 
+	it('keeps conditional schema controllers mounted when visibility is unchanged', async() => {
+		const schema = createGooSchema({
+			schema: [
+				{ path: 'mode', options: [ 'basic', 'advanced' ] },
+				{ path: 'size', min: 0, max: 100, if: { path: 'mode', equals: 'advanced' } },
+				{ path: 'opacity', min: 0, max: 1, if: { path: 'mode', equals: 'advanced' } }
+			],
+			data: {
+				mode: 'advanced',
+				opacity: 0.5,
+				size: 12
+			},
+			bare: true
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+
+		const sizeController = schema.getController('size')
+		const opacityController = schema.getController('opacity')
+		expect(sizeController).not.toBeUndefined()
+		expect(opacityController).not.toBeUndefined()
+
+		schema.setData({
+			mode: 'advanced',
+			opacity: 0.75,
+			size: 24
+		})
+		await settleGooSchema()
+
+		expect(schema.getController('size')).toBe(sizeController)
+		expect(schema.getController('opacity')).toBe(opacityController)
+		expect(schema.getData()).toMatchObject({
+			mode: 'advanced',
+			opacity: 0.75,
+			size: 24
+		})
+	})
+
+	it('rebuilds conditional schema controllers when visibility changes', async() => {
+		const schema = createGooSchema({
+			schema: [
+				{ path: 'mode', options: [ 'basic', 'advanced' ] },
+				{ path: 'basicSize', min: 0, max: 100, if: { path: 'mode', equals: 'basic' } },
+				{ path: 'advancedSize', min: 0, max: 100, if: { path: 'mode', equals: 'advanced' } }
+			],
+			data: {
+				advancedSize: 24,
+				basicSize: 8,
+				mode: 'basic'
+			},
+			bare: true
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+
+		const modeController = schema.getController('mode')
+		const basicController = schema.getController('basicSize')
+		expect(modeController).not.toBeUndefined()
+		expect(basicController).not.toBeUndefined()
+		expect(schema.getController('advancedSize')).toBeUndefined()
+
+		schema.setData({
+			advancedSize: 24,
+			basicSize: 8,
+			mode: 'advanced'
+		})
+		await settleGooSchema()
+
+		expect(schema.getController('mode')).not.toBe(modeController)
+		expect(schema.getController('basicSize')).toBeUndefined()
+		expect(schema.getController('advancedSize')).not.toBeUndefined()
+	})
+
 	it('forwards self-contained Svelte control metadata and refreshes display on data updates', async() => {
 		const schema = createGooSchema({
 			schema: [

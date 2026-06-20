@@ -9,6 +9,8 @@
  *   setModuleLevel('goo', 'DEBUG')
  */
 
+/// <reference path="../../goobits-logger.d.ts" />
+
 import { createLogger } from '@goobits/logger'
 
 /** Main logger for goo components */

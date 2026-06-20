@@ -831,7 +831,7 @@ class GooControllerRuntime {
 	 */
 	updateOptions(options: GooControllerOptions) {
 		const { object, property } = options
-		const nextValue = object?.[property]
+		const nextValue = property === undefined ? undefined : object?.[property]
 		const nextControlType = detectControlType(nextValue, options)
 		const nextLayout = resolveControllerLayout(nextControlType, options)
 		const controlIdentityChanged =
@@ -1012,7 +1012,7 @@ Object.defineProperties(GooControllerElement, {
 })
 
 const runtimeDescriptors = Object.getOwnPropertyDescriptors(GooControllerRuntime.prototype)
-delete runtimeDescriptors.constructor
+Reflect.deleteProperty(runtimeDescriptors, 'constructor')
 Object.defineProperties(GooControllerElement.prototype, runtimeDescriptors)
 
 // ============================================================================
@@ -1021,7 +1021,7 @@ Object.defineProperties(GooControllerElement.prototype, runtimeDescriptors)
 
 function initializeController(element: GooControllerInternal, options: GooControllerOptions): void {
 	const { object, property } = options
-	const initialValue = object?.[property]
+	const initialValue = property === undefined ? undefined : object?.[property]
 	const controlType = detectControlType(initialValue, options)
 	const layout = resolveControllerLayout(controlType, options)
 
