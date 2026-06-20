@@ -36,6 +36,7 @@
 	--goo-select-item-gap: 0.375rem;
 	--goo-select-item-line-height: 1.25rem;
 	--goo-select-item-media-size: calc(var(--goo-select-item-box-size) + var(--goo-select-item-padding-y));
+	--goo-select-item-bleed-x: calc(var(--goo-select-padding) * -1);
 	--goo-select-font-size: var(--goo-theme-font-size-sm, 0.75rem);
 	--goo-select-height: var(--goo-theme-control-height-md, 2rem);
 	--goo-select-trigger-gap: var(--goo-theme-space-sm, 0.5rem);
@@ -237,6 +238,7 @@
 	/* Re-define select variables for popout context */
 	--goo-select-check-size: 0.75rem;
 	--goo-select-item-box-size: 1.25rem;
+	--goo-select-item-bleed-x: calc(var(--goo-select-padding) * -1);
 	--goo-select-item-gap: 0.375rem;
 	--goo-select-item-line-height: 1.25rem;
 	--goo-select-item-padding-x: 0.5rem;
@@ -283,6 +285,7 @@
 .goo-popout.goo-select-popout.sketch-contextual-menu-popout {
 	--goo-select-padding: 0.4375rem;
 	--goo-select-item-gap: 0.5rem;
+	--goo-select-item-bleed-x: calc(var(--goo-select-padding) * -1);
 	--goo-select-item-line-height: 1.375rem;
 	--goo-select-item-padding-x: 0.625rem;
 	--goo-select-radius: var(--goo-theme-radius-md, 0.5rem);
@@ -291,7 +294,7 @@
 }
 
 .goo-popout.sketch-contextual-menu-popout .goo-select__divider {
-	margin: 0.375rem 0.125rem;
+	margin: 0.375rem var(--goo-select-item-bleed-x);
 	background: color-mix(in srgb, var(--goo-theme-fg) 13%, transparent);
 }
 
@@ -329,13 +332,17 @@
 	flex-direction: row;
 	align-items: center;
 	gap: var(--goo-select-item-gap, 0.5rem);
-	padding: var(--goo-select-item-padding-y) var(--goo-select-item-padding-x, 0.625rem);
+	margin-inline: var(--goo-select-item-bleed-x, 0);
+	padding: var(--goo-select-item-padding-y)
+		calc(var(--goo-select-item-padding-x, 0.625rem) - var(--goo-select-item-bleed-x, 0px));
 	min-height: var(--goo-theme-control-height-sm, 1.5rem);
-	border-radius: var(--goo-select-radius, 0.25rem);
+	border-radius: calc(var(--goo-select-radius, 0.25rem) + 0.125rem);
 	color: var(--goo-select-fg, rgba(255, 255, 255, 0.9));
 	cursor: pointer;
 	line-height: var(--goo-select-item-line-height);
-	transition: background 0.1s;
+	transition:
+		background 0.12s ease,
+		color 0.12s ease;
 	user-select: none;
 }
 
@@ -343,18 +350,19 @@
 .goo-select__option:hover,
 .goo-select__option--hovered {
 	background: var(--goo-select-bg-hover);
+	color: var(--goo-select-fg);
 }
 
-/* Selected state uses accent */
+/* Selected state keeps the checkmark prominent without turning the row into a button. */
 .goo-select__option--selected {
-	background: var(--goo-select-selected-bg);
-	color: var(--goo-select-selected-fg);
+	background: color-mix(in srgb, var(--goo-select-accent) 16%, transparent);
+	color: var(--goo-select-fg);
 }
 
 .goo-select__option--selected:hover,
 .goo-select__option--selected.goo-select__option--hovered {
-	background: var(--goo-select-selected-bg);
-	color: var(--goo-select-selected-fg);
+	background: color-mix(in srgb, var(--goo-select-accent) 24%, transparent);
+	color: var(--goo-select-fg);
 }
 
 .goo-select__option--disabled {
@@ -384,7 +392,7 @@
 }
 
 .goo-select__option--selected .goo-select__check {
-	color: var(--goo-select-selected-fg);
+	color: var(--goo-select-accent);
 }
 
 .goo-select__check svg {
@@ -411,7 +419,7 @@
 .goo-select__option--selected .goo-select__icon,
 .goo-select__option--selected:hover .goo-select__icon,
 .goo-select__option--selected.goo-select__option--hovered .goo-select__icon {
-	color: var(--goo-select-selected-fg);
+	color: var(--goo-select-fg);
 }
 
 .goo-select__icon img {
@@ -444,7 +452,7 @@
 	gap: var(--goo-select-shortcut-gap);
 	flex-shrink: 0;
 	margin-left: auto;
-	padding-left: 1rem;
+	padding-left: 1.125rem;
 	line-height: var(--goo-select-item-line-height);
 	white-space: nowrap;
 }
@@ -458,7 +466,7 @@
 	padding: 0 0.3125rem;
 	background: color-mix(in srgb, var(--goo-theme-bg, #000) 34%, transparent);
 	border: 1px solid color-mix(in srgb, var(--goo-theme-fg, #fff) 15%, transparent);
-	border-radius: calc(var(--goo-select-trigger-selected-icon-radius) + 0.125rem);
+	border-radius: 0.375rem;
 	box-shadow:
 		inset 0 1px 0 color-mix(in srgb, var(--goo-theme-fg, #fff) 12%, transparent),
 		0 1px 2px rgb(0 0 0 / 12%);
@@ -478,10 +486,12 @@
 }
 
 .goo-select__option--selected .goo-select__shortcut-key {
-	background: color-mix(in srgb, var(--goo-select-selected-fg) 18%, transparent);
-	border-color: color-mix(in srgb, var(--goo-select-selected-fg) 28%, transparent);
-	box-shadow: inset 0 1px 0 color-mix(in srgb, var(--goo-select-selected-fg) 18%, transparent);
-	color: var(--goo-select-selected-fg);
+	background: color-mix(in srgb, var(--goo-select-accent) 18%, transparent);
+	border-color: color-mix(in srgb, var(--goo-select-accent) 34%, transparent);
+	box-shadow:
+		inset 0 1px 0 color-mix(in srgb, var(--goo-theme-fg, #fff) 12%, transparent),
+		0 1px 2px rgb(0 0 0 / 10%);
+	color: var(--goo-select-fg);
 }
 
 /* ============================================================================
@@ -491,9 +501,9 @@
 .goo-select__divider {
 	height: var(--goo-select-divider-size);
 	min-height: var(--goo-select-divider-size);
-	margin: var(--goo-select-item-gap) 0;
+	margin: var(--goo-select-item-gap) var(--goo-select-item-bleed-x, 0);
 	padding: 0;
-	background: var(--goo-theme-border, rgba(128, 128, 128, 0.2));
+	background: color-mix(in srgb, var(--goo-theme-fg, #fff) 12%, transparent);
 	pointer-events: none;
 }
 
@@ -514,8 +524,10 @@
 
 .goo-select__optgroup-label {
 	display: block;
-	padding: var(--goo-select-item-padding-y) var(--goo-select-item-padding-x);
+	padding: var(--goo-select-item-padding-y)
+		calc(var(--goo-select-item-padding-x, 0.625rem) - var(--goo-select-item-bleed-x, 0px));
 	margin-bottom: var(--goo-select-item-padding-y);
+	margin-inline: var(--goo-select-item-bleed-x, 0);
 	color: var(--goo-theme-muted);
 	font-size: var(--goo-theme-font-size-xs, 0.75rem);
 	font-weight: 600;
