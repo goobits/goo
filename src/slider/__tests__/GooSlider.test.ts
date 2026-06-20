@@ -768,4 +768,41 @@ describe('GooSlider', () => {
 		expect(oninput).toHaveBeenCalled()
 		expect(onchange).not.toHaveBeenCalled()
 	})
+
+	it('stops thumb drags when the pointer is released outside the slider', () => {
+		const oninput = vi.fn()
+		const onchange = vi.fn()
+		const { container } = render(GooSlider, {
+			props: {
+				value: 20,
+				oninput,
+				onchange
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const track = container.querySelector<HTMLElement>('.goo-slider__track')!
+		const thumb = container.querySelector<HTMLElement>('.goo-slider__thumb')!
+		track.getBoundingClientRect = () => ({
+			x: 0,
+			y: 0,
+			width: 100,
+			height: 20,
+			top: 0,
+			right: 100,
+			bottom: 20,
+			left: 0,
+			toJSON: () => ({})
+		})
+		slider.setPointerCapture = vi.fn()
+		slider.releasePointerCapture = vi.fn()
+
+		thumb.dispatchEvent(pointerEvent('pointerdown', { pointerId: 5, clientX: 20 }))
+		document.dispatchEvent(pointerEvent('pointerup', { pointerId: 5, clientX: 40 }))
+		slider.dispatchEvent(pointerEvent('pointermove', { pointerId: 5, clientX: 90 }))
+
+		expect(slider.releasePointerCapture).toHaveBeenCalledExactlyOnceWith(5)
+		expect(slider.getValue()).toBe(20)
+		expect(oninput).not.toHaveBeenCalled()
+		expect(onchange).toHaveBeenCalledOnce()
+	})
 })

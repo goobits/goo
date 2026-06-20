@@ -114,6 +114,7 @@ export function createPointerDrag<Environment extends object = Record<string, un
 	let startClientY = 0
 	let env = {} as Environment
 	let detached = false
+	let trackingDocument: Document | null = null
 
 	function emit(originalEvent: PointerEvent, state: GooPointerDragEvent<Environment>['state']): void | false {
 		const x = originalEvent.clientX - startClientX
@@ -171,6 +172,7 @@ export function createPointerDrag<Environment extends object = Record<string, un
 			env = {} as Environment
 			return
 		}
+		attachDocumentTracking()
 		try {
 			target.setPointerCapture?.(event.pointerId)
 		} catch {
@@ -197,11 +199,28 @@ export function createPointerDrag<Environment extends object = Record<string, un
 		lastPointerEvent = null
 		env = {} as Environment
 		if (pointerId === null) return
+		detachDocumentTracking()
 		try {
 			target.releasePointerCapture?.(pointerId)
 		} catch {
 			// Ignore capture release failures for the same reason as capture setup.
 		}
+	}
+
+	function attachDocumentTracking(): void {
+		if (trackingDocument) return
+		trackingDocument = target.ownerDocument
+		trackingDocument.addEventListener('pointerup', onPointerUp, true)
+		trackingDocument.addEventListener('pointercancel', onPointerCancel, true)
+		target.addEventListener('lostpointercapture', onLostPointerCapture)
+	}
+
+	function detachDocumentTracking(): void {
+		if (!trackingDocument) return
+		trackingDocument.removeEventListener('pointerup', onPointerUp, true)
+		trackingDocument.removeEventListener('pointercancel', onPointerCancel, true)
+		trackingDocument = null
+		target.removeEventListener('lostpointercapture', onLostPointerCapture)
 	}
 
 	function cancelActivePointer(): void {
@@ -220,6 +239,11 @@ export function createPointerDrag<Environment extends object = Record<string, un
 		finish(event, 'cancel')
 	}
 
+	function onLostPointerCapture(event: PointerEvent): void {
+		if (event.pointerId !== activePointerId) return
+		cancelActivePointer()
+	}
+
 	target.addEventListener('pointerdown', onPointerDown)
 	target.addEventListener('pointermove', onPointerMove)
 	target.addEventListener('pointerup', onPointerUp)
@@ -233,6 +257,7 @@ export function createPointerDrag<Environment extends object = Record<string, un
 			target.removeEventListener('pointermove', onPointerMove)
 			target.removeEventListener('pointerup', onPointerUp)
 			target.removeEventListener('pointercancel', onPointerCancel)
+			detachDocumentTracking()
 			cancelActivePointer()
 		}
 	}
