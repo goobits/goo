@@ -116,7 +116,7 @@
 
 .goo-popout__arrow.left::after {
 	top: calc(var(--goo-popout-arrow-size) * -1);
-	left: 1px;
+	left: calc(var(--goo-popout-arrow-size) * -1 + 1px);
 	border-right-color: var(--goo-popout-bg);
 }
 
@@ -129,7 +129,7 @@
 
 .goo-popout__arrow.right::after {
 	top: calc(var(--goo-popout-arrow-size) * -1);
-	right: 1px;
+	right: calc(var(--goo-popout-arrow-size) * -1 + 1px);
 	border-left-color: var(--goo-popout-bg);
 }
 
@@ -140,7 +140,7 @@
 }
 
 .goo-popout__arrow.top::after {
-	top: 1px;
+	top: calc(var(--goo-popout-arrow-size) * -1 + 1px);
 	left: calc(var(--goo-popout-arrow-size) * -1);
 	border-bottom-color: var(--goo-popout-bg);
 }
@@ -153,7 +153,7 @@
 }
 
 .goo-popout__arrow.bottom::after {
-	bottom: 1px;
+	bottom: calc(var(--goo-popout-arrow-size) * -1 + 1px);
 	left: calc(var(--goo-popout-arrow-size) * -1);
 	border-top-color: var(--goo-popout-bg);
 }
