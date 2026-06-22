@@ -31,6 +31,12 @@
 			"svelte": "./src/checkbox/index.ts",
 			"import": "./src/checkbox/index.ts"
 		},
+		"./chevron-tabs": {
+			"types": "./src/chevron-tabs/index.ts",
+			"svelte": "./src/chevron-tabs/index.ts",
+			"import": "./src/chevron-tabs/index.ts"
+		},
+		"./chevron-tabs/styles.css": "./src/chevron-tabs/GooChevronTabs.css",
 		"./input": {
 			"types": "./src/input/index.ts",
 			"svelte": "./src/input/index.ts",

@@ -1,0 +1,167 @@
+.goo-chevron-tabs {
+	width: 100%;
+	min-width: 0;
+	color: var(--text, #f7fbf8);
+}
+
+.goo-chevron-tabs__rail {
+	position: relative;
+	display: flex;
+	align-items: stretch;
+	width: 100%;
+	min-width: 0;
+	height: 36px;
+	padding-inline-end: 40px;
+	overflow-x: auto;
+	overflow-y: hidden;
+	scrollbar-width: none;
+}
+
+.goo-chevron-tabs__rail::-webkit-scrollbar {
+	display: none;
+}
+
+.goo-chevron-tabs__drop-target {
+	flex: 0 0 8px;
+	border-inline-start: 1px solid transparent;
+}
+
+.goo-chevron-tabs__drop-target--active {
+	border-color: var(--accent, #79f2b0);
+	background: color-mix(in srgb, var(--accent, #79f2b0), transparent 72%);
+}
+
+.goo-chevron-tabs__drop-target--end {
+	flex-basis: 10px;
+}
+
+.goo-chevron-tabs__tab {
+	position: relative;
+	display: inline-grid;
+	grid-template-columns: 8px minmax(0, auto) minmax(0, 1fr) auto;
+	align-items: center;
+	min-width: 92px;
+	max-width: 220px;
+	height: 36px;
+	padding: 0 1rem 0 10px;
+	gap: 6px;
+	flex: 0 0 auto;
+	border: 1px solid color-mix(in srgb, var(--glass-border, #2f3b46), transparent 18%);
+	border-inline-start-width: 0;
+	background: color-mix(in srgb, var(--surface, #111820), #ffffff 4%);
+	color: var(--text, #f7fbf8);
+	clip-path: polygon(0 0, calc(100% - 13px) 0, 100% 50%, calc(100% - 13px) 100%, 0 100%, 13px 50%);
+	user-select: none;
+	outline: none;
+	opacity: 0.78;
+}
+
+.goo-chevron-tabs__tab:first-of-type {
+	border-inline-start-width: 1px;
+}
+
+.goo-chevron-tabs__tab--active {
+	background: color-mix(in srgb, var(--surface-elevated, #18222c), #ffffff 9%);
+	opacity: 1;
+}
+
+.goo-chevron-tabs__tab--dragging {
+	opacity: 0.48;
+}
+
+.goo-chevron-tabs__tab:focus-visible {
+	box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--goo-chevron-tab-accent), transparent 28%);
+}
+
+.goo-chevron-tabs__divider {
+	position: absolute;
+	inset: 0 auto 0 0;
+	width: 1px;
+	background: color-mix(in srgb, var(--glass-border, #2f3b46), transparent 12%);
+}
+
+.goo-chevron-tabs__status {
+	width: 7px;
+	height: 7px;
+	border-radius: 999px;
+	background: var(--goo-chevron-tab-accent);
+	opacity: 0.74;
+}
+
+.goo-chevron-tabs__status[data-status='done'] {
+	background: #f9d66d;
+}
+
+.goo-chevron-tabs__status[data-status='needsAttention'],
+.goo-chevron-tabs__status[data-status='disconnected'] {
+	background: #ff8a7a;
+}
+
+.goo-chevron-tabs__status[data-status='connecting'] {
+	background: #8ab4ff;
+}
+
+.goo-chevron-tabs__name,
+.goo-chevron-tabs__user {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.goo-chevron-tabs__name {
+	font-size: 0.78rem;
+	font-weight: 650;
+}
+
+.goo-chevron-tabs__user {
+	font-size: 0.68rem;
+	color: var(--muted, #aeb8c2);
+}
+
+.goo-chevron-tabs__rename {
+	grid-column: 3 / 4;
+	width: 100%;
+	min-width: 0;
+	border: 0;
+	border-radius: 0;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	outline: 0;
+}
+
+.goo-chevron-tabs__close,
+.goo-chevron-tabs__add {
+	display: grid;
+	place-items: center;
+	width: 24px;
+	height: 24px;
+	border: 1px solid transparent;
+	border-radius: 4px;
+	background: transparent;
+	color: currentColor;
+	font: inherit;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.goo-chevron-tabs__close {
+	opacity: 1;
+}
+
+.goo-chevron-tabs__close:hover,
+.goo-chevron-tabs__add:hover {
+	background: color-mix(in srgb, currentColor, transparent 88%);
+}
+
+.goo-chevron-tabs__add {
+	position: sticky;
+	right: 0;
+	z-index: 2;
+	flex: 0 0 34px;
+	align-self: center;
+	margin-inline-end: 4px;
+	border-color: color-mix(in srgb, var(--glass-border, #2f3b46), transparent 10%);
+	background: color-mix(in srgb, var(--surface, #111820), #ffffff 5%);
+}

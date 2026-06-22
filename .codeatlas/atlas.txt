@@ -203,6 +203,35 @@
 │   └── ○ off
 └── ○ f createGooController
 
+│ controller/SvelteControl.svelte.ts
+├── ○ T SvelteControlSchema
+│   ├── ○ propMapping
+│   ├── ○ valueKey
+│   ├── ○ changeKey
+│   ├── ○ inputKey
+│   ├── ○ transformValue
+│   ├── ○ transformOutput
+│   └── ○ selfContained
+├── ○ T SvelteControlHostOptions
+│   ├── ○ component
+│   ├── ○ schema
+│   ├── ○ value
+│   ├── ○ options
+│   ├── ○ onchange
+│   ├── ○ oninput
+│   ├── ○ disabled
+│   ├── ○ object
+│   └── ○ property
+├── ○ T SvelteControlHost
+│   ├── ○ element
+│   ├── ○ create
+│   ├── ○ setValue
+│   ├── ○ setOptions
+│   ├── ○ getValue
+│   ├── ○ updateDisplay
+│   └── ○ destroy
+└── ○ f createSvelteControlHost
+
 │ controller/controlFactory.ts
 ├── ○ T ControlCreationOptions
 │   ├── ○ value
@@ -287,35 +316,6 @@
 │   ├── ○ min
 │   └── ○ max
 └── ○ f handleDualRangeUpdate
-
-│ controller/svelteControl.svelte.ts
-├── ○ T SvelteControlSchema
-│   ├── ○ propMapping
-│   ├── ○ valueKey
-│   ├── ○ changeKey
-│   ├── ○ inputKey
-│   ├── ○ transformValue
-│   ├── ○ transformOutput
-│   └── ○ selfContained
-├── ○ T SvelteControlHostOptions
-│   ├── ○ component
-│   ├── ○ schema
-│   ├── ○ value
-│   ├── ○ options
-│   ├── ○ onchange
-│   ├── ○ oninput
-│   ├── ○ disabled
-│   ├── ○ object
-│   └── ○ property
-├── ○ T SvelteControlHost
-│   ├── ○ element
-│   ├── ○ create
-│   ├── ○ setValue
-│   ├── ○ setOptions
-│   ├── ○ getValue
-│   ├── ○ updateDisplay
-│   └── ○ destroy
-└── ○ f createSvelteControlHost
 
 │ data-grid/types.ts
 ├── ○ T GooDataGridSortState
@@ -1508,9 +1508,9 @@
 
 ──────────────────────────────────────────────────
 
-✓ 251 files scanned
+✓ 255 files scanned
   → 116 with public exports
   → 383 public symbols
-  → 84 dependencies tracked
+  → 81 dependencies tracked
 
 Tip: Use 'codeatlas map' for visual dependency diagram
