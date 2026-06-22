@@ -78,6 +78,16 @@
 		onclose?.(tab.id)
 	}
 
+	const statusLabel = (status: GooChevronTab['status']): string | null => {
+		if (status === 'working') return 'Agent working'
+		if (status === 'done') return 'Agent done'
+		if (status === 'needsAttention') return 'Agent needs attention'
+		if (status === 'connecting') return 'Connecting'
+		if (status === 'connected') return 'Connected'
+		if (status === 'disconnected') return 'Disconnected'
+		return null
+	}
+
 	const moveDraggedTab = (targetIndex: number): void => {
 		if (!draggedId) return
 		const sourceIndex = tabs.findIndex((tab) => tab.id === draggedId)
@@ -184,7 +194,13 @@
 				}}
 			>
 				<span class="goo-chevron-tabs__divider" aria-hidden="true"></span>
-				<span class="goo-chevron-tabs__status" data-status={tab.status ?? 'idle'}></span>
+					<span
+						class="goo-chevron-tabs__status"
+						data-status={tab.status ?? 'idle'}
+						role={statusLabel(tab.status) ? 'img' : undefined}
+						aria-label={statusLabel(tab.status) ?? undefined}
+						title={statusLabel(tab.status) ?? undefined}
+					></span>
 				{#if editingId === tab.id}
 					<input
 						class="goo-chevron-tabs__rename"
