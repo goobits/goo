@@ -1,5 +1,4 @@
 import { fireEvent, render } from '@testing-library/svelte'
-import { tick } from 'svelte'
 import { describe, expect, it, vi } from 'vitest'
 
 import GooChevronTabs from '../GooChevronTabs.svelte'
@@ -28,6 +27,22 @@ describe('GooChevronTabs', () => {
 		expect(onselect).toHaveBeenCalledExactlyOnceWith('tests')
 	})
 
+	it('shows per-tab agent activity indicators without changing tab names', () => {
+		const { getByLabelText } = render(GooChevronTabs, {
+			props: {
+				tabs: [
+					...tabs,
+					{ id: 'blocked', name: 'Blocked', status: 'needsAttention' }
+				],
+				activeId: 'kernel'
+			}
+		})
+
+		expect(getByLabelText('Tests agent working')).toBeTruthy()
+		expect(getByLabelText('Logs agent done')).toBeTruthy()
+		expect(getByLabelText('Blocked needs attention')).toBeTruthy()
+	})
+
 	it('adds and closes tabs while preserving the last-tab guard', async() => {
 		const onadd = vi.fn()
 		const onclose = vi.fn()
@@ -41,16 +56,16 @@ describe('GooChevronTabs', () => {
 		expect(onadd).toHaveBeenCalledOnce()
 		expect(onclose).toHaveBeenCalledWith('tests')
 
-		await rerender({ tabs: [tabs[0]], activeId: 'kernel', onclose })
-		await fireEvent.click(container.querySelector<HTMLButtonElement>('.goo-chevron-tabs__close')!)
+		await rerender({ tabs: [ tabs[0] ], activeId: 'kernel', onclose })
+		expect(container.querySelector<HTMLButtonElement>('.goo-chevron-tabs__close')).toBeNull()
 		expect(onclose).toHaveBeenCalledOnce()
 
-		await rerender({ tabs: [tabs[0]], activeId: 'kernel', allowClosingLastTab: true, onclose })
+		await rerender({ tabs: [ tabs[0] ], activeId: 'kernel', allowClosingLastTab: true, onclose })
 		await fireEvent.click(container.querySelector<HTMLButtonElement>('.goo-chevron-tabs__close')!)
 		expect(onclose).toHaveBeenCalledWith('kernel')
 	})
 
-	it('renames tabs inline without changing tab chrome structure', async() => {
+	it('renames tabs inline with contenteditable text without changing tab chrome structure', async() => {
 		const onrename = vi.fn()
 		const { container, getByLabelText } = render(GooChevronTabs, {
 			props: { tabs, activeId: 'kernel', renameLabel: 'Rename shell tab', onrename }
@@ -58,11 +73,12 @@ describe('GooChevronTabs', () => {
 		const tab = container.querySelector<HTMLElement>('[data-goo-chevron-tab-id="kernel"]')!
 
 		await fireEvent.doubleClick(tab)
-		const input = getByLabelText('Rename shell tab') as HTMLInputElement
-		expect(input.value).toBe('Kernel')
+		const editor = getByLabelText('Rename shell tab') as HTMLElement
+		expect(editor.getAttribute('contenteditable')).toBe('true')
+		expect(editor.textContent).toBe('Kernel')
 
-		await fireEvent.input(input, { target: { value: 'ops' } })
-		await fireEvent.keyDown(input, { key: 'Enter' })
+		editor.textContent = 'ops'
+		await fireEvent.keyDown(editor, { key: 'Enter' })
 
 		expect(onrename).toHaveBeenCalledExactlyOnceWith('kernel', 'ops')
 		expect(container.querySelectorAll('.goo-chevron-tabs__tab')).toHaveLength(3)
@@ -87,7 +103,7 @@ describe('GooChevronTabs', () => {
 		expect(onclose).toHaveBeenCalledExactlyOnceWith('tests')
 	})
 
-	it('moves dragged tabs with visible drop feedback', async() => {
+	it('moves dragged tabs with visible lift feedback and no drop-slot gaps', async() => {
 		const onmove = vi.fn()
 		const { container } = render(GooChevronTabs, {
 			props: {
@@ -97,17 +113,32 @@ describe('GooChevronTabs', () => {
 				dropTargetAttributes: (index: number) => ({ 'data-test-drop-index': String(index) })
 			}
 		})
+		const rail = container.querySelector<HTMLElement>('.goo-chevron-tabs__rail')!
 		const source = container.querySelector<HTMLElement>('[data-goo-chevron-tab-id="logs"]')!
-		const target = container.querySelector<HTMLElement>('[data-test-drop-index="0"]')!
+		expect(container.querySelectorAll('.goo-chevron-tabs__drop-target')).toHaveLength(0)
 
-		await fireEvent.dragStart(source)
-		await fireEvent.dragOver(target)
-		await tick()
+		for (const [ index, element ] of Array.from(
+			container.querySelectorAll<HTMLElement>('.goo-chevron-tabs__tab')
+		).entries()) {
+			element.getBoundingClientRect = () =>
+				({
+					left: index * 100,
+					right: index * 100 + 90,
+					top: 0,
+					bottom: 28,
+					width: 90,
+					height: 28,
+					x: index * 100,
+					y: 0,
+					toJSON: () => ({})
+				}) as DOMRect
+		}
 
+		await fireEvent.pointerDown(source, { button: 0, clientX: 250, pointerId: 1 })
+		await fireEvent.pointerMove(rail, { clientX: -80, pointerId: 1 })
 		expect(source.classList.contains('goo-chevron-tabs__tab--dragging')).toBe(true)
-		expect(target.classList.contains('goo-chevron-tabs__drop-target--active')).toBe(true)
 
-		await fireEvent.drop(target)
+		await fireEvent.pointerUp(rail, { clientX: -80, pointerId: 1 })
 
 		expect(onmove).toHaveBeenCalledExactlyOnceWith('logs', 0)
 	})
