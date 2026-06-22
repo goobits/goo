@@ -1511,6 +1511,6 @@
 ✓ 255 files scanned
   → 116 with public exports
   → 383 public symbols
-  → 81 dependencies tracked
+  → 78 dependencies tracked
 
 Tip: Use 'codeatlas map' for visual dependency diagram
