@@ -267,9 +267,12 @@
 	background: transparent;
 }
 
+/* The open menu autofocuses itself; the highlighted row signals focus, so the
+   menu surface needs no dramatic accent ring of its own. */
 .goo-popout.goo-select-popout:focus-visible,
 .goo-popout.goo-select-submenu-popout:focus-visible {
 	outline: none;
+	box-shadow: none;
 }
 
 .goo-popout.goo-select-popout--outlined {
@@ -282,26 +285,139 @@
 		var(--goo-select-radius, var(--goo-theme-radius-sm, 0.25rem));
 }
 
-.goo-popout.goo-select-popout.sketch-contextual-menu-popout {
-	--goo-select-padding: 0.4375rem;
+/* ============================================================================
+   Menu surface (shared): context menus AND select dropdowns vibe together.
+   macOS-style — vibrancy material, hairline chrome, compact rows, and an inset
+   rounded highlight filled with the accent (white text) rather than a tinted
+   band or a left rail. Scoped to .goo-select-popout, which both surfaces share.
+   ============================================================================ */
+.goo-popout.goo-select-popout {
+	--goo-select-item-bleed-x: 0px;
 	--goo-select-item-gap: 0.5rem;
-	--goo-select-item-bleed-x: calc(var(--goo-select-padding) * -1);
-	--goo-select-item-line-height: 1.375rem;
+	--goo-select-item-line-height: 1.0625rem;
 	--goo-select-item-padding-x: 0.625rem;
-	--goo-select-radius: var(--goo-theme-radius-md, 0.5rem);
-	--goo-select-bg-hover: color-mix(in srgb, var(--goo-theme-fg, #fff) 10%, transparent);
+	--goo-select-item-padding-y: 0.25rem;
+	--goo-select-radius: 0.25rem;
 	--goo-select-divider-size: 1px;
+
+	/* Translucent vibrancy material: keep the base backdrop blur, drop the
+	   gradient sheen and etched edges, soften to a hairline. Radius is left to
+	   the existing --goo-popout-radius so the menu-attached variant still works. */
+	--goo-popout-bg: color-mix(in srgb, var(--goo-theme-bg, #2d2d32) 92%, transparent);
+	--goo-popout-border: color-mix(in srgb, var(--goo-theme-fg, #fff) 10%, transparent);
+	--goo-popout-shadow:
+		drop-shadow(0 10px 28px rgb(0 0 0 / 26%))
+		drop-shadow(0 2px 8px rgb(0 0 0 / 16%));
+	background-image: none;
+	box-shadow: none;
 }
 
-.goo-popout.sketch-contextual-menu-popout .goo-select__divider {
-	margin: 0.375rem var(--goo-select-item-bleed-x);
-	background: color-mix(in srgb, var(--goo-theme-fg) 13%, transparent);
+/* Container insets the highlight from the menu edges (macOS gutter). */
+.goo-popout.goo-select-popout .goo-popout__content {
+	padding: 0;
 }
 
-.goo-popout.sketch-contextual-menu-popout .goo-select__optgroup-label {
-	padding-block: 0.25rem;
+.goo-popout.goo-select-popout .goo-select__options {
+	padding: 0.25rem 0.3125rem;
+}
+
+/* Compact rows with a rounded highlight box. */
+.goo-popout.goo-select-popout .goo-select__option {
+	min-height: 1.375rem;
+	border-radius: 0.375rem;
+	box-shadow: none;
+}
+
+/* Active/selected row: solid accent fill, white-on-accent text (the macOS hallmark). */
+.goo-popout.goo-select-popout .goo-select__option:hover,
+.goo-popout.goo-select-popout .goo-select__option--hovered,
+.goo-popout.goo-select-popout .goo-select__option--selected {
+	background: var(--goo-theme-accent);
+	color: var(--goo-theme-accent-fg, #fff);
+	box-shadow: none;
+}
+
+/* Icon, checkmark, submenu arrow, and shortcut all flip to white on the active row. */
+.goo-popout.goo-select-popout .goo-select__option:hover .goo-select__icon,
+.goo-popout.goo-select-popout .goo-select__option--hovered .goo-select__icon,
+.goo-popout.goo-select-popout .goo-select__option--selected .goo-select__icon,
+.goo-popout.goo-select-popout .goo-select__option:hover .goo-select__check,
+.goo-popout.goo-select-popout .goo-select__option--hovered .goo-select__check,
+.goo-popout.goo-select-popout .goo-select__option--selected .goo-select__check,
+.goo-popout.goo-select-popout .goo-select__option:hover .goo-select__submenu-arrow,
+.goo-popout.goo-select-popout .goo-select__option--hovered .goo-select__submenu-arrow,
+.goo-popout.goo-select-popout .goo-select__option:hover .goo-select__shortcut-key,
+.goo-popout.goo-select-popout .goo-select__option--hovered .goo-select__shortcut-key {
+	color: var(--goo-theme-accent-fg, #fff);
+}
+
+/* Icons muted at rest. */
+.goo-popout.goo-select-popout .goo-select__icon {
+	color: color-mix(in srgb, var(--goo-select-fg) 60%, transparent);
+}
+
+/* Destructive rows: red label at rest, red highlight + white text on the active row. */
+.goo-popout.goo-select-popout .goo-select__option--danger {
+	color: var(--goo-theme-negative);
+}
+
+.goo-popout.goo-select-popout .goo-select__option--danger .goo-select__icon {
+	color: var(--goo-theme-negative);
+}
+
+/* On hover, destructive rows take the standard accent highlight (like macOS)
+   rather than a red fill: several themes pair --goo-theme-negative with white at
+   only ~3.8:1, so a red fill cannot meet WCAG AA, whereas the accent/accent-fg
+   pair clears AA in every theme. The accent background comes from the normal
+   hover rule above; these rules flip the red text/icon to accent-fg so it does
+   not stay red-on-accent (which is invisible when a theme's red equals its accent). */
+.goo-popout.goo-select-popout .goo-select__option--danger:hover,
+.goo-popout.goo-select-popout .goo-select__option--danger.goo-select__option--hovered {
+	color: var(--goo-theme-accent-fg, #fff);
+}
+
+.goo-popout.goo-select-popout .goo-select__option--danger:hover .goo-select__icon,
+.goo-popout.goo-select-popout .goo-select__option--danger.goo-select__option--hovered .goo-select__icon {
+	color: var(--goo-theme-accent-fg, #fff);
+}
+
+/* Plain-text shortcuts, secondary color, white on the active row (4-class beats base hover). */
+.goo-popout.goo-select-popout .goo-select__shortcut {
+	gap: 1px;
+	padding-left: 1.25rem;
+}
+
+.goo-popout.goo-select-popout .goo-select__shortcut .goo-select__shortcut-key {
+	min-width: 0;
+	height: auto;
+	padding: 0;
+	background: none;
+	border: 0;
+	box-shadow: none;
+	color: color-mix(in srgb, var(--goo-select-fg) 55%, transparent);
+	font-weight: 400;
+}
+
+/* Hairline divider, inset to match the highlight gutter. */
+.goo-popout.goo-select-popout .goo-select__divider {
+	margin: 0.25rem 0.3125rem;
+	background: color-mix(in srgb, var(--goo-theme-fg) 12%, transparent);
+}
+
+/* Subtle, tight section label. */
+.goo-popout.goo-select-popout .goo-select__optgroup-label {
+	padding: 0.25rem 0.5rem 0.125rem;
+	color: color-mix(in srgb, var(--goo-select-fg) 45%, transparent);
+	font-size: var(--goo-theme-font-size-xs, 0.6875rem);
 	letter-spacing: 0;
 	text-transform: none;
+}
+
+/* Context menu: a touch wider and fully rounded (not attached to a trigger). */
+.goo-popout.goo-select-popout.goo-context-menu-popout {
+	min-width: 12rem;
+	--goo-popout-radius: 0.75rem;
+	border-radius: 0.75rem;
 }
 
 /* Position above trigger when not enough space below */
