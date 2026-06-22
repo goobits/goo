@@ -194,13 +194,13 @@
 				}}
 			>
 				<span class="goo-chevron-tabs__divider" aria-hidden="true"></span>
-					<span
-						class="goo-chevron-tabs__status"
-						data-status={tab.status ?? 'idle'}
-						role={statusLabel(tab.status) ? 'img' : undefined}
-						aria-label={statusLabel(tab.status) ?? undefined}
-						title={statusLabel(tab.status) ?? undefined}
-					></span>
+				<span
+					class="goo-chevron-tabs__status"
+					data-status={tab.status ?? 'idle'}
+					role={statusLabel(tab.status) ? 'img' : undefined}
+					aria-label={statusLabel(tab.status) ?? undefined}
+					title={statusLabel(tab.status) ?? undefined}
+				></span>
 				{#if editingId === tab.id}
 					<input
 						class="goo-chevron-tabs__rename"
