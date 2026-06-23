@@ -1,8 +1,10 @@
+import type { GooPopoutAt } from '../popout/index.ts'
+import { findOptionById } from '../select/_normalizeOptions.ts'
 import type { GooSelectActionContext, GooSelectOpenOptions, GooSelectOptionsInput } from '../select/index.ts'
 import { createLifecycleBag } from '../support/utils/lifecycleBag.ts'
 import { createGooContextMenu, type GooContextMenuElement, type GooContextMenuOption } from './GooContextMenu.ts'
 
-export type ManagedGooContextMenuOpenAt = HTMLElement | { x: number; y: number }
+export type ManagedGooContextMenuOpenAt = HTMLElement | GooPopoutAt
 export type ManagedGooContextMenuItems = ManagedGooContextMenuItem[] | Record<string, ManagedGooContextMenuObjectItem | string | number>
 export type ManagedGooContextMenuItemPredicate = (this: ManagedGooContextMenu, id: string) => boolean
 export type ManagedGooContextMenuItemAction = (this: ManagedGooContextMenu, id: string) => void
@@ -237,7 +239,7 @@ function createRegisteredContextMenu(
 		setValue(value, options = {}) {
 			if (destroyed) return
 			const stringValue = String(value)
-			const option = findContextMenuOption(menuOptions, stringValue)
+			const option = findOptionById(menuOptions, stringValue)
 			option?.onChoose?.(stringValue)
 			contextMenu.setValue(stringValue, options)
 		}
@@ -398,16 +400,4 @@ function normalizeLabel(label: unknown): GooContextMenuOption['label'] {
 	}
 
 	return String(label ?? '')
-}
-
-function findContextMenuOption(options: GooContextMenuOption[], value: string): GooContextMenuOption | undefined {
-	for (const option of options) {
-		if (option.id === value) return option
-		if (option.options) {
-			const match = findContextMenuOption(option.options, value)
-			if (match) return match
-		}
-	}
-
-	return undefined
 }

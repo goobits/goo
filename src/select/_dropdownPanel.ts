@@ -3,6 +3,7 @@
  * @module goobits/select/DropdownPanel
  */
 
+import { findOptionById } from './_normalizeOptions.ts'
 import { SubmenuPopoutController } from './_submenuPopout.ts'
 import { createIcon, createShortcut, evaluate } from './selectDom.ts'
 import type { GooSelectOption } from './types.ts'
@@ -155,6 +156,17 @@ export class DropdownPanel {
 	}
 
 	/**
+	 * Clear the active hover state.
+	 */
+	clearHovered(): void {
+		const $prev = this.$container.querySelector('.goo-select__option--hovered')
+		if ($prev) $prev.classList.remove('goo-select__option--hovered')
+		this.hoveredId = null
+		this.$container.removeAttribute('aria-activedescendant')
+		this.#ctx.onHoverChange('', '')
+	}
+
+	/**
 	 * Navigate to next/previous option.
 	 * @param dir - 1 for next, -1 for previous
 	 */
@@ -281,7 +293,7 @@ export class DropdownPanel {
 	 * @param id - id.
 	 */
 	findOptionById(id: string): GooSelectOption | null {
-		return this.#findOptionByIdRecursive(this.#options, id)
+		return findOptionById(this.#options, id)
 	}
 
 	/**
@@ -399,17 +411,6 @@ export class DropdownPanel {
 	// --------------------------------------------------------------------------
 	// Private Methods
 	// --------------------------------------------------------------------------
-
-	#findOptionByIdRecursive(opts: GooSelectOption[], id: string): GooSelectOption | null {
-		for (const opt of opts) {
-			if (opt.id === id) return opt
-			if (opt.options) {
-				const found = this.#findOptionByIdRecursive(opt.options, id)
-				if (found) return found
-			}
-		}
-		return null
-	}
 
 	#renderOptionsList(opts: GooSelectOption[], container: HTMLElement, depth = 0) {
 		for (const opt of opts) {
@@ -588,6 +589,7 @@ export class DropdownPanel {
 		if (this.#isInsideMenuBoundary(relatedTarget)) return
 
 		this.#cancelSubmenuTimer()
+		this.clearHovered()
 		this.#submenuTimer = setTimeout(() => {
 			this.closeSubmenu()
 		}, SUBMENU_DELAY)

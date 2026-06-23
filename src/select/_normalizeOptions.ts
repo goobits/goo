@@ -131,3 +131,20 @@ export function normalizeOptions(options: unknown): GooSelectOption[] {
 
 	return []
 }
+
+/**
+ * Find an option by ID in a nested option tree.
+ * @param options - Options to search.
+ * @param id - Option ID.
+ * @returns Matching option or null.
+ */
+export function findOptionById(options: GooSelectOption[], id: string): GooSelectOption | null {
+	for (const option of options) {
+		if (option.id === id) return option
+		if (option.options) {
+			const found = findOptionById(option.options, id)
+			if (found) return found
+		}
+	}
+	return null
+}

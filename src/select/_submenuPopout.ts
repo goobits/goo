@@ -68,7 +68,7 @@ export class SubmenuPopoutController {
 		this.#popout = createGooPopout({
 			content: this.#createSubmenuFrame($nextSubmenu),
 			parentElement: document.body,
-			className: 'goo-select-submenu-popout goo-select-submenu-popout--morph',
+			className: 'goo-menu-popout goo-select-submenu-popout goo-select-submenu-popout--morph',
 			clickToClose: false,
 			escapeToClose: false,
 			showArrow: true,

@@ -25,7 +25,7 @@ import {
 	mapNativeKeyToCommand,
 	type GooSelectKeyboardHost
 } from './_keyboardHandler.ts'
-import { normalizeOptions } from './_normalizeOptions.ts'
+import { findOptionById, normalizeOptions } from './_normalizeOptions.ts'
 import {
 	applySelectMenuWidth,
 	getSelectMenuAlign,
@@ -513,17 +513,6 @@ function emitChange(oldValue: string): void {
 
 function getContext(): unknown {
 	return currentBoundContext || selectElement
-}
-
-function findOptionById(options: GooSelectOption[], optionId: string): GooSelectOption | null {
-	for (const option of options) {
-		if (option.id === optionId) return option
-		if (option.options) {
-			const found = findOptionById(option.options, optionId)
-			if (found) return found
-		}
-	}
-	return null
 }
 
 function getOptionLabel(option: GooSelectOption | null): string {

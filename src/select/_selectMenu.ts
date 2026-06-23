@@ -55,6 +55,7 @@ export function getSelectMenuOffset(menu: NormalizedGooSelectMenu): { x?: number
 
 export function getSelectMenuPopoutClass(menu: NormalizedGooSelectMenu, openClassName?: string): string {
 	return [
+		'goo-menu-popout',
 		'goo-select-popout',
 		menu.variant === 'attached' ? 'goo-select-popout--menu-attached' : '',
 		menu.outline ? 'goo-select-popout--outlined' : '',

@@ -1,6 +1,7 @@
 import { tick } from 'svelte'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { gooTooltipRuntime } from '../../tooltip/index.ts'
 import { createGooContextMenu } from '../GooContextMenu.ts'
 import { GooContextMenu } from '../managed-context-menu.ts'
 
@@ -10,6 +11,7 @@ describe('createGooContextMenu', () => {
 		GooContextMenu.get('managed-destroy')?.destroy()
 		GooContextMenu.get('replace-menu')?.destroy()
 		document.querySelectorAll('.goo-popout').forEach(element => element.remove())
+		vi.restoreAllMocks()
 	})
 
 	it('applies context-menu classes to the visible popout', async() => {
@@ -32,9 +34,18 @@ describe('createGooContextMenu', () => {
 		await Promise.resolve()
 
 		const popout = document.querySelector('.goo-popout.goo-context-menu-popout')
+		expect(popout?.classList.contains('goo-menu-popout')).toBe(true)
 		expect(popout?.classList.contains('sketch-contextmenu')).toBe(true)
 		expect(popout?.classList.contains('sketch-CancelDestroy')).toBe(true)
 		expect(popout?.querySelector('.goo-select__submenu-arrow svg')).toBeInstanceOf(SVGElement)
+
+		const submenuOption = popout?.querySelector<HTMLElement>('.goo-select__option[data-id="order"]')
+		if (submenuOption) submenuOption.scrollIntoView = vi.fn()
+		submenuOption?.dispatchEvent(new MouseEvent('pointerup', { button: 0 }))
+		await Promise.resolve()
+
+		const submenu = document.querySelector('.goo-popout.goo-select-submenu-popout')
+		expect(submenu?.classList.contains('goo-menu-popout')).toBe(true)
 	})
 
 	it('renders managed string labels as text instead of HTML', async() => {
@@ -52,6 +63,42 @@ describe('createGooContextMenu', () => {
 		const label = document.querySelector('.goo-context-menu-popout .goo-select__label')
 		expect(label?.textContent).toBe('<img src=x onerror=alert(1)>')
 		expect(label?.querySelector('img')).toBeNull()
+	})
+
+	it('honors explicit point alignment and hides active tooltips before opening', async() => {
+		const hideTooltip = vi.spyOn(gooTooltipRuntime, 'hide')
+		vi.spyOn(document.body, 'getBoundingClientRect').mockReturnValue({
+			bottom: 1000,
+			height: 1000,
+			left: 0,
+			right: 1000,
+			toJSON: () => ({}),
+			top: 0,
+			width: 1000,
+			x: 0,
+			y: 0
+		})
+		const menu = createGooContextMenu({
+			options: [
+				{ id: 'delete', label: 'Delete' }
+			]
+		})
+		await tick()
+
+		expect(menu.open({
+			at: {
+				align: 'right top to left top',
+				offset: { x: 12, y: 0 },
+				point: { x: 100, y: 80 }
+			},
+			autoFocus: false
+		})).toBe(true)
+		await Promise.resolve()
+
+		const popout = document.querySelector<HTMLElement>('.goo-popout.goo-context-menu-popout')
+		expect(hideTooltip).toHaveBeenCalledOnce()
+		expect(Number.parseFloat(popout?.style.left ?? '')).toBeLessThan(100)
+		expect(Number.parseFloat(popout?.style.top ?? '')).toBe(80)
 	})
 
 	it('detaches owned contextmenu listeners when destroyed', () => {

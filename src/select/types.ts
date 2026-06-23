@@ -5,7 +5,7 @@
 
 import type { Snippet } from 'svelte'
 
-import type { GooPopoutOptions } from '../popout/popout.ts'
+import type { GooPopoutAt, GooPopoutOptions } from '../popout/popout.ts'
 import type { GooForwardedAttributes } from '../support/types/forwardedAttributes.ts'
 
 /** Host-owned action context passed through menu/select actions. */
@@ -223,7 +223,7 @@ export type GooSelectElement = HTMLDivElement & {
  */
 export interface GooSelectOpenOptions {
 	autoFocus?: boolean
-	at?: HTMLElement | { x: number; y: number }
+	at?: HTMLElement | GooPopoutAt
 	clickToClose?: GooPopoutOptions['clickToClose']
 	keepWithin?: { element?: HTMLElement; margin?: number }
 	parentElement?: HTMLElement

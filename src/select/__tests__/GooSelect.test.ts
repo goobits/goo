@@ -607,6 +607,9 @@ describe('GooSelect', () => {
 		expect(document.querySelector('.goo-popout.goo-select-submenu-popout')?.textContent).toContain('Rotate')
 
 		panel.dispatchEvent(new MouseEvent('mouseleave', { relatedTarget: document.body }))
+		expect(transformOption.classList.contains('goo-select__option--hovered')).toBe(false)
+		expect(panel.hasAttribute('aria-activedescendant')).toBe(false)
+		expect(element.getHoveredOptionId()).toBeNull()
 		await delay(520)
 
 		expect(document.querySelector('.goo-popout.goo-select-submenu-popout')).toBeNull()
@@ -671,7 +674,6 @@ describe('GooSelect', () => {
 			document.dispatchEvent(pointerEvent('pointerup', { pointerId: 3, clientX: 20, clientY: 48 }))
 			await tick()
 
-			expect(option.classList.contains('goo-select__option--hovered')).toBe(true)
 			expect(element.getValue()).toBe('b')
 		} finally {
 			document.elementFromPoint = originalElementFromPoint
