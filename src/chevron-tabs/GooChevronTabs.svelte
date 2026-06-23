@@ -1,6 +1,4 @@
 <script lang="ts">
-	import Bell from '@lucide/svelte/icons/bell'
-	import Bot from '@lucide/svelte/icons/bot'
 	import ChevronDown from '@lucide/svelte/icons/chevron-down'
 	import CircleAlert from '@lucide/svelte/icons/circle-alert'
 	import Plus from '@lucide/svelte/icons/plus'
@@ -128,12 +126,16 @@
 		tab: GooChevronTab
 	): { kind: 'working' | 'done' | 'needsAttention'; label: string } | null => {
 		if (tab.status === 'working') return { kind: 'working', label: `${tab.name} agent working` }
-		if (tab.status === 'done') return { kind: 'done', label: `${tab.name} agent done` }
+		if (tab.status === 'done' && tab.id !== activeId) {
+			return { kind: 'done', label: `${tab.name} agent done` }
+		}
 		if (tab.status === 'needsAttention') {
 			return { kind: 'needsAttention', label: `${tab.name} needs attention` }
 		}
 		return null
 	}
+
+	const activityEmoji = (kind: 'working' | 'done'): string => (kind === 'working' ? '🤖' : '🔔')
 
 	const canCloseTab = (): boolean => allowClosingLastTab || tabs.length > 1
 
@@ -461,9 +463,13 @@
 						title={activity.label}
 					>
 						{#if activity.kind === 'working'}
-							<Bot size={12} strokeWidth={2.2} aria-hidden="true" />
+							<span class="goo-chevron-tabs__activity-emoji" aria-hidden="true">
+								{activityEmoji(activity.kind)}
+							</span>
 						{:else if activity.kind === 'done'}
-							<Bell size={12} strokeWidth={2.2} aria-hidden="true" />
+							<span class="goo-chevron-tabs__activity-emoji" aria-hidden="true">
+								{activityEmoji(activity.kind)}
+							</span>
 						{:else}
 							<CircleAlert size={12} strokeWidth={2.2} aria-hidden="true" />
 						{/if}

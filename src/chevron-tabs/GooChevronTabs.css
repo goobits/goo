@@ -175,6 +175,11 @@
 	transform: translateY(-50%);
 }
 
+.goo-chevron-tabs__activity-emoji {
+	font-size: 12px;
+	line-height: 1;
+}
+
 .goo-chevron-tabs__tab:not(.goo-chevron-tabs__tab--active)
 	.goo-chevron-tabs__activity--working {
 	color: #8be9fd;

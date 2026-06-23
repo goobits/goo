@@ -30,17 +30,23 @@ describe('GooChevronTabs', () => {
 	it('shows per-tab agent activity indicators without changing tab names', () => {
 		const { getByLabelText } = render(GooChevronTabs, {
 			props: {
-				tabs: [
-					...tabs,
-					{ id: 'blocked', name: 'Blocked', status: 'needsAttention' }
-				],
+				tabs: [ ...tabs, { id: 'blocked', name: 'Blocked', status: 'needsAttention' } ],
 				activeId: 'kernel'
 			}
 		})
 
-		expect(getByLabelText('Tests agent working')).toBeTruthy()
-		expect(getByLabelText('Logs agent done')).toBeTruthy()
+		expect(getByLabelText('Tests agent working').textContent).toContain('🤖')
+		expect(getByLabelText('Logs agent done').textContent).toContain('🔔')
 		expect(getByLabelText('Blocked needs attention')).toBeTruthy()
+	})
+
+	it('hides the done notification for the active tab like AW', () => {
+		const { getByLabelText, queryByLabelText } = render(GooChevronTabs, {
+			props: { tabs, activeId: 'logs' }
+		})
+
+		expect(getByLabelText('Tests agent working').textContent).toContain('🤖')
+		expect(queryByLabelText('Logs agent done')).toBeNull()
 	})
 
 	it('adds and closes tabs while preserving the last-tab guard', async() => {
