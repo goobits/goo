@@ -180,6 +180,9 @@ export type GooSelectElement = HTMLDivElement & {
 	/** Whether the dropdown is open. */
 	isOpen(): boolean
 
+	/** Reposition the open dropdown. */
+	updatePosition(options?: GooSelectOpenOptions): boolean
+
 	/** Current hovered option id, if the menu is open. */
 	getHoveredOptionId(): string | null
 

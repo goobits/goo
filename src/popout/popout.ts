@@ -7,7 +7,7 @@
 
 import './GooPopout.css'
 
-import { applyArrowPosition, applyPosition, calculatePosition, type PositionResult } from '../support/positioning/index.ts'
+import { applyArrowPosition, applyPosition, calculatePosition, type PositionAvoidRect, type PositionResult } from '../support/positioning/index.ts'
 import { createLifecycleBag } from '../support/utils/lifecycleBag.ts'
 import { createPointerDrag } from '../support/utils/pointerDrag.ts'
 
@@ -100,6 +100,8 @@ export interface GooPopoutAt {
 	y?: number
 	align?: string
 	offset?: { x?: number; y?: number }
+	avoidRects?: PositionAvoidRect[]
+	avoidMargin?: number
 }
 
 /**
@@ -245,6 +247,8 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 	let parentPopout: GooPopoutRuntime | null = null
 	let childPopout: GooPopoutRuntime | null = null
 	let currentPosition: ReturnType<typeof calculatePosition> | null = null
+	let currentAvoidRects: PositionAvoidRect[] = []
+	let currentAvoidMargin = 0
 	let previousActiveElement: HTMLElement | null = null
 	let repositionFrame = 0
 	let animationCleanup: (() => void) | null = null
@@ -460,6 +464,8 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 			align: currentAlign,
 			offset: currentOffset,
 			keepWithin: { $element: keepWithinElement, margin: keepWithinMargin },
+			avoidMargin: currentAvoidMargin,
+			avoidRects: currentAvoidRects,
 			rtl: resolvedRtl
 		}
 
@@ -919,6 +925,8 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		if (atConfig instanceof HTMLElement) {
 			targetElement = atConfig
 			targetPoint = null
+			currentAvoidRects = []
+			currentAvoidMargin = 0
 			return
 		}
 
@@ -944,6 +952,20 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		if (atConfig.offset) {
 			currentOffset = { ...currentOffset, ...atConfig.offset }
 		}
+
+		currentAvoidRects = normalizeAvoidRects(atConfig.avoidRects)
+		currentAvoidMargin = Number.isFinite(atConfig.avoidMargin) ? atConfig.avoidMargin! : 0
+	}
+
+	function normalizeAvoidRects(avoidRects: PositionAvoidRect[] | undefined): PositionAvoidRect[] {
+		return (avoidRects ?? []).filter(rect =>
+			Number.isFinite(rect.left)
+				&& Number.isFinite(rect.right)
+				&& Number.isFinite(rect.top)
+				&& Number.isFinite(rect.bottom)
+				&& rect.right >= rect.left
+				&& rect.bottom >= rect.top
+		)
 	}
 
 	/**

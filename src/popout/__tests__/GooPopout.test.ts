@@ -113,6 +113,86 @@ describe('GooPopout', () => {
 		}
 	})
 
+	it('keeps final contained placement outside avoid rectangles', async() => {
+		const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect
+		const target = document.createElement('button')
+		const content = document.createElement('div')
+
+		document.body.appendChild(target)
+		HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
+			if (this === document.documentElement) return rect(0, 0, 300, 240)
+			if (this === target) return rect(140, 100, 0, 0)
+			if (this.classList.contains('goo-popout')) return rect(0, 0, 90, 60)
+			return originalGetBoundingClientRect.call(this)
+		}
+
+		try {
+			const instance = createGooPopout({
+				at: {
+					avoidRects: [ { bottom: 170, left: 120, right: 220, top: 80 } ],
+					point: { x: 140, y: 100 }
+				},
+				content: content,
+				align: 'top left to bottom left',
+				offset: { x: 0, y: 4 },
+				keepWithin: { element: document.documentElement, margin: 12 },
+				openImmediately: false
+			})
+
+			await instance.open()
+			const popout = document.querySelector<HTMLElement>('.goo-popout')!
+
+			expect(Number.parseFloat(popout.style.left)).toBe(140)
+			expect(Number.parseFloat(popout.style.top)).toBe(20)
+
+			await instance.destroy()
+		} finally {
+			target.remove()
+			HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect
+		}
+	})
+
+	it('clears avoid rectangles when updating to an anchor without them', async() => {
+		const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect
+		const target = document.createElement('button')
+		const content = document.createElement('div')
+
+		document.body.appendChild(target)
+		HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
+			if (this === document.documentElement) return rect(0, 0, 300, 240)
+			if (this === target) return rect(140, 100, 0, 0)
+			if (this.classList.contains('goo-popout')) return rect(0, 0, 90, 60)
+			return originalGetBoundingClientRect.call(this)
+		}
+
+		try {
+			const instance = createGooPopout({
+				at: {
+					avoidRects: [ { bottom: 170, left: 120, right: 220, top: 80 } ],
+					point: { x: 140, y: 100 }
+				},
+				content: content,
+				align: 'top left to bottom left',
+				offset: { x: 0, y: 4 },
+				keepWithin: { element: document.documentElement, margin: 12 },
+				openImmediately: false
+			})
+
+			await instance.open()
+			instance.updatePosition({ point: { x: 140, y: 100 } })
+			await nextAnimationFrame()
+			const popout = document.querySelector<HTMLElement>('.goo-popout')!
+
+			expect(Number.parseFloat(popout.style.left)).toBe(140)
+			expect(Number.parseFloat(popout.style.top)).toBe(104)
+
+			await instance.destroy()
+		} finally {
+			target.remove()
+			HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect
+		}
+	})
+
 	it('repositions when visible content grows after opening', async() => {
 		const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect
 		const target = document.createElement('button')

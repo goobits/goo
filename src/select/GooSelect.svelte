@@ -242,7 +242,7 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 	syncPanelTypography()
 
 	const currentMenu = selectMenu
-	const positionAt = at || (showHeader ? triggerElement : selectElement)
+		const positionAt = getPositionTarget(at)
 	const triggerWidth = positionAt instanceof HTMLElement
 		? Math.max(1, Math.round(positionAt.getBoundingClientRect().width))
 		: undefined
@@ -314,6 +314,42 @@ export function close({ quiet = false, fromPopout = false }: { quiet?: boolean; 
 	}
 }
 
+export function updatePosition(options: GooSelectOpenOptions = {}): boolean {
+	if (!popout?.isOpen()) return false
+
+	const positionAt = withPositionOverrides(getPositionTarget(options.at), options)
+	popout.updatePosition(positionAt, options.align)
+	popout.reposition()
+	return true
+}
+
+function getPositionTarget(at: GooSelectOpenOptions['at']): HTMLElement | NonNullable<GooSelectOpenOptions['at']> {
+	return at || (showHeader ? triggerElement : selectElement)!
+}
+
+function withPositionOverrides(
+	positionAt: HTMLElement | NonNullable<GooSelectOpenOptions['at']>,
+	options: GooSelectOpenOptions
+): HTMLElement | NonNullable<GooSelectOpenOptions['at']> {
+	if (!options.offset && !options.align) {
+		return positionAt
+	}
+
+	if (positionAt instanceof HTMLElement) {
+		return {
+			align: options.align,
+			element: positionAt,
+			offset: options.offset
+		}
+	}
+
+	return {
+		...positionAt,
+		align: options.align ?? positionAt.align,
+		offset: options.offset ?? positionAt.offset
+	}
+}
+
 export function toggle(): void {
 	if (opened) {
 		close()
@@ -381,6 +417,7 @@ function assignSelectApi(select: GooSelectRuntimeElement): void {
 	select.setValue = (nextValue, { silent = false } = {}) => setValue(nextValue, { silent })
 	select.getValue = () => getValue()
 	select.isOpen = () => opened
+	select.updatePosition = options => updatePosition(options)
 	select.getHoveredOptionId = () => panel?.hoveredId ?? null
 	select.getOptions = () => normalizedOptions
 	select.setOptions = nextOptions => setOptions(nextOptions)

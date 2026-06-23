@@ -37,6 +37,8 @@ export function calculatePosition(
 		align: alignInput = 'left to right',
 		offset = { x: 15, y: 15 },
 		keepWithin,
+		avoidRects,
+		avoidMargin,
 		rtl = false
 	} = options
 
@@ -70,7 +72,9 @@ export function calculatePosition(
 			keepWithin,
 			direction,
 			flippedAlign =>
-				calculateInitialPosition(popoutRect, targetRect, flippedAlign, offset, direction)
+				calculateInitialPosition(popoutRect, targetRect, flippedAlign, offset, direction),
+			avoidRects,
+			avoidMargin
 		)
 	}
 

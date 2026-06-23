@@ -65,6 +65,37 @@ describe('createGooContextMenu', () => {
 		expect(label?.querySelector('img')).toBeNull()
 	})
 
+	it('repositions the current managed menu when reopened with a new anchor', async() => {
+		vi.spyOn(document.body, 'getBoundingClientRect').mockReturnValue({
+			bottom: 1000,
+			height: 1000,
+			left: 0,
+			right: 1000,
+			toJSON: () => ({}),
+			top: 0,
+			width: 1000,
+			x: 0,
+			y: 0
+		})
+		const menu = GooContextMenu.register('reposition-menu', [
+			{ id: 'delete', label: 'Delete' }
+		])
+		await tick()
+
+		GooContextMenu.open(menu, { at: { x: 20, y: 30 }, autoFocus: false })
+		await Promise.resolve()
+		const popout = document.querySelector<HTMLElement>('.goo-popout.goo-context-menu-popout')
+		expect(popout).not.toBeNull()
+		const firstLeft = Number.parseFloat(popout?.style.left ?? '')
+		const firstTop = Number.parseFloat(popout?.style.top ?? '')
+
+		GooContextMenu.open(menu, { at: { x: 120, y: 130 }, autoFocus: false })
+		await new Promise(requestAnimationFrame)
+
+		expect(Number.parseFloat(popout?.style.left ?? '')).not.toBe(firstLeft)
+		expect(Number.parseFloat(popout?.style.top ?? '')).not.toBe(firstTop)
+	})
+
 	it('honors explicit point alignment and hides active tooltips before opening', async() => {
 		const hideTooltip = vi.spyOn(gooTooltipRuntime, 'hide')
 		vi.spyOn(document.body, 'getBoundingClientRect').mockReturnValue({

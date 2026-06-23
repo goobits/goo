@@ -6,7 +6,7 @@
 
 import { clamp } from '../utils/numberUtils.ts'
 import { HORIZONTAL } from './direction.ts'
-import type { AlignmentConfig, PositionResult } from './types.ts'
+import type { AlignmentConfig, PositionAvoidRect, PositionResult } from './types.ts'
 
 // =============================================================================
 // Types
@@ -80,7 +80,9 @@ export function applyContainment(
 	offset: { x?: number; y?: number },
 	keepWithin: ContainmentConfig,
 	direction: number,
-	recalculatePosition: RecalculatePositionFn
+	recalculatePosition: RecalculatePositionFn,
+	avoidRects: PositionAvoidRect[] = [],
+	avoidMargin = 0
 ): PositionResult {
 	const container = keepWithin.$element
 	if (!container) return result
@@ -109,6 +111,7 @@ export function applyContainment(
 	// Clamp to bounds
 	result.x = clamp(result.x, bounds.minX, bounds.maxX)
 	result.y = clamp(result.y, bounds.minY, bounds.maxY)
+	result = avoidOverlappingRects(result, popoutRect, bounds, avoidRects, avoidMargin)
 
 	// Set max dimensions
 	result.maxWidth = containerRect.width - margin * 2
@@ -126,6 +129,13 @@ interface Bounds {
 	maxX: number
 	minY: number
 	maxY: number
+}
+
+type AvoidCandidate = {
+	distance: number
+	overlap: number
+	x: number
+	y: number
 }
 
 /**
@@ -219,4 +229,99 @@ function attemptFlip(
 	}
 
 	return result
+}
+
+function avoidOverlappingRects(
+	result: PositionResult,
+	popoutRect: Rect,
+	bounds: Bounds,
+	avoidRects: PositionAvoidRect[],
+	avoidMargin: number
+): PositionResult {
+	let nextResult = result
+	for (const avoidRect of avoidRects) {
+		const expandedRect = expandAvoidRect(avoidRect, avoidMargin)
+		if (!rectsIntersect(toPositionRect(nextResult, popoutRect), expandedRect)) {
+			continue
+		}
+
+		nextResult = {
+			...nextResult,
+			...chooseAvoidancePosition(nextResult, popoutRect, bounds, expandedRect)
+		}
+	}
+
+	return nextResult
+}
+
+function chooseAvoidancePosition(
+	result: PositionResult,
+	popoutRect: Rect,
+	bounds: Bounds,
+	avoidRect: PositionAvoidRect
+): { x: number; y: number } {
+	const base = { x: result.x, y: result.y }
+	const candidates = [
+		{ x: avoidRect.left - popoutRect.width, y: result.y },
+		{ x: avoidRect.right, y: result.y },
+		{ x: result.x, y: avoidRect.top - popoutRect.height },
+		{ x: result.x, y: avoidRect.bottom }
+	].map(candidate => scoreAvoidCandidate(candidate, base, popoutRect, bounds, avoidRect))
+
+	return candidates.reduce((best, next) => {
+		if (next.overlap !== best.overlap) return next.overlap < best.overlap ? next : best
+		return next.distance < best.distance ? next : best
+	}, candidates[0])
+}
+
+function scoreAvoidCandidate(
+	candidate: { x: number; y: number },
+	base: { x: number; y: number },
+	popoutRect: Rect,
+	bounds: Bounds,
+	avoidRect: PositionAvoidRect
+): AvoidCandidate {
+	const x = clamp(candidate.x, bounds.minX, bounds.maxX)
+	const y = clamp(candidate.y, bounds.minY, bounds.maxY)
+	return {
+		distance: Math.abs(x - base.x) + Math.abs(y - base.y),
+		overlap: getOverlapArea(toRect(x, y, popoutRect), avoidRect),
+		x,
+		y
+	}
+}
+
+function expandAvoidRect(rect: PositionAvoidRect, margin: number): PositionAvoidRect {
+	return {
+		bottom: rect.bottom + margin,
+		left: rect.left - margin,
+		right: rect.right + margin,
+		top: rect.top - margin
+	}
+}
+
+function toPositionRect(position: PositionResult, popoutRect: Rect): PositionAvoidRect {
+	return toRect(position.x, position.y, popoutRect)
+}
+
+function toRect(x: number, y: number, popoutRect: Rect): PositionAvoidRect {
+	return {
+		bottom: y + popoutRect.height,
+		left: x,
+		right: x + popoutRect.width,
+		top: y
+	}
+}
+
+function rectsIntersect(a: PositionAvoidRect, b: PositionAvoidRect): boolean {
+	return a.left < b.right
+		&& a.right > b.left
+		&& a.top < b.bottom
+		&& a.bottom > b.top
+}
+
+function getOverlapArea(a: PositionAvoidRect, b: PositionAvoidRect): number {
+	const width = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left))
+	const height = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top))
+	return width * height
 }

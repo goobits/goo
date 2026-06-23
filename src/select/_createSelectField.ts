@@ -133,6 +133,10 @@ export function createSelectField(options: SelectFieldOptions = {}): GooSelectEl
 		if (destroyed) return false
 		return (component().open as ((openOptions?: GooSelectOpenOptions) => boolean) | undefined)?.(openOptions) ?? false
 	}
+	field.updatePosition = (openOptions?: GooSelectOpenOptions) => {
+		if (destroyed) return false
+		return (component().updatePosition as ((openOptions?: GooSelectOpenOptions) => boolean) | undefined)?.(openOptions) ?? false
+	}
 	field.close = (closeOptions = {}) => {
 		if (destroyed) return
 		;(component().close as ((closeOptions?: { quiet?: boolean }) => void) | undefined)?.(closeOptions)

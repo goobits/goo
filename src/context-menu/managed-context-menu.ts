@@ -140,7 +140,12 @@ function isOpen(): boolean {
 
 function open(idOrMenu: ManagedGooContextMenu | string, options: ManagedGooContextMenuOpenOptions = {}): void {
 	const contextMenu = typeof idOrMenu === 'string' ? get(idOrMenu) : idOrMenu
-	if (!contextMenu || contextMenuState.currentMenu?.id === contextMenu.id) {
+	if (!contextMenu) {
+		return
+	}
+
+	if (contextMenu.isOpen() || contextMenuState.currentMenu?.id === contextMenu.id) {
+		contextMenu.open(options)
 		return
 	}
 

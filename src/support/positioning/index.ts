@@ -20,6 +20,7 @@ export { HORIZONTAL, VERTICAL } from './direction.ts'
 // Types
 export type {
 	AlignmentConfig,
+	PositionAvoidRect,
 	PositionElementAtOptions,
 	PositionOptions,
 	PositionResult
