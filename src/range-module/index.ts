@@ -1,3 +1,5 @@
+/// <reference path="../svelte.d.ts" />
+
 export { createRangeModuleField } from './gooRangeModule.ts'
 export type {
 	GooRangeModuleElement,

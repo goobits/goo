@@ -3,6 +3,8 @@
  * @module goobits/schema
  */
 
+/// <reference path="../svelte.d.ts" />
+
 export { default as GooSchema } from './GooSchema.svelte'
 export type {
 	GooSchemaChangeHandler,

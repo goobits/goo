@@ -23,6 +23,8 @@ export type { GooCheckboxProps } from './checkbox/index.ts'
 export { GooCheckbox } from './checkbox/index.ts'
 export type { GooColorElement, GooColorEventData, GooColorProps } from './color/index.ts'
 export { GooColor } from './color/index.ts'
+/// <reference path="./svelte.d.ts" />
+
 export type {
 	GooContextMenuElement,
 	GooContextMenuManager,
