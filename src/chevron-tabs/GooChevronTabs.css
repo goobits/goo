@@ -54,8 +54,10 @@
 
 .goo-chevron-tabs__tab {
 	position: relative;
-	display: grid;
-	place-content: center;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.32rem;
 	flex: 0 0 auto;
 	min-width: 4rem;
 	max-width: 13rem;
@@ -153,18 +155,9 @@
 	user-select: text;
 }
 
-.goo-chevron-tabs__tab--has-activity {
-	padding-right: 52px;
-}
-
-.goo-chevron-tabs__tab--has-activity .goo-chevron-tabs__name {
-	max-width: 7.2rem;
-}
-
 .goo-chevron-tabs__activity {
-	position: absolute;
-	top: 50%;
-	right: 29px;
+	position: relative;
+	flex: 0 0 auto;
 	display: grid;
 	place-content: center;
 	width: 14px;
@@ -172,7 +165,6 @@
 	color: currentColor;
 	opacity: 0.9;
 	pointer-events: none;
-	transform: translateY(-50%);
 }
 
 .goo-chevron-tabs__activity-emoji {

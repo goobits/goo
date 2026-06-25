@@ -430,29 +430,6 @@
 				ondblclick={() => startRename(tab)}
 				onkeydown={(event) => handleTabKeydown(event, tab)}
 			>
-				<span
-					class="goo-chevron-tabs__name"
-					class:goo-chevron-tabs__name--hidden={editingId === tab.id}
-				>
-					{tab.name}
-				</span>
-				{#if editingId === tab.id}
-					<span
-						class="goo-chevron-tabs__name goo-chevron-tabs__name--editing"
-						use:setNameElement={tab.id}
-						contenteditable="true"
-						role="textbox"
-						tabindex="-1"
-						spellcheck="false"
-						aria-label={renameLabel}
-						onpointerdown={(event) => event.stopPropagation()}
-						onkeydown={handleRenameKeydown}
-						onblur={(event) => commitRename(tab, event.currentTarget)}
-					>
-						{tab.name}
-					</span>
-				{/if}
-
 				{#if activity && editingId !== tab.id}
 					<span
 						class="goo-chevron-tabs__activity"
@@ -473,6 +450,28 @@
 						{:else}
 							<CircleAlert size={12} strokeWidth={2.2} aria-hidden="true" />
 						{/if}
+					</span>
+				{/if}
+				<span
+					class="goo-chevron-tabs__name"
+					class:goo-chevron-tabs__name--hidden={editingId === tab.id}
+				>
+					{tab.name}
+				</span>
+				{#if editingId === tab.id}
+					<span
+						class="goo-chevron-tabs__name goo-chevron-tabs__name--editing"
+						use:setNameElement={tab.id}
+						contenteditable="true"
+						role="textbox"
+						tabindex="-1"
+						spellcheck="false"
+						aria-label={renameLabel}
+						onpointerdown={(event) => event.stopPropagation()}
+						onkeydown={handleRenameKeydown}
+						onblur={(event) => commitRename(tab, event.currentTarget)}
+					>
+						{tab.name}
 					</span>
 				{/if}
 

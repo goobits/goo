@@ -28,16 +28,22 @@ describe('GooChevronTabs', () => {
 	})
 
 	it('shows per-tab agent activity indicators without changing tab names', () => {
-		const { getByLabelText } = render(GooChevronTabs, {
+		const { container, getByLabelText } = render(GooChevronTabs, {
 			props: {
 				tabs: [ ...tabs, { id: 'blocked', name: 'Blocked', status: 'needsAttention' } ],
 				activeId: 'kernel'
 			}
 		})
+		const testsTab = container.querySelector<HTMLElement>('[data-goo-chevron-tab-id="tests"]')!
+		const testsActivity = getByLabelText('Tests agent working')
+		const testsName = testsTab.querySelector('.goo-chevron-tabs__name')!
 
 		expect(getByLabelText('Tests agent working').textContent).toContain('🤖')
 		expect(getByLabelText('Logs agent done').textContent).toContain('🔔')
 		expect(getByLabelText('Blocked needs attention')).toBeTruthy()
+		expect(
+			testsActivity.compareDocumentPosition(testsName) & Node.DOCUMENT_POSITION_FOLLOWING
+		).toBeTruthy()
 	})
 
 	it('hides the done notification for the active tab like AW', () => {
