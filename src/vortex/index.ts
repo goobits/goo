@@ -1,5 +1,3 @@
-/// <reference path="../svelte.d.ts" />
-
 import { mount, unmount } from 'svelte'
 
 import GooVortexComponent from './GooVortex.svelte'

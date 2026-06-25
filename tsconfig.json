@@ -8,11 +8,11 @@
 		"skipLibCheck": true,
 		"strict": true,
 		"verbatimModuleSyntax": true,
-		"types": ["vitest/globals"],
+		"types": ["vitest/globals", "svelte"],
 		"baseUrl": ".",
 		"ignoreDeprecations": "6.0",
 		"noEmit": true
 	},
-	"include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.js", "src/**/*.svelte"],
+	"include": ["src/**/*.ts", "src/**/*.js", "src/**/*.svelte"],
 	"exclude": ["node_modules", "dist", "src/**/*.test.ts", "src/**/__tests__/**"]
 }

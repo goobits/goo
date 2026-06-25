@@ -1,5 +1,3 @@
-/// <reference path="../svelte.d.ts" />
-
 import './GooSpinner.css'
 
 import { resolveSpinnerAttrs } from './_spinnerAttrs.ts'

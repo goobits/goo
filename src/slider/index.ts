@@ -1,5 +1,3 @@
-/// <reference path="../svelte.d.ts" />
-
 export { default as GooSlider } from './GooSlider.svelte'
 export {
 	sliderPresetConfigs,

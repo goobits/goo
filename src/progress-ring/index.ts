@@ -1,5 +1,3 @@
-/// <reference path="../svelte.d.ts" />
-
 import { flushSync, mount, unmount } from 'svelte'
 
 import { clampProgress } from './_progressRingRenderer.ts'

@@ -1,5 +1,3 @@
-/// <reference path="../svelte.d.ts" />
-
 export { default as GooDataGrid } from './GooDataGrid.svelte'
 export type {
 	GooDataGridCellSlot,

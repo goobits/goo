@@ -3,8 +3,6 @@
  * Angle input with circular dial and number input.
  */
 
-/// <reference path="../svelte.d.ts" />
-
 export { default as GooAngleInput } from './GooAngleInput.svelte'
 export type {
 	GooAngleInputElement,

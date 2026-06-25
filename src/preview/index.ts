@@ -1,5 +1,3 @@
-/// <reference path="../svelte.d.ts" />
-
 export { default as GooPreview } from './GooPreview.svelte'
 export type {
 	GooPreviewBackground,

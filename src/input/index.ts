@@ -1,5 +1,3 @@
-/// <reference path="../svelte.d.ts" />
-
 export { default as GooInput } from './GooInput.svelte'
 export { default as GooNumber } from './GooNumber.svelte'
 export type {

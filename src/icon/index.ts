@@ -2,8 +2,6 @@
 import { iconRegistry } from './registry.ts'
 import type { GooIconProps } from './types.ts'
 
-/// <reference path="../svelte.d.ts" />
-
 export { default as GooIcon } from './GooIcon.svelte'
 export type { GooIconProps } from './types.ts'
 

@@ -1,5 +1,3 @@
-/// <reference path="../svelte.d.ts" />
-
 export { default as GooToast } from './GooToast.svelte'
 export { default as GooToaster } from './GooToaster.svelte'
 export {

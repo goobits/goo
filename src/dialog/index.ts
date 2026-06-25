@@ -1,5 +1,3 @@
-/// <reference path="../svelte.d.ts" />
-
 export {
 	createGooDialog,
 	type DialogField,
