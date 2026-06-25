@@ -3,6 +3,7 @@ import { tick } from 'svelte'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { pointerEvent } from '../../__tests__/_pointerEvents.ts'
+import { gooTooltipRuntime } from '../../tooltip/index.ts'
 import { DropdownPanel } from '../_dropdownPanel.ts'
 import GooSelect from '../GooSelect.svelte'
 import { createIcon } from '../selectDom.ts'
@@ -136,6 +137,25 @@ describe('GooSelect', () => {
 		await tick()
 
 		expect(document.querySelector('.goo-popout.goo-select-popout.sketch-contextual-menu-popout')).not.toBeNull()
+	})
+
+	it('hides active tooltips before opening menu popouts', async() => {
+		const hideTooltip = vi.spyOn(gooTooltipRuntime, 'hide')
+		const { container } = render(GooSelect, {
+			props: {
+				value: 'a',
+				options: [
+					{ id: 'a', label: 'A' },
+					{ id: 'b', label: 'B' }
+				]
+			}
+		})
+		const element = container.querySelector<GooSelectElement>('.goo-select')!
+
+		expect(element.open({ autoFocus: false })).toBe(true)
+		await tick()
+
+		expect(hideTooltip).toHaveBeenCalledOnce()
 	})
 
 	it('does not render inline HTML icon strings', () => {

@@ -18,6 +18,7 @@ import './GooSelect.submenu.css'
 
 import { createGooPopout } from '../popout/index.ts'
 import type { GooPopoutInstance } from '../popout/index.ts'
+import { gooTooltipRuntime } from '../tooltip/index.ts'
 import { DropdownPanel } from './_dropdownPanel.ts'
 import {
 	handleKeyboard,
@@ -214,6 +215,8 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 	if (contextOverride) {
 		currentBoundContext = contextOverride
 	}
+
+	gooTooltipRuntime.hide()
 
 	if (!panel) {
 		panel = new DropdownPanel({

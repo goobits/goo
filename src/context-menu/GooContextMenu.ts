@@ -14,7 +14,6 @@ import type {
 	GooSelectOptionsInput
 } from '../select/index.ts'
 import { createLifecycleBag } from '../support/utils/lifecycleBag.ts'
-import { gooTooltipRuntime } from '../tooltip/index.ts'
 
 /**
  * Goo context menu option.
@@ -137,7 +136,6 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 			positionAt = { x: x ?? 0, y: y ?? 0 }
 		}
 
-		gooTooltipRuntime.hide()
 		if (contextMenuOpened || contextMenu.isOpen()) {
 			return contextMenu.updatePosition({
 				...restOpts,
