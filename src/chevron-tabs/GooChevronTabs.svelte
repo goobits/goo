@@ -112,6 +112,13 @@
 		onselect?.(tab.id)
 	}
 
+	const selectTabAt = (index: number): void => {
+		const tab = tabs[index]
+		if (!tab) return
+		selectTab(tab)
+		tabElements[tab.id]?.focus()
+	}
+
 	const closeTab = (tab: GooChevronTab): void => {
 		if (!canClose) return
 		onclose?.(tab.id)
@@ -172,6 +179,27 @@
 
 	const handleTabKeydown = (event: KeyboardEvent, tab: GooChevronTab): void => {
 		if (editingId) return
+		const currentIndex = tabs.findIndex(({ id }) => id === tab.id)
+		if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+			event.preventDefault()
+			selectTabAt((currentIndex + 1) % tabs.length)
+			return
+		}
+		if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+			event.preventDefault()
+			selectTabAt((currentIndex - 1 + tabs.length) % tabs.length)
+			return
+		}
+		if (event.key === 'Home') {
+			event.preventDefault()
+			selectTabAt(0)
+			return
+		}
+		if (event.key === 'End') {
+			event.preventDefault()
+			selectTabAt(tabs.length - 1)
+			return
+		}
 		if (event.key === 'Enter' || event.key === ' ') {
 			event.preventDefault()
 			selectTab(tab)
@@ -222,13 +250,9 @@
 			.filter((id) => id !== drag.id)
 			.map((id) => drag.centers[id])
 			.filter((value): value is number => typeof value === 'number')
-		let insertion = drag.insertion
-		while (insertion < otherCenters.length && draggedCenter > otherCenters[insertion] - 0.25 * drag.advance) {
-			insertion += 1
-		}
-		while (insertion > 0 && draggedCenter < otherCenters[insertion - 1] - 0.75 * drag.advance) {
-			insertion -= 1
-		}
+		const firstGreaterCenter = otherCenters.findIndex((center) => draggedCenter < center)
+		const insertion =
+			firstGreaterCenter === -1 ? otherCenters.length : firstGreaterCenter
 		drag.insertion = insertion
 		dragVisualOffset = movement
 	}
