@@ -2,6 +2,10 @@
 	import { ChevronDown, CircleAlert, Plus, X } from '@lucide/svelte'
 	import './GooChevronTabs.css'
 	import type { GooChevronTab, GooChevronTabStatus, GooChevronTabsProps } from './types.ts'
+	import {
+		resolveChevronTabDragInsertion,
+		resolveChevronTabKeyboardTargetIndex
+	} from './_chevronTabsModel.ts'
 
 	const statusInfo: Record<
 		GooChevronTabStatus | 'idle',
@@ -180,24 +184,14 @@
 	const handleTabKeydown = (event: KeyboardEvent, tab: GooChevronTab): void => {
 		if (editingId) return
 		const currentIndex = tabs.findIndex(({ id }) => id === tab.id)
-		if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+		const keyboardTargetIndex = resolveChevronTabKeyboardTargetIndex(
+			currentIndex,
+			tabs.length,
+			event.key
+		)
+		if (keyboardTargetIndex !== null) {
 			event.preventDefault()
-			selectTabAt((currentIndex + 1) % tabs.length)
-			return
-		}
-		if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
-			event.preventDefault()
-			selectTabAt((currentIndex - 1 + tabs.length) % tabs.length)
-			return
-		}
-		if (event.key === 'Home') {
-			event.preventDefault()
-			selectTabAt(0)
-			return
-		}
-		if (event.key === 'End') {
-			event.preventDefault()
-			selectTabAt(tabs.length - 1)
+			selectTabAt(keyboardTargetIndex)
 			return
 		}
 		if (event.key === 'Enter' || event.key === ' ') {
@@ -250,10 +244,7 @@
 			.filter((id) => id !== drag.id)
 			.map((id) => drag.centers[id])
 			.filter((value): value is number => typeof value === 'number')
-		const firstGreaterCenter = otherCenters.findIndex((center) => draggedCenter < center)
-		const insertion =
-			firstGreaterCenter === -1 ? otherCenters.length : firstGreaterCenter
-		drag.insertion = insertion
+		drag.insertion = resolveChevronTabDragInsertion(draggedCenter, otherCenters)
 		dragVisualOffset = movement
 	}
 
