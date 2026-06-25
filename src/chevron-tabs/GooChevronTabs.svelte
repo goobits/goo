@@ -3,6 +3,7 @@
 	import './GooChevronTabs.css'
 	import type { GooChevronTab, GooChevronTabStatus, GooChevronTabsProps } from './types.ts'
 	import {
+		hasChevronTabDragIntent,
 		resolveChevronTabDragInsertion,
 		resolveChevronTabKeyboardTargetIndex
 	} from './_chevronTabsModel.ts'
@@ -61,6 +62,7 @@
 		id: string
 		startX: number
 		moved: boolean
+		originalIndex: number
 		pointerId: number
 		insertion: number
 		originalIds: string[]
@@ -216,6 +218,7 @@
 	const beginDrag = (event: PointerEvent, tab: GooChevronTab): void => {
 		if (editingId === tab.id || event.button !== 0) return
 		const originalIds = tabs.map(({ id }) => id)
+		const originalIndex = originalIds.indexOf(tab.id)
 		const centers: Record<string, number> = {}
 		for (const id of originalIds) {
 			const rect = tabElements[id]?.getBoundingClientRect()
@@ -225,8 +228,9 @@
 			id: tab.id,
 			startX: event.clientX,
 			moved: false,
+			originalIndex,
 			pointerId: event.pointerId,
-			insertion: originalIds.indexOf(tab.id),
+			insertion: originalIndex,
 			originalIds,
 			centers,
 			advance: (tabElements[tab.id]?.getBoundingClientRect().width ?? 100) - 7
@@ -238,7 +242,7 @@
 		if (!drag) return
 		const movement = event.clientX - drag.startX
 		if (!drag.moved) {
-			if (Math.abs(movement) < 4) return
+			if (!hasChevronTabDragIntent(movement)) return
 			railElement?.setPointerCapture?.(drag.pointerId)
 			drag.moved = true
 		}
@@ -262,6 +266,7 @@
 			if (tab) selectTab(tab)
 			return
 		}
+		if (drag.insertion === drag.originalIndex) return
 		onmove?.(drag.id, drag.insertion)
 	}
 

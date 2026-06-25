@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+	chevronTabDragActivationDistance,
+	hasChevronTabDragIntent,
 	resolveChevronTabDragInsertion,
 	resolveChevronTabKeyboardTargetIndex
 } from '../_chevronTabsModel.ts'
@@ -30,5 +32,12 @@ describe('chevron tabs model', () => {
 		expect(resolveChevronTabDragInsertion(100, centers)).toBe(1)
 		expect(resolveChevronTabDragInsertion(200, centers)).toBe(2)
 		expect(resolveChevronTabDragInsertion(300, centers)).toBe(3)
+	})
+
+	it('requires deliberate pointer movement before treating a tab click as drag', () => {
+		expect(hasChevronTabDragIntent(chevronTabDragActivationDistance - 1)).toBe(false)
+		expect(hasChevronTabDragIntent(-(chevronTabDragActivationDistance - 1))).toBe(false)
+		expect(hasChevronTabDragIntent(chevronTabDragActivationDistance)).toBe(true)
+		expect(hasChevronTabDragIntent(-chevronTabDragActivationDistance)).toBe(true)
 	})
 })

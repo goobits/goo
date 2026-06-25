@@ -1,3 +1,8 @@
+export const chevronTabDragActivationDistance = 10
+
+export const hasChevronTabDragIntent = (movement: number): boolean =>
+	Math.abs(movement) >= chevronTabDragActivationDistance
+
 export const resolveChevronTabKeyboardTargetIndex = (
 	currentIndex: number,
 	totalTabs: number,
