@@ -3,6 +3,9 @@
 	"version": "0.1.0",
 	"description": "Svelte 5 UI primitives and imperative DOM handles for Goo-based apps.",
 	"type": "module",
+	"imports": {
+		"#src/*": "./src/*"
+	},
 	"packageManager": "pnpm@10.25.0",
 	"publishConfig": {
 		"access": "public"
