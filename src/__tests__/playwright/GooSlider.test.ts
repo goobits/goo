@@ -99,7 +99,7 @@ test.describe('GooSlider', () => {
 
 		expect(await snapSlider.evaluate(element => element.classList.contains('goo-slider--snap-animate'))).toBe(true)
 		expect(await snapField.evaluate(element => (element as unknown as { getValue(): number }).getValue())).toBe(50)
-		await page.waitForTimeout(180)
+		await page.waitForTimeout(180) // test-shape: timing-probe - snap animation duration is the contract under test.
 		expect(await snapSlider.evaluate(element => element.classList.contains('goo-slider--snap-animate'))).toBe(false)
 		await page.mouse.up()
 
