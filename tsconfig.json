@@ -3,6 +3,7 @@
 		"target": "ES2022",
 		"module": "ESNext",
 		"moduleResolution": "bundler",
+		"noEmit": true,
 		"allowImportingTsExtensions": true,
 		"isolatedModules": true,
 		"skipLibCheck": true,

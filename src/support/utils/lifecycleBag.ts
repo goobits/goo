@@ -71,7 +71,12 @@ export function createLifecycleBag(): GooLifecycleBag {
 			cancel = bag.add(() => cancelAnimationFrame(frameId))
 			return cancel
 		},
-		listen(target, type, listener, options) {
+		listen(
+			target: EventTarget,
+			type: string,
+			listener: EventListenerOrEventListenerObject,
+			options?: boolean | AddEventListenerOptions
+		) {
 			target.addEventListener(type, listener, options)
 			return bag.add(() => target.removeEventListener(type, listener, options))
 		},
