@@ -1,3 +1,5 @@
+import type { Snippet } from 'svelte'
+
 export type GooChevronTabStatus =
 	| 'connecting'
 	| 'connected'
@@ -30,9 +32,10 @@ export type GooChevronTabsProps = {
 	closeLabel?: (_tab: GooChevronTab) => string
 	tabAttributes?: (_tab: GooChevronTab, _index: number) => GooChevronTabAttributes
 	dropTargetAttributes?: (_index: number) => GooChevronDropTargetAttributes
+	actions?: Snippet
 	onselect?: (_tabId: string) => void
 	onadd?: () => void
 	onclose?: (_tabId: string) => void
 	onrename?: (_tabId: string, _name: string) => void
 	onmove?: (_tabId: string, _targetIndex: number) => void
-} & Record<`data-${ string }`, string | undefined>
+} & Record<`data-${string}`, string | undefined>

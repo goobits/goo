@@ -44,6 +44,7 @@
 		closeLabel = (tab) => `Close ${tab.name} tab`,
 		tabAttributes = () => ({}),
 		dropTargetAttributes: _dropTargetAttributes = () => ({}),
+		actions,
 		onselect,
 		onadd,
 		onclose,
@@ -104,8 +105,10 @@
 		tab: GooChevronTab
 	): { kind: 'working' | 'done' | 'needsAttention'; label: string } | null => {
 		if (tab.status === 'working') return { kind: 'working', label: `${tab.name} agent working` }
-		if (tab.status === 'done' && tab.id !== activeId) return { kind: 'done', label: `${tab.name} agent done` }
-		if (tab.status === 'needsAttention') return { kind: 'needsAttention', label: `${tab.name} needs attention` }
+		if (tab.status === 'done' && tab.id !== activeId)
+			return { kind: 'done', label: `${tab.name} agent done` }
+		if (tab.status === 'needsAttention')
+			return { kind: 'needsAttention', label: `${tab.name} needs attention` }
 		return null
 	}
 
@@ -320,7 +323,13 @@
 		onpointerup={finishDrag}
 		onpointercancel={finishDrag}
 	>
-		<button class="goo-chevron-tabs__add" type="button" aria-label={addLabel} title={addLabel} onclick={onadd}>
+		<button
+			class="goo-chevron-tabs__add"
+			type="button"
+			aria-label={addLabel}
+			title={addLabel}
+			onclick={onadd}
+		>
 			<Plus size={15} strokeWidth={2} aria-hidden="true" />
 		</button>
 
@@ -359,7 +368,10 @@
 						{/if}
 					</span>
 				{/if}
-				<span class="goo-chevron-tabs__label" class:goo-chevron-tabs__label--hidden={editingId === tab.id}>
+				<span
+					class="goo-chevron-tabs__label"
+					class:goo-chevron-tabs__label--hidden={editingId === tab.id}
+				>
 					{tab.name}
 				</span>
 				{#if editingId === tab.id}
@@ -372,8 +384,8 @@
 						aria-label={renameLabel}
 						onpointerdown={(event) => event.stopPropagation()}
 						onkeydown={handleNameKeydown}
-						onblur={(event) => commitRename(tab, event.currentTarget)}
-					>{tab.name}</span>
+						onblur={(event) => commitRename(tab, event.currentTarget)}>{tab.name}</span
+					>
 				{/if}
 
 				{#if canClose && editingId !== tab.id}
@@ -433,6 +445,11 @@
 				<ChevronDown size={14} strokeWidth={2.2} aria-hidden="true" />
 			</button>
 		{/if}
+		{#if actions}
+			<div class="goo-chevron-tabs__actions">
+				{@render actions()}
+			</div>
+		{/if}
 	</div>
 
 	{#if menuOpen}
@@ -456,7 +473,10 @@
 						menuOpen = false
 					}}
 				>
-					<span class="goo-chevron-tabs__menu-accent" style={`background: ${tab.accent ?? '#79f2b0'}`}></span>
+					<span
+						class="goo-chevron-tabs__menu-accent"
+						style={`background: ${tab.accent ?? '#79f2b0'}`}
+					></span>
 					<span class="goo-chevron-tabs__menu-name">{tab.name}</span>
 					<span
 						class="goo-chevron-tabs__menu-status"
