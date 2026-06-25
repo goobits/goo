@@ -103,7 +103,7 @@
 }
 
 .goo-panel__toggle:focus-visible {
-	outline: 2px solid var(--goo-theme-focus-ring, #3b82f6);
+	outline: 2px solid var(--goo-theme-focus-ring, #007bff);
 	outline-offset: 1px;
 }
 

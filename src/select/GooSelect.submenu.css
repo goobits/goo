@@ -30,6 +30,12 @@
 	--goo-select-submenu-arrow-scale: -1;
 }
 
+/* Match the leading icon: the arrow adopts the accent on the active row. */
+.goo-select__option:hover .goo-select__submenu-arrow,
+.goo-select__option--hovered .goo-select__submenu-arrow {
+	color: var(--goo-select-accent);
+}
+
 .goo-select__option--selected .goo-select__submenu-arrow,
 .goo-select__option--selected:hover .goo-select__submenu-arrow,
 .goo-select__option--selected.goo-select__option--hovered .goo-select__submenu-arrow {

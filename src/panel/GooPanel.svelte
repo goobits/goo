@@ -110,10 +110,7 @@ function assignApi(): void {
 		}
 		root.removeElement = child => removeChild(root, child)
 		root.clear = () => clearChildren(root)
-		root.destroy = () => {
-			root.clear()
-			root.remove()
-		}
+		root.destroy = destroyPanel
 		apiReady = true
 	}
 	element = root
@@ -122,6 +119,8 @@ function assignApi(): void {
 }
 
 function mountDrag(): void {
+	dragEvent?.detach?.()
+	dragEvent = undefined
 	if (!root || !headerElement || docked || draggable === false) return
 	dragEvent = createPointerDrag(headerElement, event => {
 		const env = event.env
@@ -153,6 +152,13 @@ function mountDrag(): void {
 	})
 }
 
+function destroyPanel(): void {
+	dragEvent?.detach?.()
+	dragEvent = undefined
+	root?.clear()
+	root?.remove()
+}
+
 let mountedRoot: GooPanelElement | undefined
 
 $effect(() => {
@@ -164,13 +170,25 @@ $effect(() => {
 		appendContent(nextContent, content)
 		hydrateChildren(nextRoot)
 		assignApi()
-		mountDrag()
 	})
 	return () => {
 		dragEvent?.detach?.()
+		dragEvent = undefined
 		onelement?.(null)
 		element = null
 		if (mountedRoot === nextRoot) mountedRoot = undefined
+	}
+})
+
+$effect(() => {
+	root
+	headerElement
+	docked
+	draggable
+	mountDrag()
+	return () => {
+		dragEvent?.detach?.()
+		dragEvent = undefined
 	}
 })
 

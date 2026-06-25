@@ -486,7 +486,7 @@ describe('GooSchema', () => {
 			schema: [
 				{
 					path: 'size',
-					type: 'range-module',
+					type: 'slider-field',
 					min: 0,
 					max: 100,
 					canCross: true,
@@ -496,7 +496,7 @@ describe('GooSchema', () => {
 			data: { size: 12 },
 			bare: true,
 			controlTypes: {
-				'range-module': {
+				'slider-field': {
 					load: () => Promise.resolve({}),
 					extract: () => options => {
 						receivedOptions = options as Record<string, unknown>
@@ -517,6 +517,94 @@ describe('GooSchema', () => {
 			max: 100,
 			min: 0
 		})
+	})
+
+	it('destroys child controllers when the schema is destroyed', async() => {
+		const destroyControl = vi.fn()
+		const schema = createGooSchema({
+			schema: [ { path: 'size', type: 'destroyable-control' } ],
+			data: { size: 12 },
+			bare: true,
+			controlTypes: {
+				'destroyable-control': {
+					load: () => Promise.resolve({}),
+					extract: () => () => Object.assign(document.createElement('div'), {
+						destroy: destroyControl,
+						getValue: () => 12,
+						setValue: vi.fn()
+					})
+				}
+			}
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+
+		expect(schema.getController('size')).not.toBeUndefined()
+
+		schema.destroy()
+		schema.destroy()
+
+		expect(destroyControl).toHaveBeenCalledOnce()
+	})
+
+	it('destroys previous child controllers when rebuilding schema', async() => {
+		const destroyControl = vi.fn()
+		const schema = createGooSchema({
+			schema: [ { path: 'size', type: 'destroyable-control' } ],
+			data: { size: 12, opacity: 0.5 },
+			bare: true,
+			controlTypes: {
+				'destroyable-control': {
+					load: () => Promise.resolve({}),
+					extract: () => () => Object.assign(document.createElement('div'), {
+						destroy: destroyControl,
+						getValue: () => 12,
+						setValue: vi.fn()
+					})
+				}
+			}
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+
+		const firstController = schema.getController('size')
+		expect(firstController).not.toBeUndefined()
+
+		schema.setSchema([ { path: 'opacity', type: 'destroyable-control' } ])
+		await settleGooSchema()
+
+		expect(destroyControl).toHaveBeenCalledOnce()
+		expect(schema.getController('size')).toBeUndefined()
+		expect(schema.getController('opacity')).not.toBeUndefined()
+	})
+
+	it('does not rebuild after destroy when a rebuild was already queued', async() => {
+		const destroyControl = vi.fn()
+		const schema = createGooSchema({
+			schema: [ { path: 'size', type: 'destroyable-control' } ],
+			data: { size: 12 },
+			bare: true,
+			controlTypes: {
+				'destroyable-control': {
+					load: () => Promise.resolve({}),
+					extract: () => () => Object.assign(document.createElement('div'), {
+						destroy: destroyControl,
+						getValue: () => 12,
+						setValue: vi.fn()
+					})
+				}
+			}
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+
+		schema.setOptions({ showReset: true })
+		schema.destroy()
+		await settleGooSchema()
+
+		expect(destroyControl).toHaveBeenCalledOnce()
+		expect(schema.querySelector('.goo-controller')).toBeNull()
+		expect(schema.getController('size')).toBeUndefined()
 	})
 
 	it('auto-detects xy pad controls for point fields', async() => {
@@ -558,7 +646,7 @@ describe('GooSchema', () => {
 			schema: [
 				{
 					path: 'opacity',
-					type: 'range-module',
+					type: 'slider-field',
 					format: 'percent',
 					min: 0,
 					max: 1,
@@ -569,7 +657,7 @@ describe('GooSchema', () => {
 			data: { opacity: 0.5 },
 			bare: true,
 			controlTypes: {
-				'range-module': {
+				'slider-field': {
 					load: () => Promise.resolve({}),
 					extract: () => options => {
 						receivedOptions = options as Record<string, unknown>
@@ -597,7 +685,7 @@ describe('GooSchema', () => {
 			schema: [
 				{
 					path: 'opacity',
-					type: 'range-module',
+					type: 'slider-field',
 					valueFormat: 'percent',
 					displayUnit: '%',
 					showLabel: false,
@@ -610,7 +698,7 @@ describe('GooSchema', () => {
 			data: { opacity: 0.5 },
 			bare: true,
 			controlTypes: {
-				'range-module': {
+				'slider-field': {
 					load: () => Promise.resolve({}),
 					extract: () => options => {
 						receivedOptions = options as Record<string, unknown>

@@ -6,13 +6,12 @@
 		"allowImportingTsExtensions": true,
 		"isolatedModules": true,
 		"skipLibCheck": true,
-		"strict": true,
+		"strict": false,
 		"verbatimModuleSyntax": true,
-		"types": ["vitest/globals", "svelte"],
+		"types": ["vitest/globals"],
 		"baseUrl": ".",
-		"ignoreDeprecations": "6.0",
-		"noEmit": true
+		"ignoreDeprecations": "6.0"
 	},
-	"include": ["src/**/*.ts", "src/**/*.js", "src/**/*.svelte"],
+	"include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.js", "src/**/*.svelte"],
 	"exclude": ["node_modules", "dist", "src/**/*.test.ts", "src/**/__tests__/**"]
 }

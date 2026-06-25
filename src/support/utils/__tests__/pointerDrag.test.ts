@@ -104,6 +104,64 @@ describe('createPointerDrag', () => {
 		expect(onDrag).not.toHaveBeenCalled()
 	})
 
+	it('cancels active drags and releases pointer capture on detach', () => {
+		const target = document.createElement('div')
+		target.setPointerCapture = vi.fn()
+		target.releasePointerCapture = vi.fn()
+		const states: string[] = []
+		const handle = createPointerDrag(target, event => {
+			states.push(event.state)
+		})
+
+		target.dispatchEvent(pointerEvent('pointerdown', { clientX: 10, clientY: 20, pointerId: 7 }))
+		target.dispatchEvent(pointerEvent('pointermove', { clientX: 15, clientY: 25, pointerId: 7 }))
+
+		handle.detach()
+		handle.detach()
+		target.dispatchEvent(pointerEvent('pointerup', { clientX: 15, clientY: 25, pointerId: 7 }))
+
+		expect(states).toEqual([ 'start', 'move', 'cancel' ])
+		expect(target.releasePointerCapture).toHaveBeenCalledExactlyOnceWith(7)
+	})
+
+	it('ends active drags from document-level pointer release events', () => {
+		const target = document.createElement('div')
+		target.setPointerCapture = vi.fn()
+		target.releasePointerCapture = vi.fn()
+		const states: string[] = []
+		const handle = createPointerDrag(target, event => {
+			states.push(event.state)
+		})
+
+		target.dispatchEvent(pointerEvent('pointerdown', { clientX: 10, clientY: 20, pointerId: 7 }))
+		document.dispatchEvent(pointerEvent('pointerup', { clientX: 16, clientY: 30, pointerId: 7 }))
+		target.dispatchEvent(pointerEvent('pointermove', { clientX: 24, clientY: 40, pointerId: 7 }))
+
+		expect(states).toEqual([ 'start', 'end' ])
+		expect(target.releasePointerCapture).toHaveBeenCalledExactlyOnceWith(7)
+
+		handle.detach()
+	})
+
+	it('cancels active drags when pointer capture is lost unexpectedly', () => {
+		const target = document.createElement('div')
+		target.setPointerCapture = vi.fn()
+		target.releasePointerCapture = vi.fn()
+		const states: string[] = []
+		const handle = createPointerDrag(target, event => {
+			states.push(event.state)
+		})
+
+		target.dispatchEvent(pointerEvent('pointerdown', { clientX: 10, clientY: 20, pointerId: 7 }))
+		target.dispatchEvent(pointerEvent('lostpointercapture', { clientX: 12, clientY: 22, pointerId: 7 }))
+		target.dispatchEvent(pointerEvent('pointermove', { clientX: 24, clientY: 40, pointerId: 7 }))
+
+		expect(states).toEqual([ 'start', 'cancel' ])
+		expect(target.releasePointerCapture).toHaveBeenCalledExactlyOnceWith(7)
+
+		handle.detach()
+	})
+
 	it('emits pointer taps when movement stays below the threshold', () => {
 		const target = document.createElement('button')
 		const onTap = vi.fn()

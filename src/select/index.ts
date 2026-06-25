@@ -3,6 +3,8 @@
  * @module goobits/select
  */
 
+/// <reference path="../svelte.d.ts" />
+
 export { default as GooSelect } from './GooSelect.svelte'
 export type {
 	GooSelectActionContext,

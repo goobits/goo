@@ -118,9 +118,17 @@
 
 	function refreshItemsTop() {
 		if (!itemsEl || !scrollRoot) return
-		const rootRect = scrollRoot.getBoundingClientRect()
-		const itemsRect = itemsEl.getBoundingClientRect()
-		itemsTop = itemsRect.top - rootRect.top + scrollRoot.scrollTop
+		itemsTop = offsetTopInDocument(itemsEl) - offsetTopInDocument(scrollRoot)
+	}
+
+	function offsetTopInDocument(element: HTMLElement): number {
+		let top = 0
+		let node: HTMLElement | null = element
+		while (node) {
+			top += node.offsetTop
+			node = node.offsetParent as HTMLElement | null
+		}
+		return top
 	}
 
 	function scheduleMeasure() {
@@ -159,29 +167,33 @@
 	}
 
 	$effect(() => {
-		if (!scrollRoot) return
+		const root = scrollRoot
+		const currentItemsEl = itemsEl
+		if (!root) return
 		// Virtualization constantly resizes the spacer rows, which changes content
 		// height above the viewport. The browser's scroll anchoring tries to keep an
 		// anchor node in place by adjusting scrollTop, and when the grid is one of
 		// several blocks in a shared scroll container that feedback runs the scroll
 		// to the top or bottom. Disable anchoring on the scroll root while mounted.
-		const previousOverflowAnchor = scrollRoot.style.overflowAnchor
-		scrollRoot.style.overflowAnchor = 'none'
+		const previousOverflowAnchor = root.style.overflowAnchor
+		root.style.overflowAnchor = 'none'
 		scheduleMeasure()
-		itemsEl?.addEventListener('virtualgridnavigate', handleVirtualNavigate)
-		scrollRoot.addEventListener('scroll', handleScroll, { passive: true })
-		const resizeObserver = new ResizeObserver(scheduleMeasure)
-		if (itemsEl) resizeObserver.observe(itemsEl)
-		resizeObserver.observe(scrollRoot)
+		currentItemsEl?.addEventListener('virtualgridnavigate', handleVirtualNavigate)
+		root.addEventListener('scroll', handleScroll, { passive: true })
+		const resizeObserver = typeof ResizeObserver === 'function'
+			? new ResizeObserver(scheduleMeasure)
+			: null
+		if (currentItemsEl) resizeObserver?.observe(currentItemsEl)
+		resizeObserver?.observe(root)
 		return () => {
 			if (measureFrame !== null) cancelAnimationFrame(measureFrame)
 			measureFrame = null
 			if (deferContentTimer !== null) clearTimeout(deferContentTimer)
 			deferContentTimer = null
-			itemsEl?.removeEventListener('virtualgridnavigate', handleVirtualNavigate)
-			scrollRoot.removeEventListener('scroll', handleScroll)
-			resizeObserver.disconnect()
-			scrollRoot.style.overflowAnchor = previousOverflowAnchor
+			currentItemsEl?.removeEventListener('virtualgridnavigate', handleVirtualNavigate)
+			root.removeEventListener('scroll', handleScroll)
+			resizeObserver?.disconnect()
+			root.style.overflowAnchor = previousOverflowAnchor
 		}
 	})
 

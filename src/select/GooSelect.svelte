@@ -1,5 +1,5 @@
 <script module lang="ts">
-import type { SvelteControlSchema } from '../controller/svelteControl.svelte.ts'
+import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.ts'
 
 /** GooController binding metadata for the Svelte select component. */
 export const controlSchema: SvelteControlSchema = {
@@ -25,7 +25,7 @@ import {
 	mapNativeKeyToCommand,
 	type GooSelectKeyboardHost
 } from './_keyboardHandler.ts'
-import { normalizeOptions } from './_normalizeOptions.ts'
+import { findOptionById, normalizeOptions } from './_normalizeOptions.ts'
 import {
 	applySelectMenuWidth,
 	getSelectMenuAlign,
@@ -61,6 +61,8 @@ let currentBoundContext = $state<unknown>()
 let listboxId = $state('')
 let activeDescendant = $state('')
 let triggerPointerId: number | null = null
+let selectLifecycleToken = 0
+let focusFrame = 0
 
 let {
 	options = [],
@@ -159,6 +161,8 @@ $effect(() => {
 })
 
 $effect(() => () => {
+	selectLifecycleToken += 1
+	clearFocusFrame()
 	stopTriggerPointerSelection()
 	panel?.destroy()
 	popout?.destroy()
@@ -204,7 +208,8 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 		parentElement,
 		actionContext: contextOverride,
 		align: alignOverride,
-		offset: offsetOverride
+		offset: offsetOverride,
+		popoutClassName
 	} = options
 	if (contextOverride) {
 		currentBoundContext = contextOverride
@@ -237,7 +242,7 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 	syncPanelTypography()
 
 	const currentMenu = selectMenu
-	const positionAt = at || (showHeader ? triggerElement : selectElement)
+		const positionAt = getPositionTarget(at)
 	const triggerWidth = positionAt instanceof HTMLElement
 		? Math.max(1, Math.round(positionAt.getBoundingClientRect().width))
 		: undefined
@@ -248,7 +253,7 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 		content: panel.$container,
 		parentElement: parentElement || document.body,
 		role: null,
-		className: getSelectMenuPopoutClass(currentMenu),
+		className: getSelectMenuPopoutClass(currentMenu, popoutClassName),
 		clickToClose,
 		escapeToClose: true,
 		keepWithin: keepWithin || { element: document.body, margin: 15 },
@@ -262,8 +267,10 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 		onClose: () => close({ fromPopout: true }),
 		onOpen: () => {
 			if (!autoFocus) return
-			requestAnimationFrame(() => {
-				if (!panel) return
+			clearFocusFrame()
+			focusFrame = requestAnimationFrame(() => {
+				focusFrame = 0
+				if (!panel || !opened) return
 				const toFocus = selectedValue || panel.getNavigableOptions()[0]?.dataset.id
 				if (toFocus) panel.setHovered(toFocus)
 			})
@@ -289,6 +296,7 @@ export function close({ quiet = false, fromPopout = false }: { quiet?: boolean; 
 	if (!selectElement || !opened) return
 
 	stopTriggerPointerSelection()
+	clearFocusFrame()
 	panel?.closeSubmenu()
 	panel?.resetTypeahead()
 	if (panel) panel.hoveredId = null
@@ -303,6 +311,42 @@ export function close({ quiet = false, fromPopout = false }: { quiet?: boolean; 
 	if (!quiet) {
 		selectElement.dispatchEvent(new CustomEvent('close', { bubbles: true }))
 		onclose?.()
+	}
+}
+
+export function updatePosition(options: GooSelectOpenOptions = {}): boolean {
+	if (!popout?.isOpen()) return false
+
+	const positionAt = withPositionOverrides(getPositionTarget(options.at), options)
+	popout.updatePosition(positionAt, options.align)
+	popout.reposition()
+	return true
+}
+
+function getPositionTarget(at: GooSelectOpenOptions['at']): HTMLElement | NonNullable<GooSelectOpenOptions['at']> {
+	return at || (showHeader ? triggerElement : selectElement)!
+}
+
+function withPositionOverrides(
+	positionAt: HTMLElement | NonNullable<GooSelectOpenOptions['at']>,
+	options: GooSelectOpenOptions
+): HTMLElement | NonNullable<GooSelectOpenOptions['at']> {
+	if (!options.offset && !options.align) {
+		return positionAt
+	}
+
+	if (positionAt instanceof HTMLElement) {
+		return {
+			align: options.align,
+			element: positionAt,
+			offset: options.offset
+		}
+	}
+
+	return {
+		...positionAt,
+		align: options.align ?? positionAt.align,
+		offset: options.offset ?? positionAt.offset
 	}
 }
 
@@ -373,6 +417,7 @@ function assignSelectApi(select: GooSelectRuntimeElement): void {
 	select.setValue = (nextValue, { silent = false } = {}) => setValue(nextValue, { silent })
 	select.getValue = () => getValue()
 	select.isOpen = () => opened
+	select.updatePosition = options => updatePosition(options)
 	select.getHoveredOptionId = () => panel?.hoveredId ?? null
 	select.getOptions = () => normalizedOptions
 	select.setOptions = nextOptions => setOptions(nextOptions)
@@ -467,10 +512,20 @@ function selectOption(option: GooSelectOption, item?: HTMLElement | null): void 
 
 	const optionElement = item ?? panel?.getOptionElementById(selectedValue)
 	if (optionElement && panel) {
-		panel.animateSelection(optionElement).then(() => finishSelection(option, oldValue))
+		const token = selectLifecycleToken
+		panel.animateSelection(optionElement).then(() => {
+			if (token !== selectLifecycleToken || !selectElement) return
+			finishSelection(option, oldValue)
+		})
 	} else {
 		finishSelection(option, oldValue)
 	}
+}
+
+function clearFocusFrame(): void {
+	if (!focusFrame) return
+	cancelAnimationFrame(focusFrame)
+	focusFrame = 0
 }
 
 function finishSelection(option: GooSelectOption, oldValue: string): void {
@@ -495,17 +550,6 @@ function emitChange(oldValue: string): void {
 
 function getContext(): unknown {
 	return currentBoundContext || selectElement
-}
-
-function findOptionById(options: GooSelectOption[], optionId: string): GooSelectOption | null {
-	for (const option of options) {
-		if (option.id === optionId) return option
-		if (option.options) {
-			const found = findOptionById(option.options, optionId)
-			if (found) return found
-		}
-	}
-	return null
 }
 
 function getOptionLabel(option: GooSelectOption | null): string {

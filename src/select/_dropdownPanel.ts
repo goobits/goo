@@ -3,6 +3,7 @@
  * @module goobits/select/DropdownPanel
  */
 
+import { findOptionById } from './_normalizeOptions.ts'
 import { SubmenuPopoutController } from './_submenuPopout.ts'
 import { createIcon, createShortcut, evaluate } from './selectDom.ts'
 import type { GooSelectOption } from './types.ts'
@@ -70,6 +71,11 @@ export class DropdownPanel {
 	#submenuPopout: SubmenuPopoutController
 	#typeaheadBuffer = ''
 	#typeaheadTimer: ReturnType<typeof setTimeout> | null = null
+	#selectionAnimationCleanup: (() => void) | null = null
+	#selectionAnimationToken = 0
+	#handleContainerMouseEnter = () => this.#cancelSubmenuTimer()
+	#handleContainerMouseLeave = (event: MouseEvent) =>
+		this.#scheduleSubmenuClose(event.relatedTarget)
 
 	constructor(ctx: DropdownPanelContext) {
 		this.#ctx = ctx
@@ -86,10 +92,8 @@ export class DropdownPanel {
 				onMouseLeave: event => this.#scheduleSubmenuClose(event.relatedTarget)
 			}
 		)
-		this.$container.addEventListener('mouseenter', () => this.#cancelSubmenuTimer())
-		this.$container.addEventListener('mouseleave', event =>
-			this.#scheduleSubmenuClose(event.relatedTarget)
-		)
+		this.$container.addEventListener('mouseenter', this.#handleContainerMouseEnter)
+		this.$container.addEventListener('mouseleave', this.#handleContainerMouseLeave)
 	}
 
 	// --------------------------------------------------------------------------
@@ -152,6 +156,17 @@ export class DropdownPanel {
 	}
 
 	/**
+	 * Clear the active hover state.
+	 */
+	clearHovered(): void {
+		const $prev = this.$container.querySelector('.goo-select__option--hovered')
+		if ($prev) $prev.classList.remove('goo-select__option--hovered')
+		this.hoveredId = null
+		this.$container.removeAttribute('aria-activedescendant')
+		this.#ctx.onHoverChange('', '')
+	}
+
+	/**
 	 * Navigate to next/previous option.
 	 * @param dir - 1 for next, -1 for previous
 	 */
@@ -201,8 +216,12 @@ export class DropdownPanel {
 	 * @param $item - item.
 	 */
 	animateSelection($item: HTMLElement): Promise<void> {
+		this.#cancelSelectionAnimation()
 		return new Promise<void>(resolve => {
 			const duration = 60 // ms per step
+			const token = ++this.#selectionAnimationToken
+			const timers: Array<ReturnType<typeof setTimeout>> = []
+			let settled = false
 
 			// Mark as animating
 			$item.dataset.isChosen = 'true'
@@ -210,8 +229,20 @@ export class DropdownPanel {
 
 			let step = 0
 			const totalSteps = 3
+			const cleanup = () => {
+				for (const timer of timers) clearTimeout(timer)
+				timers.length = 0
+				$item.classList.remove('goo-select__option--flash')
+				$item.dataset.isChosen = ''
+				this.$container.dataset.isChoosingOption = ''
+				if (this.#selectionAnimationCleanup === cleanup) {
+					this.#selectionAnimationCleanup = null
+				}
+			}
+			this.#selectionAnimationCleanup = cleanup
 
 			const nextStep = () => {
+				if (token !== this.#selectionAnimationToken) return
 				const isHighlighted = step % 2 === 0
 
 				if (isHighlighted) {
@@ -222,16 +253,21 @@ export class DropdownPanel {
 
 				step++
 				if (step <= totalSteps) {
-					setTimeout(nextStep, duration)
+					timers.push(setTimeout(nextStep, duration))
 				} else {
 					// Cleanup
-					$item.classList.remove('goo-select__option--flash')
-					$item.dataset.isChosen = ''
-					this.$container.dataset.isChoosingOption = ''
+					settled = true
+					cleanup()
 					resolve()
 				}
 			}
 
+			const cancel = cleanup
+			this.#selectionAnimationCleanup = () => {
+				if (settled) return
+				++this.#selectionAnimationToken
+				cancel()
+			}
 			nextStep()
 		})
 	}
@@ -257,7 +293,7 @@ export class DropdownPanel {
 	 * @param id - id.
 	 */
 	findOptionById(id: string): GooSelectOption | null {
-		return this.#findOptionByIdRecursive(this.#options, id)
+		return findOptionById(this.#options, id)
 	}
 
 	/**
@@ -297,7 +333,7 @@ export class DropdownPanel {
 	}
 
 	/**
-	 * Symbol symbol used by Goo controls.
+	 * Apply hover behavior for an option element.
 	 * @param item - item.
 	 */
 	hoverOptionElement(item: HTMLElement): void {
@@ -361,7 +397,10 @@ export class DropdownPanel {
 	 * Clean up resources.
 	 */
 	destroy() {
+		this.#cancelSelectionAnimation()
 		this.closeSubmenu()
+		this.$container.removeEventListener('mouseenter', this.#handleContainerMouseEnter)
+		this.$container.removeEventListener('mouseleave', this.#handleContainerMouseLeave)
 		clearTimeout(this.#submenuTimer!)
 		clearTimeout(this.#typeaheadTimer!)
 		this.#typeaheadBuffer = ''
@@ -372,17 +411,6 @@ export class DropdownPanel {
 	// --------------------------------------------------------------------------
 	// Private Methods
 	// --------------------------------------------------------------------------
-
-	#findOptionByIdRecursive(opts: GooSelectOption[], id: string): GooSelectOption | null {
-		for (const opt of opts) {
-			if (opt.id === id) return opt
-			if (opt.options) {
-				const found = this.#findOptionByIdRecursive(opt.options, id)
-				if (found) return found
-			}
-		}
-		return null
-	}
 
 	#renderOptionsList(opts: GooSelectOption[], container: HTMLElement, depth = 0) {
 		for (const opt of opts) {
@@ -435,7 +463,8 @@ export class DropdownPanel {
 			'goo-select__option',
 			isDisabled ? 'goo-select__option--disabled' : '',
 			isSelected ? 'goo-select__option--selected' : '',
-			isSubmenu ? 'goo-select__option--submenu' : ''
+			isSubmenu ? 'goo-select__option--submenu' : '',
+			opt.tone === 'danger' ? 'goo-select__option--danger' : ''
 		]
 			.filter(Boolean)
 			.join(' ')
@@ -551,10 +580,16 @@ export class DropdownPanel {
 		this.#submenuTimer = null
 	}
 
+	#cancelSelectionAnimation(): void {
+		this.#selectionAnimationCleanup?.()
+		this.#selectionAnimationCleanup = null
+	}
+
 	#scheduleSubmenuClose(relatedTarget: EventTarget | null = null): void {
 		if (this.#isInsideMenuBoundary(relatedTarget)) return
 
 		this.#cancelSubmenuTimer()
+		this.clearHovered()
 		this.#submenuTimer = setTimeout(() => {
 			this.closeSubmenu()
 		}, SUBMENU_DELAY)

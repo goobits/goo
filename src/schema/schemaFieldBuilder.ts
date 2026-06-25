@@ -280,8 +280,7 @@ export function buildControllerOptions(
 
 function isGooControlOptionValue(value: unknown): value is GooControlOptionValue {
 	return (
-		value === null ||
-		value === undefined ||
+		value == null ||
 		typeof value === 'string' ||
 		typeof value === 'number' ||
 		typeof value === 'boolean' ||

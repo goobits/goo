@@ -40,13 +40,20 @@ export function createSelectField(options: SelectFieldOptions = {}): GooSelectEl
 	field.className = 'goo-select-field'
 	let currentValue = options.value ?? ''
 	let instance: MountedControl | null = null
+	let destroyed = false
 
-	function render(): void {
+	function unmountSelect(): void {
 		if (instance) {
 			unmount(instance)
 			instance = null
-			field.replaceChildren()
 		}
+		field.replaceChildren()
+	}
+
+	function render(): void {
+		if (destroyed) return
+
+		unmountSelect()
 
 		instance = mount(GooSelect, {
 			target: field,
@@ -66,7 +73,7 @@ export function createSelectField(options: SelectFieldOptions = {}): GooSelectEl
 				id: options.id,
 				class: options.class ?? options.className,
 				style: options.style,
-				onchange: (value: string, data: GooSelectEventData) => {
+				onchange: (value, data) => {
 					currentValue = value
 					options.onchange?.(value, data)
 				},
@@ -89,57 +96,76 @@ export function createSelectField(options: SelectFieldOptions = {}): GooSelectEl
 	})
 
 	field.setValue = (value, { silent = false } = {}) => {
+		if (destroyed) return
 		currentValue = value
-		;(component().setValue as ((value: string, opts?: { silent?: boolean }) => void) | undefined)?.(
-			value,
-			{ silent }
-		)
+		const setValue = component().setValue as ((value: string, opts?: { silent?: boolean }) => void) | undefined
+		if (setValue) {
+			setValue(value, { silent })
+		} else {
+			render()
+		}
 	}
 	field.getValue = () => currentValue
-	field.isOpen = () => (component().isOpen as (() => boolean) | undefined)?.() ?? false
-	field.getHoveredOptionId = () =>
-		(component().getHoveredOptionId as (() => string | null) | undefined)?.() ?? null
-	field.getOptions = () =>
-		(component().getOptions as (() => GooSelectOption[]) | undefined)?.() ??
-		normalizeOptions(options.options)
-	field.setOptions = (nextOptions) => {
+	field.isOpen = () => !destroyed && ((component().isOpen as (() => boolean) | undefined)?.() ?? false)
+	field.getHoveredOptionId = () => destroyed ? null : (component().getHoveredOptionId as (() => string | null) | undefined)?.() ?? null
+	field.getOptions = () => destroyed ? normalizeOptions(options.options) : (component().getOptions as (() => GooSelectOption[]) | undefined)?.() ?? normalizeOptions(options.options)
+	field.setOptions = nextOptions => {
+		if (destroyed) return
 		options.options = nextOptions
-		;(component().setOptions as ((nextOptions: typeof options.options) => void) | undefined)?.(
-			nextOptions
-		)
+		const setOptions = component().setOptions as ((nextOptions: typeof options.options) => void) | undefined
+		if (setOptions) {
+			setOptions(nextOptions)
+		} else {
+			render()
+		}
 	}
-	field.setTriggerIcon = (icon) => {
+	field.setTriggerIcon = icon => {
+		if (destroyed) return
 		options.triggerIcon = icon ?? undefined
-		;(
-			component().setTriggerIcon as ((icon: typeof options.triggerIcon | null) => void) | undefined
-		)?.(icon)
+		const setTriggerIcon = component().setTriggerIcon as ((icon: typeof options.triggerIcon | null) => void) | undefined
+		if (setTriggerIcon) {
+			setTriggerIcon(icon)
+		} else {
+			render()
+		}
 	}
 	field.open = (openOptions?: GooSelectOpenOptions) => {
-		return (
-			(component().open as ((openOptions?: GooSelectOpenOptions) => boolean) | undefined)?.(
-				openOptions
-			) ?? false
-		)
+		if (destroyed) return false
+		return (component().open as ((openOptions?: GooSelectOpenOptions) => boolean) | undefined)?.(openOptions) ?? false
+	}
+	field.updatePosition = (openOptions?: GooSelectOpenOptions) => {
+		if (destroyed) return false
+		return (component().updatePosition as ((openOptions?: GooSelectOpenOptions) => boolean) | undefined)?.(openOptions) ?? false
 	}
 	field.close = (closeOptions = {}) => {
-		;(component().close as ((closeOptions?: { quiet?: boolean }) => void) | undefined)?.(
-			closeOptions
-		)
+		if (destroyed) return
+		;(component().close as ((closeOptions?: { quiet?: boolean }) => void) | undefined)?.(closeOptions)
 	}
 	field.toggle = () => {
+		if (destroyed) return
 		;(component().toggle as (() => void) | undefined)?.()
 	}
 	field.enable = () => {
+		if (destroyed) return
 		;(component().enable as (() => void) | undefined)?.()
 	}
 	field.disable = () => {
+		if (destroyed) return
 		;(component().disable as (() => void) | undefined)?.()
 	}
 	field.focus = () => {
+		if (destroyed) return
 		;(component().focus as (() => void) | undefined)?.()
 	}
 	field.blur = () => {
+		if (destroyed) return
 		;(component().blur as (() => void) | undefined)?.()
+	}
+	field.destroy = () => {
+		if (destroyed) return
+		destroyed = true
+		unmountSelect()
+		field.remove()
 	}
 
 	render()

@@ -116,7 +116,7 @@ export function getByPath(obj: Record<string, unknown>, path: string): unknown {
 
 	let current: unknown = obj
 	for (const segment of segments) {
-		if (current === null || current === undefined) return undefined
+		if (current == null) return undefined
 		const { key } = parseSegment(segment)
 		current = (current as Record<string | number, unknown>)[key]
 	}
@@ -145,7 +145,7 @@ export function setByPath(obj: Record<string, unknown>, path: string, value: unk
 		const segment = segments[i]
 		const { key } = parseSegment(segment)
 
-		if (current[key] === null || current[key] === undefined) {
+		if (current[key] == null) {
 			// Look ahead to determine if we should create array or object.
 			// Use an index check so an empty next segment isn't skipped via `||`.
 			const nextSegment = i + 1 < segments.length ? segments[i + 1] : lastSegment
@@ -188,14 +188,14 @@ export function resolvePath(
 
 	let object: unknown = root
 	for (const segment of segments) {
-		if (object === null || object === undefined) {
+		if (object == null) {
 			return null
 		}
 		const { key } = parseSegment(segment)
 		object = (object as Record<string | number, unknown>)[key]
 	}
 
-	if (object === null || object === undefined) {
+	if (object == null) {
 		return null
 	}
 

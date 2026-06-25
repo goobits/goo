@@ -44,6 +44,7 @@ export function createGooFloatingWindow(options: GooFloatingWindowOptions): GooF
 	let containmentElement = containment
 	let dragHandler: GooPointerDragHandle | undefined
 	let ready = Promise.resolve()
+	let destroyed = false
 
 	element.classList.add('goo-floating-window')
 	element.dataset.gooFloatingWindow = id
@@ -139,7 +140,10 @@ export function createGooFloatingWindow(options: GooFloatingWindowOptions): GooF
 	}
 
 	function destroy(): void {
+		if (destroyed) return
+		destroyed = true
 		dragHandler?.detach?.()
+		dragHandler = undefined
 		unfocus()
 		element.classList.remove('goo-floating-window', 'goo-floating-window--dragging', 'opened')
 		delete element.dataset.gooFloatingWindow
@@ -164,6 +168,7 @@ export function createGooFloatingWindow(options: GooFloatingWindowOptions): GooF
 	}
 
 	function focus(): void {
+		if (destroyed) return
 		const index = ++zIndexGlobal
 		zIndexGlobal = Math.max(zIndexGlobal, index)
 		settings.index = index
@@ -187,6 +192,7 @@ export function createGooFloatingWindow(options: GooFloatingWindowOptions): GooF
 	}
 
 	function hide(): boolean {
+		if (destroyed) return false
 		if (settings.closeable === false) return false
 		settings.display = 'none'
 		element.classList.remove('opened')
@@ -197,16 +203,19 @@ export function createGooFloatingWindow(options: GooFloatingWindowOptions): GooF
 	}
 
 	function isOpen(): boolean {
+		if (destroyed) return false
 		return String(settings.display).toLowerCase() === 'block'
 			&& element.classList.contains('opened')
 			&& element.style.display !== 'none'
 	}
 
 	function record(): void {
+		if (destroyed) return
 		void storage?.set(id, toPlainSettings(settings))
 	}
 
 	function recordFromElement(): void {
+		if (destroyed) return
 		const rect = element.getBoundingClientRect()
 		const containmentRect = getContainmentRect()
 
@@ -226,6 +235,7 @@ export function createGooFloatingWindow(options: GooFloatingWindowOptions): GooF
 	}
 
 	function restore(): void {
+		if (destroyed) return
 		if (String(settings.display).toLowerCase() !== 'block') {
 			element.style.display = 'none'
 			element.classList.remove('opened')
@@ -270,6 +280,7 @@ export function createGooFloatingWindow(options: GooFloatingWindowOptions): GooF
 
 	async function restoreFromStorage(): Promise<void> {
 		const persisted = normalizeFloatingWindowSettings(await storage?.get(id))
+		if (destroyed) return
 		if (persisted) {
 			delete persisted.closeable
 			Object.assign(settings, persisted)
@@ -278,6 +289,7 @@ export function createGooFloatingWindow(options: GooFloatingWindowOptions): GooF
 	}
 
 	function setPosition(position: GooFloatingWindowPosition): void {
+		if (destroyed) return
 		const [ nextVAlign, nextHAlign ] = position.split(' ') as ['top' | 'bottom', 'left' | 'right']
 		if (settings.hAlign !== nextHAlign) {
 			flipHorizontalAnchor()
@@ -289,17 +301,20 @@ export function createGooFloatingWindow(options: GooFloatingWindowOptions): GooF
 	}
 
 	function setContainment(nextContainment?: HTMLElement): void {
+		if (destroyed) return
 		containmentElement = nextContainment
 		restore()
 	}
 
 	function show(): void {
+		if (destroyed) return
 		settings.display = 'block'
 		focus()
 		restore()
 	}
 
 	function toggle(): void {
+		if (destroyed) return
 		if (isOpen()) {
 			hide()
 		} else {

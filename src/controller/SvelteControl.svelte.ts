@@ -1,4 +1,5 @@
-import { mount, type Component, unmount } from 'svelte'
+import type { Component } from 'svelte'
+import { mount, unmount } from 'svelte'
 
 /** Options passed to a Svelte control schema. */
 export type ControlSchemaOptions = Record<string, unknown>

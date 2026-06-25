@@ -65,7 +65,7 @@ sketch-line-break {
 
 .goo-quote {
 	background: color-mix(in srgb, var(--goo-theme-fg) 15%, var(--goo-theme-bg));
-	border-radius: var(--goo-theme-radius-md, 0.5rem);
+	border-radius: var(--goo-theme-radius-md, 0.25rem);
 	clear: both;
 	cursor: default;
 	display: block;
@@ -95,7 +95,7 @@ sketch-title a {
 sketch-label-group {
 	display: block;
 	border: 2px solid var(--goo-theme-bg);
-	border-radius: var(--goo-theme-radius-md, 0.5rem);
+	border-radius: var(--goo-theme-radius-md, 0.25rem);
 }
 
 sketch-label-group sketch-label:first-child {
@@ -126,7 +126,7 @@ sketch-label[data-tag='textarea'] {
 
 sketch-label input,
 sketch-label textarea {
-	border-radius: var(--goo-theme-radius-md, 0.5rem);
+	border-radius: var(--goo-theme-radius-md, 0.25rem);
 	padding: 5px 7px;
 }
 

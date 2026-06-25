@@ -1,3 +1,5 @@
+import { createLifecycleBag } from '../support/utils/lifecycleBag.ts'
+
 /**
  * Rect XYWH.
  */
@@ -46,6 +48,11 @@ export function rectIntersects(a: RectXYWH, b: RectXYWH): boolean {
  * @param opts - opts.
  */
 export function gridMarquee(node: HTMLElement, opts: GridMarqueeOptions) {
+	const lifecycle = createLifecycleBag()
+	let trackingLifecycle = createLifecycleBag()
+	let activeLifecycle = createLifecycleBag()
+	let cleanupTrackingLifecycle = lifecycle.add(trackingLifecycle)
+	let cleanupActiveLifecycle = lifecycle.add(activeLifecycle)
 	let tracking = false
 	let active = false
 	let dragged = false
@@ -77,9 +84,10 @@ export function gridMarquee(node: HTMLElement, opts: GridMarqueeOptions) {
 		mode = e.shiftKey || e.metaKey || e.ctrlKey ? 'additive' : 'replace'
 		initial = opts.getInitialSelection()
 
-		document.addEventListener('pointermove', trackMove)
-		document.addEventListener('pointerup', trackingEnd, true)
-		document.addEventListener('pointercancel', trackingEnd, true)
+		resetTrackingLifecycle()
+		trackingLifecycle.listen(document, 'pointermove', trackMove)
+		trackingLifecycle.listen(document, 'pointerup', trackingEnd, true)
+		trackingLifecycle.listen(document, 'pointercancel', trackingEnd, true)
 	}
 
 	function trackMove(e: PointerEvent) {
@@ -99,13 +107,12 @@ export function gridMarquee(node: HTMLElement, opts: GridMarqueeOptions) {
 	function tearDownTracking() {
 		if (!tracking) return
 		tracking = false
-		document.removeEventListener('pointermove', trackMove)
-		document.removeEventListener('pointerup', trackingEnd, true)
-		document.removeEventListener('pointercancel', trackingEnd, true)
+		cleanupTrackingLifecycle()
 	}
 
 	function promote(e: PointerEvent) {
 		tearDownTracking()
+		resetActiveLifecycle()
 		active = true
 		dragged = true
 		node.setPointerCapture?.(e.pointerId)
@@ -120,13 +127,15 @@ export function gridMarquee(node: HTMLElement, opts: GridMarqueeOptions) {
 		overlay.style.pointerEvents = 'none'
 		node.appendChild(overlay)
 
-		node.addEventListener('pointermove', move)
-		node.addEventListener('pointerup', end)
-		node.addEventListener('pointercancel', end)
+		activeLifecycle.listen(node, 'pointermove', move)
+		activeLifecycle.listen(node, 'pointerup', end)
+		activeLifecycle.listen(node, 'pointercancel', end)
 
 		readItemsIntoCache()
 		scrollAncestor = findScrollableAncestor(node)
-		scrollAncestor?.addEventListener('scroll', invalidateItemCache, { passive: true })
+		if (scrollAncestor) {
+			activeLifecycle.listen(scrollAncestor, 'scroll', invalidateItemCache, { passive: true })
+		}
 
 		pendingX = e.clientX
 		pendingY = e.clientY
@@ -190,35 +199,42 @@ export function gridMarquee(node: HTMLElement, opts: GridMarqueeOptions) {
 		if (e && node.hasPointerCapture?.(e.pointerId)) node.releasePointerCapture(e.pointerId)
 		overlay?.remove()
 		overlay = null
-		node.removeEventListener('pointermove', move)
-		node.removeEventListener('pointerup', end)
-		node.removeEventListener('pointercancel', end)
-		scrollAncestor?.removeEventListener('scroll', invalidateItemCache)
+		cleanupActiveLifecycle()
 		scrollAncestor = null
 		cachedItems = null
 
 		if (dragged) {
-			const cleanup = () => {
-				window.removeEventListener('click', block, true)
-				clearTimeout(timer)
-			}
+			const clickBlockLifecycle = createLifecycleBag()
+			const cleanupClickBlockLifecycle = lifecycle.add(clickBlockLifecycle)
 			const block = (ev: MouseEvent) => {
 				ev.stopPropagation()
-				cleanup()
+				cleanupClickBlockLifecycle()
 			}
-			const timer = setTimeout(cleanup, 50)
-			window.addEventListener('click', block, true)
+			clickBlockLifecycle.listen(window, 'click', block, true)
+			clickBlockLifecycle.timeout(cleanupClickBlockLifecycle, 50)
 		}
 	}
 
-	node.addEventListener('pointerdown', pointerdown)
+	lifecycle.listen(node, 'pointerdown', pointerdown)
 
 	return {
 		destroy() {
-			node.removeEventListener('pointerdown', pointerdown)
 			tearDownTracking()
 			end()
+			lifecycle.destroy()
 		}
+	}
+
+	function resetTrackingLifecycle(): void {
+		cleanupTrackingLifecycle()
+		trackingLifecycle = createLifecycleBag()
+		cleanupTrackingLifecycle = lifecycle.add(trackingLifecycle)
+	}
+
+	function resetActiveLifecycle(): void {
+		cleanupActiveLifecycle()
+		activeLifecycle = createLifecycleBag()
+		cleanupActiveLifecycle = lifecycle.add(activeLifecycle)
 	}
 }
 

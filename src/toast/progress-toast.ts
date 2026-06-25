@@ -80,12 +80,14 @@ export function createGooProgressToast({
 			return toast
 		},
 		cancel() {
+			if (destroyed) return
 			if (setPhase(PHASES.canceled)) {
 				toast.dispatchEvent(new CustomEvent('cancel'))
 				scheduleClose()
 			}
 		},
 		complete() {
+			if (destroyed) return
 			if (setPhase(PHASES.completed)) {
 				toast.dispatchEvent(new CustomEvent('complete'))
 				scheduleClose()
@@ -95,16 +97,19 @@ export function createGooProgressToast({
 			destroy()
 		},
 		error() {
+			if (destroyed) return
 			if (setPhase(PHASES.error)) {
 				toast.dispatchEvent(new CustomEvent('error'))
 				scheduleClose()
 			}
 		},
 		setMessage(message) {
+			if (destroyed) return
 			resolvedMessages[state.phase] = message
 			render()
 		},
 		setProgress(value) {
+			if (destroyed) return
 			state.progress = Math.min(Math.max(value, 0), 1)
 			if (state.progress === 1) {
 				handle.complete()
@@ -121,6 +126,7 @@ export function createGooProgressToast({
 	return handle
 
 	function setPhase(phase: ProgressToastPhase): boolean {
+		if (destroyed) return false
 		const canTransition = state.phase === PHASES.inProgress
 		if (!canTransition) return false
 
@@ -131,6 +137,7 @@ export function createGooProgressToast({
 	}
 
 	function scheduleClose(): void {
+		if (destroyed) return
 		if (closeTimer !== undefined) return
 		closeTimer = window.setTimeout(destroy, closeDelay)
 	}
@@ -148,6 +155,7 @@ export function createGooProgressToast({
 	}
 
 	function render(): void {
+		if (destroyed) return
 		setContent(status, resolvedMessages[state.phase])
 		setContent(cancel, cancelButton ?? '')
 		cancel.hidden = !cancelButton || state.phase !== PHASES.inProgress

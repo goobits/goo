@@ -1,30 +1,14 @@
-import type {
-	GooSelectActionContext,
-	GooSelectOpenOptions,
-	GooSelectOptionsInput
-} from '../select/index.ts'
-import {
-	createGooContextMenu,
-	type GooContextMenuElement,
-	type GooContextMenuOption
-} from './gooContextMenu.ts'
+import type { GooPopoutAt } from '../popout/index.ts'
+import { findOptionById } from '../select/_normalizeOptions.ts'
+import type { GooSelectActionContext, GooSelectOpenOptions, GooSelectOptionsInput } from '../select/index.ts'
+import { createLifecycleBag } from '../support/utils/lifecycleBag.ts'
+import { createGooContextMenu, type GooContextMenuElement, type GooContextMenuOption } from './GooContextMenu.ts'
 
-/** Managed Goo Context Menu Open At typed model for managed context menus. */
-export type ManagedGooContextMenuOpenAt = HTMLElement | { x: number; y: number }
-/** Managed Goo Context Menu Items typed model for managed context menus. */
-export type ManagedGooContextMenuItems =
-	| ManagedGooContextMenuItem[]
-	| Record<string, ManagedGooContextMenuObjectItem | string | number>
-/** Managed Goo Context Menu Item Predicate typed model for managed context menus. */
-export type ManagedGooContextMenuItemPredicate = (
-	this: ManagedGooContextMenu,
-	id: string
-) => boolean
-/** Managed Goo Context Menu Item Action typed model for managed context menus. */
+export type ManagedGooContextMenuOpenAt = HTMLElement | GooPopoutAt
+export type ManagedGooContextMenuItems = ManagedGooContextMenuItem[] | Record<string, ManagedGooContextMenuObjectItem | string | number>
+export type ManagedGooContextMenuItemPredicate = (this: ManagedGooContextMenu, id: string) => boolean
 export type ManagedGooContextMenuItemAction = (this: ManagedGooContextMenu, id: string) => void
-/** Managed Goo Context Menu Event Name typed model for managed context menus. */
 export type ManagedGooContextMenuEventName = 'open' | 'close'
-/** Managed Goo Context Menu Event Handler typed model for managed context menus. */
 export type ManagedGooContextMenuEventHandler = (this: ManagedGooContextMenu) => void
 
 /** Object item accepted by the managed Goo context menu API before normalization. */
@@ -52,12 +36,10 @@ export type ManagedGooContextMenu = {
 	readonly id: string
 	readonly menuOptions: GooContextMenuOption[]
 	close(options?: { quiet?: boolean }): void
+	destroy(): void
 	getValue(): string
 	isOpen(): boolean
-	on(
-		eventName: ManagedGooContextMenuEventName,
-		handler: ManagedGooContextMenuEventHandler
-	): () => void
+	on(eventName: ManagedGooContextMenuEventName, handler: ManagedGooContextMenuEventHandler): () => void
 	open(options?: ManagedGooContextMenuOpenOptions): boolean
 	setOptions(options: GooSelectOptionsInput): void
 	setValue(value: string | number, options?: { silent?: boolean }): void
@@ -70,7 +52,7 @@ export interface ManagedGooContextMenuOptions {
 	enableKeyboard?: boolean
 	id?: string
 	items?: ManagedGooContextMenuItems
-	menu?: NonNullable<Parameters<typeof createGooContextMenu>[0]>['menu']
+	menu?: Parameters<typeof createGooContextMenu>[0]['menu']
 	onChange?: (this: ManagedGooContextMenu, value: string) => void
 	onClose?: (this: ManagedGooContextMenu) => void
 	onOpen?: (this: ManagedGooContextMenu) => void
@@ -136,7 +118,8 @@ function register(
 	items: ManagedGooContextMenuItems,
 	options: ManagedGooContextMenuOptions = {}
 ): ManagedGooContextMenu {
-	return (registeredMenus[id] = createRegisteredContextMenu(id, items, { ...options, id }))
+	registeredMenus[id]?.destroy()
+	return registeredMenus[id] = createRegisteredContextMenu(id, items, { ...options, id })
 }
 
 function get(id: string): ManagedGooContextMenu | undefined {
@@ -155,12 +138,14 @@ function isOpen(): boolean {
 	return contextMenuState.opened
 }
 
-function open(
-	idOrMenu: ManagedGooContextMenu | string,
-	options: ManagedGooContextMenuOpenOptions = {}
-): void {
+function open(idOrMenu: ManagedGooContextMenu | string, options: ManagedGooContextMenuOpenOptions = {}): void {
 	const contextMenu = typeof idOrMenu === 'string' ? get(idOrMenu) : idOrMenu
-	if (!contextMenu || contextMenuState.currentMenu?.id === contextMenu.id) {
+	if (!contextMenu) {
+		return
+	}
+
+	if (contextMenu.isOpen() || contextMenuState.currentMenu?.id === contextMenu.id) {
+		contextMenu.open(options)
 		return
 	}
 
@@ -182,17 +167,14 @@ function createRegisteredContextMenu(
 	items: ManagedGooContextMenuOptions['items'],
 	config: ManagedGooContextMenuOptions = {}
 ): ManagedGooContextMenu {
-	const listeners = new Map<
-		ManagedGooContextMenuEventName,
-		Set<ManagedGooContextMenuEventHandler>
-	>()
+	const listeners = new Map<ManagedGooContextMenuEventName, Set<ManagedGooContextMenuEventHandler>>()
 	const handleRef: { current?: ManagedGooContextMenu } = {}
 	const menuOptions = normalizeContextMenuItems(items, () => getManagedMenuHandle(handleRef))
 	const contextMenu = createGooContextMenu({
 		actionContext: config.actionContext,
-		className: [id, 'goo-managed-context-menu'].join(' '),
+		className: [ id, 'goo-managed-context-menu' ].join(' '),
 		enableKeyboard: config.enableKeyboard,
-		id: `goo-contextmenu-${id}`,
+		id: `goo-contextmenu-${ id }`,
 		menu: {
 			arrow: config.showPopoutArrow ?? true,
 			backdrop: config.showPopoutBackdrop ?? false,
@@ -206,17 +188,39 @@ function createRegisteredContextMenu(
 	})
 	let onDestroyCallback: (() => void) | undefined
 	let isOpen = false
+	let destroyed = false
+	const lifecycle = createLifecycleBag()
 	const handle: ManagedGooContextMenu = {
 		element: contextMenu,
 		id,
 		menuOptions,
 		close(options = {}) {
+			if (destroyed) return
 			contextMenu.close(options)
 			markClosed()
+		},
+		destroy() {
+			if (destroyed) return
+			destroyed = true
+			lifecycle.destroy()
+			listeners.clear()
+			onDestroyCallback = undefined
+			if (contextMenuState.currentMenu === handle) {
+				contextMenuState.currentMenu = undefined
+				contextMenuState.id = undefined
+				contextMenuState.opened = false
+			}
+			isOpen = false
+			contextMenu.close({ quiet: true })
+			contextMenu.destroy()
+			if (registeredMenus[id] === handle) {
+				delete registeredMenus[id]
+			}
 		},
 		getValue: () => contextMenu.getValue(),
 		isOpen: () => contextMenu.isOpen(),
 		on(eventName, handler) {
+			if (destroyed) return () => undefined
 			const handlers = listeners.get(eventName) || new Set()
 			handlers.add(handler)
 			listeners.set(eventName, handlers)
@@ -226,34 +230,40 @@ function createRegisteredContextMenu(
 			}
 		},
 		open(options = {}) {
+			if (destroyed) return false
 			onDestroyCallback = options.onDestroy || options.onClose
 			return contextMenu.open({
 				...options,
 				actionContext: options.actionContext || config.actionContext
 			})
 		},
-		setOptions: (options) => contextMenu.setOptions(options),
+		setOptions: options => {
+			if (destroyed) return
+			contextMenu.setOptions(options)
+		},
 		setValue(value, options = {}) {
+			if (destroyed) return
 			const stringValue = String(value)
-			const option = findContextMenuOption(menuOptions, stringValue)
+			const option = findOptionById(menuOptions, stringValue)
 			option?.onChoose?.(stringValue)
 			contextMenu.setValue(stringValue, options)
 		}
 	}
 	handleRef.current = handle
 
-	contextMenu.addEventListener('change', (event) => {
-		const value =
-			(event as CustomEvent<{ value?: string }>).detail?.value ?? contextMenu.getValue?.()
+	const handleChange = (event: Event) => {
+		const value = (event as CustomEvent<{ value?: string }>).detail?.value ?? contextMenu.getValue?.()
 		config.onChange?.call(handle, String(value))
 		markClosed()
-	})
-	contextMenu.addEventListener('open', markOpen)
-	contextMenu.addEventListener('close', markClosed)
+	}
+	lifecycle.listen(contextMenu, 'change', handleChange)
+	lifecycle.listen(contextMenu, 'open', markOpen)
+	lifecycle.listen(contextMenu, 'close', markClosed)
 
 	return handle
 
 	function markOpen(): void {
+		if (destroyed) return
 		if (isOpen) return
 
 		isOpen = true
@@ -265,6 +275,7 @@ function createRegisteredContextMenu(
 	}
 
 	function markClosed(): void {
+		if (destroyed) return
 		if (!isOpen && !contextMenuState.opened) return
 
 		isOpen = false
@@ -285,9 +296,7 @@ function createRegisteredContextMenu(
 	}
 }
 
-function getManagedMenuHandle(handleRef: {
-	current?: ManagedGooContextMenu
-}): ManagedGooContextMenu {
+function getManagedMenuHandle(handleRef: { current?: ManagedGooContextMenu }): ManagedGooContextMenu {
 	if (!handleRef.current) {
 		throw new Error('Managed Goo context menu handle is not ready.')
 	}
@@ -303,23 +312,17 @@ function normalizeContextMenuItems(
 	}
 
 	if (!Array.isArray(items) && typeof items === 'object') {
-		return Object.entries(items)
-			.map(([itemId, label]) =>
-				isManagedContextMenuObjectItem(label)
-					? normalizeContextMenuItem({ id: itemId, ...label }, getMenu)
-					: normalizeContextMenuItem({ id: itemId, label }, getMenu)
-			)
-			.filter(Boolean) as GooContextMenuOption[]
+		return Object.entries(items).map(([ itemId, label ]) => (
+			isManagedContextMenuObjectItem(label)
+				? normalizeContextMenuItem({ id: itemId, ...label }, getMenu)
+				: normalizeContextMenuItem({ id: itemId, label }, getMenu)
+		)).filter(Boolean) as GooContextMenuOption[]
 	}
 
-	return items
-		.map((item) => normalizeContextMenuItem(item, getMenu))
-		.filter(Boolean) as GooContextMenuOption[]
+	return items.map(item => normalizeContextMenuItem(item, getMenu)).filter(Boolean) as GooContextMenuOption[]
 }
 
-function isManagedContextMenuObjectItem(
-	value: ManagedGooContextMenuObjectItem | string | number
-): value is ManagedGooContextMenuObjectItem {
+function isManagedContextMenuObjectItem(value: ManagedGooContextMenuObjectItem | string | number): value is ManagedGooContextMenuObjectItem {
 	return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
@@ -356,10 +359,7 @@ function normalizeContextMenuItem(
 	}
 
 	if (itemRecord.options) {
-		option.options = normalizeContextMenuItems(
-			itemRecord.options as ManagedGooContextMenuOptions['items'],
-			getMenu
-		)
+		option.options = normalizeContextMenuItems(itemRecord.options as ManagedGooContextMenuOptions['items'], getMenu)
 	}
 
 	return option
@@ -380,7 +380,7 @@ function normalizeAction(
 	id: string
 ): GooContextMenuOption['onChoose'] {
 	if (!action) return undefined
-	return function (this: GooContextMenuElement | ManagedGooContextMenu, value?: string) {
+	return function(value) {
 		const menu = getMenu()
 		const context = this && this !== menu.element ? this : menu
 		return action.call(context as ManagedGooContextMenu, value || id)
@@ -405,19 +405,4 @@ function normalizeLabel(label: unknown): GooContextMenuOption['label'] {
 	}
 
 	return String(label ?? '')
-}
-
-function findContextMenuOption(
-	options: GooContextMenuOption[],
-	value: string
-): GooContextMenuOption | undefined {
-	for (const option of options) {
-		if (option.id === value) return option
-		if (option.options) {
-			const match = findContextMenuOption(option.options, value)
-			if (match) return match
-		}
-	}
-
-	return undefined
 }

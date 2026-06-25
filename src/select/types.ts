@@ -5,7 +5,7 @@
 
 import type { Snippet } from 'svelte'
 
-import type { GooPopoutOptions } from '../popout/popout.ts'
+import type { GooPopoutAt, GooPopoutOptions } from '../popout/popout.ts'
 import type { GooForwardedAttributes } from '../support/types/forwardedAttributes.ts'
 
 /** Host-owned action context passed through menu/select actions. */
@@ -24,6 +24,8 @@ export interface GooSelectOption {
 	type?: 'option' | 'divider' | 'optgroup' | 'submenu'
 	label?: GooSelectRenderable
 	id?: string
+	/** Visual tone. `'danger'` styles the row as destructive (negative color). */
+	tone?: 'danger'
 	icon?: GooSelectRenderable
 	shortcut?: GooSelectShortcut
 	isDisabled?: boolean | (() => boolean)
@@ -161,6 +163,9 @@ export interface GooSelectEventData {
 /** Native root element bound by `GooSelect` for imperative updates. */
 export type GooSelectElement = HTMLDivElement & {
 
+	/** Destroy the mounted select and remove it from the DOM. */
+	destroy(): void
+
 	/** Current option id. */
 	value: string
 
@@ -174,6 +179,9 @@ export type GooSelectElement = HTMLDivElement & {
 
 	/** Whether the dropdown is open. */
 	isOpen(): boolean
+
+	/** Reposition the open dropdown. */
+	updatePosition(options?: GooSelectOpenOptions): boolean
 
 	/** Current hovered option id, if the menu is open. */
 	getHoveredOptionId(): string | null
@@ -218,7 +226,7 @@ export type GooSelectElement = HTMLDivElement & {
  */
 export interface GooSelectOpenOptions {
 	autoFocus?: boolean
-	at?: HTMLElement | { x: number; y: number }
+	at?: HTMLElement | GooPopoutAt
 	clickToClose?: GooPopoutOptions['clickToClose']
 	keepWithin?: { element?: HTMLElement; margin?: number }
 	parentElement?: HTMLElement
@@ -229,4 +237,7 @@ export interface GooSelectOpenOptions {
 
 	/** Override the popout offset. */
 	offset?: { x?: number; y?: number }
+
+	/** Extra class names appended to this open call's popout. */
+	popoutClassName?: string
 }

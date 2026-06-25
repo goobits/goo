@@ -1,11 +1,15 @@
 import { fireEvent, render } from '@testing-library/svelte'
 import { tick } from 'svelte'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { pointerEvent } from '../../__tests__/_pointerEvents.ts'
 import GooCheckbox from '../GooCheckbox.svelte'
 
 describe('GooCheckbox', () => {
+	afterEach(() => {
+		vi.useRealTimers()
+	})
+
 	it('toggles without entering the transitionless dragging state', async() => {
 		const onchange = vi.fn()
 		const { container } = render(GooCheckbox, {
@@ -61,6 +65,23 @@ describe('GooCheckbox', () => {
 		expect(checkbox.releasePointerCapture).toHaveBeenCalledWith(12)
 		expect(checkbox.classList.contains('goo-checkbox--dragging')).toBe(false)
 		expect(thumb.style.left).toBe('')
+	})
+
+	it('clears pending drag settle timers when unmounted', () => {
+		vi.useFakeTimers()
+		const clearTimeoutSpy = vi.spyOn(window, 'clearTimeout')
+		const { container, unmount } = render(GooCheckbox)
+		const checkbox = container.querySelector<HTMLDivElement>('.goo-checkbox')!
+
+		checkbox.dispatchEvent(pointerEvent('pointerdown', { pointerId: 6, clientX: 0 }))
+		checkbox.dispatchEvent(pointerEvent('pointermove', { pointerId: 6, clientX: 8 }))
+		checkbox.dispatchEvent(pointerEvent('pointerup', { pointerId: 6, clientX: 8 }))
+
+		unmount()
+
+		expect(clearTimeoutSpy).toHaveBeenCalled()
+		clearTimeoutSpy.mockRestore()
+		vi.useRealTimers()
 	})
 
 	it('prevents default browser handling for custom keyboard activation', () => {

@@ -3,12 +3,14 @@ import { tick } from 'svelte'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { pointerEvent } from '../../__tests__/_pointerEvents.ts'
+import { DropdownPanel } from '../_dropdownPanel.ts'
 import GooSelect from '../GooSelect.svelte'
 import { createIcon } from '../selectDom.ts'
 import type { GooSelectElement } from '../types.ts'
 
 describe('GooSelect', () => {
 	afterEach(() => {
+		vi.useRealTimers()
 		document.querySelectorAll('.goo-popout').forEach(element => element.remove())
 	})
 
@@ -115,6 +117,27 @@ describe('GooSelect', () => {
 		expect(document.querySelectorAll('.goo-select__option').length).toBe(2)
 	})
 
+	it('appends open-time popout class names', async() => {
+		const { container } = render(GooSelect, {
+			props: {
+				value: 'a',
+				options: [
+					{ id: 'a', label: 'A' },
+					{ id: 'b', label: 'B' }
+				]
+			}
+		})
+		const element = container.querySelector<GooSelectElement>('.goo-select')!
+
+		expect(element.open({
+			autoFocus: false,
+			popoutClassName: 'sketch-contextual-menu-popout'
+		})).toBe(true)
+		await tick()
+
+		expect(document.querySelector('.goo-popout.goo-select-popout.sketch-contextual-menu-popout')).not.toBeNull()
+	})
+
 	it('does not render inline HTML icon strings', () => {
 		const icon = createIcon(' <img src=x onerror=alert(1)>')
 
@@ -139,6 +162,26 @@ describe('GooSelect', () => {
 		const selected = document.querySelector<HTMLElement>('.goo-select__option[data-id="b"]')!
 		expect(selected.getAttribute('aria-selected')).toBe('true')
 		expect(selected.querySelector('.goo-select__check svg')).not.toBeNull()
+	})
+
+	it('marks destructive options with the danger modifier', async() => {
+		const { container } = render(GooSelect, {
+			props: {
+				value: 'a',
+				options: [
+					{ id: 'a', label: 'A' },
+					{ id: 'remove', label: 'Delete', tone: 'danger' }
+				]
+			}
+		})
+		const element = container.querySelector<GooSelectElement>('.goo-select')!
+
+		expect(element.open({ autoFocus: false })).toBe(true)
+		await tick()
+
+		const danger = document.querySelector<HTMLElement>('.goo-select__option[data-id="remove"]')!
+		expect(danger.classList.contains('goo-select__option--danger')).toBe(true)
+		expect(document.querySelector<HTMLElement>('.goo-select__option[data-id="a"]')?.classList.contains('goo-select__option--danger')).toBe(false)
 	})
 
 	it('can hide the selection indicator without disabling option choice', async() => {
@@ -564,6 +607,9 @@ describe('GooSelect', () => {
 		expect(document.querySelector('.goo-popout.goo-select-submenu-popout')?.textContent).toContain('Rotate')
 
 		panel.dispatchEvent(new MouseEvent('mouseleave', { relatedTarget: document.body }))
+		expect(transformOption.classList.contains('goo-select__option--hovered')).toBe(false)
+		expect(panel.hasAttribute('aria-activedescendant')).toBe(false)
+		expect(element.getHoveredOptionId()).toBeNull()
 		await delay(520)
 
 		expect(document.querySelector('.goo-popout.goo-select-submenu-popout')).toBeNull()
@@ -628,7 +674,6 @@ describe('GooSelect', () => {
 			document.dispatchEvent(pointerEvent('pointerup', { pointerId: 3, clientX: 20, clientY: 48 }))
 			await tick()
 
-			expect(option.classList.contains('goo-select__option--hovered')).toBe(true)
 			expect(element.getValue()).toBe('b')
 		} finally {
 			document.elementFromPoint = originalElementFromPoint
@@ -714,6 +759,56 @@ describe('GooSelect', () => {
 		expect(submenu).not.toBeNull()
 		expect(submenu.textContent).toContain('Child')
 		expect(element.getHoveredOptionId()).toBe('more')
+	})
+
+	it('clears panel selection animation timers when destroyed', () => {
+		vi.useFakeTimers()
+		const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout')
+		const panel = new DropdownPanel({
+			showSelectionIndicator: true,
+			value: 'a',
+			getContext: () => null,
+			onSelect: vi.fn(),
+			onHoverChange: vi.fn()
+		})
+		const option = document.createElement('div')
+		panel.$container.appendChild(option)
+
+		void panel.animateSelection(option)
+		panel.destroy()
+
+		expect(clearTimeoutSpy).toHaveBeenCalled()
+		expect(panel.$container.dataset.isChoosingOption).toBe('')
+		expect(option.dataset.isChosen).toBe('')
+		expect(option.classList.contains('goo-select__option--flash')).toBe(false)
+	})
+
+	it('does not finish an animated selection after unmount', async() => {
+		vi.useFakeTimers()
+		const onchange = vi.fn()
+		const { container, unmount } = render(GooSelect, {
+			props: {
+				value: 'a',
+				options: [
+					{ id: 'a', label: 'A' },
+					{ id: 'b', label: 'B' }
+				],
+				onchange
+			}
+		})
+		const element = container.querySelector<GooSelectElement>('.goo-select')!
+
+		expect(element.open({ autoFocus: false })).toBe(true)
+		await tick()
+
+		const option = document.querySelector<HTMLElement>('.goo-select__option[data-id="b"]')!
+		option.dispatchEvent(pointerEvent('pointerup', { pointerId: 12 }))
+		await tick()
+		unmount()
+		vi.advanceTimersByTime(500)
+		await Promise.resolve()
+
+		expect(onchange).not.toHaveBeenCalled()
 	})
 
 	it('opens submenu options under a pen pointer dragged from the trigger', async() => {

@@ -3,8 +3,6 @@ import { mount, unmount } from 'svelte'
 import GooButtonGroup from './GooButtonGroup.svelte'
 import type { ButtonGroupOptions, GooButtonGroupLayout } from './types.ts'
 
-type ButtonGroupValue = string | string[] | null
-
 export type ButtonGroupFieldOptions = {
 	allowMultiple?: boolean
 	allowToggle?: boolean
@@ -12,37 +10,46 @@ export type ButtonGroupFieldOptions = {
 	className?: string
 	disabled?: boolean
 	layout?: GooButtonGroupLayout
-	onchange?: (value: ButtonGroupValue) => void
+	onchange?: (value: string | string[] | null) => void
 	options?: ButtonGroupOptions
 	size?: string
 	style?: string
 	tabIndex?: number
-	value?: ButtonGroupValue
+	value?: string | string[] | null
 }
 
-type MountedButtonGroup = ReturnType<typeof mount>
+type MountedButtonGroup = ReturnType<typeof mount> & {
+	getValue?: () => string | string[] | null
+	setValue?: (value: string | string[] | null) => void
+}
 
 export type ButtonGroupFieldElement = HTMLDivElement & {
-	getValue(): ButtonGroupValue
-	setValue(value: ButtonGroupValue): void
-	value: ButtonGroupValue
+	destroy(): void
+	getValue(): string | string[] | null
+	setValue(value: string | string[] | null): void
+	value: string | string[] | null
 }
 
-export function createButtonGroupField(
-	options: ButtonGroupFieldOptions = {}
-): ButtonGroupFieldElement {
+export function createButtonGroupField(options: ButtonGroupFieldOptions = {}): ButtonGroupFieldElement {
 	const field = document.createElement('div') as ButtonGroupFieldElement
 	field.className = 'goo-button-group-field'
 
 	let selectedValue = options.value ?? null
 	let instance: MountedButtonGroup | null = null
+	let destroyed = false
 
-	function render(): void {
+	function unmountButtonGroup(): void {
 		if (instance) {
 			unmount(instance)
 			instance = null
-			field.replaceChildren()
 		}
+		field.replaceChildren()
+	}
+
+	function render(): void {
+		if (destroyed) return
+
+		unmountButtonGroup()
 
 		instance = mount(GooButtonGroup, {
 			target: field,
@@ -57,7 +64,7 @@ export function createButtonGroupField(
 				style: options.style,
 				tabIndex: options.tabIndex,
 				class: options.class ?? options.className,
-				onchange: (value: ButtonGroupValue) => {
+				onchange: value => {
 					selectedValue = value
 					options.onchange?.(value)
 				}
@@ -69,15 +76,27 @@ export function createButtonGroupField(
 		value: {
 			configurable: true,
 			get: () => selectedValue,
-			set: (value: ButtonGroupValue) => {
+			set: (value: string | string[] | null) => {
 				field.setValue(value)
 			}
 		}
 	})
 	field.getValue = () => selectedValue
-	field.setValue = (value) => {
+	field.setValue = value => {
+		if (destroyed) return
 		selectedValue = value
-		render()
+		if (instance?.setValue) {
+			instance.setValue(value)
+			selectedValue = instance.getValue?.() ?? selectedValue
+		} else {
+			render()
+		}
+	}
+	field.destroy = () => {
+		if (destroyed) return
+		destroyed = true
+		unmountButtonGroup()
+		field.remove()
 	}
 
 	render()

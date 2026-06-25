@@ -7,7 +7,8 @@
 
 import './GooPopout.css'
 
-import { applyArrowPosition, applyPosition, calculatePosition, type PositionResult } from '../support/positioning/index.ts'
+import { applyArrowPosition, applyPosition, calculatePosition, type PositionAvoidRect, type PositionResult } from '../support/positioning/index.ts'
+import { createLifecycleBag } from '../support/utils/lifecycleBag.ts'
 import { createPointerDrag } from '../support/utils/pointerDrag.ts'
 
 // =============================================================================
@@ -99,6 +100,8 @@ export interface GooPopoutAt {
 	y?: number
 	align?: string
 	offset?: { x?: number; y?: number }
+	avoidRects?: PositionAvoidRect[]
+	avoidMargin?: number
 }
 
 /**
@@ -240,12 +243,15 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 	let $backdrop: HTMLElement | null = null
 	let opened = false
 	let destroying = false
-	const cleanupHandlers: Array<(() => void) | { detach?: () => void }> = []
+	let lifecycle = createLifecycleBag()
 	let parentPopout: GooPopoutRuntime | null = null
 	let childPopout: GooPopoutRuntime | null = null
 	let currentPosition: ReturnType<typeof calculatePosition> | null = null
+	let currentAvoidRects: PositionAvoidRect[] = []
+	let currentAvoidMargin = 0
 	let previousActiveElement: HTMLElement | null = null
 	let repositionFrame = 0
+	let animationCleanup: (() => void) | null = null
 	const resolvedRtl =
 		rtl ?? (document.documentElement?.dir === 'rtl' || document.body?.dir === 'rtl')
 	const fallbackAlign = alignInput ?? (resolvedRtl ? 'right to left' : 'left to right')
@@ -310,6 +316,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 	 */
 	async function open() {
 		if (opened || destroying) return
+		if (lifecycle.destroyed) lifecycle = createLifecycleBag()
 		if (initialFocus !== 'none') {
 			previousActiveElement =
 				document.activeElement instanceof HTMLElement ? document.activeElement : null
@@ -332,7 +339,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		setupEventHandlers()
 		observeOpenLayoutChanges()
 
-		void $element.offsetHeight // Force reflow
+		$element.offsetHeight // Force reflow
 
 		await animateIn($element)
 		if (!$element || destroying || !opened) return
@@ -384,16 +391,9 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		destroying = true
 		const removedElement = $element
 
-		// Cleanup handlers
-		for (const cleanup of cleanupHandlers) {
-			if (typeof cleanup === 'function') {
-				cleanup()
-			} else if (cleanup?.detach) {
-				cleanup.detach()
-			}
-		}
-		cleanupHandlers.length = 0
+		lifecycle.destroy()
 		cancelScheduledReposition()
+		cancelActiveAnimation()
 
 		// Remove from parent chain
 		if (parentPopout) {
@@ -415,6 +415,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 
 		activePopouts.delete(instance)
 		destroying = false
+		lifecycle = createLifecycleBag()
 
 		// Callback
 		if (onDestroy) onDestroy()
@@ -463,6 +464,8 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 			align: currentAlign,
 			offset: currentOffset,
 			keepWithin: { $element: keepWithinElement, margin: keepWithinMargin },
+			avoidMargin: currentAvoidMargin,
+			avoidRects: currentAvoidRects,
 			rtl: resolvedRtl
 		}
 
@@ -484,6 +487,11 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		if (!repositionFrame) return
 		cancelAnimationFrame(repositionFrame)
 		repositionFrame = 0
+	}
+
+	function cancelActiveAnimation() {
+		animationCleanup?.()
+		animationCleanup = null
 	}
 
 	async function stabilizeOpeningLayout() {
@@ -582,7 +590,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 			if (targetElement) {
 				resizeObserver.observe(targetElement)
 			}
-			cleanupHandlers.push(() => resizeObserver.disconnect())
+			lifecycle.add(resizeObserver)
 		}
 
 		if (typeof MutationObserver === 'function') {
@@ -591,7 +599,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 				childList: true,
 				subtree: true
 			})
-			cleanupHandlers.push(() => mutationObserver.disconnect())
+			lifecycle.add(mutationObserver)
 		}
 	}
 
@@ -694,11 +702,11 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		// Click outside to close
 		if (clickToClose) {
 			// Delay to prevent immediate close from triggering click
-			setTimeout(() => {
-				if (!opened) return
+			lifecycle.timeout(() => {
+				if (!opened || destroying || !$element) return
 
 				const handlePointerDown = (event: PointerEvent) => {
-					if (!opened) return
+					if (!opened || destroying) return
 
 					const pointerEvent = toGooPointerEvent(event)
 					const clickedElement = pointerEvent.target as HTMLElement
@@ -713,12 +721,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 					}
 				}
 
-				document.addEventListener('pointerdown', handlePointerDown, { capture: true })
-				cleanupHandlers.push(() => {
-					document.removeEventListener('pointerdown', handlePointerDown, {
-						capture: true
-					})
-				})
+				lifecycle.listen(document, 'pointerdown', handlePointerDown, { capture: true })
 			}, 100)
 		}
 
@@ -730,16 +733,14 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 					close()
 				}
 			}
-			$element.addEventListener('keydown', handleKeydown)
-			cleanupHandlers.push(() => $element?.removeEventListener('keydown', handleKeydown))
+			lifecycle.listen($element, 'keydown', handleKeydown)
 		}
 
 		// Reposition on resize
 		const handleResize = () => {
 			if (opened) reposition()
 		}
-		window.addEventListener('resize', handleResize)
-		cleanupHandlers.push(() => window.removeEventListener('resize', handleResize))
+		lifecycle.listen(window, 'resize', handleResize)
 
 		// Prevent scroll propagation
 		const handleWheel = (e: WheelEvent) => {
@@ -758,8 +759,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 			}
 			e.stopPropagation()
 		}
-		$element.addEventListener('wheel', handleWheel, { passive: false })
-		cleanupHandlers.push(() => $element?.removeEventListener('wheel', handleWheel))
+		lifecycle.listen($element, 'wheel', handleWheel, { passive: false })
 
 		// Drag to move
 		if (dragToMove) {
@@ -768,8 +768,8 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 
 		// Focus handling based on initialFocus option
 		if (initialFocus !== 'none') {
-			requestAnimationFrame(() => {
-				if (!$element) return
+			lifecycle.frame(() => {
+				if (!$element || destroying) return
 
 				if (initialFocus === 'content') {
 					// Try to focus first focusable element in content
@@ -870,7 +870,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 			{ ignoreTouch: true }
 		)
 
-		cleanupHandlers.push(handler)
+		lifecycle.add(handler)
 	}
 
 	function toGooPointerEvent(event: PointerEvent): GooPopoutPointerEvent {
@@ -925,6 +925,8 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		if (atConfig instanceof HTMLElement) {
 			targetElement = atConfig
 			targetPoint = null
+			currentAvoidRects = []
+			currentAvoidMargin = 0
 			return
 		}
 
@@ -937,10 +939,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 			const point = atConfig.point
 			const pointX = point?.x ?? atConfig.x
 			const pointY = point?.y ?? atConfig.y
-			if (
-				(pointX !== null && pointX !== undefined) ||
-				(pointY !== null && pointY !== undefined)
-			) {
+			if (pointX != null || pointY != null) {
 				targetElement = null
 				targetPoint = { x: pointX ?? 0, y: pointY ?? 0 }
 			}
@@ -953,6 +952,20 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		if (atConfig.offset) {
 			currentOffset = { ...currentOffset, ...atConfig.offset }
 		}
+
+		currentAvoidRects = normalizeAvoidRects(atConfig.avoidRects)
+		currentAvoidMargin = Number.isFinite(atConfig.avoidMargin) ? atConfig.avoidMargin! : 0
+	}
+
+	function normalizeAvoidRects(avoidRects: PositionAvoidRect[] | undefined): PositionAvoidRect[] {
+		return (avoidRects ?? []).filter(rect =>
+			Number.isFinite(rect.left)
+				&& Number.isFinite(rect.right)
+				&& Number.isFinite(rect.top)
+				&& Number.isFinite(rect.bottom)
+				&& rect.right >= rect.left
+				&& rect.bottom >= rect.top
+		)
 	}
 
 	/**
@@ -983,16 +996,37 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 	 * @returns {Promise<void>}
 	 */
 	function animateIn(el: HTMLElement): Promise<void> {
+		cancelActiveAnimation()
 		return new Promise(resolve => {
+			let frame = 0
+			let timer: ReturnType<typeof setTimeout> | null = null
+			let finished = false
+			const finish = () => {
+				if (finished) return
+				finished = true
+				if (frame) cancelAnimationFrame(frame)
+				if (timer) clearTimeout(timer)
+				frame = 0
+				timer = null
+				if (animationCleanup === finish) animationCleanup = null
+				resolve()
+			}
+			animationCleanup = finish
+
 			el.style.transition = 'opacity 150ms ease-out, transform 150ms ease-out'
 			el.style.transform = 'translateY(-4px)'
 			el.style.opacity = '0'
 
-			requestAnimationFrame(() => {
+			frame = requestAnimationFrame(() => {
+				frame = 0
+				if (destroying || !$element) {
+					finish()
+					return
+				}
 				el.style.transform = 'translateY(0)'
 				el.style.opacity = '1'
 
-				setTimeout(resolve, 150)
+				timer = setTimeout(finish, 150)
 			})
 		})
 	}
@@ -1003,16 +1037,28 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 	 * @returns {Promise<void>}
 	 */
 	function animateOut(el: HTMLElement | null): Promise<void> {
+		cancelActiveAnimation()
 		return new Promise<void>(resolve => {
 			if (!el) {
 				resolve()
 				return
 			}
+			let timer: ReturnType<typeof setTimeout> | null = null
+			let finished = false
+			const finish = () => {
+				if (finished) return
+				finished = true
+				if (timer) clearTimeout(timer)
+				timer = null
+				if (animationCleanup === finish) animationCleanup = null
+				resolve()
+			}
+			animationCleanup = finish
 
 			el.style.transition = 'opacity 150ms ease-out'
 			el.style.opacity = '0'
 
-			setTimeout(resolve, 150)
+			timer = setTimeout(finish, 150)
 		})
 	}
 

@@ -34,6 +34,7 @@ let currentPopout: GooPopoutInstance | null = null
 let cleanupTrigger: (() => void) | null = null
 let mounted = false
 let lastKey = ''
+let lifecycleToken = 0
 
 let {
 	for: forTarget,
@@ -96,6 +97,7 @@ function getKey(): string {
 }
 
 function destroyPopout(): void {
+	lifecycleToken += 1
 	cleanupTrigger?.()
 	cleanupTrigger = null
 	currentPopout?.destroy()
@@ -167,7 +169,11 @@ $effect(() => {
 	const key = getKey()
 	if (!mounted || key === lastKey) return
 	lastKey = key
-	void Promise.resolve().then(mountPopout)
+	const token = ++lifecycleToken
+	void Promise.resolve().then(() => {
+		if (token !== lifecycleToken) return
+		mountPopout()
+	})
 })
 
 $effect(() => {

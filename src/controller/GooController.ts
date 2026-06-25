@@ -7,9 +7,9 @@
 import './GooController.css'
 
 import type { GooSelectMenuOptions } from '../select/types.ts'
-import { createSliderField } from '../slider/_createSliderField.ts'
+import { createSliderPrimitiveField } from '../slider/_createSliderPrimitiveField.ts'
 import type { GooSliderPreset, GooSliderShape } from '../slider/types.ts'
-import { emitter } from '../support/utils/MyComponent.ts'
+import { emitter } from '../support/utils/emitter.ts'
 import { log } from '../support/utils/logger.ts'
 import { createControlFromRegistry } from './controlFactory.ts'
 import { type GooControlOptionBag, type GooControlOptions, type GooControlType, type GooControlTypeRegistry, resolveGooControlTypeConfig } from './controlRegistry.ts'
@@ -34,6 +34,7 @@ import {
  * Controls may implement some or all of these methods.
  */
 interface GooControlElement extends HTMLElement {
+	destroy?: () => void
 	getValue?: () => unknown
 	setValue?: (value: unknown, options?: { silent?: boolean }) => void
 	setOptions?: (options: Record<string, unknown>) => void
@@ -275,7 +276,7 @@ class GooControllerRuntime {
 	 */
 	_getExistingControl() {
 		if (!this.$widget) return null
-		const control = this.$widget.children[0] as HTMLElement | undefined
+		const control = this.$widget.children[0] as GooControlElement | undefined
 		if (!control) return null
 		if (this.$widget.children.length > 1) {
 			this.$widget.replaceChildren(control)
@@ -291,7 +292,7 @@ class GooControllerRuntime {
 	 */
 	_attachControl(control: HTMLElement) {
 		if (!this.$widget) return
-		this._control = control
+		this._control = control as GooControlElement
 		if (this.$widget.children.length !== 1 || this.$widget.children[0] !== control) {
 			this.$widget.replaceChildren(control)
 		}
@@ -388,10 +389,16 @@ class GooControllerRuntime {
 		})
 
 		// Check if component was destroyed during async creation
-		if (!this.$widget) return
+		if (!this.$widget) {
+			destroyControlResult(result)
+			return
+		}
 
 		// Ignore stale async results
-		if (token !== this._controlToken) return
+		if (token !== this._controlToken) {
+			destroyControlResult(result)
+			return
+		}
 
 		if (this._getExistingControl()) return
 
@@ -496,7 +503,7 @@ class GooControllerRuntime {
 		// Store format for handlers
 		this._dualRangeIsMinMax = isMinMaxFormat
 
-		this._control = createSliderField(sliderOptions) as GooControlElement
+		this._control = createSliderPrimitiveField(sliderOptions) as GooControlElement
 		this.$widget.appendChild(this._control)
 	}
 
@@ -530,6 +537,7 @@ class GooControllerRuntime {
 	 */
 	_destroyElement() {
 		this._stopListening()
+		this._control?.destroy?.()
 		this.$widget = null
 		this._control = null
 		this._controlToken += 1
@@ -968,6 +976,12 @@ class GooControllerRuntime {
 
 		// Create control (SSR or empty widget)
 		this._createControl()
+	}
+}
+
+function destroyControlResult(result: Awaited<ReturnType<typeof createControlFromRegistry>>): void {
+	if (result.status === 'created') {
+		(result.control as GooControlElement).destroy?.()
 	}
 }
 

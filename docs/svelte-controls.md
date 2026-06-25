@@ -9,7 +9,15 @@ How to expose a Svelte editor as a GooSchema control.
 3. Register the control type with an explicit config object.
 4. Use the type name in your schema.
 
-GooController owns the row wrapper, binding lifecycle, and imperative handle. Svelte controls should expose props and callbacks only; do not depend on controller private fields such as `_controlPromise`, `_control`, or `_destroyElement`. Imperative controls should use stable handle names such as `destroy()`, `setValue()`, `getValue()`, and `getRange()`.
+GooController owns the row wrapper, binding lifecycle, and imperative handle. Svelte controls should expose props and callbacks only; do not depend on controller private fields such as `_controlPromise`, `_control`, or `_destroyElement`. Imperative controls should use stable handle names such as `destroy()`, `setValue()`, `getValue()`, and `getSlider()`.
+
+## Lifecycle Guardrails
+
+- Components should clean up timers, animation frames, observers, popouts, tooltips, document/window listeners, and pointer capture from `$effect` teardown or `onDestroy`.
+- Use `createLifecycleBag` for internal Goo code that owns multiple listeners, timers, frames, observers, or small `destroy()`/`detach()` handles. Use `createPointerDrag` for pointer drag/capture sequences.
+- Imperative wrappers should make `destroy()` idempotent and clear every resource the wrapper created, including listeners registered by convenience methods like `attachTo(...)`.
+- After `destroy()`, public methods should no-op or return `false`; they should not recreate Svelte mounts or mutate detached DOM.
+- Tests for controls that use fake timers, global spies, or body-mounted UI should restore timers/globals and remove mounted popouts/tooltips in `afterEach`.
 
 ## Component + controlSchema
 
@@ -97,4 +105,22 @@ interface SvelteControlSchema {
 
 ## Built-in controls
 
-Built-in Goo controls are registered in `src/controller/controlRegistry.ts`. Use `type: 'range-module'` for a native Goo slider with synced numeric inputs. Rich editor-specific controls live in `@goobits/goo-editors` and should be registered by the host package or app through its explicit control type map.
+Built-in Goo controls are registered in `src/controller/controlRegistry.ts`. Use `type: 'slider-field'` for a native Goo slider with synced numeric inputs. Rich editor-specific controls live in `@goobits/goo-editors` and should be registered by the host package or app through its explicit control type map.
+
+## Slider Feature Ownership
+
+`GooSlider` owns primitive slider behavior. `GooSliderField` composes `GooSlider`
+with a label and synced number fields, and should pass slider behavior through
+instead of duplicating it.
+
+| Feature | Owner | Notes |
+| --- | --- | --- |
+| Single value | `GooSlider` | `mode="value"` is explicit; omitted mode still infers from value shape. |
+| Range values | `GooSlider` | `mode="range"` or a two-value array. |
+| Variance values | `GooSlider` | `mode="variance"` or legacy `variance: true`. Edge compression is shared with `GooSliderField`. |
+| Ticks / marks / labels | `GooSlider` | Use `ticks` and `marks`; `GooSliderField` passes them through. |
+| Snap points | `GooSlider` | Use `snap: true` for marks/ticks or `snap: number[]` for explicit points. |
+| Scale mapping | `GooSlider` | `scale="linear"`, `"log"`, or `"exponential"`. Custom easing remains available for bespoke mappings. |
+| Thumb distance constraints | `GooSlider` | Use `minDistance` and `maxDistance` for neighboring range thumbs. |
+| Value bubble | `GooSlider` | Use `valueBubble: true` for active/hover/focus or `"always"` for persistent display. |
+| Labels and number inputs | `GooSliderField` | Field composition only; it does not own slider math or track rendering. |

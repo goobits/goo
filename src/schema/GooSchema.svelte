@@ -11,7 +11,7 @@ import {
 	type GooSchemaResetEvent,
 	type GooSchemaUpdateOptions,
 	type GooSchemaType
-} from './gooSchema.ts'
+} from './GooSchema.ts'
 
 type GooSchemaDomEventHandler = (event: GooSchemaEvent) => void
 type GooSchemaPresetDomEventHandler = (event: GooSchemaPresetEvent) => void

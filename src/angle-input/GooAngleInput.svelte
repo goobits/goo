@@ -1,5 +1,5 @@
 <script module lang="ts">
-import type { SvelteControlSchema } from '../controller/svelteControl.svelte.ts'
+import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.ts'
 
 /** GooController binding metadata for the Svelte angle input component. */
 export const controlSchema: SvelteControlSchema = {
@@ -15,6 +15,7 @@ export const controlSchema: SvelteControlSchema = {
 import './GooAngleInput.css'
 
 import GooNumber from '../input/GooNumber.svelte'
+import { createPointerDrag, type GooPointerDragEvent, type GooPointerDragHandle } from '../support/utils/pointerDrag.ts'
 import type {
 	GooAngleInputElement,
 	GooAngleInputEventData,
@@ -33,6 +34,7 @@ let lastCommittedValue = $state(0)
 let currentUnit: GooAngleInputUnit = $state('degree')
 let effectiveDisabled = $state(false)
 let skipNextValueSync = false
+let pointerDragHandle: GooPointerDragHandle | null = null
 
 let {
 	value = $bindable<number | string>(0),
@@ -87,6 +89,17 @@ $effect(() => {
 
 $effect(() => {
 	effectiveDisabled = Boolean(disabled)
+})
+
+$effect(() => {
+	const track = trackElement
+	if (!track) return
+	pointerDragHandle?.detach()
+	pointerDragHandle = createPointerDrag(track, handlePointerDrag)
+	return () => {
+		pointerDragHandle?.detach()
+		pointerDragHandle = null
+	}
 })
 
 $effect(() => {
@@ -169,43 +182,29 @@ function handleNumberBlur(): void {
 	emitAngleInputEvent('change')
 }
 
-function handlePointerDown(event: PointerEvent): void {
-	if (effectiveDisabled || !trackElement) return
-	if (event.button !== 0) return
+function handlePointerDrag(event: GooPointerDragEvent): void | false {
 	event.preventDefault()
-	focus()
-	activePointerId = event.pointerId
-	// Capture on the element that received the event (the track button), not on
-	// the outer div — Firefox throws InvalidPointerId otherwise. With capture in
-	// place, pointermove/up will continue firing on trackElement even when the
-	// pointer leaves the track's bounds.
-	trackElement.setPointerCapture?.(event.pointerId)
-	setAngleFromPointer(event, 'input')
-}
 
-function handlePointerMove(event: PointerEvent): void {
-	if (effectiveDisabled || activePointerId !== event.pointerId) return
-	event.preventDefault()
-	setAngleFromPointer(event, 'input')
-}
+	if (event.START) {
+		if (effectiveDisabled || !trackElement) return false
+		focus()
+		activePointerId = event.pointerId
+		setAngleFromPointer(event.originalEvent, 'input')
+		return
+	}
 
-function handlePointerUp(event: PointerEvent): void {
-	finishPointerDrag(event, { commit: true })
-}
-
-function handlePointerCancel(event: PointerEvent): void {
-	finishPointerDrag(event, { commit: false })
-}
-
-function finishPointerDrag(event: PointerEvent, { commit }: { commit: boolean }): void {
 	if (activePointerId !== event.pointerId) return
-	event.preventDefault()
+
+	if (event.CHANGE) {
+		if (!effectiveDisabled) setAngleFromPointer(event.originalEvent, 'input')
+		return
+	}
+
 	activePointerId = null
-	trackElement?.releasePointerCapture?.(event.pointerId)
-	if (commit) {
+	if (!event.CANCEL) {
 		focus()
 		lastCommittedValue = currentValue
-		emitAngleInputEvent('change', event)
+		emitAngleInputEvent('change', event.originalEvent)
 	}
 }
 
@@ -293,10 +292,6 @@ function syncBoundValue(nextValue: number): void {
 		class:is-dragging={activePointerId !== null}
 		tabindex="-1"
 		aria-label={ariaLabel || 'Set angle'}
-		onpointerdown={handlePointerDown}
-		onpointermove={handlePointerMove}
-		onpointerup={handlePointerUp}
-		onpointercancel={handlePointerCancel}
 	>
 		<div
 			class="goo-angle-input__handle"

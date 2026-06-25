@@ -1,5 +1,5 @@
 <script module lang="ts">
-import type { SvelteControlSchema } from '../controller/svelteControl.svelte.ts'
+import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.ts'
 
 /** GooController binding metadata for the Svelte checkbox component. */
 export const controlSchema: SvelteControlSchema = {
@@ -14,7 +14,7 @@ export const controlSchema: SvelteControlSchema = {
 </script>
 
 <script lang="ts">
-import { untrack } from 'svelte'
+import { onDestroy, untrack } from 'svelte'
 import './GooCheckbox.css'
 import { isRTL } from '../support/i18n/index.ts'
 import { clamp } from '../support/utils/numberUtils.ts'
@@ -45,6 +45,7 @@ let incomingChecked = $derived(Boolean(checked ?? value ?? false))
 let currentChecked = $state(false)
 let dragState = $state<{ startX: number; width: number; offset: number; moved: boolean } | null>(null)
 let dragHandle: GooPointerDragHandle | null = null
+let finishDragTimer: number | null = null
 
 $effect(() => {
 	currentChecked = incomingChecked
@@ -60,6 +61,10 @@ $effect(() => {
 		dragHandle?.detach()
 		dragHandle = null
 	}
+})
+
+onDestroy(() => {
+	clearFinishDragTimer()
 })
 
 const classes = $derived.by(() => {
@@ -213,9 +218,17 @@ function movePointerDrag(event: GooPointerDragEvent): void {
 function finishPointerDrag(): void {
 	if (!dragState || !thumbElement) return
 	thumbElement.style.left = ''
-	window.setTimeout(() => {
+	clearFinishDragTimer()
+	finishDragTimer = window.setTimeout(() => {
 		dragState = null
+		finishDragTimer = null
 	})
+}
+
+function clearFinishDragTimer(): void {
+	if (finishDragTimer === null) return
+	window.clearTimeout(finishDragTimer)
+	finishDragTimer = null
 }
 </script>
 

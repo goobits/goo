@@ -1,13 +1,10 @@
-/** Goo Xy Pad Value request or option shape for XY pad controls. */
 export interface GooXyPadValue {
 	x: number
 	y: number
 }
 
-/** Goo Xy Pad State typed model for XY pad controls. */
 export type GooXyPadState = 'input' | 'change' | 'set'
 
-/** Goo Xy Pad Event Data request or option shape for XY pad controls. */
 export interface GooXyPadEventData {
 	element: GooXyPadElement
 	event?: Event
@@ -15,7 +12,6 @@ export interface GooXyPadEventData {
 	value: GooXyPadValue
 }
 
-/** Goo Xy Pad Props request or option shape for XY pad controls. */
 export interface GooXyPadProps {
 	value?: GooXyPadValue | number[] | null
 	min?: number
@@ -41,7 +37,6 @@ export interface GooXyPadProps {
 	children?: import('svelte').Snippet
 }
 
-/** Goo Xy Pad Element typed model for XY pad controls. */
 export type GooXyPadElement = HTMLDivElement & {
 	value: GooXyPadValue
 	disable(): void

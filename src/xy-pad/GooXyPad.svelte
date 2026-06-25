@@ -1,5 +1,5 @@
 <script module lang="ts">
-import type { SvelteControlSchema } from '../controller/svelteControl.svelte.ts'
+import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.ts'
 
 /** GooController binding metadata for the Svelte XY pad component. */
 export const controlSchema: SvelteControlSchema = {
@@ -21,8 +21,11 @@ export const controlSchema: SvelteControlSchema = {
 <script lang="ts">
 import './GooXyPad.css'
 
+import { onDestroy } from 'svelte'
+
 import GooNumber from '../input/GooNumber.svelte'
 import { clamp, roundToStep } from '../support/utils/numberUtils.ts'
+import { createPointerDrag, type GooPointerDragEvent, type GooPointerDragHandle } from '../support/utils/pointerDrag.ts'
 import type { GooXyPadElement, GooXyPadEventData, GooXyPadProps, GooXyPadValue } from './types.ts'
 
 const DEFAULT_MIN = -100
@@ -66,6 +69,8 @@ let lastExternalValue: GooXyPadValue = normalizeValue(value)
 let pendingInternalValue = $state<GooXyPadValue | null>(null)
 let pendingExternalFallback = $state<GooXyPadValue | null>(null)
 let ignoreNumberEvents = $state(false)
+let pointerDragHandle: GooPointerDragHandle | null = null
+let ignoreNumberEventsTimer: ReturnType<typeof setTimeout> | null = null
 
 const range = $derived(Math.max(max - min, Number.EPSILON))
 const xPct = $derived(toPercent(currentValue.x))
@@ -107,6 +112,21 @@ $effect(() => {
 
 $effect(() => {
 	effectiveDisabled = Boolean(disabled)
+})
+
+$effect(() => {
+	const surface = surfaceElement
+	if (!surface) return
+	pointerDragHandle?.detach()
+	pointerDragHandle = createPointerDrag(surface, handlePointerDrag)
+	return () => {
+		pointerDragHandle?.detach()
+		pointerDragHandle = null
+	}
+})
+
+onDestroy(() => {
+	clearIgnoreNumberEventsTimer()
 })
 
 $effect(() => {
@@ -158,36 +178,27 @@ function assignXyPadApi(xyPad: GooXyPadElement): void {
 	xyPad.blur = () => blur()
 }
 
-function handlePointerDown(event: PointerEvent): void {
-	if (effectiveDisabled || !surfaceElement || event.button !== 0) return
+function handlePointerDrag(event: GooPointerDragEvent): void | false {
 	event.preventDefault()
-	focus()
-	activePointerId = event.pointerId
-	surfaceElement.setPointerCapture?.(event.pointerId)
-	setValueFromPointer(event, 'input')
-}
 
-function handlePointerMove(event: PointerEvent): void {
-	if (effectiveDisabled || activePointerId !== event.pointerId) return
-	event.preventDefault()
-	setValueFromPointer(event, 'input')
-}
+	if (event.START) {
+		if (effectiveDisabled || !surfaceElement) return false
+		focus()
+		activePointerId = event.pointerId
+		setValueFromPointer(event.originalEvent, 'input')
+		return
+	}
 
-function handlePointerUp(event: PointerEvent): void {
-	finishPointerDrag(event, { commit: true })
-}
-
-function handlePointerCancel(event: PointerEvent): void {
-	finishPointerDrag(event, { commit: false })
-}
-
-function finishPointerDrag(event: PointerEvent, { commit }: { commit: boolean }): void {
 	if (activePointerId !== event.pointerId) return
-	event.preventDefault()
+
+	if (event.CHANGE) {
+		if (!effectiveDisabled) setValueFromPointer(event.originalEvent, 'input')
+		return
+	}
+
 	activePointerId = null
-	surfaceElement?.releasePointerCapture?.(event.pointerId)
-	if (commit) {
-		emitXyPadEvent('change', event)
+	if (!event.CANCEL) {
+		emitXyPadEvent('change', event.originalEvent)
 	}
 }
 
@@ -289,9 +300,17 @@ function commitCurrentValue(nextValue: GooXyPadValue): void {
 	latestValue = nextValue
 	ignoreNumberEvents = true
 	currentValue = nextValue
-	setTimeout(() => {
+	clearIgnoreNumberEventsTimer()
+	ignoreNumberEventsTimer = setTimeout(() => {
 		ignoreNumberEvents = false
+		ignoreNumberEventsTimer = null
 	}, 0)
+}
+
+function clearIgnoreNumberEventsTimer(): void {
+	if (ignoreNumberEventsTimer === null) return
+	clearTimeout(ignoreNumberEventsTimer)
+	ignoreNumberEventsTimer = null
 }
 
 function syncBoundValue(nextValue: GooXyPadValue): void {
@@ -326,10 +345,6 @@ function syncBoundValue(nextValue: GooXyPadValue): void {
 		role="slider"
 		style={`--goo-xy-pad-dot-x: ${ xPct }%; --goo-xy-pad-dot-y: ${ yPct }%;`}
 		onkeydown={handleKeydown}
-		onpointerdown={handlePointerDown}
-		onpointermove={handlePointerMove}
-		onpointerup={handlePointerUp}
-		onpointercancel={handlePointerCancel}
 	>
 		<span class="goo-xy-pad__dot" aria-hidden="true"></span>
 	</button>

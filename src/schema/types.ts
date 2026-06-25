@@ -11,10 +11,8 @@ import type { GooSliderPreset, GooSliderShape } from '../slider/types.ts'
  */
 export type GooSchemaControlType = GooControlType
 
-/** Goo Schema Data typed model for schema-driven controls. */
 export type GooSchemaData = Record<string, unknown>
 
-/** Goo Schema Change Handler typed model for schema-driven controls. */
 export type GooSchemaChangeHandler = (path: string, value: unknown) => void
 
 export type GooSchemaCondition = string | {

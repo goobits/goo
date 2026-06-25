@@ -13,6 +13,14 @@ export interface AlignmentConfig {
 	toPosition: string
 }
 
+/** Rectangle that positioned content should avoid overlapping. */
+export interface PositionAvoidRect {
+	bottom: number
+	left: number
+	right: number
+	top: number
+}
+
 /**
  * Options for calculating element position.
  */
@@ -38,6 +46,12 @@ export interface PositionOptions {
 		$element?: HTMLElement
 		margin?: number
 	}
+
+	/** Rectangles that the final position should avoid overlapping. */
+	avoidRects?: PositionAvoidRect[]
+
+	/** Extra gap to keep around avoided rectangles. */
+	avoidMargin?: number
 
 	/** Right-to-left mode */
 	rtl?: boolean

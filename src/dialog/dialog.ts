@@ -7,6 +7,7 @@ import './GooDialog.css'
 
 import type { CheckboxFieldElement } from '../checkbox/_createCheckboxField.ts'
 import { focusFirst, focusLast, getFocusableElements } from '../support/utils/focusUtils.ts'
+import { createLifecycleBag, type GooLifecycleBag } from '../support/utils/lifecycleBag.ts'
 import {
 	appendContent,
 	buildFields,
@@ -34,17 +35,14 @@ export type GooDialogType = 'alert' | 'confirm' | 'prompt' | 'notify' | 'overlay
 export type GooDialogDefaultFocus = 'ok' | 'cancel' | 'disregard'
 
 /** Values collected from dialog fields. */
-export type DialogValues<TValues extends Record<string, unknown> = Record<string, unknown>> =
-	TValues
+export type DialogValues<TValues extends Record<string, unknown> = Record<string, unknown>> = TValues
 
 /** Field element map passed to dialog verification callbacks. */
 export type DialogFieldElements = Map<string, HTMLElement>
 
 /** Verification callback for prompt dialogs. */
-export type DialogVerifyHandler<TValues extends DialogValues = DialogValues> = (
-	values: TValues,
-	fieldElements: DialogFieldElements
-) => boolean | Promise<boolean>
+export type DialogVerifyHandler<TValues extends DialogValues = DialogValues> =
+	(values: TValues, fieldElements: DialogFieldElements) => boolean | Promise<boolean>
 
 /**
  * Dialog options for construction
@@ -125,11 +123,15 @@ export interface GooDialogController<TValues extends DialogValues = DialogValues
 	readonly isOpen: boolean
 	/** Close the dialog. */
 	close(): Promise<void>
+	/** Close and permanently tear down dialog-owned resources. */
+	destroy(): Promise<void>
 	/** Open the dialog and resolve with the user's action. */
 	open(): Promise<DialogResult<TValues>>
 	/** Replace dialog content. Strings render as text; pass a DOM node for rich content. */
 	setContent(content: string | Node): void
 }
+
+type DestroyableElement = HTMLElement & { destroy?: () => void }
 
 /**
  * Internal dialog implementation.
@@ -165,6 +167,10 @@ class GooDialogControllerRuntime {
 	declare _isOpen: boolean
 	declare _autoDismissTimer: ReturnType<typeof setTimeout> | null
 	declare _previousActiveElement: HTMLElement | null
+	declare _destroyed: boolean
+	declare _elementLifecycle: GooLifecycleBag
+	declare _openLifecycle: GooLifecycleBag
+	declare _closePromise: Promise<void> | null
 
 	// Callback functions
 	declare _onOk: ((result: DialogResult) => void) | undefined
@@ -209,6 +215,11 @@ class GooDialogControllerRuntime {
 		this._$backdrop = null
 		this._isOpen = false
 		this._autoDismissTimer = null
+		this._previousActiveElement = null
+		this._destroyed = false
+		this._elementLifecycle = createLifecycleBag()
+		this._openLifecycle = createLifecycleBag()
+		this._closePromise = null
 		this._createElement()
 	}
 
@@ -223,17 +234,17 @@ class GooDialogControllerRuntime {
 		const { type, width, height, heading, showClose } = this.state
 
 		// Apply type class
-		this.$element.classList.add(`goo-dialog--${type}`)
+		this.$element.classList.add(`goo-dialog--${ type }`)
 		if (this._className) {
 			this.$element.classList.add(this._className)
 		}
 
 		// Set dimensions
 		if (width !== 'auto') {
-			this.$element.style.width = typeof width === 'number' ? `${width}px` : String(width)
+			this.$element.style.width = typeof width === 'number' ? `${ width }px` : String(width)
 		}
 		if (height !== 'auto') {
-			this.$element.style.height = typeof height === 'number' ? `${height}px` : String(height)
+			this.$element.style.height = typeof height === 'number' ? `${ height }px` : String(height)
 		}
 
 		// Accessibility
@@ -247,11 +258,7 @@ class GooDialogControllerRuntime {
 			this.$content = notifyElements.$content
 			this.$closeBtn = notifyElements.$closeBtn
 		} else if (type === 'overlay') {
-			const overlayElements = buildOverlayLayout(
-				this.$element,
-				{ type, heading, showClose },
-				this._content
-			)
+			const overlayElements = buildOverlayLayout(this.$element, { type, heading, showClose }, this._content)
 			this.$header = overlayElements.$header
 			this.$title = overlayElements.$title
 			this.$content = overlayElements.$content
@@ -306,7 +313,13 @@ class GooDialogControllerRuntime {
 	 * Destroy element.
 	 */
 	_destroyElement() {
+		this._cleanupElementListeners()
+		this._cleanupOpenResources()
 		this._clearAutoDismiss()
+		for (const $field of this._fieldElements.values()) {
+			($field as DestroyableElement).destroy?.()
+		}
+		this.$applyToAll?.destroy?.()
 		this.$header = null
 		this.$title = null
 		this.$content = null
@@ -325,16 +338,15 @@ class GooDialogControllerRuntime {
 	 * Reference the title, or use an explicit/string label, so `role="dialog"` exposes an accessible name.
 	 */
 	_applyAccessibleName() {
-		const instanceId = `goo-dialog-${++dialogInstanceCount}`
+		const instanceId = `goo-dialog-${ ++dialogInstanceCount }`
 		if (this.$title) {
-			if (!this.$title.id) this.$title.id = `${instanceId}-title`
+			if (!this.$title.id) this.$title.id = `${ instanceId }-title`
 			this.$element.setAttribute('aria-labelledby', this.$title.id)
 			this.$element.removeAttribute('aria-label')
 			return
 		}
 
-		const label =
-			this.state.ariaLabel || (typeof this._content === 'string' ? this._content.trim() : '')
+		const label = this.state.ariaLabel || (typeof this._content === 'string' ? this._content.trim() : '')
 		if (!label) return
 
 		this.$element.setAttribute('aria-label', label)
@@ -351,29 +363,67 @@ class GooDialogControllerRuntime {
 	_bindEvents() {
 		// Close buttons
 		if (this.$closeBtn) {
-			this.$closeBtn.addEventListener('click', () => this._handleCancel())
+			this._listen(this.$closeBtn, 'click', () => this._handleCancel())
 		}
 		if (this.$closeBadge) {
-			this.$closeBadge.addEventListener('click', () => this._handleCancel())
+			this._listen(this.$closeBadge, 'click', () => this._handleCancel())
 		}
 
 		// Footer buttons
 		if (this.$okBtn) {
-			this.$okBtn.addEventListener('click', () => this._handleOk())
+			this._listen(this.$okBtn, 'click', () => this._handleOk())
 		}
 		if (this.$cancelBtn) {
-			this.$cancelBtn.addEventListener('click', () => this._handleCancel())
+			this._listen(this.$cancelBtn, 'click', () => this._handleCancel())
 		}
 		if (this.$disregardBtn) {
-			this.$disregardBtn.addEventListener('click', () => this._handleDisregard())
+			this._listen(this.$disregardBtn, 'click', () => this._handleDisregard())
 		}
 
 		// Keyboard
-		this.$element.addEventListener('keydown', (e) => this._handleKeydown(e))
+		this._listen(this.$element, 'keydown', e => this._handleKeydown(e as KeyboardEvent))
 
 		// Focus trap
-		this._$focusTrapStart?.addEventListener('focus', () => this._focusLast())
-		this._$focusTrapEnd?.addEventListener('focus', () => this._focusFirst())
+		if (this._$focusTrapStart) {
+			this._listen(this._$focusTrapStart, 'focus', () => this._focusLast())
+		}
+		if (this._$focusTrapEnd) {
+			this._listen(this._$focusTrapEnd, 'focus', () => this._focusFirst())
+		}
+	}
+
+	_listen(
+		target: EventTarget,
+		type: string,
+		listener: EventListener,
+		options?: boolean | AddEventListenerOptions
+	) {
+		this._elementLifecycle.listen(target, type, listener, options)
+	}
+
+	_listenOpen(
+		target: EventTarget,
+		type: string,
+		listener: EventListener,
+		options?: boolean | AddEventListenerOptions
+	) {
+		this._openLifecycle.listen(target, type, listener, options)
+	}
+
+	_requestOpenFrame(callback: () => void): void {
+		this._openLifecycle.frame(() => {
+			if (!this._isOpen || this._destroyed) return
+			callback()
+		})
+	}
+
+	_cleanupElementListeners(): void {
+		this._elementLifecycle.destroy()
+	}
+
+	_cleanupOpenResources(): void {
+		this._openLifecycle.destroy()
+		this._openLifecycle = createLifecycleBag()
 	}
 
 	/**
@@ -411,10 +461,12 @@ class GooDialogControllerRuntime {
 	 * Handles ok.
 	 */
 	async _handleOk() {
+		if (this._destroyed || !this._isOpen) return
 		// Validate if verify function provided
 		if (this._verify) {
 			const values = this._getFieldValues()
 			const valid = await Promise.resolve(this._verify(values, this._fieldElements))
+			if (this._destroyed || !this._isOpen) return
 			if (!valid) return
 		}
 
@@ -434,6 +486,7 @@ class GooDialogControllerRuntime {
 	 * Handles cancel.
 	 */
 	_handleCancel() {
+		if (this._destroyed || !this._isOpen) return
 		const result: DialogResult = { cancel: true }
 		if (this._onCancel) this._onCancel(result)
 		this._resolve?.(result)
@@ -445,6 +498,7 @@ class GooDialogControllerRuntime {
 	 * Handles disregard.
 	 */
 	_handleDisregard() {
+		if (this._destroyed || !this._isOpen) return
 		const result: DialogResult = {
 			disregard: true,
 			applyToAll: (this.$applyToAll as unknown as { checked: boolean })?.checked ?? false,
@@ -460,12 +514,8 @@ class GooDialogControllerRuntime {
 	 */
 	_getFieldValues(): DialogValues {
 		const values: DialogValues = {}
-		for (const [name, $el] of this._fieldElements) {
-			const elWithValue = $el as unknown as {
-				value?: unknown
-				getValue?: () => unknown
-				state?: { value?: unknown }
-			}
+		for (const [ name, $el ] of this._fieldElements) {
+			const elWithValue = $el as unknown as { value?: unknown; getValue?: () => unknown; state?: { value?: unknown } }
 			values[name] = elWithValue.value ?? elWithValue.getValue?.() ?? elWithValue.state?.value ?? ''
 		}
 		return values
@@ -481,9 +531,7 @@ class GooDialogControllerRuntime {
 	_setInitialFocus() {
 		// Focus first field for prompt
 		if (this.state.type === 'prompt' && this._fieldElements.size > 0) {
-			const firstEntry = this._fieldElements.entries().next().value
-			if (!firstEntry) return
-			const [, $first] = firstEntry
+			const [ , $first ] = this._fieldElements.entries().next().value
 			const firstWithFocus = $first as unknown as { focus?: () => void; select?: () => void }
 			if (firstWithFocus?.focus) {
 				firstWithFocus.focus()
@@ -541,6 +589,7 @@ class GooDialogControllerRuntime {
 	 */
 	_startAutoDismiss() {
 		if (this.state.autoDismiss > 0) {
+			this._clearAutoDismiss()
 			this._autoDismissTimer = setTimeout(() => {
 				this._handleCancel()
 			}, this.state.autoDismiss)
@@ -565,10 +614,11 @@ class GooDialogControllerRuntime {
 	 * Open the dialog and return a promise with the result.
 	 * @returns {Promise<DialogResult>}
 	 */
-	open(): Promise<DialogResult> {
-		if (this._isOpen) return Promise.resolve({ cancel: true })
+	open() {
+		if (this._destroyed || this._isOpen) return Promise.resolve({ cancel: true })
 
-		return new Promise<DialogResult>((resolve) => {
+		return new Promise(resolve => {
+			this._cleanupOpenResources()
 			this._resolve = resolve
 			this._isOpen = true
 
@@ -582,22 +632,16 @@ class GooDialogControllerRuntime {
 			if (this.state.showBackdrop && this.state.type !== 'notify') {
 				this._$backdrop = document.createElement('div')
 				this._$backdrop.className = 'goo-dialog-backdrop'
-				this._$backdrop.style.setProperty(
-					'--goo-dialog-z-index',
-					String(dialogManager.getZIndex(this))
-				)
+				this._$backdrop.style.setProperty('--goo-dialog-z-index', String(dialogManager.getZIndex(this)))
 
 				if (this.state.closeOnBackdrop) {
-					this._$backdrop.addEventListener('click', () => this._handleCancel())
+					this._listenOpen(this._$backdrop, 'click', () => this._handleCancel())
 				}
 
 				document.body.appendChild(this._$backdrop)
 
 				// Animate backdrop in
-				requestAnimationFrame(() => {
-					if (!this._isOpen || !this._$backdrop) return
-					this._$backdrop.classList.add('goo-dialog-backdrop--visible')
-				})
+				this._requestOpenFrame(() => this._$backdrop?.classList.add('goo-dialog-backdrop--visible'))
 			}
 
 			// Set z-index
@@ -607,8 +651,8 @@ class GooDialogControllerRuntime {
 			document.body.appendChild(this.$element)
 
 			// Animate in
-			requestAnimationFrame(() => {
-				if (!this._isOpen || !document.body.contains(this.$element)) return
+			this._requestOpenFrame(() => {
+				if (!document.body.contains(this.$element)) return
 				this.$element.setAttribute('open', '')
 				this._setInitialFocus()
 				this._startAutoDismiss()
@@ -621,10 +665,21 @@ class GooDialogControllerRuntime {
 	 * @returns {Promise<void>}
 	 */
 	async close() {
+		if (this._closePromise) return this._closePromise
 		if (!this._isOpen) return
 
+		this._closePromise = this._close()
+		try {
+			await this._closePromise
+		} finally {
+			this._closePromise = null
+		}
+	}
+
+	async _close() {
 		this._isOpen = false
 		this._clearAutoDismiss()
+		this._cleanupOpenResources()
 
 		// Resolve the promise if not already resolved (e.g., when called via widget.destroy())
 		// This ensures .then()/.finally() handlers are triggered
@@ -641,12 +696,15 @@ class GooDialogControllerRuntime {
 		}
 
 		// Wait for animation
-		await new Promise((r) => setTimeout(r, TRANSITION_DURATION))
+		await new Promise<void>(resolve => {
+			this._openLifecycle.timeout(resolve, TRANSITION_DURATION)
+		})
 
 		// Cleanup
 		this.$element.removeAttribute('open')
 		this.$element.classList.remove('goo-dialog--hiding')
 		this.$element.remove()
+		this._cleanupOpenResources()
 
 		if (this._$backdrop) {
 			this._$backdrop.remove()
@@ -663,6 +721,23 @@ class GooDialogControllerRuntime {
 
 		// Callback
 		if (this._onClose) this._onClose()
+	}
+
+	/**
+	 * Close and permanently tear down dialog-owned resources.
+	 * @returns {Promise<void>}
+	 */
+	async destroy() {
+		if (this._destroyed) return
+		this._destroyed = true
+		await this.close()
+		this._destroyElement()
+		this.$element.remove()
+		this._$backdrop?.remove()
+		this._$backdrop = null
+		dialogManager.unregister(this)
+		this._resolve?.({ cancel: true })
+		this._resolve = null
 	}
 
 	/**
@@ -702,8 +777,7 @@ interface GooDialogControllerRuntime extends GooDialogController {}
 /**
  * Goo dialog instance.
  */
-export type GooDialogInstance<TValues extends DialogValues = DialogValues> =
-	GooDialogController<TValues>
+export type GooDialogInstance<TValues extends DialogValues = DialogValues> = GooDialogController<TValues>
 
 /**
  * Creates goo dialog.

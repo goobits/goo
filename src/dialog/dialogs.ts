@@ -3,7 +3,7 @@
  * @module goobits/dialog/dialogs
  */
 
-import { createGooDialog, type DialogField, type DialogLabels, type DialogResult, type DialogVerifyHandler, type GooDialogDefaultFocus, type GooDialogInstance } from './GooDialogControllerRuntime.ts'
+import { createGooDialog, type DialogField, type DialogLabels, type DialogResult, type DialogVerifyHandler, type GooDialogDefaultFocus, type GooDialogInstance } from './dialog.ts'
 
 /** Task returned by dialog convenience helpers. */
 export type GooDialogTask = {
@@ -22,6 +22,7 @@ export interface GooAlertOptions {
 	className?: string
 	content: string | Node
 	heading?: string
+	showBackdrop?: boolean
 	showClose?: boolean
 }
 
@@ -32,6 +33,7 @@ export interface GooConfirmOptions {
 	defaultFocus?: Extract<GooDialogDefaultFocus, 'ok' | 'cancel'>
 	heading?: string
 	labels?: DialogLabels
+	showBackdrop?: boolean
 }
 
 /** Options accepted by `GooPrompt`. */
@@ -59,6 +61,7 @@ export interface GooOverlayOptions {
 	className?: string
 	content: string | Node
 	heading?: string
+	showBackdrop?: boolean
 	showClose?: boolean
 }
 

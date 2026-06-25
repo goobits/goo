@@ -1,3 +1,5 @@
+/// <reference path="../svelte.d.ts" />
+
 export {
 	createGooDialog,
 	type DialogField,
@@ -9,7 +11,7 @@ export {
 	type GooDialogDefaultFocus,
 	type GooDialogInstance,
 	type GooDialogOptions,
-	type GooDialogType } from './GooDialogControllerRuntime.ts'
+	type GooDialogType } from './dialog.ts'
 export { createGooDialogTextContent, createTrustedGooDialogContent } from './dialogContent.ts'
 export {
 	GooAlert,

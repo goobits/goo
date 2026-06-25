@@ -41,6 +41,7 @@
 
 	/* Non-interactive by default */
 	pointer-events: none;
+	z-index: var(--goo-tooltip-z-index, 2147483647);
 }
 
 /* Interactive tooltips can receive pointer events */
@@ -89,7 +90,7 @@
 
 /* Warning tooltip */
 .goo-popout.goo-tooltip--warning {
-	--goo-popout-bg: var(--goo-theme-warning, #fbbf24);
+	--goo-popout-bg: var(--goo-theme-warning, #f59e0b);
 	--goo-popout-fg: var(--goo-theme-warning-fg, #000);
 	--goo-popout-border: transparent;
 }

@@ -1,10 +1,6 @@
 import { flushSync, mount, unmount } from 'svelte'
 
-import {
-	createFolder,
-	type GooFolderElement,
-	type GooFolderOptions
-} from '../folder/_createFolder.ts'
+import { createFolder, type GooFolderElement, type GooFolderOptions } from '../folder/_createFolder.ts'
 import type { ChildContainerHost } from '../support/utils/_childContainer.ts'
 import GooPanelComponent from './GooPanel.svelte'
 
@@ -75,7 +71,7 @@ export function createPanel(options: GooPanelOptions = {}): GooPanelElement {
 		target,
 		props: {
 			...options,
-			onelement: (nextElement: GooPanelElement | null) => {
+			onelement: nextElement => {
 				element = nextElement
 			},
 			createFolder

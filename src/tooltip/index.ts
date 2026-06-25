@@ -1,3 +1,5 @@
+/// <reference path="../svelte.d.ts" />
+
 export { default as GooTooltip } from './GooTooltip.svelte'
 export {
 	gooTooltipRuntime,

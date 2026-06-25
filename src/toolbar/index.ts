@@ -1,3 +1,5 @@
+/// <reference path="../svelte.d.ts" />
+
 import './Toolbar.css'
 
 export type { CreateFloatingToolbarViewOptions, FloatingToolbarElement } from './createFloatingToolbarView.ts'

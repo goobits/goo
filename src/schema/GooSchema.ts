@@ -7,7 +7,7 @@ import './GooSchema.css'
 
 import { type GooSvelteControlModule, resolveGooControlTypeConfig } from '../controller/controlRegistry.ts'
 import { createGooController } from '../controller/GooController.ts'
-import { createSvelteControlHost } from '../controller/svelteControl.svelte.ts'
+import { createSvelteControlHost, type SvelteControlHost } from '../controller/SvelteControl.svelte.ts'
 import { createFolder, type GooFolderElement } from '../folder/_createFolder.ts'
 import { createPanel } from '../panel/_createPanel.ts'
 import { schemaLog as log } from '../support/utils/logger.ts'
@@ -92,10 +92,15 @@ export interface GooSchema extends HTMLElement {
 	setSchema(schema: GooSchemaType): void
 }
 
+type GooSchemaController = (HTMLElement | SvelteControlHost) & {
+	destroy?: () => void
+}
+
 type GooSchemaInternal = GooSchema & {
 	_changeHandler: GooSchemaChangeHandler | null
-	_controllers: Map<string, unknown>
+	_controllers: Map<string, GooSchemaController>
 	_data: GooSchemaData
+	_destroyed: boolean
 	_onpreset: ((preset: GooSchemaPreset) => void) | null
 	_onreset: ((data: GooSchemaData) => void) | null
 	_rebuildPending: boolean
@@ -134,6 +139,7 @@ function initializeSchema(element: GooSchemaInternal, options: GooSchemaOptions)
 		controlTypes: options.controlTypes
 	}
 	element._data = options.data || {}
+	element._destroyed = false
 	element._changeHandler = options.onchange || null
 	element._onreset = options.onreset || null
 	element._onpreset = options.onpreset || null
@@ -148,22 +154,30 @@ function initializeSchema(element: GooSchemaInternal, options: GooSchemaOptions)
 function attachSchemaApi(element: GooSchemaInternal): void {
 	Object.assign(element, {
 		destroy: () => {
+			if (element._destroyed) return
+			element._destroyed = true
+			element._rebuildPending = false
+			element._rebuildToken += 1
+			destroySchemaControllers(element)
 			element._root = null
 			element._toolbar = null
-			element._controllers.clear()
+			element.replaceChildren()
 			element.remove()
 		},
 		getController: (path: string) => element._controllers.get(path) as HTMLElement | undefined,
 		getData: () => element._data,
 		getSchema: () => element.state.schema,
 		refreshConditions: () => {
+			if (element._destroyed) return
 			void element._rebuild()
 		},
 		setData: (data: GooSchemaData) => {
+			if (element._destroyed) return
 			mergeSchemaData(element._data, data)
 			updateSchemaAfterDataMutation(element)
 		},
 		setOptions: (options: GooSchemaUpdateOptions) => {
+			if (element._destroyed) return
 			let shouldRebuild = false
 			if ('defaults' in options && element.state.defaults !== options.defaults) {
 				element.state.defaults = options.defaults
@@ -200,10 +214,12 @@ function attachSchemaApi(element: GooSchemaInternal): void {
 			if (shouldRebuild) element._scheduleRebuild()
 		},
 		setSchema: (schema: GooSchemaType) => {
+			if (element._destroyed) return
 			element.state.schema = schema
 			void element._rebuild()
 		},
 		refresh: () => {
+			if (element._destroyed) return
 			for (const [ , controller ] of element._controllers) {
 				const refreshable = controller as { refresh?: () => void; updateDisplay?: () => void }
 				if (refreshable.refresh) {
@@ -215,9 +231,11 @@ function attachSchemaApi(element: GooSchemaInternal): void {
 			updateSchemaActionState(element)
 		},
 		_scheduleRebuild: () => {
+			if (element._destroyed) return
 			if (element._rebuildPending) return
 			element._rebuildPending = true
 			queueMicrotask(() => {
+				if (element._destroyed) return
 				element._rebuildPending = false
 				void element._rebuild()
 			})
@@ -265,7 +283,6 @@ function isPlainRecord(value: unknown): value is GooSchemaData {
 		&& Object.getPrototypeOf(value) === Object.prototype
 }
 
-/** Processes has conditions for schema-driven controls. */
 export function schemaHasConditions(schema: GooSchemaType): boolean {
 	const nodes = Array.isArray(schema) ? schema : schema.children
 	return nodes.some(nodeHasConditions)
@@ -278,12 +295,13 @@ function nodeHasConditions(node: GooSchemaNode): boolean {
 }
 
 async function rebuildSchema(element: GooSchemaInternal): Promise<void> {
+	if (element._destroyed) return
 	const token = ++element._rebuildToken
 
+	destroySchemaControllers(element)
 	element.replaceChildren()
 	element._root = null
 	element._toolbar = null
-	element._controllers.clear()
 
 	const schema = element.state.schema
 	if (!schema || !element._data) return
@@ -483,7 +501,10 @@ async function buildSelfContainedField(
 	})
 
 	const hostElement = host.create()
-	if (token !== element._rebuildToken) return
+	if (token !== element._rebuildToken) {
+		host.destroy()
+		return
+	}
 
 	element._controllers.set(node.path, host)
 
@@ -493,6 +514,13 @@ async function buildSelfContainedField(
 	} else {
 		parent.appendChild(hostElement)
 	}
+}
+
+function destroySchemaControllers(element: GooSchemaInternal): void {
+	for (const controller of element._controllers.values()) {
+		controller.destroy?.()
+	}
+	element._controllers.clear()
 }
 
 function isGooSvelteControlModule(module: unknown): module is GooSvelteControlModule {

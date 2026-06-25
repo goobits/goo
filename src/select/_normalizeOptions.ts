@@ -45,6 +45,7 @@ export function normalizeOption(opt: unknown): GooSelectOption | null {
 		type: (optObj.type as GooSelectOption['type']) || 'option',
 		label: (optObj.label || optObj.title || '') as GooSelectOption['label'],
 		id: (optObj.id as string) || labelToId(optObj.label as string || optObj.title as string || ''),
+		tone: optObj.tone as GooSelectOption['tone'],
 		icon: optObj.icon as GooSelectOption['icon'],
 		shortcut: optObj.shortcut as GooSelectOption['shortcut'],
 		isDisabled: optObj.isDisabled as GooSelectOption['isDisabled'],
@@ -129,4 +130,21 @@ export function normalizeOptions(options: unknown): GooSelectOption[] {
 	}
 
 	return []
+}
+
+/**
+ * Find an option by ID in a nested option tree.
+ * @param options - Options to search.
+ * @param id - Option ID.
+ * @returns Matching option or null.
+ */
+export function findOptionById(options: GooSelectOption[], id: string): GooSelectOption | null {
+	for (const option of options) {
+		if (option.id === id) return option
+		if (option.options) {
+			const found = findOptionById(option.options, id)
+			if (found) return found
+		}
+	}
+	return null
 }

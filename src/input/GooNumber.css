@@ -260,6 +260,34 @@
 	background: var(--goo-number-border);
 }
 
+@keyframes goo-number-value-pulse-a {
+	0% {
+		opacity: 0;
+	}
+
+	25% {
+		opacity: 1;
+	}
+
+	100% {
+		opacity: 0;
+	}
+}
+
+@keyframes goo-number-value-pulse-b {
+	0% {
+		opacity: 0;
+	}
+
+	25% {
+		opacity: 1;
+	}
+
+	100% {
+		opacity: 0;
+	}
+}
+
 /* RTL support */
 [dir='rtl'] .goo-number {
 	--goo-number-leading-padding: calc(var(--goo-number-stepper-space) + var(--goo-number-unit-padding, 0px));

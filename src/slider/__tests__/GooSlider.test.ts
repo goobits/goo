@@ -1,12 +1,21 @@
+import { readFileSync } from 'node:fs'
+
 import { fireEvent, render } from '@testing-library/svelte'
 import { tick } from 'svelte'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { pointerEvent } from '../../__tests__/_pointerEvents.ts'
+import { createSliderPrimitiveField } from '../_createSliderPrimitiveField.ts'
 import GooSlider from '../GooSlider.svelte'
 import type { GooSliderElement } from '../types.ts'
 
+const sliderCss = readFileSync('src/slider/GooSlider.css', 'utf8')
+
 describe('GooSlider', () => {
+	afterEach(() => {
+		vi.useRealTimers()
+	})
+
 	it('renders a native slider surface without custom element tags', () => {
 		const { container } = render(GooSlider, {
 			props: {
@@ -58,6 +67,25 @@ describe('GooSlider', () => {
 		element?.setValue(70)
 
 		expect(element?.getValue()).toBe(70)
+	})
+
+	it('updates primitive field values without remounting the slider', async() => {
+		const field = createSliderPrimitiveField({ value: 25, min: 0, max: 100 })
+		document.body.appendChild(field)
+		await tick()
+
+		const slider = field.querySelector<GooSliderElement>('.goo-slider')!
+		field.setValue(70)
+		await tick()
+
+		expect(field.querySelector('.goo-slider')).toBe(slider)
+		expect(field.getValue()).toBe(70)
+
+		field.destroy()
+		field.destroy()
+		field.setValue(20)
+
+		expect(field.querySelector('.goo-slider')).toBeNull()
 	})
 
 	it('emits Svelte callbacks with numeric values', async() => {
@@ -212,6 +240,342 @@ describe('GooSlider', () => {
 		expect(onchange).toHaveBeenCalled()
 	})
 
+	it('renders ticks and labeled marks on the slider track', () => {
+		const { container } = render(GooSlider, {
+			props: {
+				value: 50,
+				min: 0,
+				max: 100,
+				ticks: 2,
+				marks: [
+					{ value: 25, label: 'Low' },
+					{ value: 75, label: 'High' }
+				]
+			}
+		})
+		const marks = container.querySelectorAll<HTMLElement>('.goo-slider__mark')
+
+		expect(marks).toHaveLength(5)
+		expect(container.querySelector('.goo-slider__mark-label')?.textContent).toBe('Low')
+		expect([ ...marks ].map(mark => mark.style.left)).toContain('75%')
+	})
+
+	it('snaps values to explicit snap points', async() => {
+		const { container } = render(GooSlider, {
+			props: {
+				value: 12,
+				min: 0,
+				max: 100,
+				snap: [ 0, 10, 100 ]
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+
+		await tick()
+
+		expect(slider.getValue()).toBe(10)
+	})
+
+	it('uses explicit mode="variance" without the legacy variance boolean', () => {
+		const { container } = render(GooSlider, {
+			props: {
+				value: [ 30, 50, 70 ],
+				mode: 'variance'
+			}
+		})
+
+		expect(container.querySelector('.goo-slider')?.hasAttribute('variance')).toBe(true)
+		expect(container.querySelectorAll('.goo-slider__thumb--variance-control')).toHaveLength(2)
+	})
+
+	it('maps log-scaled values to track percentage', () => {
+		const { container } = render(GooSlider, {
+			props: {
+				value: 10,
+				min: 1,
+				max: 100,
+				scale: 'log'
+			}
+		})
+		const thumb = container.querySelector<HTMLElement>('.goo-slider__thumb')!
+
+		expect(thumb.style.left).toBe('50%')
+	})
+
+	it('enforces minimum distance between range thumbs', async() => {
+		const { container } = render(GooSlider, {
+			props: {
+				value: [ 20, 35 ],
+				min: 0,
+				max: 100,
+				step: 5,
+				minDistance: 15
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const thumbs = container.querySelectorAll<HTMLElement>('.goo-slider__thumb')
+
+		await fireEvent.keyDown(thumbs[1]!, { key: 'ArrowLeft' })
+
+		expect(slider.getValue()).toEqual([ 20, 35 ])
+	})
+
+	it('renders value bubbles when enabled', () => {
+		const { container } = render(GooSlider, {
+			props: {
+				value: 42,
+				valueBubble: true
+			}
+		})
+
+		expect(container.querySelector('.goo-slider__value-bubble')?.textContent).toBe('42')
+	})
+
+	it('renders variance handles with side-control roles', () => {
+		const { container } = render(GooSlider, {
+			props: {
+				value: [ 30, 50, 70 ],
+				min: 0,
+				max: 100,
+				variance: true
+			}
+		})
+		const slider = container.querySelector<HTMLElement>('.goo-slider')!
+		const thumbs = container.querySelectorAll<HTMLElement>('.goo-slider__thumb')
+
+		expect(slider.classList.contains('goo-slider--variance')).toBe(true)
+		expect(slider.hasAttribute('variance')).toBe(true)
+		expect(thumbs[0]?.classList.contains('goo-slider__thumb--variance-control')).toBe(true)
+		expect(thumbs[1]?.classList.contains('goo-slider__thumb--variance-base')).toBe(true)
+		expect(thumbs[2]?.classList.contains('goo-slider__thumb--variance-control')).toBe(true)
+		expect(thumbs[0]?.classList.contains('goo-slider__thumb--variance-low')).toBe(true)
+		expect(thumbs[2]?.classList.contains('goo-slider__thumb--variance-high')).toBe(true)
+		expect(thumbs[0]?.dataset.role).toBe('variance')
+		expect(thumbs[1]?.dataset.role).toBe('base')
+		expect(thumbs[2]?.dataset.role).toBe('variance')
+		expect(thumbs[0]?.dataset.side).toBe('low')
+		expect(thumbs[1]?.dataset.side).toBe('base')
+		expect(thumbs[2]?.dataset.side).toBe('high')
+		expect(thumbs[0]?.getAttribute('aria-label')).toBe('Value low')
+		expect(thumbs[1]?.getAttribute('aria-label')).toBe('Value base')
+		expect(thumbs[2]?.getAttribute('aria-label')).toBe('Value high')
+	})
+
+	it('styles variance coverage as a mirrored gradient in both directions', () => {
+		expect(sliderCss).toContain('.goo-slider.goo-slider--variance .goo-slider__coverage')
+		expect(sliderCss).toContain('linear-gradient(\n\t\tto right')
+		expect(sliderCss).toContain('.goo-slider.goo-slider--variance.goo-slider--vertical .goo-slider__coverage')
+		expect(sliderCss).toContain('linear-gradient(\n\t\tto top')
+		expect(sliderCss).toContain('rotate(45deg)')
+		expect(sliderCss).toContain('translateX(-50%) translateY(50%) rotate(45deg)')
+		expect(sliderCss).not.toContain('clip-path: polygon')
+	})
+
+	it('moves variance side controls symmetrically when one side changes', async() => {
+		const onchange = vi.fn()
+		const { container } = render(GooSlider, {
+			props: {
+				value: [ 30, 50, 70 ],
+				min: 0,
+				max: 100,
+				step: 5,
+				variance: true,
+				onchange
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const thumbs = container.querySelectorAll<HTMLElement>('.goo-slider__thumb')
+
+		await fireEvent.keyDown(thumbs[2]!, { key: 'ArrowRight' })
+
+		expect(slider.getValue()).toEqual([ 25, 50, 75 ])
+		expect(onchange.mock.calls[0]?.[0]).toEqual([ 25, 50, 75 ])
+	})
+
+	it('slides variance side controls with the base control', async() => {
+		const { container } = render(GooSlider, {
+			props: {
+				value: [ 30, 50, 70 ],
+				min: 0,
+				max: 100,
+				step: 5,
+				variance: true
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const thumbs = container.querySelectorAll<HTMLElement>('.goo-slider__thumb')
+
+		await fireEvent.keyDown(thumbs[1]!, { key: 'ArrowRight' })
+
+		expect(slider.getValue()).toEqual([ 35, 55, 75 ])
+	})
+
+	it('keeps variance side controls mirrored when dragged toward the base', async() => {
+		const { container } = render(GooSlider, {
+			props: {
+				value: [ 40, 50, 60 ],
+				min: 0,
+				max: 100,
+				step: 10,
+				variance: true
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const thumbs = container.querySelectorAll<HTMLElement>('.goo-slider__thumb')
+
+		await fireEvent.keyDown(thumbs[0]!, { key: 'ArrowRight' })
+
+		expect(slider.getValue()).toEqual([ 50, 50, 50 ])
+	})
+
+	it('keeps variance high control mirrored when dragged toward the base', async() => {
+		const { container } = render(GooSlider, {
+			props: {
+				value: [ 40, 50, 60 ],
+				min: 0,
+				max: 100,
+				step: 10,
+				variance: true
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const thumbs = container.querySelectorAll<HTMLElement>('.goo-slider__thumb')
+
+		await fireEvent.keyDown(thumbs[2]!, { key: 'ArrowLeft' })
+
+		expect(slider.getValue()).toEqual([ 50, 50, 50 ])
+	})
+
+	it('expands variance controls symmetrically up to range edges', async() => {
+		const { container } = render(GooSlider, {
+			props: {
+				value: [ 10, 50, 90 ],
+				min: 0,
+				max: 100,
+				step: 10,
+				variance: true
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const thumbs = container.querySelectorAll<HTMLElement>('.goo-slider__thumb')
+
+		await fireEvent.keyDown(thumbs[2]!, { key: 'ArrowRight' })
+
+		expect(slider.getValue()).toEqual([ 0, 50, 100 ])
+	})
+
+	it('does not emit when variance side movement is clamped at a range edge', async() => {
+		const onchange = vi.fn()
+		const { container } = render(GooSlider, {
+			props: {
+				value: [ 0, 10, 20 ],
+				min: 0,
+				max: 100,
+				step: 10,
+				variance: true,
+				onchange
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const thumbs = container.querySelectorAll<HTMLElement>('.goo-slider__thumb')
+
+		await fireEvent.keyDown(thumbs[0]!, { key: 'ArrowLeft' })
+
+		expect(slider.getValue()).toEqual([ 0, 10, 20 ])
+		expect(onchange).not.toHaveBeenCalled()
+	})
+
+	it('lets the variance base reach the range edge while compressing only the edge side', async() => {
+		const onchange = vi.fn()
+		const { container } = render(GooSlider, {
+			props: {
+				value: [ 0, 10, 20 ],
+				min: 0,
+				max: 100,
+				step: 10,
+				variance: true,
+				onchange
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const thumbs = container.querySelectorAll<HTMLElement>('.goo-slider__thumb')
+
+		await fireEvent.keyDown(thumbs[1]!, { key: 'ArrowLeft' })
+
+		expect(slider.getValue()).toEqual([ 0, 0, 10 ])
+		expect(onchange.mock.calls[0]?.[0]).toEqual([ 0, 0, 10 ])
+	})
+
+	it('preserves variance radius on the free side as the base reaches the edge', async() => {
+		const { container } = render(GooSlider, {
+			props: {
+				value: [ 30, 50, 70 ],
+				min: 0,
+				max: 100,
+				step: 10,
+				variance: true
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const thumbs = container.querySelectorAll<HTMLElement>('.goo-slider__thumb')
+
+		await fireEvent.keyDown(thumbs[1]!, { key: 'End' })
+
+		expect(slider.getValue()).toEqual([ 80, 100, 100 ])
+	})
+
+	it('restores the compressed variance side when the base moves back from the edge', async() => {
+		const { container } = render(GooSlider, {
+			props: {
+				value: [ 80, 100, 100 ],
+				min: 0,
+				max: 100,
+				step: 10,
+				variance: true
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const thumbs = container.querySelectorAll<HTMLElement>('.goo-slider__thumb')
+
+		await fireEvent.keyDown(thumbs[1]!, { key: 'ArrowLeft' })
+		await fireEvent.keyDown(thumbs[1]!, { key: 'ArrowLeft' })
+		await fireEvent.keyDown(thumbs[1]!, { key: 'ArrowLeft' })
+
+		expect(slider.getValue()).toEqual([ 50, 70, 90 ])
+	})
+
+	it('drags the clicked variance base even when it overlaps an edge control', () => {
+		const { container } = render(GooSlider, {
+			props: {
+				value: [ 0, 0, 20 ],
+				min: 0,
+				max: 100,
+				step: 1,
+				variance: true
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const track = container.querySelector<HTMLElement>('.goo-slider__track')!
+		const thumbs = container.querySelectorAll<HTMLElement>('.goo-slider__thumb')
+		track.getBoundingClientRect = () => ({
+			x: 0,
+			y: 0,
+			width: 100,
+			height: 20,
+			top: 0,
+			right: 100,
+			bottom: 20,
+			left: 0,
+			toJSON: () => ({})
+		})
+		slider.setPointerCapture = vi.fn()
+
+		thumbs[1]!.dispatchEvent(pointerEvent('pointerdown', { pointerId: 3, clientX: 0 }))
+		slider.dispatchEvent(pointerEvent('pointermove', { pointerId: 3, clientX: 10 }))
+
+		expect(slider.getValue()).toEqual([ 0, 10, 30 ])
+	})
+
 	it('disables the hidden form value when the slider is disabled', () => {
 		const { container } = render(GooSlider, {
 			props: {
@@ -277,6 +641,87 @@ describe('GooSlider', () => {
 		vi.useRealTimers()
 	})
 
+	it('settles snapped drag jumps with a snap animation', async() => {
+		vi.useFakeTimers()
+		const { container } = render(GooSlider, {
+			props: {
+				value: 0,
+				min: 0,
+				max: 100,
+				snap: [ 0, 50, 100 ]
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const track = container.querySelector<HTMLElement>('.goo-slider__track')!
+		const thumb = container.querySelector<HTMLElement>('.goo-slider__thumb')!
+		track.getBoundingClientRect = () => ({
+			x: 0,
+			y: 0,
+			width: 100,
+			height: 20,
+			top: 0,
+			right: 100,
+			bottom: 20,
+			left: 0,
+			toJSON: () => ({})
+		})
+		slider.setPointerCapture = vi.fn()
+		slider.releasePointerCapture = vi.fn()
+
+		thumb.dispatchEvent(pointerEvent('pointerdown', { pointerId: 4, clientX: 0 }))
+		slider.dispatchEvent(pointerEvent('pointermove', { pointerId: 4, clientX: 60 }))
+		await tick()
+
+		expect(slider.getValue()).toBe(50)
+		expect(slider.classList.contains('goo-slider--snap-animate')).toBe(true)
+		expect(slider.classList.contains('goo-slider--animate')).toBe(false)
+
+		vi.runAllTimers()
+		await tick()
+
+		expect(slider.classList.contains('goo-slider--snap-animate')).toBe(false)
+		slider.dispatchEvent(pointerEvent('pointerup', { pointerId: 4, clientX: 60 }))
+		vi.useRealTimers()
+	})
+
+	it('cleans active pointer capture and timers when unmounted mid-drag', async() => {
+		vi.useFakeTimers()
+		const { container, unmount } = render(GooSlider, {
+			props: {
+				value: 0,
+				min: 0,
+				max: 100,
+				snap: [ 0, 50, 100 ]
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const track = container.querySelector<HTMLElement>('.goo-slider__track')!
+		const thumb = container.querySelector<HTMLElement>('.goo-slider__thumb')!
+		track.getBoundingClientRect = () => ({
+			x: 0,
+			y: 0,
+			width: 100,
+			height: 20,
+			top: 0,
+			right: 100,
+			bottom: 20,
+			left: 0,
+			toJSON: () => ({})
+		})
+		slider.setPointerCapture = vi.fn()
+		slider.releasePointerCapture = vi.fn()
+
+		thumb.dispatchEvent(pointerEvent('pointerdown', { pointerId: 8, clientX: 0 }))
+		slider.dispatchEvent(pointerEvent('pointermove', { pointerId: 8, clientX: 60 }))
+		await tick()
+
+		unmount()
+		vi.runAllTimers()
+
+		expect(slider.releasePointerCapture).toHaveBeenCalledExactlyOnceWith(8)
+		vi.useRealTimers()
+	})
+
 	it('ignores non-primary pointer drags', () => {
 		const oninput = vi.fn()
 		const onchange = vi.fn()
@@ -322,5 +767,42 @@ describe('GooSlider', () => {
 		expect(slider.releasePointerCapture).toHaveBeenCalledExactlyOnceWith(7)
 		expect(oninput).toHaveBeenCalled()
 		expect(onchange).not.toHaveBeenCalled()
+	})
+
+	it('stops thumb drags when the pointer is released outside the slider', () => {
+		const oninput = vi.fn()
+		const onchange = vi.fn()
+		const { container } = render(GooSlider, {
+			props: {
+				value: 20,
+				oninput,
+				onchange
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const track = container.querySelector<HTMLElement>('.goo-slider__track')!
+		const thumb = container.querySelector<HTMLElement>('.goo-slider__thumb')!
+		track.getBoundingClientRect = () => ({
+			x: 0,
+			y: 0,
+			width: 100,
+			height: 20,
+			top: 0,
+			right: 100,
+			bottom: 20,
+			left: 0,
+			toJSON: () => ({})
+		})
+		slider.setPointerCapture = vi.fn()
+		slider.releasePointerCapture = vi.fn()
+
+		thumb.dispatchEvent(pointerEvent('pointerdown', { pointerId: 5, clientX: 20 }))
+		document.dispatchEvent(pointerEvent('pointerup', { pointerId: 5, clientX: 40 }))
+		slider.dispatchEvent(pointerEvent('pointermove', { pointerId: 5, clientX: 90 }))
+
+		expect(slider.releasePointerCapture).toHaveBeenCalledExactlyOnceWith(5)
+		expect(slider.getValue()).toBe(20)
+		expect(oninput).not.toHaveBeenCalled()
+		expect(onchange).toHaveBeenCalledOnce()
 	})
 })

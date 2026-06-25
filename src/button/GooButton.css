@@ -102,7 +102,7 @@
 	/* Danger variant - destructive actions */
 	&.goo-button--danger,
 	&[variant='danger'] {
-		--goo-button-fg: var(--goo-theme-negative, #ef4444);
+		--goo-button-fg: var(--goo-theme-negative, #f87171);
 		--goo-button-bg: color-mix(in srgb, var(--goo-theme-negative, #ef4444) 5%, transparent);
 		--goo-button-bg-hover: color-mix(
 			in srgb,

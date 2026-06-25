@@ -3,8 +3,8 @@
  * @module goo/context-menu
  */
 
-export type { GooContextMenuElement, GooContextMenuOpenOptions, GooContextMenuOption, GooContextMenuOptions } from './gooContextMenu.ts'
-export { createGooContextMenu } from './gooContextMenu.ts'
+export type { GooContextMenuElement, GooContextMenuOpenOptions, GooContextMenuOption, GooContextMenuOptions } from './GooContextMenu.ts'
+export { createGooContextMenu } from './GooContextMenu.ts'
 export {
 	GooContextMenu,
 	type GooContextMenuManager,
@@ -18,4 +18,4 @@ export {
 	type ManagedGooContextMenuObjectItem,
 	type ManagedGooContextMenuOpenAt,
 	type ManagedGooContextMenuOpenOptions,
-	type ManagedGooContextMenuOptions } from './managedContextMenu.ts'
+	type ManagedGooContextMenuOptions } from './managed-context-menu.ts'

@@ -1,3 +1,5 @@
+/// <reference path="../svelte.d.ts" />
+
 /**
  * Image Diff Component
  *

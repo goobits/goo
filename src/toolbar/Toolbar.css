@@ -16,6 +16,7 @@
 	display: none;
 	margin: 0;
 	outline: none;
+	overflow: hidden;
 	position: absolute;
 	right: 0;
 	text-align: center;
@@ -48,17 +49,19 @@
 	appearance: none;
 	background: transparent;
 	border: 0;
+	border-radius: 0;
 	color: inherit;
 	cursor: pointer;
 	display: block;
 	font-size: var(--goo-theme-icon-lg);
 	height: 44px;
 	line-height: 44px !important;
+	margin: 0;
 	position: relative;
 	transition:
-		background 140ms ease,
-		color 140ms ease,
-		opacity 140ms ease;
+		background 240ms ease,
+		color 240ms ease,
+		opacity 180ms ease;
 	width: 100%;
 }
 
@@ -88,6 +91,13 @@
 	width: var(--goo-theme-icon-lg);
 }
 
+.goo-floating-toolbar__glyph {
+	font-size: 0.7rem;
+	font-weight: 700;
+	letter-spacing: 0;
+	line-height: 1;
+}
+
 .goo-floating-toolbar__tool.disabled {
 	cursor: default;
 	opacity: 0.25;
@@ -100,21 +110,29 @@
 
 .goo-floating-toolbar__tool--selected {
 	background: var(--goo-theme-accent);
-	border-radius: var(--goo-theme-radius-sm);
+	border-radius: 0;
+}
+
+.goo-floating-toolbar__tool[aria-pressed='true'] {
+	background: var(--goo-theme-accent);
+	color: var(--goo-theme-accent-fg);
 }
 
 .goo-floating-toolbar__tool--selected::before {
 	color: var(--goo-theme-accent-fg);
 }
 
-.goo-floating-toolbar__tool--selected > * {
+.goo-floating-toolbar__tool--selected > *,
+.goo-floating-toolbar__tool[aria-pressed='true'] > * {
 	color: var(--goo-theme-accent-fg);
 }
 
 .goo-floating-toolbar hr {
 	background: color-mix(in srgb, var(--goo-theme-fg) 20%, var(--goo-theme-bg));
 	border: 0;
-	margin: 6px 8px 5px;
+	height: 1px;
+	margin: 0;
+	width: 100%;
 }
 
 .goo-toolbar-tool-button {

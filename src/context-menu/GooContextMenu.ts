@@ -13,6 +13,8 @@ import type {
 	GooSelectOption,
 	GooSelectOptionsInput
 } from '../select/index.ts'
+import { createLifecycleBag } from '../support/utils/lifecycleBag.ts'
+import { gooTooltipRuntime } from '../tooltip/index.ts'
 
 /**
  * Goo context menu option.
@@ -92,6 +94,8 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 		onclose
 	} = options
 
+	let contextMenuOpened = false
+
 	// Create GooSelect with context menu defaults
 	const select = createSelectField({
 		options: menuOptions,
@@ -108,13 +112,22 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 		},
 		className: `goo-context-menu ${ className }`.trim(),
 		actionContext,
-		onopen,
-		onclose
+		onopen: () => {
+			contextMenuOpened = true
+			onopen?.()
+		},
+		onclose: () => {
+			contextMenuOpened = false
+			onclose?.()
+		}
 	})
 
 	// Override open to accept position coordinates directly
 	const contextMenu = select as GooContextMenuElement
 	const originalOpen = contextMenu.open.bind(contextMenu)
+	const originalClose = contextMenu.close.bind(contextMenu)
+	const originalDestroy = contextMenu.destroy.bind(contextMenu)
+	const attachments = createLifecycleBag()
 	contextMenu.open = function openContextMenu(opts: GooContextMenuOpenOptions = {}) {
 		const { x, y, at, ...restOpts } = opts
 
@@ -124,11 +137,27 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 			positionAt = { x: x ?? 0, y: y ?? 0 }
 		}
 
-		return originalOpen({
+		gooTooltipRuntime.hide()
+		if (contextMenuOpened || contextMenu.isOpen()) {
+			return contextMenu.updatePosition({
+				...restOpts,
+				at: positionAt
+			})
+		}
+
+		const didOpen = originalOpen({
 			...restOpts,
 			at: positionAt,
 			autoFocus: opts.autoFocus !== false
 		})
+		if (didOpen) {
+			contextMenuOpened = true
+		}
+		return didOpen
+	}
+	contextMenu.close = function closeContextMenu(opts = {}) {
+		contextMenuOpened = false
+		originalClose(opts)
 	}
 
 	// Add convenience method for right-click handling
@@ -150,11 +179,13 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 		}
 
 		$element.addEventListener('contextmenu', contextHandler as EventListener)
+		return attachments.add(() => $element.removeEventListener('contextmenu', contextHandler as EventListener))
+	}
 
-		// Return cleanup function
-		return () => {
-			$element.removeEventListener('contextmenu', contextHandler as EventListener)
-		}
+	contextMenu.destroy = function destroyContextMenu() {
+		attachments.destroy()
+		contextMenuOpened = false
+		originalDestroy()
 	}
 
 	return contextMenu

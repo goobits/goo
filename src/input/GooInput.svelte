@@ -1,5 +1,5 @@
 <script module lang="ts">
-import type { SvelteControlSchema } from '../controller/svelteControl.svelte.ts'
+import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.ts'
 
 /** GooController binding metadata for the Svelte text input component. */
 export const controlSchema: SvelteControlSchema = {
@@ -17,7 +17,6 @@ export const controlSchema: SvelteControlSchema = {
 
 <script lang="ts" generics="T = string">
 import { onDestroy } from 'svelte'
-import '../field/goo-field.css'
 import './GooInput.css'
 
 import type { GooInputProps } from './types.ts'

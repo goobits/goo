@@ -78,6 +78,7 @@ let openedOverride = $state<boolean | undefined>()
 let valueOverride = $state<TriggerValue>({})
 let contentFadeActive = $state(false)
 let contentFadeTimer: ReturnType<typeof setTimeout> | undefined
+let contentFadeFrame = 0
 let lastContentSignature = ''
 const triggerClass = $derived([
 	'goo-grid-trigger',
@@ -169,7 +170,8 @@ $effect(() => {
 function playContentFade(): void {
 	clearContentFadeTimer()
 	contentFadeActive = false
-	requestAnimationFrame(() => {
+	contentFadeFrame = requestAnimationFrame(() => {
+		contentFadeFrame = 0
 		contentFadeActive = true
 		contentFadeTimer = setTimeout(() => {
 			contentFadeActive = false
@@ -179,6 +181,10 @@ function playContentFade(): void {
 }
 
 function clearContentFadeTimer(): void {
+	if (contentFadeFrame) {
+		cancelAnimationFrame(contentFadeFrame)
+		contentFadeFrame = 0
+	}
 	if (!contentFadeTimer) return
 
 	clearTimeout(contentFadeTimer)

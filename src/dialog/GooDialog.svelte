@@ -1,8 +1,8 @@
 <script lang="ts">
 import { untrack } from 'svelte'
 import type { Snippet } from 'svelte'
-import { createGooDialog } from './GooDialogControllerRuntime.ts'
-import type { GooDialogInstance, GooDialogOptions, DialogResult } from './GooDialogControllerRuntime.ts'
+import { createGooDialog } from './dialog.ts'
+import type { GooDialogInstance, GooDialogOptions, DialogResult } from './dialog.ts'
 
 type GooDialogProps = Omit<GooDialogOptions, 'content' | 'onOk' | 'onCancel' | 'onClose'> & {
 	open?: boolean

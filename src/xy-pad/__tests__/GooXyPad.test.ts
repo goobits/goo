@@ -1,12 +1,16 @@
 import { fireEvent, render } from '@testing-library/svelte'
 import { tick } from 'svelte'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { pointerEvent } from '../../__tests__/_pointerEvents.ts'
 import GooXyPad from '../GooXyPad.svelte'
 import type { GooXyPadElement } from '../types.ts'
 
 describe('GooXyPad', () => {
+	afterEach(() => {
+		vi.useRealTimers()
+	})
+
 	it('renders a native XY pad with precision number fields', () => {
 		const { container } = render(GooXyPad, {
 			props: {
@@ -42,6 +46,31 @@ describe('GooXyPad', () => {
 		element?.setValue({ x: 20, y: -15 })
 
 		expect(element?.getValue()).toEqual({ x: 20, y: -15 })
+	})
+
+	it('clears pending number-event suppression timers when unmounted', async() => {
+		vi.useFakeTimers()
+		const clearTimeoutSpy = vi.spyOn(window, 'clearTimeout')
+		let element: GooXyPadElement | null = null
+		const { unmount } = render(GooXyPad, {
+			props: {
+				value: { x: 1, y: 2 },
+				get element() {
+					return element
+				},
+				set element(value) {
+					element = value
+				}
+			}
+		})
+		await tick()
+
+		element?.setValue({ x: 20, y: -15 })
+		unmount()
+
+		expect(clearTimeoutSpy).toHaveBeenCalled()
+		clearTimeoutSpy.mockRestore()
+		vi.useRealTimers()
 	})
 
 	it('emits input while dragging and change on release', () => {

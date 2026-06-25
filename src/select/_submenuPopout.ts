@@ -29,6 +29,7 @@ export class SubmenuPopoutController {
 	#boundaryCleanup: (() => void) | null = null
 	#transitionCleanup: (() => void) | null = null
 	#transitionFrame = 0
+	#transitionFlipFrame = 0
 	#transitionToken = 0
 
 	constructor(renderOptionsList: RenderOptionsList, boundaryHandlers: SubmenuBoundaryHandlers = {}) {
@@ -67,7 +68,7 @@ export class SubmenuPopoutController {
 		this.#popout = createGooPopout({
 			content: this.#createSubmenuFrame($nextSubmenu),
 			parentElement: document.body,
-			className: 'goo-select-submenu-popout goo-select-submenu-popout--morph',
+			className: 'goo-menu-popout goo-select-submenu-popout goo-select-submenu-popout--morph',
 			clickToClose: false,
 			escapeToClose: false,
 			showArrow: true,
@@ -199,7 +200,8 @@ export class SubmenuPopoutController {
 				forceLayout($frame)
 				$frame.style.removeProperty('transition')
 
-				requestAnimationFrame(() => {
+				this.#transitionFlipFrame = requestAnimationFrame(() => {
+					this.#transitionFlipFrame = 0
 					if (token !== this.#transitionToken) return
 					$frame.style.transform = 'translate(0, 0)'
 				})
@@ -224,6 +226,10 @@ export class SubmenuPopoutController {
 		if (this.#transitionFrame) {
 			cancelAnimationFrame(this.#transitionFrame)
 			this.#transitionFrame = 0
+		}
+		if (this.#transitionFlipFrame) {
+			cancelAnimationFrame(this.#transitionFlipFrame)
+			this.#transitionFlipFrame = 0
 		}
 
 		this.#transitionCleanup?.()

@@ -17,7 +17,7 @@
 	--goo-input-fg: var(--goo-theme-fg, rgba(255, 255, 255, 0.9));
 	--goo-input-fg-placeholder: var(--goo-theme-muted);
 	--goo-input-radius: var(--goo-theme-radius-md, 0.5rem);
-	--goo-input-height: var(--goo-theme-control-height-md, 2rem);
+	--goo-input-height: var(--goo-theme-control-height-md, 1.875rem);
 	--goo-input-padding: var(--goo-theme-control-padding-md, 0 0.5rem);
 	--goo-input-motion-fast: var(--goo-theme-transition-fast, 0.15s ease);
 	--goo-input-motion-normal: var(--goo-theme-transition-normal, 0.2s ease);
@@ -63,7 +63,7 @@
 }
 
 .goo-input.goo-input--changed::after {
-	animation: goo-field-value-pulse 260ms ease-out;
+	animation: goo-input-value-pulse 260ms ease-out;
 }
 
 /* Disabled state */
@@ -99,6 +99,20 @@
 
 	&::placeholder {
 		color: var(--goo-input-fg-placeholder);
+	}
+}
+
+@keyframes goo-input-value-pulse {
+	0% {
+		opacity: 0;
+	}
+
+	25% {
+		opacity: 1;
+	}
+
+	100% {
+		opacity: 0;
 	}
 }
 

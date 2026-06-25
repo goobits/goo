@@ -19,8 +19,15 @@ export type CheckboxFieldOptions = {
 
 type MountedCheckbox = ReturnType<typeof mount>
 
+type CheckboxControlElement = HTMLDivElement & {
+	getValue?: () => boolean
+	setValue?: (value: boolean, options?: { silent?: boolean }) => void
+	toggle?: (value?: boolean) => boolean
+}
+
 export type CheckboxFieldElement = HTMLDivElement & {
 	checked: boolean
+	destroy(): void
 	getValue(): boolean
 	setValue(value: boolean): void
 	toggle(value?: boolean): boolean
@@ -33,13 +40,22 @@ export function createCheckboxField(options: CheckboxFieldOptions = {}): Checkbo
 
 	let currentValue = Boolean(options.checked ?? options.value ?? false)
 	let instance: MountedCheckbox | null = null
+	let checkboxElement: CheckboxControlElement | null = null
+	let destroyed = false
 
-	function render(): void {
+	function unmountCheckbox(): void {
 		if (instance) {
 			unmount(instance)
 			instance = null
-			field.replaceChildren()
 		}
+		checkboxElement = null
+		field.replaceChildren()
+	}
+
+	function render(): void {
+		if (destroyed) return
+
+		unmountCheckbox()
 
 		instance = mount(GooCheckbox, {
 			target: field,
@@ -53,12 +69,13 @@ export function createCheckboxField(options: CheckboxFieldOptions = {}): Checkbo
 				tabIndex: options.tabIndex,
 				title: options.title,
 				class: options.class ?? options.className,
-				onchange: (value: boolean, oldValue?: boolean) => {
+				onchange: (value, oldValue) => {
 					currentValue = value
 					options.onchange?.(value, oldValue)
 				}
 			}
 		})
+		checkboxElement = field.querySelector('.goo-checkbox') as CheckboxControlElement | null
 	}
 
 	Object.defineProperties(field, {
@@ -78,11 +95,23 @@ export function createCheckboxField(options: CheckboxFieldOptions = {}): Checkbo
 		}
 	})
 	field.getValue = () => currentValue
-	field.setValue = (value) => {
+	field.setValue = value => {
+		if (destroyed) return
 		currentValue = Boolean(value)
-		render()
+		if (checkboxElement?.setValue) {
+			checkboxElement.setValue(currentValue, { silent: true })
+			currentValue = checkboxElement.getValue?.() ?? currentValue
+		} else {
+			render()
+		}
 	}
-	field.toggle = (value) => {
+	field.toggle = value => {
+		if (destroyed) return false
+		if (checkboxElement?.toggle) {
+			const changed = checkboxElement.toggle(value)
+			currentValue = checkboxElement.getValue?.() ?? currentValue
+			return changed
+		}
 		const oldValue = currentValue
 		const nextValue = value ?? !currentValue
 		if (nextValue === oldValue) return false
@@ -90,6 +119,12 @@ export function createCheckboxField(options: CheckboxFieldOptions = {}): Checkbo
 		render()
 		options.onchange?.(currentValue, oldValue)
 		return true
+	}
+	field.destroy = () => {
+		if (destroyed) return
+		destroyed = true
+		unmountCheckbox()
+		field.remove()
 	}
 
 	render()

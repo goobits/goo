@@ -1,3 +1,5 @@
+/// <reference path="../svelte.d.ts" />
+
 export { default as GooErrorBoundary } from './GooErrorBoundary.svelte'
 export type {
 	GooErrorBoundaryFallback,

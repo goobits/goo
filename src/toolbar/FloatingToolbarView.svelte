@@ -44,8 +44,14 @@
 				id={tool.id}
 				aria-label={tool.tooltip}
 				class={toolClass(tool)}
+				data-affordance-id={tool.affordanceId}
+				data-affordance-kind={tool.affordanceKind}
+				data-affordance-modifier={tool.affordanceModifier}
+				data-affordance-owner-ids={tool.affordanceOwnerIds?.join(' ')}
+				data-affordance-quick-tool-id={tool.affordanceQuickToolId}
 				data-exec={tool.exec}
 				data-tooltip={tool.tooltip}
+				aria-pressed={tool.affordanceKind ? 'false' : undefined}
 				type="button"
 				use:mountFunctionIcon={tool.icon}
 			></button>

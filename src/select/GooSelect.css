@@ -13,7 +13,7 @@
 	--goo-select-bg-elevated: var(--goo-theme-surface-raised);
 	--goo-select-bg-hover: color-mix(in srgb, var(--goo-theme-fg, #fff) 8%, transparent);
 	--goo-select-selected-bg: var(--goo-theme-accent, #3b82f6);
-	--goo-select-selected-fg: var(--goo-theme-accent-fg, #fff);
+	--goo-select-selected-fg: var(--goo-theme-accent-fg, white);
 	--goo-select-bg-flash: var(--goo-theme-accent, #3b82f6);
 	--goo-select-border: var(--goo-theme-border, rgba(128, 128, 128, 0.2));
 	--goo-select-border-focus: var(--goo-theme-accent, #3b82f6);
@@ -36,7 +36,8 @@
 	--goo-select-item-gap: 0.375rem;
 	--goo-select-item-line-height: 1.25rem;
 	--goo-select-item-media-size: calc(var(--goo-select-item-box-size) + var(--goo-select-item-padding-y));
-	--goo-select-font-size: var(--goo-theme-font-size-sm, 0.8125rem);
+	--goo-select-item-bleed-x: calc(var(--goo-select-padding) * -1);
+	--goo-select-font-size: var(--goo-theme-font-size-sm, 0.75rem);
 	--goo-select-height: var(--goo-theme-control-height-md, 2rem);
 	--goo-select-trigger-gap: var(--goo-theme-space-sm, 0.5rem);
 	--goo-select-trigger-icon-size: var(--goo-theme-icon-md, 1rem);
@@ -46,7 +47,7 @@
 	--goo-select-options-offset: var(--goo-theme-space-xs, 0.25rem);
 	--goo-select-content-max-inset: var(--goo-theme-space-xl, 2rem);
 	--goo-select-enter-offset: calc(var(--goo-theme-space-xs, 0.25rem) * -1);
-	--goo-select-shortcut-gap: 2px;
+	--goo-select-shortcut-gap: 3px;
 	--goo-select-divider-size: 1px;
 	--goo-select-scrollbar-border: 2px;
 	--goo-select-scrollbar-size: 0.625rem;
@@ -229,49 +230,46 @@
 /* GooPopout styling for select menus */
 /* Note: Popout is a sibling of .goo-select, not a child, so it can't inherit
    --goo-select-* variables. Define them here for the dropdown options. */
-.goo-popout.goo-select-popout,
-.goo-popout.goo-select-submenu-popout {
-	/* Elevated surface - slightly lighter than main background */
-	--goo-popout-bg: var(--goo-theme-surface-raised);
-	--goo-popout-shadow: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.28))
-		drop-shadow(0 2px 8px rgba(0, 0, 0, 0.18));
+.goo-popout.goo-menu-popout {
 	--goo-select-padding: 0.375rem;
 	padding: 0;
 
 	/* Re-define select variables for popout context */
 	--goo-select-check-size: 0.75rem;
 	--goo-select-item-box-size: 1.25rem;
+	--goo-select-item-bleed-x: calc(var(--goo-select-padding) * -1);
 	--goo-select-item-gap: 0.375rem;
 	--goo-select-item-line-height: 1.25rem;
 	--goo-select-item-padding-x: 0.5rem;
-	--goo-select-font-size: var(--goo-theme-font-size-sm, 0.8125rem);
+	--goo-select-font-size: var(--goo-theme-font-size-sm, 0.75rem);
 	--goo-select-radius: var(--goo-theme-radius-sm, 0.25rem);
 	--goo-select-fg: var(--goo-theme-fg, rgba(255, 255, 255, 0.9));
 	--goo-select-fg-muted: var(--goo-theme-muted);
 	--goo-select-fg-disabled: var(--goo-theme-text-disabled, rgba(128, 128, 128, 0.25));
 	--goo-select-bg-hover: color-mix(in srgb, var(--goo-theme-fg, #fff) 8%, transparent);
 	--goo-select-selected-bg: var(--goo-theme-accent, #3b82f6);
-	--goo-select-selected-fg: var(--goo-theme-accent-fg, #fff);
+	--goo-select-selected-fg: var(--goo-theme-accent-fg, white);
 	--goo-select-accent: var(--goo-theme-accent, #3b82f6);
 	--goo-select-scrollbar-size: 0.625rem;
 	--goo-select-scrollbar-thumb: color-mix(in srgb, var(--goo-select-fg-muted) 70%, transparent);
 	--goo-select-scrollbar-thumb-hover: color-mix(in srgb, var(--goo-select-fg) 55%, transparent);
-	--goo-popout-radius: var(--goo-select-radius, var(--goo-theme-radius-sm, 0.25rem));
+	--goo-popout-radius: var(--goo-theme-radius-lg, 0.6875rem);
 }
 
-.goo-popout.goo-select-popout .goo-popout__content,
-.goo-popout.goo-select-submenu-popout .goo-popout__content {
+.goo-popout.goo-menu-popout .goo-popout__content {
 	height: auto;
 	max-height: none;
 	overflow: visible;
 	position: relative;
 	z-index: 2;
-	background: var(--goo-popout-bg);
+	background: transparent;
 }
 
-.goo-popout.goo-select-popout:focus-visible,
-.goo-popout.goo-select-submenu-popout:focus-visible {
+/* The open menu autofocuses itself; the highlighted row signals focus, so the
+   menu surface needs no dramatic accent ring of its own. */
+.goo-popout.goo-menu-popout:focus-visible {
 	outline: none;
+	box-shadow: none;
 }
 
 .goo-popout.goo-select-popout--outlined {
@@ -282,6 +280,141 @@
 .goo-popout.goo-select-popout--menu-attached {
 	--goo-popout-radius: 0 0 var(--goo-select-radius, var(--goo-theme-radius-sm, 0.25rem))
 		var(--goo-select-radius, var(--goo-theme-radius-sm, 0.25rem));
+}
+
+/* ============================================================================
+   Menu surface (shared): context menus AND select dropdowns vibe together.
+   macOS-style — vibrancy material, hairline chrome, compact rows, and an inset
+   rounded highlight filled with the accent (white text) rather than a tinted
+   band or a left rail. Scoped to .goo-menu-popout, which every menu surface shares.
+   ============================================================================ */
+.goo-popout.goo-menu-popout {
+	--goo-select-item-bleed-x: 0px;
+	--goo-select-item-gap: 0.5rem;
+	--goo-select-item-line-height: 1.0625rem;
+	--goo-select-item-padding-x: 0.625rem;
+	--goo-select-item-padding-y: 0.25rem;
+	--goo-select-radius: 0.25rem;
+	--goo-select-divider-size: 1px;
+
+	/* Translucent vibrancy material: keep the base backdrop blur, drop the
+	   gradient sheen and etched edges, soften to a hairline. Radius is left to
+	   the existing --goo-popout-radius so the menu-attached variant still works. */
+	--goo-popout-bg: color-mix(in srgb, var(--goo-theme-bg, #2d2d32) 92%, transparent);
+	--goo-popout-border: color-mix(in srgb, var(--goo-theme-fg, #fff) 10%, transparent);
+	--goo-popout-shadow:
+		drop-shadow(0 10px 28px rgb(0 0 0 / 26%))
+		drop-shadow(0 2px 8px rgb(0 0 0 / 16%));
+	background-image: none;
+	box-shadow: none;
+}
+
+/* Container insets the highlight from the menu edges (macOS gutter). */
+.goo-popout.goo-menu-popout .goo-popout__content {
+	padding: 0;
+}
+
+.goo-popout.goo-select-popout .goo-select__options {
+	padding: 0.25rem 0.3125rem;
+}
+
+/* Compact rows with a rounded highlight box. */
+.goo-popout.goo-menu-popout .goo-select__option {
+	min-height: 1.375rem;
+	border-radius: 0.375rem;
+	box-shadow: none;
+}
+
+/* Active/selected row: solid accent fill, white-on-accent text (the macOS hallmark). */
+.goo-popout.goo-menu-popout .goo-select__option:hover,
+.goo-popout.goo-menu-popout .goo-select__option--hovered,
+.goo-popout.goo-menu-popout .goo-select__option--selected {
+	background: var(--goo-theme-accent);
+	color: var(--goo-theme-accent-fg, #fff);
+	box-shadow: none;
+}
+
+/* Icon, checkmark, submenu arrow, and shortcut all flip to white on the active row. */
+.goo-popout.goo-menu-popout .goo-select__option:hover .goo-select__icon,
+.goo-popout.goo-menu-popout .goo-select__option--hovered .goo-select__icon,
+.goo-popout.goo-menu-popout .goo-select__option--selected .goo-select__icon,
+.goo-popout.goo-menu-popout .goo-select__option:hover .goo-select__check,
+.goo-popout.goo-menu-popout .goo-select__option--hovered .goo-select__check,
+.goo-popout.goo-menu-popout .goo-select__option--selected .goo-select__check,
+.goo-popout.goo-menu-popout .goo-select__option:hover .goo-select__submenu-arrow,
+.goo-popout.goo-menu-popout .goo-select__option--hovered .goo-select__submenu-arrow,
+.goo-popout.goo-menu-popout .goo-select__option:hover .goo-select__shortcut-key,
+.goo-popout.goo-menu-popout .goo-select__option--hovered .goo-select__shortcut-key {
+	color: var(--goo-theme-accent-fg, #fff);
+}
+
+/* Icons muted at rest. */
+.goo-popout.goo-menu-popout .goo-select__icon {
+	color: color-mix(in srgb, var(--goo-select-fg) 60%, transparent);
+}
+
+/* Destructive rows: red label at rest, red highlight + white text on the active row. */
+.goo-popout.goo-menu-popout .goo-select__option--danger {
+	color: var(--goo-theme-negative);
+}
+
+.goo-popout.goo-menu-popout .goo-select__option--danger .goo-select__icon {
+	color: var(--goo-theme-negative);
+}
+
+/* On hover, destructive rows take the standard accent highlight (like macOS)
+   rather than a red fill: several themes pair --goo-theme-negative with white at
+   only ~3.8:1, so a red fill cannot meet WCAG AA, whereas the accent/accent-fg
+   pair clears AA in every theme. The accent background comes from the normal
+   hover rule above; these rules flip the red text/icon to accent-fg so it does
+   not stay red-on-accent (which is invisible when a theme's red equals its accent). */
+.goo-popout.goo-menu-popout .goo-select__option--danger:hover,
+.goo-popout.goo-menu-popout .goo-select__option--danger.goo-select__option--hovered {
+	color: var(--goo-theme-accent-fg, #fff);
+}
+
+.goo-popout.goo-menu-popout .goo-select__option--danger:hover .goo-select__icon,
+.goo-popout.goo-menu-popout .goo-select__option--danger.goo-select__option--hovered .goo-select__icon {
+	color: var(--goo-theme-accent-fg, #fff);
+}
+
+/* Plain-text shortcuts, secondary color, white on the active row (4-class beats base hover). */
+.goo-popout.goo-menu-popout .goo-select__shortcut {
+	gap: 1px;
+	padding-left: 1.25rem;
+}
+
+.goo-popout.goo-menu-popout .goo-select__shortcut .goo-select__shortcut-key {
+	min-width: 0;
+	height: auto;
+	padding: 0;
+	background: none;
+	border: 0;
+	box-shadow: none;
+	color: color-mix(in srgb, var(--goo-select-fg) 55%, transparent);
+	font-weight: 400;
+}
+
+/* Hairline divider, inset to match the highlight gutter. */
+.goo-popout.goo-menu-popout .goo-select__divider {
+	margin: 0.25rem 0.3125rem;
+	background: color-mix(in srgb, var(--goo-theme-fg) 12%, transparent);
+}
+
+/* Subtle, tight section label. */
+.goo-popout.goo-menu-popout .goo-select__optgroup-label {
+	padding: 0.25rem 0.5rem 0.125rem;
+	color: color-mix(in srgb, var(--goo-select-fg) 45%, transparent);
+	font-size: var(--goo-theme-font-size-xs, 0.6875rem);
+	letter-spacing: 0;
+	text-transform: none;
+}
+
+/* Context menu: a touch wider and fully rounded (not attached to a trigger). */
+.goo-popout.goo-select-popout.goo-context-menu-popout {
+	min-width: 12rem;
+	--goo-popout-radius: 0.75rem;
+	border-radius: 0.75rem;
 }
 
 /* Position above trigger when not enough space below */
@@ -295,11 +428,11 @@
 @keyframes goo-select-fade-in {
 	from {
 		opacity: 0;
-		transform: translateY(var(--goo-select-enter-offset));
+		transform: translateY(var(--goo-select-enter-offset)) scale(0.985);
 	}
 	to {
 		opacity: 1;
-		transform: translateY(0);
+		transform: translateY(0) scale(1);
 	}
 }
 
@@ -312,32 +445,39 @@
 	flex-direction: row;
 	align-items: center;
 	gap: var(--goo-select-item-gap, 0.5rem);
-	padding: var(--goo-select-item-padding-y) var(--goo-select-item-padding-x, 0.625rem);
+	margin-inline: var(--goo-select-item-bleed-x, 0);
+	padding: var(--goo-select-item-padding-y)
+		calc(var(--goo-select-item-padding-x, 0.625rem) - var(--goo-select-item-bleed-x, 0px));
 	min-height: var(--goo-theme-control-height-sm, 1.5rem);
-	border-radius: var(--goo-select-radius, 0.25rem);
+	border-radius: calc(var(--goo-select-radius, 0.25rem) + 0.125rem);
 	color: var(--goo-select-fg, rgba(255, 255, 255, 0.9));
 	cursor: pointer;
 	line-height: var(--goo-select-item-line-height);
-	transition: background 0.1s;
+	transition:
+		background 0.12s ease,
+		color 0.12s ease;
 	user-select: none;
 }
 
-/* Subtle hover - not the strong accent color */
+/* Active row: accent-tinted fill with a thin rounded accent rail down the
+   leading edge, so the focused item is unmistakable without shouting. */
 .goo-select__option:hover,
 .goo-select__option--hovered {
-	background: var(--goo-select-bg-hover);
+	background: color-mix(in srgb, var(--goo-select-accent) 16%, transparent);
+	color: var(--goo-select-fg);
+	box-shadow: inset 2px 0 0 var(--goo-select-accent);
 }
 
-/* Selected state uses accent */
+/* Selected state keeps the checkmark prominent without turning the row into a button. */
 .goo-select__option--selected {
-	background: var(--goo-select-selected-bg);
-	color: var(--goo-select-selected-fg);
+	background: color-mix(in srgb, var(--goo-select-accent) 16%, transparent);
+	color: var(--goo-select-fg);
 }
 
 .goo-select__option--selected:hover,
 .goo-select__option--selected.goo-select__option--hovered {
-	background: var(--goo-select-selected-bg);
-	color: var(--goo-select-selected-fg);
+	background: color-mix(in srgb, var(--goo-select-accent) 24%, transparent);
+	color: var(--goo-select-fg);
 }
 
 .goo-select__option--disabled {
@@ -347,6 +487,24 @@
 
 .goo-select__option--disabled:hover {
 	background: transparent;
+}
+
+/* Destructive rows (set via the option's tone: 'danger'). Resting stays calm
+   with a faintly negative-tinted icon; hover commits to the negative tone. */
+.goo-select__option--danger .goo-select__icon {
+	color: color-mix(in srgb, var(--goo-theme-negative) 75%, var(--goo-select-fg));
+}
+
+.goo-select__option--danger:hover,
+.goo-select__option--danger.goo-select__option--hovered {
+	background: color-mix(in srgb, var(--goo-theme-negative) 16%, transparent);
+	color: var(--goo-theme-negative);
+	box-shadow: inset 2px 0 0 var(--goo-theme-negative);
+}
+
+.goo-select__option--danger:hover .goo-select__icon,
+.goo-select__option--danger.goo-select__option--hovered .goo-select__icon {
+	color: var(--goo-theme-negative);
 }
 
 /* Flash animation on selection */
@@ -367,7 +525,7 @@
 }
 
 .goo-select__option--selected .goo-select__check {
-	color: var(--goo-select-selected-fg);
+	color: var(--goo-select-accent);
 }
 
 .goo-select__check svg {
@@ -383,18 +541,19 @@
 	width: var(--goo-select-item-box-size, 1.25rem);
 	height: var(--goo-select-item-box-size, 1.25rem);
 	flex-shrink: 0;
-	color: var(--goo-select-fg-muted);
+	/* Lifted from muted so icons carry real weight alongside their labels. */
+	color: color-mix(in srgb, var(--goo-select-fg) 68%, transparent);
 }
 
 .goo-select__option:hover .goo-select__icon,
 .goo-select__option--hovered .goo-select__icon {
-	color: var(--goo-select-fg);
+	color: var(--goo-select-accent);
 }
 
 .goo-select__option--selected .goo-select__icon,
 .goo-select__option--selected:hover .goo-select__icon,
 .goo-select__option--selected.goo-select__option--hovered .goo-select__icon {
-	color: var(--goo-select-selected-fg);
+	color: var(--goo-select-fg);
 }
 
 .goo-select__icon img {
@@ -427,7 +586,7 @@
 	gap: var(--goo-select-shortcut-gap);
 	flex-shrink: 0;
 	margin-left: auto;
-	padding-left: 1rem;
+	padding-left: 1.125rem;
 	line-height: var(--goo-select-item-line-height);
 	white-space: nowrap;
 }
@@ -436,20 +595,41 @@
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	min-width: 1.25rem;
-	height: var(--goo-select-item-line-height);
-	padding: 0 var(--goo-select-item-padding-y);
-	background: color-mix(in srgb, var(--goo-theme-fg, #fff) 10%, transparent);
-	border-radius: var(--goo-select-trigger-selected-icon-radius);
-	color: var(--goo-select-fg-muted);
+	min-width: 1.35rem;
+	height: 1.125rem;
+	padding: 0 0.3125rem;
+	/* Tactile keycap: top-lit gradient face, crisp edge, soft physical drop. */
+	background: linear-gradient(
+		color-mix(in srgb, var(--goo-theme-fg, #fff) 11%, transparent),
+		color-mix(in srgb, var(--goo-theme-fg, #fff) 4%, transparent)
+	);
+	border: 1px solid color-mix(in srgb, var(--goo-theme-fg, #fff) 18%, transparent);
+	border-radius: 0.375rem;
+	box-shadow:
+		inset 0 1px 0 color-mix(in srgb, var(--goo-theme-fg, #fff) 18%, transparent),
+		0 1px 1.5px rgb(0 0 0 / 22%);
+	color: color-mix(in srgb, var(--goo-select-fg) 80%, transparent);
 	font-size: var(--goo-theme-font-size-xs, 0.75rem);
 	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+	font-weight: 600;
+	letter-spacing: 0;
 	line-height: 1;
 }
 
+.goo-select__option:hover .goo-select__shortcut-key,
+.goo-select__option--hovered .goo-select__shortcut-key {
+	background: color-mix(in srgb, var(--goo-theme-fg, #fff) 10%, transparent);
+	border-color: color-mix(in srgb, var(--goo-theme-fg, #fff) 22%, transparent);
+	color: var(--goo-select-fg);
+}
+
 .goo-select__option--selected .goo-select__shortcut-key {
-	background: color-mix(in srgb, var(--goo-select-selected-fg) 18%, transparent);
-	color: var(--goo-select-selected-fg);
+	background: color-mix(in srgb, var(--goo-select-accent) 18%, transparent);
+	border-color: color-mix(in srgb, var(--goo-select-accent) 34%, transparent);
+	box-shadow:
+		inset 0 1px 0 color-mix(in srgb, var(--goo-theme-fg, #fff) 12%, transparent),
+		0 1px 2px rgb(0 0 0 / 10%);
+	color: var(--goo-select-fg);
 }
 
 /* ============================================================================
@@ -459,9 +639,9 @@
 .goo-select__divider {
 	height: var(--goo-select-divider-size);
 	min-height: var(--goo-select-divider-size);
-	margin: var(--goo-select-item-gap) 0;
+	margin: var(--goo-select-item-gap) var(--goo-select-item-bleed-x, 0);
 	padding: 0;
-	background: var(--goo-theme-border, rgba(128, 128, 128, 0.2));
+	background: color-mix(in srgb, var(--goo-theme-fg, #fff) 12%, transparent);
 	pointer-events: none;
 }
 
@@ -482,8 +662,10 @@
 
 .goo-select__optgroup-label {
 	display: block;
-	padding: var(--goo-select-item-padding-y) var(--goo-select-item-padding-x);
+	padding: var(--goo-select-item-padding-y)
+		calc(var(--goo-select-item-padding-x, 0.625rem) - var(--goo-select-item-bleed-x, 0px));
 	margin-bottom: var(--goo-select-item-padding-y);
+	margin-inline: var(--goo-select-item-bleed-x, 0);
 	color: var(--goo-theme-muted);
 	font-size: var(--goo-theme-font-size-xs, 0.75rem);
 	font-weight: 600;

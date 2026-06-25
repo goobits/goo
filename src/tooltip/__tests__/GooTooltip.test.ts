@@ -1,12 +1,14 @@
 import { render } from '@testing-library/svelte'
 import { tick } from 'svelte'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import GooTooltip from '../GooTooltip.svelte'
-import { createGooTooltip, gooTooltipRuntime, tooltip, type GooTooltipInstance } from '../index.ts'
+import type { GooTooltipInstance } from '../index.ts'
+import { createGooTooltip, gooTooltipRuntime, tooltip } from '../index.ts'
 
 describe('GooTooltip', () => {
 	afterEach(() => {
+		vi.useRealTimers()
 		gooTooltipRuntime.destroy()
 		document.querySelectorAll('.goo-popout').forEach(element => element.remove())
 		document.querySelectorAll('[aria-describedby]').forEach(element => element.removeAttribute('aria-describedby'))
@@ -101,5 +103,52 @@ describe('GooTooltip', () => {
 		const arrow = document.querySelector('.goo-popout.goo-tooltip.goo-tooltip--cursor-tip .goo-popout__arrow')
 		expect(arrow).not.toBeNull()
 		expect(arrow?.classList.contains('left')).toBe(true)
+	})
+
+	it('removes interactive popout listeners when destroyed', () => {
+		const button = document.createElement('button')
+		document.body.appendChild(button)
+		const instance = createGooTooltip({
+			for: button,
+			content: 'Save',
+			interactive: true,
+			trigger: 'manual'
+		})
+
+		instance.show()
+		const popout = document.querySelector<HTMLElement>('.goo-popout.goo-tooltip')!
+		const removeEventListenerSpy = vi.spyOn(popout, 'removeEventListener')
+
+		instance.destroy()
+
+		expect(removeEventListenerSpy).toHaveBeenCalledWith('mouseenter', expect.any(Function))
+		expect(removeEventListenerSpy).toHaveBeenCalledWith('mouseleave', expect.any(Function))
+		button.remove()
+	})
+
+	it('replaces pending show timers and ignores public updates after destroy', () => {
+		vi.useFakeTimers()
+		const button = document.createElement('button')
+		document.body.appendChild(button)
+		const instance = createGooTooltip({
+			for: button,
+			content: 'Save',
+			showDelay: 50
+		})
+
+		button.dispatchEvent(new MouseEvent('mouseenter'))
+		button.dispatchEvent(new MouseEvent('mouseenter'))
+
+		expect(vi.getTimerCount()).toBe(1)
+
+		instance.destroy()
+		instance.setContent('Ignored')
+		instance.updatePosition(button)
+		instance.show()
+		vi.runAllTimers()
+
+		expect(document.querySelector('.goo-popout.goo-tooltip')).toBeNull()
+		expect(button.getAttribute('aria-describedby')).toBeNull()
+		button.remove()
 	})
 })

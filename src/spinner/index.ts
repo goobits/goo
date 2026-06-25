@@ -3,6 +3,8 @@ import './GooSpinner.css'
 import { resolveSpinnerAttrs } from './_spinnerAttrs.ts'
 import type { GooSpinnerRenderOptions } from './types.ts'
 
+/// <reference path="../svelte.d.ts" />
+
 export { default as GooSpinner } from './GooSpinner.svelte'
 export type { GooSpinnerProps, GooSpinnerRenderOptions, GooSpinnerSize, GooSpinnerVariant } from './types.ts'
 

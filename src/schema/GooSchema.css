@@ -27,7 +27,7 @@
 	box-sizing: border-box;
 	height: var(--goo-theme-control-height-sm, 1.5rem);
 	border: 1px solid var(--goo-theme-border-strong, var(--goo-theme-border));
-	border-radius: var(--goo-theme-radius-sm, 0.25rem);
+	border-radius: var(--goo-theme-radius-sm, 0.375rem);
 	background: var(--goo-theme-surface-raised, color-mix(in srgb, var(--goo-theme-fg, #fff) 6%, transparent));
 	color: var(--goo-theme-fg, inherit);
 	font: inherit;
@@ -106,7 +106,7 @@
 :is(.goo-schema, .goo-schema__bare)
 	.goo-folder
 	.goo-folder__content
-	> .goo-controller.goo-controller--range-module {
+	> .goo-controller.goo-controller--slider-field {
 	--goo-controller-padding: 0.5rem 0;
 }
 

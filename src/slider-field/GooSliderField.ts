@@ -1,54 +1,54 @@
-import './GooRangeModule.css'
+import './GooSliderField.css'
 
 import { mount, unmount } from 'svelte'
 
 import { createNumberField, type NumberInputFieldElement } from '../input/_createInputField.ts'
+import { getSliderProps } from '../slider/_sliderProps.ts'
 import GooSlider from '../slider/GooSlider.svelte'
+import { getVarianceValues } from '../slider/sliderUtils.ts'
 import type { GooSliderElement, GooSliderEventData, GooSliderValue } from '../slider/types.ts'
 import type {
-	GooRangeModuleElement,
-	GooRangeModuleEventData,
-	GooRangeModuleOptions,
-	GooRangeModuleRangeApi,
-	GooRangeModuleState,
-	GooRangeModuleValue
+	GooSliderFieldElement,
+	GooSliderFieldEventData,
+	GooSliderFieldOptions,
+	GooSliderFieldSliderApi,
+	GooSliderFieldState,
+	GooSliderFieldValue
 } from './types.ts'
 
 type MountedControl = ReturnType<typeof mount>
 type ValueMode = 'number' | 'array' | 'minmax' | 'xy'
-type GooRangeSliderElement = GooSliderElement & {
-	setAnimate(index: number, animate: boolean): void
-	toPercent(value: number): number
-}
+type GooSliderFieldSliderElement = GooSliderElement
 
 const DEFAULT_MIN = 0
 const DEFAULT_MAX = 100
 const DEFAULT_STEP = 1
 
-/** Creates range module field for range-module controls. */
-export function createRangeModuleField(options: GooRangeModuleOptions = {}): GooRangeModuleElement {
+export function createSliderField(options: GooSliderFieldOptions = {}): GooSliderFieldElement {
 	let currentOptions = { ...options }
-	const element = document.createElement('div') as GooRangeModuleElement
+	const element = document.createElement('div') as GooSliderFieldElement
 	const headerHost = document.createElement('div')
 	const labelHost = document.createElement('div')
 	const sliderHost = document.createElement('div')
 	const inputHost = document.createElement('div')
 	let sliderInstance: MountedControl | null = null
-	let sliderElement: GooRangeSliderElement | null = null
+	let sliderElement: GooSliderFieldSliderElement | null = null
 	let inputElements: NumberInputFieldElement[] = []
 	let valueMode: ValueMode = detectValueMode(currentOptions.value)
 	let currentValues = normalizeValues(currentOptions.value, currentOptions.min)
-	let state: GooRangeModuleState | 'load' = 'load'
+	let state: GooSliderFieldState | 'load' = 'load'
+	let destroyed = false
 
 	element.className = buildRootClass(currentOptions)
-	headerHost.className = 'goo-range-module__header'
-	labelHost.className = 'goo-range-module__label'
-	sliderHost.className = 'goo-range-module__slider'
-	inputHost.className = 'goo-range-module__inputs'
+	headerHost.className = 'goo-slider-field__header'
+	labelHost.className = 'goo-slider-field__label'
+	sliderHost.className = 'goo-slider-field__slider'
+	inputHost.className = 'goo-slider-field__inputs'
 	headerHost.append(labelHost, inputHost)
 	element.append(headerHost, sliderHost)
 
 	function render(): void {
+		if (destroyed) return
 		element.className = buildRootClass(currentOptions)
 		renderHeader()
 		renderSlider()
@@ -63,46 +63,23 @@ export function createRangeModuleField(options: GooRangeModuleOptions = {}): Goo
 	}
 
 	function renderSlider(): void {
-		if (sliderInstance) {
-			unmount(sliderInstance)
-			sliderInstance = null
-			sliderHost.replaceChildren()
-		}
+		unmountSlider()
 
 		let boundSliderElement: GooSliderElement | null = null
 		sliderInstance = mount(GooSlider, {
 			target: sliderHost,
 			props: {
-				value: toSliderValue(currentValues),
-				min: currentOptions.min ?? DEFAULT_MIN,
-				max: currentOptions.max ?? DEFAULT_MAX,
-				step: currentOptions.step ?? DEFAULT_STEP,
-				unit: currentOptions.unit,
-				label: currentOptions.label,
-				title: currentOptions.title,
-				name: currentOptions.name,
-				direction: currentOptions.direction,
-				preset: currentOptions.preset,
-				presetColor: currentOptions.presetColor,
-				presetHue: currentOptions.presetHue,
-				presetSaturation: currentOptions.presetSaturation,
-				shape: currentOptions.shape,
-				canCross: currentOptions.canCross,
-				canPush: currentOptions.canPush,
-				coverage: currentOptions.coverage,
-				disabled: currentOptions.disabled,
-				gradient: currentOptions.gradient,
-				class: currentOptions.class ?? currentOptions.className,
-				style: currentOptions.style,
-				tabIndex: currentOptions.tabIndex,
-				easingFn: currentOptions.easingFn,
-				easingFnInvert: currentOptions.easingFnInvert,
+				...getSliderProps({ ...currentOptions, value: toSliderValue(currentValues) }, {
+					min: DEFAULT_MIN,
+					max: DEFAULT_MAX,
+					step: DEFAULT_STEP
+				}),
 				get element() {
 					return boundSliderElement
 				},
 				set element(value) {
 					boundSliderElement = value
-					sliderElement = value as GooRangeSliderElement | null
+					sliderElement = value as GooSliderFieldSliderElement | null
 				},
 				oninput: (_value: number | number[], data: GooSliderEventData) => {
 					handleSliderEvent(data, 'input')
@@ -112,7 +89,16 @@ export function createRangeModuleField(options: GooRangeModuleOptions = {}): Goo
 				}
 			}
 		})
-		sliderElement = (boundSliderElement ?? sliderHost.querySelector('.goo-slider')) as GooRangeSliderElement | null
+		sliderElement = (boundSliderElement ?? sliderHost.querySelector('.goo-slider')) as GooSliderFieldSliderElement | null
+	}
+
+	function unmountSlider(): void {
+		if (sliderInstance) {
+			unmount(sliderInstance)
+			sliderInstance = null
+		}
+		sliderElement = null
+		sliderHost.replaceChildren()
 	}
 
 	function renderInputs(): void {
@@ -124,7 +110,7 @@ export function createRangeModuleField(options: GooRangeModuleOptions = {}): Goo
 		const nextValues = getSliderValues()
 		nextValues.forEach((value, index) => {
 			const input = createNumberField({
-				className: `goo-range-module__number goo-range-module__number--index${ index }`,
+				className: `goo-slider-field__number goo-slider-field__number--index${ index }`,
 				max: currentOptions.max,
 				min: currentOptions.min,
 				step: currentOptions.step,
@@ -137,27 +123,35 @@ export function createRangeModuleField(options: GooRangeModuleOptions = {}): Goo
 			inputHost.appendChild(input)
 		})
 
-		inputHost.classList.toggle('goo-range-module__inputs--grouped', inputElements.length > 1)
+		inputHost.classList.toggle('goo-slider-field__inputs--grouped', inputElements.length > 1)
 	}
 
-	function handleSliderEvent(data: GooSliderEventData, nextState: GooRangeModuleState): void {
+	function handleSliderEvent(data: GooSliderEventData, nextState: GooSliderFieldState): void {
 		state = nextState
 		currentValues = getSliderValues()
-		syncInputs(data.index)
+		syncInputs(currentOptions.variance ? undefined : data.index)
 		emit(nextState, data.index, data.value, data.event)
 	}
 
-	function handleNumberInput(index: number, value: number, nextState: GooRangeModuleState): void {
+	function handleNumberInput(index: number, value: number, nextState: GooSliderFieldState): void {
 		state = nextState
-		const values = currentValues.slice()
+		const previousValues = currentValues
+		const values = previousValues.slice()
 		values[index] = value
-		currentValues = values
+		currentValues = currentOptions.variance || currentOptions.mode === 'variance'
+			? getVarianceValues(previousValues, index, value, {
+				min: currentOptions.min ?? DEFAULT_MIN,
+				max: currentOptions.max ?? DEFAULT_MAX
+			})
+			: values
 		sliderElement?.setValue(toSliderValue(currentValues), { silent: true })
-		emit(nextState, index, value)
+		currentValues = getSliderValues()
+		syncInputs()
+		emit(nextState, index, currentValues[index] ?? value)
 	}
 
-	function emit(nextState: GooRangeModuleState, index: number, value: number, originalEvent?: Event): void {
-		const data: GooRangeModuleEventData = {
+	function emit(nextState: GooSliderFieldState, index: number, value: number, originalEvent?: Event): void {
+		const data: GooSliderFieldEventData = {
 			element,
 			index,
 			originalEvent,
@@ -197,7 +191,8 @@ export function createRangeModuleField(options: GooRangeModuleOptions = {}): Goo
 		return currentValues.slice()
 	}
 
-	function setValue(value: GooRangeModuleValue, { silent = true }: { silent?: boolean } = {}): void {
+	function setValue(value: GooSliderFieldValue, { silent = true }: { silent?: boolean } = {}): void {
+		if (destroyed) return
 		valueMode = detectValueMode(value)
 		currentValues = normalizeValues(value, currentOptions.min)
 		state = 'set'
@@ -211,7 +206,7 @@ export function createRangeModuleField(options: GooRangeModuleOptions = {}): Goo
 	Object.defineProperty(element, 'value', {
 		configurable: true,
 		get: () => formatValue(currentValues, valueMode),
-		set: (value: GooRangeModuleValue) => {
+		set: (value: GooSliderFieldValue) => {
 			setValue(value)
 		}
 	})
@@ -219,6 +214,7 @@ export function createRangeModuleField(options: GooRangeModuleOptions = {}): Goo
 	element.getValue = () => formatValue(currentValues, valueMode)
 	element.setValue = setValue
 	element.setOptions = nextOptions => {
+		if (destroyed) return
 		currentOptions = { ...currentOptions, ...nextOptions }
 		if (nextOptions.value !== undefined) {
 			valueMode = detectValueMode(nextOptions.value)
@@ -227,23 +223,26 @@ export function createRangeModuleField(options: GooRangeModuleOptions = {}): Goo
 		render()
 	}
 	element.enable = () => {
+		if (destroyed) return
 		currentOptions.disabled = false
-		element.classList.remove('goo-range-module--disabled')
+		element.classList.remove('goo-slider-field--disabled')
 		sliderElement?.enable?.()
 	}
 	element.disable = () => {
+		if (destroyed) return
 		currentOptions.disabled = true
-		element.classList.add('goo-range-module--disabled')
+		element.classList.add('goo-slider-field--disabled')
 		sliderElement?.disable?.()
 	}
 	element.destroy = () => {
-		if (sliderInstance) {
-			unmount(sliderInstance)
-			sliderInstance = null
-		}
+		if (destroyed) return
+		destroyed = true
+		unmountSlider()
+		inputElements = []
+		inputHost.replaceChildren()
 		element.remove()
 	}
-	const rangeApi: GooRangeModuleRangeApi = {
+	const sliderApi: GooSliderFieldSliderApi = {
 		element: sliderHost,
 		getState() {
 			return state
@@ -252,29 +251,28 @@ export function createRangeModuleField(options: GooRangeModuleOptions = {}): Goo
 			return getSliderValues()
 		},
 		getValue: () => element.getValue(),
-		setAnimate: (index, animate) => sliderElement?.setAnimate?.(index, animate),
 		setValue,
 		toPercent: value => sliderElement?.toPercent?.(value) ?? 0
 	}
-	element.getRange = () => rangeApi
+	element.getSlider = () => sliderApi
 
 	render()
 	return element
 }
 
 
-function buildRootClass(options: GooRangeModuleOptions): string {
-	const classes = [ 'goo-range-module', 'goo-range-module--goo' ]
-	if (!shouldShowInputs(options)) classes.push('goo-range-module--no-inputs')
-	if (options.disabled) classes.push('goo-range-module--disabled')
+function buildRootClass(options: GooSliderFieldOptions): string {
+	const classes = [ 'goo-slider-field', 'goo-slider-field--goo' ]
+	if (!shouldShowInputs(options)) classes.push('goo-slider-field--no-inputs')
+	if (options.disabled) classes.push('goo-slider-field--disabled')
 	return classes.join(' ')
 }
 
-function shouldShowInputs(options: GooRangeModuleOptions): boolean {
+function shouldShowInputs(options: GooSliderFieldOptions): boolean {
 	return options.showInputs ?? options.input ?? true
 }
 
-function normalizeValues(value: GooRangeModuleValue | undefined, fallbackMin = DEFAULT_MIN): number[] {
+function normalizeValues(value: GooSliderFieldValue | undefined, fallbackMin = DEFAULT_MIN): number[] {
 	if (value && typeof value === 'object' && !Array.isArray(value)) {
 		if (isXyValue(value)) {
 			return [ toFiniteNumber(value.x, fallbackMin), toFiniteNumber(value.y, fallbackMin) ]
@@ -291,7 +289,7 @@ function toSliderValue(values: number[]): GooSliderValue {
 	return values.length > 1 ? values.slice() : values[0] ?? DEFAULT_MIN
 }
 
-function formatValue(values: number[], mode: ValueMode): GooRangeModuleValue {
+function formatValue(values: number[], mode: ValueMode): GooSliderFieldValue {
 	if (mode === 'minmax') {
 		return {
 			min: values[0] ?? DEFAULT_MIN,
@@ -310,7 +308,7 @@ function formatValue(values: number[], mode: ValueMode): GooRangeModuleValue {
 	return values[0] ?? DEFAULT_MIN
 }
 
-function detectValueMode(value: GooRangeModuleValue | undefined): ValueMode {
+function detectValueMode(value: GooSliderFieldValue | undefined): ValueMode {
 	if (Array.isArray(value)) return 'array'
 	if (value && typeof value === 'object') return isXyValue(value) ? 'xy' : 'minmax'
 	return 'number'

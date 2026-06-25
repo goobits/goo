@@ -1,7 +1,7 @@
 import { mount, unmount } from 'svelte'
 
 import GooAngleInput from './GooAngleInput.svelte'
-import type { GooAngleInputEventData, GooAngleInputUnit } from './types.ts'
+import type { GooAngleInputElement, GooAngleInputEventData, GooAngleInputUnit } from './types.ts'
 
 export type AngleInputFieldOptions = {
 	class?: string
@@ -21,30 +21,44 @@ export type AngleInputFieldOptions = {
 type MountedControl = ReturnType<typeof mount>
 
 export type AngleInputFieldElement = HTMLDivElement & {
+	destroy(): void
 	getValue(): number
 	setValue(value: number | string): void
 	value: number
 }
 
-export function createAngleInputField(
-	options: AngleInputFieldOptions = {}
-): AngleInputFieldElement {
+export function createAngleInputField(options: AngleInputFieldOptions = {}): AngleInputFieldElement {
 	const field = document.createElement('div') as AngleInputFieldElement
 	field.className = 'goo-angle-input-field'
 	let currentValue = parseAngleValue(options.value)
 	let instance: MountedControl | null = null
+	let angleElement: GooAngleInputElement | null = null
+	let destroyed = false
 
-	function render(): void {
+	function unmountAngleInput(): void {
 		if (instance) {
 			unmount(instance)
 			instance = null
-			field.replaceChildren()
 		}
+		angleElement = null
+		field.replaceChildren()
+	}
+
+	function render(): void {
+		if (destroyed) return
+
+		unmountAngleInput()
 
 		instance = mount(GooAngleInput, {
 			target: field,
 			props: {
 				value: currentValue,
+				get element() {
+					return angleElement
+				},
+				set element(value) {
+					angleElement = value
+				},
 				unit: options.unit,
 				name: options.name,
 				id: options.id,
@@ -53,11 +67,11 @@ export function createAngleInputField(
 				class: options.class ?? options.className,
 				style: options.style,
 				tabIndex: options.tabIndex,
-				oninput: (value: number, data: GooAngleInputEventData) => {
+				oninput: (value, data) => {
 					currentValue = value
 					options.oninput?.(data)
 				},
-				onchange: (value: number, data: GooAngleInputEventData) => {
+				onchange: (value, data) => {
 					currentValue = value
 					options.onchange?.(data)
 				}
@@ -73,9 +87,21 @@ export function createAngleInputField(
 		}
 	})
 	field.getValue = () => currentValue
-	field.setValue = (value) => {
+	field.setValue = value => {
+		if (destroyed) return
 		currentValue = parseAngleValue(value)
-		render()
+		if (angleElement?.setValue) {
+			angleElement.setValue(currentValue, { silent: true })
+			currentValue = angleElement.getValue()
+		} else {
+			render()
+		}
+	}
+	field.destroy = () => {
+		if (destroyed) return
+		destroyed = true
+		unmountAngleInput()
+		field.remove()
 	}
 
 	render()

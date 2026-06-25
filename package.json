@@ -13,7 +13,6 @@
 			"svelte": "./src/index.ts",
 			"import": "./src/index.ts"
 		},
-		"./theme.css": "./src/theme/goo-defaults.css",
 		"./button": {
 			"types": "./src/button/index.ts",
 			"svelte": "./src/button/index.ts",
@@ -31,12 +30,6 @@
 			"svelte": "./src/checkbox/index.ts",
 			"import": "./src/checkbox/index.ts"
 		},
-		"./chevron-tabs": {
-			"types": "./src/chevron-tabs/index.ts",
-			"svelte": "./src/chevron-tabs/index.ts",
-			"import": "./src/chevron-tabs/index.ts"
-		},
-		"./chevron-tabs/styles.css": "./src/chevron-tabs/GooChevronTabs.css",
 		"./input": {
 			"types": "./src/input/index.ts",
 			"svelte": "./src/input/index.ts",
@@ -48,17 +41,16 @@
 			"svelte": "./src/radio/index.ts",
 			"import": "./src/radio/index.ts"
 		},
-		"./range-module": {
-			"types": "./src/range-module/index.ts",
-			"svelte": "./src/range-module/index.ts",
-			"import": "./src/range-module/index.ts"
-		},
 		"./select": {
 			"types": "./src/select/index.ts",
 			"svelte": "./src/select/index.ts",
 			"import": "./src/select/index.ts"
 		},
 		"./select/styles.css": "./src/select/GooSelect.css",
+		"./slider-field": {
+			"types": "./src/slider-field/index.ts",
+			"import": "./src/slider-field/index.ts"
+		},
 		"./slider": {
 			"types": "./src/slider/index.ts",
 			"svelte": "./src/slider/index.ts",
@@ -229,7 +221,7 @@
 	],
 	"scripts": {
 		"dev": "vite --host 127.0.0.1",
-		"test": "vitest run",
+		"test": "vitest run --maxWorkers=2",
 		"check": "pnpm run lint:check && pnpm run check:svelte && pnpm run check:types",
 		"check:svelte": "tsx scripts/checkSvelteConventions.ts && svelte-check --tsconfig ./tsconfig.json",
 		"check:types": "tsc --noEmit",
@@ -240,23 +232,23 @@
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
-		"@playwright/test": "^1.61.0",
-		"@stylistic/eslint-plugin": "^5.10.0",
+		"@playwright/test": "^1.59.1",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
+		"@stylistic/eslint-plugin": "^5.10.0",
 		"@testing-library/svelte": "^5.3.1",
-		"eslint": "^10.5.0",
+		"eslint": "^10.3.0",
 		"eslint-plugin-simple-import-sort": "^13.0.0",
 		"jsdom": "^29.1.1",
-		"svelte": "^5.56.3",
-		"svelte-check": "4.6.0",
-		"typescript": "^6.0.3",
-		"typescript-eslint": "^8.61.1",
-		"vite": "^8.0.16",
-		"vitest": "^4.1.9"
+		"svelte": "^5.55.5",
+		"svelte-check": "4.4.8",
+		"typescript": "^6.0.2",
+		"typescript-eslint": "^8.59.2",
+		"vite": "^8.0.11",
+		"vitest": "^4.1.5"
 	},
 	"dependencies": {
-		"@goobits/logger": "^1.0.0",
-		"@lucide/svelte": "^1.21.0"
+		"@lucide/svelte": "^1.14.0",
+		"@goobits/logger": "^1.0.0"
 	},
 	"peerDependencies": {
 		"svelte": "^5.55.5"

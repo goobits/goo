@@ -1,5 +1,5 @@
 <script module lang="ts">
-import type { SvelteControlSchema } from '../controller/svelteControl.svelte.ts'
+import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.ts'
 
 /** GooController binding metadata for the Svelte slider component. */
 export const controlSchema: SvelteControlSchema = {
@@ -7,19 +7,28 @@ export const controlSchema: SvelteControlSchema = {
 		canCross: 'canCross',
 		canPush: 'canPush',
 		coverage: 'coverage',
+		variance: 'variance',
 		direction: 'direction',
 		ariaLabel: 'ariaLabel',
 		label: 'label',
+		marks: 'marks',
 		max: 'max',
+		maxDistance: 'maxDistance',
 		min: 'min',
+		minDistance: 'minDistance',
+		mode: 'mode',
 		name: 'name',
 		preset: 'preset',
 		presetColor: 'presetColor',
 		presetHue: 'presetHue',
 		presetSaturation: 'presetSaturation',
+		scale: 'scale',
 		shape: 'shape',
+		snap: 'snap',
 		step: 'step',
-		unit: 'unit'
+		ticks: 'ticks',
+		unit: 'unit',
+		valueBubble: 'valueBubble'
 	}
 }
 </script>
@@ -27,15 +36,32 @@ export const controlSchema: SvelteControlSchema = {
 <script lang="ts">
 import './GooSlider.css'
 
+import { onDestroy } from 'svelte'
+
 import { formatNumber } from '../support/utils/formatNumber.ts'
-import { clamp, toPercent } from '../support/utils/numberUtils.ts'
-import { parseFloatArray, toFormattedValue, type GooSliderThumb } from './sliderUtils.ts'
+import { clamp } from '../support/utils/numberUtils.ts'
+import { createPointerDrag, type GooPointerDragEvent, type GooPointerDragHandle } from '../support/utils/pointerDrag.ts'
+import {
+	getConstrainedSliderValues,
+	getNearestSliderThumbIndex,
+	getSliderCoverageStyles,
+	getSliderPointerPercent,
+	getSliderPositionStyle,
+	getVarianceValues as getSharedVarianceValues,
+	normalizeSliderMarks,
+	parseFloatArray,
+	snapSliderValue,
+	toFormattedValue,
+	toScaledPercent
+} from './sliderUtils.ts'
 import { sliderPresetConfigs, sliderShapes } from './sliderPresets.ts'
 import type {
 	GooSliderDirection,
 	GooSliderElement,
 	GooSliderEventData,
 	GooSliderProps,
+	GooSliderScale,
+	GooSliderThumb,
 	GooSliderUnit,
 	GooSliderValue
 } from './types.ts'
@@ -44,14 +70,9 @@ type SliderRuntimeState = {
 	direction: GooSliderDirection
 	max: number
 	min: number
+	scale: GooSliderScale
 	step: number
 	unit: string
-}
-
-type GooSliderRuntimeElement = GooSliderElement & {
-	readonly thumbs: GooSliderThumb[]
-	setAnimate(index: number, animate: boolean): void
-	toPercent(value: number): number
 }
 
 let sliderRoot: HTMLDivElement | undefined = $state()
@@ -66,6 +87,9 @@ let activePointerId: number | null = $state(null)
 let zIndex = $state(0)
 let animate = $state(false)
 let animateTimer: ReturnType<typeof setTimeout> | undefined
+let snapAnimate = $state(false)
+let snapAnimateTimer: ReturnType<typeof setTimeout> | undefined
+let pointerDragHandle: GooPointerDragHandle | null = null
 let currentPresetColor = $state('')
 let currentPresetHue = $state(0)
 let currentPresetSaturation = $state(100)
@@ -83,6 +107,7 @@ let {
 	title,
 	name,
 	direction = 'horizontal',
+	mode,
 	preset,
 	presetColor = '',
 	presetHue = 0,
@@ -91,6 +116,14 @@ let {
 	canCross = false,
 	canPush = false,
 	coverage = false,
+	variance = false,
+	ticks,
+	marks,
+	snap,
+	scale = 'linear',
+	minDistance,
+	maxDistance,
+	valueBubble = false,
 	disabled = false,
 	gradient,
 	class: className = '',
@@ -112,9 +145,13 @@ const runtimeState = $derived<SliderRuntimeState>({
 	direction,
 	max: numericMax,
 	min: numericMin,
+	scale,
 	step: numericStep,
 	unit
 })
+const effectiveMode = $derived(mode ?? (variance ? 'variance' : (currentValues.length > 1 ? 'range' : 'value')))
+const isVarianceMode = $derived(effectiveMode === 'variance')
+const sliderMarks = $derived(normalizeSliderMarks(ticks, marks, numericMin, numericMax))
 const hiddenValue = $derived(formatSliderValue(currentValues))
 const ariaValueNow = $derived(currentValues[0] ?? numericMin)
 const ariaValueText = $derived(thumbValueText(ariaValueNow))
@@ -142,11 +179,16 @@ const classes = $derived.by(() => {
 	const usesDefaultShape = !shape || shape === 'default'
 	if (direction === 'vertical') values.push('goo-slider--vertical')
 	if (coverage) values.push('goo-slider--coverage')
+	if (isVarianceMode) values.push('goo-slider--variance')
+	if (sliderMarks.length) values.push('goo-slider--marked')
+	if (valueBubble) values.push('goo-slider--value-bubble')
+	if (valueBubble === 'always') values.push('goo-slider--value-bubble-always')
 	if (!coverage && currentValues.length === 1 && !preset && usesDefaultShape && !hasCustomGradient) values.push('goo-slider--value-fill')
 	if (effectiveDisabled) values.push('goo-slider--disabled')
 	if (preset && sliderPresetConfigs[preset]?.className) values.push(sliderPresetConfigs[preset].className)
 	if (shape && shape !== 'default') values.push(sliderShapes[shape as keyof typeof sliderShapes]?.className ?? 'goo-slider--wedge')
 	if (animate) values.push('goo-slider--animate')
+	if (snapAnimate) values.push('goo-slider--snap-animate')
 	if (activeIndex !== null) values.push('goo-slider--active')
 	if (className) values.push(className)
 	return values.filter(Boolean).join(' ')
@@ -179,6 +221,7 @@ const hostAttributes = $derived<Record<string, string | number | undefined>>({
 	max: numericMax,
 	step: numericStep,
 	unit,
+	mode: effectiveMode,
 	preset: preset || undefined,
 	'preset-color': currentPresetColor || undefined,
 	'preset-hue': currentPresetHue,
@@ -186,6 +229,9 @@ const hostAttributes = $derived<Record<string, string | number | undefined>>({
 	'can-cross': canCross ? '' : undefined,
 	'can-push': canPush ? '' : undefined,
 	coverage: coverage ? '' : undefined,
+	variance: isVarianceMode ? '' : undefined,
+	scale: scale !== 'linear' ? scale : undefined,
+	ticks: ticks ? '' : undefined,
 	disabled: effectiveDisabled ? '' : undefined
 })
 
@@ -222,8 +268,24 @@ $effect(() => {
 		return
 	}
 
-	assignSliderApi(sliderElement as GooSliderRuntimeElement)
+	assignSliderApi(sliderElement)
 	element = sliderElement
+})
+
+$effect(() => {
+	const target = sliderElement
+	if (!target) return
+	pointerDragHandle?.detach()
+	pointerDragHandle = createPointerDrag(target, handlePointerDrag)
+	return () => {
+		pointerDragHandle?.detach()
+		pointerDragHandle = null
+	}
+})
+
+onDestroy(() => {
+	cleanupSliderRuntime()
+	element = null
 })
 
 export function setValue(nextValue: GooSliderValue, { silent = true }: { silent?: boolean } = {}): void {
@@ -245,7 +307,7 @@ export function getValue(): number | number[] {
 	return valuesToSliderValue(currentValues, numericMin)
 }
 
-function assignSliderApi(slider: GooSliderRuntimeElement): void {
+function assignSliderApi(slider: GooSliderElement): void {
 	Object.defineProperties(slider, {
 		value: {
 			configurable: true,
@@ -276,10 +338,7 @@ function assignSliderApi(slider: GooSliderRuntimeElement): void {
 	slider.setGradient = colors => {
 		currentGradient = colors
 	}
-	slider.setAnimate = (_index, nextAnimate) => {
-		animate = nextAnimate
-	}
-	slider.toPercent = nextValue => toPercent(nextValue, numericMin, numericMax)
+	slider.toPercent = nextValue => toScaledPercent(nextValue, numericMin, numericMax, scale)
 	slider.enable = () => {
 		effectiveDisabled = false
 	}
@@ -288,48 +347,39 @@ function assignSliderApi(slider: GooSliderRuntimeElement): void {
 	}
 }
 
-function handlePointerDown(event: PointerEvent): void {
-	if (effectiveDisabled || !sliderElement) return
-	if (event.button !== 0) return
-
+function handlePointerDrag(event: GooPointerDragEvent): void | false {
 	event.preventDefault()
-	const startedOnThumb = isThumbTarget(event.target)
-	const index = findNearestThumbIndex(event)
-	if (index === null) return
-	if (!startedOnThumb) {
-		playPointerJumpAnimation()
+
+	if (event.START) {
+		if (effectiveDisabled || !sliderElement) return false
+		const targetIndex = getThumbTargetIndex(event.originalEvent.target)
+		const startedOnThumb = targetIndex !== null
+		const index = targetIndex ?? findNearestThumbIndex(event.originalEvent)
+		if (index === null) return false
+		if (!startedOnThumb) {
+			playPointerJumpAnimation()
+		}
+		activeIndex = index
+		activePointerId = event.pointerId
+		thumbElements[index]?.style.setProperty('z-index', String(++zIndex))
+		updateThumbFromPointer(index, event.originalEvent, 'input')
+		return
 	}
-	activeIndex = index
-	activePointerId = event.pointerId
-	thumbElements[index]?.style.setProperty('z-index', String(++zIndex))
-	sliderElement.setPointerCapture?.(event.pointerId)
-	updateThumbFromPointer(index, event, 'input')
-}
 
-function handlePointerMove(event: PointerEvent): void {
-	if (effectiveDisabled || activeIndex === null || activePointerId !== event.pointerId) return
-	event.preventDefault()
-	if (animate) stopPointerJumpAnimation()
-	updateThumbFromPointer(activeIndex, event, 'input')
-}
-
-function handlePointerUp(event: PointerEvent): void {
-	finishPointerDrag(event, { commit: true })
-}
-
-function handlePointerCancel(event: PointerEvent): void {
-	finishPointerDrag(event, { commit: false })
-}
-
-function finishPointerDrag(event: PointerEvent, { commit }: { commit: boolean }): void {
 	if (activeIndex === null || activePointerId !== event.pointerId) return
-	event.preventDefault()
+
+	if (event.CHANGE) {
+		if (!effectiveDisabled) {
+			if (animate) stopPointerJumpAnimation()
+			updateThumbFromPointer(activeIndex, event.originalEvent, 'input')
+		}
+		return
+	}
+
 	const index = activeIndex
-	activeIndex = null
-	activePointerId = null
-	sliderElement?.releasePointerCapture?.(event.pointerId)
-	if (commit) {
-		emitSliderEvent(index, 'change', event)
+	clearActivePointer()
+	if (!event.CANCEL) {
+		emitSliderEvent(index, 'change', event.originalEvent)
 	}
 }
 
@@ -366,29 +416,30 @@ function updateThumbFromPointer(index: number, event: PointerEvent, state: 'chan
 }
 
 function updateThumbValue(index: number, nextValue: number, state: 'change' | 'input', event?: Event): void {
-	const values = currentValues.slice()
-	const canPushNeighbors = !canCross && canPush
+	const unsnapped = formatValue(nextValue, { snapValue: false })
 	let formatted = formatValue(nextValue)
 
-	if (!canCross && !canPushNeighbors) {
-		const next = values[index + 1]
-		const previous = values[index - 1]
-		if (next !== undefined && formatted > next) formatted = next
-		if (previous !== undefined && formatted < previous) formatted = previous
-	}
-
-	values[index] = formatted
-	if (canPushNeighbors) {
-		for (let previous = index - 1; previous >= 0; previous--) {
-			if (values[previous] > formatted) values[previous] = formatted
-		}
-		for (let next = index + 1; next < values.length; next++) {
-			if (values[next] < formatted) values[next] = formatted
-		}
-	}
+	const values = isVarianceMode
+		? getSharedVarianceValues(currentValues, index, formatted, {
+			min: numericMin,
+			max: numericMax,
+			formatValue
+		})
+		: getConstrainedSliderValues(currentValues, index, formatted, {
+			canCross,
+			canPush,
+			formatValue,
+			maxDistance: toFiniteNumber(maxDistance, Number.POSITIVE_INFINITY),
+			min: numericMin,
+			minDistance: toFiniteNumber(minDistance, 0)
+		})
 
 	if (values.length === currentValues.length && values.every((value, valueIndex) => Object.is(value, currentValues[valueIndex]))) {
 		return
+	}
+
+	if (state === 'input' && activePointerId !== null && !Object.is(unsnapped, formatted)) {
+		playSnapAnimation()
 	}
 
 	currentValues = values
@@ -419,34 +470,20 @@ function emitSliderEvent(index: number, state: 'change' | 'input', event?: Event
 }
 
 function findNearestThumbIndex(event: PointerEvent): number | null {
-	if (!currentValues.length) return null
-
-	const pointerPct = getPointerPercent(event)
-	let nearestIndex = 0
-	let nearestDistance = Number.MAX_SAFE_INTEGER
-	for (let index = 0; index < currentValues.length; index++) {
-		const valuePct = toPercent(currentValues[index], numericMin, numericMax)
-		const distance = Math.abs(pointerPct - valuePct)
-		if (distance < nearestDistance) {
-			nearestDistance = distance
-			nearestIndex = index
-		}
-	}
-	return nearestIndex
+	return getNearestSliderThumbIndex(currentValues, getPointerPercent(event), numericMin, numericMax, scale)
 }
 
 function getPointerPercent(event: PointerEvent): number {
 	if (!trackElement) return 0
 
-	const rect = trackElement.getBoundingClientRect()
-	if (direction === 'vertical') {
-		return 1 - clamp((event.clientY - rect.top) / (rect.height || 214), 0, 1)
-	}
-	return clamp((event.clientX - rect.left) / (rect.width || 214), 0, 1)
+	return getSliderPointerPercent(event, trackElement.getBoundingClientRect(), direction)
 }
 
-function isThumbTarget(target: EventTarget | null): boolean {
-	return target instanceof Element && Boolean(target.closest('.goo-slider__thumb'))
+function getThumbTargetIndex(target: EventTarget | null): number | null {
+	if (!(target instanceof Element)) return null
+	const thumb = target.closest<HTMLElement>('.goo-slider__thumb')
+	const index = Number(thumb?.dataset.index)
+	return Number.isInteger(index) && index >= 0 && index < currentValues.length ? index : null
 }
 
 function playPointerJumpAnimation(): void {
@@ -462,6 +499,34 @@ function stopPointerJumpAnimation(): void {
 	clearTimeout(animateTimer)
 	animate = false
 	animateTimer = undefined
+}
+
+function playSnapAnimation(): void {
+	clearTimeout(snapAnimateTimer)
+	snapAnimate = true
+	snapAnimateTimer = setTimeout(() => {
+		snapAnimate = false
+		snapAnimateTimer = undefined
+	}, 140)
+}
+
+function stopSnapAnimation(): void {
+	clearTimeout(snapAnimateTimer)
+	snapAnimate = false
+	snapAnimateTimer = undefined
+}
+
+function clearActivePointer(): void {
+	activeIndex = null
+	activePointerId = null
+}
+
+function cleanupSliderRuntime(): void {
+	pointerDragHandle?.detach()
+	pointerDragHandle = null
+	clearActivePointer()
+	stopPointerJumpAnimation()
+	stopSnapAnimation()
 }
 
 function getThumb(index: number, value: number): GooSliderThumb {
@@ -480,47 +545,65 @@ function getTrackLength(): number {
 }
 
 function getDisplayPercent(nextValue: number): number {
-	const pct = toPercent(nextValue, numericMin, numericMax)
+	const pct = toScaledPercent(nextValue, numericMin, numericMax, scale)
 	return clamp(easingFn ? easingFn(pct) : pct, 0, 1)
 }
 
 function getThumbStyle(nextValue: number): string {
-	const pct = getDisplayPercent(nextValue) * 100
-	return direction === 'vertical' ? `bottom: ${ pct }%;` : `left: ${ pct }%;`
+	return getSliderPositionStyle(nextValue, direction, getDisplayPercent)
+}
+
+function getMarkStyle(nextValue: number): string {
+	return getSliderPositionStyle(nextValue, direction, getDisplayPercent)
+}
+
+function isVarianceThumb(index: number): boolean {
+	return isVarianceMode && currentValues.length >= 3 && index >= 0 && index <= 2
+}
+
+function getVarianceThumbRole(index: number): 'base' | 'variance' | undefined {
+	if (!isVarianceThumb(index)) return undefined
+	return index === 1 ? 'base' : 'variance'
+}
+
+function getVarianceThumbSide(index: number): 'low' | 'base' | 'high' | undefined {
+	if (!isVarianceThumb(index)) return undefined
+	if (index === 0) return 'low'
+	if (index === 1) return 'base'
+	return 'high'
+}
+
+function getThumbAriaLabel(index: number): string {
+	const baseLabel = ariaLabel || label || title || 'Value'
+	const side = getVarianceThumbSide(index)
+	return side ? `${ baseLabel } ${ side }` : `${ baseLabel } ${ index + 1 }`
 }
 
 function getCoverageStyles(): string[] {
-	if (currentValues.length === 2) {
-		const pct0 = getDisplayPercent(currentValues[0])
-		const pct1 = getDisplayPercent(currentValues[1])
-		const left = Math.min(pct0, pct1) * 100
-		const width = Math.abs(pct1 - pct0) * 100
-		if (direction === 'vertical') {
-			return [ `bottom: ${ left }%; height: ${ width }%;` ]
-		}
-		return [ `left: ${ left }%; width: ${ width }%;` ]
-	}
-	if (coverage) {
-		if (direction === 'vertical') {
-			return [ `bottom: 0; height: ${ getDisplayPercent(currentValues[0] ?? numericMin) * 100 }%;` ]
-		}
-		return [ `left: 0; width: ${ getDisplayPercent(currentValues[0] ?? numericMin) * 100 }%;` ]
-	}
-	return []
+	return getSliderCoverageStyles({
+		coverage,
+		direction,
+		getDisplayPercent,
+		isVarianceMode,
+		min: numericMin,
+		values: currentValues
+	})
 }
 
-function formatValue(nextValue: number | string): number {
-	return clamp(toFormattedValue(toFiniteNumber(nextValue, numericMin), false, runtimeState), numericMin, numericMax)
+function formatValue(nextValue: number | string, { snapValue = true }: { snapValue?: boolean } = {}): number {
+	const formatted = clamp(toFormattedValue(toFiniteNumber(nextValue, numericMin), false, runtimeState), numericMin, numericMax)
+	const nextFormatted = snapValue ? snapSliderValue(formatted, snap, sliderMarks) : formatted
+	return clamp(nextFormatted, numericMin, numericMax)
 }
 
 function normalizeValueArray(nextValue: GooSliderValue | undefined, fallback = 50): number[] {
 	if (nextValue === undefined || nextValue === null) return [ fallback ]
 	if (typeof nextValue === 'object' && !Array.isArray(nextValue)) {
 		const range = nextValue as { min?: unknown; max?: unknown }
-		return [ toFiniteNumber(range.min, numericMin), toFiniteNumber(range.max, numericMax) ].map(formatValue)
+		return [ toFiniteNumber(range.min, numericMin), toFiniteNumber(range.max, numericMax) ].map(value => formatValue(value))
 	}
 	const values = parseFloatArray(nextValue)
-	return values.length ? values.map(formatValue) : [ fallback ]
+	return values.length ? values.map(value => formatValue(value)) : [ fallback ]
 }
 
 function valuesToSliderValue(values: number[], fallback: number): number | number[] {
@@ -567,15 +650,22 @@ function toPositiveNumber(nextValue: unknown, fallback: number): number {
 	tabindex={isMulti ? undefined : tabIndex}
 	draggable="false"
 	style={rootStyle || undefined}
-	onpointerdown={handlePointerDown}
-	onpointermove={handlePointerMove}
-	onpointerup={handlePointerUp}
-	onpointercancel={handlePointerCancel}
 	onkeydown={isMulti ? undefined : handleKeydown}
 	{...hostAttributes}
 	aria-disabled={effectiveDisabled ? 'true' : undefined}
 >
 	<div bind:this={trackElement} class="goo-slider__track" style={trackStyle}>
+		{#each sliderMarks as mark}
+			<div
+				class="goo-slider__mark"
+				class:goo-slider__mark--labeled={mark.label}
+				style={getMarkStyle(mark.value)}
+			>
+				{#if mark.label}
+					<span class="goo-slider__mark-label">{mark.label}</span>
+				{/if}
+			</div>
+		{/each}
 		{#each getCoverageStyles() as coverageStyle}
 			<div class="goo-slider__coverage" style={coverageStyle}></div>
 		{/each}
@@ -586,7 +676,13 @@ function toPositiveNumber(nextValue: unknown, fallback: number): number {
 				bind:this={thumbElements[index]}
 				class="goo-slider__thumb"
 				class:goo-slider__thumb--active={activeIndex === index}
+				class:goo-slider__thumb--variance-base={getVarianceThumbRole(index) === 'base'}
+				class:goo-slider__thumb--variance-control={getVarianceThumbRole(index) === 'variance'}
+				class:goo-slider__thumb--variance-low={getVarianceThumbSide(index) === 'low'}
+				class:goo-slider__thumb--variance-high={getVarianceThumbSide(index) === 'high'}
 				data-index={index}
+				data-role={getVarianceThumbRole(index)}
+				data-side={getVarianceThumbSide(index)}
 				style={getThumbStyle(thumbValue)}
 				role={isMulti ? 'slider' : undefined}
 				tabindex={isMulti && !effectiveDisabled ? tabIndex : undefined}
@@ -595,10 +691,14 @@ function toPositiveNumber(nextValue: unknown, fallback: number): number {
 				aria-valuenow={isMulti ? thumbValue : undefined}
 				aria-valuetext={isMulti ? thumbValueText(thumbValue) : undefined}
 				aria-orientation={isMulti ? (direction === 'vertical' ? 'vertical' : 'horizontal') : undefined}
-				aria-label={isMulti ? `${ariaLabel || label || 'Value'} ${index + 1}` : undefined}
+				aria-label={isMulti ? getThumbAriaLabel(index) : undefined}
 				aria-disabled={isMulti && effectiveDisabled ? 'true' : undefined}
 				onkeydown={isMulti ? event => moveThumbByKey(index, event) : undefined}
-			></div>
+			>
+				{#if valueBubble}
+					<span class="goo-slider__value-bubble">{thumbValueText(thumbValue)}</span>
+				{/if}
+			</div>
 		{/each}
 	</div>
 	{#if children}

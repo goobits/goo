@@ -181,7 +181,7 @@
 	--goo-button-fg: var(--goo-theme-accent-fg, #fff);
 	--goo-button-hover-bg: color-mix(
 		in srgb,
-		var(--goo-theme-accent, #3b82f6) 88%,
+		var(--goo-theme-accent, #2563eb) 88%,
 		var(--goo-theme-fg, white)
 	);
 }
@@ -331,14 +331,14 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background: var(--goo-dialog-close-bg, #f59e0b);
+	background: var(--goo-theme-accent, #f59e0b);
 	color: var(--goo-theme-accent-fg, #fff);
 	border-radius: 50%;
 	font-size: var(--goo-theme-icon-md, 1em);
 	line-height: 1;
 	box-shadow:
-		0 0 0 3px var(--goo-dialog-close-bg, #f59e0b),
-		0 0 0 4px color-mix(in srgb, var(--goo-dialog-close-bg, #f59e0b) 50%, transparent);
+		0 0 0 3px var(--goo-theme-accent, #f59e0b),
+		0 0 0 4px color-mix(in srgb, var(--goo-theme-accent, #f59e0b) 50%, transparent);
 	transition:
 		transform 0.15s,
 		box-shadow 0.15s;
@@ -347,17 +347,17 @@
 .goo-dialog.goo-dialog--overlay .goo-dialog__close:hover {
 	background: color-mix(
 		in srgb,
-		var(--goo-dialog-close-bg-strong, #d97706) 88%,
+		var(--goo-theme-accent, #d97706) 88%,
 		var(--goo-theme-fg, white)
 	);
 	transform: scale(1.1);
 	box-shadow:
 		0 0 0 3px
-			color-mix(in srgb, var(--goo-dialog-close-bg-strong, #d97706) 88%, var(--goo-theme-fg, white)),
+			color-mix(in srgb, var(--goo-theme-accent, #d97706) 88%, var(--goo-theme-fg, white)),
 		0 0 0 4px
 			color-mix(
 				in srgb,
-				color-mix(in srgb, var(--goo-dialog-close-bg-strong, #d97706) 88%, var(--goo-theme-fg, white))
+				color-mix(in srgb, var(--goo-theme-accent, #d97706) 88%, var(--goo-theme-fg, white))
 					50%,
 				transparent
 			);

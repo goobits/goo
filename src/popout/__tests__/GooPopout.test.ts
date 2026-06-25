@@ -3,11 +3,13 @@ import { tick } from 'svelte'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import GooPopout from '../GooPopout.svelte'
-import { createGooPopout, type GooPopoutInstance } from '../index.ts'
+import type { GooPopoutInstance } from '../index.ts'
+import { createGooPopout } from '../index.ts'
 
 describe('GooPopout', () => {
 	afterEach(() => {
 		document.querySelectorAll('.goo-popout').forEach(element => element.remove())
+		vi.useRealTimers()
 	})
 
 	it('creates native popout elements without custom tags', () => {
@@ -109,6 +111,23 @@ describe('GooPopout', () => {
 			target.remove()
 			HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect
 		}
+	})
+
+	it('keeps final contained placement outside avoid rectangles', async() => {
+		await withAvoidRectPopout(({ popout }) => {
+			expect(Number.parseFloat(popout.style.left)).toBe(140)
+			expect(Number.parseFloat(popout.style.top)).toBe(20)
+		})
+	})
+
+	it('clears avoid rectangles when updating to an anchor without them', async() => {
+		await withAvoidRectPopout(async({ instance, popout }) => {
+			instance.updatePosition({ point: { x: 140, y: 100 } })
+			await nextAnimationFrame()
+
+			expect(Number.parseFloat(popout.style.left)).toBe(140)
+			expect(Number.parseFloat(popout.style.top)).toBe(104)
+		})
 	})
 
 	it('repositions when visible content grows after opening', async() => {
@@ -292,6 +311,33 @@ describe('GooPopout', () => {
 		instance?.destroy()
 		target.remove()
 	})
+
+	it('does not remount from a queued prop-change microtask after unmount', async() => {
+		const firstTarget = document.createElement('button')
+		const secondTarget = document.createElement('button')
+		firstTarget.id = 'first-popout-target'
+		secondTarget.id = 'second-popout-target'
+		document.body.append(firstTarget, secondTarget)
+		const { rerender, unmount } = render(GooPopout, {
+			props: {
+				target: 'first-popout-target',
+				open: true
+			}
+		})
+		await tick()
+
+		await rerender({
+			target: 'second-popout-target',
+			open: true
+		})
+		unmount()
+		await Promise.resolve()
+		await delay(180)
+
+		expect(document.querySelector('.goo-popout')).toBeNull()
+		firstTarget.remove()
+		secondTarget.remove()
+	})
 })
 
 function rect(x: number, y: number, width: number, height: number): DOMRect {
@@ -308,6 +354,48 @@ function rect(x: number, y: number, width: number, height: number): DOMRect {
 	} as DOMRect
 }
 
+async function withAvoidRectPopout(
+	run: (fixture: { instance: GooPopoutInstance; popout: HTMLElement }) => Promise<void> | void
+): Promise<void> {
+	const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect
+	const target = document.createElement('button')
+	const content = document.createElement('div')
+	let instance: GooPopoutInstance | undefined
+
+	document.body.appendChild(target)
+	HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
+		if (this === document.documentElement) return rect(0, 0, 300, 240)
+		if (this === target) return rect(140, 100, 0, 0)
+		if (this.classList.contains('goo-popout')) return rect(0, 0, 90, 60)
+		return originalGetBoundingClientRect.call(this)
+	}
+
+	try {
+		instance = createGooPopout({
+			at: {
+				avoidRects: [ { bottom: 170, left: 120, right: 220, top: 80 } ],
+				point: { x: 140, y: 100 }
+			},
+			content: content,
+			align: 'top left to bottom left',
+			offset: { x: 0, y: 4 },
+			keepWithin: { element: document.documentElement, margin: 12 },
+			openImmediately: false
+		})
+
+		await instance.open()
+		await run({ instance, popout: document.querySelector<HTMLElement>('.goo-popout')! })
+	} finally {
+		await instance?.destroy()
+		target.remove()
+		HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect
+	}
+}
+
 function nextAnimationFrame(): Promise<void> {
 	return new Promise(resolve => requestAnimationFrame(() => resolve()))
+}
+
+function delay(ms: number): Promise<void> {
+	return new Promise(resolve => setTimeout(resolve, ms)) // test-shape: timing-probe - waits for popout close animation.
 }

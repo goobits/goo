@@ -56,7 +56,7 @@
 	display: none;
 }
 
-.goo-controller.goo-controller--range-module[data-label]:not([data-label=""])::before {
+.goo-controller.goo-controller--slider-field[data-label]:not([data-label=""])::before {
 	display: none;
 }
 
@@ -117,7 +117,7 @@
 	flex: 1 1 auto;
 }
 
-.goo-controller.goo-controller--range-module .goo-controller__widget {
+.goo-controller.goo-controller--slider-field .goo-controller__widget {
 	flex: 1 1 100%;
 }
 

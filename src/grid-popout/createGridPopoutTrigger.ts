@@ -4,7 +4,6 @@ import { gooTooltipRuntime as UITooltip } from '../tooltip/index.ts'
 import GridPopoutPicker from './GridPopoutPicker.svelte'
 import type { GridPopoutItem } from './types.ts'
 
-/** Grid Popout Trigger Handle typed model for runtime integration. */
 export type GridPopoutTriggerHandle = {
 	readonly element: HTMLElement
 	destroy(): void
@@ -18,7 +17,6 @@ type GridPopoutPickerApi = ReturnType<typeof mount> & {
 
 type GridPopoutTooltip = string | (() => string | undefined)
 
-/** Grid Popout Trigger Options typed model for runtime integration. */
 export type GridPopoutTriggerOptions = {
 	ariaLabel?: string
 	className?: string
@@ -67,8 +65,8 @@ export function createGridPopoutTrigger({
 		throw new Error('GridPopoutPicker failed to mount.')
 	}
 
-	if (tooltip) {
-		UITooltip.attach(trigger, () => {
+	const tooltipHandle = tooltip
+		? UITooltip.attach(trigger, () => {
 			if (trigger.classList.contains('goo-grid-trigger--opened')) {
 				return
 			}
@@ -79,7 +77,7 @@ export function createGridPopoutTrigger({
 			showOnClick: true,
 			showOnHover: true
 		})
-	}
+		: undefined
 
 	const handle: GridPopoutTriggerHandle = {
 		get element() {
@@ -88,6 +86,7 @@ export function createGridPopoutTrigger({
 		destroy() {
 			if (destroyed) return
 			destroyed = true
+			tooltipHandle?.destroy()
 			void unmount(component)
 		},
 		setValue(value) {

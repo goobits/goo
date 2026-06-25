@@ -1,3 +1,5 @@
+/// <reference path="../svelte.d.ts" />
+
 export { default as GooToast } from './GooToast.svelte'
 export { default as GooToaster } from './GooToaster.svelte'
 export {
@@ -12,8 +14,8 @@ export {
 	createGooProgressToast,
 	type GooProgressToastHandle,
 	type GooProgressToastOptions
-} from './progressToast.ts'
-export { toast } from './ToastStore.svelte.ts'
+} from './progress-toast.ts'
+export { toast } from './toast-service.svelte.ts'
 export type {
 	GooToasterProps,
 	GooToastProps,
