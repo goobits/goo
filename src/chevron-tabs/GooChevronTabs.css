@@ -1,168 +1,404 @@
 .goo-chevron-tabs {
+	position: relative;
 	display: flex;
 	align-items: stretch;
-	gap: 8px;
 	min-width: 0;
-	height: 100%;
-	color: #e5e7eb;
-}
-
-.goo-chevron-tabs__add,
-.goo-chevron-tabs__tab,
-.goo-chevron-tabs__drop-target {
-	font: inherit;
-}
-
-.goo-chevron-tabs__add {
-	display: grid;
-	place-items: center;
-	flex: 0 0 34px;
-	min-width: 34px;
-	height: 34px;
-	margin: auto 0;
-	border: 1px solid rgba(148, 163, 184, 0.3);
-	border-radius: 7px;
-	background: rgba(15, 23, 42, 0.78);
-	color: rgba(248, 250, 252, 0.86);
-	cursor: pointer;
-}
-
-.goo-chevron-tabs__add:hover {
-	border-color: rgba(125, 211, 252, 0.55);
-	background: rgba(30, 41, 59, 0.9);
+	height: 28px;
+	border-bottom: 2px solid #15171e;
+	background: linear-gradient(180deg, #181a22 0%, #15171e 100%);
+	color: #f8f8f2;
+	font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 .goo-chevron-tabs__rail {
-	position: relative;
 	display: flex;
-	align-items: center;
-	gap: 0;
+	align-items: stretch;
+	flex: 1 1 auto;
 	min-width: 0;
 	overflow-x: auto;
-	scrollbar-width: thin;
+	overflow-y: hidden;
+	scrollbar-width: none;
+	user-select: none;
 }
 
-.goo-chevron-tabs__conn {
-	position: absolute;
-	left: 0;
-	right: 0;
-	bottom: 5px;
-	height: 1px;
-	background: rgba(148, 163, 184, 0.26);
-	pointer-events: none;
+.goo-chevron-tabs__rail::-webkit-scrollbar {
+	display: none;
+}
+
+.goo-chevron-tabs__add {
+	position: relative;
+	z-index: 999;
+	display: grid;
+	place-content: center;
+	flex: 0 0 auto;
+	width: 38px;
+	height: 28px;
+	padding: 0 6px 0 0;
+	border: 0;
+	background: #282a36;
+	clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%);
+	color: rgba(248, 248, 242, 0.6);
+	cursor: pointer;
+	transition:
+		background-color 0.15s ease,
+		color 0.15s ease;
+}
+
+.goo-chevron-tabs__add:hover {
+	background: #2e323e;
+	color: #fff;
 }
 
 .goo-chevron-tabs__tab {
 	position: relative;
-	z-index: 1;
-	display: inline-flex;
+	display: flex;
 	align-items: center;
-	gap: 8px;
-	min-width: 122px;
-	max-width: 220px;
-	height: 34px;
-	padding: 0 10px 0 14px;
-	border: 1px solid rgba(148, 163, 184, 0.3);
-	border-left: 3px solid var(--goo-chevron-tab-accent, #79f2b0);
-	border-radius: 7px 7px 0 0;
-	background: rgba(15, 23, 42, 0.8);
-	color: rgba(248, 250, 252, 0.78);
+	justify-content: center;
+	gap: 5px;
+	flex: 0 0 auto;
+	height: 28px;
+	min-width: 92px;
+	max-width: 240px;
+	margin-left: -7px;
+	padding: 0 36px 0 22px;
+	border: 0;
+	background: #282a36;
+	clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%, 10px 50%);
+	color: rgba(248, 248, 242, 0.62);
 	cursor: pointer;
+	font-size: 12px;
+	font-weight: 500;
+	letter-spacing: 0.04em;
+	outline: none;
+	touch-action: none;
+	transition:
+		background-color 0.2s ease,
+		color 0.2s ease,
+		filter 0.3s ease,
+		padding 0.22s ease,
+		transform 0.26s cubic-bezier(0.2, 0.9, 0.2, 1);
+	white-space: nowrap;
 }
 
-.goo-chevron-tabs__tab:hover,
+.goo-chevron-tabs__tab--has-activity {
+	padding-left: 17px;
+}
+
+.goo-chevron-tabs__tab:hover {
+	background: color-mix(in srgb, var(--goo-chevron-tab-accent) 26%, #282a36);
+	color: #fff;
+}
+
+.goo-chevron-tabs__tab:focus-visible {
+	box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--goo-chevron-tab-accent) 42%, transparent);
+}
+
 .goo-chevron-tabs__tab--active {
-	border-color: rgba(125, 211, 252, 0.52);
-	background: rgba(30, 41, 59, 0.95);
-	color: #f8fafc;
+	background: var(--goo-chevron-tab-accent);
+	color: #0c0e14;
+	filter: drop-shadow(0 -6px 16px color-mix(in srgb, var(--goo-chevron-tab-accent) 45%, transparent));
+}
+
+.goo-chevron-tabs__tab--active:hover {
+	background: var(--goo-chevron-tab-accent);
+	color: #0c0e14;
 }
 
 .goo-chevron-tabs__tab--dragging {
-	opacity: 0.56;
-	transform: translateY(-1px);
+	filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
+	transition: none;
+}
+
+.goo-chevron-tabs__rail--dragging .goo-chevron-tabs__tab {
+	cursor: grabbing;
+}
+
+.goo-chevron-tabs__rail--dragging .goo-chevron-tabs__tab:not(.goo-chevron-tabs__tab--active):hover {
+	background: #282a36;
+	color: rgba(248, 248, 242, 0.62);
+}
+
+.goo-chevron-tabs__rail--dragging .goo-chevron-tabs__tab--dragging:not(.goo-chevron-tabs__tab--active) {
+	background: color-mix(in srgb, var(--goo-chevron-tab-accent) 26%, #282a36);
+	color: #fff;
 }
 
 .goo-chevron-tabs__label {
 	min-width: 0;
+	max-width: 150px;
 	overflow: hidden;
+	outline: none;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+}
+
+.goo-chevron-tabs__activity {
+	position: relative;
+	display: grid;
+	place-content: center;
+	flex: 0 0 auto;
+	width: 14px;
+	height: 14px;
+	color: currentColor;
+	opacity: 0.92;
+	pointer-events: none;
+}
+
+.goo-chevron-tabs__activity-emoji {
 	font-size: 12px;
-	font-weight: 750;
+	line-height: 1;
 }
 
-.goo-chevron-tabs__status {
+.goo-chevron-tabs__tab:not(.goo-chevron-tabs__tab--active) .goo-chevron-tabs__activity--working {
+	color: #8be9fd;
+}
+
+.goo-chevron-tabs__tab:not(.goo-chevron-tabs__tab--active) .goo-chevron-tabs__activity--done {
+	color: #f1fa8c;
+}
+
+.goo-chevron-tabs__tab:not(.goo-chevron-tabs__tab--active) .goo-chevron-tabs__activity--needs-attention {
+	color: #ff79c6;
+}
+
+.goo-chevron-tabs__label--hidden {
+	color: transparent;
+}
+
+.goo-chevron-tabs__label--editor {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	max-width: calc(100% - 56px);
 	overflow: hidden;
-	max-width: 74px;
-	color: rgba(148, 163, 184, 0.86);
-	font-size: 10px;
-	font-weight: 700;
+	color: inherit;
+	cursor: text;
 	text-overflow: ellipsis;
-	white-space: nowrap;
-}
-
-.goo-chevron-tabs__status[data-status='working'],
-.goo-chevron-tabs__status[data-status='connecting'] {
-	color: #7dd3fc;
-}
-
-.goo-chevron-tabs__status[data-status='done'],
-.goo-chevron-tabs__status[data-status='connected'] {
-	color: #86efac;
-}
-
-.goo-chevron-tabs__status[data-status='disconnected'],
-.goo-chevron-tabs__status[data-status='error'] {
-	color: #fca5a5;
+	transform: translate(-50%, -50%);
+	user-select: text;
 }
 
 .goo-chevron-tabs__close {
+	position: absolute;
+	right: 12px;
+	top: 50%;
 	display: grid;
-	place-items: center;
-	flex: 0 0 18px;
-	width: 18px;
-	height: 18px;
-	margin-left: auto;
-	border-radius: 5px;
-	color: rgba(248, 250, 252, 0.72);
-	font-size: 15px;
-	line-height: 1;
-	opacity: 0;
-}
-
-.goo-chevron-tabs__tab:hover .goo-chevron-tabs__close,
-.goo-chevron-tabs__tab:focus-visible .goo-chevron-tabs__close,
-.goo-chevron-tabs__tab--active .goo-chevron-tabs__close {
+	place-content: center;
+	width: 15px;
+	height: 15px;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: transparent;
+	color: currentColor;
+	cursor: pointer;
 	opacity: 1;
+	transform: translateY(-50%);
+	transition:
+		background-color 0.14s ease,
+		transform 0.12s ease;
 }
 
 .goo-chevron-tabs__close:hover {
-	background: rgba(248, 113, 113, 0.18);
-	color: #fecaca;
+	background: rgba(127, 131, 150, 0.32);
 }
 
-.goo-chevron-tabs__drop-target {
+.goo-chevron-tabs__close--pressed {
+	background: rgba(127, 131, 150, 0.45);
+	transform: translateY(-50%) scale(0.78);
+}
+
+.goo-chevron-tabs__right {
 	position: relative;
-	z-index: 2;
-	flex: 0 0 18px;
-	height: 34px;
+	z-index: 3;
+	display: flex;
+	align-items: center;
+	flex: 0 0 auto;
+	gap: 13px;
+	padding: 0 14px;
+	background: linear-gradient(180deg, #181a22 0%, #15171e 100%);
+}
+
+.goo-chevron-tabs__connection {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	white-space: nowrap;
+}
+
+.goo-chevron-tabs__connection-dot {
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+}
+
+.goo-chevron-tabs__connection-dot--pulsing {
+	animation: goo-chevron-tabs-connection-pulse 1.1s ease-in-out infinite;
+}
+
+.goo-chevron-tabs__connection-state {
+	font-size: 11px;
+	font-weight: 500;
+	letter-spacing: 0.04em;
+	line-height: 1;
+}
+
+.goo-chevron-tabs__connection-tip {
+	position: absolute;
+	right: 0;
+	top: calc(100% + 9px);
+	z-index: 1400;
+	min-width: 152px;
+	padding: 9px 11px;
+	border: 1px solid rgba(255, 255, 255, 0.09);
+	border-radius: 8px;
+	background: #282a36;
+	box-shadow: 0 14px 30px -10px rgba(0, 0, 0, 0.7);
+	opacity: 0;
+	pointer-events: none;
+	transform: translateY(-4px);
+	transition:
+		opacity 150ms ease,
+		transform 150ms ease;
+}
+
+.goo-chevron-tabs__connection:hover .goo-chevron-tabs__connection-tip {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.goo-chevron-tabs__connection-user {
+	color: #f8f8f2;
+	font: 600 11px/1.4 'JetBrains Mono', ui-monospace, monospace;
+}
+
+.goo-chevron-tabs__connection-detail {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-top: 5px;
+	font-size: 11px;
+	font-weight: 500;
+	line-height: 1;
+}
+
+.goo-chevron-tabs__connection-detail span:first-child {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+}
+
+.goo-chevron-tabs__menu-button {
+	display: grid;
+	place-content: center;
+	width: 22px;
+	height: 22px;
+	padding: 0;
+	border: 0;
+	border-radius: 5px;
+	background: transparent;
+	color: rgba(248, 248, 242, 0.6);
+	cursor: pointer;
+	transition:
+		transform 160ms ease,
+		background-color 140ms ease,
+		color 140ms ease;
+}
+
+.goo-chevron-tabs__menu-button:hover {
+	background: rgba(127, 131, 150, 0.22);
+	color: #fff;
+}
+
+.goo-chevron-tabs__menu-button--open {
+	transform: rotate(180deg);
+}
+
+.goo-chevron-tabs__menu-backdrop {
+	position: fixed;
+	inset: 0;
+	z-index: 1500;
 	border: 0;
 	background: transparent;
-	cursor: copy;
 }
 
-.goo-chevron-tabs__drop-target::after {
-	content: '';
+.goo-chevron-tabs__menu {
 	position: absolute;
-	left: 8px;
-	top: 5px;
-	width: 2px;
-	height: 24px;
-	border-radius: 999px;
-	background: #38bdf8;
-	opacity: 0;
+	right: 10px;
+	top: calc(100% + 5px);
+	z-index: 1600;
+	min-width: 190px;
+	padding: 6px;
+	border: 1px solid rgba(255, 255, 255, 0.09);
+	border-radius: 9px;
+	background: #282a36;
+	box-shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.75);
 }
 
-.goo-chevron-tabs__drop-target:hover::after {
-	opacity: 1;
+.goo-chevron-tabs__menu-row {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	width: 100%;
+	padding: 7px 10px;
+	border: 0;
+	border-radius: 6px;
+	background: transparent;
+	color: #f8f8f2;
+	cursor: pointer;
+	font-size: 12px;
+	font-weight: 500;
+	line-height: 1;
+	text-align: left;
+}
+
+.goo-chevron-tabs__menu-row:hover,
+.goo-chevron-tabs__menu-row--active {
+	background: rgba(255, 255, 255, 0.07);
+}
+
+.goo-chevron-tabs__menu-accent {
+	flex: 0 0 auto;
+	width: 8px;
+	height: 8px;
+	border-radius: 2px;
+}
+
+.goo-chevron-tabs__menu-name {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.goo-chevron-tabs__menu-status {
+	flex: 0 0 auto;
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+}
+
+@keyframes goo-chevron-tabs-connection-pulse {
+	0%,
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+
+	50% {
+		opacity: 0.4;
+		transform: scale(0.78);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.goo-chevron-tabs__tab,
+	.goo-chevron-tabs__add,
+	.goo-chevron-tabs__close {
+		transition:
+			background-color 0.15s ease,
+			color 0.15s ease;
+	}
 }
