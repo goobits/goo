@@ -39,5 +39,7 @@ describe('chevron tabs model', () => {
 		expect(hasChevronTabDragIntent(-(chevronTabDragActivationDistance - 1))).toBe(false)
 		expect(hasChevronTabDragIntent(chevronTabDragActivationDistance)).toBe(true)
 		expect(hasChevronTabDragIntent(-chevronTabDragActivationDistance)).toBe(true)
+		expect(hasChevronTabDragIntent(chevronTabDragActivationDistance, 30)).toBe(false)
+		expect(hasChevronTabDragIntent(30, 10)).toBe(true)
 	})
 })

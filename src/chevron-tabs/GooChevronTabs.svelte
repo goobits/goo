@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ChevronDown, CircleAlert, Plus, X } from '@lucide/svelte'
+	import { BellRing, Bot, ChevronDown, CircleAlert, Plus, X } from '@lucide/svelte'
 	import './GooChevronTabs.css'
 	import type { GooChevronTab, GooChevronTabStatus, GooChevronTabsProps } from './types.ts'
 	import {
@@ -61,6 +61,7 @@
 	let dragging = $state<{
 		id: string
 		startX: number
+		startY: number
 		moved: boolean
 		originalIndex: number
 		pointerId: number
@@ -113,8 +114,6 @@
 			return { kind: 'needsAttention', label: `${tab.name} needs attention` }
 		return null
 	}
-
-	const activityEmoji = (kind: 'working' | 'done'): string => (kind === 'working' ? '🤖' : '🔔')
 
 	const selectTab = (tab: GooChevronTab): void => {
 		if (editingId === tab.id) return
@@ -227,6 +226,7 @@
 		dragging = {
 			id: tab.id,
 			startX: event.clientX,
+			startY: event.clientY,
 			moved: false,
 			originalIndex,
 			pointerId: event.pointerId,
@@ -235,17 +235,19 @@
 			centers,
 			advance: (tabElements[tab.id]?.getBoundingClientRect().width ?? 100) - 7
 		}
+		railElement?.setPointerCapture?.(event.pointerId)
 	}
 
 	const moveDrag = (event: PointerEvent): void => {
 		const drag = dragging
 		if (!drag) return
+		if (event.pointerId !== drag.pointerId) return
 		const movement = event.clientX - drag.startX
 		if (!drag.moved) {
-			if (!hasChevronTabDragIntent(movement)) return
-			railElement?.setPointerCapture?.(drag.pointerId)
+			if (!hasChevronTabDragIntent(movement, event.clientY - drag.startY)) return
 			drag.moved = true
 		}
+		event.preventDefault()
 		const draggedCenter = (drag.centers[drag.id] ?? drag.startX) + movement
 		const otherCenters = drag.originalIds
 			.filter((id) => id !== drag.id)
@@ -255,9 +257,10 @@
 		dragVisualOffset = movement
 	}
 
-	const finishDrag = (): void => {
+	const finishDrag = (event?: PointerEvent): void => {
 		const drag = dragging
 		if (!drag) return
+		if (event && event.pointerId !== drag.pointerId) return
 		railElement?.releasePointerCapture?.(drag.pointerId)
 		dragging = null
 		dragVisualOffset = 0
@@ -325,8 +328,8 @@
 		aria-label={resolvedAriaLabel}
 		bind:this={railElement}
 		onpointermove={moveDrag}
-		onpointerup={finishDrag}
-		onpointercancel={finishDrag}
+		onpointerup={(event) => finishDrag(event)}
+		onpointercancel={(event) => finishDrag(event)}
 	>
 		<button
 			class="goo-chevron-tabs__add"
@@ -364,12 +367,12 @@
 						aria-label={activity.label}
 						title={activity.label}
 					>
-						{#if activity.kind === 'needsAttention'}
-							<CircleAlert size={12} strokeWidth={2.2} aria-hidden="true" />
+						{#if activity.kind === 'working'}
+							<Bot size={15} strokeWidth={2.2} aria-hidden="true" />
+						{:else if activity.kind === 'done'}
+							<BellRing size={15} strokeWidth={2.2} aria-hidden="true" />
 						{:else}
-							<span class="goo-chevron-tabs__activity-emoji" aria-hidden="true">
-								{activityEmoji(activity.kind)}
-							</span>
+							<CircleAlert size={15} strokeWidth={2.2} aria-hidden="true" />
 						{/if}
 					</span>
 				{/if}
