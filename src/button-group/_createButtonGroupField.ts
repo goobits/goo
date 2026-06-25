@@ -30,7 +30,9 @@ export type ButtonGroupFieldElement = HTMLDivElement & {
 	value: string | string[] | null
 }
 
-export function createButtonGroupField(options: ButtonGroupFieldOptions = {}): ButtonGroupFieldElement {
+export function createButtonGroupField(
+	options: ButtonGroupFieldOptions = {}
+): ButtonGroupFieldElement {
 	const field = document.createElement('div') as ButtonGroupFieldElement
 	field.className = 'goo-button-group-field'
 
@@ -64,7 +66,7 @@ export function createButtonGroupField(options: ButtonGroupFieldOptions = {}): B
 				style: options.style,
 				tabIndex: options.tabIndex,
 				class: options.class ?? options.className,
-				onchange: value => {
+				onchange: (value: string | string[] | null) => {
 					selectedValue = value
 					options.onchange?.(value)
 				}
@@ -82,7 +84,7 @@ export function createButtonGroupField(options: ButtonGroupFieldOptions = {}): B
 		}
 	})
 	field.getValue = () => selectedValue
-	field.setValue = value => {
+	field.setValue = (value) => {
 		if (destroyed) return
 		selectedValue = value
 		if (instance?.setValue) {

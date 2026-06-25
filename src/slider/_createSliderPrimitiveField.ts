@@ -64,7 +64,9 @@ export type SliderPrimitiveFieldElement = HTMLDivElement & {
 	value: number | number[]
 }
 
-export function createSliderPrimitiveField(options: SliderPrimitiveFieldOptions = {}): SliderPrimitiveFieldElement {
+export function createSliderPrimitiveField(
+	options: SliderPrimitiveFieldOptions = {}
+): SliderPrimitiveFieldElement {
 	const field = document.createElement('div') as SliderPrimitiveFieldElement
 	field.className = 'goo-slider-primitive-field'
 	let currentValue: GooSliderValue = options.value ?? 50
@@ -96,11 +98,11 @@ export function createSliderPrimitiveField(options: SliderPrimitiveFieldOptions 
 				set element(value) {
 					sliderElement = value
 				},
-				oninput: (value, data) => {
+				oninput: (value: number | number[], data: GooSliderEventData) => {
 					currentValue = value
 					options.oninput?.(data)
 				},
-				onchange: (value, data) => {
+				onchange: (value: number | number[], data: GooSliderEventData) => {
 					currentValue = value
 					options.onchange?.(data)
 				}
@@ -116,7 +118,7 @@ export function createSliderPrimitiveField(options: SliderPrimitiveFieldOptions 
 		}
 	})
 	field.getValue = () => currentValue as number | number[]
-	field.setValue = value => {
+	field.setValue = (value) => {
 		if (destroyed) return
 		currentValue = value
 		sliderElement?.setValue(value, { silent: true })

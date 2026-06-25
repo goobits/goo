@@ -73,7 +73,7 @@ export function createSelectField(options: SelectFieldOptions = {}): GooSelectEl
 				id: options.id,
 				class: options.class ?? options.className,
 				style: options.style,
-				onchange: (value, data) => {
+				onchange: (value: string, data: GooSelectEventData) => {
 					currentValue = value
 					options.onchange?.(value, data)
 				},
@@ -98,7 +98,9 @@ export function createSelectField(options: SelectFieldOptions = {}): GooSelectEl
 	field.setValue = (value, { silent = false } = {}) => {
 		if (destroyed) return
 		currentValue = value
-		const setValue = component().setValue as ((value: string, opts?: { silent?: boolean }) => void) | undefined
+		const setValue = component().setValue as
+			| ((value: string, opts?: { silent?: boolean }) => void)
+			| undefined
 		if (setValue) {
 			setValue(value, { silent })
 		} else {
@@ -106,23 +108,35 @@ export function createSelectField(options: SelectFieldOptions = {}): GooSelectEl
 		}
 	}
 	field.getValue = () => currentValue
-	field.isOpen = () => !destroyed && ((component().isOpen as (() => boolean) | undefined)?.() ?? false)
-	field.getHoveredOptionId = () => destroyed ? null : (component().getHoveredOptionId as (() => string | null) | undefined)?.() ?? null
-	field.getOptions = () => destroyed ? normalizeOptions(options.options) : (component().getOptions as (() => GooSelectOption[]) | undefined)?.() ?? normalizeOptions(options.options)
-	field.setOptions = nextOptions => {
+	field.isOpen = () =>
+		!destroyed && ((component().isOpen as (() => boolean) | undefined)?.() ?? false)
+	field.getHoveredOptionId = () =>
+		destroyed
+			? null
+			: ((component().getHoveredOptionId as (() => string | null) | undefined)?.() ?? null)
+	field.getOptions = () =>
+		destroyed
+			? normalizeOptions(options.options)
+			: ((component().getOptions as (() => GooSelectOption[]) | undefined)?.() ??
+				normalizeOptions(options.options))
+	field.setOptions = (nextOptions) => {
 		if (destroyed) return
 		options.options = nextOptions
-		const setOptions = component().setOptions as ((nextOptions: typeof options.options) => void) | undefined
+		const setOptions = component().setOptions as
+			| ((nextOptions: typeof options.options) => void)
+			| undefined
 		if (setOptions) {
 			setOptions(nextOptions)
 		} else {
 			render()
 		}
 	}
-	field.setTriggerIcon = icon => {
+	field.setTriggerIcon = (icon) => {
 		if (destroyed) return
 		options.triggerIcon = icon ?? undefined
-		const setTriggerIcon = component().setTriggerIcon as ((icon: typeof options.triggerIcon | null) => void) | undefined
+		const setTriggerIcon = component().setTriggerIcon as
+			| ((icon: typeof options.triggerIcon | null) => void)
+			| undefined
 		if (setTriggerIcon) {
 			setTriggerIcon(icon)
 		} else {
@@ -131,15 +145,25 @@ export function createSelectField(options: SelectFieldOptions = {}): GooSelectEl
 	}
 	field.open = (openOptions?: GooSelectOpenOptions) => {
 		if (destroyed) return false
-		return (component().open as ((openOptions?: GooSelectOpenOptions) => boolean) | undefined)?.(openOptions) ?? false
+		return (
+			(component().open as ((openOptions?: GooSelectOpenOptions) => boolean) | undefined)?.(
+				openOptions
+			) ?? false
+		)
 	}
 	field.updatePosition = (openOptions?: GooSelectOpenOptions) => {
 		if (destroyed) return false
-		return (component().updatePosition as ((openOptions?: GooSelectOpenOptions) => boolean) | undefined)?.(openOptions) ?? false
+		return (
+			(
+				component().updatePosition as ((openOptions?: GooSelectOpenOptions) => boolean) | undefined
+			)?.(openOptions) ?? false
+		)
 	}
 	field.close = (closeOptions = {}) => {
 		if (destroyed) return
-		;(component().close as ((closeOptions?: { quiet?: boolean }) => void) | undefined)?.(closeOptions)
+		;(component().close as ((closeOptions?: { quiet?: boolean }) => void) | undefined)?.(
+			closeOptions
+		)
 	}
 	field.toggle = () => {
 		if (destroyed) return

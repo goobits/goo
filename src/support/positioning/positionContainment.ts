@@ -75,9 +75,9 @@ export function getOppositeEdge(edge: string): string {
 export function applyContainment(
 	result: PositionResult,
 	popoutRect: Rect,
-	targetRect: Rect,
+	_targetRect: Rect,
 	align: AlignmentConfig,
-	offset: { x?: number; y?: number },
+	_offset: { x?: number; y?: number },
 	keepWithin: ContainmentConfig,
 	direction: number,
 	recalculatePosition: RecalculatePositionFn,
@@ -98,14 +98,7 @@ export function applyContainment(
 
 	// Perform flip if needed
 	if (flipNeeded.x || flipNeeded.y) {
-		result = attemptFlip(
-			result,
-			align,
-			bounds,
-			direction,
-			flipNeeded,
-			recalculatePosition
-		)
+		result = attemptFlip(result, align, bounds, direction, flipNeeded, recalculatePosition)
 	}
 
 	// Clamp to bounds
@@ -144,11 +137,7 @@ type AvoidCandidate = {
  * @param margin - margin.
  * @param containerRect - container rect.
  */
-function calculateBounds(
-	containerRect: DOMRect,
-	popoutRect: Rect,
-	margin: number
-): Bounds {
+function calculateBounds(containerRect: DOMRect, popoutRect: Rect, margin: number): Bounds {
 	return {
 		minX: containerRect.left + margin,
 		maxX: containerRect.right - margin - popoutRect.width,
@@ -214,9 +203,10 @@ function attemptFlip(
 	const flippedResult = recalculatePosition(flippedAlign)
 
 	// Check if flipped position fits better
-	const flippedFits = (direction === HORIZONTAL)
-		? (flippedResult.x >= bounds.minX && flippedResult.x <= bounds.maxX)
-		: (flippedResult.y >= bounds.minY && flippedResult.y <= bounds.maxY)
+	const flippedFits =
+		direction === HORIZONTAL
+			? flippedResult.x >= bounds.minX && flippedResult.x <= bounds.maxX
+			: flippedResult.y >= bounds.minY && flippedResult.y <= bounds.maxY
 
 	if (flippedFits) {
 		result = flippedResult
@@ -266,7 +256,7 @@ function chooseAvoidancePosition(
 		{ x: avoidRect.right, y: result.y },
 		{ x: result.x, y: avoidRect.top - popoutRect.height },
 		{ x: result.x, y: avoidRect.bottom }
-	].map(candidate => scoreAvoidCandidate(candidate, base, popoutRect, bounds, avoidRect))
+	].map((candidate) => scoreAvoidCandidate(candidate, base, popoutRect, bounds, avoidRect))
 
 	return candidates.reduce((best, next) => {
 		if (next.overlap !== best.overlap) return next.overlap < best.overlap ? next : best
@@ -314,10 +304,7 @@ function toRect(x: number, y: number, popoutRect: Rect): PositionAvoidRect {
 }
 
 function rectsIntersect(a: PositionAvoidRect, b: PositionAvoidRect): boolean {
-	return a.left < b.right
-		&& a.right > b.left
-		&& a.top < b.bottom
-		&& a.bottom > b.top
+	return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top
 }
 
 function getOverlapArea(a: PositionAvoidRect, b: PositionAvoidRect): number {

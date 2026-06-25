@@ -69,7 +69,7 @@ export function createCheckboxField(options: CheckboxFieldOptions = {}): Checkbo
 				tabIndex: options.tabIndex,
 				title: options.title,
 				class: options.class ?? options.className,
-				onchange: (value, oldValue) => {
+				onchange: (value: boolean, oldValue?: boolean) => {
 					currentValue = value
 					options.onchange?.(value, oldValue)
 				}
@@ -95,7 +95,7 @@ export function createCheckboxField(options: CheckboxFieldOptions = {}): Checkbo
 		}
 	})
 	field.getValue = () => currentValue
-	field.setValue = value => {
+	field.setValue = (value) => {
 		if (destroyed) return
 		currentValue = Boolean(value)
 		if (checkboxElement?.setValue) {
@@ -105,7 +105,7 @@ export function createCheckboxField(options: CheckboxFieldOptions = {}): Checkbo
 			render()
 		}
 	}
-	field.toggle = value => {
+	field.toggle = (value) => {
 		if (destroyed) return false
 		if (checkboxElement?.toggle) {
 			const changed = checkboxElement.toggle(value)

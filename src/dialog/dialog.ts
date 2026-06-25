@@ -35,14 +35,17 @@ export type GooDialogType = 'alert' | 'confirm' | 'prompt' | 'notify' | 'overlay
 export type GooDialogDefaultFocus = 'ok' | 'cancel' | 'disregard'
 
 /** Values collected from dialog fields. */
-export type DialogValues<TValues extends Record<string, unknown> = Record<string, unknown>> = TValues
+export type DialogValues<TValues extends Record<string, unknown> = Record<string, unknown>> =
+	TValues
 
 /** Field element map passed to dialog verification callbacks. */
 export type DialogFieldElements = Map<string, HTMLElement>
 
 /** Verification callback for prompt dialogs. */
-export type DialogVerifyHandler<TValues extends DialogValues = DialogValues> =
-	(values: TValues, fieldElements: DialogFieldElements) => boolean | Promise<boolean>
+export type DialogVerifyHandler<TValues extends DialogValues = DialogValues> = (
+	values: TValues,
+	fieldElements: DialogFieldElements
+) => boolean | Promise<boolean>
 
 /**
  * Dialog options for construction
@@ -234,17 +237,17 @@ class GooDialogControllerRuntime {
 		const { type, width, height, heading, showClose } = this.state
 
 		// Apply type class
-		this.$element.classList.add(`goo-dialog--${ type }`)
+		this.$element.classList.add(`goo-dialog--${type}`)
 		if (this._className) {
 			this.$element.classList.add(this._className)
 		}
 
 		// Set dimensions
 		if (width !== 'auto') {
-			this.$element.style.width = typeof width === 'number' ? `${ width }px` : String(width)
+			this.$element.style.width = typeof width === 'number' ? `${width}px` : String(width)
 		}
 		if (height !== 'auto') {
-			this.$element.style.height = typeof height === 'number' ? `${ height }px` : String(height)
+			this.$element.style.height = typeof height === 'number' ? `${height}px` : String(height)
 		}
 
 		// Accessibility
@@ -258,7 +261,11 @@ class GooDialogControllerRuntime {
 			this.$content = notifyElements.$content
 			this.$closeBtn = notifyElements.$closeBtn
 		} else if (type === 'overlay') {
-			const overlayElements = buildOverlayLayout(this.$element, { type, heading, showClose }, this._content)
+			const overlayElements = buildOverlayLayout(
+				this.$element,
+				{ type, heading, showClose },
+				this._content
+			)
 			this.$header = overlayElements.$header
 			this.$title = overlayElements.$title
 			this.$content = overlayElements.$content
@@ -317,7 +324,7 @@ class GooDialogControllerRuntime {
 		this._cleanupOpenResources()
 		this._clearAutoDismiss()
 		for (const $field of this._fieldElements.values()) {
-			($field as DestroyableElement).destroy?.()
+			;($field as DestroyableElement).destroy?.()
 		}
 		this.$applyToAll?.destroy?.()
 		this.$header = null
@@ -338,15 +345,16 @@ class GooDialogControllerRuntime {
 	 * Reference the title, or use an explicit/string label, so `role="dialog"` exposes an accessible name.
 	 */
 	_applyAccessibleName() {
-		const instanceId = `goo-dialog-${ ++dialogInstanceCount }`
+		const instanceId = `goo-dialog-${++dialogInstanceCount}`
 		if (this.$title) {
-			if (!this.$title.id) this.$title.id = `${ instanceId }-title`
+			if (!this.$title.id) this.$title.id = `${instanceId}-title`
 			this.$element.setAttribute('aria-labelledby', this.$title.id)
 			this.$element.removeAttribute('aria-label')
 			return
 		}
 
-		const label = this.state.ariaLabel || (typeof this._content === 'string' ? this._content.trim() : '')
+		const label =
+			this.state.ariaLabel || (typeof this._content === 'string' ? this._content.trim() : '')
 		if (!label) return
 
 		this.$element.setAttribute('aria-label', label)
@@ -381,7 +389,7 @@ class GooDialogControllerRuntime {
 		}
 
 		// Keyboard
-		this._listen(this.$element, 'keydown', e => this._handleKeydown(e as KeyboardEvent))
+		this._listen(this.$element, 'keydown', (e) => this._handleKeydown(e as KeyboardEvent))
 
 		// Focus trap
 		if (this._$focusTrapStart) {
@@ -514,8 +522,12 @@ class GooDialogControllerRuntime {
 	 */
 	_getFieldValues(): DialogValues {
 		const values: DialogValues = {}
-		for (const [ name, $el ] of this._fieldElements) {
-			const elWithValue = $el as unknown as { value?: unknown; getValue?: () => unknown; state?: { value?: unknown } }
+		for (const [name, $el] of this._fieldElements) {
+			const elWithValue = $el as unknown as {
+				value?: unknown
+				getValue?: () => unknown
+				state?: { value?: unknown }
+			}
 			values[name] = elWithValue.value ?? elWithValue.getValue?.() ?? elWithValue.state?.value ?? ''
 		}
 		return values
@@ -531,7 +543,9 @@ class GooDialogControllerRuntime {
 	_setInitialFocus() {
 		// Focus first field for prompt
 		if (this.state.type === 'prompt' && this._fieldElements.size > 0) {
-			const [ , $first ] = this._fieldElements.entries().next().value
+			const firstField = this._fieldElements.entries().next()
+			if (firstField.done) return
+			const [, $first] = firstField.value
 			const firstWithFocus = $first as unknown as { focus?: () => void; select?: () => void }
 			if (firstWithFocus?.focus) {
 				firstWithFocus.focus()
@@ -614,10 +628,10 @@ class GooDialogControllerRuntime {
 	 * Open the dialog and return a promise with the result.
 	 * @returns {Promise<DialogResult>}
 	 */
-	open() {
+	open(): Promise<DialogResult> {
 		if (this._destroyed || this._isOpen) return Promise.resolve({ cancel: true })
 
-		return new Promise(resolve => {
+		return new Promise<DialogResult>((resolve) => {
 			this._cleanupOpenResources()
 			this._resolve = resolve
 			this._isOpen = true
@@ -632,7 +646,10 @@ class GooDialogControllerRuntime {
 			if (this.state.showBackdrop && this.state.type !== 'notify') {
 				this._$backdrop = document.createElement('div')
 				this._$backdrop.className = 'goo-dialog-backdrop'
-				this._$backdrop.style.setProperty('--goo-dialog-z-index', String(dialogManager.getZIndex(this)))
+				this._$backdrop.style.setProperty(
+					'--goo-dialog-z-index',
+					String(dialogManager.getZIndex(this))
+				)
 
 				if (this.state.closeOnBackdrop) {
 					this._listenOpen(this._$backdrop, 'click', () => this._handleCancel())
@@ -696,7 +713,7 @@ class GooDialogControllerRuntime {
 		}
 
 		// Wait for animation
-		await new Promise<void>(resolve => {
+		await new Promise<void>((resolve) => {
 			this._openLifecycle.timeout(resolve, TRANSITION_DURATION)
 		})
 
@@ -777,7 +794,8 @@ interface GooDialogControllerRuntime extends GooDialogController {}
 /**
  * Goo dialog instance.
  */
-export type GooDialogInstance<TValues extends DialogValues = DialogValues> = GooDialogController<TValues>
+export type GooDialogInstance<TValues extends DialogValues = DialogValues> =
+	GooDialogController<TValues>
 
 /**
  * Creates goo dialog.

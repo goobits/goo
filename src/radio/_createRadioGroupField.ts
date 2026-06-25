@@ -32,7 +32,9 @@ export type RadioGroupFieldElement = HTMLDivElement & {
 	value: string
 }
 
-export function createRadioGroupField(options: RadioGroupFieldOptions = {}): RadioGroupFieldElement {
+export function createRadioGroupField(
+	options: RadioGroupFieldOptions = {}
+): RadioGroupFieldElement {
 	const field = document.createElement('div') as RadioGroupFieldElement
 	field.className = 'goo-radio-group-field'
 
@@ -68,7 +70,7 @@ export function createRadioGroupField(options: RadioGroupFieldOptions = {}): Rad
 				style: options.style,
 				tabIndex: options.tabIndex,
 				title: options.title,
-				onchange: (value, oldValue) => {
+				onchange: (value: string, oldValue?: string) => {
 					currentValue = value
 					options.onchange?.(value, oldValue)
 				}
@@ -85,7 +87,7 @@ export function createRadioGroupField(options: RadioGroupFieldOptions = {}): Rad
 		}
 	})
 	field.getValue = () => currentValue
-	field.setValue = value => {
+	field.setValue = (value) => {
 		if (destroyed) return
 		currentValue = String(value)
 		if (radioElement?.setValue) {

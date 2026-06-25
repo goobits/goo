@@ -7,7 +7,7 @@
 		"allowImportingTsExtensions": true,
 		"isolatedModules": true,
 		"skipLibCheck": true,
-		"strict": false,
+		"strict": true,
 		"verbatimModuleSyntax": true,
 		"types": ["vitest/globals"],
 		"baseUrl": ".",

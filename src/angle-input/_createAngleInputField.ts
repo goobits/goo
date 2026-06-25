@@ -27,7 +27,9 @@ export type AngleInputFieldElement = HTMLDivElement & {
 	value: number
 }
 
-export function createAngleInputField(options: AngleInputFieldOptions = {}): AngleInputFieldElement {
+export function createAngleInputField(
+	options: AngleInputFieldOptions = {}
+): AngleInputFieldElement {
 	const field = document.createElement('div') as AngleInputFieldElement
 	field.className = 'goo-angle-input-field'
 	let currentValue = parseAngleValue(options.value)
@@ -67,11 +69,11 @@ export function createAngleInputField(options: AngleInputFieldOptions = {}): Ang
 				class: options.class ?? options.className,
 				style: options.style,
 				tabIndex: options.tabIndex,
-				oninput: (value, data) => {
+				oninput: (value: number, data: GooAngleInputEventData) => {
 					currentValue = value
 					options.oninput?.(data)
 				},
-				onchange: (value, data) => {
+				onchange: (value: number, data: GooAngleInputEventData) => {
 					currentValue = value
 					options.onchange?.(data)
 				}
@@ -87,7 +89,7 @@ export function createAngleInputField(options: AngleInputFieldOptions = {}): Ang
 		}
 	})
 	field.getValue = () => currentValue
-	field.setValue = value => {
+	field.setValue = (value) => {
 		if (destroyed) return
 		currentValue = parseAngleValue(value)
 		if (angleElement?.setValue) {

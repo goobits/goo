@@ -7,7 +7,13 @@
 
 import './GooPopout.css'
 
-import { applyArrowPosition, applyPosition, calculatePosition, type PositionAvoidRect, type PositionResult } from '../support/positioning/index.ts'
+import {
+	applyArrowPosition,
+	applyPosition,
+	calculatePosition,
+	type PositionAvoidRect,
+	type PositionResult
+} from '../support/positioning/index.ts'
 import { createLifecycleBag } from '../support/utils/lifecycleBag.ts'
 import { createPointerDrag } from '../support/utils/pointerDrag.ts'
 
@@ -158,7 +164,11 @@ export interface GooPopoutOptions {
 	onClose?: (data: { element: HTMLElement; instance: GooPopoutInstance }) => void
 
 	/** Called after each non-fullscreen placement calculation is applied. */
-	onPosition?: (data: { element: HTMLElement; instance: GooPopoutInstance; position: PositionResult }) => void
+	onPosition?: (data: {
+		element: HTMLElement
+		instance: GooPopoutInstance
+		position: PositionResult
+	}) => void
 	onDestroy?: () => void
 }
 
@@ -511,7 +521,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 	}
 
 	function waitForQuietOpeningLayout() {
-		return new Promise<void>(resolve => {
+		return new Promise<void>((resolve) => {
 			let frame = 0
 			let finished = false
 			let quietFrames = 0
@@ -523,7 +533,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 				finished = true
 				cancelAnimationFrame(frame)
 				clearTimeout(timeout)
-				observers.forEach(observer => observer.disconnect())
+				observers.forEach((observer) => observer.disconnect())
 				resolve()
 			}
 
@@ -629,7 +639,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		const el = document.createElement('div') as PopoutElement
 		const fullScreenClass = fullScreen ? 'goo-popout--fullscreen' : ''
 		const chromelessClass = chromeless ? 'goo-popout--chromeless' : ''
-		el.className = `goo-popout ${ fullScreenClass } ${ chromelessClass } ${ className }`
+		el.className = `goo-popout ${fullScreenClass} ${chromelessClass} ${className}`
 			.replace(/\s+/g, ' ')
 			.trim()
 		el.tabIndex = 0
@@ -644,7 +654,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		}
 
 		if (attributes) {
-			for (const [ key, value ] of Object.entries(attributes)) {
+			for (const [key, value] of Object.entries(attributes)) {
 				if (value === null || value === undefined || value === false) continue
 				el.setAttribute(key, value === true ? '' : String(value))
 			}
@@ -675,7 +685,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		contentWrapper.className = 'goo-popout__content'
 
 		if (content) {
-			const contentItems = Array.isArray(content) ? content : [ content ]
+			const contentItems = Array.isArray(content) ? content : [content]
 			for (const item of contentItems) {
 				if (item instanceof HTMLElement && item.dataset.gooPopoutStaged === 'true') {
 					item.hidden = false
@@ -837,18 +847,16 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 	 */
 	function setupDragToMove() {
 		let startX: number, startY: number, startLeft: number, startTop: number
-		let _hasDragged = false
 
 		const handler = createPointerDrag(
 			$element!,
-			event => {
+			(event) => {
 				if (event.START) {
 					const rect = $element!.getBoundingClientRect()
 					startX = event.clientX
 					startY = event.clientY
 					startLeft = rect.left
 					startTop = rect.top
-					_hasDragged = false
 				}
 
 				if (!event.DOWN) return
@@ -856,11 +864,10 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 				const dy = event.clientY - startY
 				if (Math.abs(dx) <= 5 && Math.abs(dy) <= 5) return
 
-				_hasDragged = true
 				event.preventDefault()
 
-				$element!.style.left = `${ startLeft + dx }px`
-				$element!.style.top = `${ startTop + dy }px`
+				$element!.style.left = `${startLeft + dx}px`
+				$element!.style.top = `${startTop + dy}px`
 
 				// Hide arrow when dragged
 				if ($arrow) {
@@ -958,13 +965,14 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 	}
 
 	function normalizeAvoidRects(avoidRects: PositionAvoidRect[] | undefined): PositionAvoidRect[] {
-		return (avoidRects ?? []).filter(rect =>
-			Number.isFinite(rect.left)
-				&& Number.isFinite(rect.right)
-				&& Number.isFinite(rect.top)
-				&& Number.isFinite(rect.bottom)
-				&& rect.right >= rect.left
-				&& rect.bottom >= rect.top
+		return (avoidRects ?? []).filter(
+			(rect) =>
+				Number.isFinite(rect.left) &&
+				Number.isFinite(rect.right) &&
+				Number.isFinite(rect.top) &&
+				Number.isFinite(rect.bottom) &&
+				rect.right >= rect.left &&
+				rect.bottom >= rect.top
 		)
 	}
 
@@ -997,7 +1005,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 	 */
 	function animateIn(el: HTMLElement): Promise<void> {
 		cancelActiveAnimation()
-		return new Promise(resolve => {
+		return new Promise((resolve) => {
 			let frame = 0
 			let timer: ReturnType<typeof setTimeout> | null = null
 			let finished = false
@@ -1038,7 +1046,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 	 */
 	function animateOut(el: HTMLElement | null): Promise<void> {
 		cancelActiveAnimation()
-		return new Promise<void>(resolve => {
+		return new Promise<void>((resolve) => {
 			if (!el) {
 				resolve()
 				return

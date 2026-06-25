@@ -25,7 +25,10 @@ export type TextInputFieldOptions<T = string> = {
 	value?: T
 }
 
-export type NumberInputFieldOptions = Omit<TextInputFieldOptions<number>, 'multiline' | 'onchange' | 'oninput' | 'type'> & {
+export type NumberInputFieldOptions = Omit<
+	TextInputFieldOptions<number>,
+	'multiline' | 'onchange' | 'oninput' | 'type'
+> & {
 	max?: number
 	min?: number
 	onchange?: (value: number, oldValue?: number) => void
@@ -59,7 +62,9 @@ export type NumberInputFieldElement = HTMLDivElement & {
 	value: number
 }
 
-export function createInputField<T = string>(options: TextInputFieldOptions<T> = {}): TextInputFieldElement<T> {
+export function createInputField<T = string>(
+	options: TextInputFieldOptions<T> = {}
+): TextInputFieldElement<T> {
 	const field = document.createElement('div') as TextInputFieldElement<T>
 	field.className = 'goo-input-field'
 	let currentValue = options.value ?? ('' as T)
@@ -95,11 +100,11 @@ export function createInputField<T = string>(options: TextInputFieldOptions<T> =
 				style: options.style,
 				tabIndex: options.tabIndex,
 				title: options.title,
-				oninput: (value, oldValue) => {
+				oninput: (value: unknown, oldValue?: unknown) => {
 					currentValue = value as T
 					options.oninput?.(value as T, oldValue as T)
 				},
-				onchange: (value, oldValue) => {
+				onchange: (value: unknown, oldValue?: unknown) => {
 					currentValue = value as T
 					options.onchange?.(value as T, oldValue as T)
 				},
@@ -117,7 +122,7 @@ export function createInputField<T = string>(options: TextInputFieldOptions<T> =
 		}
 	})
 	field.getValue = () => currentValue
-	field.setValue = value => {
+	field.setValue = (value) => {
 		if (destroyed) return
 		currentValue = value
 		if (instance?.setValue) {
@@ -173,11 +178,11 @@ export function createNumberField(options: NumberInputFieldOptions = {}): Number
 				style: options.style,
 				tabIndex: options.tabIndex,
 				title: options.title,
-				oninput: (value, oldValue) => {
+				oninput: (value: number, oldValue?: number) => {
 					currentValue = value
 					options.oninput?.(value, oldValue)
 				},
-				onchange: (value, oldValue) => {
+				onchange: (value: number, oldValue?: number) => {
 					currentValue = value
 					options.onchange?.(value, oldValue)
 				},
@@ -195,7 +200,7 @@ export function createNumberField(options: NumberInputFieldOptions = {}): Number
 		}
 	})
 	field.getValue = () => currentValue
-	field.setValue = value => {
+	field.setValue = (value) => {
 		if (destroyed) return
 		currentValue = Number(value)
 		if (instance?.setValue) {
