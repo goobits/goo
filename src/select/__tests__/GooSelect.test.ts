@@ -1,5 +1,3 @@
-import { readFileSync } from 'node:fs'
-
 import { render } from '@testing-library/svelte'
 import { tick } from 'svelte'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -10,8 +8,6 @@ import { DropdownPanel } from '../_dropdownPanel.ts'
 import GooSelect from '../GooSelect.svelte'
 import { createIcon } from '../selectDom.ts'
 import type { GooSelectElement } from '../types.ts'
-
-const gooSelectCss = readFileSync('src/select/GooSelect.css', 'utf8')
 
 describe('GooSelect', () => {
 	afterEach(() => {
@@ -158,15 +154,6 @@ describe('GooSelect', () => {
 		expect(labels).toEqual([ 'Edit' ])
 		expect(document.querySelector('.goo-select__option[data-id="copy"]')).not.toBeNull()
 		expect(document.querySelector('.goo-select__divider')).toBeNull()
-	})
-
-	it('uses active foreground for selected menu row shortcut affordances', () => {
-		expect(gooSelectCss).toContain(
-			'.goo-popout.goo-menu-popout .goo-select__option--selected .goo-select__shortcut-key'
-		)
-		expect(gooSelectCss).toContain(
-			'.goo-popout.goo-menu-popout .goo-select__option--selected .goo-select__submenu-arrow'
-		)
 	})
 
 	it('appends open-time popout class names', async() => {

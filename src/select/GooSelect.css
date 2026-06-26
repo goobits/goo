@@ -325,31 +325,6 @@
 	box-shadow: none;
 }
 
-/* Active/selected row: solid accent fill, white-on-accent text (the macOS hallmark). */
-.goo-popout.goo-menu-popout .goo-select__option:hover,
-.goo-popout.goo-menu-popout .goo-select__option--hovered,
-.goo-popout.goo-menu-popout .goo-select__option--selected {
-	background: var(--goo-theme-accent);
-	color: var(--goo-theme-accent-fg, #fff);
-	box-shadow: none;
-}
-
-/* Icon, checkmark, submenu arrow, and shortcut all flip to white on the active row. */
-.goo-popout.goo-menu-popout .goo-select__option:hover .goo-select__icon,
-.goo-popout.goo-menu-popout .goo-select__option--hovered .goo-select__icon,
-.goo-popout.goo-menu-popout .goo-select__option--selected .goo-select__icon,
-.goo-popout.goo-menu-popout .goo-select__option:hover .goo-select__check,
-.goo-popout.goo-menu-popout .goo-select__option--hovered .goo-select__check,
-.goo-popout.goo-menu-popout .goo-select__option--selected .goo-select__check,
-.goo-popout.goo-menu-popout .goo-select__option:hover .goo-select__submenu-arrow,
-.goo-popout.goo-menu-popout .goo-select__option--hovered .goo-select__submenu-arrow,
-.goo-popout.goo-menu-popout .goo-select__option--selected .goo-select__submenu-arrow,
-.goo-popout.goo-menu-popout .goo-select__option:hover .goo-select__shortcut-key,
-.goo-popout.goo-menu-popout .goo-select__option--hovered .goo-select__shortcut-key,
-.goo-popout.goo-menu-popout .goo-select__option--selected .goo-select__shortcut-key {
-	color: var(--goo-theme-accent-fg, #fff);
-}
-
 /* Icons muted at rest. */
 .goo-popout.goo-menu-popout .goo-select__icon {
 	color: color-mix(in srgb, var(--goo-select-fg) 60%, transparent);
@@ -632,6 +607,21 @@
 		inset 0 1px 0 color-mix(in srgb, var(--goo-theme-fg, #fff) 12%, transparent),
 		0 1px 2px rgb(0 0 0 / 10%);
 	color: var(--goo-select-fg);
+}
+
+/* Menu active rows live after the base item states so pointer hover, keyboard
+   hover, selected rows, and ARIA-selected rows resolve through one foreground. */
+.goo-popout.goo-menu-popout
+	.goo-select__option:is(:hover, .goo-select__option--hovered, .goo-select__option--selected, [aria-selected='true']) {
+	background: var(--goo-theme-accent);
+	color: var(--goo-theme-accent-fg, #fff);
+	box-shadow: none;
+}
+
+.goo-popout.goo-menu-popout
+	.goo-select__option:is(:hover, .goo-select__option--hovered, .goo-select__option--selected, [aria-selected='true'])
+	:is(.goo-select__icon, .goo-select__check, .goo-select__submenu-arrow, .goo-select__shortcut-key) {
+	color: var(--goo-theme-accent-fg, #fff);
 }
 
 /* ============================================================================
