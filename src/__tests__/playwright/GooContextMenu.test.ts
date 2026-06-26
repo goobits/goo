@@ -14,7 +14,7 @@ test.describe('GooContextMenu', () => {
 		})
 	})
 
-	test('keeps highlighted shortcut color stable before and after pointer hover', async({ page }) => {
+	test('keeps opt-in highlighted shortcut color stable before and after pointer hover', async({ page }) => {
 		await page.evaluate(async() => {
 			document.documentElement.style.setProperty('--goo-theme-accent', '#f4d35e')
 			document.documentElement.style.setProperty('--goo-theme-accent-fg', '#111111')
@@ -31,7 +31,7 @@ test.describe('GooContextMenu', () => {
 			})
 			container.appendChild(menu)
 			await new Promise(requestAnimationFrame)
-			if (!menu.open({ at: { x: 160, y: 96 } })) {
+			if (!menu.open({ at: { x: 160, y: 96 }, autoFocus: true })) {
 				throw new Error('Expected context menu to open.')
 			}
 		})
@@ -72,7 +72,7 @@ interface GooHarnessWindow extends Window {
 				shortcut: string[]
 			}>
 		}): HTMLElement & {
-			open(options: { at: { x: number; y: number } }): boolean
+			open(options: { at: { x: number; y: number }; autoFocus?: boolean }): boolean
 		}
 	}
 }

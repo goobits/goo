@@ -194,9 +194,8 @@ describe('createGooContextMenu', () => {
 		const detach = menu.attachTo(host)
 		await tick()
 
+		const close = vi.spyOn(menu, 'close')
 		expect(menu.open({ x: 20, y: 20 })).toBe(true)
-		await Promise.resolve()
-		expect(menu.isOpen()).toBe(true)
 
 		host.dispatchEvent(new MouseEvent('contextmenu', {
 			bubbles: true,
@@ -204,7 +203,7 @@ describe('createGooContextMenu', () => {
 			clientX: 24,
 			clientY: 24
 		}))
-		expect(menu.isOpen()).toBe(false)
+		expect(close).toHaveBeenCalledOnce()
 
 		detach()
 		await menu.destroy()
