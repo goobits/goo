@@ -15,7 +15,7 @@ import type {
 } from '../select/index.ts'
 import { createLifecycleBag } from '../support/utils/lifecycleBag.ts'
 
-const DEFAULT_CURSOR_GAP_X = 14
+const DEFAULT_CURSOR_GAP_X = 16
 const DEFAULT_CURSOR_ARROW_TIP_OFFSET_Y = 17
 
 /**
@@ -97,6 +97,7 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 	} = options
 
 	let contextMenuOpened = false
+	let releasePageUnfocus: (() => void) | null = null
 
 	// Create GooSelect with context menu defaults
 	const select = createSelectField({
@@ -116,10 +117,12 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 		actionContext,
 		onopen: () => {
 			contextMenuOpened = true
+			bindPageUnfocus()
 			onopen?.()
 		},
 		onclose: () => {
 			contextMenuOpened = false
+			unbindPageUnfocus()
 			onclose?.()
 		}
 	})
@@ -155,15 +158,17 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 		const didOpen = originalOpen({
 			...openOpts,
 			at: positionAt,
-			autoFocus: opts.autoFocus !== false
+			autoFocus: opts.autoFocus === true
 		})
 		if (didOpen) {
 			contextMenuOpened = true
+			bindPageUnfocus()
 		}
 		return didOpen
 	}
 	contextMenu.close = function closeContextMenu(opts = {}) {
 		contextMenuOpened = false
+		unbindPageUnfocus()
 		originalClose(opts)
 	}
 
@@ -172,6 +177,11 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 		const contextHandler = (e: MouseEvent) => {
 			e.preventDefault()
 			e.stopPropagation()
+
+			if (contextMenuOpened || contextMenu.isOpen()) {
+				contextMenu.close()
+				return
+			}
 
 			// Allow handler to modify options or cancel
 			if (handler) {
@@ -191,11 +201,39 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 
 	contextMenu.destroy = function destroyContextMenu() {
 		attachments.destroy()
+		unbindPageUnfocus()
 		contextMenuOpened = false
 		originalDestroy()
 	}
 
 	return contextMenu
+
+	function bindPageUnfocus(): void {
+		if (releasePageUnfocus) return
+
+		const closeForPageUnfocus = () => {
+			if (contextMenuOpened || contextMenu.isOpen()) {
+				contextMenu.close()
+			}
+		}
+		const closeForVisibilityChange = () => {
+			if (document.visibilityState === 'hidden') {
+				closeForPageUnfocus()
+			}
+		}
+
+		window.addEventListener('blur', closeForPageUnfocus)
+		document.addEventListener('visibilitychange', closeForVisibilityChange)
+		releasePageUnfocus = () => {
+			window.removeEventListener('blur', closeForPageUnfocus)
+			document.removeEventListener('visibilitychange', closeForVisibilityChange)
+			releasePageUnfocus = null
+		}
+	}
+
+	function unbindPageUnfocus(): void {
+		releasePageUnfocus?.()
+	}
 }
 
 function getPointOpenDefaults(

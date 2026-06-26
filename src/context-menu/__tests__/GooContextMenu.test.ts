@@ -30,7 +30,7 @@ describe('createGooContextMenu', () => {
 		})
 		await tick()
 
-		expect(menu.open({ at: { x: 10, y: 10 }, autoFocus: false })).toBe(true)
+		expect(menu.open({ at: { x: 10, y: 10 } })).toBe(true)
 		await Promise.resolve()
 
 		const popout = document.querySelector('.goo-popout.goo-context-menu-popout')
@@ -57,7 +57,7 @@ describe('createGooContextMenu', () => {
 		])
 		await tick()
 
-		expect(menu.open({ at: { x: 10, y: 10 }, autoFocus: false })).toBe(true)
+		expect(menu.open({ at: { x: 10, y: 10 } })).toBe(true)
 		await Promise.resolve()
 
 		const label = document.querySelector('.goo-context-menu-popout .goo-select__label')
@@ -82,14 +82,14 @@ describe('createGooContextMenu', () => {
 		])
 		await tick()
 
-		GooContextMenu.open(menu, { at: { x: 20, y: 30 }, autoFocus: false })
+		GooContextMenu.open(menu, { at: { x: 20, y: 30 } })
 		await Promise.resolve()
 		const popout = document.querySelector<HTMLElement>('.goo-popout.goo-context-menu-popout')
 		expect(popout).not.toBeNull()
 		const firstLeft = Number.parseFloat(popout?.style.left ?? '')
 		const firstTop = Number.parseFloat(popout?.style.top ?? '')
 
-		GooContextMenu.open(menu, { at: { x: 120, y: 130 }, autoFocus: false })
+		GooContextMenu.open(menu, { at: { x: 120, y: 130 } })
 		await new Promise(requestAnimationFrame)
 
 		expect(Number.parseFloat(popout?.style.left ?? '')).not.toBe(firstLeft)
@@ -121,8 +121,7 @@ describe('createGooContextMenu', () => {
 				align: 'right top to left top',
 				offset: { x: 12, y: 0 },
 				point: { x: 100, y: 80 }
-			},
-			autoFocus: false
+			}
 		})).toBe(true)
 		await Promise.resolve()
 
@@ -148,20 +147,68 @@ describe('createGooContextMenu', () => {
 		}
 
 		try {
-			expect(menu.open({ x: 100, y: 80, autoFocus: false })).toBe(true)
+			expect(menu.open({ x: 100, y: 80 })).toBe(true)
 			await Promise.resolve()
 
 			const popout = document.querySelector<HTMLElement>('.goo-popout.goo-context-menu-popout')
 			const arrow = popout?.querySelector<HTMLElement>('.goo-popout__arrow')
 
-			expect(Number.parseFloat(popout?.style.left ?? '')).toBe(114)
+			expect(Number.parseFloat(popout?.style.left ?? '')).toBe(116)
 			expect(Number.parseFloat(popout?.style.top ?? '')).toBe(63)
 			expect(arrow?.classList.contains('left')).toBe(true)
 			expect(Number.parseFloat(arrow?.style.top ?? '')).toBe(8)
+			expect(menu.getHoveredOptionId()).toBeNull()
+			expect(document.querySelector('.goo-select__option--hovered')).toBeNull()
 		} finally {
 			await menu.destroy()
 			HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect
 		}
+	})
+
+	it('closes when the page loses focus', async() => {
+		const menu = createGooContextMenu({
+			options: [
+				{ id: 'copy', label: 'Copy' }
+			]
+		})
+		await tick()
+
+		expect(menu.open({ x: 20, y: 20 })).toBe(true)
+		await Promise.resolve()
+
+		window.dispatchEvent(new Event('blur'))
+
+		expect(menu.isOpen()).toBe(false)
+
+		await menu.destroy()
+	})
+
+	it('closes an open menu on an attached contextmenu event', async() => {
+		const menu = createGooContextMenu({
+			options: [
+				{ id: 'copy', label: 'Copy' }
+			]
+		})
+		const host = document.createElement('div')
+		document.body.append(menu, host)
+		const detach = menu.attachTo(host)
+		await tick()
+
+		expect(menu.open({ x: 20, y: 20 })).toBe(true)
+		await Promise.resolve()
+		expect(menu.isOpen()).toBe(true)
+
+		host.dispatchEvent(new MouseEvent('contextmenu', {
+			bubbles: true,
+			cancelable: true,
+			clientX: 24,
+			clientY: 24
+		}))
+		expect(menu.isOpen()).toBe(false)
+
+		detach()
+		await menu.destroy()
+		host.remove()
 	})
 
 	it('detaches owned contextmenu listeners when destroyed', () => {
@@ -191,7 +238,7 @@ describe('createGooContextMenu', () => {
 		expect(removeEventListener).toHaveBeenCalledWith('open', expect.any(Function), undefined)
 		expect(removeEventListener).toHaveBeenCalledWith('close', expect.any(Function), undefined)
 		expect(GooContextMenu.get('managed-destroy')).toBeUndefined()
-		expect(menu.open({ at: { x: 10, y: 10 }, autoFocus: false })).toBe(false)
+		expect(menu.open({ at: { x: 10, y: 10 } })).toBe(false)
 
 		menu.element.dispatchEvent(new CustomEvent('open'))
 		expect(onOpen).not.toHaveBeenCalled()
@@ -209,7 +256,7 @@ describe('createGooContextMenu', () => {
 
 		expect(removeEventListener).toHaveBeenCalledWith('change', expect.any(Function), undefined)
 		expect(GooContextMenu.get('replace-menu')).toBe(secondMenu)
-		expect(firstMenu.open({ at: { x: 10, y: 10 }, autoFocus: false })).toBe(false)
+		expect(firstMenu.open({ at: { x: 10, y: 10 } })).toBe(false)
 	})
 })
 
