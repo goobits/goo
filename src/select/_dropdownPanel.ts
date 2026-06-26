@@ -413,6 +413,15 @@ export class DropdownPanel {
 	// --------------------------------------------------------------------------
 
 	#renderOptionsList(opts: GooSelectOption[], container: HTMLElement, depth = 0) {
+		for (const $item of this.#renderOptionElements(opts, depth)) {
+			container.appendChild($item)
+		}
+	}
+
+	#renderOptionElements(opts: GooSelectOption[], depth: number): HTMLElement[] {
+		const items: HTMLElement[] = []
+		let lastWasDivider = true
+
 		for (const opt of opts) {
 			// Check if supported
 			if (
@@ -423,8 +432,25 @@ export class DropdownPanel {
 			}
 
 			const $item = this.#renderOption(opt, depth)
-			if ($item) container.appendChild($item)
+			if (!$item) continue
+
+			const isDivider = $item.classList.contains('goo-select__divider')
+			if (isDivider) {
+				if (lastWasDivider) continue
+				items.push($item)
+				lastWasDivider = true
+				continue
+			}
+
+			items.push($item)
+			lastWasDivider = false
 		}
+
+		while (items.at(-1)?.classList.contains('goo-select__divider')) {
+			items.pop()
+		}
+
+		return items
 	}
 
 	#renderOption(opt: GooSelectOption, depth: number): HTMLElement | null {
@@ -440,6 +466,9 @@ export class DropdownPanel {
 
 		// Option group
 		if (opt.type === 'optgroup') {
+			const childItems = this.#renderOptionElements(opt.options || [], depth + 1)
+			if (!childItems.some(item => this.#containsOptionRow(item))) return null
+
 			const $group = document.createElement('div')
 			$group.className = 'goo-select__optgroup'
 			$group.setAttribute('role', 'group')
@@ -449,7 +478,9 @@ export class DropdownPanel {
 			$label.textContent = evaluate(opt.label) as string
 			$group.appendChild($label)
 
-			this.#renderOptionsList(opt.options || [], $group, depth + 1)
+			for (const $item of childItems) {
+				$group.appendChild($item)
+			}
 			return $group
 		}
 
@@ -457,6 +488,7 @@ export class DropdownPanel {
 		const isDisabled = evaluate(opt.isDisabled, this.#ctx.getContext())
 		const isSelected = showSelectionIndicator && value === opt.id
 		const isSubmenu = opt.type === 'submenu'
+		if (isSubmenu && !this.#hasSupportedOptionRow(opt.options || [])) return null
 
 		const $item = document.createElement('div')
 		$item.className = [
@@ -600,6 +632,29 @@ export class DropdownPanel {
 			target instanceof Node &&
 			(this.$container.contains(target) || this.#submenuPopout.containsElement(target))
 		)
+	}
+
+	#containsOptionRow(item: HTMLElement): boolean {
+		return item.classList.contains('goo-select__option') ||
+			item.querySelector('.goo-select__option') !== null
+	}
+
+	#hasSupportedOptionRow(opts: GooSelectOption[]): boolean {
+		for (const opt of opts) {
+			if (
+				opt.isSupported !== undefined &&
+				!evaluate(opt.isSupported, this.#ctx.getContext())
+			) {
+				continue
+			}
+			if (opt.type === 'divider') continue
+			if (opt.type === 'optgroup' || opt.type === 'submenu') {
+				if (this.#hasSupportedOptionRow(opt.options || [])) return true
+				continue
+			}
+			return true
+		}
+		return false
 	}
 
 	#readOptionFromElement(item: HTMLElement): GooSelectOption | null {
