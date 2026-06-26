@@ -78,6 +78,7 @@
 	font-size: var(--goo-chevron-tabs-font-size, 12px);
 	font-weight: 500;
 	letter-spacing: var(--goo-chevron-tabs-letter-spacing, 0);
+	line-height: 1;
 	outline: none;
 	touch-action: none;
 	transition:
@@ -87,10 +88,6 @@
 		padding 0.22s ease,
 		transform 0.26s cubic-bezier(0.2, 0.9, 0.2, 1);
 	white-space: nowrap;
-}
-
-.goo-chevron-tabs__tab--has-activity {
-	padding-left: 0.5rem;
 }
 
 .goo-chevron-tabs__tab:hover {
@@ -140,6 +137,7 @@
 	min-width: 0;
 	max-width: 150px;
 	overflow: hidden;
+	line-height: 1;
 	outline: none;
 	text-overflow: ellipsis;
 	white-space: nowrap;
