@@ -416,11 +416,20 @@ function getFinalArrowPosition(
 	const popoutRight = position.x + popoutRect.width
 	const popoutTop = position.y
 	const popoutBottom = position.y + popoutRect.height
+	const canPointFromTopOrBottom = targetCenterX >= popoutLeft && targetCenterX <= popoutRight
+	const canPointFromLeftOrRight = targetCenterY >= popoutTop && targetCenterY <= popoutBottom
 
-	if (targetCenterX <= popoutLeft) return 'left'
-	if (targetCenterX >= popoutRight) return 'right'
-	if (targetCenterY <= popoutTop) return 'top'
-	if (targetCenterY >= popoutBottom) return 'bottom'
+	if ((fallback === 'top' || fallback === 'bottom') && canPointFromTopOrBottom) {
+		return fallback
+	}
+	if ((fallback === 'left' || fallback === 'right') && canPointFromLeftOrRight) {
+		return fallback
+	}
+
+	if (targetCenterX < popoutLeft) return 'left'
+	if (targetCenterX > popoutRight) return 'right'
+	if (targetCenterY < popoutTop) return 'top'
+	if (targetCenterY > popoutBottom) return 'bottom'
 
 	const edgeDistances = [
 		{ position: 'left', distance: Math.abs(targetCenterX - popoutLeft) },

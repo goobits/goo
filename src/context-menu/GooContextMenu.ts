@@ -15,6 +15,9 @@ import type {
 } from '../select/index.ts'
 import { createLifecycleBag } from '../support/utils/lifecycleBag.ts'
 
+const DEFAULT_CURSOR_GAP_X = 14
+const DEFAULT_CURSOR_ARROW_TIP_OFFSET_Y = 17
+
 /**
  * Goo context menu option.
  */
@@ -135,16 +138,22 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 		if (x !== undefined || y !== undefined) {
 			positionAt = { x: x ?? 0, y: y ?? 0 }
 		}
+		positionAt = getPointOpenAnchor(positionAt, restOpts)
+		const pointDefaults = getPointOpenDefaults(positionAt, restOpts)
+		const openOpts = {
+			...restOpts,
+			...pointDefaults
+		}
 
 		if (contextMenuOpened || contextMenu.isOpen()) {
 			return contextMenu.updatePosition({
-				...restOpts,
+				...openOpts,
 				at: positionAt
 			})
 		}
 
 		const didOpen = originalOpen({
-			...restOpts,
+			...openOpts,
 			at: positionAt,
 			autoFocus: opts.autoFocus !== false
 		})
@@ -187,4 +196,39 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 	}
 
 	return contextMenu
+}
+
+function getPointOpenDefaults(
+	positionAt: GooContextMenuOpenOptions['at'],
+	opts: Omit<GooContextMenuOpenOptions, 'at' | 'x' | 'y'>
+): Pick<GooContextMenuOpenOptions, 'align' | 'offset'> {
+	if (!isPointAnchor(positionAt)) return {}
+	return {
+		align: opts.align ?? positionAt.align ?? 'left top to right top',
+		offset: opts.offset ?? positionAt.offset ?? { x: DEFAULT_CURSOR_GAP_X, y: 0 }
+	}
+}
+
+function getPointOpenAnchor(
+	positionAt: GooContextMenuOpenOptions['at'],
+	opts: Omit<GooContextMenuOpenOptions, 'at' | 'x' | 'y'>
+): GooContextMenuOpenOptions['at'] {
+	if (!isPointAnchor(positionAt)) return positionAt
+	if (opts.align || opts.offset || positionAt.align || positionAt.offset) return positionAt
+
+	const pointX = positionAt.point?.x ?? positionAt.x ?? 0
+	const pointY = positionAt.point?.y ?? positionAt.y ?? 0
+	return {
+		...positionAt,
+		point: {
+			x: pointX,
+			y: pointY - DEFAULT_CURSOR_ARROW_TIP_OFFSET_Y
+		}
+	}
+}
+
+function isPointAnchor(positionAt: GooContextMenuOpenOptions['at']): positionAt is Exclude<GooContextMenuOpenOptions['at'], HTMLElement | undefined> {
+	if (!positionAt || positionAt instanceof HTMLElement) return false
+	if (positionAt.element) return false
+	return Boolean(positionAt.point || positionAt.x !== undefined || positionAt.y !== undefined)
 }

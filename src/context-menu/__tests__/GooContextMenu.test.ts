@@ -132,6 +132,38 @@ describe('createGooContextMenu', () => {
 		expect(Number.parseFloat(popout?.style.top ?? '')).toBe(80)
 	})
 
+	it('opens point menus to the right of the cursor by default', async() => {
+		const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect
+		const menu = createGooContextMenu({
+			options: [
+				{ id: 'copy', label: 'Copy' }
+			]
+		})
+		await tick()
+
+		HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
+			if (this === document.body) return rect(0, 0, 300, 200)
+			if (this.classList.contains('goo-popout')) return rect(0, 0, 120, 40)
+			return originalGetBoundingClientRect.call(this)
+		}
+
+		try {
+			expect(menu.open({ x: 100, y: 80, autoFocus: false })).toBe(true)
+			await Promise.resolve()
+
+			const popout = document.querySelector<HTMLElement>('.goo-popout.goo-context-menu-popout')
+			const arrow = popout?.querySelector<HTMLElement>('.goo-popout__arrow')
+
+			expect(Number.parseFloat(popout?.style.left ?? '')).toBe(114)
+			expect(Number.parseFloat(popout?.style.top ?? '')).toBe(63)
+			expect(arrow?.classList.contains('left')).toBe(true)
+			expect(Number.parseFloat(arrow?.style.top ?? '')).toBe(8)
+		} finally {
+			await menu.destroy()
+			HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect
+		}
+	})
+
 	it('detaches owned contextmenu listeners when destroyed', () => {
 		const menu = createGooContextMenu()
 		const host = document.createElement('div')
@@ -180,3 +212,17 @@ describe('createGooContextMenu', () => {
 		expect(firstMenu.open({ at: { x: 10, y: 10 }, autoFocus: false })).toBe(false)
 	})
 })
+
+function rect(x: number, y: number, width: number, height: number): DOMRect {
+	return {
+		x,
+		y,
+		width,
+		height,
+		left: x,
+		top: y,
+		right: x + width,
+		bottom: y + height,
+		toJSON: () => ({})
+	} as DOMRect
+}
