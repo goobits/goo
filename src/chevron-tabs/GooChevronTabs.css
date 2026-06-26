@@ -171,20 +171,9 @@
 	color: #ff79c6;
 }
 
-.goo-chevron-tabs__label--hidden {
-	color: transparent;
-}
-
 .goo-chevron-tabs__label--editor {
-	position: absolute;
-	left: 50%;
-	top: 50%;
-	max-width: calc(100% - 56px);
-	overflow: hidden;
-	color: inherit;
 	cursor: text;
-	text-overflow: ellipsis;
-	transform: translate(-50%, -50%);
+	caret-color: currentColor;
 	user-select: text;
 }
 

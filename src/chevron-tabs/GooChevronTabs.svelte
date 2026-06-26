@@ -235,7 +235,7 @@
 			centers,
 			advance: (tabElements[tab.id]?.getBoundingClientRect().width ?? 100) - 7
 		}
-		railElement?.setPointerCapture?.(event.pointerId)
+		tabElements[tab.id]?.setPointerCapture?.(event.pointerId)
 	}
 
 	const moveDrag = (event: PointerEvent): void => {
@@ -261,7 +261,10 @@
 		const drag = dragging
 		if (!drag) return
 		if (event && event.pointerId !== drag.pointerId) return
-		railElement?.releasePointerCapture?.(drag.pointerId)
+		const captureElement = tabElements[drag.id]
+		if (captureElement?.hasPointerCapture?.(drag.pointerId)) {
+			captureElement.releasePointerCapture(drag.pointerId)
+		}
 		dragging = null
 		dragVisualOffset = 0
 		if (!drag.moved) {
@@ -347,7 +350,7 @@
 				class="goo-chevron-tabs__tab"
 				class:goo-chevron-tabs__tab--active={tab.id === activeId}
 				class:goo-chevron-tabs__tab--dragging={tab.id === dragging?.id}
-				class:goo-chevron-tabs__tab--has-activity={activity !== null && editingId !== tab.id}
+				class:goo-chevron-tabs__tab--has-activity={activity !== null}
 				role="tab"
 				tabindex="0"
 				aria-selected={tab.id === activeId}
@@ -358,7 +361,7 @@
 				ondblclick={() => startRename(tab)}
 				onkeydown={(event) => handleTabKeydown(event, tab)}
 			>
-				{#if activity && editingId !== tab.id}
+				{#if activity}
 					<span
 						class="goo-chevron-tabs__activity"
 						class:goo-chevron-tabs__activity--working={activity.kind === 'working'}
@@ -378,23 +381,23 @@
 				{/if}
 				<span
 					class="goo-chevron-tabs__label"
-					class:goo-chevron-tabs__label--hidden={editingId === tab.id}
+					class:goo-chevron-tabs__label--editor={editingId === tab.id}
+					bind:this={nameElements[tab.id]}
+					contenteditable={editingId === tab.id ? 'true' : undefined}
+					role={editingId === tab.id ? 'textbox' : undefined}
+					aria-label={editingId === tab.id ? renameLabel : undefined}
+					onpointerdown={(event) => {
+						if (editingId === tab.id) event.stopPropagation()
+					}}
+					onkeydown={(event) => {
+						if (editingId === tab.id) handleNameKeydown(event)
+					}}
+					onblur={(event) => {
+						if (editingId === tab.id) commitRename(tab, event.currentTarget)
+					}}
 				>
 					{tab.name}
 				</span>
-				{#if editingId === tab.id}
-					<span
-						class="goo-chevron-tabs__label goo-chevron-tabs__label--editor"
-						bind:this={nameElements[tab.id]}
-						contenteditable="true"
-						role="textbox"
-						tabindex="-1"
-						aria-label={renameLabel}
-						onpointerdown={(event) => event.stopPropagation()}
-						onkeydown={handleNameKeydown}
-						onblur={(event) => commitRename(tab, event.currentTarget)}>{tab.name}</span
-					>
-				{/if}
 
 				{#if canClose && editingId !== tab.id}
 					<button
