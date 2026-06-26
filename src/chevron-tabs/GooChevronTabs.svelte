@@ -44,7 +44,6 @@
 		allowClosingLastTab = false,
 		closeLabel = (tab) => `Close ${tab.name} tab`,
 		tabAttributes = () => ({}),
-		dropTargetAttributes: _dropTargetAttributes = () => ({}),
 		actions,
 		onselect,
 		onadd,

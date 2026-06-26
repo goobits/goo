@@ -19,8 +19,6 @@ export type GooChevronTab = {
 
 export type GooChevronTabAttributes = Record<string, string | undefined>
 
-export type GooChevronDropTargetAttributes = Record<string, string | undefined>
-
 export type GooChevronTabsProps = {
 	tabs: GooChevronTab[]
 	activeId?: string | null
@@ -31,7 +29,6 @@ export type GooChevronTabsProps = {
 	allowClosingLastTab?: boolean
 	closeLabel?: (_tab: GooChevronTab) => string
 	tabAttributes?: (_tab: GooChevronTab, _index: number) => GooChevronTabAttributes
-	dropTargetAttributes?: (_index: number) => GooChevronDropTargetAttributes
 	actions?: Snippet
 	onselect?: (_tabId: string) => void
 	onadd?: () => void
