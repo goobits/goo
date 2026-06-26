@@ -3,25 +3,28 @@ import { tick } from 'svelte'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import GooTooltip from '../GooTooltip.svelte'
-import type { GooTooltipInstance } from '../index.ts'
-import {
-	createGooTooltip,
-	gooTooltipRuntime,
-	tooltip
-} from '../index.ts'
+import * as gooTooltip from '../index.ts'
+
+type GooTooltipInstance = ReturnType<typeof gooTooltip.createGooTooltip>
 
 describe('GooTooltip', () => {
 	afterEach(() => {
 		vi.useRealTimers()
-		gooTooltipRuntime.destroy()
+		gooTooltip.gooTooltipRuntime.destroy()
 		document.querySelectorAll('.goo-popout').forEach(element => element.remove())
-		document.querySelectorAll('[aria-describedby]').forEach(element => element.removeAttribute('aria-describedby'))
+		document
+			.querySelectorAll('[aria-describedby]')
+			.forEach(element => element.removeAttribute('aria-describedby'))
 	})
 
 	it('creates tooltips without registering a tooltip custom element', () => {
 		const button = document.createElement('button')
 		document.body.appendChild(button)
-		const instance = createGooTooltip({ for: button, content: 'Save', trigger: 'manual' })
+		const instance = gooTooltip.createGooTooltip({
+			for: button,
+			content: 'Save',
+			trigger: 'manual'
+		})
 
 		instance.show()
 
@@ -66,7 +69,7 @@ describe('GooTooltip', () => {
 	it('attaches tooltip behavior as a Svelte action', async() => {
 		const button = document.createElement('button')
 		document.body.appendChild(button)
-		const lifecycle = tooltip(button, { content: 'Save', showDelay: 0 })
+		const lifecycle = gooTooltip.tooltip(button, { content: 'Save', showDelay: 0 })
 
 		button.dispatchEvent(new MouseEvent('mouseenter'))
 		await new Promise(resolve => setTimeout(resolve)) // test-shape: timing-probe - documented test timing behavior.
@@ -78,7 +81,7 @@ describe('GooTooltip', () => {
 	})
 
 	it('updates imperative manual tooltip content and position without recreating the popout', () => {
-		gooTooltipRuntime.show('12 x 24', {
+		gooTooltip.gooTooltipRuntime.show('12 x 24', {
 			direction: 'right',
 			position: { x: 10, y: 20 }
 		})
@@ -86,7 +89,7 @@ describe('GooTooltip', () => {
 		const firstPopout = document.querySelector('.goo-popout.goo-tooltip')
 		expect(firstPopout).not.toBeNull()
 
-		gooTooltipRuntime.show('18 x 30', {
+		gooTooltip.gooTooltipRuntime.show('18 x 30', {
 			direction: 'right',
 			position: { x: 30, y: 40 }
 		})
@@ -98,13 +101,15 @@ describe('GooTooltip', () => {
 	})
 
 	it('shows an arrow for imperative manual tooltips', () => {
-		gooTooltipRuntime.show('100 x 80', {
+		gooTooltip.gooTooltipRuntime.show('100 x 80', {
 			className: 'goo-tooltip--cursor-tip',
 			direction: 'right',
 			position: { x: 100, y: 100 }
 		})
 
-		const arrow = document.querySelector('.goo-popout.goo-tooltip.goo-tooltip--cursor-tip .goo-popout__arrow')
+		const arrow = document.querySelector(
+			'.goo-popout.goo-tooltip.goo-tooltip--cursor-tip .goo-popout__arrow'
+		)
 		expect(arrow).not.toBeNull()
 		expect(arrow?.classList.contains('left')).toBe(true)
 	})
@@ -112,7 +117,7 @@ describe('GooTooltip', () => {
 	it('removes interactive popout listeners when destroyed', () => {
 		const button = document.createElement('button')
 		document.body.appendChild(button)
-		const instance = createGooTooltip({
+		const instance = gooTooltip.createGooTooltip({
 			for: button,
 			content: 'Save',
 			interactive: true,
@@ -134,7 +139,7 @@ describe('GooTooltip', () => {
 		vi.useFakeTimers()
 		const button = document.createElement('button')
 		document.body.appendChild(button)
-		const instance = createGooTooltip({
+		const instance = gooTooltip.createGooTooltip({
 			for: button,
 			content: 'Save',
 			showDelay: 50
