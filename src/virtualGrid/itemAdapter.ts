@@ -6,7 +6,12 @@ export type VirtualGridItem = {
 	selected?: boolean
 }
 
-export type VirtualGridItemRef<T extends VirtualGridItem> = HTMLElement | T | number | string | undefined
+export type VirtualGridItemRef<T extends VirtualGridItem> =
+	| HTMLElement
+	| T
+	| number
+	| string
+	| undefined
 
 export function getGridItem<T extends VirtualGridItem>(
 	items: T[],
@@ -18,7 +23,9 @@ export function getGridItem<T extends VirtualGridItem>(
 
 	switch (typeof ref) {
 		case 'string':
-			return items.find(item => item?.key != null && String(item.key) === ref)
+			return items.find(
+				(item) => item?.key !== null && item?.key !== undefined && String(item.key) === ref
+			)
 
 		case 'number':
 			return items[ref]
@@ -39,15 +46,17 @@ export function getGridItemElement<T extends VirtualGridItem>(
 	const item = getGridItem(items, ref)
 	if (!item || !rootElement) return null
 
-	if (item.key != null) {
-		return rootElement.querySelector<HTMLElement>(`[data-key="${ escapeSelectorValue(String(item.key)) }"]`)
+	if (item.key !== null && item.key !== undefined) {
+		return rootElement.querySelector<HTMLElement>(
+			`[data-key="${escapeSelectorValue(String(item.key))}"]`
+		)
 	}
 
-	return rootElement.querySelector<HTMLElement>(`[data-index="${ items.indexOf(item) }"]`)
+	return rootElement.querySelector<HTMLElement>(`[data-index="${items.indexOf(item)}"]`)
 }
 
 export function getSelectedGridItem<T extends VirtualGridItem>(items: T[]): T | undefined {
-	return items.find(item => item?.selected)
+	return items.find((item) => item?.selected)
 }
 
 export function setGridItemSelected<T extends VirtualGridItem>(
@@ -114,23 +123,27 @@ export function getVisibleGridIndexes<T extends VirtualGridItem>(
 }
 
 function readElementRef(element: HTMLElement): string | number | undefined {
-	if (element.dataset.key != null) {
+	if (element.dataset.key !== null && element.dataset.key !== undefined) {
 		return element.dataset.key
 	}
 
 	const index = element.dataset.index
-	return index == null ? undefined : Number.parseInt(index)
+	return index === null || index === undefined ? undefined : Number.parseInt(index)
 }
 
 function findMatchingItem<T extends VirtualGridItem>(items: T[], ref: T): T | undefined {
-	if (ref.key != null) {
+	if (ref.key !== null && ref.key !== undefined) {
 		const key = String(ref.key)
-		return items.find(item => item?.key != null && String(item.key) === key)
+		return items.find(
+			(item) => item?.key !== null && item?.key !== undefined && String(item.key) === key
+		)
 	}
 
-	if (ref.id != null) {
+	if (ref.id !== null && ref.id !== undefined) {
 		const id = String(ref.id)
-		return items.find(item => item?.id != null && String(item.id) === id)
+		return items.find(
+			(item) => item?.id !== null && item?.id !== undefined && String(item.id) === id
+		)
 	}
 
 	return ref

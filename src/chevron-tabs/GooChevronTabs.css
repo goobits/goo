@@ -4,12 +4,33 @@
 	align-items: stretch;
 	min-width: 0;
 	height: 28px;
-	border-top: 2px solid #15171e;
-	border-bottom: 2px solid #15171e;
-	background: linear-gradient(180deg, #181a22 0%, #15171e 100%);
-	color: #f8f8f2;
-	--goo-chevron-tabs-selected-color: #79f2b0;
-	--goo-chevron-tabs-selected-foreground: #0c0e14;
+	--goo-chevron-tabs-control-size: 24px;
+	--goo-chevron-tabs-bg: var(--goo-theme-surface, #15171e);
+	--goo-chevron-tabs-bg-raised: var(--goo-theme-surface-raised, #181a22);
+	--goo-chevron-tabs-tab-bg: color-mix(
+		in srgb,
+		var(--goo-theme-surface-raised, #181a22) 72%,
+		var(--goo-theme-bg, #05070a)
+	);
+	--goo-chevron-tabs-hover-bg: color-mix(
+		in srgb,
+		var(--goo-chevron-tabs-selected-color) 26%,
+		var(--goo-chevron-tabs-tab-bg)
+	);
+	--goo-chevron-tabs-fg: var(--goo-theme-fg, #f8f8f2);
+	--goo-chevron-tabs-muted-fg: var(--goo-theme-muted, color-mix(in srgb, var(--goo-chevron-tabs-fg) 62%, transparent));
+	--goo-chevron-tabs-selected-color: var(--goo-theme-selected, var(--goo-theme-accent, #79f2b0));
+	--goo-chevron-tabs-selected-foreground: var(--goo-theme-selected-fg, var(--goo-theme-accent-fg, #0c0e14));
+	--goo-chevron-tabs-control-hover-bg: color-mix(in srgb, var(--goo-chevron-tabs-fg) 22%, transparent);
+	--goo-chevron-tabs-control-pressed-bg: color-mix(in srgb, var(--goo-chevron-tabs-fg) 34%, transparent);
+	border-top: 2px solid var(--goo-chevron-tabs-bg);
+	border-bottom: 2px solid var(--goo-chevron-tabs-bg);
+	background: linear-gradient(
+		180deg,
+		var(--goo-chevron-tabs-bg-raised) 0%,
+		var(--goo-chevron-tabs-bg) 100%
+	);
+	color: var(--goo-chevron-tabs-fg);
 	font-family: var(
 		--goo-chevron-tabs-font-family,
 		system-ui,
@@ -45,9 +66,9 @@
 	height: 28px;
 	padding: 0 6px 0 0;
 	border: 0;
-	background: #15171e;
+	background: var(--goo-chevron-tabs-bg);
 	clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%);
-	color: rgba(248, 248, 242, 0.6);
+	color: var(--goo-chevron-tabs-muted-fg);
 	cursor: pointer;
 	transition:
 		background-color 0.15s ease,
@@ -55,8 +76,8 @@
 }
 
 .goo-chevron-tabs__add:hover {
-	background: #2e323e;
-	color: #fff;
+	background: var(--goo-chevron-tabs-control-hover-bg);
+	color: var(--goo-chevron-tabs-fg);
 }
 
 .goo-chevron-tabs__tab {
@@ -71,9 +92,9 @@
 	margin-left: -7px;
 	padding: 0 2.5rem 0 1.5rem;
 	border: 0;
-	background: #282a36;
+	background: var(--goo-chevron-tabs-tab-bg);
 	clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%, 10px 50%);
-	color: rgba(248, 248, 242, 0.62);
+	color: var(--goo-chevron-tabs-muted-fg);
 	cursor: pointer;
 	font-size: var(--goo-chevron-tabs-font-size, 12px);
 	font-weight: 500;
@@ -91,8 +112,8 @@
 }
 
 .goo-chevron-tabs__tab:hover {
-	background: color-mix(in srgb, var(--goo-chevron-tabs-selected-color) 26%, #282a36);
-	color: #fff;
+	background: var(--goo-chevron-tabs-hover-bg);
+	color: var(--goo-chevron-tabs-fg);
 }
 
 .goo-chevron-tabs__tab:focus-visible {
@@ -123,14 +144,14 @@
 }
 
 .goo-chevron-tabs__rail--dragging .goo-chevron-tabs__tab:not(.goo-chevron-tabs__tab--active):hover {
-	background: #282a36;
-	color: rgba(248, 248, 242, 0.62);
+	background: var(--goo-chevron-tabs-tab-bg);
+	color: var(--goo-chevron-tabs-muted-fg);
 }
 
 .goo-chevron-tabs__rail--dragging
 	.goo-chevron-tabs__tab--dragging:not(.goo-chevron-tabs__tab--active) {
-	background: color-mix(in srgb, var(--goo-chevron-tabs-selected-color) 26%, #282a36);
-	color: #fff;
+	background: var(--goo-chevron-tabs-hover-bg);
+	color: var(--goo-chevron-tabs-fg);
 }
 
 .goo-chevron-tabs__label {
@@ -148,11 +169,20 @@
 	display: grid;
 	place-content: center;
 	flex: 0 0 auto;
-	width: 14px;
-	height: 14px;
+	width: var(--goo-chevron-tabs-control-size);
+	height: var(--goo-chevron-tabs-control-size);
 	color: currentColor;
 	opacity: 0.92;
-	pointer-events: none;
+}
+
+.goo-popout.goo-tooltip.goo-chevron-tabs__activity-tooltip {
+	--goo-tooltip-bg: var(--goo-theme-bg, #11151c);
+	--goo-tooltip-fg: var(--goo-theme-fg, #f7fbf8);
+	--goo-tooltip-border: var(--goo-theme-border, color-mix(in srgb, var(--goo-tooltip-fg) 22%, transparent));
+	--goo-tooltip-padding: 0.45rem 0.55rem;
+	--goo-tooltip-radius: var(--goo-theme-radius-sm, 6px);
+	--goo-tooltip-font-size: 0.72rem;
+	--goo-tooltip-line-height: 1.35;
 }
 
 .goo-chevron-tabs__tab:not(.goo-chevron-tabs__tab--active) .goo-chevron-tabs__activity--working {
@@ -180,8 +210,8 @@
 	top: 50%;
 	display: grid;
 	place-content: center;
-	width: 15px;
-	height: 15px;
+	width: var(--goo-chevron-tabs-control-size);
+	height: var(--goo-chevron-tabs-control-size);
 	padding: 0;
 	border: 0;
 	border-radius: 50%;
@@ -196,11 +226,11 @@
 }
 
 .goo-chevron-tabs__close:hover {
-	background: rgba(127, 131, 150, 0.32);
+	background: var(--goo-chevron-tabs-control-hover-bg);
 }
 
 .goo-chevron-tabs__close--pressed {
-	background: rgba(127, 131, 150, 0.45);
+	background: var(--goo-chevron-tabs-control-pressed-bg);
 	transform: translateY(-50%) scale(0.78);
 }
 
@@ -212,7 +242,11 @@
 	flex: 0 0 auto;
 	gap: 13px;
 	padding: 0 14px;
-	background: linear-gradient(180deg, #181a22 0%, #15171e 100%);
+	background: linear-gradient(
+		180deg,
+		var(--goo-chevron-tabs-bg-raised) 0%,
+		var(--goo-chevron-tabs-bg) 100%
+	);
 }
 
 .goo-chevron-tabs__connection {
@@ -247,10 +281,10 @@
 	z-index: 1400;
 	min-width: 152px;
 	padding: 9px 11px;
-	border: 1px solid rgba(255, 255, 255, 0.09);
-	border-radius: 8px;
-	background: #282a36;
-	box-shadow: 0 14px 30px -10px rgba(0, 0, 0, 0.7);
+	border: 1px solid var(--goo-theme-border-subtle, color-mix(in srgb, var(--goo-chevron-tabs-fg) 9%, transparent));
+	border-radius: var(--goo-theme-radius-md, 8px);
+	background: var(--goo-chevron-tabs-tab-bg);
+	box-shadow: var(--goo-theme-shadow-lg, 0 14px 30px -10px rgba(0, 0, 0, 0.7));
 	opacity: 0;
 	pointer-events: none;
 	transform: translateY(-4px);
@@ -265,7 +299,7 @@
 }
 
 .goo-chevron-tabs__connection-user {
-	color: #f8f8f2;
+	color: var(--goo-chevron-tabs-fg);
 	font:
 		600 11px/1.4 'JetBrains Mono',
 		ui-monospace,
@@ -291,13 +325,13 @@
 .goo-chevron-tabs__menu-button {
 	display: grid;
 	place-content: center;
-	width: 22px;
-	height: 22px;
+	width: var(--goo-chevron-tabs-control-size);
+	height: var(--goo-chevron-tabs-control-size);
 	padding: 0;
 	border: 0;
 	border-radius: 5px;
 	background: transparent;
-	color: rgba(248, 248, 242, 0.6);
+	color: var(--goo-chevron-tabs-muted-fg);
 	cursor: pointer;
 	transition:
 		transform 160ms ease,
@@ -306,8 +340,8 @@
 }
 
 .goo-chevron-tabs__menu-button:hover {
-	background: rgba(127, 131, 150, 0.22);
-	color: #fff;
+	background: var(--goo-chevron-tabs-control-hover-bg);
+	color: var(--goo-chevron-tabs-fg);
 }
 
 .goo-chevron-tabs__menu-button--open {

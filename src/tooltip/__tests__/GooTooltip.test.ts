@@ -4,7 +4,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import GooTooltip from '../GooTooltip.svelte'
 import type { GooTooltipInstance } from '../index.ts'
-import { createGooTooltip, gooTooltipRuntime, tooltip } from '../index.ts'
+import {
+	createGooTooltip,
+	gooTooltipRuntime,
+	tooltip
+} from '../index.ts'
 
 describe('GooTooltip', () => {
 	afterEach(() => {

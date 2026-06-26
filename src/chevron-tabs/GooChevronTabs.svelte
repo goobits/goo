@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { BellRing, Bot, ChevronDown, CircleAlert, Plus, X } from '@lucide/svelte'
+	import { tooltip } from '../tooltip/index.ts'
 	import './GooChevronTabs.css'
 	import type { GooChevronTab, GooChevronTabStatus, GooChevronTabsProps } from './types.ts'
 	import {
@@ -290,10 +291,19 @@
 		const tabRect = element.getBoundingClientRect()
 		const railRect = railElement.getBoundingClientRect()
 		if (tabRect.left < railRect.left + 10) {
-			railElement.scrollBy({ left: tabRect.left - railRect.left - 10, behavior: 'smooth' })
+			scrollRailBy(tabRect.left - railRect.left - 10)
 		} else if (tabRect.right > railRect.right - 10) {
-			railElement.scrollBy({ left: tabRect.right - railRect.right + 10, behavior: 'smooth' })
+			scrollRailBy(tabRect.right - railRect.right + 10)
 		}
+	}
+
+	const scrollRailBy = (left: number): void => {
+		if (!railElement) return
+		if (typeof railElement.scrollBy === 'function') {
+			railElement.scrollBy({ left, behavior: 'smooth' })
+			return
+		}
+		railElement.scrollLeft += left
 	}
 
 	$effect(() => {
@@ -367,7 +377,13 @@
 						class:goo-chevron-tabs__activity--done={activity.kind === 'done'}
 						class:goo-chevron-tabs__activity--needs-attention={activity.kind === 'needsAttention'}
 						aria-label={activity.label}
-						title={activity.label}
+						use:tooltip={{
+							content: activity.label,
+							align: 'center top to center bottom',
+							offset: { x: 0, y: 8 },
+							showDelay: 0,
+							className: 'goo-chevron-tabs__activity-tooltip'
+						}}
 					>
 						{#if activity.kind === 'working'}
 							<Bot size={15} strokeWidth={2.2} aria-hidden="true" />

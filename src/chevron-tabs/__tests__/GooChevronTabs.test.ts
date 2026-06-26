@@ -1,9 +1,14 @@
 import { fireEvent, render } from '@testing-library/svelte'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import GooChevronTabs from '../GooChevronTabs.svelte'
 
 describe('GooChevronTabs', () => {
+	afterEach(() => {
+		document.querySelectorAll('.goo-popout').forEach(element => element.remove())
+		document.querySelectorAll('[aria-describedby]').forEach(element => element.removeAttribute('aria-describedby'))
+	})
+
 	it('opens an inline tab title editor on double-click', async() => {
 		const onrename = vi.fn()
 		const { getByRole, getByTestId } = render(GooChevronTabs, {
@@ -77,7 +82,7 @@ describe('GooChevronTabs', () => {
 		expect(onclose).toHaveBeenCalledExactlyOnceWith('kernel')
 	})
 
-	it('renders Lucide activity icons for agent tab statuses', () => {
+	it('renders Lucide activity icons for agent tab statuses', async() => {
 		const { container } = render(GooChevronTabs, {
 			props: {
 				activeId: 'working',
@@ -91,10 +96,17 @@ describe('GooChevronTabs', () => {
 		})
 
 		expect(container.querySelector('.goo-chevron-tabs__activity-emoji')).toBeNull()
-		expect(container.querySelector('[aria-label="Agent agent working"] svg.lucide-bot')).not.toBeNull()
+		const workingActivity = container.querySelector<HTMLElement>('[aria-label="Agent agent working"]')
+		expect(workingActivity?.querySelector('svg.lucide-bot')).not.toBeNull()
+		expect(workingActivity?.getAttribute('title')).toBeNull()
 		expect(container.querySelector('[aria-label="Review agent done"] svg.lucide-bell-ring')).not.toBeNull()
 		expect(
 			container.querySelector('[aria-label="Blocked needs attention"] svg.lucide-circle-alert')
 		).not.toBeNull()
+
+		workingActivity?.dispatchEvent(new MouseEvent('mouseenter'))
+		await new Promise(resolve => setTimeout(resolve))
+
+		expect(document.querySelector('.goo-popout.goo-tooltip')).not.toBeNull()
 	})
 })
