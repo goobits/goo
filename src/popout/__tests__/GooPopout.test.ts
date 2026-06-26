@@ -120,6 +120,47 @@ describe('GooPopout', () => {
 		})
 	})
 
+	it('reports the resolved arrow side after avoid rectangles move placement sideways', async() => {
+		const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect
+		const target = document.createElement('button')
+		const content = document.createElement('div')
+
+		document.body.appendChild(target)
+		HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
+			if (this === document.documentElement) return rect(0, 0, 420, 240)
+			if (this === target) return rect(210, 100, 0, 0)
+			if (this.classList.contains('goo-popout')) return rect(0, 0, 90, 60)
+			return originalGetBoundingClientRect.call(this)
+		}
+
+		try {
+			const instance = createGooPopout({
+				at: {
+					avoidRects: [ { bottom: 240, left: 120, right: 220, top: 0 } ],
+					point: { x: 210, y: 100 }
+				},
+				content: content,
+				align: 'top left to bottom left',
+				offset: { x: 0, y: 4 },
+				keepWithin: { element: document.documentElement, margin: 12 },
+				openImmediately: false
+			})
+
+			await instance.open()
+
+			const popout = document.querySelector<HTMLElement>('.goo-popout')!
+			expect(Number.parseFloat(popout.style.left)).toBe(220)
+			expect(Number.parseFloat(popout.style.top)).toBe(104)
+			expect(instance.position?.arrowPosition).toBe('left')
+			expect(document.querySelector('.goo-popout__arrow')?.classList.contains('left')).toBe(true)
+
+			await instance.destroy()
+		} finally {
+			target.remove()
+			HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect
+		}
+	})
+
 	it('clears avoid rectangles when updating to an anchor without them', async() => {
 		await withAvoidRectPopout(async({ instance, popout }) => {
 			instance.updatePosition({ point: { x: 140, y: 100 } })
