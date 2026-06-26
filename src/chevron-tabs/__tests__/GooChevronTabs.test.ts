@@ -26,6 +26,57 @@ describe('GooChevronTabs', () => {
 		expect(onrename).toHaveBeenCalledExactlyOnceWith('kernel', 'Core')
 	})
 
+	it('supports tab keyboard navigation without reordering', async() => {
+		const onmove = vi.fn()
+		const onselect = vi.fn()
+		const { getByTestId } = render(GooChevronTabs, {
+			props: {
+				activeId: 'kernel',
+				tabs: [
+					{ id: 'kernel', name: 'Kernel' },
+					{ id: 'tests', name: 'Tests' }
+				],
+				tabAttributes: tab => ({ 'data-testid': `tab-${ tab.id }` }),
+				onadd: vi.fn(),
+				onmove,
+				onselect
+			}
+		})
+
+		await fireEvent.keyDown(getByTestId('tab-kernel'), { key: 'ArrowRight' })
+		await fireEvent.keyDown(getByTestId('tab-tests'), { key: 'Home' })
+
+		expect(onselect).toHaveBeenNthCalledWith(1, 'tests')
+		expect(onselect).toHaveBeenNthCalledWith(2, 'kernel')
+		expect(onmove).not.toHaveBeenCalled()
+	})
+
+	it('supports keyboard rename and close commands', async() => {
+		const onclose = vi.fn()
+		const onrename = vi.fn()
+		const { getByRole, getByTestId } = render(GooChevronTabs, {
+			props: {
+				activeId: 'kernel',
+				allowClosingLastTab: true,
+				tabs: [ { id: 'kernel', name: 'Kernel' } ],
+				tabAttributes: tab => ({ 'data-testid': `tab-${ tab.id }` }),
+				onadd: vi.fn(),
+				onclose,
+				onrename
+			}
+		})
+
+		await fireEvent.keyDown(getByTestId('tab-kernel'), { key: 'F2' })
+		const editor = getByRole('textbox', { name: 'Rename tab' })
+		editor.textContent = 'Core'
+		await fireEvent.keyDown(editor, { key: 'Enter' })
+		await fireEvent.blur(editor)
+		await fireEvent.keyDown(getByTestId('tab-kernel'), { key: 'Delete' })
+
+		expect(onrename).toHaveBeenCalledExactlyOnceWith('kernel', 'Core')
+		expect(onclose).toHaveBeenCalledExactlyOnceWith('kernel')
+	})
+
 	it('renders Lucide activity icons for agent tab statuses', () => {
 		const { container } = render(GooChevronTabs, {
 			props: {

@@ -88,7 +88,7 @@ export function applyContainment(
 	if (!container) return result
 
 	const margin = keepWithin.margin ?? 15
-	const containerRect = container.getBoundingClientRect()
+	const containerRect = getContainmentRect(container)
 
 	// Calculate bounds
 	const bounds = calculateBounds(containerRect, popoutRect, margin)
@@ -137,7 +137,51 @@ type AvoidCandidate = {
  * @param margin - margin.
  * @param containerRect - container rect.
  */
-function calculateBounds(containerRect: DOMRect, popoutRect: Rect, margin: number): Bounds {
+type ContainmentRect = Pick<DOMRect, 'bottom' | 'height' | 'left' | 'right' | 'top' | 'width' | 'x' | 'y'>
+
+function getContainmentRect(container: HTMLElement): ContainmentRect {
+	const containerRect = container.getBoundingClientRect()
+	if (!isDocumentContainmentElement(container) || isUsableContainmentRect(containerRect)) {
+		return containerRect
+	}
+
+	const ownerDocument = container.ownerDocument
+	const viewport = ownerDocument.defaultView
+	const documentElement = ownerDocument.documentElement
+	const body = ownerDocument.body
+	const width = Math.max(
+		viewport?.innerWidth ?? 0,
+		documentElement.clientWidth,
+		body?.clientWidth ?? 0
+	)
+	const height = Math.max(
+		viewport?.innerHeight ?? 0,
+		documentElement.clientHeight,
+		body?.clientHeight ?? 0
+	)
+
+	return {
+		bottom: height,
+		height,
+		left: 0,
+		right: width,
+		top: 0,
+		width,
+		x: 0,
+		y: 0
+	}
+}
+
+function isDocumentContainmentElement(container: HTMLElement): boolean {
+	const ownerDocument = container.ownerDocument
+	return container === ownerDocument.documentElement || container === ownerDocument.body
+}
+
+function isUsableContainmentRect(rect: DOMRect): boolean {
+	return rect.width > 0 && rect.height > 0
+}
+
+function calculateBounds(containerRect: ContainmentRect, popoutRect: Rect, margin: number): Bounds {
 	return {
 		minX: containerRect.left + margin,
 		maxX: containerRect.right - margin - popoutRect.width,

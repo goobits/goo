@@ -113,6 +113,53 @@ describe('GooPopout', () => {
 		}
 	})
 
+	it('uses viewport containment when the document element has no layout box', async() => {
+		const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect
+		const originalInnerWidthDescriptor = Object.getOwnPropertyDescriptor(window, 'innerWidth')
+		const originalInnerHeightDescriptor = Object.getOwnPropertyDescriptor(window, 'innerHeight')
+		const target = document.createElement('button')
+		const content = document.createElement('div')
+
+		Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1280 })
+		Object.defineProperty(window, 'innerHeight', { configurable: true, value: 720 })
+		document.body.appendChild(target)
+		HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
+			if (this === document.documentElement) return rect(0, 0, 0, 0)
+			if (this === target) return rect(1215, 8, 16, 16)
+			if (this.classList.contains('goo-popout')) return rect(0, 0, 160, 64)
+			return originalGetBoundingClientRect.call(this)
+		}
+
+		try {
+			const instance = createGooPopout({
+				at: target,
+				content: content,
+				align: 'center top to center bottom',
+				offset: { x: 0, y: 8 },
+				keepWithin: { element: document.documentElement, margin: 15 },
+				openImmediately: false
+			})
+
+			await instance.open()
+			const popout = document.querySelector<HTMLElement>('.goo-popout')!
+
+			expect(Number.parseFloat(popout.style.top)).toBe(32)
+			expect(Number.parseFloat(popout.style.left)).toBe(1105)
+			expect(instance.position?.maxHeight).toBe(690)
+
+			await instance.destroy()
+		} finally {
+			target.remove()
+			HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect
+			if (originalInnerWidthDescriptor) {
+				Object.defineProperty(window, 'innerWidth', originalInnerWidthDescriptor)
+			}
+			if (originalInnerHeightDescriptor) {
+				Object.defineProperty(window, 'innerHeight', originalInnerHeightDescriptor)
+			}
+		}
+	})
+
 	it('keeps final contained placement outside avoid rectangles', async() => {
 		await withAvoidRectPopout(({ popout }) => {
 			expect(Number.parseFloat(popout.style.left)).toBe(140)
