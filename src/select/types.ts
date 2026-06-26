@@ -77,9 +77,21 @@ export type GooSelectMenuPlacement =
   | 'bottom'
   | 'bottom-start'
   | 'bottom-end'
-  | 'left'
-  | 'left-start'
-  | 'left-end'
+	| 'left'
+	| 'left-start'
+	| 'left-end'
+
+/** ARIA semantics used by the shared dropdown renderer. */
+export type GooSelectDropdownSemantics = {
+	/** Role applied to the dropdown content element. */
+	containerRole: 'listbox' | 'menu'
+	/** Role applied to selectable rows. */
+	optionRole: 'option' | 'menuitem'
+	/** Role announced by a trigger that opens this dropdown. */
+	popupRole: 'listbox' | 'menu'
+	/** Whether rows should expose `aria-selected`. */
+	usesSelectedState: boolean
+}
 
 /** Display options for the dropdown menu owned by a GooSelect. */
 export type GooSelectMenuOptions = {
@@ -89,6 +101,7 @@ export type GooSelectMenuOptions = {
 	outline?: boolean
 	placement?: GooSelectMenuPlacement
 	popoutClassName?: string
+	semantics?: GooSelectDropdownSemantics
 	variant?: 'attached' | 'floating'
 	width?: 'auto' | 'content' | 'trigger'
 }

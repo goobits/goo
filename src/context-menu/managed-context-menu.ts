@@ -268,7 +268,7 @@ function createRegisteredContextMenu(
 			if (destroyed) return
 			const stringValue = String(value)
 			const option = findOptionById(menuOptions, stringValue)
-			option?.onChoose?.(stringValue)
+			option?.onChoose?.call(handle, stringValue)
 			contextMenu.setValue(stringValue, options)
 		}
 	}

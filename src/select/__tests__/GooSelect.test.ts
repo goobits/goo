@@ -217,7 +217,9 @@ describe('GooSelect', () => {
 		expect(element.open({ autoFocus: false })).toBe(true)
 		await tick()
 
+		expect(document.querySelector('.goo-select__options')?.getAttribute('role')).toBe('listbox')
 		const selected = document.querySelector<HTMLElement>('.goo-select__option[data-id="b"]')!
+		expect(selected.getAttribute('role')).toBe('option')
 		expect(selected.getAttribute('aria-selected')).toBe('true')
 		expect(selected.querySelector('.goo-select__check svg')).not.toBeNull()
 	})

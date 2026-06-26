@@ -10,6 +10,7 @@ export type {
 	GooSelectActionContext,
 	GooSelectChangeHandler,
 	GooSelectCloseHandler,
+	GooSelectDropdownSemantics,
 	GooSelectElement,
 	GooSelectEventData,
 	GooSelectEventName,

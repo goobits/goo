@@ -9,7 +9,9 @@ describe('createGooContextMenu', () => {
 	afterEach(() => {
 		GooContextMenu.get('unsafe-menu')?.destroy()
 		GooContextMenu.get('managed-destroy')?.destroy()
+		GooContextMenu.get('managed-set-value')?.destroy()
 		GooContextMenu.get('replace-menu')?.destroy()
+		GooContextMenu.get('reposition-menu')?.destroy()
 		document.querySelectorAll('.goo-popout').forEach(element => element.remove())
 		vi.restoreAllMocks()
 	})
@@ -37,6 +39,9 @@ describe('createGooContextMenu', () => {
 		expect(popout?.classList.contains('goo-menu-popout')).toBe(true)
 		expect(popout?.classList.contains('sketch-contextmenu')).toBe(true)
 		expect(popout?.classList.contains('sketch-CancelDestroy')).toBe(true)
+		expect(popout?.querySelector('.goo-select__options')?.getAttribute('role')).toBe('menu')
+		expect(popout?.querySelector('.goo-select__option')?.getAttribute('role')).toBe('menuitem')
+		expect(popout?.querySelector('.goo-select__option')?.hasAttribute('aria-selected')).toBe(false)
 		expect(popout?.querySelector('.goo-select__submenu-arrow svg')).toBeInstanceOf(SVGElement)
 
 		const submenuOption = popout?.querySelector<HTMLElement>('.goo-select__option[data-id="order"]')
@@ -46,6 +51,8 @@ describe('createGooContextMenu', () => {
 
 		const submenu = document.querySelector('.goo-popout.goo-select-submenu-popout')
 		expect(submenu?.classList.contains('goo-menu-popout')).toBe(true)
+		expect(submenu?.querySelector('.goo-select__submenu')?.getAttribute('role')).toBe('menu')
+		expect(submenu?.querySelector('.goo-select__option')?.getAttribute('role')).toBe('menuitem')
 	})
 
 	it('renders managed string labels as text instead of HTML', async() => {
@@ -184,7 +191,9 @@ describe('createGooContextMenu', () => {
 	})
 
 	it('closes an open menu on an attached contextmenu event', async() => {
+		const onclose = vi.fn()
 		const menu = createGooContextMenu({
+			onclose,
 			options: [
 				{ id: 'copy', label: 'Copy' }
 			]
@@ -194,16 +203,67 @@ describe('createGooContextMenu', () => {
 		const detach = menu.attachTo(host)
 		await tick()
 
-		const close = vi.spyOn(menu, 'close')
 		expect(menu.open({ x: 20, y: 20 })).toBe(true)
+		await Promise.resolve()
+		expect(document.querySelector('.goo-popout.goo-context-menu-popout')).not.toBeNull()
+		expect(onclose).not.toHaveBeenCalled()
 
+		host.dispatchEvent(new MouseEvent('pointerdown', {
+			bubbles: true,
+			cancelable: true,
+			button: 2,
+			clientX: 24,
+			clientY: 24
+		}))
 		host.dispatchEvent(new MouseEvent('contextmenu', {
 			bubbles: true,
 			cancelable: true,
 			clientX: 24,
 			clientY: 24
 		}))
-		expect(close).toHaveBeenCalledOnce()
+		await Promise.resolve()
+		expect(onclose).toHaveBeenCalledOnce()
+
+		detach()
+		await menu.destroy()
+		host.remove()
+	})
+
+	it('does not suppress a later contextmenu after a close-only right click expires', async() => {
+		const onopen = vi.fn()
+		const menu = createGooContextMenu({
+			onopen,
+			options: [
+				{ id: 'copy', label: 'Copy' }
+			]
+		})
+		const host = document.createElement('div')
+		document.body.append(menu, host)
+		const detach = menu.attachTo(host)
+		await tick()
+
+		expect(menu.open({ x: 20, y: 20 })).toBe(true)
+		await Promise.resolve()
+		expect(onopen).toHaveBeenCalledOnce()
+
+		host.dispatchEvent(new MouseEvent('pointerdown', {
+			bubbles: true,
+			cancelable: true,
+			button: 2,
+			clientX: 24,
+			clientY: 24
+		}))
+		await delay(550)
+
+		host.dispatchEvent(new MouseEvent('contextmenu', {
+			bubbles: true,
+			cancelable: true,
+			clientX: 32,
+			clientY: 32
+		}))
+		await Promise.resolve()
+
+		expect(onopen).toHaveBeenCalledTimes(2)
 
 		detach()
 		await menu.destroy()
@@ -243,6 +303,21 @@ describe('createGooContextMenu', () => {
 		expect(onOpen).not.toHaveBeenCalled()
 	})
 
+	it('binds managed setValue actions to the menu handle', () => {
+		let actionContext: unknown
+		const action = vi.fn(function(this: unknown) {
+			actionContext = this
+		})
+		const menu = GooContextMenu.register('managed-set-value', [
+			{ id: 'copy', label: 'Copy', onChoose: action }
+		])
+
+		menu.setValue('copy')
+
+		expect(action).toHaveBeenCalledWith('copy')
+		expect(actionContext).toBe(menu)
+	})
+
 	it('destroys an existing managed menu before replacing its id', () => {
 		const firstMenu = GooContextMenu.register('replace-menu', [
 			{ id: 'first', label: 'First' }
@@ -271,4 +346,8 @@ function rect(x: number, y: number, width: number, height: number): DOMRect {
 		bottom: y + height,
 		toJSON: () => ({})
 	} as DOMRect
+}
+
+function delay(ms: number): Promise<void> {
+	return new Promise(resolve => setTimeout(resolve, ms))
 }

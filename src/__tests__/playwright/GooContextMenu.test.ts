@@ -38,6 +38,9 @@ test.describe('GooContextMenu', () => {
 
 		const option = page.locator('.goo-context-menu-popout .goo-select__option[data-id="copy"]')
 		await expect(option).toHaveClass(/goo-select__option--hovered/)
+		await expect(page.locator('.goo-context-menu-popout .goo-select__options')).toHaveAttribute('role', 'menu')
+		await expect(option).toHaveAttribute('role', 'menuitem')
+		await expect(option).not.toHaveAttribute('aria-selected')
 
 		const beforeHover = await readMenuRowColors(option)
 		expect(beforeHover.shortcutColor).toBe(beforeHover.rowColor)

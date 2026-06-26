@@ -6,7 +6,7 @@
 import { findOptionById } from './_normalizeOptions.ts'
 import { SubmenuPopoutController } from './_submenuPopout.ts'
 import { createIcon, createShortcut, evaluate } from './selectDom.ts'
-import type { GooSelectOption } from './types.ts'
+import type { GooSelectDropdownSemantics, GooSelectOption } from './types.ts'
 
 // ============================================================================
 // Constants
@@ -14,6 +14,12 @@ import type { GooSelectOption } from './types.ts'
 
 const SUBMENU_DELAY = 250
 const TYPEAHEAD_TIMEOUT = 750
+const DEFAULT_DROPDOWN_SEMANTICS: GooSelectDropdownSemantics = {
+	containerRole: 'listbox',
+	optionRole: 'option',
+	popupRole: 'listbox',
+	usesSelectedState: true
+}
 
 /** Monotonic counter giving each panel instance a unique id namespace for ARIA wiring. */
 let panelInstanceCount = 0
@@ -28,6 +34,9 @@ type OptionElement = HTMLElement
  * Context provided by GooSelect to the panel.
  */
 export interface DropdownPanelContext {
+	/** ARIA semantics for the rendered dropdown. */
+	semantics?: GooSelectDropdownSemantics
+
 	/** Whether to show current-value checkmarks. */
 	showSelectionIndicator: boolean
 
@@ -78,15 +87,16 @@ export class DropdownPanel {
 		this.#scheduleSubmenuClose(event.relatedTarget)
 
 	constructor(ctx: DropdownPanelContext) {
-		this.#ctx = ctx
-		this.listboxId = `${ this.#instanceId }-listbox`
+		this.#ctx = this.#normalizeContext(ctx)
+		this.listboxId = `${ this.#instanceId }-${ this.#semantics.containerRole }`
 		this.$container = document.createElement('div')
 		this.$container.className = 'goo-select__options'
 		this.$container.id = this.listboxId
-		this.$container.setAttribute('role', 'listbox')
+		this.$container.setAttribute('role', this.#semantics.containerRole)
 		this.$container.setAttribute('tabindex', '-1')
 		this.#submenuPopout = new SubmenuPopoutController(
 			(options, container) => this.#renderOptionsList(options, container),
+			() => this.#semantics.containerRole,
 			{
 				onMouseEnter: () => this.#cancelSubmenuTimer(),
 				onMouseLeave: event => this.#scheduleSubmenuClose(event.relatedTarget)
@@ -106,6 +116,8 @@ export class DropdownPanel {
 	 */
 	updateContext(ctx: Partial<DropdownPanelContext>) {
 		Object.assign(this.#ctx, ctx)
+		this.#ctx.semantics = this.#normalizeSemantics(this.#ctx.semantics)
+		this.$container.setAttribute('role', this.#semantics.containerRole)
 	}
 
 	/**
@@ -192,7 +204,9 @@ export class DropdownPanel {
 		const $prev = this.$container.querySelector('.goo-select__option--selected')
 		if ($prev) {
 			$prev.classList.remove('goo-select__option--selected')
-			$prev.setAttribute('aria-selected', 'false')
+			if (this.#semantics.usesSelectedState) {
+				$prev.setAttribute('aria-selected', 'false')
+			}
 			const $check = $prev.querySelector('.goo-select__check')
 			if ($check) $check.innerHTML = ''
 		}
@@ -201,7 +215,9 @@ export class DropdownPanel {
 		const $item = this.getOptionElementById(id)
 		if ($item) {
 			$item.classList.add('goo-select__option--selected')
-			$item.setAttribute('aria-selected', 'true')
+			if (this.#semantics.usesSelectedState) {
+				$item.setAttribute('aria-selected', 'true')
+			}
 			const $check = $item.querySelector('.goo-select__check')
 			if ($check) {
 				$check.innerHTML =
@@ -455,6 +471,7 @@ export class DropdownPanel {
 
 	#renderOption(opt: GooSelectOption, depth: number): HTMLElement | null {
 		const { showSelectionIndicator, value } = this.#ctx
+		const semantics = this.#semantics
 
 		// Divider
 		if (opt.type === 'divider') {
@@ -501,9 +518,11 @@ export class DropdownPanel {
 			.filter(Boolean)
 			.join(' ')
 		$item.id = `${ this.#instanceId }-opt-${ this.#optionSeq++ }`
-		$item.setAttribute('role', 'option')
+		$item.setAttribute('role', semantics.optionRole)
 		$item.setAttribute('data-id', opt.id!)
-		$item.setAttribute('aria-selected', String(isSelected))
+		if (semantics.usesSelectedState) {
+			$item.setAttribute('aria-selected', String(isSelected))
+		}
 		if (isDisabled) $item.setAttribute('aria-disabled', 'true')
 
 		// Selection checkmark
@@ -660,5 +679,25 @@ export class DropdownPanel {
 	#readOptionFromElement(item: HTMLElement): GooSelectOption | null {
 		const optionId = item.dataset.id
 		return optionId ? this.findOptionById(optionId) : null
+	}
+
+	get #semantics(): GooSelectDropdownSemantics {
+		return this.#normalizeSemantics(this.#ctx.semantics)
+	}
+
+	#normalizeContext(ctx: DropdownPanelContext): DropdownPanelContext {
+		return {
+			...ctx,
+			semantics: this.#normalizeSemantics(ctx.semantics)
+		}
+	}
+
+	#normalizeSemantics(
+		semantics: GooSelectDropdownSemantics | undefined
+	): GooSelectDropdownSemantics {
+		return {
+			...DEFAULT_DROPDOWN_SEMANTICS,
+			...semantics
+		}
 	}
 }

@@ -11,6 +11,7 @@ const SUBMENU_SIDE_CLASSES = [
 
 type Direction = 'down' | 'up'
 type RenderOptionsList = (options: GooSelectOption[], container: HTMLElement) => void
+type GetContainerRole = () => 'listbox' | 'menu'
 type SubmenuElements = {
 	$frame: HTMLElement
 	$viewport: HTMLElement
@@ -22,6 +23,7 @@ type SubmenuBoundaryHandlers = {
 
 export class SubmenuPopoutController {
 	#renderOptionsList: RenderOptionsList
+	#getContainerRole: GetContainerRole
 	#boundaryHandlers: SubmenuBoundaryHandlers
 	#popout: GooPopoutInstance | null = null
 	#activeId: string | null = null
@@ -32,8 +34,13 @@ export class SubmenuPopoutController {
 	#transitionFlipFrame = 0
 	#transitionToken = 0
 
-	constructor(renderOptionsList: RenderOptionsList, boundaryHandlers: SubmenuBoundaryHandlers = {}) {
+	constructor(
+		renderOptionsList: RenderOptionsList,
+		getContainerRole: GetContainerRole,
+		boundaryHandlers: SubmenuBoundaryHandlers = {}
+	) {
 		this.#renderOptionsList = renderOptionsList
+		this.#getContainerRole = getContainerRole
 		this.#boundaryHandlers = boundaryHandlers
 	}
 
@@ -107,7 +114,7 @@ export class SubmenuPopoutController {
 	#createSubmenuContent(options: GooSelectOption[]): HTMLElement {
 		const $submenuContent = document.createElement('div')
 		$submenuContent.className = 'goo-select__submenu'
-		$submenuContent.setAttribute('role', 'listbox')
+		$submenuContent.setAttribute('role', this.#getContainerRole())
 		this.#renderOptionsList(options, $submenuContent)
 		return $submenuContent
 	}

@@ -96,6 +96,7 @@ let {
 const opened = $derived(Boolean(popout?.isOpen()))
 const selectedOption = $derived(findOptionById(normalizedOptions, selectedValue))
 const selectMenu = $derived(normalizeSelectMenu(menu))
+const dropdownSemantics = $derived(selectMenu.semantics)
 const triggerLabel = $derived(getOptionLabel(selectedOption) || placeholder)
 const triggerAccessibleName = $derived(readTriggerAccessibleName())
 const showPlaceholder = $derived(!selectedOption)
@@ -220,6 +221,7 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 
 	if (!panel) {
 		panel = new DropdownPanel({
+			semantics: dropdownSemantics,
 			showSelectionIndicator,
 			value: selectedValue,
 			getContext: () => getContext(),
@@ -235,6 +237,7 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 		})
 	} else {
 		panel.updateContext({
+			semantics: dropdownSemantics,
 			showSelectionIndicator,
 			value: selectedValue
 		})
@@ -601,7 +604,7 @@ function getTriggerIconClasses(icon: unknown): string {
 			type="button"
 			class="goo-select__trigger"
 			role="combobox"
-			aria-haspopup="listbox"
+			aria-haspopup={dropdownSemantics?.popupRole ?? 'listbox'}
 			aria-expanded={opened ? 'true' : 'false'}
 			aria-controls={opened && listboxId ? listboxId : undefined}
 			aria-activedescendant={opened && activeDescendant ? activeDescendant : undefined}
