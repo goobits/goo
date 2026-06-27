@@ -241,6 +241,7 @@ export interface GooSelectOpenOptions {
 	autoFocus?: boolean
 	at?: HTMLElement | GooPopoutAt
 	clickToClose?: GooPopoutOptions['clickToClose']
+	initialFocus?: GooPopoutOptions['initialFocus']
 	keepWithin?: { element?: HTMLElement; margin?: number }
 	parentElement?: HTMLElement
 	actionContext?: GooSelectActionContext

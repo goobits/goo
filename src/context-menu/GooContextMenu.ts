@@ -18,6 +18,7 @@ import { createLifecycleBag } from '../support/utils/lifecycleBag.ts'
 
 const DEFAULT_CURSOR_GAP_X = 16
 const DEFAULT_CURSOR_ARROW_TIP_OFFSET_Y = 17
+const POINTER_CONTEXT_MENU_GESTURE_MS = 500
 const CONTEXT_MENU_SEMANTICS: GooSelectDropdownSemantics = {
 	containerRole: 'menu',
 	optionRole: 'menuitem',
@@ -117,8 +118,8 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 		menu: {
 			arrow: true,
 			backdrop: false,
-			popoutClassName: [ 'goo-context-menu-popout', className ].filter(Boolean).join(' '),
 			...menu,
+			popoutClassName: [ 'goo-context-menu-popout', className, menu.popoutClassName ].filter(Boolean).join(' '),
 			semantics: menu.semantics ?? CONTEXT_MENU_SEMANTICS
 		},
 		className: `goo-context-menu ${ className }`.trim(),
@@ -184,6 +185,20 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 	contextMenu.attachTo = function attachTo($element, handler) {
 		let closeOnlyContextMenuGesture = false
 		let closeOnlyContextMenuReset: ReturnType<typeof setTimeout> | null = null
+		let pointerContextMenuGesture = false
+		let pointerContextMenuReset: ReturnType<typeof setTimeout> | null = null
+		const clearPointerContextMenuGesture = () => {
+			pointerContextMenuGesture = false
+			if (pointerContextMenuReset) {
+				clearTimeout(pointerContextMenuReset)
+				pointerContextMenuReset = null
+			}
+		}
+		const markPointerContextMenuGesture = () => {
+			pointerContextMenuGesture = true
+			if (pointerContextMenuReset) clearTimeout(pointerContextMenuReset)
+			pointerContextMenuReset = setTimeout(clearPointerContextMenuGesture, POINTER_CONTEXT_MENU_GESTURE_MS)
+		}
 		const clearCloseOnlyContextMenuGesture = () => {
 			closeOnlyContextMenuGesture = false
 			if (closeOnlyContextMenuReset) {
@@ -193,16 +208,20 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 		}
 		const pointerHandler = (e: PointerEvent) => {
 			if (e.button !== 2 || !isEventInsideElement(e, $element)) return
+			markPointerContextMenuGesture()
 			if (!(contextMenuOpened || contextMenu.isOpen())) return
 
 			closeOnlyContextMenuGesture = true
 			if (closeOnlyContextMenuReset) clearTimeout(closeOnlyContextMenuReset)
-			closeOnlyContextMenuReset = setTimeout(clearCloseOnlyContextMenuGesture, 500)
+			closeOnlyContextMenuReset = setTimeout(clearCloseOnlyContextMenuGesture, POINTER_CONTEXT_MENU_GESTURE_MS)
 			contextMenu.close()
 		}
 		const contextHandler = (e: MouseEvent) => {
 			e.preventDefault()
 			e.stopPropagation()
+			focusContextMenuOwner($element)
+			const openedFromPointer = pointerContextMenuGesture
+			clearPointerContextMenuGesture()
 
 			if (closeOnlyContextMenuGesture) {
 				clearCloseOnlyContextMenuGesture()
@@ -223,12 +242,18 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 				}
 			}
 
-			contextMenu.open({ x: e.clientX, y: e.clientY })
+			const didOpen = openedFromPointer
+				? contextMenu.open({ x: e.clientX, y: e.clientY, initialFocus: 'none' })
+				: contextMenu.open({ at: $element, autoFocus: true, initialFocus: 'none' })
+			if (didOpen && !openedFromPointer) {
+				focusOpenContextMenuPanel()
+			}
 		}
 
 		document.addEventListener('pointerdown', pointerHandler as EventListener, true)
 		$element.addEventListener('contextmenu', contextHandler as EventListener)
 		return attachments.add(() => {
+			clearPointerContextMenuGesture()
 			clearCloseOnlyContextMenuGesture()
 			document.removeEventListener('pointerdown', pointerHandler as EventListener, true)
 			$element.removeEventListener('contextmenu', contextHandler as EventListener)
@@ -257,12 +282,27 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 				closeForPageUnfocus()
 			}
 		}
+		const closeForOutsidePointer = (event: PointerEvent) => {
+			const target = event.target
+			if (target instanceof Element && target.closest('.goo-popout')) return
+			closeForPageUnfocus()
+		}
+		const closeForEscape = (event: KeyboardEvent) => {
+			if (event.key !== 'Escape') return
+			closeForPageUnfocus()
+		}
 
 		window.addEventListener('blur', closeForPageUnfocus)
+		window.addEventListener('pagehide', closeForPageUnfocus)
+		document.addEventListener('pointerdown', closeForOutsidePointer, true)
 		document.addEventListener('visibilitychange', closeForVisibilityChange)
+		document.addEventListener('keydown', closeForEscape)
 		releasePageUnfocus = () => {
 			window.removeEventListener('blur', closeForPageUnfocus)
+			window.removeEventListener('pagehide', closeForPageUnfocus)
+			document.removeEventListener('pointerdown', closeForOutsidePointer, true)
 			document.removeEventListener('visibilitychange', closeForVisibilityChange)
+			document.removeEventListener('keydown', closeForEscape)
 			releasePageUnfocus = null
 		}
 	}
@@ -275,6 +315,16 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 function isEventInsideElement(event: Event, element: HTMLElement): boolean {
 	const target = event.target
 	return target instanceof Node && element.contains(target)
+}
+
+function focusContextMenuOwner(element: HTMLElement): void {
+	if (element.contains(document.activeElement)) return
+	element.focus({ preventScroll: true })
+}
+
+function focusOpenContextMenuPanel(): void {
+	const panels = document.querySelectorAll<HTMLElement>('.goo-context-menu-popout .goo-select__options')
+	panels.item(panels.length - 1)?.focus({ preventScroll: true })
 }
 
 function getPointOpenDefaults(

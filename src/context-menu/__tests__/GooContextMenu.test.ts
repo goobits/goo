@@ -190,6 +190,56 @@ describe('createGooContextMenu', () => {
 		await menu.destroy()
 	})
 
+	it('closes on an immediate outside pointerdown after opening', async() => {
+		const menu = createGooContextMenu({
+			options: [
+				{ id: 'copy', label: 'Copy' }
+			]
+		})
+		const outside = document.createElement('button')
+		document.body.append(menu, outside)
+		await tick()
+
+		expect(menu.open({ x: 20, y: 20, initialFocus: 'none' })).toBe(true)
+		await Promise.resolve()
+
+		outside.dispatchEvent(new PointerEvent('pointerdown', {
+			bubbles: true,
+			cancelable: true
+		}))
+
+		expect(menu.isOpen()).toBe(false)
+
+		await menu.destroy()
+		outside.remove()
+	})
+
+	it('closes on Escape when the popout does not own focus', async() => {
+		const menu = createGooContextMenu({
+			options: [
+				{ id: 'copy', label: 'Copy' }
+			]
+		})
+		const host = document.createElement('div')
+		host.tabIndex = 0
+		document.body.append(menu, host)
+		host.focus()
+		await tick()
+
+		expect(menu.open({ x: 20, y: 20, initialFocus: 'none' })).toBe(true)
+		await Promise.resolve()
+
+		document.dispatchEvent(new KeyboardEvent('keydown', {
+			bubbles: true,
+			key: 'Escape'
+		}))
+
+		expect(menu.isOpen()).toBe(false)
+
+		await menu.destroy()
+		host.remove()
+	})
+
 	it('closes an open menu on an attached contextmenu event', async() => {
 		const onclose = vi.fn()
 		const menu = createGooContextMenu({
@@ -227,6 +277,104 @@ describe('createGooContextMenu', () => {
 		detach()
 		await menu.destroy()
 		host.remove()
+	})
+
+	it('focuses an attached contextmenu owner', async() => {
+		const menu = createGooContextMenu({
+			options: [
+				{ id: 'copy', label: 'Copy' }
+			]
+		})
+		const input = document.createElement('input')
+		const host = document.createElement('div')
+		host.tabIndex = 0
+		document.body.append(input, menu, host)
+		const detach = menu.attachTo(host)
+		input.focus()
+		await tick()
+
+		host.dispatchEvent(new MouseEvent('pointerdown', {
+			bubbles: true,
+			cancelable: true,
+			button: 2,
+			clientX: 24,
+			clientY: 24
+		}))
+		host.dispatchEvent(new MouseEvent('contextmenu', {
+			bubbles: true,
+			cancelable: true,
+			clientX: 24,
+			clientY: 24
+		}))
+		await Promise.resolve()
+
+		expect(document.activeElement).toBe(host)
+
+		detach()
+		await menu.destroy()
+		host.remove()
+		input.remove()
+	})
+
+	it('opens an attached keyboard context menu with menu focus and keyboard selection', async() => {
+		const onChoose = vi.fn()
+		const menu = createGooContextMenu({
+			options: [
+				{ id: 'copy', label: 'Copy' },
+				{ id: 'paste', label: 'Paste', onChoose }
+			]
+		})
+		const host = document.createElement('button')
+		const originalScrollIntoView = HTMLElement.prototype.scrollIntoView
+		const focus = vi.spyOn(HTMLElement.prototype, 'focus')
+		HTMLElement.prototype.scrollIntoView = vi.fn()
+		document.body.append(menu, host)
+		const detach = menu.attachTo(host)
+		host.focus()
+		await tick()
+
+		try {
+			host.dispatchEvent(new MouseEvent('contextmenu', {
+				bubbles: true,
+				cancelable: true,
+				clientX: 0,
+				clientY: 0
+			}))
+			await Promise.resolve()
+			await tick()
+			await delay(550)
+
+			const panel = document.querySelector<HTMLElement>('.goo-context-menu-popout .goo-select__options')
+			expect(panel).not.toBeNull()
+			expect(focus.mock.contexts).toContain(panel)
+			const copyOption = panel?.querySelector<HTMLElement>('.goo-select__option[data-id="copy"]')
+			expect(copyOption?.classList.contains('goo-select__option--hovered')).toBe(true)
+
+			const arrowDown = new KeyboardEvent('keydown', {
+				bubbles: true,
+				cancelable: true,
+				key: 'ArrowDown'
+			})
+			panel?.dispatchEvent(arrowDown)
+			expect(arrowDown.defaultPrevented).toBe(true)
+			const pasteOption = panel?.querySelector<HTMLElement>('.goo-select__option[data-id="paste"]')
+			expect(pasteOption?.classList.contains('goo-select__option--hovered')).toBe(true)
+			expect(panel?.hasAttribute('aria-activedescendant')).toBe(true)
+
+			panel?.dispatchEvent(new KeyboardEvent('keydown', {
+				bubbles: true,
+				cancelable: true,
+				key: 'Enter'
+			}))
+			await delay(250)
+
+			expect(onChoose).toHaveBeenCalledWith('paste')
+		} finally {
+			detach()
+			await menu.destroy()
+			host.remove()
+			HTMLElement.prototype.scrollIntoView = originalScrollIntoView
+		}
 	})
 
 	it('does not suppress a later contextmenu after a close-only right click expires', async() => {

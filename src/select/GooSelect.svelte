@@ -54,6 +54,7 @@ const selectElement = $derived(selectRoot as GooSelectElement | undefined)
 let triggerElement: HTMLButtonElement | undefined = $state()
 let panel = $state<DropdownPanel | null>(null)
 let popout = $state<SelectPopout | null>(null)
+let opened = $state(false)
 let normalizedOptions: GooSelectOption[] = $state([])
 let selectedValue = $state('')
 let effectiveDisabled = $state(false)
@@ -93,7 +94,6 @@ let {
 	...rest
 }: GooSelectProps = $props()
 
-const opened = $derived(Boolean(popout?.isOpen()))
 const selectedOption = $derived(findOptionById(normalizedOptions, selectedValue))
 const selectMenu = $derived(normalizeSelectMenu(menu))
 const dropdownSemantics = $derived(selectMenu.semantics)
@@ -166,6 +166,7 @@ $effect(() => () => {
 	selectLifecycleToken += 1
 	clearFocusFrame()
 	stopTriggerPointerSelection()
+	opened = false
 	panel?.destroy()
 	popout?.destroy()
 })
@@ -200,12 +201,13 @@ export function setTriggerIcon(icon: string | HTMLElement | (() => HTMLElement) 
 }
 
 export function open(options: GooSelectOpenOptions = {}): boolean {
-	if (!selectElement || opened || effectiveDisabled) return false
+	if (!selectElement || opened || popout?.isOpen() || effectiveDisabled) return false
 
 	const {
 		autoFocus = true,
 		at,
 		clickToClose = true,
+		initialFocus,
 		keepWithin,
 		parentElement,
 		actionContext: contextOverride,
@@ -248,7 +250,7 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 	syncPanelTypography()
 
 	const currentMenu = selectMenu
-		const positionAt = getPositionTarget(at)
+	const positionAt = getPositionTarget(at)
 	const triggerWidth = positionAt instanceof HTMLElement
 		? Math.max(1, Math.round(positionAt.getBoundingClientRect().width))
 		: undefined
@@ -262,6 +264,7 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 		className: getSelectMenuPopoutClass(currentMenu, popoutClassName),
 		clickToClose,
 		escapeToClose: true,
+		initialFocus,
 		keepWithin: keepWithin || { element: document.body, margin: 15 },
 		showArrow: currentMenu.arrow,
 		showBackdrop: currentMenu.backdrop,
@@ -282,6 +285,7 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 			})
 		}
 	})
+	opened = true
 
 	selectElement.dispatchEvent(new CustomEvent('open', { bubbles: true }))
 	onopen?.()
@@ -299,7 +303,7 @@ function syncPanelTypography(): void {
 }
 
 export function close({ quiet = false, fromPopout = false }: { quiet?: boolean; fromPopout?: boolean } = {}): void {
-	if (!selectElement || !opened) return
+	if (!selectElement || (!opened && !popout?.isOpen())) return
 
 	stopTriggerPointerSelection()
 	clearFocusFrame()
@@ -308,6 +312,7 @@ export function close({ quiet = false, fromPopout = false }: { quiet?: boolean; 
 	if (panel) panel.hoveredId = null
 	activeDescendant = ''
 	listboxId = ''
+	opened = false
 
 	if (!fromPopout && popout?.isOpen()) {
 		popout.destroy()
@@ -401,6 +406,7 @@ function assignSelectApi(select: GooSelectRuntimeElement): void {
 			configurable: true,
 			get: () => opened,
 			set: value => {
+				opened = Boolean(value)
 				if (!value) popout = null
 			}
 		},
