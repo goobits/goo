@@ -36,6 +36,7 @@
 	class="goo-floating-toolbar"
 	role="toolbar"
 	aria-label="Floating tool options"
+	aria-orientation="vertical"
 	tabindex="0"
 >
 	{#each groups as tools, groupIndex}
