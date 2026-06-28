@@ -11,6 +11,14 @@ import { createSvelteControlHost, type SvelteControlHost } from '../controller/S
 import { createFolder, type GooFolderElement } from '../folder/_createFolder.ts'
 import { createPanel } from '../panel/_createPanel.ts'
 import { schemaLog as log } from '../support/utils/logger.ts'
+import { appendSchemaActions, updateSchemaActionState } from './_schemaActions.ts'
+import {
+	cloneSchemaValue,
+	getSchemaVisibilitySignature,
+	mergeSchemaData,
+	schemaHasConditions
+} from './_schemaData.ts'
+import { attachSchemaKeyboardNavigation } from './_schemaKeyboardNavigation.ts'
 import { shouldRenderSchemaNode } from './fieldConditions.ts'
 import { isFullBleedField, isSelfContainedField } from './fieldLayout.ts'
 import { getByPath, resolvePath, setByPath } from './pathUtils.ts'
@@ -27,6 +35,7 @@ import type {
 	GooSchemaType
 } from './types.ts'
 
+export { schemaHasConditions } from './_schemaData.ts'
 export type {
 	GooSchemaChangeHandler,
 	GooSchemaControlType,
@@ -95,15 +104,6 @@ export interface GooSchema extends HTMLElement {
 type GooSchemaController = (HTMLElement | SvelteControlHost) & {
 	destroy?: () => void
 }
-
-const SCHEMA_FOCUSABLE_SELECTOR = [
-	'button:not([disabled])',
-	'[href]',
-	'input:not([disabled])',
-	'select:not([disabled])',
-	'textarea:not([disabled])',
-	'[tabindex]:not([tabindex="-1"])'
-].join(',')
 
 type GooSchemaInternal = GooSchema & {
 	_changeHandler: GooSchemaChangeHandler | null
@@ -266,152 +266,6 @@ function attachSchemaApi(element: GooSchemaInternal): void {
 			token: number
 		) => buildSelfContainedField(element, node, object, property, controllerOptions, module, parent, token)
 	})
-}
-
-function attachSchemaKeyboardNavigation(element: GooSchemaInternal): void {
-	element.tabIndex = 0
-	element.setAttribute('tabindex', '0')
-	element.setAttribute('role', 'group')
-	if (!element.hasAttribute('aria-label')) {
-		element.setAttribute('aria-label', 'Settings')
-	}
-
-	element.addEventListener('keydown', event => {
-		if (!isSchemaNavigationKey(event.key) || !shouldHandleSchemaNavigation(event, element)) {
-			return
-		}
-
-		const focusable = getSchemaFocusableElements(element)
-		if (!focusable.length) {
-			return
-		}
-
-		const active = document.activeElement instanceof HTMLElement ? document.activeElement : null
-		const currentIndex = active ? focusable.indexOf(active) : -1
-		const target = getSchemaNavigationTarget(focusable, currentIndex, event.key)
-		if (!target) {
-			return
-		}
-
-		event.preventDefault()
-		event.stopPropagation()
-		target.focus({ preventScroll: true })
-	})
-}
-
-function isSchemaNavigationKey(key: string): boolean {
-	return key === 'ArrowDown'
-		|| key === 'ArrowRight'
-		|| key === 'ArrowUp'
-		|| key === 'ArrowLeft'
-		|| key === 'Home'
-		|| key === 'End'
-}
-
-function shouldHandleSchemaNavigation(event: KeyboardEvent, element: GooSchemaInternal): boolean {
-	const target = event.target
-	if (!(target instanceof HTMLElement) || !element.contains(target)) {
-		return false
-	}
-
-	if (target === element) {
-		return true
-	}
-
-	if (isNativeKeyboardOwner(target)) {
-		return false
-	}
-
-	return target.classList.contains('goo-folder__header')
-		|| target.classList.contains('goo-schema__reset')
-}
-
-function isNativeKeyboardOwner(element: HTMLElement): boolean {
-	if (element.isContentEditable) {
-		return true
-	}
-
-	const tagName = element.tagName.toLowerCase()
-	if (tagName === 'input' || tagName === 'select' || tagName === 'textarea') {
-		return true
-	}
-
-	const role = element.getAttribute('role')
-	return role === 'combobox'
-		|| role === 'listbox'
-		|| role === 'slider'
-		|| role === 'spinbutton'
-		|| role === 'textbox'
-}
-
-function getSchemaFocusableElements(element: GooSchemaInternal): HTMLElement[] {
-	return [ ...element.querySelectorAll<HTMLElement>(SCHEMA_FOCUSABLE_SELECTOR) ]
-		.filter(candidate => candidate !== element && isSchemaFocusableElement(candidate))
-}
-
-function isSchemaFocusableElement(element: HTMLElement): boolean {
-	if (element.hidden || element.getAttribute('aria-disabled') === 'true') {
-		return false
-	}
-
-	const style = window.getComputedStyle(element)
-	return style.display !== 'none'
-		&& style.visibility !== 'hidden'
-}
-
-function getSchemaNavigationTarget(
-	focusable: HTMLElement[],
-	currentIndex: number,
-	key: string
-): HTMLElement | undefined {
-	if (key === 'Home') {
-		return focusable[0]
-	}
-	if (key === 'End') {
-		return focusable[focusable.length - 1]
-	}
-
-	const direction = key === 'ArrowUp' || key === 'ArrowLeft' ? -1 : 1
-	if (currentIndex < 0) {
-		return direction > 0 ? focusable[0] : focusable[focusable.length - 1]
-	}
-
-	return focusable[(currentIndex + direction + focusable.length) % focusable.length]
-}
-
-function mergeSchemaData(target: GooSchemaData, source: GooSchemaData): void {
-	if (target === source) return
-	for (const key of Object.keys(target)) {
-		if (!(key in source)) {
-			delete target[key]
-		}
-	}
-	for (const [ key, value ] of Object.entries(source)) {
-		const current = target[key]
-		if (isPlainRecord(current) && isPlainRecord(value)) {
-			mergeSchemaData(current, value)
-		} else {
-			target[key] = value
-		}
-	}
-}
-
-function isPlainRecord(value: unknown): value is GooSchemaData {
-	return Boolean(value)
-		&& typeof value === 'object'
-		&& !Array.isArray(value)
-		&& Object.getPrototypeOf(value) === Object.prototype
-}
-
-export function schemaHasConditions(schema: GooSchemaType): boolean {
-	const nodes = Array.isArray(schema) ? schema : schema.children
-	return nodes.some(nodeHasConditions)
-}
-
-function nodeHasConditions(node: GooSchemaNode): boolean {
-	if (node.if !== undefined || node.unless !== undefined) return true
-	if ('children' in node) return node.children.some(nodeHasConditions)
-	return false
 }
 
 async function rebuildSchema(element: GooSchemaInternal): Promise<void> {
@@ -650,91 +504,6 @@ function isGooSvelteControlModule(module: unknown): module is GooSvelteControlMo
 		&& typeof (module as { default?: unknown }).default === 'function'
 }
 
-function appendSchemaActions(element: GooSchemaInternal, parent: HTMLElement): void {
-	if (!shouldRenderSchemaActions(element)) return
-
-	const toolbar = document.createElement('div')
-	toolbar.className = 'goo-schema__actions'
-
-	const presets = element.state.presets ?? []
-	if (presets.length) {
-		const select = document.createElement('select')
-		select.className = 'goo-schema__preset-select'
-		select.ariaLabel = 'Schema preset'
-
-		for (const preset of presets) {
-			const option = document.createElement('option')
-			option.value = preset.id
-			option.textContent = preset.label
-			option.selected = preset.id === element.state.activePresetId
-			select.appendChild(option)
-		}
-
-		select.addEventListener('change', () => {
-			const preset = presets.find(candidate => candidate.id === select.value)
-			if (!preset) return
-			applySchemaPreset(element, preset)
-		})
-		toolbar.appendChild(select)
-	}
-
-	if (element.state.showReset && element.state.defaults) {
-		const reset = document.createElement('button')
-		reset.className = 'goo-schema__reset'
-		reset.type = 'button'
-		reset.textContent = 'Reset'
-		reset.title = 'Reset to defaults'
-		reset.addEventListener('click', () => resetSchemaToDefaults(element))
-		toolbar.appendChild(reset)
-	}
-
-	const parentContainer = parent as HTMLElement & { add?: (el: HTMLElement) => void }
-	if (typeof parentContainer.add === 'function') {
-		parentContainer.add(toolbar)
-	} else {
-		parent.appendChild(toolbar)
-	}
-	element._toolbar = toolbar
-	updateSchemaActionState(element)
-}
-
-function shouldRenderSchemaActions(element: GooSchemaInternal): boolean {
-	return Boolean((element.state.presets?.length ?? 0) > 0 || (element.state.showReset && element.state.defaults))
-}
-
-function applySchemaPreset(element: GooSchemaInternal, preset: GooSchemaPreset): void {
-	const data = cloneSchemaData(preset.data)
-	element.setData(data)
-	const detail: GooSchemaPresetEventDetail = { id: preset.id, preset, data: element._data }
-	element.dispatchEvent(new CustomEvent('preset', { detail, bubbles: true }))
-	element._onpreset?.(preset)
-}
-
-function resetSchemaToDefaults(element: GooSchemaInternal): void {
-	const defaults = element.state.defaults
-	if (!defaults) return
-	const data = cloneSchemaData(defaults)
-	element.setData(data)
-	const detail: GooSchemaResetEventDetail = { data: element._data, defaults }
-	element.dispatchEvent(new CustomEvent('reset', { detail, bubbles: true }))
-	element._onreset?.(element._data)
-}
-
-function updateSchemaActionState(element: GooSchemaInternal): void {
-	const toolbar = element._toolbar
-	if (!toolbar) return
-
-	const reset = toolbar.querySelector<HTMLButtonElement>('.goo-schema__reset')
-	if (reset && element.state.defaults) {
-		reset.disabled = isSchemaDataEqual(element._data, element.state.defaults)
-	}
-
-	const select = toolbar.querySelector<HTMLSelectElement>('.goo-schema__preset-select')
-	if (select && element.state.activePresetId !== undefined && select.value !== element.state.activePresetId) {
-		select.value = element.state.activePresetId ?? ''
-	}
-}
-
 function updateSchemaAfterValueMutation(element: GooSchemaInternal): void {
 	updateSchemaAfterDataMutation(element)
 }
@@ -752,59 +521,6 @@ function updateSchemaAfterDataMutation(element: GooSchemaInternal): void {
 	}
 	element.refresh()
 	updateSchemaActionState(element)
-}
-
-function getSchemaVisibilitySignature(element: GooSchemaInternal): string {
-	const schema = element.state.schema
-	const nodes = Array.isArray(schema) ? schema : schema.children
-	return nodes.map(node => getNodeVisibilitySignature(node, element._data)).filter(Boolean).join('|')
-}
-
-function getNodeVisibilitySignature(node: GooSchemaNode, data: GooSchemaData): string {
-	if (!shouldRenderSchemaNode(node, data)) return ''
-	if ('children' in node && node.type === 'folder') {
-		const children = node.children
-			.map(child => getNodeVisibilitySignature(child, data))
-			.filter(Boolean)
-			.join(',')
-		return `folder:${ node.title }:${ node.className ?? '' }:[${ children }]`
-	}
-	if ('path' in node) {
-		return `field:${ node.path }:${ node.type ?? '' }:${ node.label ?? '' }`
-	}
-	return ''
-}
-
-function cloneSchemaData(data: GooSchemaData): GooSchemaData {
-	return cloneSchemaValue(data) as GooSchemaData
-}
-
-function cloneSchemaValue(value: unknown): unknown {
-	if (Array.isArray(value)) return value.map(cloneSchemaValue)
-	if (isPlainRecord(value)) {
-		return Object.fromEntries(Object.entries(value).map(([ key, child ]) => [ key, cloneSchemaValue(child) ]))
-	}
-	return value
-}
-
-function isSchemaDataEqual(left: GooSchemaData, right: GooSchemaData): boolean {
-	return isSchemaValueEqual(left, right)
-}
-
-function isSchemaValueEqual(left: unknown, right: unknown): boolean {
-	if (Object.is(left, right)) return true
-	if (Array.isArray(left) || Array.isArray(right)) {
-		if (!Array.isArray(left) || !Array.isArray(right) || left.length !== right.length) return false
-		return left.every((value, index) => isSchemaValueEqual(value, right[index]))
-	}
-	if (isPlainRecord(left) || isPlainRecord(right)) {
-		if (!isPlainRecord(left) || !isPlainRecord(right)) return false
-		const leftKeys = Object.keys(left)
-		const rightKeys = Object.keys(right)
-		if (leftKeys.length !== rightKeys.length) return false
-		return leftKeys.every(key => key in right && isSchemaValueEqual(left[key], right[key]))
-	}
-	return false
 }
 
 function createGooSchemaElement(options: GooSchemaOptions = {}): GooSchema {
