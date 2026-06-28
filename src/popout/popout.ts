@@ -15,47 +15,26 @@ import {
 	type PositionResult
 } from '../support/positioning/index.ts'
 import { createLifecycleBag } from '../support/utils/lifecycleBag.ts'
-import { createPointerDrag } from '../support/utils/pointerDrag.ts'
-
-// =============================================================================
-// Popout Registry (for parent-child chains)
-// =============================================================================
-
-const activePopouts = new Set<GooPopoutRuntime>()
-
-/**
- * Close all active popouts.
- */
-function closeAllPopouts() {
-	for (const popout of Array.from(activePopouts)) {
-		popout.close()
-	}
-}
-
-/**
- * Close active popouts that do not contain the provided element.
- * This preserves parent panes while switching between sibling popouts inside them.
- * @param target - Element that should keep its containing popout chain open.
- */
-function closePopoutsOutside(target: HTMLElement) {
-	for (const popout of Array.from(activePopouts)) {
-		const element = popout.element
-		if (element?.contains(target)) {
-			continue
-		}
-
-		popout.close()
-	}
-}
-
-/**
- * Get the currently active popout (most recently opened).
- * @returns {GooPopoutInstance|null}
- */
-function getActivePopout() {
-	const arr = Array.from(activePopouts)
-	return arr[arr.length - 1] || null
-}
+import {
+	createPopoutElement,
+	type PopoutElement
+} from './_popoutElement.ts'
+import { setupPopoutEventHandlers } from './_popoutEvents.ts'
+import {
+	bindImmediateEscapeToClose,
+	capturePopoutFocusTarget,
+	restorePopoutFocus
+} from './_popoutFocus.ts'
+import {
+	observeOpenLayoutChanges,
+	stabilizeOpeningLayout
+} from './_popoutLayout.ts'
+import {
+	getActivePopout,
+	type GooPopoutRuntime,
+	gooPopoutRuntime as sharedGooPopoutRuntime,
+	registerActivePopout,
+	unregisterActivePopout } from './_popoutRegistry.ts'
 
 /** Runtime controls for the shared Goo popout registry. */
 export interface GooPopoutManager {
@@ -68,24 +47,11 @@ export interface GooPopoutManager {
 }
 
 /** Shared Goo popout registry controls. */
-export const gooPopoutRuntime: GooPopoutManager = {
-	closeAll: closeAllPopouts,
-	closeOutside: closePopoutsOutside,
-	getActive: getActivePopout
-}
+export const gooPopoutRuntime: GooPopoutManager = sharedGooPopoutRuntime
 
 // =============================================================================
 // Goo Popout Factory
 // =============================================================================
-
-/**
- * Extended HTMLElement with popout-specific properties.
- */
-interface PopoutElement extends HTMLElement {
-	_factoryControlled?: boolean
-	_isGooPopout?: boolean
-	_popoutInstance?: GooPopoutRuntime
-}
 
 /**
  * Containment configuration.
@@ -208,11 +174,6 @@ export interface GooPopoutInstance {
 	updatePosition: (newAt: GooPopoutAt | HTMLElement, newAlign?: string) => void
 }
 
-interface GooPopoutRuntime extends GooPopoutInstance {
-	parent: GooPopoutRuntime | null
-	child: GooPopoutRuntime | null
-}
-
 /**
  * Create a new popout instance.
  * @param {GooPopoutOptions} options - options.
@@ -327,13 +288,25 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 	async function open() {
 		if (opened || destroying) return
 		if (lifecycle.destroyed) lifecycle = createLifecycleBag()
-		if (initialFocus !== 'none') {
-			previousActiveElement =
-				document.activeElement instanceof HTMLElement ? document.activeElement : null
-		}
+		previousActiveElement = capturePopoutFocusTarget(initialFocus)
 
 		// Create DOM
-		$element = createPopoutElement()
+		const popoutElement = createPopoutElement({
+			ariaLabel,
+			attributes,
+			chromeless,
+			className,
+			content,
+			dataset,
+			fullScreen,
+			instance,
+			role,
+			showArrow,
+			showBackdrop
+		})
+		$element = popoutElement.element
+		$arrow = popoutElement.arrowElement
+		$backdrop = popoutElement.backdropElement
 		parentElement.appendChild($element)
 
 		// Index parent-child chain
@@ -341,14 +314,44 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 
 		// Mark open before the first await so callers can synchronously observe the state.
 		opened = true
-		activePopouts.add(instance)
-		bindImmediateEscapeToClose()
+		registerActivePopout(instance)
+		bindImmediateEscapeToClose({
+			close,
+			escapeToClose,
+			isActive: () => getActivePopout() === instance,
+			isOpen: () => opened,
+			lifecycle
+		})
 
-		await stabilizeOpeningLayout()
+		await stabilizeOpeningLayout({
+			element: $element,
+			isActive: () => $element !== null && !destroying,
+			reposition
+		})
 		if (!$element || destroying) return
 
-		setupEventHandlers()
-		observeOpenLayoutChanges()
+		setupPopoutEventHandlers({
+			clickToClose,
+			close,
+			dragToMove,
+			element: $element,
+			getArrowElement: () => $arrow,
+			initialFocus,
+			isClickInsidePopout: isClickInsidePopoutChain,
+			isDestroying: () => destroying,
+			isOpen: () => opened,
+			lifecycle,
+			reposition
+		})
+		if ($element) {
+			observeOpenLayoutChanges({
+				element: $element,
+				fullScreen,
+				lifecycle,
+				reposition: scheduleReposition,
+				targetElement
+			})
+		}
 
 		$element.offsetHeight // Force reflow
 
@@ -367,7 +370,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		if (!opened || destroying) return
 
 		opened = false
-		activePopouts.delete(instance)
+		unregisterActivePopout(instance)
 
 		// Close child popouts first
 		if (childPopout) {
@@ -424,13 +427,13 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		$element = null
 		$arrow = null
 
-		activePopouts.delete(instance)
+		unregisterActivePopout(instance)
 		destroying = false
 		lifecycle = createLifecycleBag()
 
 		// Callback
 		if (onDestroy) onDestroy()
-		restoreFocus(removedElement)
+		previousActiveElement = restorePopoutFocus(removedElement, previousActiveElement)
 	}
 
 	/**
@@ -505,115 +508,6 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		animationCleanup = null
 	}
 
-	async function stabilizeOpeningLayout() {
-		if (!$element) return
-
-		$element.style.visibility = 'hidden'
-		$element.style.pointerEvents = 'none'
-		$element.style.opacity = '0'
-		reposition()
-
-		await waitForQuietOpeningLayout()
-		if (!$element || destroying) return
-
-		reposition()
-		$element.style.visibility = ''
-		$element.style.pointerEvents = ''
-	}
-
-	function waitForQuietOpeningLayout() {
-		return new Promise<void>(resolve => {
-			let frame = 0
-			let finished = false
-			let quietFrames = 0
-			const observers: Array<{ disconnect(): void }> = []
-			const timeout = setTimeout(finish, 240)
-
-			function finish() {
-				if (finished) return
-				finished = true
-				cancelAnimationFrame(frame)
-				clearTimeout(timeout)
-				observers.forEach(observer => observer.disconnect())
-				resolve()
-			}
-
-			function schedule() {
-				if (finished) return
-				if (frame) return
-				frame = requestAnimationFrame(() => {
-					frame = 0
-					if (!$element || destroying) {
-						finish()
-						return
-					}
-
-					reposition()
-					quietFrames += 1
-					if (quietFrames >= 2) {
-						finish()
-						return
-					}
-
-					schedule()
-				})
-			}
-
-			function markDirty() {
-				if (finished) return
-				quietFrames = 0
-				schedule()
-			}
-
-			if (typeof ResizeObserver === 'function' && $element) {
-				const resizeObserver = new ResizeObserver(markDirty)
-				resizeObserver.observe($element)
-				const $contentEl = $element.querySelector('.goo-popout__content')
-				if ($contentEl) {
-					resizeObserver.observe($contentEl)
-				}
-				observers.push(resizeObserver)
-			}
-
-			if (typeof MutationObserver === 'function' && $element) {
-				const mutationObserver = new MutationObserver(markDirty)
-				mutationObserver.observe($element, {
-					childList: true,
-					subtree: true
-				})
-				observers.push(mutationObserver)
-			}
-
-			schedule()
-		})
-	}
-
-	function observeOpenLayoutChanges() {
-		if (!$element || fullScreen) return
-
-		if (typeof ResizeObserver === 'function') {
-			const resizeObserver = new ResizeObserver(scheduleReposition)
-			resizeObserver.observe($element)
-			const $contentEl = $element.querySelector('.goo-popout__content')
-			if ($contentEl) {
-				resizeObserver.observe($contentEl)
-			}
-			if (targetElement) {
-				resizeObserver.observe(targetElement)
-			}
-			lifecycle.add(resizeObserver)
-		}
-
-		if (typeof MutationObserver === 'function') {
-			const mutationObserver = new MutationObserver(scheduleReposition)
-			mutationObserver.observe($element, {
-				childList: true,
-				subtree: true
-			})
-			lifecycle.add(mutationObserver)
-		}
-	}
-
 	/**
 	 * Update the target position and reposition the popout.
 	 * @param newAt - New target element or coordinates
@@ -626,275 +520,6 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		}
 
 		scheduleReposition()
-	}
-
-	// ==========================================================================
-	// DOM Creation
-	// ==========================================================================
-
-	/**
-	 * Create the popout DOM element.
-	 * @returns {PopoutElement}
-	 */
-	function createPopoutElement(): PopoutElement {
-		const el = document.createElement('div') as PopoutElement
-		const fullScreenClass = fullScreen ? 'goo-popout--fullscreen' : ''
-		const chromelessClass = chromeless ? 'goo-popout--chromeless' : ''
-		el.className = `goo-popout ${ fullScreenClass } ${ chromelessClass } ${ className }`
-			.replace(/\s+/g, ' ')
-			.trim()
-		el.tabIndex = 0
-		if (role) {
-			el.setAttribute('role', role)
-			el.setAttribute('aria-label', ariaLabel)
-		}
-
-		// Dataset
-		if (dataset) {
-			Object.assign(el.dataset, dataset)
-		}
-
-		if (attributes) {
-			for (const [ key, value ] of Object.entries(attributes)) {
-				if (value === null || value === undefined || value === false) continue
-				el.setAttribute(key, value === true ? '' : String(value))
-			}
-		}
-
-		// Mark as popout for click detection
-		el._isGooPopout = true
-		el._popoutInstance = instance
-
-		// Backdrop
-		if (showBackdrop) {
-			$backdrop = document.createElement('div')
-			$backdrop.className = 'goo-popout__backdrop'
-			el.appendChild($backdrop)
-		}
-
-		// Arrow — never shown when the popout is chromeless, since the arrow
-		// inherits the (now absent) panel color and would float as an orphan
-		// triangle next to the content's own frame.
-		if (showArrow && !chromeless) {
-			$arrow = document.createElement('div')
-			$arrow.className = 'goo-popout__arrow'
-			el.appendChild($arrow)
-		}
-
-		// Content wrapper
-		const contentWrapper = document.createElement('div')
-		contentWrapper.className = 'goo-popout__content'
-
-		if (content) {
-			const contentItems = Array.isArray(content) ? content : [ content ]
-			for (const item of contentItems) {
-				if (item instanceof HTMLElement && item.dataset.gooPopoutStaged === 'true') {
-					item.hidden = false
-				}
-				contentWrapper.appendChild(item)
-			}
-		}
-
-		el.appendChild(contentWrapper)
-
-		return el
-	}
-
-	// ==========================================================================
-	// Event Handlers
-	// ==========================================================================
-
-	/**
-	 * Setup event handlers for click-outside, escape, resize, drag.
-	 */
-	function setupEventHandlers() {
-		if (!$element) return
-
-		// Click outside to close
-		if (clickToClose) {
-			// Delay to prevent immediate close from triggering click
-			lifecycle.timeout(() => {
-				if (!opened || destroying || !$element) return
-
-				const handlePointerDown = (event: PointerEvent) => {
-					if (!opened || destroying) return
-
-					const pointerEvent = toGooPointerEvent(event)
-					const clickedElement = pointerEvent.target as HTMLElement
-					const isInsidePopout = isClickInsidePopoutChain(clickedElement)
-
-					if (typeof clickToClose === 'function') {
-						if (clickToClose(pointerEvent, isInsidePopout)) {
-							close()
-						}
-					} else if (!isInsidePopout) {
-						close()
-					}
-				}
-
-				lifecycle.listen(document, 'pointerdown', handlePointerDown, { capture: true })
-			}, 100)
-		}
-
-		// Reposition on resize
-		const handleResize = () => {
-			if (opened) reposition()
-		}
-		lifecycle.listen(window, 'resize', handleResize)
-
-		// Prevent scroll propagation
-		const handleWheel = (e: WheelEvent) => {
-			const scrollContainer = getScrollableWheelContainer(e)
-			if (!scrollContainer) {
-				e.stopPropagation()
-				return
-			}
-
-			const { scrollTop, scrollHeight, clientHeight } = scrollContainer
-			const atTop = scrollTop === 0
-			const atBottom = scrollTop + clientHeight >= scrollHeight
-
-			if ((e.deltaY < 0 && atTop) || (e.deltaY > 0 && atBottom)) {
-				e.preventDefault()
-			}
-			e.stopPropagation()
-		}
-		lifecycle.listen($element, 'wheel', handleWheel, { passive: false })
-
-		// Drag to move
-		if (dragToMove) {
-			setupDragToMove()
-		}
-
-		// Focus handling based on initialFocus option
-		if (initialFocus !== 'none') {
-			lifecycle.frame(() => {
-				if (!$element || destroying) return
-
-				if (initialFocus === 'content') {
-					// Try to focus first focusable element in content
-					const focusable = $element.querySelector<HTMLElement>(
-						'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-					)
-					if (focusable) {
-						focusable.focus({ preventScroll: true })
-						return
-					}
-				}
-
-				// 'popout' mode or fallback if no focusable content found
-				$element.focus({ preventScroll: true })
-			})
-		}
-	}
-
-	function bindImmediateEscapeToClose(): void {
-		if (!escapeToClose) return
-
-		const handleKeydown = (event: KeyboardEvent) => {
-			if (event.key !== 'Escape' || !opened || getActivePopout() !== instance) {
-				return
-			}
-
-			event.preventDefault()
-			event.stopPropagation()
-			void close()
-		}
-		lifecycle.listen(document, 'keydown', handleKeydown, { capture: true })
-	}
-
-	function restoreFocus(removedElement: HTMLElement) {
-		if (!previousActiveElement) return
-		const activeElement = document.activeElement
-		if (
-			activeElement instanceof HTMLElement &&
-			activeElement !== document.body &&
-			activeElement !== document.documentElement &&
-			activeElement.isConnected &&
-			!removedElement.contains(activeElement)
-		) {
-			previousActiveElement = null
-			return
-		}
-
-		const focusTarget = previousActiveElement
-		previousActiveElement = null
-		if (focusTarget.isConnected) {
-			focusTarget.focus({ preventScroll: true })
-		}
-	}
-
-	/**
-	 * Resolve the scroll container that should consume a wheel event inside the popout.
-	 * Walk up from the event target so nested scroll regions keep the wheel interaction
-	 * instead of letting it chain through the document underneath.
-	 * @param e - e.
-	 */
-	function getScrollableWheelContainer(e: WheelEvent) {
-		const root = $element
-		if (!root) return null
-
-		let node = e.target instanceof HTMLElement ? e.target : null
-		while (node && node !== root) {
-			const style = window.getComputedStyle(node)
-			const canScrollY = /auto|scroll|overlay/.test(style.overflowY)
-			if (canScrollY && node.scrollHeight > node.clientHeight) {
-				return node
-			}
-			node = node.parentElement
-		}
-
-		return root.querySelector('.goo-popout__content') as HTMLElement | null
-	}
-
-	/**
-	 * Setup drag-to-move behavior.
-	 */
-	function setupDragToMove() {
-		let startX: number, startY: number, startLeft: number, startTop: number
-
-		const handler = createPointerDrag(
-			$element!,
-			event => {
-				if (event.START) {
-					const rect = $element!.getBoundingClientRect()
-					startX = event.clientX
-					startY = event.clientY
-					startLeft = rect.left
-					startTop = rect.top
-				}
-
-				if (!event.DOWN) return
-				const dx = event.clientX - startX
-				const dy = event.clientY - startY
-				if (Math.abs(dx) <= 5 && Math.abs(dy) <= 5) return
-
-				event.preventDefault()
-
-				$element!.style.left = `${ startLeft + dx }px`
-				$element!.style.top = `${ startTop + dy }px`
-
-				// Hide arrow when dragged
-				if ($arrow) {
-					$arrow.classList.add('goo-popout__arrow--hidden')
-				}
-			},
-			{ ignoreTouch: true }
-		)
-
-		lifecycle.add(handler)
-	}
-
-	function toGooPointerEvent(event: PointerEvent): GooPopoutPointerEvent {
-		return {
-			originalEvent: event,
-			target: event.target,
-			clientX: event.clientX,
-			clientY: event.clientY,
-			isTouch: event.pointerType === 'touch',
-			preventDefault: () => event.preventDefault(),
-			stopPropagation: () => event.stopPropagation()
-		}
 	}
 
 	/**
