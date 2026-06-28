@@ -325,6 +325,39 @@ describe('GooPopout', () => {
 		target.remove()
 	})
 
+	it('closes on Escape before opening layout settles without owning focus', async() => {
+		const target = document.createElement('button')
+		const content = document.createElement('div')
+		document.body.appendChild(target)
+		target.focus()
+		const instance = createGooPopout({
+			at: target,
+			content,
+			initialFocus: 'none',
+			openImmediately: false
+		})
+
+		try {
+			const openPromise = instance.open()
+			const escape = new KeyboardEvent('keydown', {
+				bubbles: true,
+				cancelable: true,
+				key: 'Escape'
+			})
+			document.dispatchEvent(escape)
+			await openPromise
+			await delay(180)
+
+			expect(escape.defaultPrevented).toBe(true)
+			expect(instance.isOpen()).toBe(false)
+			expect(document.querySelector('.goo-popout')).toBeNull()
+			expect(document.activeElement).toBe(target)
+		} finally {
+			await instance.destroy()
+			target.remove()
+		}
+	})
+
 	it('binds the Svelte component instance for imperative control', async() => {
 		const target = document.createElement('button')
 		target.id = 'popout-target'

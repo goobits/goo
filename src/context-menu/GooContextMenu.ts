@@ -287,22 +287,16 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 			if (target instanceof Element && target.closest('.goo-popout')) return
 			closeForPageUnfocus()
 		}
-		const closeForEscape = (event: KeyboardEvent) => {
-			if (event.key !== 'Escape') return
-			closeForPageUnfocus()
-		}
 
 		window.addEventListener('blur', closeForPageUnfocus)
 		window.addEventListener('pagehide', closeForPageUnfocus)
 		document.addEventListener('pointerdown', closeForOutsidePointer, true)
 		document.addEventListener('visibilitychange', closeForVisibilityChange)
-		document.addEventListener('keydown', closeForEscape)
 		releasePageUnfocus = () => {
 			window.removeEventListener('blur', closeForPageUnfocus)
 			window.removeEventListener('pagehide', closeForPageUnfocus)
 			document.removeEventListener('pointerdown', closeForOutsidePointer, true)
 			document.removeEventListener('visibilitychange', closeForVisibilityChange)
-			document.removeEventListener('keydown', closeForEscape)
 			releasePageUnfocus = null
 		}
 	}
