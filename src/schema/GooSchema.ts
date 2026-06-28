@@ -16,7 +16,7 @@ import {
 	cloneSchemaValue,
 	getSchemaVisibilitySignature,
 	mergeSchemaData,
-	schemaHasConditions
+	schemaHasConditions as hasSchemaConditions
 } from './_schemaData.ts'
 import { attachSchemaKeyboardNavigation } from './_schemaKeyboardNavigation.ts'
 import { shouldRenderSchemaNode } from './fieldConditions.ts'
@@ -35,7 +35,6 @@ import type {
 	GooSchemaType
 } from './types.ts'
 
-export { schemaHasConditions } from './_schemaData.ts'
 export type {
 	GooSchemaChangeHandler,
 	GooSchemaControlType,
@@ -509,7 +508,7 @@ function updateSchemaAfterValueMutation(element: GooSchemaInternal): void {
 }
 
 function updateSchemaAfterDataMutation(element: GooSchemaInternal): void {
-	if (schemaHasConditions(element.state.schema)) {
+	if (hasSchemaConditions(element.state.schema)) {
 		const nextVisibilitySignature = getSchemaVisibilitySignature(element)
 		if (nextVisibilitySignature !== element._visibilitySignature) {
 			element._scheduleRebuild()
@@ -521,6 +520,11 @@ function updateSchemaAfterDataMutation(element: GooSchemaInternal): void {
 	}
 	element.refresh()
 	updateSchemaActionState(element)
+}
+
+/** Return true when a GooSchema tree contains conditional nodes. */
+export function schemaHasConditions(schema: GooSchemaType): boolean {
+	return hasSchemaConditions(schema)
 }
 
 function createGooSchemaElement(options: GooSchemaOptions = {}): GooSchema {
