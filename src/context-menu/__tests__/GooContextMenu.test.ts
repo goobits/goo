@@ -229,11 +229,14 @@ describe('createGooContextMenu', () => {
 		expect(menu.open({ x: 20, y: 20, initialFocus: 'none' })).toBe(true)
 		await Promise.resolve()
 
-		document.dispatchEvent(new KeyboardEvent('keydown', {
+		const escape = new KeyboardEvent('keydown', {
 			bubbles: true,
+			cancelable: true,
 			key: 'Escape'
-		}))
+		})
+		document.dispatchEvent(escape)
 
+		expect(escape.defaultPrevented).toBe(true)
 		expect(menu.isOpen()).toBe(false)
 
 		await menu.destroy()
