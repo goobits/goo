@@ -1,6 +1,6 @@
 import type { GooLifecycleBag } from '../support/utils/lifecycleBag.ts'
 import { createPointerDrag } from '../support/utils/pointerDrag.ts'
-import type { GooPopoutPointerEvent } from './popout.ts'
+import type { GooPopoutPointerEvent } from './popoutTypes.ts'
 
 export function setupPopoutEventHandlers({
 	clickToClose,

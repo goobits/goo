@@ -1,4 +1,4 @@
-import type { GooPopoutInstance } from './popout.ts'
+import type { GooPopoutInstance } from './popoutTypes.ts'
 
 export type GooPopoutRuntime = GooPopoutInstance & {
 	parent: GooPopoutRuntime | null

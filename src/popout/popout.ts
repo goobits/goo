@@ -11,8 +11,7 @@ import {
 	applyArrowPosition,
 	applyPosition,
 	calculatePosition,
-	type PositionAvoidRect,
-	type PositionResult
+	type PositionAvoidRect
 } from '../support/positioning/index.ts'
 import { createLifecycleBag } from '../support/utils/lifecycleBag.ts'
 import {
@@ -41,16 +40,21 @@ import {
 	gooPopoutRuntime as sharedGooPopoutRuntime,
 	registerActivePopout,
 	unregisterActivePopout } from './_popoutRegistry.ts'
+import type {
+	GooPopoutAt,
+	GooPopoutInstance,
+	GooPopoutManager,
+	GooPopoutOptions
+} from './popoutTypes.ts'
 
-/** Runtime controls for the shared Goo popout registry. */
-export interface GooPopoutManager {
-	/** Close all active popouts. */
-	closeAll(): void
-	/** Close active popouts that do not contain the provided element. */
-	closeOutside(target: HTMLElement): void
-	/** Return the most recently opened popout. */
-	getActive(): GooPopoutInstance | null
-}
+export type {
+	GooPopoutAt,
+	GooPopoutInstance,
+	GooPopoutManager,
+	GooPopoutOptions,
+	GooPopoutPointerEvent,
+	PopoutKeepWithin
+} from './popoutTypes.ts'
 
 /** Shared Goo popout registry controls. */
 export const gooPopoutRuntime: GooPopoutManager = sharedGooPopoutRuntime
@@ -58,127 +62,6 @@ export const gooPopoutRuntime: GooPopoutManager = sharedGooPopoutRuntime
 // =============================================================================
 // Goo Popout Factory
 // =============================================================================
-
-/**
- * Containment configuration.
- */
-export interface PopoutKeepWithin {
-	element?: HTMLElement
-	margin?: number
-	fullScreen?: boolean
-}
-
-/**
- * Target specification - element or coordinates with optional alignment/offset.
- */
-export interface GooPopoutAt {
-	element?: HTMLElement
-	point?: { x?: number; y?: number }
-	x?: number
-	y?: number
-	align?: string
-	offset?: { x?: number; y?: number }
-	avoidRects?: PositionAvoidRect[]
-	avoidMargin?: number
-}
-
-/**
- * Options for creating a Goo popout instance.
- */
-export interface GooPopoutOptions {
-	content?: Element | Element[]
-	parentElement?: HTMLElement
-	ariaLabel?: string
-
-	/**
-	 * ARIA role for the popout container. Defaults to `'dialog'`.
-	 * Pass `null` for a non-semantic wrapper when the content provides its own
-	 * role (e.g. a `listbox`), so the container is not announced as a dialog.
-	 */
-	role?: string | null
-	at?: HTMLElement | GooPopoutAt
-	align?: string
-	offset?: { x?: number; y?: number }
-	keepWithin?: PopoutKeepWithin
-	className?: string
-	dataset?: Record<string, string>
-	attributes?: Record<string, string | number | boolean | null | undefined>
-	showArrow?: boolean
-	showBackdrop?: boolean
-	clickToClose?: boolean | ((event: GooPopoutPointerEvent, isInsidePopout: boolean) => boolean)
-	escapeToClose?: boolean
-	dragToMove?: boolean
-	openImmediately?: boolean
-	rtl?: boolean
-
-	/**
-	 * Controls initial focus behavior when popout opens.
-	 * - 'content': Focus first focusable element in content (default)
-	 * - 'popout': Focus the popout container itself
-	 * - 'none': Don't move focus - keyboard stays where it was
-	 */
-	initialFocus?: 'content' | 'popout' | 'none'
-
-	/**
-	 * When true, popout expands to fill the entire viewport (mobile-friendly).
-	 * Hides the arrow and ignores normal positioning.
-	 */
-	fullScreen?: boolean
-
-	/**
-	 * When true, the popout's own chrome (background, drop shadow,
-	 * border-radius, arrow) is dropped so the content can supply its own
-	 * visual frame. Use for self-themed sheets that would otherwise render
-	 * as a box within a box. Positioning still anchors to the target.
-	 */
-	chromeless?: boolean
-	onOpen?: (data: { element: HTMLElement; instance: GooPopoutInstance }) => void
-	onClose?: (data: { element: HTMLElement; instance: GooPopoutInstance }) => void
-
-	/** Called after each non-fullscreen placement calculation is applied. */
-	onPosition?: (data: {
-		element: HTMLElement
-		instance: GooPopoutInstance
-		position: PositionResult
-	}) => void
-	onDestroy?: () => void
-}
-
-/** Pointer event data passed to Goo popout callbacks. */
-export interface GooPopoutPointerEvent {
-	readonly originalEvent: PointerEvent
-	readonly target: EventTarget | null
-	readonly clientX: number
-	readonly clientY: number
-	readonly isTouch: boolean
-	preventDefault: () => void
-	stopPropagation: () => void
-}
-
-/**
- * GooPopout instance object returned from the factory function.
- */
-export interface GooPopoutInstance {
-	readonly element: HTMLElement | null
-	readonly contentElement: HTMLElement | null
-	readonly arrowElement: HTMLElement | null
-
-	/** Most recently applied non-fullscreen position, if the popout has been placed. */
-	readonly position: PositionResult | null
-	isOpen: () => boolean
-	open: () => Promise<void>
-	close: () => Promise<void>
-	toggle: () => void
-	destroy: () => Promise<void>
-	reposition: () => void
-
-	/**
-	 * Update the target position and reposition the popout.
-	 * @param newAt - New target element or GooPopoutAt configuration
-	 * @param newAlign - Optional new alignment string
-	 */
-	updatePosition: (newAt: GooPopoutAt | HTMLElement, newAlign?: string) => void
-}
 
 /**
  * Create a new popout instance.
