@@ -4,7 +4,16 @@
  */
 
 .goo-schema {
-	display: contents;
+	display: block;
+	min-width: 0;
+	outline: none;
+}
+
+.goo-schema:focus-visible {
+	border-radius: var(--goo-theme-radius-sm, 0.375rem);
+	box-shadow:
+		0 0 0 1px var(--goo-theme-accent, #3b82f6),
+		0 0 0 3px color-mix(in srgb, var(--goo-theme-accent, #3b82f6) 24%, transparent);
 }
 
 /* Bare mode - controls without panel wrapper */

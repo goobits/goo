@@ -34,6 +34,26 @@ const gridPopoutControlType = defineSvelteControlType({
 	})
 })
 
+function dispatchKey(element: HTMLElement, key: string): KeyboardEvent {
+	const event = new KeyboardEvent('keydown', {
+		bubbles: true,
+		cancelable: true,
+		key
+	})
+	element.dispatchEvent(event)
+	return event
+}
+
+async function waitForSchemaElement<T extends HTMLElement>(schema: HTMLElement, selector: string): Promise<T> {
+	for (let attempt = 0; attempt < 10; attempt += 1) {
+		const element = schema.querySelector<T>(selector)
+		if (element) return element
+		await settleGooSchema()
+	}
+
+	throw new Error(`GooSchema test element not found: ${ selector }`)
+}
+
 const selfContainedInputControlType = defineSvelteControlType({
 	load: () => Promise.resolve({
 		default: SelfContainedInputControl,
@@ -66,6 +86,68 @@ describe('GooSchema', () => {
 		expect(typeof schema.destroy).toBe('function')
 		expect(schema.querySelector('.goo-controller')).not.toBeNull()
 		expect(schema.getController('size')).not.toBeUndefined()
+	})
+
+	it('supports direct keyboard navigation from schema-owned focus targets', async() => {
+		const schema = createGooSchema({
+			schema: [
+				{
+					type: 'folder',
+					title: 'Shape',
+					open: true,
+					children: [
+						{ path: 'size', min: 0, max: 100 },
+						{ path: 'name' }
+					]
+				}
+			],
+			data: { size: 12, name: 'Marker' },
+			bare: true
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+
+		const folderHeader = await waitForSchemaElement<HTMLElement>(schema, '.goo-folder__header')
+		const textInput = await waitForSchemaElement<HTMLInputElement>(schema, '.goo-input__content')
+		expect(schema.tabIndex).toBe(0)
+		expect(schema.getAttribute('role')).toBe('group')
+
+		schema.focus()
+		const arrowDown = dispatchKey(schema, 'ArrowDown')
+
+		expect(arrowDown.defaultPrevented).toBe(true)
+		expect(document.activeElement).toBe(folderHeader)
+
+		const end = dispatchKey(folderHeader, 'End')
+		expect(end.defaultPrevented).toBe(true)
+		expect(document.activeElement).toBe(textInput)
+
+		folderHeader.focus()
+		const home = dispatchKey(folderHeader, 'Home')
+		expect(home.defaultPrevented).toBe(true)
+		expect(document.activeElement).toBe(folderHeader)
+
+		schema.focus()
+		const arrowUp = dispatchKey(schema, 'ArrowUp')
+		expect(arrowUp.defaultPrevented).toBe(true)
+		expect(document.activeElement).toBe(textInput)
+	})
+
+	it('leaves native schema inputs in charge of editing keys', async() => {
+		const schema = createGooSchema({
+			schema: [ { path: 'name' } ],
+			data: { name: 'Marker' },
+			bare: true
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+
+		const textInput = await waitForSchemaElement<HTMLInputElement>(schema, '.goo-input__content')
+		textInput.focus()
+		const home = dispatchKey(textInput, 'Home')
+
+		expect(home.defaultPrevented).toBe(false)
+		expect(document.activeElement).toBe(textInput)
 	})
 
 	it('can render generated panels without their header', async() => {
