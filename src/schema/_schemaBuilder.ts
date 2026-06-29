@@ -198,13 +198,13 @@ async function buildField(
 		const detail = { path: node.path, value, data: element._data }
 		element.dispatchEvent(new CustomEvent('change', { detail, bubbles: true }))
 		element._changeHandler?.(node.path, value)
-		updateSchemaAfterValueMutation(element)
+		updateSchemaAfterDataMutation(element)
 	}
 
 	controllerOptions.oninput = (value: unknown) => {
 		const detail = { path: node.path, value, data: element._data }
 		element.dispatchEvent(new CustomEvent('input', { detail, bubbles: true }))
-		updateSchemaAfterValueMutation(element)
+		updateSchemaAfterDataMutation(element)
 	}
 
 	const controller = createGooController(controllerOptions)
@@ -243,14 +243,14 @@ async function buildSelfContainedField(
 		const detail = { path: node.path, value, data: element._data }
 		element.dispatchEvent(new CustomEvent('change', { detail, bubbles: true }))
 		element._changeHandler?.(node.path, value)
-		updateSchemaAfterValueMutation(element)
+		updateSchemaAfterDataMutation(element)
 	}
 
 	const handleInput = (value: unknown) => {
 		object[property] = value
 		const detail = { path: node.path, value, data: element._data }
 		element.dispatchEvent(new CustomEvent('input', { detail, bubbles: true }))
-		updateSchemaAfterValueMutation(element)
+		updateSchemaAfterDataMutation(element)
 	}
 
 	const { controlOptions, ...controllerBaseOptions } = controllerOptions
@@ -287,10 +287,6 @@ async function buildSelfContainedField(
 	} else {
 		parent.appendChild(hostElement)
 	}
-}
-
-function updateSchemaAfterValueMutation(element: GooSchemaBuildElement): void {
-	updateSchemaAfterDataMutation(element)
 }
 
 function isGooSvelteControlModule(module: unknown): module is GooSvelteControlModule {
