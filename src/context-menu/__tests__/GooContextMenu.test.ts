@@ -350,6 +350,8 @@ describe('createGooContextMenu', () => {
 			const panel = document.querySelector<HTMLElement>('.goo-context-menu-popout .goo-select__options')
 			expect(panel).not.toBeNull()
 			expect(focus.mock.contexts).toContain(panel)
+			const laterKeydown = vi.fn()
+			panel?.addEventListener('keydown', laterKeydown)
 			const copyOption = panel?.querySelector<HTMLElement>('.goo-select__option[data-id="copy"]')
 			expect(copyOption?.classList.contains('goo-select__option--hovered')).toBe(true)
 
@@ -360,6 +362,7 @@ describe('createGooContextMenu', () => {
 			})
 			panel?.dispatchEvent(arrowDown)
 			expect(arrowDown.defaultPrevented).toBe(true)
+			expect(laterKeydown).not.toHaveBeenCalled()
 			const pasteOption = panel?.querySelector<HTMLElement>('.goo-select__option[data-id="paste"]')
 			expect(pasteOption?.classList.contains('goo-select__option--hovered')).toBe(true)
 			expect(panel?.hasAttribute('aria-activedescendant')).toBe(true)

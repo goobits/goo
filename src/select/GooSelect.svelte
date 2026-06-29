@@ -24,6 +24,7 @@ import {
 	handleKeyboard,
 	handleTypeahead,
 	mapNativeKeyToCommand,
+	mapNativeTypeaheadKeyToCommand,
 	type GooSelectKeyboardHost
 } from './_keyboardHandler.ts'
 import { findOptionById, normalizeOptions } from './_normalizeOptions.ts'
@@ -501,12 +502,11 @@ function handleKeydown(event: KeyboardEvent): void {
 	const command = mapNativeKeyToCommand(event)
 	if (command) {
 		handleKeyboard(selectElement as unknown as GooSelectKeyboardHost, command)
-	} else if (event.key.length === 1) {
-		handleTypeahead(selectElement as unknown as GooSelectKeyboardHost, {
-			command: event.key,
-			cancel: () => event.preventDefault()
-		})
+		return
 	}
+
+	const typeaheadCommand = mapNativeTypeaheadKeyToCommand(event)
+	if (typeaheadCommand) handleTypeahead(selectElement as unknown as GooSelectKeyboardHost, typeaheadCommand)
 }
 
 function selectOption(option: GooSelectOption, item?: HTMLElement | null): void {

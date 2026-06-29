@@ -4,7 +4,10 @@
  * @module goobits/select/keyboardHandler
  */
 
-import { isKeyboardActivationKey } from '../support/keyboard/_keyboardActivation.ts'
+import {
+	containKeyboardEvent,
+	isKeyboardActivationKey
+} from '../support/keyboard/_keyboardActivation.ts'
 import type { GooSelectOption, GooSelectState } from './types.ts'
 
 /** Keyboard command event used by GooSelect navigation. */
@@ -68,7 +71,16 @@ export function mapNativeKeyToCommand(e: KeyboardEvent): GooSelectKeyCommand | n
 
 	return {
 		command,
-		cancel: () => e.preventDefault()
+		cancel: () => containKeyboardEvent(e)
+	}
+}
+
+export function mapNativeTypeaheadKeyToCommand(e: KeyboardEvent): GooSelectKeyCommand | null {
+	if (e.key.length !== 1) return null
+
+	return {
+		command: e.key,
+		cancel: () => containKeyboardEvent(e)
 	}
 }
 
@@ -160,5 +172,6 @@ export function handleTypeahead(host: KeyboardHandlerHost, event: GooSelectKeyCo
 	if (command.includes('+') || command.length > 1) return
 
 	// Single character - delegate to panel
+	event.cancel()
 	host._panel.handleTypeahead(command)
 }
