@@ -87,12 +87,15 @@ describe('GooCheckbox', () => {
 	it('prevents default browser handling for custom keyboard activation', () => {
 		const { container } = render(GooCheckbox)
 		const checkbox = container.querySelector<HTMLDivElement>('.goo-checkbox')!
+		const parentKeydown = vi.fn()
+		container.addEventListener('keydown', parentKeydown)
 
-		for (const key of [ 'Enter', ' ', 'ArrowLeft', 'ArrowRight' ]) {
+		for (const key of [ 'Enter', ' ', 'Spacebar', 'ArrowLeft', 'ArrowRight' ]) {
 			const event = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key })
 			checkbox.dispatchEvent(event)
 
 			expect(event.defaultPrevented).toBe(true)
 		}
+		expect(parentKeydown).not.toHaveBeenCalled()
 	})
 })

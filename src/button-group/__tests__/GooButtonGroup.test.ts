@@ -134,4 +134,36 @@ describe('GooButtonGroup', () => {
 		expect(right.classList.contains('goo-button--selected')).toBe(true)
 		expect(onchange).toHaveBeenCalledExactlyOnceWith('right')
 	})
+
+	it('selects the focused button from activation aliases and contains handled keys', async() => {
+		const onchange = vi.fn()
+		const { container } = render(GooButtonGroup, {
+			props: {
+				value: 'left',
+				onchange,
+				allowMultiple: true,
+				options: [
+					{ key: 'left', value: 'Left' },
+					{ key: 'right', value: 'Right' }
+				]
+			}
+		})
+		const left = container.querySelector<HTMLButtonElement>('.goo-button[data-key="left"]')!
+		const parentKeydown = vi.fn()
+		container.addEventListener('keydown', parentKeydown)
+
+		left.focus()
+		const event = new KeyboardEvent('keydown', {
+			bubbles: true,
+			cancelable: true,
+			key: 'Spacebar'
+		})
+		left.dispatchEvent(event)
+		await Promise.resolve()
+
+		expect(event.defaultPrevented).toBe(true)
+		expect(parentKeydown).not.toHaveBeenCalled()
+		expect(onchange).toHaveBeenCalledExactlyOnceWith([])
+		expect(left.classList.contains('goo-button--selected')).toBe(false)
+	})
 })

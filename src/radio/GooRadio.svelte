@@ -1,6 +1,7 @@
 <script lang="ts">
 import { untrack } from 'svelte'
 import './GooRadio.css'
+import { handleKeyboardActivation } from '../support/keyboard/_keyboardActivation.ts'
 import type { GooRadioProps } from './types.ts'
 
 let radioElement: HTMLButtonElement | undefined = $state()
@@ -104,16 +105,7 @@ function handleClick(event: MouseEvent): void {
 
 function handleKeydown(event: KeyboardEvent): void {
 	if (disabled) return
-	switch (event.key) {
-		case 'Enter':
-			event.preventDefault()
-			check()
-			break
-		case ' ':
-			event.preventDefault()
-			check()
-			break
-	}
+	handleKeyboardActivation(event, check)
 }
 
 function cssEscape(value: string): string {

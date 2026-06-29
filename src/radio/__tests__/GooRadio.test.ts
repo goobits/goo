@@ -49,13 +49,16 @@ describe('GooRadio', () => {
 			}
 		})
 		const radio = container.querySelector<HTMLButtonElement>('.goo-radio')!
+		const parentKeydown = vi.fn()
+		container.addEventListener('keydown', parentKeydown)
 
-		for (const key of [ 'Enter', ' ' ]) {
+		for (const key of [ 'Enter', ' ', 'Spacebar' ]) {
 			const event = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key })
 			radio.dispatchEvent(event)
 
 			expect(event.defaultPrevented).toBe(true)
 		}
+		expect(parentKeydown).not.toHaveBeenCalled()
 	})
 })
 

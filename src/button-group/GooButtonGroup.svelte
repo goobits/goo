@@ -24,6 +24,10 @@ import {
 	normalizeButtonGroupValue,
 	readButtonGroupValue
 } from './_model.ts'
+import {
+	containKeyboardEvent,
+	isKeyboardActivationKey
+} from '../support/keyboard/_keyboardActivation.ts'
 import type { GooButtonGroupProps, NormalizedButtonGroupOption } from './types.ts'
 
 let groupElement: HTMLDivElement | undefined = $state()
@@ -119,36 +123,37 @@ function handleGroupClick(event: MouseEvent): void {
 function handleGroupKeydown(event: KeyboardEvent): void {
 	if (disabled) return
 
+	if (isKeyboardActivationKey(event.key)) {
+		containKeyboardEvent(event)
+		if (focusedKey) {
+			selectKey(focusedKey, { emit: true })
+		}
+		return
+	}
+
 	switch (event.key) {
 		case 'ArrowLeft':
 			if (layout !== 'vertical') {
-				event.preventDefault()
+				containKeyboardEvent(event)
 				navigateButton(-1)
 			}
 			break
 		case 'ArrowRight':
 			if (layout !== 'vertical') {
-				event.preventDefault()
+				containKeyboardEvent(event)
 				navigateButton(1)
 			}
 			break
 		case 'ArrowUp':
 			if (layout === 'vertical') {
-				event.preventDefault()
+				containKeyboardEvent(event)
 				navigateButton(-1)
 			}
 			break
 		case 'ArrowDown':
 			if (layout === 'vertical') {
-				event.preventDefault()
+				containKeyboardEvent(event)
 				navigateButton(1)
-			}
-			break
-		case 'Enter':
-		case ' ':
-			event.preventDefault()
-			if (focusedKey) {
-				selectKey(focusedKey, { emit: true })
 			}
 			break
 	}

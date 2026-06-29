@@ -1,3 +1,8 @@
+import {
+	containKeyboardEvent,
+	isKeyboardActivationKey
+} from '../support/keyboard/_keyboardActivation.ts'
+
 export type GridPopoutTriggerKeyboardOptions = {
 	close: () => void
 	isOpen: () => boolean
@@ -23,23 +28,23 @@ export function handleGridPopoutTriggerKeyboardEvent(
 ): boolean {
 	if (event.key === 'Escape') {
 		if (!isOpen()) return false
-		containGridPopoutKey(event)
+		containKeyboardEvent(event)
 		close()
 		return true
 	}
 
 	if (event.key === 'Tab') {
 		if (!isOpen()) return false
-		containGridPopoutKey(event, { preventDefault: false })
+		containKeyboardEvent(event, { preventDefault: false })
 		close()
 		return true
 	}
 
-	if (event.key !== 'Enter' && event.key !== ' ' && event.key !== 'ArrowDown') {
+	if (!isKeyboardActivationKey(event.key) && event.key !== 'ArrowDown') {
 		return false
 	}
 
-	containGridPopoutKey(event)
+	containKeyboardEvent(event)
 	open()
 	return true
 }
@@ -52,7 +57,7 @@ export function handleGridPopoutDocumentKeyboardEvent(
 		return false
 	}
 
-	containGridPopoutKey(event)
+	containKeyboardEvent(event)
 	close()
 	focusTrigger()
 	return true
@@ -72,21 +77,14 @@ export function handleGridPopoutListKeyboardEvent(
 		: null
 
 	switch (event.key) {
-		case 'Enter':
-		case ' ':
-			if (!option?.dataset.optionId) return false
-			containGridPopoutKey(event)
-			choose(option.dataset.optionId)
-			return true
-
 		case 'Escape':
-			containGridPopoutKey(event)
+			containKeyboardEvent(event)
 			close()
 			focusTrigger()
 			return true
 
 		case 'Tab':
-			containGridPopoutKey(event, { preventDefault: false })
+			containKeyboardEvent(event, { preventDefault: false })
 			close()
 			focusTrigger()
 			return true
@@ -95,9 +93,16 @@ export function handleGridPopoutListKeyboardEvent(
 		case 'ArrowRight':
 		case 'ArrowUp':
 		case 'ArrowLeft':
-			containGridPopoutKey(event)
+			containKeyboardEvent(event)
 			focusSibling(option, getGridPopoutKeyboardDelta(event.key))
 			return true
+	}
+
+	if (isKeyboardActivationKey(event.key)) {
+		if (!option?.dataset.optionId) return false
+		containKeyboardEvent(event)
+		choose(option.dataset.optionId)
+		return true
 	}
 
 	return false
@@ -110,12 +115,4 @@ export function getGridPopoutKeyboardDelta(key: string): number {
 	return key === 'ArrowLeft'
 		? rtl ? 1 : -1
 		: rtl ? -1 : 1
-}
-
-function containGridPopoutKey(
-	event: KeyboardEvent,
-	{ preventDefault = true }: { preventDefault?: boolean } = {}
-): void {
-	if (preventDefault) event.preventDefault()
-	event.stopImmediatePropagation()
 }
