@@ -4,6 +4,7 @@
  * @module goobits/select/keyboardHandler
  */
 
+import { isKeyboardActivationKey } from '../support/keyboard/_keyboardActivation.ts'
 import type { GooSelectOption, GooSelectState } from './types.ts'
 
 /** Keyboard command event used by GooSelect navigation. */
@@ -46,8 +47,6 @@ const KEY_TO_COMMAND: Record<string, string> = {
 	ArrowUp: 'up',
 	ArrowLeft: 'left',
 	ArrowRight: 'right',
-	Enter: 'enter',
-	' ': 'space',
 	Escape: 'escape',
 	Tab: 'tab'
 }
@@ -62,7 +61,9 @@ const KEY_TO_COMMAND: Record<string, string> = {
  * @returns Keyboard command event or null if not mapped
  */
 export function mapNativeKeyToCommand(e: KeyboardEvent): GooSelectKeyCommand | null {
-	const command = KEY_TO_COMMAND[e.key]
+	const command = isKeyboardActivationKey(e.key)
+		? 'enter'
+		: KEY_TO_COMMAND[e.key]
 	if (!command) return null
 
 	return {

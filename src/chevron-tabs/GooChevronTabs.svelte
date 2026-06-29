@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { BellRing, Bot, ChevronDown, CircleAlert, Plus, X } from '@lucide/svelte'
 	import './GooChevronTabs.css'
+	import {
+		containKeyboardEvent,
+		isKeyboardActivationKey
+	} from '../support/keyboard/_keyboardActivation.ts'
 	import type { GooChevronTab, GooChevronTabStatus, GooChevronTabsProps } from './types.ts'
 	import {
 		hasChevronTabDragIntent,
@@ -194,22 +198,22 @@
 			event.key
 		)
 		if (keyboardTargetIndex !== null) {
-			event.preventDefault()
+			containKeyboardEvent(event)
 			selectTabAt(keyboardTargetIndex)
 			return
 		}
-		if (event.key === 'Enter' || event.key === ' ') {
-			event.preventDefault()
+		if (isKeyboardActivationKey(event.key)) {
+			containKeyboardEvent(event)
 			selectTab(tab)
 			return
 		}
 		if (event.key === 'F2') {
-			event.preventDefault()
+			containKeyboardEvent(event)
 			startRename(tab)
 			return
 		}
 		if (event.key === 'Delete' || event.key === 'Backspace') {
-			event.preventDefault()
+			containKeyboardEvent(event)
 			closeTab(tab)
 		}
 	}
