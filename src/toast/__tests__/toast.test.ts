@@ -89,8 +89,29 @@ describe('GooToast', () => {
 		const root = container.querySelector('.goo-toast')
 		expect(root?.classList.contains('goo-toast--success')).toBe(true)
 		expect(root?.getAttribute('role')).toBe('status')
+		expect(root?.getAttribute('aria-atomic')).toBe('true')
 		expect(container.querySelector('.goo-toast__title')?.textContent).toBe('Saved')
 		expect(container.querySelector('.goo-toast__message')?.textContent).toBe('All good')
+	})
+
+	it('uses assertive alert semantics for warning and error toasts', () => {
+		const warning = render(GooToast, {
+			props: {
+				toast: makeToast({ variant: 'warning', title: 'Heads up' }),
+				ondismiss: vi.fn()
+			}
+		})
+		const error = render(GooToast, {
+			props: {
+				toast: makeToast({ variant: 'error', title: 'Failed' }),
+				ondismiss: vi.fn()
+			}
+		})
+
+		expect(warning.container.querySelector('.goo-toast')?.getAttribute('role')).toBe('alert')
+		expect(warning.container.querySelector('.goo-toast')?.getAttribute('aria-live')).toBe('assertive')
+		expect(error.container.querySelector('.goo-toast')?.getAttribute('role')).toBe('alert')
+		expect(error.container.querySelector('.goo-toast')?.getAttribute('aria-live')).toBe('assertive')
 	})
 
 	it('dismiss button calls ondismiss with the toast id', async() => {
@@ -103,6 +124,8 @@ describe('GooToast', () => {
 		})
 
 		const button = container.querySelector('.goo-toast__dismiss') as HTMLButtonElement
+		expect(button.tagName).toBe('BUTTON')
+		expect(button.type).toBe('button')
 		await fireEvent.click(button)
 
 		expect(ondismiss).toHaveBeenCalledWith('pick-me')
@@ -123,6 +146,8 @@ describe('GooToast', () => {
 		})
 
 		const action = container.querySelector('.goo-toast__action') as HTMLButtonElement
+		expect(action.tagName).toBe('BUTTON')
+		expect(action.type).toBe('button')
 		await fireEvent.click(action)
 
 		expect(onClick).toHaveBeenCalledOnce()
