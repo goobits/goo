@@ -5,7 +5,7 @@
 
 import type { Snippet } from 'svelte'
 
-import type { GooPopoutAt, GooPopoutOptions } from '../popout/popout.ts'
+import type { GooPopoutAt, GooPopoutOptions } from '../popout/popoutTypes.ts'
 import type { GooForwardedAttributes } from '../support/types/forwardedAttributes.ts'
 
 /** Host-owned action context passed through menu/select actions. */
