@@ -142,4 +142,56 @@ describe('GooDialog', () => {
 		expect(onOk).not.toHaveBeenCalled()
 		await expect(resultPromise).resolves.toEqual({ cancel: true })
 	})
+
+	it('contains Escape on the topmost dialog', async() => {
+		const dialog = createGooDialog({
+			type: 'alert',
+			content: 'Hello'
+		})
+		const onBodyKeydown = vi.fn()
+		const resultPromise = dialog.open()
+		await nextFrame()
+
+		document.body.addEventListener('keydown', onBodyKeydown)
+		try {
+			const event = dispatchDialogKey(dialog.element, 'Escape')
+
+			expect(event.defaultPrevented).toBe(true)
+			expect(onBodyKeydown).not.toHaveBeenCalled()
+			await expect(resultPromise).resolves.toEqual({ cancel: true })
+		} finally {
+			document.body.removeEventListener('keydown', onBodyKeydown)
+		}
+	})
+
+	it('contains Enter when it submits the dialog', async() => {
+		const dialog = createGooDialog({
+			type: 'confirm',
+			content: 'Continue?'
+		})
+		const onBodyKeydown = vi.fn()
+		const resultPromise = dialog.open()
+		await nextFrame()
+
+		document.body.addEventListener('keydown', onBodyKeydown)
+		try {
+			const event = dispatchDialogKey(dialog.element, 'Enter')
+
+			expect(event.defaultPrevented).toBe(true)
+			expect(onBodyKeydown).not.toHaveBeenCalled()
+			await expect(resultPromise).resolves.toMatchObject({ ok: true })
+		} finally {
+			document.body.removeEventListener('keydown', onBodyKeydown)
+		}
+	})
 })
+
+function dispatchDialogKey(element: HTMLElement, key: string): KeyboardEvent {
+	const event = new KeyboardEvent('keydown', {
+		bubbles: true,
+		cancelable: true,
+		key
+	})
+	element.dispatchEvent(event)
+	return event
+}

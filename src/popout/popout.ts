@@ -26,10 +26,10 @@ import {
 } from './_popoutElement.ts'
 import { setupPopoutEventHandlers } from './_popoutEvents.ts'
 import {
-	bindImmediateEscapeToClose,
 	capturePopoutFocusTarget,
 	restorePopoutFocus
 } from './_popoutFocus.ts'
+import { bindImmediatePopoutEscapeToClose } from './_popoutKeyboard.ts'
 import {
 	observeOpenLayoutChanges,
 	stabilizeOpeningLayout
@@ -206,7 +206,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		// Mark open before the first await so callers can synchronously observe the state.
 		opened = true
 		registerActivePopout(instance)
-		bindImmediateEscapeToClose({
+		bindImmediatePopoutEscapeToClose({
 			close,
 			escapeToClose,
 			isActive: () => getActivePopout() === instance,

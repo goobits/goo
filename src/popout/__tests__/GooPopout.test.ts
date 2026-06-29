@@ -336,9 +336,11 @@ describe('GooPopout', () => {
 			initialFocus: 'none',
 			openImmediately: false
 		})
+		const leakedKeydown = vi.fn()
 
 		try {
 			const openPromise = instance.open()
+			document.addEventListener('keydown', leakedKeydown)
 			const escape = new KeyboardEvent('keydown', {
 				bubbles: true,
 				cancelable: true,
@@ -349,10 +351,12 @@ describe('GooPopout', () => {
 			await delay(180)
 
 			expect(escape.defaultPrevented).toBe(true)
+			expect(leakedKeydown).not.toHaveBeenCalled()
 			expect(instance.isOpen()).toBe(false)
 			expect(document.querySelector('.goo-popout')).toBeNull()
 			expect(document.activeElement).toBe(target)
 		} finally {
+			document.removeEventListener('keydown', leakedKeydown)
 			await instance.destroy()
 			target.remove()
 		}

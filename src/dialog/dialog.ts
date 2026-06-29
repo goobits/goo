@@ -19,6 +19,7 @@ import {
 	type DialogField,
 	type DialogLabels
 } from './dialogBuilder.ts'
+import { handleDialogKeyboardEvent } from './_dialogKeyboard.ts'
 import { dialogManager } from './GooDialogManager.ts'
 
 // Re-export types for consumers
@@ -440,25 +441,13 @@ class GooDialogControllerRuntime {
 	 * @param e - e.
 	 */
 	_handleKeydown(e: KeyboardEvent) {
-		// Only the topmost dialog reacts to keys, so stacked dialogs close one at a time.
-		if (dialogManager.getTopDialog() !== this) return
-
-		if (e.key === 'Escape' && this.state.closeOnEscape) {
-			e.preventDefault()
-			e.stopPropagation()
-			this._handleCancel()
-		}
-
-		if (e.key === 'Enter') {
-			// If focused on OK button or no input is focused
-			const activeEl = document.activeElement
-			const isInput = activeEl?.tagName === 'INPUT' || activeEl?.tagName === 'TEXTAREA'
-
-			if (activeEl === this.$okBtn || !isInput) {
-				e.preventDefault()
-				this._handleOk()
-			}
-		}
+		handleDialogKeyboardEvent(e, {
+			closeOnEscape: this.state.closeOnEscape,
+			isTopDialog: () => dialogManager.getTopDialog() === this,
+			okButton: this.$okBtn,
+			onCancel: () => this._handleCancel(),
+			onOk: () => void this._handleOk()
+		})
 	}
 
 	// --------------------------------------------------------------------------

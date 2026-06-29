@@ -1,12 +1,3 @@
-type EscapeLifecycle = {
-	listen(
-		target: Document,
-		type: 'keydown',
-		handler: (event: KeyboardEvent) => void,
-		options: { capture: boolean }
-	): void
-}
-
 export function capturePopoutFocusTarget(initialFocus: 'content' | 'popout' | 'none'): HTMLElement | null {
 	if (initialFocus === 'none') {
 		return null
@@ -35,31 +26,4 @@ export function restorePopoutFocus(
 		previousActiveElement.focus({ preventScroll: true })
 	}
 	return null
-}
-
-export function bindImmediateEscapeToClose({
-	close,
-	escapeToClose,
-	isActive,
-	isOpen,
-	lifecycle
-}: {
-	close(): Promise<void>
-	escapeToClose: boolean
-	isActive(): boolean
-	isOpen(): boolean
-	lifecycle: EscapeLifecycle
-}): void {
-	if (!escapeToClose) return
-
-	const handleKeydown = (event: KeyboardEvent) => {
-		if (event.key !== 'Escape' || !isOpen() || !isActive()) {
-			return
-		}
-
-		event.preventDefault()
-		event.stopPropagation()
-		void close()
-	}
-	lifecycle.listen(document, 'keydown', handleKeydown, { capture: true })
 }
