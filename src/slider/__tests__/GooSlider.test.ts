@@ -132,9 +132,14 @@ describe('GooSlider', () => {
 			}
 		})
 		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const parentKeydown = vi.fn()
+		container.addEventListener('keydown', parentKeydown)
 
-		await fireEvent.keyDown(slider, { key: 'ArrowRight' })
+		const event = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: 'ArrowRight' })
+		slider.dispatchEvent(event)
 
+		expect(event.defaultPrevented).toBe(true)
+		expect(parentKeydown).not.toHaveBeenCalled()
 		expect(slider.getValue()).toBe(25)
 		expect(onchange.mock.calls[0]?.[0]).toBe(25)
 	})

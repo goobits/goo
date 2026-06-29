@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { BellRing, Bot, ChevronDown, CircleAlert, Plus, X } from '@lucide/svelte'
-import './GooChevronTabs.css'
-import {
-	focusFirstMenuItem,
-	handleMenuKeyboardEvent
-} from '@goobits/keyboard/composite'
-import {
-	containKeyboardEvent,
-	isKeyboardActivationKey
+	import './GooChevronTabs.css'
+	import {
+		focusFirstMenuItem,
+		handleMenuKeyboardEvent
+	} from '@goobits/keyboard/composite'
+	import {
+		containKeyboardEvent,
+		isKeyboardActivationKey
 	} from '../support/keyboard/_keyboardActivation.ts'
 	import type { GooChevronTab, GooChevronTabStatus, GooChevronTabsProps } from './types.ts'
 	import {
@@ -171,12 +171,12 @@ import {
 
 	const handleNameKeydown = (event: KeyboardEvent): void => {
 		if (event.key === 'Enter') {
-			event.preventDefault()
+			containKeyboardEvent(event)
 			;(event.currentTarget as HTMLElement).blur()
 			return
 		}
 		if (event.key === 'Escape') {
-			event.preventDefault()
+			containKeyboardEvent(event)
 			canceledRename = true
 			;(event.currentTarget as HTMLElement).blur()
 		}

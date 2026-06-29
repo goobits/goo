@@ -39,6 +39,7 @@
 	import { onDestroy } from 'svelte'
 
 	import { formatNumber } from '../support/utils/formatNumber.ts'
+	import { containKeyboardEvent } from '../support/keyboard/_keyboardActivation.ts'
 	import { clamp } from '../support/utils/numberUtils.ts'
 	import {
 		createPointerDrag,
@@ -424,7 +425,7 @@
 		const nextValue = keyToNextValue(currentValues[index] ?? numericMin, event)
 		if (nextValue === null) return
 
-		event.preventDefault()
+		containKeyboardEvent(event)
 		updateThumbValue(index, nextValue, 'change', event)
 	}
 

@@ -19,6 +19,7 @@ export const controlSchema: SvelteControlSchema = {
 import { onDestroy } from 'svelte'
 import './GooInput.css'
 
+import { containKeyboardEvent } from '../support/keyboard/_keyboardActivation.ts'
 import type { GooInputProps } from './types.ts'
 
 let inputElement: HTMLDivElement | undefined = $state()
@@ -154,17 +155,17 @@ function handleBlur(event: Event): void {
 }
 
 function handleKeydown(event: KeyboardEvent): void {
-	event.stopPropagation()
+	containKeyboardEvent(event, { preventDefault: false, immediate: false })
 	if (disabled) return
 	onkeydown?.(event)
 	if (event.defaultPrevented) return
 
 	if (!multiline && (event.key === 'Escape' || event.key === 'Enter')) {
-		event.preventDefault()
+		containKeyboardEvent(event, { immediate: false })
 		contentElement?.blur()
 	}
 	if (multiline && event.key === 'Escape') {
-		event.preventDefault()
+		containKeyboardEvent(event, { immediate: false })
 		contentElement?.blur()
 	}
 }
@@ -222,8 +223,8 @@ function pulseValueChange(): void {
 			oninput={handleInput}
 			onfocus={handleFocus}
 			onblur={handleBlur}
-			onkeydown={handleKeydown}
-			onkeyup={(event) => event.stopPropagation()}
+			onkeydowncapture={handleKeydown}
+			onkeyupcapture={(event) => containKeyboardEvent(event, { preventDefault: false, immediate: false })}
 		></textarea>
 	{:else}
 		<input
@@ -245,8 +246,8 @@ function pulseValueChange(): void {
 			oninput={handleInput}
 			onfocus={handleFocus}
 			onblur={handleBlur}
-			onkeydown={handleKeydown}
-			onkeyup={(event) => event.stopPropagation()}
+			onkeydowncapture={handleKeydown}
+			onkeyupcapture={(event) => containKeyboardEvent(event, { preventDefault: false, immediate: false })}
 		/>
 	{/if}
 	{#if children}

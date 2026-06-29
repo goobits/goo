@@ -19,6 +19,7 @@ export const controlSchema: SvelteControlSchema = {
 import { onDestroy } from 'svelte'
 import './GooNumber.css'
 
+import { containKeyboardEvent } from '../support/keyboard/_keyboardActivation.ts'
 import { formatNumber } from '../support/utils/formatNumber.ts'
 import { clamp, roundToStep } from '../support/utils/numberUtils.ts'
 import type { GooNumberProps } from './types.ts'
@@ -197,11 +198,11 @@ function handleBlur(event: Event): void {
 }
 
 function handleKeydown(event: KeyboardEvent): void {
-	event.stopPropagation()
+	containKeyboardEvent(event, { preventDefault: false, immediate: false })
 	if (disabled) return
 
 	if (event.key === 'Escape' || event.key === 'Enter') {
-		event.preventDefault()
+		containKeyboardEvent(event, { immediate: false })
 		if (event.key === 'Enter') {
 			onenter?.()
 			numberElement?.dispatchEvent(new CustomEvent('enter', {
@@ -212,7 +213,7 @@ function handleKeydown(event: KeyboardEvent): void {
 		contentElement?.blur()
 	}
 	if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
-		event.preventDefault()
+		containKeyboardEvent(event, { immediate: false })
 		increment(event.key === 'ArrowUp' ? 'up' : 'down', event.shiftKey)
 	}
 }
@@ -353,8 +354,8 @@ function pulseValueChange(): void {
 		oninput={handleInput}
 		onfocus={handleFocus}
 		onblur={handleBlur}
-		onkeydown={handleKeydown}
-		onkeyup={(event) => event.stopPropagation()}
+		onkeydowncapture={handleKeydown}
+		onkeyupcapture={(event) => containKeyboardEvent(event, { preventDefault: false, immediate: false })}
 		onwheel={handleWheel}
 	/>
 	{#if unitSuffix}

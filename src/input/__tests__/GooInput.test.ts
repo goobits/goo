@@ -56,6 +56,29 @@ describe('GooInput', () => {
 
 		expect(root.classList.contains('goo-input--changed')).toBe(true)
 	})
+
+	it('contains handled editor keys without blocking native typing keys', () => {
+		const { container } = render(GooInput, {
+			props: {
+				value: 'draft'
+			}
+		})
+		const input = container.querySelector<HTMLInputElement>('.goo-input__content')!
+		const parentKeydown = vi.fn()
+		container.addEventListener('keydown', parentKeydown)
+
+		const typingEvent = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: 'a' })
+		input.dispatchEvent(typingEvent)
+
+		expect(typingEvent.defaultPrevented).toBe(false)
+		expect(parentKeydown).not.toHaveBeenCalled()
+
+		const enterEvent = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: 'Enter' })
+		input.dispatchEvent(enterEvent)
+
+		expect(enterEvent.defaultPrevented).toBe(true)
+		expect(parentKeydown).not.toHaveBeenCalled()
+	})
 })
 
 describe('GooNumber', () => {
@@ -205,6 +228,32 @@ describe('GooNumber', () => {
 		await tick()
 
 		expect(upButton.classList.contains('goo-number__arrow--pressed')).toBe(false)
+	})
+
+	it('contains handled number keys inside the input', () => {
+		const onenter = vi.fn()
+		const { container } = render(GooNumber, {
+			props: {
+				value: 4,
+				onenter
+			}
+		})
+		const input = container.querySelector<HTMLInputElement>('.goo-number__content')!
+		const parentKeydown = vi.fn()
+		container.addEventListener('keydown', parentKeydown)
+
+		const enterEvent = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: 'Enter' })
+		input.dispatchEvent(enterEvent)
+
+		expect(enterEvent.defaultPrevented).toBe(true)
+		expect(parentKeydown).not.toHaveBeenCalled()
+		expect(onenter).toHaveBeenCalledExactlyOnceWith()
+
+		const arrowEvent = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: 'ArrowUp' })
+		input.dispatchEvent(arrowEvent)
+
+		expect(arrowEvent.defaultPrevented).toBe(true)
+		expect(parentKeydown).not.toHaveBeenCalled()
 	})
 
 	it('keeps only one active pointer-hold repeat for number arrows', () => {
