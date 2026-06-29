@@ -1,9 +1,13 @@
 <script lang="ts">
 	import { BellRing, Bot, ChevronDown, CircleAlert, Plus, X } from '@lucide/svelte'
-	import './GooChevronTabs.css'
-	import {
-		containKeyboardEvent,
-		isKeyboardActivationKey
+import './GooChevronTabs.css'
+import {
+	focusFirstMenuItem,
+	handleMenuKeyboardEvent
+} from '@goobits/keyboard/composite'
+import {
+	containKeyboardEvent,
+	isKeyboardActivationKey
 	} from '../support/keyboard/_keyboardActivation.ts'
 	import type { GooChevronTab, GooChevronTabStatus, GooChevronTabsProps } from './types.ts'
 	import {
@@ -77,6 +81,7 @@
 	let dragVisualOffset = $state(0)
 
 	let railElement: HTMLElement | null = $state(null)
+	let menuElement: HTMLElement | null = $state(null)
 	const tabElements = $state<Record<string, HTMLElement>>({})
 	const nameElements = $state<Record<string, HTMLElement>>({})
 	let originalName = ''
@@ -298,6 +303,21 @@
 		}
 	}
 
+	const setMenuOpen = (open: boolean): void => {
+		menuOpen = open
+		if (open) {
+			queueMicrotask(() => {
+				if (menuElement) focusFirstMenuItem(menuElement)
+			})
+		}
+	}
+
+	const handleMenuKeydown = (event: KeyboardEvent): void => {
+		handleMenuKeyboardEvent(event, event.currentTarget as HTMLElement, {
+			close: () => setMenuOpen(false)
+		})
+	}
+
 	$effect(() => {
 		tabs.length
 		const rail = railElement
@@ -451,7 +471,7 @@
 				aria-label="All sessions"
 				title="All sessions"
 				onclick={() => {
-					menuOpen = !menuOpen
+					setMenuOpen(!menuOpen)
 				}}
 			>
 				<ChevronDown size={14} strokeWidth={2.2} aria-hidden="true" />
@@ -470,10 +490,17 @@
 			type="button"
 			aria-label="Close session menu"
 			onclick={() => {
-				menuOpen = false
+				setMenuOpen(false)
 			}}
 		></button>
-		<div class="goo-chevron-tabs__menu" role="menu" aria-label="Sessions">
+		<div
+			bind:this={menuElement}
+			class="goo-chevron-tabs__menu"
+			role="menu"
+			aria-label="Sessions"
+			tabindex="-1"
+			onkeydown={handleMenuKeydown}
+		>
 			{#each tabs as tab (tab.id)}
 				<button
 					class="goo-chevron-tabs__menu-row"
@@ -482,7 +509,7 @@
 					role="menuitem"
 					onclick={() => {
 						onselect?.(tab.id)
-						menuOpen = false
+						setMenuOpen(false)
 					}}
 				>
 					<span
