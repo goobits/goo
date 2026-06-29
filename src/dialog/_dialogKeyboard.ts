@@ -1,3 +1,5 @@
+import { containKeyboardEvent } from '../support/keyboard/_keyboardActivation.ts'
+
 export type DialogKeyboardOptions = {
 	closeOnEscape: boolean
 	isTopDialog: () => boolean
@@ -21,8 +23,7 @@ export function handleDialogKeyboardEvent(
 	}
 
 	if (event.key === 'Escape' && closeOnEscape) {
-		event.preventDefault()
-		event.stopImmediatePropagation()
+		containKeyboardEvent(event)
 		onCancel()
 		return true
 	}
@@ -33,8 +34,7 @@ export function handleDialogKeyboardEvent(
 
 	const activeElement = document.activeElement
 	if (activeElement === okButton || !isDialogTextEntryElement(activeElement)) {
-		event.preventDefault()
-		event.stopImmediatePropagation()
+		containKeyboardEvent(event)
 		onOk()
 		return true
 	}

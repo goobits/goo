@@ -1,3 +1,5 @@
+import { containKeyboardEvent } from '../support/keyboard/_keyboardActivation.ts'
+
 export type FocusTrapKeyboardOptions = {
 	onEscape?: () => void
 	root: HTMLElement | undefined
@@ -22,8 +24,7 @@ export function handleFocusTrapKeyboardEvent(
 	{ onEscape, root }: FocusTrapKeyboardOptions
 ): boolean {
 	if (event.key === 'Escape') {
-		event.preventDefault()
-		event.stopImmediatePropagation()
+		containKeyboardEvent(event)
 		onEscape?.()
 		return true
 	}
@@ -33,9 +34,8 @@ export function handleFocusTrapKeyboardEvent(
 	}
 
 	const items = getFocusTrapItems(root)
-	event.stopImmediatePropagation()
 	if (items.length === 0) {
-		event.preventDefault()
+		containKeyboardEvent(event)
 		return true
 	}
 
@@ -43,15 +43,16 @@ export function handleFocusTrapKeyboardEvent(
 	const last = items[items.length - 1]
 	const active = document.activeElement
 	if (event.shiftKey && active === first) {
-		event.preventDefault()
+		containKeyboardEvent(event)
 		last.focus()
 		return true
 	}
 	if (!event.shiftKey && active === last) {
-		event.preventDefault()
+		containKeyboardEvent(event)
 		first.focus()
 		return true
 	}
 
+	containKeyboardEvent(event, { preventDefault: false })
 	return true
 }

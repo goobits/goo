@@ -1,3 +1,5 @@
+import { containKeyboardEvent } from '../support/keyboard/_keyboardActivation.ts'
+
 const SCHEMA_FOCUSABLE_SELECTOR = [
 	'button:not([disabled])',
 	'[href]',
@@ -32,8 +34,7 @@ export function attachSchemaKeyboardNavigation(element: HTMLElement): void {
 			return
 		}
 
-		event.preventDefault()
-		event.stopImmediatePropagation()
+		containKeyboardEvent(event)
 		target.focus({ preventScroll: true })
 	})
 }

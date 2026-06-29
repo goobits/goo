@@ -1,3 +1,5 @@
+import { containKeyboardEvent } from '../support/keyboard/_keyboardActivation.ts'
+
 type EscapeLifecycle = {
 	listen(
 		target: Document,
@@ -27,8 +29,7 @@ export function bindImmediatePopoutEscapeToClose({
 			return
 		}
 
-		event.preventDefault()
-		event.stopImmediatePropagation()
+		containKeyboardEvent(event)
 		void close()
 	}
 	lifecycle.listen(document, 'keydown', handleKeydown, { capture: true })
