@@ -33,7 +33,7 @@ export function attachSchemaKeyboardNavigation(element: HTMLElement): void {
 		}
 
 		event.preventDefault()
-		event.stopPropagation()
+		event.stopImmediatePropagation()
 		target.focus({ preventScroll: true })
 	})
 }

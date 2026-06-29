@@ -10,6 +10,11 @@ import GridPopoutTrigger from './GridPopoutTrigger.svelte'
 import './gridPickerSelectedMark.css'
 import type { GridPopoutItem, GridPopoutPreview, GridPopoutSvgIcon } from './types.ts'
 import { createGridPickerSelectedMark } from './gridPickerSelectedMark.ts'
+import {
+	handleGridPopoutDocumentKeyboardEvent,
+	handleGridPopoutListKeyboardEvent,
+	handleGridPopoutTriggerKeyboardEvent
+} from './_gridPopoutKeyboard.ts'
 
 const QUICK_REPEAT_TOGGLE_MS = 350
 
@@ -126,16 +131,11 @@ function handleClick(event: MouseEvent): void {
 }
 
 function handleKeydown(event: KeyboardEvent): void {
-	if (event.key === 'Escape' || event.key === 'Tab') {
-		closePopout()
-		return
-	}
-
-	if (event.key !== 'Enter' && event.key !== ' ' && event.key !== 'ArrowDown') return
-
-	event.preventDefault()
-	event.stopPropagation()
-	openPopout()
+	handleGridPopoutTriggerKeyboardEvent(event, {
+		close: closePopout,
+		isOpen: () => opened,
+		open: openPopout
+	})
 }
 
 function togglePopout(): void {
@@ -199,12 +199,11 @@ function unbindDocumentKeydown(): void {
 }
 
 function handleDocumentKeydown(event: KeyboardEvent): void {
-	if (!opened || event.key !== 'Escape') return
-
-	event.preventDefault()
-	event.stopPropagation()
-	closePopout()
-	rootElement?.focus({ preventScroll: true })
+	handleGridPopoutDocumentKeyboardEvent(event, {
+		close: closePopout,
+		focusTrigger: () => rootElement?.focus({ preventScroll: true }),
+		isOpen: () => opened
+	})
 }
 
 function getPopoutClassName(): string {
@@ -381,43 +380,12 @@ function createSvgIcon(icon: GridPopoutSvgIcon): HTMLElement {
 }
 
 function handlePopoutKeydown(event: KeyboardEvent): void {
-	const option = event.target instanceof Element
-		? event.target.closest<HTMLElement>('sketch-grid-item')
-		: null
-
-	switch (event.key) {
-		case 'Enter':
-		case ' ':
-			if (!option?.dataset.optionId) return
-			event.preventDefault()
-			event.stopPropagation()
-			chooseItem(option.dataset.optionId)
-			break
-
-		case 'Escape':
-		case 'Tab':
-			closePopout()
-			rootElement?.focus({ preventScroll: true })
-			break
-
-		case 'ArrowDown':
-		case 'ArrowRight':
-		case 'ArrowUp':
-		case 'ArrowLeft':
-			event.preventDefault()
-			event.stopPropagation()
-			focusSiblingOption(option, getKeyboardDelta(event.key))
-			break
-	}
-}
-
-function getKeyboardDelta(key: string): number {
-	if (key === 'ArrowUp') return -1
-	if (key === 'ArrowDown') return 1
-	const rtl = document.dir === 'rtl' || document.documentElement.dir === 'rtl'
-	return key === 'ArrowLeft'
-		? rtl ? 1 : -1
-		: rtl ? -1 : 1
+	handleGridPopoutListKeyboardEvent(event, {
+		choose: chooseItem,
+		close: closePopout,
+		focusSibling: focusSiblingOption,
+		focusTrigger: () => rootElement?.focus({ preventScroll: true })
+	})
 }
 
 function focusSiblingOption(option: HTMLElement | null, delta: number): void {

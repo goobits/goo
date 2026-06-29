@@ -109,6 +109,11 @@ describe('GooSchema', () => {
 
 		const folderHeader = await waitForSchemaElement<HTMLElement>(schema, '.goo-folder__header')
 		const textInput = await waitForSchemaElement<HTMLInputElement>(schema, '.goo-input__content')
+		const parent = document.createElement('div')
+		const parentKeydown = vi.fn()
+		parent.addEventListener('keydown', parentKeydown)
+		document.body.appendChild(parent)
+		parent.appendChild(schema)
 		expect(schema.tabIndex).toBe(0)
 		expect(schema.getAttribute('role')).toBe('group')
 
@@ -116,6 +121,7 @@ describe('GooSchema', () => {
 		const arrowDown = dispatchKey(schema, 'ArrowDown')
 
 		expect(arrowDown.defaultPrevented).toBe(true)
+		expect(parentKeydown).not.toHaveBeenCalled()
 		expect(document.activeElement).toBe(folderHeader)
 
 		const end = dispatchKey(folderHeader, 'End')
@@ -131,6 +137,7 @@ describe('GooSchema', () => {
 		const arrowUp = dispatchKey(schema, 'ArrowUp')
 		expect(arrowUp.defaultPrevented).toBe(true)
 		expect(document.activeElement).toBe(textInput)
+		parent.remove()
 	})
 
 	it('leaves native schema inputs in charge of editing keys', async() => {

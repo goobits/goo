@@ -15,7 +15,7 @@ import {
 	mergeSchemaData,
 	schemaHasConditions as hasSchemaConditions
 } from './_schemaData.ts'
-import { attachSchemaKeyboardNavigation } from './_schemaKeyboardNavigation.ts'
+import { attachSchemaKeyboardNavigation } from './_schemaKeyboard.ts'
 import type {
 	GooSchemaData,
 	GooSchemaOptions,
