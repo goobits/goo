@@ -240,6 +240,21 @@
 	letter-spacing: 0.02em;
 }
 
+@media (hover: none) and (pointer: coarse) {
+	.goo-button-group,
+	.goo-button-group[size='compact'] {
+		--goo-button-group-height: max(2.75rem, var(--goo-theme-control-height-md, 2.75rem));
+	}
+
+	.goo-button-group[data-layout='vertical'] > .goo-button {
+		height: max(2.75rem, var(--goo-theme-control-height-md, 2.75rem));
+	}
+
+	.goo-button-group > .goo-button[layout='stacked'] {
+		min-height: max(2.75rem, var(--goo-theme-control-height-md, 2.75rem));
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.goo-button-group::before,
 	.goo-button-group > .goo-button {

@@ -355,3 +355,40 @@
 	right: auto;
 	left: 12px;
 }
+
+@media (hover: none) and (pointer: coarse) {
+	.goo-dialog__close {
+		min-height: 44px;
+		min-width: 44px;
+	}
+
+	.goo-dialog.goo-dialog--alert .goo-dialog__close-badge {
+		height: 44px;
+		right: -18px;
+		top: -18px;
+		width: 44px;
+	}
+
+	.goo-dialog.goo-dialog--overlay .goo-dialog__header {
+		height: 48px;
+		min-height: 48px;
+	}
+
+	.goo-dialog.goo-dialog--overlay .goo-dialog__title {
+		line-height: 48px;
+	}
+
+	.goo-dialog.goo-dialog--overlay .goo-dialog__close {
+		height: 44px;
+		min-height: 44px;
+		min-width: 44px;
+		right: 8px;
+		top: 2px;
+		width: 44px;
+	}
+
+	[dir='rtl'] .goo-dialog.goo-dialog--overlay .goo-dialog__close {
+		left: 8px;
+		right: auto;
+	}
+}

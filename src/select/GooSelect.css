@@ -72,6 +72,21 @@
 	--goo-select-height: var(--goo-theme-control-height-sm, 1.5rem);
 }
 
+@media (hover: none) and (pointer: coarse) {
+	.goo-select {
+		--goo-theme-control-height-sm: 2.75rem;
+		--goo-theme-control-height-md: 2.75rem;
+		--goo-select-height: 2.75rem;
+		--goo-select-item-gap: 0.5rem;
+		--goo-select-item-line-height: 1.5rem;
+		--goo-select-item-padding-y: 0.5rem;
+	}
+
+	.goo-select[size='compact'] {
+		--goo-select-height: 2.75rem;
+	}
+}
+
 /* ============================================================================
    Trigger Button
    ============================================================================ */
@@ -307,6 +322,14 @@
 		drop-shadow(0 2px 8px rgb(0 0 0 / 16%));
 	background-image: none;
 	box-shadow: none;
+}
+
+@media (hover: none) and (pointer: coarse) {
+	.goo-popout.goo-menu-popout {
+		--goo-theme-control-height-sm: 2.75rem;
+		--goo-select-item-line-height: 1.5rem;
+		--goo-select-item-padding-y: 0.5rem;
+	}
 }
 
 /* Container insets the highlight from the menu edges (macOS gutter). */

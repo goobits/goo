@@ -16,6 +16,15 @@
 		0 0 0 3px color-mix(in srgb, var(--goo-theme-accent, #3b82f6) 24%, transparent);
 }
 
+@media (hover: none) and (pointer: coarse) {
+	.goo-schema {
+		--goo-theme-control-height-sm: 2.75rem;
+		--goo-theme-control-height-md: 2.75rem;
+		--goo-theme-control-height-lg: 3rem;
+		--goo-theme-control-height: var(--goo-theme-control-height-md);
+	}
+}
+
 /* Bare mode - controls without panel wrapper */
 .goo-schema__bare {
 	display: flex;
