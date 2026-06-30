@@ -3,7 +3,7 @@ import { tick, type Snippet } from 'svelte'
 import {
 	getFocusTrapItems,
 	handleFocusTrapKeyboardEvent
-} from './_focusTrapKeyboard.ts'
+} from '@goobits/keyboard/focus'
 
 let {
 	ariaLabel,
