@@ -37,6 +37,8 @@ export interface GooPopoutOptions {
 	content?: Element | Element[]
 	parentElement?: HTMLElement
 	ariaLabel?: string
+	ariaLabelledby?: string
+	ariaDescribedby?: string
 
 	/**
 	 * ARIA role for the popout container. Defaults to `'dialog'`.

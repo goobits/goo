@@ -73,6 +73,8 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		content,
 		parentElement = document.body,
 		ariaLabel = 'Popout',
+		ariaLabelledby,
+		ariaDescribedby,
 		role = 'dialog',
 		at,
 		align: alignInput,
@@ -184,6 +186,8 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		// Create DOM
 		const popoutElement = createPopoutElement({
 			ariaLabel,
+			ariaLabelledby,
+			ariaDescribedby,
 			attributes,
 			chromeless,
 			className,

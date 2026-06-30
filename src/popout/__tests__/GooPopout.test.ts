@@ -29,6 +29,35 @@ describe('GooPopout', () => {
 		target.remove()
 	})
 
+	it('uses explicit accessible label references when provided', () => {
+		const target = document.createElement('button')
+		const title = document.createElement('h2')
+		const description = document.createElement('p')
+		const content = document.createElement('div')
+		title.id = 'popout-title'
+		description.id = 'popout-description'
+		content.append(title, description)
+		document.body.appendChild(target)
+		const instance = createGooPopout({
+			at: target,
+			content,
+			ariaLabel: 'Fallback label',
+			ariaLabelledby: 'popout-title',
+			ariaDescribedby: 'popout-description',
+			openImmediately: false
+		})
+
+		instance.open()
+
+		const popout = document.querySelector<HTMLElement>('.goo-popout')!
+		expect(popout.getAttribute('aria-labelledby')).toBe('popout-title')
+		expect(popout.getAttribute('aria-describedby')).toBe('popout-description')
+		expect(popout.hasAttribute('aria-label')).toBe(false)
+
+		instance.destroy()
+		target.remove()
+	})
+
 	it('positions after opening content settles', async() => {
 		const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect
 		const target = document.createElement('button')

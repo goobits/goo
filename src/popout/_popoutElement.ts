@@ -8,6 +8,8 @@ export interface PopoutElement extends HTMLElement {
 
 export function createPopoutElement({
 	ariaLabel,
+	ariaLabelledby,
+	ariaDescribedby,
 	attributes,
 	chromeless,
 	className,
@@ -20,6 +22,8 @@ export function createPopoutElement({
 	showBackdrop
 }: {
 	ariaLabel: string
+	ariaLabelledby: string | undefined
+	ariaDescribedby: string | undefined
 	attributes: Record<string, string | number | boolean | null | undefined> | undefined
 	chromeless: boolean
 	className: string
@@ -46,7 +50,14 @@ export function createPopoutElement({
 	element.tabIndex = 0
 	if (role) {
 		element.setAttribute('role', role)
-		element.setAttribute('aria-label', ariaLabel)
+		if (ariaLabelledby) {
+			element.setAttribute('aria-labelledby', ariaLabelledby)
+		} else {
+			element.setAttribute('aria-label', ariaLabel)
+		}
+		if (ariaDescribedby) {
+			element.setAttribute('aria-describedby', ariaDescribedby)
+		}
 	}
 
 	if (dataset) {
