@@ -186,18 +186,6 @@
 	);
 }
 
-/* Focus trap sentinel */
-.goo-dialog__focus-trap {
-	position: absolute;
-	width: 1px;
-	height: 1px;
-	padding: 0;
-	margin: -1px;
-	overflow: hidden;
-	clip: rect(0, 0, 0, 0);
-	border: 0;
-}
-
 /* Alert type - simple message with close */
 .goo-dialog.goo-dialog--alert .goo-dialog__close-badge {
 	position: absolute;

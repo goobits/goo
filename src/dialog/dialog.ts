@@ -5,8 +5,12 @@
 
 import './GooDialog.css'
 
+import {
+	activateModalIsolation,
+	handleFocusTrapKeyboardEvent
+} from '@goobits/keyboard/focus'
+
 import type { CheckboxFieldElement } from '../checkbox/_createCheckboxField.ts'
-import { focusFirst, focusLast, getFocusableElements } from '../support/utils/focusUtils.ts'
 import { createLifecycleBag, type GooLifecycleBag } from '../support/utils/lifecycleBag.ts'
 import {
 	appendContent,
@@ -15,7 +19,6 @@ import {
 	buildNotifyLayout,
 	buildOverlayLayout,
 	buildStandardLayout,
-	createFocusTrapSentinels,
 	type DialogField,
 	type DialogLabels
 } from './dialogBuilder.ts'
@@ -166,8 +169,6 @@ class GooDialogControllerRuntime {
 	declare _resolve: ((result: DialogResult) => void) | null
 	declare _fieldElements: DialogFieldElements
 	declare _$backdrop: HTMLElement | null
-	declare _$focusTrapStart: HTMLElement | null
-	declare _$focusTrapEnd: HTMLElement | null
 	declare _isOpen: boolean
 	declare _autoDismissTimer: ReturnType<typeof setTimeout> | null
 	declare _previousActiveElement: HTMLElement | null
@@ -306,14 +307,6 @@ class GooDialogControllerRuntime {
 		// Give the dialog an accessible name from its title, explicit label, or short text content.
 		this._applyAccessibleName()
 
-		// Focus trap sentinels
-		const { $start, $end } = createFocusTrapSentinels()
-		this._$focusTrapStart = $start
-		this._$focusTrapEnd = $end
-
-		this.$element.insertBefore(this._$focusTrapStart, this.$element.firstChild)
-		this.$element.appendChild(this._$focusTrapEnd)
-
 		this._bindEvents()
 	}
 
@@ -391,14 +384,6 @@ class GooDialogControllerRuntime {
 
 		// Keyboard
 		this._listen(this.$element, 'keydown', (e) => this._handleKeydown(e as KeyboardEvent))
-
-		// Focus trap
-		if (this._$focusTrapStart) {
-			this._listen(this._$focusTrapStart, 'focus', () => this._focusLast())
-		}
-		if (this._$focusTrapEnd) {
-			this._listen(this._$focusTrapEnd, 'focus', () => this._focusFirst())
-		}
 	}
 
 	_listen(
@@ -441,6 +426,11 @@ class GooDialogControllerRuntime {
 	 * @param e - e.
 	 */
 	_handleKeydown(e: KeyboardEvent) {
+		if (e.key === 'Tab' && dialogManager.getTopDialog() === this) {
+			handleFocusTrapKeyboardEvent(e, { root: this.$element })
+			return
+		}
+
 		handleDialogKeyboardEvent(e, {
 			closeOnEscape: this.state.closeOnEscape,
 			isTopDialog: () => dialogManager.getTopDialog() === this,
@@ -562,27 +552,6 @@ class GooDialogControllerRuntime {
 		}
 	}
 
-	/**
-	 * Focus first.
-	 */
-	_focusFirst() {
-		focusFirst(this.$element, '.goo-dialog__focus-trap')
-	}
-
-	/**
-	 * Focus last.
-	 */
-	_focusLast() {
-		focusLast(this.$element, '.goo-dialog__focus-trap')
-	}
-
-	/**
-	 * Gets focusable elements.
-	 */
-	_getFocusableElements() {
-		return getFocusableElements(this.$element, '.goo-dialog__focus-trap')
-	}
-
 	// --------------------------------------------------------------------------
 	// Auto Dismiss
 	// --------------------------------------------------------------------------
@@ -655,6 +624,12 @@ class GooDialogControllerRuntime {
 
 			// Append to body
 			document.body.appendChild(this.$element)
+			if (this.state.type !== 'notify') {
+				this._openLifecycle.add(activateModalIsolation({
+					modal: this.$element,
+					preserve: [ this._$backdrop ]
+				}))
+			}
 
 			// Animate in
 			this._requestOpenFrame(() => {
@@ -721,7 +696,7 @@ class GooDialogControllerRuntime {
 		dialogManager.unregister(this)
 
 		// Restore focus
-		if (this._previousActiveElement?.focus) {
+		if (this._previousActiveElement?.isConnected && this._previousActiveElement.focus) {
 			this._previousActiveElement.focus()
 		}
 

@@ -1,6 +1,7 @@
 <script lang="ts">
 import { tick, type Snippet } from 'svelte'
 import {
+	activateModalIsolation,
 	getFocusTrapItems,
 	handleFocusTrapKeyboardEvent
 } from '@goobits/keyboard/focus'
@@ -31,10 +32,23 @@ function focusables(): HTMLElement[] {
 
 $effect(() => {
 	if (!root) return
+	let disposed = false
+	const previousActiveElement = root.ownerDocument.activeElement
+	const isolation = activateModalIsolation({ modal: root })
+
 	void tick().then(() => {
+		if (disposed || !root?.isConnected) return
 		const first = focusables()[0] ?? root
-		first.focus()
+		first.focus({ preventScroll: true })
 	})
+
+	return () => {
+		disposed = true
+		isolation.detach()
+		if (previousActiveElement instanceof HTMLElement && previousActiveElement.isConnected) {
+			previousActiveElement.focus({ preventScroll: true })
+		}
+	}
 })
 
 function handleKeydown(event: KeyboardEvent): void {

@@ -184,13 +184,75 @@ describe('GooDialog', () => {
 			document.body.removeEventListener('keydown', onBodyKeydown)
 		}
 	})
+
+	it('wraps Tab inside the topmost dialog without sentinel elements', async() => {
+		const dialog = createGooDialog({
+			type: 'confirm',
+			content: 'Continue?',
+			showClose: false
+		})
+		const resultPromise = dialog.open()
+		await nextFrame()
+		const buttons = dialog.element.querySelectorAll<HTMLElement>('.goo-dialog__footer .goo-button')
+		const cancel = buttons[0]!
+		const ok = buttons[1]!
+
+		ok.focus()
+		const tabEvent = dispatchDialogKey(ok, 'Tab')
+
+		expect(tabEvent.defaultPrevented).toBe(true)
+		expect(document.activeElement).toBe(cancel)
+
+		cancel.focus()
+		const shiftTabEvent = dispatchDialogKey(cancel, 'Tab', { shiftKey: true })
+
+		expect(shiftTabEvent.defaultPrevented).toBe(true)
+		expect(document.activeElement).toBe(ok)
+		expect(dialog.element.querySelector('.goo-dialog__focus-trap')).toBeNull()
+
+		await dialog.close()
+		await expect(resultPromise).resolves.toEqual({ cancel: true })
+	})
+
+	it('isolates background content while open and restores prior focus on close', async() => {
+		const appRoot = document.createElement('main')
+		const opener = document.createElement('button')
+		appRoot.dataset['testAppRoot'] = 'true'
+		appRoot.append(opener)
+		document.body.append(appRoot)
+		opener.focus()
+		const dialog = createGooDialog({
+			type: 'alert',
+			content: 'Hello'
+		})
+		const resultPromise = dialog.open()
+		await nextFrame()
+		const backdrop = document.querySelector<HTMLElement>('.goo-dialog-backdrop')
+
+		expect(appRoot.inert).toBe(true)
+		expect(appRoot.getAttribute('aria-hidden')).toBe('true')
+		expect(backdrop?.inert).not.toBe(true)
+
+		await dialog.close()
+
+		expect(appRoot.inert).toBe(false)
+		expect(appRoot.getAttribute('aria-hidden')).toBeNull()
+		expect(document.activeElement).toBe(opener)
+		appRoot.remove()
+		await expect(resultPromise).resolves.toEqual({ cancel: true })
+	})
 })
 
-function dispatchDialogKey(element: HTMLElement, key: string): KeyboardEvent {
+function dispatchDialogKey(
+	element: HTMLElement,
+	key: string,
+	options: { shiftKey?: boolean } = {}
+): KeyboardEvent {
 	const event = new KeyboardEvent('keydown', {
 		bubbles: true,
 		cancelable: true,
-		key
+		key,
+		shiftKey: options.shiftKey
 	})
 	element.dispatchEvent(event)
 	return event
