@@ -19,14 +19,14 @@ export const controlSchema: SvelteControlSchema = {
 import '../button/GooButton.css'
 import './GooButtonGroup.css'
 
+import { handleLinearNavigationKeyboardEvent } from '@goobits/keyboard/composite'
 import {
 	normalizeButtonGroupOptions,
 	normalizeButtonGroupValue,
 	readButtonGroupValue
 } from './_model.ts'
 import {
-	containKeyboardEvent,
-	isKeyboardActivationKey
+	handleKeyboardActivation
 } from '../support/keyboard/_keyboardActivation.ts'
 import type { GooButtonGroupProps, NormalizedButtonGroupOption } from './types.ts'
 
@@ -121,57 +121,29 @@ function handleGroupClick(event: MouseEvent): void {
 }
 
 function handleGroupKeydown(event: KeyboardEvent): void {
-	if (disabled) return
+	if (disabled || !groupElement) return
 
-	if (isKeyboardActivationKey(event.key)) {
-		containKeyboardEvent(event)
-		if (focusedKey) {
-			selectKey(focusedKey, { emit: true })
+	if (handleKeyboardActivation(event, () => {
+		const button = getKeyboardButton(event)
+		if (button) {
+			selectKey(readButtonKey(button), { emit: true })
 		}
+	})) {
 		return
 	}
 
-	switch (event.key) {
-		case 'ArrowLeft':
-			if (layout !== 'vertical') {
-				containKeyboardEvent(event)
-				navigateButton(-1)
+	handleLinearNavigationKeyboardEvent(event, groupElement, {
+		activeItem: getFocusedButton(),
+		itemSelector: ':scope > .goo-button',
+		orientation: layout === 'vertical' ? 'vertical' : 'horizontal',
+		activate: item => {
+			const nextKey = readButtonKey(item as HTMLButtonElement)
+			focusedKey = nextKey
+			if (!allowMultiple) {
+				selectKey(nextKey, { emit: true })
 			}
-			break
-		case 'ArrowRight':
-			if (layout !== 'vertical') {
-				containKeyboardEvent(event)
-				navigateButton(1)
-			}
-			break
-		case 'ArrowUp':
-			if (layout === 'vertical') {
-				containKeyboardEvent(event)
-				navigateButton(-1)
-			}
-			break
-		case 'ArrowDown':
-			if (layout === 'vertical') {
-				containKeyboardEvent(event)
-				navigateButton(1)
-			}
-			break
-	}
-}
-
-function navigateButton(direction: number): void {
-	const keys = getSelectableKeys()
-	if (keys.length === 0) return
-
-	const currentIndex = Math.max(0, keys.indexOf(focusedKey ?? keys[0]))
-	const nextKey = keys[currentIndex + direction]
-	if (!nextKey) return
-
-	focusedKey = nextKey
-	if (!allowMultiple) {
-		selectKey(nextKey, { emit: true })
-	}
-	void Promise.resolve().then(() => focusButton(nextKey))
+		}
+	})
 }
 
 function selectKey(key: string, { emit }: { emit: boolean }): void {
@@ -255,10 +227,6 @@ function getChildButtons(): HTMLButtonElement[] {
 	return Array.from(groupElement?.querySelectorAll<HTMLButtonElement>(':scope > .goo-button') ?? [])
 }
 
-function focusButton(key: string): void {
-	getChildButtons().find(button => readButtonKey(button) === key)?.focus()
-}
-
 function getEventButton(event: MouseEvent): HTMLButtonElement | null {
 	const target = event.target
 	if (!(target instanceof Element)) return null
@@ -266,6 +234,26 @@ function getEventButton(event: MouseEvent): HTMLButtonElement | null {
 	const button = target.closest<HTMLButtonElement>('.goo-button')
 	if (!button || button.parentElement !== groupElement || button.disabled) return null
 	return button
+}
+
+function getKeyboardButton(event: KeyboardEvent): HTMLButtonElement | null {
+	const target = event.target instanceof Element ? event.target : null
+	const button = target?.closest<HTMLButtonElement>('.goo-button')
+	if (button?.parentElement === groupElement && !button.disabled) {
+		return button
+	}
+	return getFocusedButton()
+}
+
+function getFocusedButton(): HTMLButtonElement | null {
+	const active = document.activeElement
+	if (active instanceof HTMLButtonElement && active.parentElement === groupElement && !active.disabled) {
+		return active
+	}
+	if (!focusedKey) {
+		return null
+	}
+	return getChildButtons().find(button => readButtonKey(button) === focusedKey) ?? null
 }
 
 function readButtonKey(button: HTMLButtonElement): string {
