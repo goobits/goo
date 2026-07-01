@@ -10,13 +10,26 @@ import {
 } from '../support/keyboard/_keyboardActivation.ts'
 import type { GooSelectOption, GooSelectState } from './types.ts'
 
+export type GooSelectNavigationCommand =
+	| 'down'
+	| 'enter'
+	| 'escape'
+	| 'left'
+	| 'right'
+	| 'space'
+	| 'tab'
+	| 'up'
+
 /** Keyboard command event used by GooSelect navigation. */
 export interface GooSelectKeyCommand {
-	command: string
+	command: GooSelectNavigationCommand
 	cancel: () => void
 }
 
-type KeyboardHandlerHost = GooSelectKeyboardHost
+export interface GooSelectTypeaheadCommand {
+	command: string
+	cancel: () => void
+}
 
 type GooSelectPanelHost = {
 	hoveredId: string | null
@@ -45,7 +58,7 @@ export type GooSelectKeyboardHost = {
 // Key Mapping
 // ============================================================================
 
-const KEY_TO_COMMAND: Record<string, string> = {
+const KEY_TO_COMMAND: Record<string, GooSelectNavigationCommand> = {
 	ArrowDown: 'down',
 	ArrowUp: 'up',
 	ArrowLeft: 'left',
@@ -64,9 +77,7 @@ const KEY_TO_COMMAND: Record<string, string> = {
  * @returns Keyboard command event or null if not mapped
  */
 export function mapNativeKeyToCommand(e: KeyboardEvent): GooSelectKeyCommand | null {
-	const command = isKeyboardActivationKey(e.key)
-		? 'enter'
-		: KEY_TO_COMMAND[e.key]
+	const command = activationCommandForKey(e.key) ?? KEY_TO_COMMAND[e.key]
 	if (!command) return null
 
 	return {
@@ -75,8 +86,10 @@ export function mapNativeKeyToCommand(e: KeyboardEvent): GooSelectKeyCommand | n
 	}
 }
 
-export function mapNativeTypeaheadKeyToCommand(e: KeyboardEvent): GooSelectKeyCommand | null {
+export function mapNativeTypeaheadKeyToCommand(e: KeyboardEvent): GooSelectTypeaheadCommand | null {
+	if (e.altKey || e.ctrlKey || e.metaKey) return null
 	if (e.key.length !== 1) return null
+	if (e.key.trim() === '') return null
 
 	return {
 		command: e.key,
@@ -89,7 +102,7 @@ export function mapNativeTypeaheadKeyToCommand(e: KeyboardEvent): GooSelectKeyCo
  * @param host - The select component
  * @param event - Keyboard command event
  */
-export function handleKeyboard(host: KeyboardHandlerHost, event: GooSelectKeyCommand): void {
+export function handleKeyboard(host: GooSelectKeyboardHost, event: GooSelectKeyCommand): void {
 	if (host.state.disabled) return
 
 	const { command } = event
@@ -161,17 +174,17 @@ export function handleKeyboard(host: KeyboardHandlerHost, event: GooSelectKeyCom
  * Handle typeahead keystrokes for GooSelect.
  * Filters to only single printable characters.
  * @param host - The select component
- * @param event - Keyboard command event
+ * @param event - Typeahead command event
  */
-export function handleTypeahead(host: KeyboardHandlerHost, event: GooSelectKeyCommand): void {
+export function handleTypeahead(host: GooSelectKeyboardHost, event: GooSelectTypeaheadCommand): void {
 	if (!host._opened || host.state.disabled || !host._panel) return
 
-	const { command } = event
-
-	// Skip modifier combos and navigation keys
-	if (command.includes('+') || command.length > 1) return
-
-	// Single character - delegate to panel
 	event.cancel()
-	host._panel.handleTypeahead(command)
+	host._panel.handleTypeahead(event.command)
+}
+
+function activationCommandForKey(key: string): GooSelectNavigationCommand | null {
+	if (key === 'Enter') return 'enter'
+	if (isKeyboardActivationKey(key)) return 'space'
+	return null
 }

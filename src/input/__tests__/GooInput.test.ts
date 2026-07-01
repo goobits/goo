@@ -256,6 +256,56 @@ describe('GooNumber', () => {
 		expect(parentKeydown).not.toHaveBeenCalled()
 	})
 
+	it('supports spinbutton keyboard stepping and bounds', async() => {
+		const oninput = vi.fn()
+		const { container } = render(GooNumber, {
+			props: {
+				value: 4,
+				min: 0,
+				max: 10,
+				step: 0.5,
+				oninput
+			}
+		})
+		const input = container.querySelector<HTMLInputElement>('.goo-number__content')!
+
+		input.dispatchEvent(new KeyboardEvent('keydown', {
+			bubbles: true,
+			cancelable: true,
+			key: 'ArrowUp'
+		}))
+		await tick()
+		expect(input.getAttribute('aria-valuenow')).toBe('4.5')
+		expect(oninput).toHaveBeenLastCalledWith(4.5, 4)
+
+		input.dispatchEvent(new KeyboardEvent('keydown', {
+			bubbles: true,
+			cancelable: true,
+			key: 'PageUp'
+		}))
+		await tick()
+		expect(input.getAttribute('aria-valuenow')).toBe('10')
+		expect(oninput).toHaveBeenLastCalledWith(10, 4.5)
+
+		input.dispatchEvent(new KeyboardEvent('keydown', {
+			bubbles: true,
+			cancelable: true,
+			key: 'Home'
+		}))
+		await tick()
+		expect(input.getAttribute('aria-valuenow')).toBe('0')
+		expect(oninput).toHaveBeenLastCalledWith(0, 10)
+
+		input.dispatchEvent(new KeyboardEvent('keydown', {
+			bubbles: true,
+			cancelable: true,
+			key: 'End'
+		}))
+		await tick()
+		expect(input.getAttribute('aria-valuenow')).toBe('10')
+		expect(oninput).toHaveBeenLastCalledWith(10, 0)
+	})
+
 	it('keeps only one active pointer-hold repeat for number arrows', () => {
 		vi.useFakeTimers()
 		try {
