@@ -8,6 +8,7 @@ import { appendSchemaActions, updateSchemaActionState } from './_schemaActions.t
 import {
 	cloneSchemaValue,
 	getSchemaVisibilitySignature,
+	isSchemaValueEqual,
 	schemaHasConditions as hasSchemaConditions
 } from './_schemaData.ts'
 import { shouldRenderSchemaNode } from './fieldConditions.ts'
@@ -17,12 +18,18 @@ import { buildControllerOptions, type ControllerOptions } from './schemaFieldBui
 import type {
 	GooSchemaChangeHandler,
 	GooSchemaData,
+	GooSchemaDataUpdateOptions,
 	GooSchemaField,
 	GooSchemaFolder,
 	GooSchemaNode,
 	GooSchemaPreset,
 	GooSchemaState
 } from './types.ts'
+
+const SCHEMA_DATA_MOTION_CLASS = 'goo-schema__data-motion'
+const SCHEMA_DATA_MOTION_ATTRIBUTE = 'data-goo-schema-data-motion'
+const SCHEMA_DATA_MOTION_DURATION_MS = 360
+const schemaDataMotionTimers = new WeakMap<HTMLElement, ReturnType<typeof setTimeout>>()
 
 export type GooSchemaController = (HTMLElement | SvelteControlHost) & {
 	destroy?: () => void
@@ -41,8 +48,13 @@ export type GooSchemaBuildElement = HTMLElement & {
 	_visibilitySignature: string
 	state: GooSchemaState
 	refresh(): void
-	setData(data: GooSchemaData): void
+	setData(data: GooSchemaData, options?: GooSchemaDataUpdateOptions): void
 	_scheduleRebuild(): void
+}
+
+type SchemaDataMutationOptions = {
+	changedPaths?: ReadonlySet<string>
+	update?: GooSchemaDataUpdateOptions
 }
 
 export async function rebuildSchema(element: GooSchemaBuildElement): Promise<void> {
@@ -98,7 +110,19 @@ export function destroySchemaControllers(element: GooSchemaBuildElement): void {
 	element._controllers.clear()
 }
 
-export function updateSchemaAfterDataMutation(element: GooSchemaBuildElement): void {
+export function getChangedSchemaControllerPaths(
+	element: GooSchemaBuildElement,
+	nextData: GooSchemaData
+): Set<string> {
+	const changedPaths = new Set<string>()
+	appendChangedSchemaControllerPaths(element, getSchemaNodes(element.state.schema), nextData, changedPaths)
+	return changedPaths
+}
+
+export function updateSchemaAfterDataMutation(
+	element: GooSchemaBuildElement,
+	options: SchemaDataMutationOptions = {}
+): void {
 	if (hasSchemaConditions(element.state.schema)) {
 		const nextVisibilitySignature = getSchemaVisibilitySignature(element)
 		if (nextVisibilitySignature !== element._visibilitySignature) {
@@ -106,11 +130,75 @@ export function updateSchemaAfterDataMutation(element: GooSchemaBuildElement): v
 			return
 		}
 		element.refresh()
+		applySchemaDataMotion(element, options.changedPaths, options.update)
 		updateSchemaActionState(element)
 		return
 	}
 	element.refresh()
+	applySchemaDataMotion(element, options.changedPaths, options.update)
 	updateSchemaActionState(element)
+}
+
+function getSchemaNodes(schema: GooSchemaState['schema']): GooSchemaNode[] {
+	return Array.isArray(schema) ? schema : schema.children
+}
+
+function appendChangedSchemaControllerPaths(
+	element: GooSchemaBuildElement,
+	nodes: GooSchemaNode[],
+	nextData: GooSchemaData,
+	changedPaths: Set<string>
+): void {
+	for (const node of nodes) {
+		if ('children' in node && node.type === 'folder') {
+			appendChangedSchemaControllerPaths(element, node.children, nextData, changedPaths)
+			continue
+		}
+		if (!('path' in node) || !element._controllers.has(node.path)) {
+			continue
+		}
+
+		const currentValue = getByPath(element._data, node.path)
+		const nextValue = getByPath(nextData, node.path)
+		if (!isSchemaValueEqual(currentValue, nextValue)) {
+			changedPaths.add(node.path)
+		}
+	}
+}
+
+function applySchemaDataMotion(
+	element: GooSchemaBuildElement,
+	changedPaths: ReadonlySet<string> | undefined,
+	options: GooSchemaDataUpdateOptions | undefined
+): void {
+	if (!options?.animate || !changedPaths?.size) return
+	const reason = options.reason ?? 'sync'
+	for (const path of changedPaths) {
+		const target = getSchemaControllerMotionElement(element._controllers.get(path))
+		if (!target) continue
+
+		const existingTimer = schemaDataMotionTimers.get(target)
+		if (existingTimer) clearTimeout(existingTimer)
+		target.classList.remove(SCHEMA_DATA_MOTION_CLASS)
+		target.removeAttribute(SCHEMA_DATA_MOTION_ATTRIBUTE)
+		void target.offsetWidth
+		target.setAttribute(SCHEMA_DATA_MOTION_ATTRIBUTE, reason)
+		target.classList.add(SCHEMA_DATA_MOTION_CLASS)
+
+		const timer = setTimeout(() => {
+			if (!target.isConnected) return
+			target.classList.remove(SCHEMA_DATA_MOTION_CLASS)
+			target.removeAttribute(SCHEMA_DATA_MOTION_ATTRIBUTE)
+			schemaDataMotionTimers.delete(target)
+		}, SCHEMA_DATA_MOTION_DURATION_MS)
+		schemaDataMotionTimers.set(target, timer)
+	}
+}
+
+function getSchemaControllerMotionElement(controller: GooSchemaController | undefined): HTMLElement | null {
+	if (!controller) return null
+	if (controller instanceof HTMLElement) return controller
+	return controller.element
 }
 
 async function buildNodes(

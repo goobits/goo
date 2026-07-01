@@ -4,6 +4,7 @@ import {
 } from './_schemaData.ts'
 import type {
 	GooSchemaData,
+	GooSchemaDataUpdateOptions,
 	GooSchemaPreset,
 	GooSchemaState
 } from './types.ts'
@@ -14,7 +15,7 @@ type SchemaActionsElement = HTMLElement & {
 	_onreset: ((data: GooSchemaData) => void) | null
 	_toolbar: HTMLElement | null
 	state: Pick<GooSchemaState, 'activePresetId' | 'defaults' | 'presets' | 'showReset'>
-	setData(data: GooSchemaData): void
+	setData(data: GooSchemaData, options?: GooSchemaDataUpdateOptions): void
 }
 
 export function appendSchemaActions(element: SchemaActionsElement, parent: HTMLElement): void {
@@ -86,7 +87,7 @@ function shouldRenderSchemaActions(element: SchemaActionsElement): boolean {
 
 function applySchemaPreset(element: SchemaActionsElement, preset: GooSchemaPreset): void {
 	const data = cloneSchemaData(preset.data)
-	element.setData(data)
+	element.setData(data, { animate: true, reason: 'preset' })
 	const detail = { id: preset.id, preset, data: element._data }
 	element.dispatchEvent(new CustomEvent('preset', { detail, bubbles: true }))
 	element._onpreset?.(preset)
@@ -96,7 +97,7 @@ function resetSchemaToDefaults(element: SchemaActionsElement): void {
 	const defaults = element.state.defaults
 	if (!defaults) return
 	const data = cloneSchemaData(defaults)
-	element.setData(data)
+	element.setData(data, { animate: true, reason: 'reset' })
 	const detail = { data: element._data, defaults }
 	element.dispatchEvent(new CustomEvent('reset', { detail, bubbles: true }))
 	element._onreset?.(element._data)

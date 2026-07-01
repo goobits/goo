@@ -504,6 +504,8 @@ describe('GooSchema', () => {
 		await settleGooSchema()
 
 		expect(schema.getController('size')).toBe(controller)
+		expect((controller as HTMLElement).classList.contains('goo-schema__data-motion')).toBe(true)
+		expect((controller as HTMLElement).getAttribute('data-goo-schema-data-motion')).toBe('reset')
 		expect(schema.getData()).toEqual({ size: 12 })
 		expect(onreset).toHaveBeenCalledWith({ size: 12 })
 		expect(reset?.disabled).toBe(true)
@@ -540,6 +542,8 @@ describe('GooSchema', () => {
 		await settleGooSchema()
 
 		expect(schema.getController('shape.size')).toBe(controller)
+		expect((controller as HTMLElement).classList.contains('goo-schema__data-motion')).toBe(true)
+		expect((controller as HTMLElement).getAttribute('data-goo-schema-data-motion')).toBe('preset')
 		expect(schema.getData()).toEqual({ shape: { size: 32 } })
 		expect(onpreset).toHaveBeenCalledWith(presets[1])
 		expect(presetEvent.mock.calls[0]?.[0].detail).toMatchObject({

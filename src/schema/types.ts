@@ -15,6 +15,18 @@ export type GooSchemaData = Record<string, unknown>
 
 export type GooSchemaChangeHandler = (path: string, value: unknown) => void
 
+/** Programmatic data update source for schema refresh behavior. */
+export type GooSchemaDataUpdateReason = 'preset' | 'reset' | 'sync'
+
+/** Options for applying schema data without rebuilding the schema. */
+export interface GooSchemaDataUpdateOptions {
+	/** Briefly mark controls whose displayed values changed. */
+	animate?: boolean
+
+	/** Semantic source of the data update. */
+	reason?: GooSchemaDataUpdateReason
+}
+
 export type GooSchemaCondition = string | {
 	path: string
 	equals?: unknown

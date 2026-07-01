@@ -84,7 +84,7 @@ function getNodeVisibilitySignature(node: GooSchemaNode, data: GooSchemaData): s
 	return ''
 }
 
-function isSchemaValueEqual(left: unknown, right: unknown): boolean {
+export function isSchemaValueEqual(left: unknown, right: unknown): boolean {
 	if (Object.is(left, right)) return true
 	if (Array.isArray(left) || Array.isArray(right)) {
 		if (!Array.isArray(left) || !Array.isArray(right) || left.length !== right.length) return false

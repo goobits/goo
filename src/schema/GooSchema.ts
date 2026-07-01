@@ -8,9 +8,11 @@ import './GooSchema.css'
 import { updateSchemaActionState } from './_schemaActions.ts'
 import {
 	destroySchemaControllers,
+	getChangedSchemaControllerPaths,
 	type GooSchemaBuildElement,
 	rebuildSchema,
-	updateSchemaAfterDataMutation } from './_schemaBuilder.ts'
+	updateSchemaAfterDataMutation
+} from './_schemaBuilder.ts'
 import {
 	mergeSchemaData,
 	schemaHasConditions as hasSchemaConditions
@@ -18,6 +20,7 @@ import {
 import { attachSchemaKeyboardNavigation } from './_schemaKeyboard.ts'
 import type {
 	GooSchemaData,
+	GooSchemaDataUpdateOptions,
 	GooSchemaOptions,
 	GooSchemaPreset,
 	GooSchemaType
@@ -27,6 +30,8 @@ export type {
 	GooSchemaChangeHandler,
 	GooSchemaControlType,
 	GooSchemaData,
+	GooSchemaDataUpdateOptions,
+	GooSchemaDataUpdateReason,
 	GooSchemaField,
 	GooSchemaFolder,
 	GooSchemaNode,
@@ -83,7 +88,7 @@ export interface GooSchema extends HTMLElement {
 	getSchema(): GooSchemaType
 	refresh(): void
 	refreshConditions(): void
-	setData(data: GooSchemaData): void
+	setData(data: GooSchemaData, options?: GooSchemaDataUpdateOptions): void
 	setOptions(options: GooSchemaUpdateOptions): void
 	setSchema(schema: GooSchemaType): void
 }
@@ -140,10 +145,16 @@ function attachSchemaApi(element: GooSchemaInternal): void {
 			if (element._destroyed) return
 			void element._rebuild()
 		},
-		setData: (data: GooSchemaData) => {
+		setData: (data: GooSchemaData, options: GooSchemaDataUpdateOptions = {}) => {
 			if (element._destroyed) return
+			const changedPaths = options.animate
+				? getChangedSchemaControllerPaths(element, data)
+				: undefined
 			mergeSchemaData(element._data, data)
-			updateSchemaAfterDataMutation(element)
+			updateSchemaAfterDataMutation(element, {
+				changedPaths,
+				update: options
+			})
 		},
 		setOptions: (options: GooSchemaUpdateOptions) => {
 			if (element._destroyed) return

@@ -5,6 +5,7 @@
 		type GooSchema,
 		type GooSchemaChangeHandler,
 		type GooSchemaData,
+		type GooSchemaDataUpdateOptions,
 		type GooSchemaEvent,
 		type GooSchemaOptions,
 		type GooSchemaPresetEvent,
@@ -255,8 +256,8 @@
 		}
 	}
 
-	export function setData(nextData: GooSchemaData): void {
-		schemaElement?.setData(nextData)
+	export function setData(nextData: GooSchemaData, options?: GooSchemaDataUpdateOptions): void {
+		schemaElement?.setData(nextData, options)
 	}
 
 	export function getData(): GooSchemaData | undefined {

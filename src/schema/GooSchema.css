@@ -82,6 +82,26 @@
 		0 0 0 3px color-mix(in srgb, var(--goo-theme-accent, #3b82f6) 24%, transparent);
 }
 
+.goo-schema .goo-schema__data-motion {
+	animation: goo-schema-data-motion 0.36s ease-out;
+}
+
+@keyframes goo-schema-data-motion {
+	from {
+		box-shadow: inset 0 0 0 999px color-mix(in srgb, var(--goo-theme-accent, #3b82f6) 18%, transparent);
+	}
+
+	to {
+		box-shadow: inset 0 0 0 999px transparent;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.goo-schema .goo-schema__data-motion {
+		animation: none;
+	}
+}
+
 /* Add dividers and consistent row padding between controls in bare mode */
 .goo-schema__bare > .goo-controller {
 	--goo-controller-padding: var(--goo-theme-control-row-padding, 0.5rem 0.75rem);
