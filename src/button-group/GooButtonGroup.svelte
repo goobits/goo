@@ -239,7 +239,7 @@ function getEventButton(event: MouseEvent): HTMLButtonElement | null {
 function getKeyboardButton(event: KeyboardEvent): HTMLButtonElement | null {
 	const target = event.target instanceof Element ? event.target : null
 	const button = target?.closest<HTMLButtonElement>('.goo-button')
-	if (button?.parentElement === groupElement && !button.disabled) {
+	if (button && button.parentElement === groupElement && !button.disabled) {
 		return button
 	}
 	return getFocusedButton()

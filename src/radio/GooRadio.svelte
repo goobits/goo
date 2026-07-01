@@ -105,7 +105,7 @@ function handleClick(event: MouseEvent): void {
 
 function handleKeydown(event: KeyboardEvent): void {
 	if (disabled) return
-	handleKeyboardActivation(event, check)
+	handleKeyboardActivation(event, () => check())
 }
 
 function cssEscape(value: string): string {
