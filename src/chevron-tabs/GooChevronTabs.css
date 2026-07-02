@@ -7,6 +7,11 @@
 	--goo-chevron-tabs-control-size: 24px;
 	--goo-chevron-tabs-bg: var(--goo-theme-surface, #15171e);
 	--goo-chevron-tabs-bg-raised: var(--goo-theme-surface-raised, #181a22);
+	--goo-chevron-tabs-bg-highlight: color-mix(
+		in srgb,
+		var(--goo-chevron-tabs-bg-raised) 46%,
+		var(--goo-chevron-tabs-bg)
+	);
 	--goo-chevron-tabs-tab-bg: color-mix(
 		in srgb,
 		var(--goo-theme-surface-raised, #181a22) 72%,
@@ -27,7 +32,7 @@
 	border-bottom: 2px solid var(--goo-chevron-tabs-bg);
 	background: linear-gradient(
 		180deg,
-		var(--goo-chevron-tabs-bg-raised) 0%,
+		var(--goo-chevron-tabs-bg-highlight) 0%,
 		var(--goo-chevron-tabs-bg) 100%
 	);
 	color: var(--goo-chevron-tabs-fg);
@@ -124,9 +129,6 @@
 .goo-chevron-tabs__tab--active {
 	background: var(--goo-chevron-tabs-selected-color);
 	color: var(--goo-chevron-tabs-selected-foreground);
-	filter: drop-shadow(
-		0 -6px 16px color-mix(in srgb, var(--goo-chevron-tabs-selected-color) 45%, transparent)
-	);
 }
 
 .goo-chevron-tabs__tab--active:hover {
@@ -244,7 +246,7 @@
 	padding: 0 14px;
 	background: linear-gradient(
 		180deg,
-		var(--goo-chevron-tabs-bg-raised) 0%,
+		var(--goo-chevron-tabs-bg-highlight) 0%,
 		var(--goo-chevron-tabs-bg) 100%
 	);
 }
