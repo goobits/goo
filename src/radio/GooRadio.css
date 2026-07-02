@@ -3,8 +3,8 @@
  */
 
 .goo-radio {
-	--goo-radio-size: var(--goo-theme-control-height-sm, 1.5rem);
-	--goo-radio-dot-size: calc(var(--goo-theme-control-height-sm, 1.5rem) - 14px);
+	--goo-radio-size: var(--goo-theme-control-height-sm, 24px);
+	--goo-radio-dot-size: calc(var(--goo-theme-control-height-sm, 24px) - 14px);
 	--goo-radio-border-color: var(--goo-theme-border-strong, rgba(128, 128, 128, 0.3));
 	--goo-radio-border-color-checked: var(--goo-theme-selected, var(--goo-theme-accent, #3b82f6));
 	--goo-radio-dot-color: var(--goo-theme-selected, var(--goo-theme-accent, #3b82f6));
@@ -12,7 +12,7 @@
 
 	display: inline-flex;
 	align-items: center;
-	gap: 8px;
+	gap: var(--goo-theme-space-sm, 8px);
 	background: transparent;
 	border: 0;
 	color: inherit;
@@ -33,7 +33,7 @@
 	width: var(--goo-radio-size);
 	height: var(--goo-radio-size);
 	border: 2px solid var(--goo-radio-border-color);
-	border-radius: 50%;
+	border-radius: var(--goo-theme-radius-full, 999px);
 	transition: border-color var(--goo-radio-transition);
 	flex-shrink: 0;
 }
@@ -46,7 +46,7 @@
 	width: var(--goo-radio-dot-size);
 	height: var(--goo-radio-dot-size);
 	background: var(--goo-radio-dot-color);
-	border-radius: 50%;
+	border-radius: var(--goo-theme-radius-full, 999px);
 	transform: translate(-50%, -50%) scale(0);
 	transition: transform var(--goo-radio-transition);
 }

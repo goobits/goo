@@ -1,17 +1,17 @@
 .goo-progress-toast {
 	position: fixed;
-	right: 16px;
-	bottom: 16px;
+	right: var(--goo-theme-space-md, 16px);
+	bottom: var(--goo-theme-space-md, 16px);
 	z-index: 100000;
 	display: grid;
 	grid-template-columns: 32px minmax(160px, auto);
-	gap: 8px 12px;
+	gap: var(--goo-theme-space-sm, 8px) var(--goo-theme-space-12, 12px);
 	align-items: center;
-	max-width: min(360px, calc(100vw - 32px));
-	padding: 12px;
+	max-width: min(360px, calc(100vw - var(--goo-theme-space-xl, 32px)));
+	padding: var(--goo-theme-space-12, 12px);
 	color: var(--goo-toast-color, #fff);
 	background: var(--goo-toast-background, #1f2937);
-	border-radius: 6px;
+	border-radius: var(--goo-theme-radius-md, 6px);
 	box-shadow: 0 12px 32px rgb(0 0 0 / 22%);
 }
 

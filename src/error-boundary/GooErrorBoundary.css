@@ -49,13 +49,13 @@
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	padding: 0.5rem 1.25rem;
+	padding: var(--goo-theme-space-sm, 8px) var(--goo-theme-space-20, 20px);
 	font: inherit;
 	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
 	color: var(--goo-error-boundary-accent-fg);
 	background: var(--goo-error-boundary-accent);
 	border: 1px solid transparent;
-	border-radius: var(--goo-theme-radius-sm, 0.25rem);
+	border-radius: var(--goo-theme-radius-sm, 4px);
 	cursor: pointer;
 	transition: filter 0.15s;
 

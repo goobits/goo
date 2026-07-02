@@ -68,7 +68,7 @@
 	box-sizing: border-box;
 	display: flex;
 	flex-direction: column;
-	gap: 1px;
+	gap: var(--goo-select-options-gap, 1px);
 	width: max-content;
 	min-width: 100%;
 }
@@ -158,7 +158,7 @@
 	background: var(--goo-select-scrollbar-thumb);
 	background-clip: padding-box;
 	border: 2px solid transparent;
-	border-radius: 999px;
+	border-radius: var(--goo-theme-radius-full, 999px);
 }
 
 .goo-select__submenu-viewport::-webkit-scrollbar-thumb:hover {

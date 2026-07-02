@@ -3,9 +3,9 @@
  */
 
 .goo-checkbox {
-	--goo-checkbox-width: calc(var(--goo-theme-control-height-sm, 1.5rem) * 1.8);
-	--goo-checkbox-height: var(--goo-theme-control-height-sm, 1.5rem);
-	--goo-checkbox-thumb-size: calc(var(--goo-theme-control-height-sm, 1.5rem) - 4px);
+	--goo-checkbox-width: calc(var(--goo-theme-control-height-sm, 24px) * 1.8);
+	--goo-checkbox-height: var(--goo-theme-control-height-sm, 24px);
+	--goo-checkbox-thumb-size: calc(var(--goo-theme-control-height-sm, 24px) - var(--goo-theme-space-xs, 4px));
 	--goo-checkbox-track-color: color-mix(in srgb, var(--goo-theme-fg, #fff) 12%, var(--goo-theme-bg, #111));
 	--goo-checkbox-track-color-checked: var(--goo-theme-selected, var(--goo-theme-accent, #3b82f6));
 	--goo-checkbox-thumb-color: var(--goo-theme-fg, #fff);
@@ -13,7 +13,7 @@
 
 	display: inline-flex;
 	align-items: center;
-	gap: 8px;
+	gap: var(--goo-theme-space-sm, 8px);
 	position: relative;
 	cursor: pointer;
 	user-select: none;
@@ -22,7 +22,7 @@
 
 .goo-checkbox:focus-visible {
 	outline: none;
-	border-radius: var(--goo-theme-radius-md, 0.5rem);
+	border-radius: var(--goo-theme-radius-md, 6px);
 	box-shadow: 0 0 0 3px var(--goo-theme-focus-ring, rgba(59, 130, 246, 0.4));
 }
 
@@ -46,7 +46,7 @@
 	width: var(--goo-checkbox-thumb-size);
 	height: var(--goo-checkbox-thumb-size);
 	background: var(--goo-checkbox-thumb-color);
-	border-radius: 50%;
+	border-radius: var(--goo-theme-radius-full, 999px);
 	box-shadow: var(--goo-theme-shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.3));
 	transition: left var(--goo-checkbox-transition);
 }

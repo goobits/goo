@@ -6,7 +6,7 @@
 	--goo-xy-pad-fill: color-mix(in srgb, var(--goo-theme-control-bg, #202126) 88%, black 12%);
 	--goo-xy-pad-accent: var(--goo-theme-accent, #6fb7ff);
 	display: grid;
-	gap: 0.5rem;
+	gap: var(--goo-theme-space-sm, 8px);
 	inline-size: 100%;
 	min-inline-size: 0;
 }
@@ -24,7 +24,7 @@
 	margin: 0;
 	padding: 0;
 	border: 1px solid var(--goo-theme-control-border, rgba(255, 255, 255, 0.12));
-	border-radius: 6px;
+	border-radius: var(--goo-theme-radius-md, 6px);
 	background:
 		linear-gradient(var(--goo-xy-pad-axis-color), var(--goo-xy-pad-axis-color)) 50% 0 / 1px 100% no-repeat,
 		linear-gradient(90deg, var(--goo-xy-pad-axis-color), var(--goo-xy-pad-axis-color)) 0 50% / 100% 1px no-repeat,
@@ -57,7 +57,7 @@
 	inline-size: var(--goo-xy-pad-dot-size);
 	block-size: var(--goo-xy-pad-dot-size);
 	border: 2px solid color-mix(in srgb, var(--goo-xy-pad-accent) 80%, white 20%);
-	border-radius: 999px;
+	border-radius: var(--goo-theme-radius-full, 999px);
 	background: var(--goo-theme-bg, #18191d);
 	box-shadow:
 		0 0 0 1px rgba(0, 0, 0, 0.5),
@@ -69,19 +69,19 @@
 .goo-xy-pad__inputs {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-	gap: 0.375rem;
+	gap: var(--goo-theme-space-6, 6px);
 	min-inline-size: 0;
 }
 
 .goo-xy-pad__input {
 	display: grid;
-	gap: 0.1875rem;
+	gap: var(--goo-theme-space-3, 3px);
 	min-inline-size: 0;
 }
 
 .goo-xy-pad__input-label {
 	color: var(--goo-theme-muted-fg, #a6a8af);
-	font-size: 0.6875rem;
+	font-size: var(--goo-theme-font-size-xs, 0.6875rem);
 	font-weight: 650;
 	line-height: 1;
 	text-transform: uppercase;
@@ -90,13 +90,13 @@
 .goo-xy-pad__reset {
 	justify-self: start;
 	border: 0;
-	border-radius: 4px;
-	padding: 0.25rem 0.4375rem;
+	border-radius: var(--goo-theme-radius-sm, 4px);
+	padding: var(--goo-theme-space-xs, 4px) var(--goo-theme-space-7, 7px);
 	background: var(--goo-theme-control-bg, #24262d);
 	color: var(--goo-theme-muted-fg, #a6a8af);
 	cursor: pointer;
 	font: inherit;
-	font-size: 0.75rem;
+	font-size: var(--goo-theme-font-size-xs, 0.6875rem);
 	line-height: 1;
 }
 

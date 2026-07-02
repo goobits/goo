@@ -145,7 +145,7 @@
 	.goo-folder
 	.goo-folder__content
 	> .goo-controller.goo-controller--slider-field {
-	--goo-controller-padding: 0.5rem 0;
+	--goo-controller-padding: var(--goo-theme-space-sm, 8px) 0;
 }
 
 :is(.goo-schema, .goo-schema__bare) .goo-folder .goo-folder__content > .goo-svelte-control,

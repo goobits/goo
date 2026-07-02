@@ -11,10 +11,10 @@
 	--goo-panel-header-bg: var(--goo-theme-surface-raised, #16162a);
 	--goo-panel-border: var(--goo-theme-border, rgba(128, 128, 128, 0.2));
 	--goo-panel-fg: var(--goo-theme-fg, #e8e8e8);
-	--goo-panel-radius: var(--goo-theme-radius-xl, 0.875rem);
+	--goo-panel-radius: var(--goo-theme-radius-xl, 12px);
 	--goo-panel-shadow: var(--goo-theme-shadow-lg, 0 4px 20px rgba(0, 0, 0, 0.4));
 	--goo-panel-z-index: 9999;
-	--goo-panel-margin: 10px;
+	--goo-panel-margin: var(--goo-theme-space-10, 10px);
 
 	display: block;
 	position: fixed;
@@ -57,7 +57,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 10px 12px;
+	padding: var(--goo-theme-space-10, 10px) var(--goo-theme-space-12, 12px);
 	background: var(--goo-panel-header-bg);
 	border-bottom: 1px solid var(--goo-panel-border);
 	cursor: grab;
@@ -87,7 +87,7 @@
 	padding: 0;
 	background: transparent;
 	border: none;
-	border-radius: 4px;
+	border-radius: var(--goo-theme-radius-sm, 4px);
 	cursor: pointer;
 	color: var(--goo-panel-fg);
 	opacity: 0.6;
@@ -142,7 +142,7 @@
 
 .goo-panel__content::-webkit-scrollbar-thumb {
 	background: color-mix(in srgb, var(--goo-theme-fg, #fff) 20%, transparent);
-	border-radius: 3px;
+	border-radius: var(--goo-theme-radius-xs, 2px);
 }
 
 .goo-panel__content::-webkit-scrollbar-thumb:hover {
@@ -243,7 +243,7 @@
 }
 
 .goo-settings-surface-dialog .dialog__content {
-	padding: var(--goo-theme-space-lg, 1.5rem);
+	padding: var(--goo-theme-space-lg, 24px);
 }
 
 .goo-settings-pane {
@@ -263,7 +263,7 @@
 .goo-settings-pane__field {
 	background: var(--goo-settings-pane-bg);
 	color: var(--goo-settings-pane-fg);
-	padding: var(--goo-theme-space-md, 1rem) var(--goo-theme-space-lg, 1.5rem);
+	padding: var(--goo-theme-space-md, 16px) var(--goo-theme-space-lg, 24px);
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -289,7 +289,7 @@
 	align-items: center;
 	top: 0;
 	font-weight: 400;
-	gap: 0.5rem;
+	gap: var(--goo-theme-space-sm, 8px);
 }
 
 .goo-settings-pane__category {
@@ -303,11 +303,11 @@
 	display: block;
 	font-weight: 600;
 	margin: 0;
-	padding: var(--goo-theme-space-md, 1rem) var(--goo-theme-space-lg, 1.5rem);
+	padding: var(--goo-theme-space-md, 16px) var(--goo-theme-space-lg, 24px);
 	width: 100%;
 	color: var(--goo-settings-pane-muted-fg);
 	font-size: var(--goo-theme-font-size-md);
-	line-height: var(--goo-theme-space-xl, 2rem);
+	line-height: var(--goo-theme-space-xl, 32px);
 	letter-spacing: 0.25px;
 }
 
@@ -330,8 +330,8 @@
 [dir='rtl'] .goo-settings-pane__field {
 	background: var(--goo-settings-pane-bg);
 	color: var(--goo-settings-pane-fg);
-	padding: var(--goo-theme-space-sm, 0.5rem) var(--goo-theme-space-lg, 1.5rem)
-		var(--goo-theme-space-sm, 0.5rem) var(--goo-theme-space-xs, 0.25rem);
+	padding: var(--goo-theme-space-sm, 8px) var(--goo-theme-space-lg, 24px)
+		var(--goo-theme-space-sm, 8px) var(--goo-theme-space-xs, 4px);
 }
 
 @media (max-width: 450px) {

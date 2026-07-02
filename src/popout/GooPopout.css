@@ -21,8 +21,8 @@
 		drop-shadow(0 1px 1px rgb(0 0 0 / 22%))
 		drop-shadow(0 16px 36px rgb(0 0 0 / 40%))
 		drop-shadow(0 4px 12px rgb(0 0 0 / 26%));
-	--goo-popout-radius: var(--goo-theme-radius-lg, 0.6875rem);
-	--goo-popout-arrow-size: 8px;
+	--goo-popout-radius: var(--goo-theme-radius-lg, 8px);
+	--goo-popout-arrow-size: var(--goo-theme-space-sm, 8px);
 
 	backdrop-filter: blur(18px) saturate(1.35);
 	background-image: linear-gradient(
@@ -84,7 +84,7 @@
 	background: color-mix(in srgb, var(--goo-theme-muted, var(--goo-theme-fg, #fff)) 72%, transparent);
 	background-clip: padding-box;
 	border: 2px solid transparent;
-	border-radius: 999px;
+	border-radius: var(--goo-theme-radius-full, 999px);
 }
 
 .goo-popout__content::-webkit-scrollbar-thumb:hover {
@@ -243,11 +243,11 @@
 /* Style popouts for toolbar tool configuration */
 .goo-popout.sketch-style-popout {
 	--goo-popout-content-height: auto;
-	--goo-popout-content-max-height: calc(100vh - 16px);
+	--goo-popout-content-max-height: calc(100vh - var(--goo-theme-space-lg, 16px));
 	--goo-popout-content-overflow-x: hidden;
 	--goo-popout-content-overflow-y: auto;
 
-	inline-size: min(226px, calc(100vw - 16px));
+	inline-size: min(226px, calc(100vw - var(--goo-theme-space-lg, 16px)));
 	min-width: 226px;
 }
 
@@ -259,7 +259,8 @@
 .goo-filter-popout__item {
 	border-bottom: 1px solid rgb(0 0 0 / 10%);
 	cursor: pointer;
-	padding: 0.5rem 0.5rem 0.5rem 0.75rem;
+	padding: var(--goo-theme-space-sm, 8px) var(--goo-theme-space-sm, 8px)
+		var(--goo-theme-space-sm, 8px) var(--goo-theme-space-md, 16px);
 	text-transform: capitalize;
 }
 

@@ -11,7 +11,7 @@
 	--goo-data-grid-fg: var(--goo-theme-fg, rgba(255, 255, 255, 0.92));
 	--goo-data-grid-muted: var(--goo-theme-muted);
 	--goo-data-grid-hover: color-mix(in srgb, var(--goo-theme-accent, #3b82f6) 10%, transparent);
-	--goo-data-grid-radius: var(--goo-theme-radius-md, 0.375rem);
+	--goo-data-grid-radius: var(--goo-theme-radius-md, 6px);
 	--goo-data-grid-row-height: 2.75rem;
 
 	background: var(--goo-data-grid-bg);
@@ -39,7 +39,7 @@
 .goo-data-grid::-webkit-scrollbar-thumb {
 	background: color-mix(in srgb, var(--goo-data-grid-fg) 18%, transparent);
 	border: 3px solid transparent;
-	border-radius: 999px;
+	border-radius: var(--goo-theme-radius-full, 999px);
 	background-clip: padding-box;
 }
 
@@ -96,10 +96,10 @@
 .goo-data-grid__cell {
 	align-items: center;
 	display: flex;
-	gap: var(--goo-theme-space-xs, 0.375rem);
+	gap: var(--goo-theme-space-6, 6px);
 	min-width: 0;
 	overflow: hidden;
-	padding: 0 var(--goo-theme-space-md, 1rem);
+	padding: 0 var(--goo-theme-space-md, 16px);
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }

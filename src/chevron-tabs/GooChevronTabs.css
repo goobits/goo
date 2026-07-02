@@ -291,7 +291,7 @@
 	align-items: center;
 	gap: 6px;
 	margin-top: 5px;
-	font-size: 11px;
+	font-size: var(--goo-theme-font-size-xs);
 	font-weight: 500;
 	line-height: 1;
 }
@@ -367,7 +367,7 @@
 	background: transparent;
 	color: #f8f8f2;
 	cursor: pointer;
-	font-size: 12px;
+	font-size: var(--goo-theme-font-size-xs);
 	font-weight: 500;
 	line-height: 1;
 	text-align: left;

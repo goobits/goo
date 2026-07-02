@@ -4,10 +4,10 @@
  */
 
 .goo-toaster {
-	--goo-toaster-width: min(100vw - 2rem, 24rem);
-	--goo-toaster-gap: 0.75rem;
+	--goo-toaster-width: min(100vw - var(--goo-theme-space-xl, 32px), 24rem);
+	--goo-toaster-gap: var(--goo-theme-space-12, 12px);
 	--goo-toaster-z-index: 999;
-	--goo-toaster-edge: 1rem;
+	--goo-toaster-edge: var(--goo-theme-space-md, 16px);
 
 	position: fixed;
 	display: flex;

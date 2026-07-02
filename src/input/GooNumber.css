@@ -20,11 +20,11 @@
 		color-mix(in srgb, var(--goo-theme-fg, #fff) 7%, transparent)
 	);
 	--goo-number-arrows-hover: color-mix(in srgb, var(--goo-theme-fg, #fff) 10%, transparent);
-	--goo-number-radius: var(--goo-theme-radius-md, 0.5rem);
-	--goo-number-height: 1.5rem;
+	--goo-number-radius: var(--goo-theme-radius-md, 6px);
+	--goo-number-height: var(--goo-theme-control-height-sm, 24px);
 	--goo-number-arrows-width: calc(var(--goo-number-height) * 0.68);
 	--goo-number-stepper-space: 0px;
-	--goo-number-edge-padding: 0.5rem;
+	--goo-number-edge-padding: var(--goo-theme-space-sm, 8px);
 	--goo-number-leading-padding: var(--goo-number-edge-padding);
 	--goo-number-trailing-padding: calc(var(--goo-number-stepper-space) + var(--goo-number-unit-padding, 0px));
 	--goo-number-unit-left: auto;
@@ -335,7 +335,7 @@
 
 /* Compact size variant - for dense UIs like editors */
 .goo-number[size='compact'] {
-	--goo-number-height: var(--goo-theme-control-height-sm, 1.5rem);
+	--goo-number-height: var(--goo-theme-control-height-sm, 24px);
 	--goo-number-arrows-width: calc(var(--goo-number-height) * 0.7);
 	--goo-number-edge-padding: 0.375em;
 	font-size: var(--goo-theme-font-size-xs, 0.75rem);

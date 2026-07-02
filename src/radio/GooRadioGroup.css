@@ -5,7 +5,7 @@
 .goo-radio-group {
 	display: flex;
 	flex-direction: column;
-	gap: var(--goo-theme-space-sm, 0.5rem);
+	gap: var(--goo-theme-space-sm, 8px);
 	outline: none;
 	width: 100%;
 }
@@ -13,14 +13,14 @@
 .goo-radio-group:focus-visible {
 	outline: 2px solid var(--goo-theme-focus-ring, #3b82f6);
 	outline-offset: 2px;
-	border-radius: 4px;
+	border-radius: var(--goo-theme-radius-sm, 4px);
 }
 
 /* Options container */
 .goo-radio-group__options {
 	display: flex;
 	flex-direction: column;
-	gap: var(--goo-theme-space-sm, 0.5rem);
+	gap: var(--goo-theme-space-sm, 8px);
 	width: 100%;
 }
 
@@ -28,7 +28,7 @@
 .goo-radio-group[data-layout='horizontal'] .goo-radio-group__options {
 	flex-direction: row;
 	flex-wrap: wrap;
-	gap: var(--goo-theme-space-md, 0.75rem);
+	gap: var(--goo-theme-space-12, 12px);
 }
 
 /* Disabled state */

@@ -292,7 +292,7 @@ sketch-FilterFooter {
 .goo-controller.goo-controller--stacked {
 	flex-direction: column;
 	align-items: stretch;
-	gap: 8px;
+	gap: var(--goo-theme-space-sm, 8px);
 	padding: var(--goo-controller-stacked-padding-block, 0.75rem) 0;
 }
 
@@ -306,7 +306,7 @@ sketch-FilterFooter {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	gap: 8px;
+	gap: var(--goo-theme-space-sm, 8px);
 	padding-inline: var(--goo-controller-stacked-padding-inline, 0.75rem);
 }
 

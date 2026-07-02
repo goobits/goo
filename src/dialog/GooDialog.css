@@ -74,7 +74,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 16px 20px;
+	padding: var(--goo-theme-space-16, 16px) var(--goo-theme-space-20, 20px);
 	background: var(
 		--goo-dialog-header-bg,
 		var(
@@ -82,7 +82,8 @@
 			color-mix(in srgb, var(--goo-theme-fg, #fff) 5%, transparent)
 		)
 	);
-	border-radius: var(--goo-dialog-border-radius, 8px) var(--goo-dialog-border-radius, 8px) 0 0;
+	border-radius: var(--goo-dialog-border-radius, var(--goo-theme-radius-lg, 8px))
+		var(--goo-dialog-border-radius, var(--goo-theme-radius-lg, 8px)) 0 0;
 	border-bottom: 1px solid var(--goo-theme-border, rgba(128, 128, 128, 0.2));
 }
 
@@ -99,8 +100,8 @@
 	border: none;
 	color: var(--goo-theme-muted);
 	cursor: pointer;
-	padding: 4px;
-	border-radius: 4px;
+	padding: var(--goo-theme-space-xs, 4px);
+	border-radius: var(--goo-theme-radius-sm, 4px);
 	transition:
 		background 0.15s,
 		color 0.15s;
@@ -122,7 +123,7 @@
 /* Content */
 .goo-dialog__content {
 	flex: 1;
-	padding: 20px;
+	padding: var(--goo-theme-space-20, 20px);
 	overflow: auto;
 	line-height: 1.6;
 }
@@ -131,14 +132,14 @@
 .goo-dialog__fields {
 	display: flex;
 	flex-direction: column;
-	gap: 16px;
-	margin-top: 16px;
+	gap: var(--goo-theme-space-16, 16px);
+	margin-top: var(--goo-theme-space-16, 16px);
 }
 
 .goo-dialog__field {
 	display: flex;
 	flex-direction: column;
-	gap: 6px;
+	gap: var(--goo-theme-space-6, 6px);
 }
 
 .goo-dialog__field-label {
@@ -152,8 +153,8 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 8px;
-	padding: 16px 20px;
+	gap: var(--goo-theme-space-sm, 8px);
+	padding: var(--goo-theme-space-16, 16px) var(--goo-theme-space-20, 20px);
 	background: var(
 		--goo-dialog-footer-bg,
 		var(
@@ -161,7 +162,8 @@
 			color-mix(in srgb, var(--goo-theme-fg, #fff) 5%, transparent)
 		)
 	);
-	border-radius: 0 0 var(--goo-dialog-border-radius, 8px) var(--goo-dialog-border-radius, 8px);
+	border-radius: 0 0 var(--goo-dialog-border-radius, var(--goo-theme-radius-lg, 8px))
+		var(--goo-dialog-border-radius, var(--goo-theme-radius-lg, 8px));
 	border-top: 1px solid var(--goo-theme-border, rgba(128, 128, 128, 0.2));
 }
 
@@ -170,7 +172,7 @@
 	margin-right: auto;
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: var(--goo-theme-space-sm, 8px);
 	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
 	color: var(--goo-theme-muted);
 }
@@ -194,7 +196,7 @@
 	width: 24px;
 	height: 24px;
 	background: var(--goo-theme-accent, #3b82f6);
-	border-radius: 50%;
+	border-radius: var(--goo-theme-radius-full, 999px);
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -233,14 +235,14 @@
 }
 
 .goo-dialog.goo-dialog--notify .goo-dialog__content {
-	padding: 12px 20px;
+	padding: var(--goo-theme-space-12, 12px) var(--goo-theme-space-20, 20px);
 	text-align: center;
 	font-weight: 500;
 }
 
 .goo-dialog.goo-dialog--notify .goo-dialog__close {
 	position: absolute;
-	right: 12px;
+	right: var(--goo-theme-space-12, 12px);
 	top: 50%;
 	transform: translateY(-50%);
 	color: color-mix(in srgb, var(--goo-theme-accent-fg, #fff) 80%, transparent);
@@ -298,7 +300,7 @@
 	border-bottom: 1px solid color-mix(in srgb, var(--goo-theme-fg, #fff) 3%, transparent);
 	height: 40px;
 	min-height: 40px;
-	padding: 0 1em;
+	padding: 0 var(--goo-theme-space-lg, 24px);
 	border-radius: 0;
 }
 
@@ -310,8 +312,8 @@
 /* Overlay close button - circular badge styling matching old Alertify */
 .goo-dialog.goo-dialog--overlay .goo-dialog__close {
 	position: absolute;
-	top: 12px;
-	right: 12px;
+	top: var(--goo-theme-space-12, 12px);
+	right: var(--goo-theme-space-12, 12px);
 	z-index: 10;
 	width: 1.5rem;
 	height: 1.5rem;
@@ -321,7 +323,7 @@
 	justify-content: center;
 	background: var(--goo-theme-accent, #f59e0b);
 	color: var(--goo-theme-accent-fg, #fff);
-	border-radius: 50%;
+	border-radius: var(--goo-theme-radius-full, 999px);
 	font-size: var(--goo-theme-icon-md, 1em);
 	line-height: 1;
 	box-shadow:
@@ -353,7 +355,7 @@
 
 [dir='rtl'] .goo-dialog.goo-dialog--overlay .goo-dialog__close {
 	right: auto;
-	left: 12px;
+	left: var(--goo-theme-space-12, 12px);
 }
 
 @media (hover: none) and (pointer: coarse) {

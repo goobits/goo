@@ -16,9 +16,9 @@
 	--goo-input-change-pulse: color-mix(in srgb, var(--goo-input-border-focus) 18%, transparent);
 	--goo-input-fg: var(--goo-theme-fg, rgba(255, 255, 255, 0.9));
 	--goo-input-fg-placeholder: var(--goo-theme-muted);
-	--goo-input-radius: var(--goo-theme-radius-md, 0.5rem);
-	--goo-input-height: var(--goo-theme-control-height-md, 1.875rem);
-	--goo-input-padding: var(--goo-theme-control-padding-md, 0 0.5rem);
+	--goo-input-radius: var(--goo-theme-radius-md, 6px);
+	--goo-input-height: var(--goo-theme-control-height-md, 32px);
+	--goo-input-padding: var(--goo-theme-control-padding-md, 0 12px);
 	--goo-input-motion-fast: var(--goo-theme-transition-fast, 0.15s ease);
 	--goo-input-motion-normal: var(--goo-theme-transition-normal, 0.2s ease);
 
@@ -169,8 +169,8 @@
 
 /* Compact size variant - for dense UIs like editors */
 .goo-input[size='compact'] {
-	--goo-input-height: var(--goo-theme-control-height-sm, 1.5rem);
-	--goo-input-padding: var(--goo-theme-control-padding-sm, 0 0.5rem);
+	--goo-input-height: var(--goo-theme-control-height-sm, 24px);
+	--goo-input-padding: var(--goo-theme-control-padding-sm, 0 8px);
 	font-size: var(--goo-theme-font-size-xs, 0.75rem);
 	width: auto;
 	min-width: 80px;

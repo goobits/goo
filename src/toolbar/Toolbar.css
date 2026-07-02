@@ -92,7 +92,7 @@
 }
 
 .goo-floating-toolbar__glyph {
-	font-size: 0.7rem;
+	font-size: var(--goo-theme-font-size-xs);
 	font-weight: 700;
 	letter-spacing: 0;
 	line-height: 1;

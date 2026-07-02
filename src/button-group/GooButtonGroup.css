@@ -5,7 +5,7 @@
 
 .goo-button-group {
 	/* Customizable - matches standalone button defaults */
-	--goo-button-group-radius: var(--goo-theme-radius-md, 0.5rem);
+	--goo-button-group-radius: var(--goo-theme-radius-md, 6px);
 	--goo-button-group-bg: var(
 		--goo-theme-border-subtle,
 		color-mix(in srgb, var(--goo-theme-fg, #fff) 12%, transparent)
@@ -14,7 +14,7 @@
 		--goo-theme-border,
 		color-mix(in srgb, var(--goo-theme-fg, #fff) 15%, transparent)
 	);
-	--goo-button-group-height: var(--goo-theme-control-height-md, 2rem);
+	--goo-button-group-height: var(--goo-theme-control-height-md, 32px);
 
 	box-sizing: border-box;
 	display: inline-flex;
@@ -160,11 +160,11 @@
 
 /* Compact size variant - for dense UIs like editors */
 .goo-button-group[size='compact'] {
-	--goo-button-group-height: var(--goo-theme-control-height-sm, 1.5rem);
+	--goo-button-group-height: var(--goo-theme-control-height-sm, 24px);
 }
 
 .goo-button-group[size='compact'] > .goo-button {
-	padding: 0 0.625rem;
+	padding: var(--goo-theme-control-padding-sm, 0 8px);
 	font-size: var(--goo-theme-font-size-xs, 0.75rem);
 }
 
@@ -190,7 +190,7 @@
 	border-right: none;
 	border-bottom: 1px solid var(--goo-theme-border, rgba(128, 128, 128, 0.2));
 	width: 100%;
-	height: var(--goo-theme-control-height-md, 2rem);
+	height: var(--goo-theme-control-height-md, 32px);
 	flex: 0 0 auto;
 	justify-content: center;
 }
@@ -228,7 +228,7 @@
 	flex-direction: column;
 	gap: 0.25em;
 	height: auto;
-	padding: 0.5rem 0.75rem;
+	padding: var(--goo-theme-space-sm, 8px) var(--goo-theme-space-md, 16px);
 	line-height: 1.2;
 	min-height: unset;
 	text-transform: none;
@@ -243,15 +243,15 @@
 @media (hover: none) and (pointer: coarse) {
 	.goo-button-group,
 	.goo-button-group[size='compact'] {
-		--goo-button-group-height: max(2.75rem, var(--goo-theme-control-height-md, 2.75rem));
+		--goo-button-group-height: max(var(--goo-theme-control-height-touch, 44px), var(--goo-theme-control-height-md, 44px));
 	}
 
 	.goo-button-group[data-layout='vertical'] > .goo-button {
-		height: max(2.75rem, var(--goo-theme-control-height-md, 2.75rem));
+		height: max(var(--goo-theme-control-height-touch, 44px), var(--goo-theme-control-height-md, 44px));
 	}
 
 	.goo-button-group > .goo-button[layout='stacked'] {
-		min-height: max(2.75rem, var(--goo-theme-control-height-md, 2.75rem));
+		min-height: max(var(--goo-theme-control-height-touch, 44px), var(--goo-theme-control-height-md, 44px));
 	}
 }
 

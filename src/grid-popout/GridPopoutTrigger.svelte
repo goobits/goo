@@ -289,7 +289,7 @@ goo-grid-popout-trigger {
 }
 
 goo-grid-popout-trigger:focus::after {
-	border-radius: var(--goo-theme-radius-sm);
+	border-radius: var(--goo-theme-radius-sm, 4px);
 	box-shadow: inset 0 0 0 1px var(--goo-theme-accent) !important;
 	content: "";
 	display: block;
@@ -319,7 +319,7 @@ goo-grid-popout-trigger :global(grid-title) {
 	display: flex;
 	flex-direction: column;
 	color: var(--goo-theme-fg);
-	gap: 1px;
+	gap: var(--goo-theme-space-2xs, 2px);
 	height: 60px;
 	justify-content: center;
 	inset-inline-start: 65px;
@@ -335,7 +335,7 @@ goo-grid-popout-trigger :global(grid-title) {
 
 .goo-grid-popout-trigger__kicker {
 	color: var(--goo-theme-muted);
-	font-size: 0.625rem;
+	font-size: var(--goo-theme-font-size-xs);
 	font-weight: 600;
 	letter-spacing: 0.07em;
 	text-transform: uppercase;
@@ -356,7 +356,7 @@ goo-grid-popout-trigger :global(.goo-grid-trigger__icon) {
 	height: 60px !important;
 	inset-inline-start: 0;
 	line-height: 57px;
-	margin-left: 4px;
+	margin-left: var(--goo-theme-space-xs, 4px);
 	object-fit: contain;
 	position: absolute;
 	text-align: center;
@@ -374,12 +374,12 @@ goo-grid-popout-trigger :global(canvas.icon),
 goo-grid-popout-trigger :global(img.icon),
 goo-grid-popout-trigger :global(canvas.goo-grid-trigger__icon),
 goo-grid-popout-trigger :global(img.goo-grid-trigger__icon) {
-	padding: 8px;
+	padding: var(--goo-theme-space-sm, 8px);
 }
 
 goo-grid-popout-trigger .goo-grid-trigger__arrow {
 	align-items: center;
-	border-radius: var(--goo-theme-radius-sm, 0.375rem);
+	border-radius: var(--goo-theme-radius-sm, 4px);
 	color: var(--goo-theme-muted, currentColor);
 	display: inline-flex;
 	font-size: var(--goo-grid-trigger-arrow-size);
@@ -465,7 +465,7 @@ goo-grid-popout-trigger.goo-grid-trigger--small :global(.goo-grid-trigger__icon)
 	font-size: var(--goo-theme-icon-lg, 1.125rem);
 	height: 40px !important;
 	line-height: 37px;
-	margin-left: 8px;
+	margin-left: var(--goo-theme-space-sm, 8px);
 	width: 40px;
 }
 
@@ -479,7 +479,7 @@ goo-grid-popout-trigger.goo-grid-trigger--font :global(.goo-grid-trigger__icon) 
 }
 
 .goo-grid-popout-trigger__preview {
-	border-radius: var(--goo-theme-radius-sm, 0.25rem);
+	border-radius: var(--goo-theme-radius-sm, 4px);
 	object-fit: cover;
 	transition: opacity 140ms ease-out;
 	will-change: opacity;
@@ -490,7 +490,7 @@ goo-grid-popout-trigger.goo-grid-trigger--preset {
 
 	background: var(--goo-theme-surface-raised, color-mix(in srgb, var(--goo-theme-fg) 5%, var(--goo-theme-bg)));
 	border: 1px solid var(--goo-theme-border-strong, var(--goo-theme-border));
-	border-radius: var(--goo-theme-radius-lg, 0.5rem);
+	border-radius: var(--goo-theme-radius-lg, 8px);
 	height: 2.875rem;
 	line-height: 1.2;
 	overflow: hidden;

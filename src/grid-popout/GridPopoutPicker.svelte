@@ -457,13 +457,13 @@ function escapeSelectorValue(value: string): string {
 
 :global(goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) goo-popout-content),
 :global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .goo-popout__content) {
-	padding: var(--goo-theme-space-sm, 0.5rem);
+	padding: var(--goo-theme-space-sm, 8px);
 }
 
 :global(goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .goo-grid-picker),
 :global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .goo-grid-picker) {
 	display: grid;
-	gap: 6px;
+	gap: var(--goo-theme-space-6, 6px);
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 	justify-items: stretch;
 }
@@ -474,10 +474,10 @@ function escapeSelectorValue(value: string): string {
 	border: 1px solid transparent;
 	border-radius: var(--goo-theme-radius-sm);
 	display: flex;
-	gap: 8px;
+	gap: var(--goo-theme-space-sm, 8px);
 	justify-content: flex-start;
 	min-height: 2.9rem;
-	padding: var(--goo-theme-space-sm);
+	padding: var(--goo-theme-space-sm, 8px);
 	position: relative;
 	width: 100%;
 }
@@ -511,7 +511,7 @@ function escapeSelectorValue(value: string): string {
 :global(goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .goo-grid-picker__kicker),
 :global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .goo-grid-picker__kicker) {
 	color: var(--goo-theme-muted);
-	font-size: 0.625rem;
+	font-size: var(--goo-theme-font-size-xs);
 	font-weight: 600;
 	letter-spacing: 0.07em;
 	text-transform: uppercase;
@@ -533,7 +533,7 @@ function escapeSelectorValue(value: string): string {
 
 :global(goo-popout.goo-grid-popout--one-column goo-popout-content),
 :global(.goo-popout.goo-grid-popout--one-column .goo-popout__content) {
-	padding: var(--goo-theme-space-sm, 0.5rem);
+	padding: var(--goo-theme-space-sm, 8px);
 }
 
 :global(goo-popout.goo-grid-popout--one-column .goo-grid-picker),
@@ -548,12 +548,12 @@ function escapeSelectorValue(value: string): string {
 
 :global(goo-popout.goo-grid-popout--small goo-popout-content),
 :global(.goo-popout.goo-grid-popout--small .goo-popout__content) {
-	padding: var(--goo-theme-space-sm, 0.5rem);
+	padding: var(--goo-theme-space-sm, 8px);
 }
 
 :global(goo-popout.goo-grid-popout--small .goo-grid-picker),
 :global(.goo-popout.goo-grid-popout--small .goo-grid-picker) {
-	gap: 4px;
+	gap: var(--goo-theme-space-xs, 4px);
 }
 
 :global(goo-popout.goo-grid-popout--icon-grid),
@@ -564,12 +564,12 @@ function escapeSelectorValue(value: string): string {
 
 :global(goo-popout.goo-grid-popout--icon-grid goo-popout-content),
 :global(.goo-popout.goo-grid-popout--icon-grid .goo-popout__content) {
-	padding: var(--goo-theme-space-sm);
+	padding: var(--goo-theme-space-sm, 8px);
 }
 
 :global(goo-popout.goo-grid-popout.goo-grid-popout--icon-grid .goo-grid-picker),
 :global(.goo-popout.goo-grid-popout.goo-grid-popout--icon-grid .goo-grid-picker) {
-	gap: var(--goo-theme-space-sm);
+	gap: var(--goo-theme-space-sm, 8px);
 	grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
@@ -577,11 +577,11 @@ function escapeSelectorValue(value: string): string {
 :global(.goo-popout.goo-grid-popout--icon-grid sketch-grid-item) {
 	align-items: center;
 	flex-direction: column;
-	gap: var(--goo-theme-space-xs);
+	gap: var(--goo-theme-space-xs, 4px);
 	justify-content: flex-start;
 	min-height: 5.25rem;
 	min-width: 0;
-	padding: var(--goo-theme-space-xs);
+	padding: var(--goo-theme-space-xs, 4px);
 	text-align: center;
 }
 
@@ -610,7 +610,7 @@ function escapeSelectorValue(value: string): string {
 	align-items: center;
 	display: inline-flex;
 	flex: 0 0 40px;
-	font-size: 40px;
+	font-size: var(--goo-theme-icon-lg);
 	height: 40px;
 	justify-content: center;
 	line-height: 1;
@@ -632,7 +632,7 @@ function escapeSelectorValue(value: string): string {
 
 :global(goo-popout.goo-grid-popout--preset .goo-grid-picker),
 :global(.goo-popout.goo-grid-popout--preset .goo-grid-picker) {
-	gap: var(--goo-theme-space-sm);
+	gap: var(--goo-theme-space-sm, 8px);
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
@@ -641,7 +641,7 @@ function escapeSelectorValue(value: string): string {
 	align-items: stretch;
 	flex-direction: column;
 	min-height: 6.9rem;
-	padding: var(--goo-theme-space-xs);
+	padding: var(--goo-theme-space-xs, 4px);
 }
 
 :global(goo-popout.goo-grid-popout--preset grid-title),

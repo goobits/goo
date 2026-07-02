@@ -15,7 +15,7 @@
 
 	display: inline-flex;
 	align-items: center;
-	gap: var(--goo-theme-space-xs, 0.25rem);
+	gap: var(--goo-theme-space-xs, 4px);
 	font-family: var(--goo-theme-font-sans, system-ui, sans-serif);
 	font-size: var(--goo-theme-control-label-size, var(--goo-theme-font-size-sm, 0.8125rem));
 	font-weight: var(--goo-theme-control-label-weight, 600);
@@ -65,24 +65,24 @@ sketch-line-break {
 
 .goo-quote {
 	background: color-mix(in srgb, var(--goo-theme-fg) 15%, var(--goo-theme-bg));
-	border-radius: var(--goo-theme-radius-md, 0.25rem);
+	border-radius: var(--goo-theme-radius-md, 6px);
 	clear: both;
 	cursor: default;
 	display: block;
 	font-style: italic;
 	line-height: 1.5em;
-	padding: 1em;
+	padding: var(--goo-theme-space-md, 16px);
 }
 
 sketch-title {
-	border-bottom-right-radius: 5px;
+	border-bottom-right-radius: var(--goo-theme-space-5, 5px);
 	cursor: default;
 	display: inline-block;
 	letter-spacing: 1px;
 	line-height: 22px;
 	margin: 0;
 	overflow: hidden;
-	padding: 0 0.5rem;
+	padding: 0 var(--goo-theme-space-sm, 8px);
 	position: relative;
 	text-transform: capitalize;
 	z-index: 1;
@@ -95,7 +95,7 @@ sketch-title a {
 sketch-label-group {
 	display: block;
 	border: 2px solid var(--goo-theme-bg);
-	border-radius: var(--goo-theme-radius-md, 0.25rem);
+	border-radius: var(--goo-theme-radius-md, 6px);
 }
 
 sketch-label-group sketch-label:first-child {
@@ -126,8 +126,8 @@ sketch-label[data-tag='textarea'] {
 
 sketch-label input,
 sketch-label textarea {
-	border-radius: var(--goo-theme-radius-md, 0.25rem);
-	padding: 5px 7px;
+	border-radius: var(--goo-theme-radius-md, 6px);
+	padding: var(--goo-theme-space-5, 5px) var(--goo-theme-space-7, 7px);
 }
 
 sketch-label[data-tag='checkbox'],
@@ -138,7 +138,7 @@ sketch-label[data-tag='selectmenu'] {
 	justify-content: space-between;
 	height: 40px;
 	line-height: 40px;
-	padding: 0 0.5rem;
+	padding: 0 var(--goo-theme-space-sm, 8px);
 }
 
 sketch-label[data-tag='checkbox'] sketch-title,
@@ -178,11 +178,11 @@ sketch-label.goo-config-field[data-tag='input'],
 sketch-label.goo-config-field[data-tag='number'] {
 	align-items: center;
 	display: flex;
-	gap: 0.5rem;
+	gap: var(--goo-theme-space-sm, 8px);
 	height: 40px;
 	justify-content: space-between;
 	line-height: 40px;
-	padding: 0 0.5rem;
+	padding: 0 var(--goo-theme-space-sm, 8px);
 }
 
 sketch-label.goo-config-field[data-tag='checkbox'] sketch-title,
@@ -194,11 +194,11 @@ sketch-label.goo-config-field[data-tag='number'] sketch-title {
 }
 
 sketch-label.goo-config-field[data-tag='textarea'] {
-	padding: 0.5rem;
+	padding: var(--goo-theme-space-sm, 8px);
 }
 
 sketch-label.goo-config-field[data-tag='textarea'] .goo-textarea {
-	margin-top: 0.375rem;
+	margin-top: var(--goo-theme-space-6, 6px);
 	width: 100%;
 }
 

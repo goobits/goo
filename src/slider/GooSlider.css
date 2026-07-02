@@ -209,7 +209,7 @@
 	top: calc(100% + 4px);
 	left: 50%;
 	color: var(--goo-theme-muted, color-mix(in srgb, var(--goo-theme-fg, #fff) 62%, transparent));
-	font-size: 0.625rem;
+	font-size: var(--goo-theme-font-size-xs, 0.6875rem);
 	line-height: 1;
 	white-space: nowrap;
 	transform: translateX(-50%);
@@ -225,7 +225,7 @@
 	border: 1px solid color-mix(in srgb, var(--goo-theme-fg, #fff) 18%, transparent);
 	border-radius: 4px;
 	color: var(--goo-theme-fg, #fff);
-	font-size: 0.6875rem;
+	font-size: var(--goo-theme-font-size-xs, 0.6875rem);
 	line-height: 1;
 	opacity: 0;
 	pointer-events: none;
