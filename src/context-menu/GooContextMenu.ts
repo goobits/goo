@@ -105,6 +105,7 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 	} = options
 
 	let contextMenuOpened = false
+	let contextMenuAnchor: HTMLElement | null = null
 	let releasePageUnfocus: (() => void) | null = null
 
 	// Create GooSelect with context menu defaults
@@ -151,6 +152,8 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 			positionAt = { x: x ?? 0, y: y ?? 0 }
 		}
 		positionAt = getPointOpenAnchor(positionAt, restOpts)
+		const anchorElement = positionAt instanceof HTMLElement ? positionAt : null
+		contextMenuAnchor = anchorElement
 		const pointDefaults = getPointOpenDefaults(positionAt, restOpts)
 		const openOpts = {
 			...restOpts,
@@ -164,19 +167,24 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 			})
 		}
 
+		const shouldFocusPanel = opts.autoFocus === true
 		const didOpen = originalOpen({
 			...openOpts,
 			at: positionAt,
-			autoFocus: opts.autoFocus === true
+			autoFocus: shouldFocusPanel,
+			clickToClose: openOpts.clickToClose ?? getAnchorAwareClickToClose(anchorElement),
+			initialFocus: shouldFocusPanel ? 'none' : openOpts.initialFocus
 		})
 		if (didOpen) {
 			contextMenuOpened = true
 			bindPageUnfocus()
+			if (shouldFocusPanel) focusOpenContextMenuPanelWhenVisible()
 		}
 		return didOpen
 	}
 	contextMenu.close = function closeContextMenu(opts = {}) {
 		contextMenuOpened = false
+		contextMenuAnchor = null
 		unbindPageUnfocus()
 		originalClose(opts)
 	}
@@ -285,6 +293,7 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 		const closeForOutsidePointer = (event: PointerEvent) => {
 			const target = event.target
 			if (target instanceof Element && target.closest('.goo-popout')) return
+			if (contextMenuAnchor && isEventOnElement(event, contextMenuAnchor)) return
 			closeForPageUnfocus()
 		}
 
@@ -319,6 +328,42 @@ function focusContextMenuOwner(element: HTMLElement): void {
 function focusOpenContextMenuPanel(): void {
 	const panels = document.querySelectorAll<HTMLElement>('.goo-context-menu-popout .goo-select__options')
 	panels.item(panels.length - 1)?.focus({ preventScroll: true })
+}
+
+function focusOpenContextMenuPanelWhenVisible(attempts = 30): void {
+	const panel = getLatestOpenContextMenuPanel()
+	if (panel && getComputedStyle(panel).visibility !== 'hidden') {
+		panel.focus({ preventScroll: true })
+		return
+	}
+
+	if (attempts <= 0) {
+		focusOpenContextMenuPanel()
+		return
+	}
+
+	requestAnimationFrame(() => focusOpenContextMenuPanelWhenVisible(attempts - 1))
+}
+
+function getLatestOpenContextMenuPanel(): HTMLElement | null {
+	const panels = document.querySelectorAll<HTMLElement>('.goo-context-menu-popout .goo-select__options')
+	return panels.item(panels.length - 1) ?? null
+}
+
+function getAnchorAwareClickToClose(anchor: HTMLElement | null): GooContextMenuOpenOptions['clickToClose'] | undefined {
+	if (!anchor) return undefined
+
+	return (event, isInsidePopout) => {
+		if (isInsidePopout) return false
+		if (event.originalEvent && isEventOnElement(event.originalEvent, anchor)) return false
+		return true
+	}
+}
+
+function isEventOnElement(event: Event, element: HTMLElement): boolean {
+	if (event.composedPath().includes(element)) return true
+	const target = event.target
+	return target instanceof Node && element.contains(target)
 }
 
 function getPointOpenDefaults(

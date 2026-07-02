@@ -30,7 +30,9 @@ describe('GooSelect keyboard handler', () => {
 		[ 'ArrowUp', 'up' ],
 		[ 'ArrowLeft', 'left' ],
 		[ 'ArrowRight', 'right' ],
+		[ 'End', 'last' ],
 		[ 'Escape', 'escape' ],
+		[ 'Home', 'first' ],
 		[ 'Tab', 'tab' ]
 	])('maps native key %s to %s command', (key, command) => {
 		expect(mapNativeKeyToCommand(new KeyboardEvent('keydown', { key }))?.command).toBe(command)
@@ -96,6 +98,16 @@ describe('GooSelect keyboard handler', () => {
 
 		expect(panel.navigate).toHaveBeenNthCalledWith(1, 1)
 		expect(panel.navigate).toHaveBeenNthCalledWith(2, -1)
+	})
+
+	it('navigates opened menus to first and last options', () => {
+		const { host, panel } = createHost()
+
+		handleKeyboard(host, createCommand('first'))
+		handleKeyboard(host, createCommand('last'))
+
+		expect(panel.navigateToBoundary).toHaveBeenNthCalledWith(1, 'first')
+		expect(panel.navigateToBoundary).toHaveBeenNthCalledWith(2, 'last')
 	})
 
 	it('opens and closes submenus with horizontal keys', () => {
@@ -209,6 +221,7 @@ function createHost({
 		handleTypeahead: vi.fn(),
 		hoveredId,
 		navigate: vi.fn(),
+		navigateToBoundary: vi.fn(),
 		openSubmenu: vi.fn()
 	}
 	const host: GooSelectKeyboardHost = {

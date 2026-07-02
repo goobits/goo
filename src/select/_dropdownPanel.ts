@@ -196,6 +196,18 @@ export class DropdownPanel {
 	}
 
 	/**
+	 * Navigate directly to the first or last option.
+	 * @param boundary - Target menu boundary.
+	 */
+	navigateToBoundary(boundary: 'first' | 'last') {
+		const items = this.getNavigableOptions()
+		if (!items.length) return
+
+		const item = boundary === 'first' ? items[0] : items[items.length - 1]
+		this.setHovered(item.dataset.id!)
+	}
+
+	/**
 	 * Update selection visual (checkmark) to a new option.
 	 * @param id - id.
 	 */

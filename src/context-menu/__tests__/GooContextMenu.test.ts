@@ -72,6 +72,56 @@ describe('createGooContextMenu', () => {
 		expect(label?.querySelector('img')).toBeNull()
 	})
 
+	it('focuses the menu panel when imperatively opened with autofocus', async() => {
+		const menu = createGooContextMenu({
+			options: [
+				{ id: 'copy', label: 'Copy' }
+			]
+		})
+		const originalScrollIntoView = HTMLElement.prototype.scrollIntoView
+		const focus = vi.spyOn(HTMLElement.prototype, 'focus')
+		HTMLElement.prototype.scrollIntoView = vi.fn()
+		document.body.append(menu)
+		await tick()
+
+		try {
+			expect(menu.open({ x: 20, y: 20, autoFocus: true, initialFocus: 'content' })).toBe(true)
+			await Promise.resolve()
+			await delay(550)
+
+			const panel = document.querySelector<HTMLElement>('.goo-context-menu-popout .goo-select__options')
+			expect(panel).not.toBeNull()
+			expect(focus.mock.contexts).toContain(panel)
+		} finally {
+			await menu.destroy()
+			HTMLElement.prototype.scrollIntoView = originalScrollIntoView
+		}
+	})
+
+	it('keeps an imperatively anchored menu open on anchor pointerdown', async() => {
+		const menu = createGooContextMenu({
+			options: [
+				{ id: 'copy', label: 'Copy' }
+			]
+		})
+		const anchor = document.createElement('button')
+		document.body.append(menu, anchor)
+		await tick()
+
+		expect(menu.open({ at: anchor, initialFocus: 'none' })).toBe(true)
+		await Promise.resolve()
+		expect(document.querySelector('.goo-popout.goo-context-menu-popout')).not.toBeNull()
+
+		anchor.dispatchEvent(new PointerEvent('pointerdown', {
+			bubbles: true,
+			cancelable: true
+		}))
+		expect(document.querySelector('.goo-popout.goo-context-menu-popout')).not.toBeNull()
+
+		await menu.destroy()
+		anchor.remove()
+	})
+
 	it('repositions the current managed menu when reopened with a new anchor', async() => {
 		vi.spyOn(document.body, 'getBoundingClientRect').mockReturnValue({
 			bottom: 1000,

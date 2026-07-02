@@ -14,6 +14,8 @@ export type GooSelectNavigationCommand =
 	| 'down'
 	| 'enter'
 	| 'escape'
+	| 'first'
+	| 'last'
 	| 'left'
 	| 'right'
 	| 'space'
@@ -34,6 +36,7 @@ export interface GooSelectTypeaheadCommand {
 type GooSelectPanelHost = {
 	hoveredId: string | null
 	navigate(dir: 1 | -1): void
+	navigateToBoundary(boundary: 'first' | 'last'): void
 	getHoveredElement(): HTMLElement | null
 	findOptionById(id: string): GooSelectOption | null
 	openSubmenu($item: HTMLElement, opt: GooSelectOption): void
@@ -63,7 +66,9 @@ const KEY_TO_COMMAND: Record<string, GooSelectNavigationCommand> = {
 	ArrowUp: 'up',
 	ArrowLeft: 'left',
 	ArrowRight: 'right',
+	End: 'last',
 	Escape: 'escape',
+	Home: 'first',
 	Tab: 'tab'
 }
 
@@ -127,6 +132,16 @@ export function handleKeyboard(host: GooSelectKeyboardHost, event: GooSelectKeyC
 		case 'up':
 			event.cancel()
 			host._panel.navigate(-1)
+			break
+
+		case 'first':
+			event.cancel()
+			host._panel.navigateToBoundary('first')
+			break
+
+		case 'last':
+			event.cancel()
+			host._panel.navigateToBoundary('last')
 			break
 
 		case 'right': {
