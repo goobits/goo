@@ -74,7 +74,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: var(--goo-theme-space-16, 16px) var(--goo-theme-space-20, 20px);
+	padding: var(--goo-theme-space-lg, 16px) var(--goo-theme-space-xl, 24px);
 	background: var(
 		--goo-dialog-header-bg,
 		var(
@@ -123,7 +123,7 @@
 /* Content */
 .goo-dialog__content {
 	flex: 1;
-	padding: var(--goo-theme-space-20, 20px);
+	padding: var(--goo-theme-space-xl, 24px);
 	overflow: auto;
 	line-height: 1.6;
 }
@@ -132,14 +132,14 @@
 .goo-dialog__fields {
 	display: flex;
 	flex-direction: column;
-	gap: var(--goo-theme-space-16, 16px);
-	margin-top: var(--goo-theme-space-16, 16px);
+	gap: var(--goo-theme-space-lg, 16px);
+	margin-top: var(--goo-theme-space-lg, 16px);
 }
 
 .goo-dialog__field {
 	display: flex;
 	flex-direction: column;
-	gap: var(--goo-theme-space-6, 6px);
+	gap: var(--goo-theme-space-sm, 8px);
 }
 
 .goo-dialog__field-label {
@@ -154,7 +154,7 @@
 	align-items: center;
 	justify-content: center;
 	gap: var(--goo-theme-space-sm, 8px);
-	padding: var(--goo-theme-space-16, 16px) var(--goo-theme-space-20, 20px);
+	padding: var(--goo-theme-space-lg, 16px) var(--goo-theme-space-xl, 24px);
 	background: var(
 		--goo-dialog-footer-bg,
 		var(
@@ -235,14 +235,14 @@
 }
 
 .goo-dialog.goo-dialog--notify .goo-dialog__content {
-	padding: var(--goo-theme-space-12, 12px) var(--goo-theme-space-20, 20px);
+	padding: var(--goo-theme-space-md, 12px) var(--goo-theme-space-xl, 24px);
 	text-align: center;
 	font-weight: 500;
 }
 
 .goo-dialog.goo-dialog--notify .goo-dialog__close {
 	position: absolute;
-	right: var(--goo-theme-space-12, 12px);
+	right: var(--goo-theme-space-md, 12px);
 	top: 50%;
 	transform: translateY(-50%);
 	color: color-mix(in srgb, var(--goo-theme-accent-fg, #fff) 80%, transparent);
@@ -312,8 +312,8 @@
 /* Overlay close button - circular badge styling matching old Alertify */
 .goo-dialog.goo-dialog--overlay .goo-dialog__close {
 	position: absolute;
-	top: var(--goo-theme-space-12, 12px);
-	right: var(--goo-theme-space-12, 12px);
+	top: var(--goo-theme-space-md, 12px);
+	right: var(--goo-theme-space-md, 12px);
 	z-index: 10;
 	width: 1.5rem;
 	height: 1.5rem;
@@ -355,7 +355,7 @@
 
 [dir='rtl'] .goo-dialog.goo-dialog--overlay .goo-dialog__close {
 	right: auto;
-	left: var(--goo-theme-space-12, 12px);
+	left: var(--goo-theme-space-md, 12px);
 }
 
 @media (hover: none) and (pointer: coarse) {

@@ -62,6 +62,7 @@ export interface GooDialogOptions<TValues extends DialogValues = DialogValues> {
 	labels?: DialogLabels
 	fields?: DialogField[]
 	verify?: DialogVerifyHandler<TValues>
+	modal?: boolean
 	showBackdrop?: boolean
 	showClose?: boolean
 	closeOnBackdrop?: boolean
@@ -94,6 +95,7 @@ export interface GooDialogState {
 	ariaLabel?: string
 	type: string
 	heading: string
+	modal: boolean
 	showBackdrop: boolean
 	showClose: boolean
 	closeOnBackdrop: boolean
@@ -194,6 +196,7 @@ class GooDialogControllerRuntime {
 			ariaLabel: undefined,
 			type: 'alert',
 			heading: '',
+			modal: true,
 			showBackdrop: true,
 			showClose: true,
 			closeOnBackdrop: true,
@@ -254,7 +257,11 @@ class GooDialogControllerRuntime {
 
 		// Accessibility
 		this.$element.setAttribute('role', 'dialog')
-		this.$element.setAttribute('aria-modal', 'true')
+		if (this._isModalDialog()) {
+			this.$element.setAttribute('aria-modal', 'true')
+		} else {
+			this.$element.removeAttribute('aria-modal')
+		}
 		this.$element.tabIndex = -1
 
 		// Build structure based on type using dialog builder functions
@@ -426,7 +433,7 @@ class GooDialogControllerRuntime {
 	 * @param e - e.
 	 */
 	_handleKeydown(e: KeyboardEvent) {
-		if (e.key === 'Tab' && dialogManager.getTopDialog() === this) {
+		if (this._isModalDialog() && e.key === 'Tab' && dialogManager.getTopDialog() === this) {
 			handleFocusTrapKeyboardEvent(e, { root: this.$element })
 			return
 		}
@@ -624,7 +631,7 @@ class GooDialogControllerRuntime {
 
 			// Append to body
 			document.body.appendChild(this.$element)
-			if (this.state.type !== 'notify') {
+			if (this._isModalDialog()) {
 				this._openLifecycle.add(activateModalIsolation({
 					modal: this.$element,
 					preserve: [ this._$backdrop ]
@@ -739,6 +746,10 @@ class GooDialogControllerRuntime {
 	 */
 	get isOpen() {
 		return this._isOpen
+	}
+
+	_isModalDialog(): boolean {
+		return this.state.modal && this.state.type !== 'notify'
 	}
 
 	/**

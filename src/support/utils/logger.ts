@@ -1,5 +1,3 @@
-/// <reference path="../types/goobitsLogger.d.ts" />
-
 /**
  * Goo Package Logger
  *

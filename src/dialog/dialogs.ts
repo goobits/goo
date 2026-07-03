@@ -61,6 +61,7 @@ export interface GooOverlayOptions {
 	className?: string
 	content: string | Node
 	heading?: string
+	modal?: boolean
 	showBackdrop?: boolean
 	showClose?: boolean
 }

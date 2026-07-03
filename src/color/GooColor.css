@@ -111,7 +111,7 @@
 	-webkit-appearance: none;
 	appearance: none;
 	background: linear-gradient(to right, transparent, var(--goo-color-fg));
-	border-radius: var(--goo-theme-radius-xs, 2px);
+	border-radius: var(--goo-theme-radius-sm, 2px);
 	cursor: pointer;
 
 	&::-webkit-slider-thumb {

@@ -463,7 +463,7 @@ function escapeSelectorValue(value: string): string {
 :global(goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .goo-grid-picker),
 :global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .goo-grid-picker) {
 	display: grid;
-	gap: var(--goo-theme-space-6, 6px);
+	gap: var(--goo-theme-space-sm, 6px);
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 	justify-items: stretch;
 }

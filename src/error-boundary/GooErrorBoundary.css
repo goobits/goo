@@ -49,7 +49,7 @@
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	padding: var(--goo-theme-space-sm, 8px) var(--goo-theme-space-20, 20px);
+	padding: var(--goo-theme-space-sm, 8px) var(--goo-theme-space-xl, 20px);
 	font: inherit;
 	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
 	color: var(--goo-error-boundary-accent-fg);

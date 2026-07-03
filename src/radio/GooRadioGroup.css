@@ -28,7 +28,7 @@
 .goo-radio-group[data-layout='horizontal'] .goo-radio-group__options {
 	flex-direction: row;
 	flex-wrap: wrap;
-	gap: var(--goo-theme-space-12, 12px);
+	gap: var(--goo-theme-space-md, 12px);
 }
 
 /* Disabled state */

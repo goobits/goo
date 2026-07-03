@@ -75,7 +75,7 @@ sketch-line-break {
 }
 
 sketch-title {
-	border-bottom-right-radius: var(--goo-theme-space-5, 5px);
+	border-bottom-right-radius: var(--goo-theme-radius-sm, 5px);
 	cursor: default;
 	display: inline-block;
 	letter-spacing: 1px;
@@ -127,7 +127,7 @@ sketch-label[data-tag='textarea'] {
 sketch-label input,
 sketch-label textarea {
 	border-radius: var(--goo-theme-radius-md, 6px);
-	padding: var(--goo-theme-space-5, 5px) var(--goo-theme-space-7, 7px);
+	padding: var(--goo-theme-space-xs, 5px) var(--goo-theme-space-sm, 7px);
 }
 
 sketch-label[data-tag='checkbox'],
@@ -198,7 +198,7 @@ sketch-label.goo-config-field[data-tag='textarea'] {
 }
 
 sketch-label.goo-config-field[data-tag='textarea'] .goo-textarea {
-	margin-top: var(--goo-theme-space-6, 6px);
+	margin-top: var(--goo-theme-space-sm, 6px);
 	width: 100%;
 }
 

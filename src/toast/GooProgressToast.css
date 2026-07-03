@@ -5,10 +5,10 @@
 	z-index: 100000;
 	display: grid;
 	grid-template-columns: 32px minmax(160px, auto);
-	gap: var(--goo-theme-space-sm, 8px) var(--goo-theme-space-12, 12px);
+	gap: var(--goo-theme-space-sm, 8px) var(--goo-theme-space-md, 12px);
 	align-items: center;
 	max-width: min(360px, calc(100vw - var(--goo-theme-space-xl, 32px)));
-	padding: var(--goo-theme-space-12, 12px);
+	padding: var(--goo-theme-space-md, 12px);
 	color: var(--goo-toast-color, #fff);
 	background: var(--goo-toast-background, #1f2937);
 	border-radius: var(--goo-theme-radius-md, 6px);

@@ -12,8 +12,8 @@
 	--goo-toast-shadow: var(--goo-theme-shadow-md, 0 4px 12px rgba(0, 0, 0, 0.15));
 	--goo-toast-accent: var(--goo-theme-accent, #3b82f6);
 	--goo-toast-accent-fg: var(--goo-theme-accent-fg, #ffffff);
-	--goo-toast-padding: var(--goo-theme-space-12, 12px) var(--goo-theme-space-16, 16px);
-	--goo-toast-gap: var(--goo-theme-space-12, 12px);
+	--goo-toast-padding: var(--goo-theme-space-md, 12px) var(--goo-theme-space-lg, 16px);
+	--goo-toast-gap: var(--goo-theme-space-md, 12px);
 
 	position: relative;
 	display: flex;
@@ -84,9 +84,9 @@
 }
 
 .goo-toast__action {
-	margin-top: var(--goo-theme-space-6, 6px);
+	margin-top: var(--goo-theme-space-sm, 6px);
 	align-self: flex-start;
-	padding: var(--goo-theme-space-xs, 4px) var(--goo-theme-space-10, 10px);
+	padding: var(--goo-theme-space-xs, 4px) var(--goo-theme-space-md, 10px);
 	font: inherit;
 	font-size: var(--goo-theme-font-size-xs, 0.6875rem);
 	font-weight: 500;
@@ -125,7 +125,7 @@
 	&:focus-visible {
 		outline: 2px solid var(--goo-toast-accent);
 		outline-offset: 2px;
-		border-radius: var(--goo-theme-radius-xs, 2px);
+		border-radius: var(--goo-theme-radius-sm, 2px);
 	}
 }
 

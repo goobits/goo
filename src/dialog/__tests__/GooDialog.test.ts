@@ -235,8 +235,35 @@ describe('GooDialog', () => {
 
 		await dialog.close()
 
-		expect(appRoot.inert).toBe(false)
+		expect(appRoot.inert).not.toBe(true)
 		expect(appRoot.getAttribute('aria-hidden')).toBeNull()
+		expect(document.activeElement).toBe(opener)
+		appRoot.remove()
+		await expect(resultPromise).resolves.toEqual({ cancel: true })
+	})
+
+	it('leaves background content interactive for non-modal overlays', async() => {
+		const appRoot = document.createElement('main')
+		const opener = document.createElement('button')
+		appRoot.append(opener)
+		document.body.append(appRoot)
+		opener.focus()
+		const dialog = createGooDialog({
+			type: 'overlay',
+			content: 'Help',
+			modal: false,
+			showBackdrop: false
+		})
+		const resultPromise = dialog.open()
+		await nextFrame()
+
+		expect(dialog.element.getAttribute('aria-modal')).toBeNull()
+		expect(appRoot.inert).not.toBe(true)
+		expect(appRoot.getAttribute('aria-hidden')).toBeNull()
+
+		await dialog.close()
+
+		expect(appRoot.inert).not.toBe(true)
 		expect(document.activeElement).toBe(opener)
 		appRoot.remove()
 		await expect(resultPromise).resolves.toEqual({ cancel: true })

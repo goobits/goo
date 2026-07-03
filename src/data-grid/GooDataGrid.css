@@ -96,7 +96,7 @@
 .goo-data-grid__cell {
 	align-items: center;
 	display: flex;
-	gap: var(--goo-theme-space-6, 6px);
+	gap: var(--goo-theme-space-sm, 6px);
 	min-width: 0;
 	overflow: hidden;
 	padding: 0 var(--goo-theme-space-md, 16px);

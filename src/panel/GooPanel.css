@@ -14,7 +14,7 @@
 	--goo-panel-radius: var(--goo-theme-radius-xl, 12px);
 	--goo-panel-shadow: var(--goo-theme-shadow-lg, 0 4px 20px rgba(0, 0, 0, 0.4));
 	--goo-panel-z-index: 9999;
-	--goo-panel-margin: var(--goo-theme-space-10, 10px);
+	--goo-panel-margin: var(--goo-theme-space-md, 10px);
 
 	display: block;
 	position: fixed;
@@ -57,7 +57,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: var(--goo-theme-space-10, 10px) var(--goo-theme-space-12, 12px);
+	padding: var(--goo-theme-space-sm, 10px) var(--goo-theme-space-md, 12px);
 	background: var(--goo-panel-header-bg);
 	border-bottom: 1px solid var(--goo-panel-border);
 	cursor: grab;
@@ -142,7 +142,7 @@
 
 .goo-panel__content::-webkit-scrollbar-thumb {
 	background: color-mix(in srgb, var(--goo-theme-fg, #fff) 20%, transparent);
-	border-radius: var(--goo-theme-radius-xs, 2px);
+	border-radius: var(--goo-theme-radius-sm, 2px);
 }
 
 .goo-panel__content::-webkit-scrollbar-thumb:hover {
