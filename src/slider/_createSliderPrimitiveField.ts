@@ -78,9 +78,10 @@ export function createSliderPrimitiveField(
 		if (instance) {
 			unmount(instance)
 			instance = null
+		} else {
+			field.replaceChildren()
 		}
 		sliderElement = null
-		field.replaceChildren()
 	}
 
 	function render(): void {
@@ -118,7 +119,7 @@ export function createSliderPrimitiveField(
 		}
 	})
 	field.getValue = () => currentValue as number | number[]
-	field.setValue = (value) => {
+	field.setValue = value => {
 		if (destroyed) return
 		currentValue = value
 		sliderElement?.setValue(value, { silent: true })

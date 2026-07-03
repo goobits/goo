@@ -41,9 +41,10 @@ export function createAngleInputField(
 		if (instance) {
 			unmount(instance)
 			instance = null
+		} else {
+			field.replaceChildren()
 		}
 		angleElement = null
-		field.replaceChildren()
 	}
 
 	function render(): void {
@@ -89,7 +90,7 @@ export function createAngleInputField(
 		}
 	})
 	field.getValue = () => currentValue
-	field.setValue = (value) => {
+	field.setValue = value => {
 		if (destroyed) return
 		currentValue = parseAngleValue(value)
 		if (angleElement?.setValue) {

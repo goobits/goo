@@ -44,8 +44,9 @@ export function createButtonGroupField(
 		if (instance) {
 			unmount(instance)
 			instance = null
+		} else {
+			field.replaceChildren()
 		}
-		field.replaceChildren()
 	}
 
 	function render(): void {
@@ -84,7 +85,7 @@ export function createButtonGroupField(
 		}
 	})
 	field.getValue = () => selectedValue
-	field.setValue = (value) => {
+	field.setValue = value => {
 		if (destroyed) return
 		selectedValue = value
 		if (instance?.setValue) {
