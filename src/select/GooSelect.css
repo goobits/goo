@@ -338,12 +338,13 @@
 }
 
 .goo-popout.goo-select-popout .goo-select__options {
-	padding: var(--goo-theme-space-xs, 4px) calc(var(--goo-theme-space-sm, 8px) - 3px);
+	padding: var(--goo-theme-space-xs, 4px)
+		calc(var(--goo-theme-space-sm, 8px) - var(--goo-theme-space-2xs, 2px));
 }
 
 /* Compact rows with a rounded highlight box. */
 .goo-popout.goo-menu-popout .goo-select__option {
-	min-height: 1.375rem;
+	min-height: var(--goo-theme-control-height-sm, 24px);
 	border-radius: var(--goo-theme-radius-md, 6px);
 	box-shadow: none;
 }
@@ -397,7 +398,8 @@
 
 /* Hairline divider, inset to match the highlight gutter. */
 .goo-popout.goo-menu-popout .goo-select__divider {
-	margin: var(--goo-theme-space-xs, 4px) calc(var(--goo-theme-space-sm, 8px) - 3px);
+	margin: var(--goo-theme-space-xs, 4px)
+		calc(var(--goo-theme-space-sm, 8px) - var(--goo-theme-space-2xs, 2px));
 	background: color-mix(in srgb, var(--goo-theme-fg) 12%, transparent);
 }
 

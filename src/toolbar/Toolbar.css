@@ -1,7 +1,9 @@
 .goo-floating-toolbar {
 	--goo-floating-toolbar-icon-size: var(--goo-theme-icon-lg);
-	--goo-floating-toolbar-tool-size: 44px;
-	--goo-floating-toolbar-width: 54px;
+	--goo-floating-toolbar-tool-size: var(--goo-theme-control-height-touch, 44px);
+	--goo-floating-toolbar-width: calc(
+		var(--goo-theme-control-height-touch, 44px) + var(--goo-theme-space-sm, 8px) + var(--goo-theme-space-2xs, 2px)
+	);
 
 	-webkit-touch-callout: none;
 	backdrop-filter: blur(18px) saturate(1.35);
@@ -149,7 +151,7 @@
 	display: inline-flex;
 	gap: var(--goo-theme-space-sm);
 	justify-content: center;
-	min-height: 2.25rem;
+	min-height: var(--goo-theme-control-height-lg, 40px);
 	padding: var(--goo-theme-space-xs) var(--goo-theme-space-sm);
 }
 

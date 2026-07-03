@@ -127,7 +127,7 @@ sketch-label[data-tag='textarea'] {
 sketch-label input,
 sketch-label textarea {
 	border-radius: var(--goo-theme-radius-md, 6px);
-	padding: var(--goo-theme-space-xs, 5px) var(--goo-theme-space-sm, 7px);
+	padding: var(--goo-theme-space-xs, 4px) var(--goo-theme-space-sm, 8px);
 }
 
 sketch-label[data-tag='checkbox'],
@@ -198,7 +198,7 @@ sketch-label.goo-config-field[data-tag='textarea'] {
 }
 
 sketch-label.goo-config-field[data-tag='textarea'] .goo-textarea {
-	margin-top: var(--goo-theme-space-sm, 6px);
+	margin-top: var(--goo-theme-space-sm, 8px);
 	width: 100%;
 }
 

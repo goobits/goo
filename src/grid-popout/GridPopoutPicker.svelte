@@ -463,7 +463,7 @@ function escapeSelectorValue(value: string): string {
 :global(goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .goo-grid-picker),
 :global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .goo-grid-picker) {
 	display: grid;
-	gap: var(--goo-theme-space-sm, 6px);
+	gap: var(--goo-theme-space-sm, 8px);
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 	justify-items: stretch;
 }
@@ -609,13 +609,13 @@ function escapeSelectorValue(value: string): string {
 :global(.goo-popout.goo-grid-popout--icon-grid img.icon) {
 	align-items: center;
 	display: inline-flex;
-	flex: 0 0 40px;
+	flex: 0 0 var(--goo-theme-control-height-lg, 40px);
 	font-size: var(--goo-theme-icon-lg);
-	height: 40px;
+	height: var(--goo-theme-control-height-lg, 40px);
 	justify-content: center;
 	line-height: 1;
 	margin: 0;
-	width: 40px;
+	width: var(--goo-theme-control-height-lg, 40px);
 }
 
 :global(goo-popout.goo-grid-popout--icon-grid .icon svg),

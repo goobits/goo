@@ -84,9 +84,9 @@
 }
 
 .goo-toast__action {
-	margin-top: var(--goo-theme-space-sm, 6px);
+	margin-top: var(--goo-theme-space-sm, 8px);
 	align-self: flex-start;
-	padding: var(--goo-theme-space-xs, 4px) var(--goo-theme-space-md, 10px);
+	padding: var(--goo-theme-space-xs, 4px) var(--goo-theme-space-md, 12px);
 	font: inherit;
 	font-size: var(--goo-theme-font-size-xs, 0.6875rem);
 	font-weight: 500;
