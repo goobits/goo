@@ -690,7 +690,10 @@ Core components should use this contract directly:
 | Accent/selection | `--goo-theme-accent`, `--goo-theme-accent-fg`, `--goo-theme-selected`, `--goo-theme-selected-fg` |
 | Status | `--goo-theme-positive`, `--goo-theme-positive-fg`, `--goo-theme-negative`, `--goo-theme-negative-fg`, `--goo-theme-warning`, `--goo-theme-warning-fg` |
 | Secondary | `--goo-theme-secondary`, `--goo-theme-secondary-fg` |
-| Radius/space/type | `--goo-theme-radius-sm/md/lg/xl/full`, `--goo-theme-space-xs/sm/md/lg/xl`, `--goo-theme-font-size-xs/sm/md/lg/xl` |
+| Radius/space/type | `--goo-theme-radius-sm/md/lg/xl/full`, `--goo-theme-space-2xs/xs/sm/md/lg/xl`, `--goo-theme-font-size-xs/sm/root/md/lg/xl` |
+| Icons/shadows | `--goo-theme-icon-xs/sm/md/lg`, `--goo-theme-shadow-sm/md/lg` |
+| Controls | `--goo-theme-control-height-sm/md/lg/touch`, `--goo-theme-control-padding-sm/md/lg`, `--goo-theme-control-row-padding`, `--goo-theme-control-label-*`, `--goo-theme-control-divider`, `--goo-theme-control-range-tick-color` |
+| Canvas/preview | `--goo-theme-canvas-*`, `--goo-theme-preview-bg-*`, `--goo-theme-handle-*`, `--goo-theme-region-hover` |
 
 Hover, active, and subtle accent backgrounds are derived at the component site:
 
