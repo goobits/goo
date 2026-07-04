@@ -13,7 +13,7 @@
 	--goo-panel-fg: var(--goo-theme-fg, #e8e8e8);
 	--goo-panel-radius: var(--goo-theme-radius-lg, 12px);
 	--goo-panel-shadow: var(--goo-theme-shadow-lg, 0 4px 20px rgba(0, 0, 0, 0.4));
-	--goo-panel-z-index: 9999;
+	--goo-panel-z-index: var(--goo-theme-layer-popout, 10000);
 	--goo-panel-margin: var(--goo-theme-space-md, 12px);
 	--goo-panel-toggle-size: var(--goo-theme-control-height-sm, 1.5rem);
 	--goo-panel-header-offset: calc(
@@ -117,7 +117,7 @@
 
 .goo-panel__toggle-icon {
 	display: block;
-	transition: transform 0.2s ease;
+	transition: transform var(--goo-theme-transition-normal, 0.15s ease);
 }
 
 /* Rotate icon when closed */
@@ -181,7 +181,7 @@
 /* Animation for smooth open/close */
 @media (prefers-reduced-motion: no-preference) {
 	.goo-panel__content {
-		animation: goo-panel-expand 0.2s ease-out;
+		animation: goo-panel-expand var(--goo-theme-transition-normal, 0.15s ease);
 	}
 }
 
@@ -275,7 +275,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	transition: background 0.2s ease;
+	transition: background var(--goo-theme-transition-normal, 0.15s ease);
 }
 
 .goo-settings-pane__title,

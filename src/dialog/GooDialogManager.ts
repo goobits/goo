@@ -3,7 +3,7 @@
  * @module goobits/dialog/GooDialogManager
  */
 
-const BASE_Z_INDEX = 99999
+const BASE_Z_INDEX = 100000
 
 /** Minimal dialog surface the manager needs to stack and close dialogs. */
 export interface ManagedDialog {

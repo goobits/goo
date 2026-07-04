@@ -1,5 +1,5 @@
 .goo-progress-toast {
-	--goo-progress-toast-z-index: 100000;
+	--goo-progress-toast-z-index: var(--goo-theme-layer-toast, 99999);
 
 	position: fixed;
 	right: var(--goo-theme-space-lg, 16px);
@@ -14,7 +14,7 @@
 	color: var(--goo-toast-color, #fff);
 	background: var(--goo-toast-background, #1f2937);
 	border-radius: var(--goo-theme-radius-md, 6px);
-	box-shadow: 0 12px 32px rgb(0 0 0 / 22%);
+	box-shadow: var(--goo-theme-shadow-lg, 0 12px 32px rgb(0 0 0 / 22%));
 }
 
 .goo-progress-toast__ring {

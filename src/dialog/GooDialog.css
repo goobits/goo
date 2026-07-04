@@ -7,9 +7,9 @@
 	position: fixed;
 	inset: 0;
 	background: var(--goo-dialog-backdrop, rgba(0, 0, 0, 0.7));
-	z-index: var(--goo-dialog-z-index, 99999);
+	z-index: var(--goo-dialog-z-index, var(--goo-theme-layer-modal, 100000));
 	opacity: 0;
-	transition: opacity var(--goo-dialog-transition-duration, 150ms) ease-out;
+	transition: opacity var(--goo-dialog-transition, var(--goo-theme-transition-normal, 0.15s ease));
 }
 
 .goo-dialog-backdrop--visible {
@@ -32,6 +32,7 @@
 	--goo-dialog-touch-header-height: calc(var(--goo-theme-control-height-touch, 44px) + var(--goo-theme-space-xs, 4px));
 	--goo-dialog-touch-overlay-close-inset: var(--goo-theme-space-sm, 8px);
 	--goo-dialog-touch-overlay-close-top: calc(var(--goo-theme-space-2xs, 2px));
+	--goo-dialog-transition: var(--goo-theme-transition-normal, 0.15s ease);
 
 	position: fixed;
 	inset: 0;
@@ -41,7 +42,7 @@
 	background: var(--goo-dialog-bg, var(--goo-theme-surface, #1a1a2e));
 	border: none;
 	border-radius: var(--goo-dialog-border-radius, var(--goo-theme-radius-lg, 8px));
-	box-shadow: var(--goo-dialog-shadow, 2px 2px 5px rgba(0, 0, 0, 0.33));
+	box-shadow: var(--goo-dialog-shadow, var(--goo-theme-shadow-md, 0 8px 22px rgba(0, 0, 0, 0.22)));
 	color: var(--goo-dialog-fg, var(--goo-theme-fg, #fff));
 	max-width: min(600px, 90vw);
 	max-height: 80vh;
@@ -49,9 +50,9 @@
 	height: fit-content;
 	padding: 0;
 	outline: none;
-	z-index: calc(var(--goo-dialog-z-index, 99999) + 1);
+	z-index: calc(var(--goo-dialog-z-index, var(--goo-theme-layer-modal, 100000)) + 1);
 	opacity: 0;
-	transition: opacity var(--goo-dialog-transition-duration, 150ms) ease-out;
+	transition: opacity var(--goo-dialog-transition);
 }
 
 .goo-dialog[open] {
@@ -114,8 +115,8 @@
 	padding: var(--goo-theme-space-xs, 4px);
 	border-radius: var(--goo-theme-radius-sm, 4px);
 	transition:
-		background 0.15s,
-		color 0.15s;
+		background var(--goo-dialog-transition),
+		color var(--goo-dialog-transition);
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -215,7 +216,7 @@
 	font-size: var(--goo-theme-font-size-md, 0.9375rem);
 	cursor: pointer;
 	box-shadow: var(--goo-theme-shadow-md, 0 2px 8px rgba(0, 0, 0, 0.3));
-	transition: transform 0.15s;
+	transition: transform var(--goo-dialog-transition);
 }
 
 .goo-dialog.goo-dialog--alert .goo-dialog__close-badge:hover {
@@ -341,8 +342,8 @@
 		0 0 0 3px var(--goo-theme-accent, #f59e0b),
 		0 0 0 4px color-mix(in srgb, var(--goo-theme-accent, #f59e0b) 50%, transparent);
 	transition:
-		transform 0.15s,
-		box-shadow 0.15s;
+		transform var(--goo-dialog-transition),
+		box-shadow var(--goo-dialog-transition);
 }
 
 .goo-dialog.goo-dialog--overlay .goo-dialog__close:hover {

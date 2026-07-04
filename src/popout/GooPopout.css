@@ -26,7 +26,7 @@
 	--goo-popout-backdrop-bg: rgb(0 0 0 / 30%);
 	--goo-popout-backdrop-z-index: -1;
 	--goo-popout-scrollbar-size: calc(var(--goo-theme-space-sm, 8px) - var(--goo-theme-space-2xs, 2px));
-	--goo-popout-z-index: 100000;
+	--goo-popout-z-index: var(--goo-theme-layer-popout, 10000);
 
 	backdrop-filter: blur(18px) saturate(1.35);
 	background-image: linear-gradient(
@@ -187,7 +187,7 @@
 /* Hidden arrow (e.g., when dragged) */
 .goo-popout__arrow--hidden {
 	opacity: 0;
-	transition: opacity 150ms ease;
+	transition: opacity var(--goo-theme-transition-normal, 0.15s ease);
 }
 
 /* =============================================================================

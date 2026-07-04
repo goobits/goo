@@ -9,7 +9,7 @@
 		24rem
 	);
 	--goo-toaster-gap: var(--goo-theme-space-md, 12px);
-	--goo-toaster-z-index: 999;
+	--goo-toaster-z-index: var(--goo-theme-layer-toast, 99999);
 	--goo-toaster-edge: var(--goo-theme-space-lg, 16px);
 
 	position: fixed;

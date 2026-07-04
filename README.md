@@ -663,20 +663,21 @@ Goo components read CSS custom properties from the current DOM tree. Define the 
 	--goo-theme-surface-raised: #f9fafb;
 	--goo-theme-surface-sunken: #f3f4f6;
 	--goo-theme-border: rgba(17, 24, 39, 0.14);
-	--goo-theme-border-subtle: rgba(17, 24, 39, 0.08);
+	--goo-theme-border-strong: rgba(17, 24, 39, 0.2);
 	--goo-theme-accent: #2563eb;
 	--goo-theme-accent-fg: #ffffff;
-	--goo-theme-selected: #dbeafe;
-	--goo-theme-selected-fg: #1e3a8a;
 	--goo-theme-positive: #16a34a;
 	--goo-theme-positive-fg: #ffffff;
-	--goo-theme-negative: #dc2626;
-	--goo-theme-negative-fg: #ffffff;
+	--goo-theme-danger: #dc2626;
+	--goo-theme-danger-fg: #ffffff;
 	--goo-theme-warning: #f59e0b;
 	--goo-theme-warning-fg: #111827;
-	--goo-theme-secondary: #7c3aed;
-	--goo-theme-secondary-fg: #ffffff;
 	--goo-theme-focus-ring: rgba(37, 99, 235, 0.4);
+	--goo-theme-layer-dropdown: 1000;
+	--goo-theme-layer-popout: 10000;
+	--goo-theme-layer-toast: 99999;
+	--goo-theme-layer-modal: 100000;
+	--goo-theme-layer-system: 2147483000;
 }
 ```
 
@@ -686,14 +687,13 @@ Core components should use this contract directly:
 | ----- | ------ |
 | Text | `--goo-theme-fg`, `--goo-theme-muted`, `--goo-theme-text-disabled` |
 | Surfaces | `--goo-theme-bg`, `--goo-theme-surface`, `--goo-theme-surface-raised`, `--goo-theme-surface-sunken` |
-| Borders | `--goo-theme-border`, `--goo-theme-border-subtle`, `--goo-theme-focus-ring` |
-| Accent/selection | `--goo-theme-accent`, `--goo-theme-accent-fg`, `--goo-theme-selected`, `--goo-theme-selected-fg` |
-| Status | `--goo-theme-positive`, `--goo-theme-positive-fg`, `--goo-theme-negative`, `--goo-theme-negative-fg`, `--goo-theme-warning`, `--goo-theme-warning-fg` |
-| Secondary | `--goo-theme-secondary`, `--goo-theme-secondary-fg` |
-| Radius/space/type | `--goo-theme-radius-sm/md/lg/xl/full`, `--goo-theme-space-2xs/xs/sm/md/lg/xl`, `--goo-theme-font-size-xs/sm/root/md/lg/xl` |
+| Borders | `--goo-theme-border`, `--goo-theme-border-strong`, `--goo-theme-focus-ring` |
+| Accent | `--goo-theme-accent`, `--goo-theme-accent-fg` |
+| Status | `--goo-theme-positive`, `--goo-theme-positive-fg`, `--goo-theme-danger`, `--goo-theme-danger-fg`, `--goo-theme-warning`, `--goo-theme-warning-fg` |
+| Radius/space/type | `--goo-theme-radius-sm/md/lg/full`, `--goo-theme-space-2xs/xs/sm/md/lg/xl`, `--goo-theme-font-size-xs/sm/base/md/lg/xl` |
 | Icons/shadows | `--goo-theme-icon-xs/sm/md/lg`, `--goo-theme-shadow-sm/md/lg` |
-| Controls | `--goo-theme-control-height-sm/md/lg/touch`, `--goo-theme-control-padding-sm/md/lg`, `--goo-theme-control-row-padding`, `--goo-theme-control-label-*`, `--goo-theme-control-divider`, `--goo-theme-control-range-tick-color` |
-| Canvas/preview | `--goo-theme-canvas-*`, `--goo-theme-preview-bg-*`, `--goo-theme-handle-*`, `--goo-theme-region-hover` |
+| Controls | `--goo-theme-control-height-sm/md/lg/touch`, `--goo-theme-control-padding-sm/md/lg`, `--goo-theme-control-row-padding` |
+| Layers | `--goo-theme-layer-dropdown`, `--goo-theme-layer-popout`, `--goo-theme-layer-toast`, `--goo-theme-layer-modal`, `--goo-theme-layer-system` |
 
 Hover, active, and subtle accent backgrounds are derived at the component site:
 

@@ -7,7 +7,7 @@
 	--goo-vortex-message-radius: var(--goo-theme-radius-lg, 10px);
 	--goo-vortex-message-z-index: 11;
 	--goo-vortex-size: 250px;
-	--goo-vortex-z-index: 99;
+	--goo-vortex-z-index: var(--goo-theme-layer-popout, 10000);
 
 	display: block;
 	height: var(--goo-vortex-size);
