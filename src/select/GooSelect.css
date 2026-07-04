@@ -250,7 +250,7 @@
 	/* Re-define select variables for popout context */
 	--goo-select-check-size: 0.75rem;
 	--goo-select-item-box-size: 1.25rem;
-	--goo-select-item-bleed-x: calc(var(--goo-select-padding) * -1);
+	--goo-select-item-bleed-x: 0px;
 	--goo-select-item-gap: var(--goo-theme-space-sm);
 	--goo-select-item-line-height: 1.25rem;
 	--goo-select-item-padding-x: var(--goo-theme-space-sm);
@@ -268,6 +268,14 @@
 	--goo-select-scrollbar-thumb: color-mix(in srgb, var(--goo-select-fg-muted) 70%, transparent);
 	--goo-select-scrollbar-thumb-hover: color-mix(in srgb, var(--goo-select-fg) 55%, transparent);
 	--goo-popout-radius: var(--goo-theme-radius-lg);
+	--goo-popout-bg: color-mix(in srgb, var(--goo-theme-bg, #2d2d32) 92%, transparent);
+	--goo-popout-border: color-mix(in srgb, var(--goo-theme-fg, #fff) 10%, transparent);
+	--goo-popout-shadow:
+		drop-shadow(0 10px 28px rgb(0 0 0 / 26%))
+		drop-shadow(0 2px 8px rgb(0 0 0 / 16%));
+
+	background-image: none;
+	box-shadow: none;
 }
 
 .goo-popout.goo-menu-popout .goo-popout__content {
@@ -294,28 +302,6 @@
 .goo-popout.goo-select-popout--menu-attached {
 	--goo-popout-radius: 0 0 var(--goo-select-radius, var(--goo-theme-radius-sm, 4px))
 		var(--goo-select-radius, var(--goo-theme-radius-sm, 4px));
-}
-
-/* ============================================================================
-   Menu surface (shared): context menus AND select dropdowns vibe together.
-   macOS-style — vibrancy material, hairline chrome, compact rows, and an inset
-   rounded highlight filled with the accent (white text) rather than a tinted
-   band or a left rail. Scoped to .goo-menu-popout, which every menu surface shares.
-   ============================================================================ */
-.goo-popout.goo-menu-popout {
-	--goo-select-item-bleed-x: 0px;
-	--goo-select-divider-size: 1px;
-
-	/* Translucent vibrancy material: keep the base backdrop blur, drop the
-	   gradient sheen and etched edges, soften to a hairline. Radius is left to
-	   the existing --goo-popout-radius so the menu-attached variant still works. */
-	--goo-popout-bg: color-mix(in srgb, var(--goo-theme-bg, #2d2d32) 92%, transparent);
-	--goo-popout-border: color-mix(in srgb, var(--goo-theme-fg, #fff) 10%, transparent);
-	--goo-popout-shadow:
-		drop-shadow(0 10px 28px rgb(0 0 0 / 26%))
-		drop-shadow(0 2px 8px rgb(0 0 0 / 16%));
-	background-image: none;
-	box-shadow: none;
 }
 
 @media (hover: none) and (pointer: coarse) {

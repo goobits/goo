@@ -15,6 +15,14 @@
 	--goo-panel-shadow: var(--goo-theme-shadow-lg, 0 4px 20px rgba(0, 0, 0, 0.4));
 	--goo-panel-z-index: 9999;
 	--goo-panel-margin: var(--goo-theme-space-md, 12px);
+	--goo-panel-toggle-size: var(--goo-theme-control-height-sm, 1.5rem);
+	--goo-panel-header-offset: calc(
+		var(--goo-theme-control-height-md, 2rem) + var(--goo-theme-space-md, 0.75rem) +
+			var(--goo-theme-space-2xs, 0.125rem) * 0.5
+	);
+	--goo-panel-scrollbar-size: calc(
+		var(--goo-theme-space-sm, 0.5rem) - var(--goo-theme-space-2xs, 0.125rem)
+	);
 
 	display: block;
 	position: fixed;
@@ -25,7 +33,7 @@
 	border-radius: var(--goo-panel-radius);
 	box-shadow: var(--goo-panel-shadow);
 	color: var(--goo-panel-fg);
-	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-family: var(--goo-theme-font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
 	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
 	z-index: var(--goo-panel-z-index);
 	overflow: hidden;
@@ -82,8 +90,8 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 20px;
-	height: 20px;
+	width: var(--goo-panel-toggle-size);
+	height: var(--goo-panel-toggle-size);
 	padding: 0;
 	background: transparent;
 	border: none;
@@ -121,7 +129,7 @@
 .goo-panel__content {
 	display: none;
 	flex-direction: column;
-	max-height: calc(var(--goo-panel-max-height) - 45px);
+	max-height: calc(var(--goo-panel-max-height) - var(--goo-panel-header-offset));
 	overflow-y: auto;
 	overflow-x: hidden;
 }
@@ -133,7 +141,7 @@
 
 /* Scrollbar styling */
 .goo-panel__content::-webkit-scrollbar {
-	width: 6px;
+	width: var(--goo-panel-scrollbar-size);
 }
 
 .goo-panel__content::-webkit-scrollbar-track {
@@ -356,6 +364,6 @@
 }
 
 .goo-panel.goo-panel--docked .goo-panel__content {
-	max-height: calc(100% - 45px);
-	height: calc(100% - 45px);
+	max-height: calc(100% - var(--goo-panel-header-offset));
+	height: calc(100% - var(--goo-panel-header-offset));
 }

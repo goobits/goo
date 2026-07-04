@@ -12,6 +12,9 @@
 	--goo-label-required-color: var(--goo-theme-negative, #ef4444);
 	--goo-label-disabled-opacity: var(--goo-theme-disabled-opacity);
 	--goo-label-motion: var(--goo-theme-transition-fast, 0.15s ease);
+	--goo-label-title-line-height: var(--goo-theme-control-height-sm, 1.5rem);
+	--goo-label-row-height: var(--goo-theme-control-height-lg, 2.5rem);
+	--goo-label-textarea-min-height: calc(var(--goo-theme-control-height-lg, 2.5rem) * 2);
 
 	display: inline-flex;
 	align-items: center;
@@ -78,8 +81,8 @@ sketch-title {
 	border-bottom-right-radius: var(--goo-theme-radius-sm, 5px);
 	cursor: default;
 	display: inline-block;
-	letter-spacing: 1px;
-	line-height: 22px;
+	letter-spacing: 0;
+	line-height: var(--goo-label-title-line-height);
 	margin: 0;
 	overflow: hidden;
 	padding: 0 var(--goo-theme-space-sm, 8px);
@@ -121,7 +124,7 @@ sketch-label.sk-font-menu {
 }
 
 sketch-label[data-tag='textarea'] {
-	min-height: 80px;
+	min-height: var(--goo-label-textarea-min-height);
 }
 
 sketch-label input,
@@ -136,8 +139,8 @@ sketch-label[data-tag='selectmenu'] {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	height: 40px;
-	line-height: 40px;
+	height: var(--goo-label-row-height);
+	line-height: var(--goo-label-row-height);
 	padding: 0 var(--goo-theme-space-sm, 8px);
 }
 
@@ -179,9 +182,9 @@ sketch-label.goo-config-field[data-tag='number'] {
 	align-items: center;
 	display: flex;
 	gap: var(--goo-theme-space-sm, 8px);
-	height: 40px;
+	height: var(--goo-label-row-height);
 	justify-content: space-between;
-	line-height: 40px;
+	line-height: var(--goo-label-row-height);
 	padding: 0 var(--goo-theme-space-sm, 8px);
 }
 

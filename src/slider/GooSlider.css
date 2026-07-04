@@ -3,7 +3,9 @@
 .goo-slider {
 	--goo-slider-track-bg: color-mix(in srgb, var(--goo-theme-fg, #fff) 12%, var(--goo-theme-bg, #111));
 	--goo-slider-track-height: calc(var(--goo-theme-control-height-lg, 2.5rem) * 0.3);
-	--goo-slider-track-radius: 4px;
+	--goo-slider-track-margin-block: calc(var(--goo-theme-space-sm, 0.5rem) + var(--goo-theme-space-2xs, 0.125rem) * 0.5);
+	--goo-slider-track-margin-inline: calc(var(--goo-theme-space-sm, 0.5rem) - var(--goo-theme-space-2xs, 0.125rem));
+	--goo-slider-track-radius: var(--goo-theme-radius-sm, 0.375rem);
 	--goo-slider-thumb-size: calc(var(--goo-theme-control-height-lg, 2.5rem) * 0.35);
 	--goo-slider-hit-area-size: max(2.75rem, var(--goo-theme-control-height-lg, 2.5rem));
 	--goo-slider-thumb-bg: color-mix(in srgb, var(--goo-theme-fg, #fff) 94%, var(--goo-theme-accent, #3b82f6));
@@ -27,6 +29,12 @@
 	--goo-slider-transition-timing: cubic-bezier(0.5, 1.3, 0.5, 1);
 	--goo-slider-motion-fast: var(--goo-theme-transition-fast, 0.15s ease);
 	--goo-slider-motion-normal: var(--goo-theme-transition-normal, 0.2s ease);
+	--goo-slider-mark-extra-height: var(--goo-theme-space-sm, 0.5rem);
+	--goo-slider-mark-label-offset: var(--goo-theme-space-xs, 0.25rem);
+	--goo-slider-header-gap: var(--goo-theme-space-sm, 0.5rem);
+	--goo-slider-header-block-gap: var(--goo-theme-space-sm, 0.5rem);
+	--goo-slider-number-min-width: calc(var(--goo-theme-control-height-sm, 1.5rem) * 2);
+	--goo-slider-number-max-width: calc(var(--goo-theme-control-height-sm, 1.5rem) * 3.33);
 
 	/* Default color for theme-aware track background fallback (when no gradient provided) */
 	color: var(--goo-theme-muted);
@@ -69,7 +77,7 @@
 	position: relative;
 	z-index: 1;
 	height: var(--goo-slider-track-height);
-	margin: 9px 6px;
+	margin: var(--goo-slider-track-margin-block) var(--goo-slider-track-margin-inline);
 	background: var(--goo-slider-track-bg);
 	border-radius: var(--goo-slider-track-radius);
 	/* Subtle inner shadow for depth */
@@ -197,7 +205,7 @@
 	position: absolute;
 	top: 50%;
 	width: 1px;
-	height: calc(var(--goo-slider-track-height) + 8px);
+	height: calc(var(--goo-slider-track-height) + var(--goo-slider-mark-extra-height));
 	background: var(--goo-slider-mark-color, var(--goo-theme-control-range-tick-color, color-mix(in srgb, var(--goo-theme-fg, #fff) 36%, transparent)));
 	pointer-events: none;
 	transform: translateX(-50%) translateY(-50%);
@@ -206,7 +214,7 @@
 
 .goo-slider__mark-label {
 	position: absolute;
-	top: calc(100% + 4px);
+	top: calc(100% + var(--goo-slider-mark-label-offset));
 	left: 50%;
 	color: var(--goo-theme-muted, color-mix(in srgb, var(--goo-theme-fg, #fff) 62%, transparent));
 	font-size: var(--goo-theme-font-size-xs, 0.6875rem);
@@ -265,8 +273,8 @@
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	gap: 8px;
-	margin-bottom: 8px;
+	gap: var(--goo-slider-header-gap);
+	margin-bottom: var(--goo-slider-header-block-gap);
 
 	.goo-label {
 		flex: 1;
@@ -279,11 +287,11 @@
 	.goo-number {
 		flex-shrink: 0;
 		width: auto;
-		min-width: 48px;
-		max-width: 80px;
+		min-width: var(--goo-slider-number-min-width);
+		max-width: var(--goo-slider-number-max-width);
 		--goo-number-bg: var(--goo-theme-surface-raised);
 		--goo-number-border: transparent;
-		--goo-number-border-radius: 6px;
+		--goo-number-radius: var(--goo-theme-radius-md, 0.5rem);
 		--goo-number-height: var(--goo-theme-control-height-sm, 1.5rem);
 	}
 }

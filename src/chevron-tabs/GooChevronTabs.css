@@ -1,15 +1,48 @@
 .goo-chevron-tabs {
+	--goo-chevron-tabs-bg: var(--goo-theme-surface-sunken, #15171e);
+	--goo-chevron-tabs-bg-raised: var(--goo-theme-surface-raised, #282a36);
+	--goo-chevron-tabs-border: var(--goo-theme-surface-sunken, #15171e);
+	--goo-chevron-tabs-fg: var(--goo-theme-fg, #f8f8f2);
+	--goo-chevron-tabs-fg-muted: color-mix(in srgb, var(--goo-chevron-tabs-fg) 62%, transparent);
+	--goo-chevron-tabs-height: calc(var(--goo-theme-control-height-md, 2rem) - var(--goo-theme-space-xs, 0.25rem));
+	--goo-chevron-tabs-border-width: var(--goo-theme-space-2xs, 0.125rem);
+	--goo-chevron-tabs-add-width: calc(var(--goo-theme-control-height-lg, 2.5rem) - var(--goo-theme-space-2xs, 0.125rem));
+	--goo-chevron-tabs-chevron-size: calc(var(--goo-theme-space-sm, 0.5rem) + var(--goo-theme-space-2xs, 0.125rem));
+	--goo-chevron-tabs-tab-gap: calc(var(--goo-theme-space-sm, 0.5rem) + var(--goo-theme-space-2xs, 0.125rem) * 0.5);
+	--goo-chevron-tabs-tab-min-width: calc(var(--goo-theme-control-height-lg, 2.5rem) * 2 + var(--goo-theme-space-md, 0.75rem));
+	--goo-chevron-tabs-tab-max-width: calc(var(--goo-theme-control-height-lg, 2.5rem) * 6);
+	--goo-chevron-tabs-tab-overlap: calc(
+		(var(--goo-theme-space-sm, 0.5rem) - var(--goo-theme-space-2xs, 0.125rem) * 0.5) * -1
+	);
+	--goo-chevron-tabs-tab-inline-end-padding: calc(var(--goo-theme-control-height-md, 2rem) + var(--goo-theme-space-xs, 0.25rem));
+	--goo-chevron-tabs-label-max-width: calc(var(--goo-theme-control-height-lg, 2.5rem) * 3.75);
+	--goo-chevron-tabs-activity-size: var(--goo-theme-icon-sm, 0.875rem);
+	--goo-chevron-tabs-close-size: calc(var(--goo-theme-icon-sm, 0.875rem) + var(--goo-theme-space-2xs, 0.125rem) * 0.5);
+	--goo-chevron-tabs-close-offset: var(--goo-theme-space-md, 0.75rem);
+	--goo-chevron-tabs-tip-offset: calc(var(--goo-theme-space-sm, 0.5rem) + var(--goo-theme-space-2xs, 0.125rem) * 0.5);
+	--goo-chevron-tabs-tip-min-width: calc(var(--goo-theme-control-height-lg, 2.5rem) * 3.8);
+	--goo-chevron-tabs-tip-padding: calc(var(--goo-theme-space-sm, 0.5rem) + var(--goo-theme-space-2xs, 0.125rem) * 0.5)
+		calc(var(--goo-theme-space-md, 0.75rem) - var(--goo-theme-space-2xs, 0.125rem) * 0.5);
+	--goo-chevron-tabs-menu-button-size: calc(var(--goo-theme-control-height-sm, 1.5rem) - var(--goo-theme-space-2xs, 0.125rem));
+	--goo-chevron-tabs-menu-offset: calc(var(--goo-theme-space-sm, 0.5rem) + var(--goo-theme-space-2xs, 0.125rem));
+	--goo-chevron-tabs-menu-min-width: calc(var(--goo-theme-control-height-lg, 2.5rem) * 4.75);
+	--goo-chevron-tabs-menu-padding: calc(var(--goo-theme-space-sm, 0.5rem) - var(--goo-theme-space-2xs, 0.125rem));
+	--goo-chevron-tabs-menu-row-gap: calc(var(--goo-theme-space-sm, 0.5rem) + var(--goo-theme-space-2xs, 0.125rem) * 0.5);
+	--goo-chevron-tabs-menu-row-padding: calc(var(--goo-theme-space-sm, 0.5rem) - var(--goo-theme-space-2xs, 0.125rem) * 0.5)
+		calc(var(--goo-theme-space-sm, 0.5rem) + var(--goo-theme-space-2xs, 0.125rem));
+	--goo-chevron-tabs-menu-dot-size: calc(var(--goo-theme-space-sm, 0.5rem) - var(--goo-theme-space-2xs, 0.125rem));
+	--goo-chevron-tabs-menu-accent-size: var(--goo-theme-space-sm, 0.5rem);
 	position: relative;
 	display: flex;
 	align-items: stretch;
 	min-width: 0;
-	height: 28px;
-	border-top: 2px solid #15171e;
-	border-bottom: 2px solid #15171e;
-	background: linear-gradient(180deg, #181a22 0%, #15171e 100%);
-	color: #f8f8f2;
-	--goo-chevron-tabs-selected-color: #79f2b0;
-	--goo-chevron-tabs-selected-foreground: #0c0e14;
+	height: var(--goo-chevron-tabs-height);
+	border-top: var(--goo-chevron-tabs-border-width) solid var(--goo-chevron-tabs-border);
+	border-bottom: var(--goo-chevron-tabs-border-width) solid var(--goo-chevron-tabs-border);
+	background: var(--goo-chevron-tabs-bg);
+	color: var(--goo-chevron-tabs-fg);
+	--goo-chevron-tabs-selected-color: var(--goo-theme-accent);
+	--goo-chevron-tabs-selected-foreground: var(--goo-theme-accent-fg);
 	font-family: var(
 		--goo-chevron-tabs-font-family,
 		system-ui,
@@ -37,17 +70,17 @@
 
 .goo-chevron-tabs__add {
 	position: relative;
-	z-index: 999;
+	z-index: 1;
 	display: grid;
 	place-content: center;
 	flex: 0 0 auto;
-	width: 38px;
-	height: 28px;
-	padding: 0 6px 0 0;
+	width: var(--goo-chevron-tabs-add-width);
+	height: var(--goo-chevron-tabs-height);
+	padding: 0 var(--goo-theme-space-sm, 0.5rem) 0 0;
 	border: 0;
-	background: #282a36;
-	clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%);
-	color: rgba(248, 248, 242, 0.6);
+	background: var(--goo-chevron-tabs-bg-raised);
+	clip-path: polygon(0 0, calc(100% - var(--goo-chevron-tabs-chevron-size)) 0, 100% 50%, calc(100% - var(--goo-chevron-tabs-chevron-size)) 100%, 0 100%);
+	color: var(--goo-chevron-tabs-fg-muted);
 	cursor: pointer;
 	transition:
 		background-color 0.15s ease,
@@ -55,8 +88,8 @@
 }
 
 .goo-chevron-tabs__add:hover {
-	background: #2e323e;
-	color: #fff;
+	background: color-mix(in srgb, var(--goo-theme-fg) 10%, var(--goo-chevron-tabs-bg-raised));
+	color: var(--goo-chevron-tabs-fg);
 }
 
 .goo-chevron-tabs__tab {
@@ -64,17 +97,17 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 5px;
+	gap: var(--goo-chevron-tabs-tab-gap);
 	flex: 0 0 auto;
-	height: 28px;
-	min-width: 92px;
-	max-width: 240px;
-	margin-left: -7px;
-	padding: 0 36px 0 0.5rem;
+	height: var(--goo-chevron-tabs-height);
+	min-width: var(--goo-chevron-tabs-tab-min-width);
+	max-width: var(--goo-chevron-tabs-tab-max-width);
+	margin-left: var(--goo-chevron-tabs-tab-overlap);
+	padding: 0 var(--goo-chevron-tabs-tab-inline-end-padding) 0 var(--goo-theme-space-sm, 0.5rem);
 	border: 0;
-	background: #282a36;
-	clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%, 10px 50%);
-	color: rgba(248, 248, 242, 0.62);
+	background: var(--goo-chevron-tabs-bg-raised);
+	clip-path: polygon(0 0, calc(100% - var(--goo-chevron-tabs-chevron-size)) 0, 100% 50%, calc(100% - var(--goo-chevron-tabs-chevron-size)) 100%, 0 100%, var(--goo-chevron-tabs-chevron-size) 50%);
+	color: var(--goo-chevron-tabs-fg-muted);
 	cursor: pointer;
 	font-size: var(--goo-chevron-tabs-font-size, 12px);
 	font-weight: 500;
@@ -95,8 +128,8 @@
 }
 
 .goo-chevron-tabs__tab:hover {
-	background: color-mix(in srgb, var(--goo-chevron-tabs-selected-color) 26%, #282a36);
-	color: #fff;
+	background: color-mix(in srgb, var(--goo-chevron-tabs-selected-color) 26%, var(--goo-chevron-tabs-bg-raised));
+	color: var(--goo-chevron-tabs-fg);
 }
 
 .goo-chevron-tabs__tab:focus-visible {
@@ -118,7 +151,7 @@
 }
 
 .goo-chevron-tabs__tab--dragging {
-	filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
+	filter: drop-shadow(var(--goo-theme-shadow-sm));
 	transition: none;
 }
 
@@ -127,19 +160,19 @@
 }
 
 .goo-chevron-tabs__rail--dragging .goo-chevron-tabs__tab:not(.goo-chevron-tabs__tab--active):hover {
-	background: #282a36;
-	color: rgba(248, 248, 242, 0.62);
+	background: var(--goo-chevron-tabs-bg-raised);
+	color: var(--goo-chevron-tabs-fg-muted);
 }
 
 .goo-chevron-tabs__rail--dragging
 	.goo-chevron-tabs__tab--dragging:not(.goo-chevron-tabs__tab--active) {
-	background: color-mix(in srgb, var(--goo-chevron-tabs-selected-color) 26%, #282a36);
-	color: #fff;
+	background: color-mix(in srgb, var(--goo-chevron-tabs-selected-color) 26%, var(--goo-chevron-tabs-bg-raised));
+	color: var(--goo-chevron-tabs-fg);
 }
 
 .goo-chevron-tabs__label {
 	min-width: 0;
-	max-width: 150px;
+	max-width: var(--goo-chevron-tabs-label-max-width);
 	overflow: hidden;
 	outline: none;
 	text-overflow: ellipsis;
@@ -151,24 +184,24 @@
 	display: grid;
 	place-content: center;
 	flex: 0 0 auto;
-	width: 14px;
-	height: 14px;
+	width: var(--goo-chevron-tabs-activity-size);
+	height: var(--goo-chevron-tabs-activity-size);
 	color: currentColor;
 	opacity: 0.92;
 	pointer-events: none;
 }
 
 .goo-chevron-tabs__tab:not(.goo-chevron-tabs__tab--active) .goo-chevron-tabs__activity--working {
-	color: #8be9fd;
+	color: var(--goo-theme-secondary);
 }
 
 .goo-chevron-tabs__tab:not(.goo-chevron-tabs__tab--active) .goo-chevron-tabs__activity--done {
-	color: #f1fa8c;
+	color: var(--goo-theme-warning);
 }
 
 .goo-chevron-tabs__tab:not(.goo-chevron-tabs__tab--active)
 	.goo-chevron-tabs__activity--needs-attention {
-	color: #ff79c6;
+	color: var(--goo-theme-negative);
 }
 
 .goo-chevron-tabs__label--hidden {
@@ -179,7 +212,7 @@
 	position: absolute;
 	left: 50%;
 	top: 50%;
-	max-width: calc(100% - 56px);
+	max-width: calc(100% - var(--goo-theme-control-height-lg, 2.5rem) - var(--goo-theme-space-lg, 1rem));
 	overflow: hidden;
 	color: inherit;
 	cursor: text;
@@ -190,12 +223,12 @@
 
 .goo-chevron-tabs__close {
 	position: absolute;
-	right: 12px;
+	right: var(--goo-chevron-tabs-close-offset);
 	top: 50%;
 	display: grid;
 	place-content: center;
-	width: 15px;
-	height: 15px;
+	width: var(--goo-chevron-tabs-close-size);
+	height: var(--goo-chevron-tabs-close-size);
 	padding: 0;
 	border: 0;
 	border-radius: 50%;
@@ -257,17 +290,17 @@
 .goo-chevron-tabs__connection-tip {
 	position: absolute;
 	right: 0;
-	top: calc(100% + 9px);
+	top: calc(100% + var(--goo-chevron-tabs-tip-offset));
 	z-index: 1400;
-	min-width: 152px;
-	padding: 9px 11px;
-	border: 1px solid rgba(255, 255, 255, 0.09);
-	border-radius: 8px;
-	background: #282a36;
-	box-shadow: 0 14px 30px -10px rgba(0, 0, 0, 0.7);
+	min-width: var(--goo-chevron-tabs-tip-min-width);
+	padding: var(--goo-chevron-tabs-tip-padding);
+	border: 1px solid var(--goo-theme-border);
+	border-radius: var(--goo-theme-radius-md);
+	background: var(--goo-chevron-tabs-bg-raised);
+	box-shadow: var(--goo-theme-shadow-lg);
 	opacity: 0;
 	pointer-events: none;
-	transform: translateY(-4px);
+	transform: translateY(calc(var(--goo-theme-space-xs, 0.25rem) * -1));
 	transition:
 		opacity 150ms ease,
 		transform 150ms ease;
@@ -279,9 +312,9 @@
 }
 
 .goo-chevron-tabs__connection-user {
-	color: #f8f8f2;
+	color: var(--goo-chevron-tabs-fg);
 	font:
-		600 11px/1.4 'JetBrains Mono',
+		600 var(--goo-theme-font-size-xs) / 1.4 'JetBrains Mono',
 		ui-monospace,
 		monospace;
 }
@@ -289,29 +322,29 @@
 .goo-chevron-tabs__connection-detail {
 	display: flex;
 	align-items: center;
-	gap: 6px;
-	margin-top: 5px;
+	gap: var(--goo-chevron-tabs-menu-dot-size);
+	margin-top: var(--goo-chevron-tabs-tab-gap);
 	font-size: var(--goo-theme-font-size-xs);
 	font-weight: 500;
 	line-height: 1;
 }
 
 .goo-chevron-tabs__connection-detail span:first-child {
-	width: 6px;
-	height: 6px;
+	width: var(--goo-chevron-tabs-menu-dot-size);
+	height: var(--goo-chevron-tabs-menu-dot-size);
 	border-radius: 50%;
 }
 
 .goo-chevron-tabs__menu-button {
 	display: grid;
 	place-content: center;
-	width: 22px;
-	height: 22px;
+	width: var(--goo-chevron-tabs-menu-button-size);
+	height: var(--goo-chevron-tabs-menu-button-size);
 	padding: 0;
 	border: 0;
-	border-radius: 5px;
+	border-radius: var(--goo-theme-radius-sm);
 	background: transparent;
-	color: rgba(248, 248, 242, 0.6);
+	color: var(--goo-chevron-tabs-fg-muted);
 	cursor: pointer;
 	transition:
 		transform 160ms ease,
@@ -320,8 +353,8 @@
 }
 
 .goo-chevron-tabs__menu-button:hover {
-	background: rgba(127, 131, 150, 0.22);
-	color: #fff;
+	background: color-mix(in srgb, var(--goo-theme-fg) 10%, transparent);
+	color: var(--goo-chevron-tabs-fg);
 }
 
 .goo-chevron-tabs__menu-button--open {
@@ -345,27 +378,27 @@
 
 .goo-chevron-tabs__menu {
 	position: absolute;
-	right: 10px;
-	top: calc(100% + 5px);
+	right: var(--goo-chevron-tabs-menu-offset);
+	top: calc(100% + var(--goo-chevron-tabs-tab-gap));
 	z-index: 1600;
-	min-width: 190px;
-	padding: 6px;
-	border: 1px solid rgba(255, 255, 255, 0.09);
-	border-radius: 9px;
-	background: #282a36;
-	box-shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.75);
+	min-width: var(--goo-chevron-tabs-menu-min-width);
+	padding: var(--goo-chevron-tabs-menu-padding);
+	border: 1px solid var(--goo-theme-border);
+	border-radius: var(--goo-theme-radius-md);
+	background: var(--goo-chevron-tabs-bg-raised);
+	box-shadow: var(--goo-theme-shadow-lg);
 }
 
 .goo-chevron-tabs__menu-row {
 	display: flex;
 	align-items: center;
-	gap: 9px;
+	gap: var(--goo-chevron-tabs-menu-row-gap);
 	width: 100%;
-	padding: 7px 10px;
+	padding: var(--goo-chevron-tabs-menu-row-padding);
 	border: 0;
-	border-radius: 6px;
+	border-radius: var(--goo-theme-radius-sm);
 	background: transparent;
-	color: #f8f8f2;
+	color: var(--goo-chevron-tabs-fg);
 	cursor: pointer;
 	font-size: var(--goo-theme-font-size-xs);
 	font-weight: 500;
@@ -375,14 +408,14 @@
 
 .goo-chevron-tabs__menu-row:hover,
 .goo-chevron-tabs__menu-row--active {
-	background: rgba(255, 255, 255, 0.07);
+	background: color-mix(in srgb, var(--goo-theme-fg) 7%, transparent);
 }
 
 .goo-chevron-tabs__menu-accent {
 	flex: 0 0 auto;
-	width: 8px;
-	height: 8px;
-	border-radius: 2px;
+	width: var(--goo-chevron-tabs-menu-accent-size);
+	height: var(--goo-chevron-tabs-menu-accent-size);
+	border-radius: var(--goo-theme-space-2xs);
 }
 
 .goo-chevron-tabs__menu-name {
@@ -395,8 +428,8 @@
 
 .goo-chevron-tabs__menu-status {
 	flex: 0 0 auto;
-	width: 6px;
-	height: 6px;
+	width: var(--goo-chevron-tabs-menu-dot-size);
+	height: var(--goo-chevron-tabs-menu-dot-size);
 	border-radius: 50%;
 }
 
