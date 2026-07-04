@@ -22,6 +22,16 @@
 
 /* Dialog */
 .goo-dialog {
+	--goo-dialog-close-icon-size: var(--goo-theme-icon-md, 1rem);
+	--goo-dialog-alert-close-offset: calc((var(--goo-theme-space-sm, 8px) + var(--goo-theme-space-2xs, 2px)) * -1);
+	--goo-dialog-alert-close-size: var(--goo-theme-control-height-sm, 24px);
+	--goo-dialog-overlay-close-size: var(--goo-theme-control-height-sm, 1.5rem);
+	--goo-dialog-overlay-header-height: var(--goo-theme-control-height-lg, 40px);
+	--goo-dialog-touch-close-size: var(--goo-theme-control-height-touch, 44px);
+	--goo-dialog-touch-header-height: calc(var(--goo-theme-control-height-touch, 44px) + var(--goo-theme-space-xs, 4px));
+	--goo-dialog-touch-overlay-close-inset: var(--goo-theme-space-sm, 8px);
+	--goo-dialog-touch-overlay-close-top: calc(var(--goo-theme-space-2xs, 2px));
+
 	position: fixed;
 	inset: 0;
 	margin: auto;
@@ -111,8 +121,8 @@
 }
 
 .goo-dialog__close svg {
-	width: 16px;
-	height: 16px;
+	width: var(--goo-dialog-close-icon-size);
+	height: var(--goo-dialog-close-icon-size);
 }
 
 .goo-dialog__close:hover {
@@ -191,10 +201,10 @@
 /* Alert type - simple message with close */
 .goo-dialog.goo-dialog--alert .goo-dialog__close-badge {
 	position: absolute;
-	top: -10px;
-	right: -10px;
-	width: 24px;
-	height: 24px;
+	top: var(--goo-dialog-alert-close-offset);
+	right: var(--goo-dialog-alert-close-offset);
+	width: var(--goo-dialog-alert-close-size);
+	height: var(--goo-dialog-alert-close-size);
 	background: var(--goo-theme-accent, #3b82f6);
 	border-radius: var(--goo-theme-radius-full, 999px);
 	display: flex;
@@ -298,15 +308,15 @@
 		color-mix(in srgb, var(--goo-theme-fg, #fff) 5%, transparent)
 	);
 	border-bottom: 1px solid color-mix(in srgb, var(--goo-theme-fg, #fff) 3%, transparent);
-	height: 40px;
-	min-height: 40px;
+	height: var(--goo-dialog-overlay-header-height);
+	min-height: var(--goo-dialog-overlay-header-height);
 	padding: 0 var(--goo-theme-space-lg, 24px);
 	border-radius: 0;
 }
 
 .goo-dialog.goo-dialog--overlay .goo-dialog__title {
 	font-size: var(--goo-theme-font-size-xl, 1.25em);
-	line-height: 40px;
+	line-height: var(--goo-dialog-overlay-header-height);
 }
 
 /* Overlay close button - circular badge styling matching old Alertify */
@@ -315,8 +325,8 @@
 	top: var(--goo-theme-space-md, 12px);
 	right: var(--goo-theme-space-md, 12px);
 	z-index: 10;
-	width: 1.5rem;
-	height: 1.5rem;
+	width: var(--goo-dialog-overlay-close-size);
+	height: var(--goo-dialog-overlay-close-size);
 	padding: 0;
 	display: flex;
 	align-items: center;
@@ -360,37 +370,37 @@
 
 @media (hover: none) and (pointer: coarse) {
 	.goo-dialog__close {
-		min-height: 44px;
-		min-width: 44px;
+		min-height: var(--goo-dialog-touch-close-size);
+		min-width: var(--goo-dialog-touch-close-size);
 	}
 
 	.goo-dialog.goo-dialog--alert .goo-dialog__close-badge {
-		height: 44px;
-		right: -18px;
-		top: -18px;
-		width: 44px;
+		height: var(--goo-dialog-touch-close-size);
+		right: calc((var(--goo-dialog-touch-close-size) - var(--goo-theme-space-sm, 8px)) * -0.5);
+		top: calc((var(--goo-dialog-touch-close-size) - var(--goo-theme-space-sm, 8px)) * -0.5);
+		width: var(--goo-dialog-touch-close-size);
 	}
 
 	.goo-dialog.goo-dialog--overlay .goo-dialog__header {
-		height: 48px;
-		min-height: 48px;
+		height: var(--goo-dialog-touch-header-height);
+		min-height: var(--goo-dialog-touch-header-height);
 	}
 
 	.goo-dialog.goo-dialog--overlay .goo-dialog__title {
-		line-height: 48px;
+		line-height: var(--goo-dialog-touch-header-height);
 	}
 
 	.goo-dialog.goo-dialog--overlay .goo-dialog__close {
-		height: 44px;
-		min-height: 44px;
-		min-width: 44px;
-		right: 8px;
-		top: 2px;
-		width: 44px;
+		height: var(--goo-dialog-touch-close-size);
+		min-height: var(--goo-dialog-touch-close-size);
+		min-width: var(--goo-dialog-touch-close-size);
+		right: var(--goo-dialog-touch-overlay-close-inset);
+		top: var(--goo-dialog-touch-overlay-close-top);
+		width: var(--goo-dialog-touch-close-size);
 	}
 
 	[dir='rtl'] .goo-dialog.goo-dialog--overlay .goo-dialog__close {
-		left: 8px;
+		left: var(--goo-dialog-touch-overlay-close-inset);
 		right: auto;
 	}
 }

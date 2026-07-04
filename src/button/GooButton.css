@@ -17,6 +17,15 @@
 	--goo-button-fg: var(--goo-theme-fg, rgba(255, 255, 255, 0.9));
 	--goo-button-radius: var(--goo-theme-radius-md, 6px);
 	--goo-button-focus: var(--goo-theme-accent, #3b82f6);
+	--goo-button-gap: var(--goo-theme-space-sm, 8px);
+	--goo-button-font-size: var(--goo-theme-font-size-sm, 0.8125rem);
+	--goo-button-height: var(--goo-theme-control-height-md, 32px);
+	--goo-button-padding: var(--goo-theme-control-padding-md, 0 12px);
+	--goo-button-compact-font-size: var(--goo-theme-font-size-xs, 0.75rem);
+	--goo-button-compact-height: var(--goo-theme-control-height-sm, 24px);
+	--goo-button-compact-padding: var(--goo-theme-control-padding-sm, 0 8px);
+	--goo-button-stacked-gap: calc(var(--goo-theme-space-2xs, 0.125rem) * 1.5);
+	--goo-button-stacked-line-height: 1.2;
 
 	/* Base styles - flat background, no gradient */
 	background: var(--goo-button-bg);
@@ -27,14 +36,14 @@
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	gap: var(--goo-theme-space-sm, 8px);
-	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
+	gap: var(--goo-button-gap);
+	font-size: var(--goo-button-font-size);
 	font-weight: 600;
 	line-height: 1;
-	height: var(--goo-theme-control-height-md, 32px);
+	height: var(--goo-button-height);
 	min-height: 0;
 	outline: none;
-	padding: var(--goo-theme-control-padding-md, 0 12px);
+	padding: var(--goo-button-padding);
 	pointer-events: auto;
 	position: relative;
 	text-align: center;
@@ -243,18 +252,18 @@
 
 /* Compact size variant - for dense UIs like editors */
 .goo-button[size='compact'] {
-	font-size: var(--goo-theme-font-size-xs, 0.75rem);
-	height: var(--goo-theme-control-height-sm, 24px);
-	padding: var(--goo-theme-control-padding-sm, 0 8px);
-	gap: 0.25em;
+	font-size: var(--goo-button-compact-font-size);
+	height: var(--goo-button-compact-height);
+	padding: var(--goo-button-compact-padding);
+	gap: var(--goo-button-stacked-gap);
 }
 
 /* Stacked layout - icon on top, label below */
 .goo-button[layout='stacked'] {
 	flex-direction: column;
-	gap: 0.25em;
+	gap: var(--goo-button-stacked-gap);
 	padding: var(--goo-theme-space-sm, 8px) var(--goo-theme-space-md, 16px);
-	line-height: 1.2;
+	line-height: var(--goo-button-stacked-line-height);
 	min-height: unset;
 	text-transform: none;
 }

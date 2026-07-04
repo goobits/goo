@@ -18,10 +18,7 @@
 
 @media (hover: none) and (pointer: coarse) {
 	.goo-schema {
-		--goo-theme-control-height-sm: 2.75rem;
-		--goo-theme-control-height-md: 2.75rem;
-		--goo-theme-control-height-lg: 3rem;
-		--goo-theme-control-height: var(--goo-theme-control-height-md);
+		--goo-schema-action-height: var(--goo-theme-control-height-touch, 2.75rem);
 	}
 }
 
@@ -43,7 +40,7 @@
 .goo-schema__preset-select,
 .goo-schema__reset {
 	box-sizing: border-box;
-	height: var(--goo-theme-control-height-sm, 1.5rem);
+	height: var(--goo-schema-action-height, var(--goo-theme-control-height-sm, 1.5rem));
 	border: 1px solid var(--goo-theme-border-strong, var(--goo-theme-border));
 	border-radius: var(--goo-theme-radius-sm, 0.375rem);
 	background: var(--goo-theme-surface-raised, color-mix(in srgb, var(--goo-theme-fg, #fff) 6%, transparent));

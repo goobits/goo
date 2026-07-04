@@ -22,6 +22,7 @@
 	--goo-number-arrows-hover: color-mix(in srgb, var(--goo-theme-fg, #fff) 10%, transparent);
 	--goo-number-radius: var(--goo-theme-radius-md, 6px);
 	--goo-number-height: var(--goo-theme-control-height-sm, 24px);
+	--goo-number-inline-size: calc(var(--goo-theme-control-height-md, 2rem) * 6.25);
 	--goo-number-arrows-width: calc(var(--goo-number-height) * 0.68);
 	--goo-number-stepper-space: 0px;
 	--goo-number-edge-padding: var(--goo-theme-space-sm, 8px);
@@ -30,6 +31,9 @@
 	--goo-number-unit-left: auto;
 	--goo-number-unit-right: var(--goo-number-stepper-space);
 	--goo-number-arrow-slide: 4px;
+	--goo-number-focus-outline-size: var(--goo-theme-space-2xs, 2px);
+	--goo-number-focus-outline-offset: calc(var(--goo-theme-space-xs, 4px) - var(--goo-theme-space-2xs, 2px) * 0.5);
+	--goo-number-compact-min-inline-size: calc(var(--goo-theme-control-height-md, 2rem) * 1.875);
 	--goo-number-motion-fast: var(--goo-theme-transition-fast, 0.15s ease);
 	--goo-number-motion-normal: var(--goo-theme-transition-normal, 0.2s ease);
 
@@ -47,7 +51,7 @@
 	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
 	height: var(--goo-number-height);
 	line-height: var(--goo-number-height);
-	width: 200px;
+	width: var(--goo-number-inline-size);
 	transition:
 		background-color var(--goo-number-motion-fast),
 		box-shadow var(--goo-number-motion-normal),
@@ -57,9 +61,9 @@
 .goo-number::after {
 	content: '';
 	position: absolute;
-	inset: -3px;
-	border: 2px solid var(--goo-number-change-pulse);
-	border-radius: calc(var(--goo-number-radius) + 3px);
+	inset: calc(var(--goo-number-focus-outline-offset) * -1);
+	border: var(--goo-number-focus-outline-size) solid var(--goo-number-change-pulse);
+	border-radius: calc(var(--goo-number-radius) + var(--goo-number-focus-outline-offset));
 	opacity: 0;
 	pointer-events: none;
 }
@@ -340,7 +344,7 @@
 	--goo-number-edge-padding: 0.375em;
 	font-size: var(--goo-theme-font-size-xs, 0.75rem);
 	width: auto;
-	min-width: 60px;
+	min-width: var(--goo-number-compact-min-inline-size);
 
 	.goo-number__arrow::before {
 		border-left-width: 3px;

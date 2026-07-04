@@ -74,8 +74,6 @@
 
 @media (hover: none) and (pointer: coarse) {
 	.goo-select {
-		--goo-theme-control-height-sm: var(--goo-theme-control-height-touch, 44px);
-		--goo-theme-control-height-md: var(--goo-theme-control-height-touch, 44px);
 		--goo-select-height: var(--goo-theme-control-height-touch, 44px);
 		--goo-select-item-gap: var(--goo-theme-space-sm, 8px);
 		--goo-select-item-line-height: 1.5rem;
@@ -322,7 +320,7 @@
 
 @media (hover: none) and (pointer: coarse) {
 	.goo-popout.goo-menu-popout {
-		--goo-theme-control-height-sm: var(--goo-theme-control-height-touch, 44px);
+		--goo-select-menu-row-height: var(--goo-theme-control-height-touch, 44px);
 		--goo-select-item-line-height: 1.5rem;
 		--goo-select-item-padding-y: var(--goo-theme-space-sm);
 	}
@@ -340,7 +338,7 @@
 
 /* Compact rows with a rounded highlight box. */
 .goo-popout.goo-menu-popout .goo-select__option {
-	min-height: var(--goo-theme-control-height-sm, 24px);
+	min-height: var(--goo-select-menu-row-height, var(--goo-theme-control-height-sm, 24px));
 	border-radius: var(--goo-theme-radius-md);
 	box-shadow: none;
 }
