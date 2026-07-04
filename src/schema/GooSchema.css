@@ -37,7 +37,7 @@
 	align-items: center;
 	gap: var(--goo-theme-space-xs, 0.25rem);
 	min-width: 0;
-	padding: 0 0 0.375rem;
+	padding: 0 0 calc(var(--goo-theme-space-xs, 0.25rem) + var(--goo-theme-space-2xs, 0.125rem));
 }
 
 .goo-schema__preset-select,
@@ -56,12 +56,12 @@
 .goo-schema__preset-select {
 	min-width: 0;
 	flex: 1 1 auto;
-	padding: 0 1.5rem 0 0.5rem;
+	padding: 0 var(--goo-theme-space-xl, 1.5rem) 0 var(--goo-theme-space-sm, 0.5rem);
 }
 
 .goo-schema__reset {
 	flex: 0 0 auto;
-	padding: 0 0.5rem;
+	padding: 0 var(--goo-theme-space-sm, 0.5rem);
 	cursor: pointer;
 }
 

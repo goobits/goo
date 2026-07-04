@@ -31,14 +31,14 @@
 }
 
 .goo-error-boundary__title {
-	margin: 0 0 0.75rem;
+	margin: 0 0 var(--goo-theme-space-md, 0.75rem);
 	font-size: var(--goo-theme-font-size-lg, 1.125rem);
 	font-weight: 600;
 	color: var(--goo-error-boundary-border);
 }
 
 .goo-error-boundary__message {
-	margin: 0 0 1.25rem;
+	margin: 0 0 calc(var(--goo-theme-space-lg, 1rem) + var(--goo-theme-space-xs, 0.25rem));
 	font-family: var(--goo-theme-font-mono, ui-monospace, monospace);
 	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
 	color: var(--goo-error-boundary-muted);

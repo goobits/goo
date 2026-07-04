@@ -229,7 +229,7 @@ sketch-toolconfig {
 .goo-tool-config .goo-angle-input,
 .goo-palette .goo-angle-input,
 sketch-toolconfig .goo-angle-input {
-	margin: 0 0.5rem;
+	margin: 0 var(--goo-theme-space-sm, 0.5rem);
 }
 
 sketch-FilterFooter {

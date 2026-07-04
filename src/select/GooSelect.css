@@ -594,7 +594,7 @@
 	justify-content: center;
 	min-width: 1.35rem;
 	height: 1.125rem;
-	padding: 0 0.3125rem;
+	padding: 0 calc(var(--goo-theme-space-xs, 0.25rem) + var(--goo-theme-space-2xs, 0.125rem) * 0.5);
 	/* Tactile keycap: top-lit gradient face, crisp edge, soft physical drop. */
 	background: linear-gradient(
 		color-mix(in srgb, var(--goo-theme-fg, #fff) 11%, transparent),
