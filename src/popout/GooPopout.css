@@ -237,55 +237,6 @@
 }
 
 /* =============================================================================
-   Application-Specific Styles
-   ============================================================================= */
-
-/* Style popouts for toolbar tool configuration */
-.goo-popout.sketch-style-popout {
-	--goo-popout-content-height: auto;
-	--goo-popout-content-max-height: calc(100vh - var(--goo-theme-space-lg, 16px));
-	--goo-popout-content-overflow-x: hidden;
-	--goo-popout-content-overflow-y: auto;
-
-	inline-size: min(226px, calc(100vw - var(--goo-theme-space-lg, 16px)));
-	min-width: 226px;
-}
-
-.goo-filter-popout {
-	font-size: var(--goo-theme-font-size-sm);
-	width: 150px;
-}
-
-.goo-filter-popout__item {
-	border-bottom: 1px solid rgb(0 0 0 / 10%);
-	cursor: pointer;
-	padding: var(--goo-theme-space-sm, 8px) var(--goo-theme-space-sm, 8px)
-		var(--goo-theme-space-sm, 8px) var(--goo-theme-space-md, 16px);
-	text-transform: capitalize;
-}
-
-.goo-filter-popout__item:hover {
-	background: color-mix(in srgb, var(--goo-theme-fg) 8%, transparent);
-}
-
-.goo-filter-popout__item:hover::after {
-	border: solid currentColor;
-	border-width: 0 2px 2px 0;
-	content: '';
-	float: right;
-	height: 0.55em;
-	margin-top: 0.1em;
-	transform: rotate(45deg);
-	width: 0.3em;
-}
-
-.goo-filter-popout__footer {
-	display: block;
-	margin: 0.5em 0;
-	text-align: center;
-}
-
-/* =============================================================================
    Animation Classes
    ============================================================================= */
 

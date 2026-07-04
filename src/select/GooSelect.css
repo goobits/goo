@@ -246,18 +246,19 @@
 /* Note: Popout is a sibling of .goo-select, not a child, so it can't inherit
    --goo-select-* variables. Define them here for the dropdown options. */
 .goo-popout.goo-menu-popout {
-	--goo-select-padding: var(--goo-theme-space-xs, 4px);
+	--goo-select-padding: var(--goo-theme-space-xs);
 	padding: 0;
 
 	/* Re-define select variables for popout context */
 	--goo-select-check-size: 0.75rem;
 	--goo-select-item-box-size: 1.25rem;
 	--goo-select-item-bleed-x: calc(var(--goo-select-padding) * -1);
-	--goo-select-item-gap: var(--goo-theme-space-xs, 4px);
+	--goo-select-item-gap: var(--goo-theme-space-sm);
 	--goo-select-item-line-height: 1.25rem;
-	--goo-select-item-padding-x: var(--goo-theme-space-sm, 8px);
-	--goo-select-font-size: var(--goo-theme-font-size-sm, 0.8125rem);
-	--goo-select-radius: var(--goo-theme-radius-sm, 4px);
+	--goo-select-item-padding-x: var(--goo-theme-space-sm);
+	--goo-select-item-padding-y: var(--goo-theme-space-xs);
+	--goo-select-font-size: var(--goo-theme-font-size-sm);
+	--goo-select-radius: var(--goo-theme-radius-sm);
 	--goo-select-fg: var(--goo-theme-fg, rgba(255, 255, 255, 0.9));
 	--goo-select-fg-muted: var(--goo-theme-muted);
 	--goo-select-fg-disabled: var(--goo-theme-text-disabled, rgba(128, 128, 128, 0.25));
@@ -268,7 +269,7 @@
 	--goo-select-scrollbar-size: 0.625rem;
 	--goo-select-scrollbar-thumb: color-mix(in srgb, var(--goo-select-fg-muted) 70%, transparent);
 	--goo-select-scrollbar-thumb-hover: color-mix(in srgb, var(--goo-select-fg) 55%, transparent);
-	--goo-popout-radius: var(--goo-theme-radius-lg, 8px);
+	--goo-popout-radius: var(--goo-theme-radius-lg);
 }
 
 .goo-popout.goo-menu-popout .goo-popout__content {
@@ -305,11 +306,6 @@
    ============================================================================ */
 .goo-popout.goo-menu-popout {
 	--goo-select-item-bleed-x: 0px;
-	--goo-select-item-gap: var(--goo-theme-space-sm, 8px);
-	--goo-select-item-line-height: 1.0625rem;
-	--goo-select-item-padding-x: var(--goo-theme-space-sm, 8px);
-	--goo-select-item-padding-y: var(--goo-theme-space-xs, 4px);
-	--goo-select-radius: var(--goo-theme-radius-sm, 4px);
 	--goo-select-divider-size: 1px;
 
 	/* Translucent vibrancy material: keep the base backdrop blur, drop the
@@ -328,7 +324,7 @@
 	.goo-popout.goo-menu-popout {
 		--goo-theme-control-height-sm: var(--goo-theme-control-height-touch, 44px);
 		--goo-select-item-line-height: 1.5rem;
-		--goo-select-item-padding-y: var(--goo-theme-space-sm, 8px);
+		--goo-select-item-padding-y: var(--goo-theme-space-sm);
 	}
 }
 
@@ -338,14 +334,14 @@
 }
 
 .goo-popout.goo-select-popout .goo-select__options {
-	padding: var(--goo-theme-space-xs, 4px)
-		calc(var(--goo-theme-space-sm, 8px) - var(--goo-theme-space-2xs, 2px));
+	padding: var(--goo-theme-space-xs)
+		calc(var(--goo-theme-space-sm) - var(--goo-theme-space-2xs));
 }
 
 /* Compact rows with a rounded highlight box. */
 .goo-popout.goo-menu-popout .goo-select__option {
 	min-height: var(--goo-theme-control-height-sm, 24px);
-	border-radius: var(--goo-theme-radius-md, 6px);
+	border-radius: var(--goo-theme-radius-md);
 	box-shadow: none;
 }
 
@@ -398,16 +394,15 @@
 
 /* Hairline divider, inset to match the highlight gutter. */
 .goo-popout.goo-menu-popout .goo-select__divider {
-	margin: var(--goo-theme-space-xs, 4px)
-		calc(var(--goo-theme-space-sm, 8px) - var(--goo-theme-space-2xs, 2px));
+	margin: var(--goo-theme-space-xs) calc(var(--goo-theme-space-sm) - var(--goo-theme-space-2xs));
 	background: color-mix(in srgb, var(--goo-theme-fg) 12%, transparent);
 }
 
 /* Subtle, tight section label. */
 .goo-popout.goo-menu-popout .goo-select__optgroup-label {
-	padding: var(--goo-theme-space-xs, 4px) var(--goo-theme-space-sm, 8px) var(--goo-theme-space-2xs, 2px);
+	padding: var(--goo-theme-space-xs) var(--goo-theme-space-sm) var(--goo-theme-space-2xs);
 	color: color-mix(in srgb, var(--goo-select-fg) 45%, transparent);
-	font-size: var(--goo-theme-font-size-xs, 0.6875rem);
+	font-size: var(--goo-theme-font-size-xs);
 	letter-spacing: 0;
 	text-transform: none;
 }
@@ -415,8 +410,8 @@
 /* Context menu: a touch wider and fully rounded (not attached to a trigger). */
 .goo-popout.goo-select-popout.goo-context-menu-popout {
 	min-width: 12rem;
-	--goo-popout-radius: var(--goo-theme-radius-xl, 12px);
-	border-radius: var(--goo-theme-radius-xl, 12px);
+	--goo-popout-radius: var(--goo-theme-radius-xl);
+	border-radius: var(--goo-theme-radius-xl);
 }
 
 /* Position above trigger when not enough space below */

@@ -232,11 +232,6 @@ sketch-toolconfig .goo-angle-input {
 	margin: 0 0.5rem;
 }
 
-.sketch-style-popout .goo-tool-config,
-.sketch-style-popout sketch-toolconfig {
-	inline-size: 100%;
-}
-
 sketch-FilterFooter {
 	box-sizing: border-box;
 	display: block;
