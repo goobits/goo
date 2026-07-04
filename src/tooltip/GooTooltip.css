@@ -83,8 +83,8 @@
 
 /* Error tooltip */
 .goo-popout.goo-tooltip--error {
-	--goo-popout-bg: var(--goo-theme-negative, #ef4444);
-	--goo-popout-fg: var(--goo-theme-negative-fg, #fff);
+	--goo-popout-bg: var(--goo-theme-danger, #ef4444);
+	--goo-popout-fg: var(--goo-theme-danger-fg, #fff);
 	--goo-popout-border: transparent;
 }
 

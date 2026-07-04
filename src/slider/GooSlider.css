@@ -15,7 +15,7 @@
 		0 0 0 2px var(--goo-slider-thumb-border), 0 4px 12px rgba(0, 0, 0, 0.28);
 	--goo-slider-thumb-shadow-active:
 		0 0 0 3px var(--goo-slider-thumb-border), 0 6px 16px rgba(0, 0, 0, 0.32);
-	--goo-slider-coverage-bg: var(--goo-theme-selected, var(--goo-theme-accent, rgba(59, 130, 246, 0.4)));
+	--goo-slider-coverage-bg: var(--goo-theme-accent, var(--goo-theme-accent, rgba(59, 130, 246, 0.4)));
 	--goo-slider-variance-coverage-edge-bg: color-mix(in srgb, var(--goo-slider-coverage-bg) 28%, transparent);
 	--goo-slider-variance-coverage-base-bg: color-mix(in srgb, var(--goo-slider-coverage-bg) 88%, var(--goo-theme-fg, #fff) 12%);
 	--goo-slider-value-pct: 0%;
@@ -206,7 +206,7 @@
 	top: 50%;
 	width: 1px;
 	height: calc(var(--goo-slider-track-height) + var(--goo-slider-mark-extra-height));
-	background: var(--goo-slider-mark-color, var(--goo-theme-control-range-tick-color, color-mix(in srgb, var(--goo-theme-fg, #fff) 36%, transparent)));
+	background: var(--goo-slider-mark-color, color-mix(in srgb, var(--goo-theme-fg, #fff) 36%, transparent));
 	pointer-events: none;
 	transform: translateX(-50%) translateY(-50%);
 	z-index: 0;
@@ -279,9 +279,9 @@
 	.goo-label {
 		flex: 1;
 		white-space: nowrap;
-		font-size: var(--goo-theme-control-label-size, 0.8125rem);
-		font-weight: var(--goo-theme-control-label-weight, 600);
-		color: var(--goo-theme-control-label-color, rgba(255, 255, 255, 0.9));
+		font-size: var(--goo-theme-font-size-sm, 0.8125rem);
+		font-weight: var(--goo-theme-font-weight-semibold, 600);
+		color: var(--goo-theme-fg, rgba(255, 255, 255, 0.9));
 	}
 
 	.goo-number {

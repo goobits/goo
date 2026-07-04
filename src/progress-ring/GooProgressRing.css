@@ -2,7 +2,7 @@
 	--goo-progress-ring-size: 120px;
 	--goo-progress-ring-stroke: max(4px, calc(var(--goo-progress-ring-size) * 0.08));
 	--goo-progress-ring-progress: 0deg;
-	--goo-progress-ring-color: var(--goo-theme-selected, #378cff);
+	--goo-progress-ring-color: var(--goo-theme-accent, #378cff);
 	--goo-progress-ring-track: color-mix(
 		in srgb,
 		var(--goo-theme-fg, currentColor) 15%,

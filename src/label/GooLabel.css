@@ -5,11 +5,11 @@
 
 .goo-label {
 	--goo-label-color: var(
-		--goo-theme-control-label-color,
+		--goo-theme-fg,
 		var(--goo-theme-muted)
 	);
-	--goo-label-color-hover: var(--goo-theme-control-label-color-hover);
-	--goo-label-required-color: var(--goo-theme-negative, #ef4444);
+	--goo-label-color-hover: var(--goo-theme-accent);
+	--goo-label-required-color: var(--goo-theme-danger, #ef4444);
 	--goo-label-disabled-opacity: var(--goo-theme-disabled-opacity);
 	--goo-label-motion: var(--goo-theme-transition-fast, 0.15s ease);
 	--goo-label-title-line-height: var(--goo-theme-control-height-sm, 1.5rem);
@@ -20,8 +20,8 @@
 	align-items: center;
 	gap: var(--goo-theme-space-xs, 4px);
 	font-family: var(--goo-theme-font-sans, system-ui, sans-serif);
-	font-size: var(--goo-theme-control-label-size, var(--goo-theme-font-size-sm, 0.8125rem));
-	font-weight: var(--goo-theme-control-label-weight, 600);
+	font-size: var(--goo-theme-font-size-sm, var(--goo-theme-font-size-sm, 0.8125rem));
+	font-weight: var(--goo-theme-font-weight-semibold, 600);
 	color: var(--goo-label-color);
 	line-height: 1.25;
 	cursor: default;

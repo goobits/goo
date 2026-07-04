@@ -102,13 +102,13 @@
 /* Add dividers and consistent row padding between controls in bare mode */
 .goo-schema__bare > .goo-controller {
 	--goo-controller-padding: var(--goo-theme-control-row-padding, 0.5rem 0.75rem);
-	border-bottom: 1px solid color-mix(in srgb, var(--goo-theme-control-divider, rgba(128, 128, 128, 0.1)) 72%, transparent);
+	border-bottom: 1px solid color-mix(in srgb, var(--goo-theme-border, rgba(128, 128, 128, 0.1)) 72%, transparent);
 }
 
 .goo-schema__bare > .goo-svelte-control,
 .goo-schema__bare > .goo-native-control {
 	padding: var(--goo-theme-control-row-padding, 0.5rem 0.75rem);
-	border-bottom: 1px solid color-mix(in srgb, var(--goo-theme-control-divider, rgba(128, 128, 128, 0.1)) 72%, transparent);
+	border-bottom: 1px solid color-mix(in srgb, var(--goo-theme-border, rgba(128, 128, 128, 0.1)) 72%, transparent);
 }
 
 .goo-schema__bare > .goo-svelte-control {
@@ -135,7 +135,7 @@
 
 :is(.goo-schema, .goo-schema__bare) .goo-folder .goo-folder__content > .goo-controller {
 	--goo-controller-padding: var(--goo-theme-control-row-padding, 0.5rem 0.75rem);
-	border-bottom: 1px solid color-mix(in srgb, var(--goo-theme-control-divider, rgba(128, 128, 128, 0.1)) 72%, transparent);
+	border-bottom: 1px solid color-mix(in srgb, var(--goo-theme-border, rgba(128, 128, 128, 0.1)) 72%, transparent);
 }
 
 :is(.goo-schema, .goo-schema__bare)
@@ -148,7 +148,7 @@
 :is(.goo-schema, .goo-schema__bare) .goo-folder .goo-folder__content > .goo-svelte-control,
 :is(.goo-schema, .goo-schema__bare) .goo-folder .goo-folder__content > .goo-native-control {
 	padding: var(--goo-theme-control-row-padding, 0.5rem 0.75rem);
-	border-bottom: 1px solid color-mix(in srgb, var(--goo-theme-control-divider, rgba(128, 128, 128, 0.1)) 72%, transparent);
+	border-bottom: 1px solid color-mix(in srgb, var(--goo-theme-border, rgba(128, 128, 128, 0.1)) 72%, transparent);
 }
 
 :is(.goo-schema, .goo-schema__bare) .goo-folder .goo-folder__content > .goo-svelte-control {

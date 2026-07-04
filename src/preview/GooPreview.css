@@ -3,7 +3,7 @@
 	--goo-preview-radius: var(--goo-theme-radius-lg, 0.5rem);
 	--goo-preview-tint: var(--goo-theme-accent, #8b5cf6);
 	--goo-preview-bg: var(--goo-theme-surface-sunken, #171821);
-	--goo-preview-border: var(--goo-theme-border-subtle, rgba(255, 255, 255, 0.12));
+	--goo-preview-border: var(--goo-theme-border, rgba(255, 255, 255, 0.12));
 	--goo-preview-dot: color-mix(in srgb, var(--goo-theme-fg, #fff) 14%, transparent);
 	--goo-preview-badge-bg: color-mix(in srgb, var(--goo-theme-bg, #111) 76%, transparent);
 	--goo-preview-badge-fg: var(--goo-theme-muted, rgba(255, 255, 255, 0.65));

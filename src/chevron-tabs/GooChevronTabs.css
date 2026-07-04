@@ -192,7 +192,7 @@
 }
 
 .goo-chevron-tabs__tab:not(.goo-chevron-tabs__tab--active) .goo-chevron-tabs__activity--working {
-	color: var(--goo-theme-secondary);
+	color: var(--goo-theme-accent);
 }
 
 .goo-chevron-tabs__tab:not(.goo-chevron-tabs__tab--active) .goo-chevron-tabs__activity--done {
@@ -201,7 +201,7 @@
 
 .goo-chevron-tabs__tab:not(.goo-chevron-tabs__tab--active)
 	.goo-chevron-tabs__activity--needs-attention {
-	color: var(--goo-theme-negative);
+	color: var(--goo-theme-danger);
 }
 
 .goo-chevron-tabs__label--hidden {

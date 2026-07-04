@@ -7,7 +7,7 @@
 	--goo-toast-bg: var(--goo-theme-surface-raised);
 	--goo-toast-fg: var(--goo-theme-fg, rgba(255, 255, 255, 0.9));
 	--goo-toast-muted: var(--goo-theme-muted);
-	--goo-toast-border: var(--goo-theme-border-subtle, rgba(255, 255, 255, 0.1));
+	--goo-toast-border: var(--goo-theme-border, rgba(255, 255, 255, 0.1));
 	--goo-toast-radius: var(--goo-theme-radius-md, 6px);
 	--goo-toast-shadow: var(--goo-theme-shadow-md, 0 4px 12px rgba(0, 0, 0, 0.15));
 	--goo-toast-accent: var(--goo-theme-accent, #3b82f6);
@@ -41,7 +41,7 @@
 	border-left-color: var(--goo-theme-warning, #f59e0b);
 }
 .goo-toast--error {
-	border-left-color: var(--goo-theme-negative, #ef4444);
+	border-left-color: var(--goo-theme-danger, #ef4444);
 }
 
 .goo-toast__icon {
@@ -60,7 +60,7 @@
 	color: var(--goo-theme-warning, #f59e0b);
 }
 .goo-toast--error .goo-toast__icon {
-	color: var(--goo-theme-negative, #ef4444);
+	color: var(--goo-theme-danger, #ef4444);
 }
 
 .goo-toast__body {
@@ -149,7 +149,7 @@
 	color: var(--goo-theme-warning, #f59e0b);
 }
 .goo-toast--error .goo-toast__progress {
-	color: var(--goo-theme-negative, #ef4444);
+	color: var(--goo-theme-danger, #ef4444);
 }
 
 @media (prefers-reduced-motion: reduce) {

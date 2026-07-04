@@ -10,7 +10,7 @@
 		color-mix(in srgb, var(--goo-theme-bg, #000) 30%, transparent)
 	);
 	--goo-input-bg-focus: var(--goo-theme-surface-sunken, var(--goo-theme-bg, #000));
-	--goo-input-border: var(--goo-theme-border-subtle, var(--goo-theme-border, rgba(128, 128, 128, 0.2)));
+	--goo-input-border: var(--goo-theme-border, var(--goo-theme-border, rgba(128, 128, 128, 0.2)));
 	--goo-input-border-focus: var(--goo-theme-accent, #3b82f6);
 	--goo-input-focus-ring: color-mix(in srgb, var(--goo-input-border-focus) 32%, transparent);
 	--goo-input-change-pulse: color-mix(in srgb, var(--goo-input-border-focus) 18%, transparent);

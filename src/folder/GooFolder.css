@@ -102,7 +102,7 @@
 	font-weight: 500;
 	text-transform: none;
 	letter-spacing: 0;
-	color: var(--goo-theme-control-label-color, var(--goo-folder-fg));
+	color: var(--goo-theme-fg, var(--goo-folder-fg));
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;

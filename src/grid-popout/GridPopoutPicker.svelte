@@ -487,7 +487,7 @@ function escapeSelectorValue(value: string): string {
 :global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) sketch-grid-item:hover),
 :global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) sketch-grid-item:focus-visible) {
 	background: color-mix(in srgb, var(--goo-theme-fg) 15%, transparent);
-	border-color: var(--goo-theme-border-subtle, var(--goo-theme-border));
+	border-color: var(--goo-theme-border, var(--goo-theme-border));
 	outline: none;
 }
 

@@ -336,15 +336,15 @@
 
 /* Destructive rows: red label at rest, red highlight + white text on the active row. */
 .goo-popout.goo-menu-popout .goo-select__option--danger {
-	color: var(--goo-theme-negative);
+	color: var(--goo-theme-danger);
 }
 
 .goo-popout.goo-menu-popout .goo-select__option--danger .goo-select__icon {
-	color: var(--goo-theme-negative);
+	color: var(--goo-theme-danger);
 }
 
 /* On hover, destructive rows take the standard accent highlight (like macOS)
-   rather than a red fill: several themes pair --goo-theme-negative with white at
+   rather than a red fill: several themes pair --goo-theme-danger with white at
    only ~3.8:1, so a red fill cannot meet WCAG AA, whereas the accent/accent-fg
    pair clears AA in every theme. The accent background comes from the normal
    hover rule above; these rules flip the red text/icon to accent-fg so it does
@@ -394,8 +394,8 @@
 /* Context menu: a touch wider and fully rounded (not attached to a trigger). */
 .goo-popout.goo-select-popout.goo-context-menu-popout {
 	min-width: 12rem;
-	--goo-popout-radius: var(--goo-theme-radius-xl);
-	border-radius: var(--goo-theme-radius-xl);
+	--goo-popout-radius: var(--goo-theme-radius-lg);
+	border-radius: var(--goo-theme-radius-lg);
 }
 
 /* Position above trigger when not enough space below */
@@ -473,19 +473,19 @@
 /* Destructive rows (set via the option's tone: 'danger'). Resting stays calm
    with a faintly negative-tinted icon; hover commits to the negative tone. */
 .goo-select__option--danger .goo-select__icon {
-	color: color-mix(in srgb, var(--goo-theme-negative) 75%, var(--goo-select-fg));
+	color: color-mix(in srgb, var(--goo-theme-danger) 75%, var(--goo-select-fg));
 }
 
 .goo-select__option--danger:hover,
 .goo-select__option--danger.goo-select__option--hovered {
-	background: color-mix(in srgb, var(--goo-theme-negative) 16%, transparent);
-	color: var(--goo-theme-negative);
-	box-shadow: inset 2px 0 0 var(--goo-theme-negative);
+	background: color-mix(in srgb, var(--goo-theme-danger) 16%, transparent);
+	color: var(--goo-theme-danger);
+	box-shadow: inset 2px 0 0 var(--goo-theme-danger);
 }
 
 .goo-select__option--danger:hover .goo-select__icon,
 .goo-select__option--danger.goo-select__option--hovered .goo-select__icon {
-	color: var(--goo-theme-negative);
+	color: var(--goo-theme-danger);
 }
 
 /* Flash animation on selection */

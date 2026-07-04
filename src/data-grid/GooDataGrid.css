@@ -5,7 +5,7 @@
 		color-mix(in srgb, var(--goo-theme-fg, #fff) 14%, transparent)
 	);
 	--goo-data-grid-border-subtle: var(
-		--goo-theme-border-subtle,
+		--goo-theme-border,
 		color-mix(in srgb, var(--goo-theme-fg, #fff) 9%, transparent)
 	);
 	--goo-data-grid-fg: var(--goo-theme-fg, rgba(255, 255, 255, 0.92));

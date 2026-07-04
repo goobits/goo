@@ -11,7 +11,7 @@
 	--goo-panel-header-bg: var(--goo-theme-surface-raised, #16162a);
 	--goo-panel-border: var(--goo-theme-border, rgba(128, 128, 128, 0.2));
 	--goo-panel-fg: var(--goo-theme-fg, #e8e8e8);
-	--goo-panel-radius: var(--goo-theme-radius-xl, 12px);
+	--goo-panel-radius: var(--goo-theme-radius-lg, 12px);
 	--goo-panel-shadow: var(--goo-theme-shadow-lg, 0 4px 20px rgba(0, 0, 0, 0.4));
 	--goo-panel-z-index: 9999;
 	--goo-panel-margin: var(--goo-theme-space-md, 12px);
@@ -78,11 +78,11 @@
 
 /* Title */
 .goo-panel__title {
-	font-size: var(--goo-theme-control-label-size, 0.8125rem);
-	font-weight: var(--goo-theme-control-label-weight, 600);
+	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
+	font-weight: var(--goo-theme-font-weight-semibold, 600);
 	text-transform: uppercase;
 	letter-spacing: 0.07em;
-	color: var(--goo-theme-control-label-color, var(--goo-panel-fg));
+	color: var(--goo-theme-fg, var(--goo-panel-fg));
 }
 
 /* Toggle button */

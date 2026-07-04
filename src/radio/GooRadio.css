@@ -6,8 +6,8 @@
 	--goo-radio-size: var(--goo-theme-control-height-sm, 24px);
 	--goo-radio-dot-size: calc(var(--goo-theme-control-height-sm, 24px) - 14px);
 	--goo-radio-border-color: var(--goo-theme-border-strong, rgba(128, 128, 128, 0.3));
-	--goo-radio-border-color-checked: var(--goo-theme-selected, var(--goo-theme-accent, #3b82f6));
-	--goo-radio-dot-color: var(--goo-theme-selected, var(--goo-theme-accent, #3b82f6));
+	--goo-radio-border-color-checked: var(--goo-theme-accent, var(--goo-theme-accent, #3b82f6));
+	--goo-radio-dot-color: var(--goo-theme-accent, var(--goo-theme-accent, #3b82f6));
 	--goo-radio-transition: var(--goo-theme-transition-fast, 0.15s ease);
 
 	display: inline-flex;
