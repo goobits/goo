@@ -46,6 +46,30 @@ describe('GooButtonGroup', () => {
 		expect(container.querySelector('.goo-button[data-key="right"]')?.classList.contains('goo-button--selected')).toBe(true)
 	})
 
+	it('keeps disabled options visible but unavailable', async() => {
+		const onchange = vi.fn()
+		const { container } = render(GooButtonGroup, {
+			props: {
+				onchange,
+				options: [
+					{ key: 'previous', value: 'Previous', disabled: true },
+					{ key: 'next', value: 'Next' }
+				]
+			}
+		})
+		const previous = container.querySelector<HTMLButtonElement>('.goo-button[data-key="previous"]')!
+		const next = container.querySelector<HTMLButtonElement>('.goo-button[data-key="next"]')!
+
+		expect(previous.disabled).toBe(true)
+		expect(previous.classList.contains('goo-button--disabled')).toBe(true)
+		expect(previous.getAttribute('tabindex')).toBe('-1')
+		expect(next.getAttribute('tabindex')).toBe('0')
+
+		await fireEvent.click(previous)
+
+		expect(onchange).not.toHaveBeenCalled()
+	})
+
 	it('exposes selected index CSS variables for animated single selection', async() => {
 		const { container } = render(GooButtonGroup, {
 			props: {

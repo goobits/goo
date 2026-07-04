@@ -184,13 +184,15 @@ function getOptionButtonClass(option: NormalizedButtonGroupOption): string {
 	const values = [ 'goo-button' ]
 	if (isSelected(option.key)) values.push('goo-button--selected')
 	if (focusedKey === option.key) values.push('goo-button--focused')
-	if (disabled) values.push('goo-button--disabled')
+	if (disabled || option.disabled) values.push('goo-button--disabled')
 	if (option.hideLabel) values.push('goo-button--icon-only')
 	if (option.className) values.push(...option.className.split(' ').filter(Boolean))
 	return values.join(' ')
 }
 
 function getButtonTabIndex(key: string): number {
+	const option = normalizedOptions.find(item => item.key === key)
+	if (option?.disabled) return -1
 	if (disabled) return -1
 	return focusedKey === key ? tabIndex : -1
 }
@@ -202,7 +204,9 @@ function getPreferredFocusKey(nextSelected: Set<string>): string | null {
 
 function getSelectableKeys(): string[] {
 	if (normalizedOptions.length > 0) {
-		return normalizedOptions.map(option => option.key)
+		return normalizedOptions
+			.filter(option => !option.disabled)
+			.map(option => option.key)
 	}
 
 	return getChildButtons().map(readButtonKey)
@@ -302,8 +306,8 @@ function mountIcon(node: HTMLSpanElement, iconFactory: () => Element) {
 				class={getOptionButtonClass(option)}
 				data-key={option.key}
 				tabindex={getButtonTabIndex(option.key)}
-				disabled={disabled ? true : undefined}
-				aria-disabled={disabled ? 'true' : undefined}
+				disabled={disabled || option.disabled ? true : undefined}
+				aria-disabled={disabled || option.disabled ? 'true' : undefined}
 				aria-label={option.ariaLabel || option.tooltip || option.value || undefined}
 				aria-pressed={isSelected(option.key)}
 				title={option.tooltip || undefined}

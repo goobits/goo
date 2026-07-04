@@ -2,6 +2,7 @@ import type { ButtonGroupOptions, NormalizedButtonGroupOption } from './types.ts
 
 type RawButtonGroupOption = {
 	className?: string
+	disabled?: boolean
 	icon?: string | (() => Element)
 	id?: string | number
 	key?: string | number
@@ -53,6 +54,7 @@ function normalizeButtonGroupOption(option: RawButtonGroupOption): NormalizedBut
 		tooltip: option.tooltip,
 		ariaLabel: option.ariaLabel,
 		hideLabel: option.hideLabel,
-		className: option.className
+		className: option.className,
+		disabled: option.disabled
 	}
 }
