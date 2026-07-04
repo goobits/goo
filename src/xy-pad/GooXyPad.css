@@ -82,7 +82,7 @@
 .goo-xy-pad__input-label {
 	color: var(--goo-theme-muted, #a6a8af);
 	font-size: var(--goo-theme-font-size-xs, 0.6875rem);
-	font-weight: 650;
+	font-weight: var(--goo-theme-font-weight-semibold);
 	line-height: 1;
 	text-transform: uppercase;
 }
