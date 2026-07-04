@@ -33,7 +33,7 @@
 .goo-error-boundary__title {
 	margin: 0 0 var(--goo-theme-space-md, 0.75rem);
 	font-size: var(--goo-theme-font-size-lg, 1.125rem);
-	font-weight: 600;
+	font-weight: var(--goo-theme-font-weight-semibold);
 	color: var(--goo-error-boundary-border);
 }
 

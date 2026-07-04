@@ -362,7 +362,7 @@ goo-grid-popout-trigger :global(grid-title) {
 .goo-grid-popout-trigger__kicker {
 	color: var(--goo-theme-muted);
 	font-size: var(--goo-theme-font-size-xs);
-	font-weight: 600;
+	font-weight: var(--goo-theme-font-weight-semibold);
 	letter-spacing: 0.07em;
 	text-transform: uppercase;
 }
@@ -370,7 +370,7 @@ goo-grid-popout-trigger :global(grid-title) {
 .goo-grid-popout-trigger__title {
 	color: var(--goo-theme-fg);
 	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
-	font-weight: 600;
+	font-weight: var(--goo-theme-font-weight-semibold);
 	overflow: hidden;
 	text-overflow: ellipsis;
 	width: 100%;

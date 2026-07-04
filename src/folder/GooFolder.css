@@ -99,7 +99,7 @@
 	flex: 1;
 	min-width: 0;
 	font-size: var(--goo-theme-font-size-xs, 0.75rem);
-	font-weight: 500;
+	font-weight: var(--goo-theme-font-weight-medium);
 	text-transform: none;
 	letter-spacing: 0;
 	color: var(--goo-theme-fg, var(--goo-folder-fg));
@@ -207,7 +207,7 @@
 
 .goo-folder--inspector > .goo-folder__header > .goo-folder__title {
 	font-size: var(--goo-folder-inspector-title-size, 12px);
-	font-weight: 500;
+	font-weight: var(--goo-theme-font-weight-medium);
 	text-transform: none;
 	letter-spacing: 0;
 	color: color-mix(in srgb, var(--goo-theme-muted, var(--goo-folder-fg)) 70%, var(--goo-folder-fg));

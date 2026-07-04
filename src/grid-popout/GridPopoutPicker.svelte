@@ -512,7 +512,7 @@ function escapeSelectorValue(value: string): string {
 :global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .goo-grid-picker__kicker) {
 	color: var(--goo-theme-muted);
 	font-size: var(--goo-theme-font-size-xs);
-	font-weight: 600;
+	font-weight: var(--goo-theme-font-weight-semibold);
 	letter-spacing: 0.07em;
 	text-transform: uppercase;
 }

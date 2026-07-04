@@ -47,7 +47,7 @@
 	color: var(--goo-number-fg);
 	cursor: text;
 	direction: ltr;
-	font-weight: 500;
+	font-weight: var(--goo-theme-font-weight-medium);
 	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
 	height: var(--goo-number-height);
 	line-height: var(--goo-number-height);

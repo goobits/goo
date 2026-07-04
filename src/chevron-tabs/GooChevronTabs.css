@@ -21,10 +21,12 @@
 	--goo-chevron-tabs-close-offset: var(--goo-theme-space-md, 0.75rem);
 	--goo-chevron-tabs-tip-offset: calc(var(--goo-theme-space-sm, 0.5rem) + var(--goo-theme-space-2xs, 0.125rem) * 0.5);
 	--goo-chevron-tabs-tip-min-width: calc(var(--goo-theme-control-height-lg, 2.5rem) * 3.8);
+	--goo-chevron-tabs-tip-z-index: 1400;
 	--goo-chevron-tabs-tip-padding: calc(var(--goo-theme-space-sm, 0.5rem) + var(--goo-theme-space-2xs, 0.125rem) * 0.5)
 		calc(var(--goo-theme-space-md, 0.75rem) - var(--goo-theme-space-2xs, 0.125rem) * 0.5);
 	--goo-chevron-tabs-menu-button-size: calc(var(--goo-theme-control-height-sm, 1.5rem) - var(--goo-theme-space-2xs, 0.125rem));
 	--goo-chevron-tabs-menu-offset: calc(var(--goo-theme-space-sm, 0.5rem) + var(--goo-theme-space-2xs, 0.125rem));
+	--goo-chevron-tabs-menu-backdrop-z-index: 1500;
 	--goo-chevron-tabs-menu-min-width: calc(var(--goo-theme-control-height-lg, 2.5rem) * 4.75);
 	--goo-chevron-tabs-menu-padding: calc(var(--goo-theme-space-sm, 0.5rem) - var(--goo-theme-space-2xs, 0.125rem));
 	--goo-chevron-tabs-menu-row-gap: calc(var(--goo-theme-space-sm, 0.5rem) + var(--goo-theme-space-2xs, 0.125rem) * 0.5);
@@ -32,6 +34,7 @@
 		calc(var(--goo-theme-space-sm, 0.5rem) + var(--goo-theme-space-2xs, 0.125rem));
 	--goo-chevron-tabs-menu-dot-size: calc(var(--goo-theme-space-sm, 0.5rem) - var(--goo-theme-space-2xs, 0.125rem));
 	--goo-chevron-tabs-menu-accent-size: var(--goo-theme-space-sm, 0.5rem);
+	--goo-chevron-tabs-menu-z-index: 1600;
 	position: relative;
 	display: flex;
 	align-items: stretch;
@@ -110,7 +113,7 @@
 	color: var(--goo-chevron-tabs-fg-muted);
 	cursor: pointer;
 	font-size: var(--goo-chevron-tabs-font-size, 12px);
-	font-weight: 500;
+	font-weight: var(--goo-theme-font-weight-medium);
 	letter-spacing: var(--goo-chevron-tabs-letter-spacing, 0);
 	outline: none;
 	touch-action: none;
@@ -282,7 +285,7 @@
 
 .goo-chevron-tabs__connection-state {
 	font-size: calc(var(--goo-chevron-tabs-font-size, 12px) * 0.92);
-	font-weight: 500;
+	font-weight: var(--goo-theme-font-weight-medium);
 	letter-spacing: var(--goo-chevron-tabs-letter-spacing, 0);
 	line-height: 1;
 }
@@ -291,7 +294,7 @@
 	position: absolute;
 	right: 0;
 	top: calc(100% + var(--goo-chevron-tabs-tip-offset));
-	z-index: 1400;
+	z-index: var(--goo-chevron-tabs-tip-z-index);
 	min-width: var(--goo-chevron-tabs-tip-min-width);
 	padding: var(--goo-chevron-tabs-tip-padding);
 	border: 1px solid var(--goo-theme-border);
@@ -325,7 +328,7 @@
 	gap: var(--goo-chevron-tabs-menu-dot-size);
 	margin-top: var(--goo-chevron-tabs-tab-gap);
 	font-size: var(--goo-theme-font-size-xs);
-	font-weight: 500;
+	font-weight: var(--goo-theme-font-weight-medium);
 	line-height: 1;
 }
 
@@ -371,7 +374,7 @@
 .goo-chevron-tabs__menu-backdrop {
 	position: fixed;
 	inset: 0;
-	z-index: 1500;
+	z-index: var(--goo-chevron-tabs-menu-backdrop-z-index);
 	border: 0;
 	background: transparent;
 }
@@ -380,7 +383,7 @@
 	position: absolute;
 	right: var(--goo-chevron-tabs-menu-offset);
 	top: calc(100% + var(--goo-chevron-tabs-tab-gap));
-	z-index: 1600;
+	z-index: var(--goo-chevron-tabs-menu-z-index);
 	min-width: var(--goo-chevron-tabs-menu-min-width);
 	padding: var(--goo-chevron-tabs-menu-padding);
 	border: 1px solid var(--goo-theme-border);
@@ -401,7 +404,7 @@
 	color: var(--goo-chevron-tabs-fg);
 	cursor: pointer;
 	font-size: var(--goo-theme-font-size-xs);
-	font-weight: 500;
+	font-weight: var(--goo-theme-font-weight-medium);
 	line-height: 1;
 	text-align: left;
 }

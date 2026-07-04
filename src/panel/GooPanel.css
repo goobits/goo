@@ -309,7 +309,7 @@
 	);
 	border-top: 3px solid var(--goo-settings-pane-border);
 	display: block;
-	font-weight: 600;
+	font-weight: var(--goo-theme-font-weight-semibold);
 	margin: 0;
 	padding: var(--goo-theme-space-lg, 16px) var(--goo-theme-space-xl, 24px);
 	width: 100%;

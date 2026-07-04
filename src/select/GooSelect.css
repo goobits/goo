@@ -45,6 +45,7 @@
 	--goo-select-trigger-selected-icon-radius: calc(var(--goo-select-radius) / 2);
 	--goo-select-options-gap: 1px;
 	--goo-select-options-offset: var(--goo-theme-space-xs, 4px);
+	--goo-select-options-z-index: 1000;
 	--goo-select-content-max-inset: var(--goo-theme-space-xl, 32px);
 	--goo-select-enter-offset: calc(var(--goo-theme-space-xs, 4px) * -1);
 	--goo-select-shortcut-gap: 3px;
@@ -198,7 +199,7 @@
 	position: absolute;
 	top: 100%;
 	left: 0;
-	z-index: 1000;
+	z-index: var(--goo-select-options-z-index);
 	min-width: 100%;
 	max-height: var(--goo-select-max-height);
 	margin-top: var(--goo-select-options-offset);
@@ -592,7 +593,7 @@
 	color: color-mix(in srgb, var(--goo-select-fg) 80%, transparent);
 	font-size: var(--goo-theme-font-size-xs, 0.6875rem);
 	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-	font-weight: 600;
+	font-weight: var(--goo-theme-font-weight-semibold);
 	letter-spacing: 0;
 	line-height: 1;
 }
@@ -664,7 +665,7 @@
 	margin-inline: var(--goo-select-item-bleed-x, 0);
 	color: var(--goo-theme-muted);
 	font-size: var(--goo-theme-font-size-xs, 0.6875rem);
-	font-weight: 600;
+	font-weight: var(--goo-theme-font-weight-semibold);
 	text-transform: uppercase;
 	letter-spacing: 0.05em;
 }

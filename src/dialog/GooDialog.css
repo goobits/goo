@@ -26,6 +26,7 @@
 	--goo-dialog-alert-close-offset: calc((var(--goo-theme-space-sm, 8px) + var(--goo-theme-space-2xs, 2px)) * -1);
 	--goo-dialog-alert-close-size: var(--goo-theme-control-height-sm, 24px);
 	--goo-dialog-overlay-close-size: var(--goo-theme-control-height-sm, 1.5rem);
+	--goo-dialog-overlay-control-z-index: 10;
 	--goo-dialog-overlay-header-height: var(--goo-theme-control-height-lg, 40px);
 	--goo-dialog-touch-close-size: var(--goo-theme-control-height-touch, 44px);
 	--goo-dialog-touch-header-height: calc(var(--goo-theme-control-height-touch, 44px) + var(--goo-theme-space-xs, 4px));
@@ -100,7 +101,7 @@
 .goo-dialog__title {
 	margin: 0;
 	font-size: var(--goo-theme-font-size-xl, 1.1875rem);
-	font-weight: 600;
+	font-weight: var(--goo-theme-font-weight-semibold);
 	color: var(--goo-dialog-fg, var(--goo-theme-fg, #fff));
 }
 
@@ -154,7 +155,7 @@
 
 .goo-dialog__field-label {
 	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
-	font-weight: 500;
+	font-weight: var(--goo-theme-font-weight-medium);
 	color: var(--goo-theme-muted);
 }
 
@@ -247,7 +248,7 @@
 .goo-dialog.goo-dialog--notify .goo-dialog__content {
 	padding: var(--goo-theme-space-md, 12px) var(--goo-theme-space-xl, 24px);
 	text-align: center;
-	font-weight: 500;
+	font-weight: var(--goo-theme-font-weight-medium);
 }
 
 .goo-dialog.goo-dialog--notify .goo-dialog__close {
@@ -324,7 +325,7 @@
 	position: absolute;
 	top: var(--goo-theme-space-md, 12px);
 	right: var(--goo-theme-space-md, 12px);
-	z-index: 10;
+	z-index: var(--goo-dialog-overlay-control-z-index);
 	width: var(--goo-dialog-overlay-close-size);
 	height: var(--goo-dialog-overlay-close-size);
 	padding: 0;

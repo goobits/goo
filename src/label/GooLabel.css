@@ -39,7 +39,7 @@
 .goo-label__required {
 	content: '*';
 	color: var(--goo-label-required-color);
-	font-weight: 700;
+	font-weight: var(--goo-theme-font-weight-bold);
 	line-height: 1;
 }
 

@@ -38,7 +38,7 @@
 	justify-content: center;
 	gap: var(--goo-button-gap);
 	font-size: var(--goo-button-font-size);
-	font-weight: 600;
+	font-weight: var(--goo-theme-font-weight-semibold);
 	line-height: 1;
 	height: var(--goo-button-height);
 	min-height: 0;
@@ -278,7 +278,7 @@
 .goo-button[layout='stacked'] .goo-button__title,
 .goo-button[layout='stacked'] > span {
 	font-size: var(--goo-theme-font-size-xs, 0.75rem);
-	font-weight: 500;
+	font-weight: var(--goo-theme-font-weight-medium);
 	letter-spacing: 0.02em;
 }
 

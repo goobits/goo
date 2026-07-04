@@ -1,8 +1,10 @@
 .goo-progress-toast {
+	--goo-progress-toast-z-index: 100000;
+
 	position: fixed;
 	right: var(--goo-theme-space-lg, 16px);
 	bottom: var(--goo-theme-space-lg, 16px);
-	z-index: 100000;
+	z-index: var(--goo-progress-toast-z-index);
 	display: grid;
 	grid-template-columns: var(--goo-theme-control-height-md, 32px) minmax(160px, auto);
 	gap: var(--goo-theme-space-sm, 8px) var(--goo-theme-space-md, 12px);

@@ -37,7 +37,7 @@
 	&::before {
 		animation: goo-spinner-rotate 0.8s linear infinite;
 		border: var(--goo-spinner-stroke) solid var(--goo-spinner-track);
-		border-radius: 999px;
+		border-radius: var(--goo-theme-radius-full, 999px);
 		border-top-color: currentColor;
 		box-sizing: border-box;
 		content: '';
@@ -76,7 +76,7 @@
 			transparent 130deg,
 			transparent 360deg
 		);
-		border-radius: 999px;
+		border-radius: var(--goo-theme-radius-full, 999px);
 		box-sizing: border-box;
 		content: '';
 		display: block;

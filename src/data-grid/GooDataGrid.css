@@ -107,7 +107,7 @@
 .goo-data-grid__header-cell {
 	color: var(--goo-data-grid-muted);
 	font-size: var(--goo-theme-font-size-xs, 0.6875rem);
-	font-weight: 700;
+	font-weight: var(--goo-theme-font-weight-bold);
 	letter-spacing: 0;
 	min-height: 2.25rem;
 	text-transform: none;

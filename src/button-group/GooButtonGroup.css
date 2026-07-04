@@ -236,7 +236,7 @@
 
 .goo-button-group > .goo-button[layout='stacked'] > span {
 	font-size: var(--goo-theme-font-size-xs, 0.75rem);
-	font-weight: 500;
+	font-weight: var(--goo-theme-font-weight-medium);
 	letter-spacing: 0.02em;
 }
 

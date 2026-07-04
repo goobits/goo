@@ -72,7 +72,7 @@
 }
 
 .goo-toast__title {
-	font-weight: 600;
+	font-weight: var(--goo-theme-font-weight-semibold);
 	color: var(--goo-toast-fg);
 	word-wrap: break-word;
 }
@@ -89,7 +89,7 @@
 	padding: var(--goo-theme-space-xs, 4px) var(--goo-theme-space-md, 12px);
 	font: inherit;
 	font-size: var(--goo-theme-font-size-xs, 0.6875rem);
-	font-weight: 500;
+	font-weight: var(--goo-theme-font-weight-medium);
 	color: var(--goo-toast-accent-fg);
 	background: var(--goo-toast-accent);
 	border: 1px solid transparent;
