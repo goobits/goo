@@ -7,9 +7,11 @@
 	position: fixed;
 	inset: 0;
 	background: var(--goo-dialog-backdrop, rgba(0, 0, 0, 0.7));
+	backdrop-filter: var(--goo-dialog-backdrop-filter, none);
+	-webkit-backdrop-filter: var(--goo-dialog-backdrop-filter, none);
 	z-index: var(--goo-dialog-z-index, 99999);
 	opacity: 0;
-	transition: opacity var(--goo-dialog-transition-duration, 150ms) ease-out;
+	transition: opacity var(--goo-dialog-backdrop-transition-duration, var(--goo-dialog-transition-duration, 150ms)) ease-out;
 }
 
 .goo-dialog-backdrop--visible {
@@ -40,15 +42,21 @@
 	outline: none;
 	z-index: calc(var(--goo-dialog-z-index, 99999) + 1);
 	opacity: 0;
-	transition: opacity var(--goo-dialog-transition-duration, 150ms) ease-out;
+	transform: var(--goo-dialog-enter-transform, none);
+	transition:
+		opacity var(--goo-dialog-transition-duration, 150ms) ease-out,
+		transform var(--goo-dialog-transition-duration, 150ms)
+			var(--goo-dialog-transition-easing, ease-out);
 }
 
 .goo-dialog[open] {
 	opacity: 1;
+	transform: none;
 }
 
 .goo-dialog.goo-dialog--hiding {
 	opacity: 0;
+	transform: var(--goo-dialog-enter-transform, none);
 }
 
 .goo-dialog.goo-dialog--chromeless {

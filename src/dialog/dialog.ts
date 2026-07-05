@@ -231,6 +231,14 @@ class GooDialogControllerRuntime {
 	// --------------------------------------------------------------------------
 
 	/**
+	 * Splits the configured className into individual class tokens.
+	 */
+	_classNames(): string[] {
+		if (!this._className) return []
+		return this._className.split(/\s+/).filter(Boolean)
+	}
+
+	/**
 	 * Creates element.
 	 */
 	_createElement() {
@@ -238,8 +246,8 @@ class GooDialogControllerRuntime {
 
 		// Apply type class
 		this.$element.classList.add(`goo-dialog--${type}`)
-		if (this._className) {
-			this.$element.classList.add(this._className)
+		for (const name of this._classNames()) {
+			this.$element.classList.add(name)
 		}
 
 		// Set dimensions
@@ -646,6 +654,9 @@ class GooDialogControllerRuntime {
 			if (this.state.showBackdrop && this.state.type !== 'notify') {
 				this._$backdrop = document.createElement('div')
 				this._$backdrop.className = 'goo-dialog-backdrop'
+				for (const name of this._classNames()) {
+					this._$backdrop.classList.add(name)
+				}
 				this._$backdrop.style.setProperty(
 					'--goo-dialog-z-index',
 					String(dialogManager.getZIndex(this))
