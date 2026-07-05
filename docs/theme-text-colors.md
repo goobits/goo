@@ -18,8 +18,8 @@ Do not use legacy text aliases such as `--goo-theme-fg-muted`,
 
 Each background has a paired `-fg` for contrast:
 
-`--goo-theme-accent-fg`, `--goo-theme-selected-fg`, `--goo-theme-secondary-fg`,
-`--goo-theme-positive-fg`, `--goo-theme-negative-fg`, `--goo-theme-warning-fg`.
+`--goo-theme-accent-fg`, `--goo-theme-positive-fg`, `--goo-theme-warning-fg`,
+and `--goo-theme-danger-fg`.
 
 Muted text on colored backgrounds:
 
