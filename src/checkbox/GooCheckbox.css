@@ -7,7 +7,7 @@
 	--goo-checkbox-height: var(--goo-theme-control-height-sm, 24px);
 	--goo-checkbox-thumb-size: calc(var(--goo-theme-control-height-sm, 24px) - var(--goo-theme-space-xs, 4px));
 	--goo-checkbox-track-color: color-mix(in srgb, var(--goo-theme-fg, #fff) 12%, var(--goo-theme-bg, #111));
-	--goo-checkbox-track-color-checked: var(--goo-theme-accent, var(--goo-theme-accent, #3b82f6));
+	--goo-checkbox-track-color-checked: var(--goo-theme-accent, #3b82f6);
 	--goo-checkbox-thumb-color: var(--goo-theme-fg, #fff);
 	--goo-checkbox-transition: var(--goo-theme-transition-normal, 0.2s ease);
 

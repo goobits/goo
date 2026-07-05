@@ -30,7 +30,7 @@
 .goo-slider-field--goo .goo-slider-field__label {
 	min-inline-size: 0;
 	overflow: hidden;
-	color: var(--goo-theme-fg, var(--goo-theme-fg, #fff));
+	color: var(--goo-theme-fg, #fff);
 	font-size: var(--goo-theme-font-size-sm, 0.75rem);
 	font-weight: var(--goo-theme-font-weight-semibold, 600);
 	text-overflow: ellipsis;

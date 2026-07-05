@@ -39,7 +39,7 @@
 	z-index: 0;
 	width: calc(100% / var(--goo-button-group-option-count));
 	border-radius: max(0px, calc(var(--goo-button-group-radius) - 1px));
-	background: var(--goo-theme-accent, var(--goo-theme-accent, #3b82f6));
+	background: var(--goo-theme-accent, #3b82f6);
 	opacity: 0;
 	pointer-events: none;
 	transform: translateX(calc(var(--goo-button-group-selected-index) * 100%));
@@ -125,8 +125,8 @@
 /* Selected state - use !important to override base button gradient */
 .goo-button-group > .goo-button.goo-button--selected,
 .goo-button-group > .goo-button[selected] {
-	background: var(--goo-theme-accent, var(--goo-theme-accent, #3b82f6)) !important;
-	color: var(--goo-theme-accent-fg, var(--goo-theme-accent-fg, #fff));
+	background: var(--goo-theme-accent, #3b82f6) !important;
+	color: var(--goo-theme-accent-fg, #fff);
 }
 
 .goo-button-group.goo-button-group--single-select > .goo-button.goo-button--selected,

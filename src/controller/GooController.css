@@ -10,7 +10,7 @@
 	--goo-controller-border: var(--goo-theme-border, rgba(128, 128, 128, 0.1));
 	--goo-controller-padding: var(--goo-theme-control-row-padding, 0.5rem 0.75rem);
 	--goo-controller-label-width: clamp(140px, 40%, 360px);
-	--goo-controller-label-color: var(--goo-theme-fg, var(--goo-theme-fg, #fff));
+	--goo-controller-label-color: var(--goo-theme-fg, #fff);
 	--goo-controller-label-size: var(--goo-theme-font-size-sm, 0.8125rem);
 	--goo-controller-label-weight: var(--goo-theme-font-weight-semibold, 600);
 

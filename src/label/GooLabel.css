@@ -20,7 +20,7 @@
 	align-items: center;
 	gap: var(--goo-theme-space-xs, 4px);
 	font-family: var(--goo-theme-font-sans, system-ui, sans-serif);
-	font-size: var(--goo-theme-font-size-sm, var(--goo-theme-font-size-sm, 0.8125rem));
+	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
 	font-weight: var(--goo-theme-font-weight-semibold, 600);
 	color: var(--goo-label-color);
 	line-height: 1.25;

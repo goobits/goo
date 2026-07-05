@@ -17,7 +17,7 @@
 		0 0 0 3px var(--goo-slider-thumb-border), 0 6px 16px rgba(0, 0, 0, 0.32);
 	--goo-slider-variance-thumb-radius: var(--goo-theme-space-2xs, 2px);
 	--goo-slider-value-bubble-radius: calc(var(--goo-theme-radius-sm, 6px) - var(--goo-theme-space-2xs, 2px));
-	--goo-slider-coverage-bg: var(--goo-theme-accent, var(--goo-theme-accent, rgba(59, 130, 246, 0.4)));
+	--goo-slider-coverage-bg: var(--goo-theme-accent, rgba(59, 130, 246, 0.4));
 	--goo-slider-variance-coverage-edge-bg: color-mix(in srgb, var(--goo-slider-coverage-bg) 28%, transparent);
 	--goo-slider-variance-coverage-base-bg: color-mix(in srgb, var(--goo-slider-coverage-bg) 88%, var(--goo-theme-fg, #fff) 12%);
 	--goo-slider-value-pct: 0%;
