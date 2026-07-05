@@ -690,9 +690,11 @@ Core components should use this contract directly:
 | Borders | `--goo-theme-border`, `--goo-theme-border-strong`, `--goo-theme-focus-ring` |
 | Accent | `--goo-theme-accent`, `--goo-theme-accent-fg` |
 | Status | `--goo-theme-positive`, `--goo-theme-positive-fg`, `--goo-theme-danger`, `--goo-theme-danger-fg`, `--goo-theme-warning`, `--goo-theme-warning-fg` |
-| Radius/space/type | `--goo-theme-radius-sm/md/lg/full`, `--goo-theme-space-2xs/xs/sm/md/lg/xl`, `--goo-theme-font-size-xs/sm/base/md/lg/xl` |
+| Typography | `--goo-theme-font-sans`, `--goo-theme-font-mono`, `--goo-theme-font-size-xs/sm/base/md/lg/xl`, `--goo-theme-font-weight-medium/semibold/bold` |
+| Radius/space | `--goo-theme-radius-sm/md/lg/full`, `--goo-theme-space-2xs/xs/sm/md/lg/xl` |
 | Icons/shadows | `--goo-theme-icon-xs/sm/md/lg`, `--goo-theme-shadow-sm/md/lg` |
 | Controls | `--goo-theme-control-height-sm/md/lg/touch`, `--goo-theme-control-padding-sm/md/lg`, `--goo-theme-control-row-padding` |
+| State/motion | `--goo-theme-disabled-opacity`, `--goo-theme-transition-fast/normal/slow` |
 | Layers | `--goo-theme-layer-dropdown`, `--goo-theme-layer-popout`, `--goo-theme-layer-toast`, `--goo-theme-layer-modal`, `--goo-theme-layer-system` |
 
 Hover, active, and subtle accent backgrounds are derived at the component site:
