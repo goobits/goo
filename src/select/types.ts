@@ -26,6 +26,8 @@ export interface GooSelectOption {
 	id?: string
 	/** Visual tone. `'danger'` styles the row as destructive (negative color). */
 	tone?: 'danger'
+	/** Extra class names applied to the rendered option row. */
+	className?: string
 	icon?: GooSelectRenderable
 	shortcut?: GooSelectShortcut
 	isDisabled?: boolean | (() => boolean)

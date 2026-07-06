@@ -12,6 +12,7 @@ import {
 
 import type { CheckboxFieldElement } from '../checkbox/_createCheckboxField.ts'
 import { createLifecycleBag, type GooLifecycleBag } from '../support/utils/lifecycleBag.ts'
+import { handleDialogKeyboardEvent } from './_dialogKeyboard.ts'
 import {
 	appendContent,
 	buildFields,
@@ -22,7 +23,6 @@ import {
 	type DialogField,
 	type DialogLabels
 } from './dialogBuilder.ts'
-import { handleDialogKeyboardEvent } from './_dialogKeyboard.ts'
 import { dialogManager } from './GooDialogManager.ts'
 
 // Re-export types for consumers
@@ -242,17 +242,17 @@ class GooDialogControllerRuntime {
 		const { type, width, height, heading, showClose } = this.state
 
 		// Apply type class
-		this.$element.classList.add(`goo-dialog--${type}`)
+		this.$element.classList.add(`goo-dialog--${ type }`)
 		if (this._className) {
 			this.$element.classList.add(this._className)
 		}
 
 		// Set dimensions
 		if (width !== 'auto') {
-			this.$element.style.width = typeof width === 'number' ? `${width}px` : String(width)
+			this.$element.style.width = typeof width === 'number' ? `${ width }px` : String(width)
 		}
 		if (height !== 'auto') {
-			this.$element.style.height = typeof height === 'number' ? `${height}px` : String(height)
+			this.$element.style.height = typeof height === 'number' ? `${ height }px` : String(height)
 		}
 
 		// Accessibility
@@ -346,9 +346,9 @@ class GooDialogControllerRuntime {
 	 * Reference the title, or use an explicit/string label, so `role="dialog"` exposes an accessible name.
 	 */
 	_applyAccessibleName() {
-		const instanceId = `goo-dialog-${++dialogInstanceCount}`
+		const instanceId = `goo-dialog-${ ++dialogInstanceCount }`
 		if (this.$title) {
-			if (!this.$title.id) this.$title.id = `${instanceId}-title`
+			if (!this.$title.id) this.$title.id = `${ instanceId }-title`
 			this.$element.setAttribute('aria-labelledby', this.$title.id)
 			this.$element.removeAttribute('aria-label')
 			return
@@ -390,7 +390,7 @@ class GooDialogControllerRuntime {
 		}
 
 		// Keyboard
-		this._listen(this.$element, 'keydown', (e) => this._handleKeydown(e as KeyboardEvent))
+		this._listen(this.$element, 'keydown', e => this._handleKeydown(e as KeyboardEvent))
 	}
 
 	_listen(
@@ -508,7 +508,7 @@ class GooDialogControllerRuntime {
 	 */
 	_getFieldValues(): DialogValues {
 		const values: DialogValues = {}
-		for (const [name, $el] of this._fieldElements) {
+		for (const [ name, $el ] of this._fieldElements) {
 			const elWithValue = $el as unknown as {
 				value?: unknown
 				getValue?: () => unknown
@@ -531,7 +531,7 @@ class GooDialogControllerRuntime {
 		if (this.state.type === 'prompt' && this._fieldElements.size > 0) {
 			const firstField = this._fieldElements.entries().next()
 			if (firstField.done) return
-			const [, $first] = firstField.value
+			const [ , $first ] = firstField.value
 			const firstWithFocus = $first as unknown as { focus?: () => void; select?: () => void }
 			if (firstWithFocus?.focus) {
 				firstWithFocus.focus()
@@ -596,7 +596,7 @@ class GooDialogControllerRuntime {
 	open(): Promise<DialogResult> {
 		if (this._destroyed || this._isOpen) return Promise.resolve({ cancel: true })
 
-		return new Promise<DialogResult>((resolve) => {
+		return new Promise<DialogResult>(resolve => {
 			this._cleanupOpenResources()
 			this._resolve = resolve
 			this._isOpen = true
@@ -684,7 +684,7 @@ class GooDialogControllerRuntime {
 		}
 
 		// Wait for animation
-		await new Promise<void>((resolve) => {
+		await new Promise<void>(resolve => {
 			this._openLifecycle.timeout(resolve, TRANSITION_DURATION)
 		})
 

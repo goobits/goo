@@ -1,14 +1,14 @@
 .goo-grid-picker-selected-mark {
 	align-items: center;
-	background: var(--goo-theme-accent, #3b82f6);
-	border-radius: var(--goo-theme-radius-full, 999px);
-	color: var(--goo-theme-accent-fg, #fff);
+	background: var(--goo-theme-accent);
+	border-radius: var(--goo-theme-radius-full);
+	color: var(--goo-theme-accent-fg);
 	display: inline-flex;
 	height: 1rem;
 	justify-content: center;
 	position: absolute;
-	right: var(--goo-theme-space-xs, 4px);
-	top: var(--goo-theme-space-xs, 4px);
+	right: var(--goo-theme-space-xs);
+	top: var(--goo-theme-space-xs);
 	width: 1rem;
 	z-index: 1;
 }

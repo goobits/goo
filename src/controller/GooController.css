@@ -6,13 +6,23 @@
 .goo-controller {
 	/* Customizable via CSS custom properties */
 	--goo-controller-bg: transparent;
-	--goo-controller-bg-hover: color-mix(in srgb, var(--goo-theme-fg, #fff) 3%, transparent);
-	--goo-controller-border: var(--goo-theme-border, rgba(128, 128, 128, 0.1));
-	--goo-controller-padding: var(--goo-theme-control-row-padding, 0.5rem 0.75rem);
+	--goo-controller-bg-hover: color-mix(in srgb, var(--goo-theme-fg) 3%, transparent);
+	--goo-controller-border: var(--goo-theme-border);
+	--goo-controller-border-width: 1px;
+	--goo-controller-row-padding: var(--goo-theme-space-sm) var(--goo-theme-space-md);
+	--goo-controller-padding: var(--goo-controller-row-padding);
 	--goo-controller-label-width: clamp(140px, 40%, 360px);
-	--goo-controller-label-color: var(--goo-theme-fg, #fff);
-	--goo-controller-label-size: var(--goo-theme-font-size-sm, 0.8125rem);
-	--goo-controller-label-weight: var(--goo-theme-font-weight-semibold, 600);
+	--goo-controller-label-padding-inline-end: var(--goo-theme-space-sm);
+	--goo-controller-label-color: var(--goo-theme-fg);
+	--goo-controller-label-size: var(--goo-theme-font-size-sm);
+	--goo-controller-label-weight: var(--goo-theme-font-weight-semibold);
+	--goo-controller-number-max-width: calc(var(--goo-theme-control-height-lg) * 2);
+	--goo-controller-color-max-width: calc(var(--goo-theme-control-height-lg) * 2.5);
+	--goo-controller-angle-width: calc(var(--goo-theme-control-height-lg) * 3);
+	--goo-controller-checkbox-thumb-size: calc(var(--goo-theme-control-height-sm) - var(--goo-theme-space-xs));
+	--goo-controller-stacked-padding-block: var(--goo-theme-space-md);
+	--goo-controller-stacked-padding-inline: var(--goo-theme-space-md);
+	--goo-controller-transition: var(--goo-theme-transition-normal);
 
 	box-sizing: border-box;
 	display: flex;
@@ -21,8 +31,8 @@
 	min-inline-size: 0;
 	padding: var(--goo-controller-padding);
 	background: var(--goo-controller-bg);
-	border-bottom: 1px solid var(--goo-controller-border);
-	transition: background 0.15s;
+	border-bottom: var(--goo-controller-border-width) solid var(--goo-controller-border);
+	transition: background var(--goo-controller-transition);
 }
 
 .goo-controller:hover {
@@ -38,7 +48,7 @@
 	content: attr(data-label);
 	flex: 0 1 var(--goo-controller-label-width);
 	min-width: 0;
-	padding-right: 8px;
+	padding-right: var(--goo-controller-label-padding-inline-end);
 	font-size: var(--goo-controller-label-size);
 	font-weight: var(--goo-controller-label-weight);
 	color: var(--goo-controller-label-color);
@@ -109,7 +119,7 @@
 /* Number type - compact input */
 .goo-controller.goo-controller--number .goo-controller__widget {
 	flex: 0 0 auto;
-	max-width: 80px;
+	max-width: var(--goo-controller-number-max-width);
 }
 
 /* Select type */
@@ -124,7 +134,7 @@
 /* Color type - compact swatch + input */
 .goo-controller.goo-controller--color .goo-controller__widget {
 	flex: 0 0 auto;
-	max-width: 100px;
+	max-width: var(--goo-controller-color-max-width);
 }
 
 /* Checkbox type - compact toggle */
@@ -168,42 +178,42 @@
 
 /* Adjust nested component sizes */
 .goo-controller .goo-slider {
-	--goo-slider-track-height: calc(var(--goo-theme-control-height-lg, 2.5rem) * 0.3);
-	--goo-slider-thumb-size: calc(var(--goo-theme-control-height-lg, 2.5rem) * 0.35);
+	--goo-slider-track-height: calc(var(--goo-theme-control-height-lg) * 0.3);
+	--goo-slider-thumb-size: calc(var(--goo-theme-control-height-lg) * 0.35);
 }
 
 .goo-controller .goo-number {
-	--goo-number-height: var(--goo-theme-control-height-md, 2rem);
-	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
+	--goo-number-height: var(--goo-theme-control-height-md);
+	font-size: var(--goo-theme-font-size-sm);
 	width: 100%;
 }
 
 .goo-controller .goo-input {
-	--goo-input-height: var(--goo-theme-control-height-md, 2rem);
-	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
+	--goo-input-height: var(--goo-theme-control-height-md);
+	font-size: var(--goo-theme-font-size-sm);
 }
 
 .goo-controller .goo-checkbox {
-	--goo-checkbox-height: var(--goo-theme-control-height-sm, 1.5rem);
-	--goo-checkbox-thumb-size: calc(var(--goo-theme-control-height-sm, 1.5rem) - 4px);
-	--goo-checkbox-width: calc(var(--goo-theme-control-height-sm, 1.5rem) * 1.8);
+	--goo-checkbox-height: var(--goo-theme-control-height-sm);
+	--goo-checkbox-thumb-size: var(--goo-controller-checkbox-thumb-size);
+	--goo-checkbox-width: calc(var(--goo-theme-control-height-sm) * 1.8);
 }
 
 .goo-controller .goo-button {
-	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
-	min-height: var(--goo-theme-control-height-md, 2rem);
-	line-height: var(--goo-theme-control-height-md, 2rem);
-	padding: var(--goo-theme-control-padding-md, 0 0.75rem);
+	font-size: var(--goo-theme-font-size-sm);
+	min-height: var(--goo-theme-control-height-md);
+	line-height: var(--goo-theme-control-height-md);
+	padding: var(--goo-theme-control-padding-md);
 }
 
 .goo-controller .goo-button.goo-button--full-row {
 	line-height: 1;
-	min-height: var(--goo-button-full-row-height, var(--goo-theme-control-height-lg, 2.5rem));
+	min-height: var(--goo-button-full-row-height, var(--goo-theme-control-height-lg));
 	padding-block: 0;
 }
 
 .goo-controller .goo-select {
-	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
+	font-size: var(--goo-theme-font-size-sm);
 	inline-size: 100%;
 	min-inline-size: 0;
 }
@@ -213,9 +223,9 @@
 }
 
 .goo-controller .goo-angle-input {
-	--goo-angle-track-size: var(--goo-theme-control-height-md, 2rem);
-	width: 120px;
-	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
+	--goo-angle-track-size: var(--goo-theme-control-height-md);
+	width: var(--goo-controller-angle-width);
+	font-size: var(--goo-theme-font-size-sm);
 }
 
 .goo-tool-config,
@@ -229,7 +239,7 @@ sketch-toolconfig {
 .goo-tool-config .goo-angle-input,
 .goo-palette .goo-angle-input,
 sketch-toolconfig .goo-angle-input {
-	margin: 0 var(--goo-theme-space-sm, 0.5rem);
+	margin: 0 var(--goo-theme-space-sm);
 }
 
 sketch-FilterFooter {
@@ -287,8 +297,8 @@ sketch-FilterFooter {
 .goo-controller.goo-controller--stacked {
 	flex-direction: column;
 	align-items: stretch;
-	gap: var(--goo-theme-space-sm, 8px);
-	padding: var(--goo-controller-stacked-padding-block, 0.75rem) 0;
+	gap: var(--goo-theme-space-sm);
+	padding: var(--goo-controller-stacked-padding-block) 0;
 }
 
 /* Hide the ::before label in stacked mode (we use real DOM instead) */
@@ -301,8 +311,8 @@ sketch-FilterFooter {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	gap: var(--goo-theme-space-sm, 8px);
-	padding-inline: var(--goo-controller-stacked-padding-inline, 0.75rem);
+	gap: var(--goo-theme-space-sm);
+	padding-inline: var(--goo-controller-stacked-padding-inline);
 }
 
 .goo-controller__header .goo-label {

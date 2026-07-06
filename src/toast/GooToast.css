@@ -5,15 +5,15 @@
 
 .goo-toast {
 	--goo-toast-bg: var(--goo-theme-surface-raised);
-	--goo-toast-fg: var(--goo-theme-fg, rgba(255, 255, 255, 0.9));
+	--goo-toast-fg: var(--goo-theme-fg);
 	--goo-toast-muted: var(--goo-theme-muted);
-	--goo-toast-border: var(--goo-theme-border, rgba(255, 255, 255, 0.1));
-	--goo-toast-radius: var(--goo-theme-radius-md, 6px);
-	--goo-toast-shadow: var(--goo-theme-shadow-md, 0 4px 12px rgba(0, 0, 0, 0.15));
-	--goo-toast-accent: var(--goo-theme-accent, #3b82f6);
-	--goo-toast-accent-fg: var(--goo-theme-accent-fg, #ffffff);
-	--goo-toast-padding: var(--goo-theme-space-md, 12px) var(--goo-theme-space-lg, 16px);
-	--goo-toast-gap: var(--goo-theme-space-md, 12px);
+	--goo-toast-border: var(--goo-theme-border);
+	--goo-toast-radius: var(--goo-theme-radius-md);
+	--goo-toast-shadow: var(--goo-theme-shadow-md);
+	--goo-toast-accent: var(--goo-theme-accent);
+	--goo-toast-accent-fg: var(--goo-theme-accent-fg);
+	--goo-toast-padding: var(--goo-theme-space-md) var(--goo-theme-space-lg);
+	--goo-toast-gap: var(--goo-theme-space-md);
 
 	position: relative;
 	display: flex;
@@ -28,46 +28,46 @@
 	box-shadow: var(--goo-toast-shadow);
 	overflow: hidden;
 	pointer-events: auto;
-	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
+	font-size: var(--goo-theme-font-size-sm);
 }
 
 .goo-toast--info {
-	border-left-color: var(--goo-theme-accent, #3b82f6);
+	border-left-color: var(--goo-theme-accent);
 }
 .goo-toast--success {
-	border-left-color: var(--goo-theme-positive, #22c55e);
+	border-left-color: var(--goo-theme-positive);
 }
 .goo-toast--warning {
-	border-left-color: var(--goo-theme-warning, #f59e0b);
+	border-left-color: var(--goo-theme-warning);
 }
 .goo-toast--error {
-	border-left-color: var(--goo-theme-danger, #ef4444);
+	border-left-color: var(--goo-theme-danger);
 }
 
 .goo-toast__icon {
 	flex: 0 0 auto;
-	font-size: var(--goo-theme-icon-lg, 1.25rem);
+	font-size: var(--goo-theme-icon-lg);
 	line-height: 1;
 }
 
 .goo-toast--info .goo-toast__icon {
-	color: var(--goo-theme-accent, #3b82f6);
+	color: var(--goo-theme-accent);
 }
 .goo-toast--success .goo-toast__icon {
-	color: var(--goo-theme-positive, #22c55e);
+	color: var(--goo-theme-positive);
 }
 .goo-toast--warning .goo-toast__icon {
-	color: var(--goo-theme-warning, #f59e0b);
+	color: var(--goo-theme-warning);
 }
 .goo-toast--error .goo-toast__icon {
-	color: var(--goo-theme-danger, #ef4444);
+	color: var(--goo-theme-danger);
 }
 
 .goo-toast__body {
 	flex: 1 1 auto;
 	display: flex;
 	flex-direction: column;
-	gap: var(--goo-theme-space-xs, 4px);
+	gap: var(--goo-theme-space-xs);
 	min-width: 0;
 }
 
@@ -84,16 +84,16 @@
 }
 
 .goo-toast__action {
-	margin-top: var(--goo-theme-space-sm, 8px);
+	margin-top: var(--goo-theme-space-sm);
 	align-self: flex-start;
-	padding: var(--goo-theme-space-xs, 4px) var(--goo-theme-space-md, 12px);
+	padding: var(--goo-theme-space-xs) var(--goo-theme-space-md);
 	font: inherit;
-	font-size: var(--goo-theme-font-size-xs, 0.6875rem);
+	font-size: var(--goo-theme-font-size-xs);
 	font-weight: var(--goo-theme-font-weight-medium);
 	color: var(--goo-toast-accent-fg);
 	background: var(--goo-toast-accent);
 	border: 1px solid transparent;
-	border-radius: var(--goo-theme-radius-sm, 4px);
+	border-radius: var(--goo-theme-radius-sm);
 	cursor: pointer;
 	transition: filter 0.15s;
 
@@ -111,12 +111,12 @@
 	background: transparent;
 	border: none;
 	font: inherit;
-	font-size: var(--goo-theme-font-size-lg, 1.0625rem);
+	font-size: var(--goo-theme-font-size-lg);
 	line-height: 1;
 	color: var(--goo-toast-muted);
 	cursor: pointer;
 	padding: 0;
-	margin-left: var(--goo-theme-space-xs, 4px);
+	margin-left: var(--goo-theme-space-xs);
 	transition: color 0.15s;
 
 	&:hover {
@@ -125,7 +125,7 @@
 	&:focus-visible {
 		outline: 2px solid var(--goo-toast-accent);
 		outline-offset: 2px;
-		border-radius: var(--goo-theme-radius-sm, 2px);
+		border-radius: var(--goo-theme-radius-sm);
 	}
 }
 
@@ -140,16 +140,16 @@
 }
 
 .goo-toast--info .goo-toast__progress {
-	color: var(--goo-theme-accent, #3b82f6);
+	color: var(--goo-theme-accent);
 }
 .goo-toast--success .goo-toast__progress {
-	color: var(--goo-theme-positive, #22c55e);
+	color: var(--goo-theme-positive);
 }
 .goo-toast--warning .goo-toast__progress {
-	color: var(--goo-theme-warning, #f59e0b);
+	color: var(--goo-theme-warning);
 }
 .goo-toast--error .goo-toast__progress {
-	color: var(--goo-theme-danger, #ef4444);
+	color: var(--goo-theme-danger);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -14,6 +14,7 @@
 	--goo-button-gap: var(--goo-theme-space-sm);
 	--goo-button-font-size: var(--goo-theme-font-size-sm);
 	--goo-button-height: var(--goo-theme-control-height-md);
+	--goo-button-icon-size: var(--goo-theme-icon-md);
 	--goo-button-padding: var(--goo-theme-control-padding-md);
 	--goo-button-compact-font-size: var(--goo-theme-font-size-xs);
 	--goo-button-compact-height: var(--goo-theme-control-height-sm);
@@ -160,8 +161,8 @@
 	align-items: center;
 	justify-content: center;
 	flex-shrink: 0;
-	height: var(--goo-button-icon-size, 1em);
-	width: var(--goo-button-icon-size, 1em);
+	height: var(--goo-button-icon-size);
+	width: var(--goo-button-icon-size);
 }
 
 /* Ensure SVGs inside icons are properly centered */
@@ -258,7 +259,7 @@
 .goo-button[layout='stacked'] > span {
 	font-size: var(--goo-theme-font-size-xs);
 	font-weight: var(--goo-theme-font-weight-medium);
-	letter-spacing: 0.02em;
+	letter-spacing: 0;
 }
 
 @media (hover: none) and (pointer: coarse) {
@@ -278,6 +279,6 @@
 
 @media (prefers-reduced-motion: reduce) {
 	.goo-button {
-		transition-duration: 0.01ms;
+		transition: none;
 	}
 }

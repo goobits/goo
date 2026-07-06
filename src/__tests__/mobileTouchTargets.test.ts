@@ -8,11 +8,11 @@ const currentDir = dirname(fileURLToPath(import.meta.url))
 const gooSrcDir = resolve(currentDir, '..')
 
 const coarsePointerTargets = [
-	[ 'button/GooButton.css', 'button controls', /\.goo-button[\s\S]*(?:44px|2\.75rem)/ ],
-	[ 'button-group/GooButtonGroup.css', 'button group controls', /--goo-button-group-height:\s*max\(var\(--goo-theme-control-height-touch,\s*44px\)/ ],
-	[ 'dialog/GooDialog.css', 'dialog controls', /--goo-dialog-touch-close-size:\s*var\(--goo-theme-control-height-touch,\s*44px\)[\s\S]*\.goo-dialog__close\s*\{[\s\S]*min-height:\s*var\(--goo-dialog-touch-close-size\)[\s\S]*min-width:\s*var\(--goo-dialog-touch-close-size\)/ ],
-	[ 'schema/GooSchema.css', 'schema controls', /--goo-schema-action-height:\s*var\(--goo-theme-control-height-touch,\s*2\.75rem\)/ ],
-	[ 'select/GooSelect.css', 'select and menu controls', /--goo-select-height:\s*var\(--goo-theme-control-height-touch,\s*44px\)/ ]
+	[ 'button/GooButton.css', 'button controls', /\.goo-button[\s\S]*height:\s*max\(var\(--goo-theme-control-height-touch\),\s*var\(--goo-theme-control-height-md\)\)/ ],
+	[ 'button-group/GooButtonGroup.css', 'button group controls', /--goo-button-group-height:\s*max\(var\(--goo-theme-control-height-touch\),\s*var\(--goo-theme-control-height-md\)\)/ ],
+	[ 'dialog/GooDialog.css', 'dialog controls', /--goo-dialog-touch-close-size:\s*var\(--goo-theme-control-height-touch\)[\s\S]*\.goo-dialog__close\s*\{[\s\S]*min-height:\s*var\(--goo-dialog-touch-close-size\)[\s\S]*min-width:\s*var\(--goo-dialog-touch-close-size\)/ ],
+	[ 'schema/GooSchema.css', 'schema controls', /--goo-schema-action-height:\s*var\(--goo-theme-control-height-touch\)/ ],
+	[ 'select/GooSelect.css', 'select and menu controls', /--goo-select-height:\s*var\(--goo-theme-control-height-touch\)/ ]
 ] as const
 
 describe('Goo mobile touch target contracts', () => {

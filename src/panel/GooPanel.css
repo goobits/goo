@@ -5,23 +5,28 @@
 
 .goo-panel {
 	/* Customizable via CSS custom properties */
-	--goo-panel-width: 280px;
+	--goo-panel-width: calc(var(--goo-theme-control-height-lg) * 7);
 	--goo-panel-max-height: 90vh;
-	--goo-panel-bg: var(--goo-theme-surface, #1a1a2e);
-	--goo-panel-header-bg: var(--goo-theme-surface-raised, #16162a);
-	--goo-panel-border: var(--goo-theme-border, rgba(128, 128, 128, 0.2));
-	--goo-panel-fg: var(--goo-theme-fg, #e8e8e8);
-	--goo-panel-radius: var(--goo-theme-radius-lg, 12px);
-	--goo-panel-shadow: var(--goo-theme-shadow-lg, 0 4px 20px rgba(0, 0, 0, 0.4));
-	--goo-panel-z-index: var(--goo-theme-layer-popout, 10000);
-	--goo-panel-margin: var(--goo-theme-space-md, 12px);
-	--goo-panel-toggle-size: var(--goo-theme-control-height-sm, 1.5rem);
+	--goo-panel-bg: var(--goo-theme-surface);
+	--goo-panel-header-bg: var(--goo-theme-surface-raised);
+	--goo-panel-border: var(--goo-theme-border);
+	--goo-panel-border-width: 1px;
+	--goo-panel-fg: var(--goo-theme-fg);
+	--goo-panel-radius: var(--goo-theme-radius-lg);
+	--goo-panel-shadow: var(--goo-theme-shadow-lg);
+	--goo-panel-z-index: var(--goo-theme-layer-popout);
+	--goo-panel-margin: var(--goo-theme-space-md);
+	--goo-panel-toggle-size: var(--goo-theme-control-height-sm);
+	--goo-panel-title-letter-spacing: 0;
+	--goo-panel-toggle-transition: var(--goo-theme-transition-normal);
+	--goo-panel-focus-outline-width: 2px;
+	--goo-panel-focus-outline-offset: 1px;
 	--goo-panel-header-offset: calc(
-		var(--goo-theme-control-height-md, 2rem) + var(--goo-theme-space-md, 0.75rem) +
-			var(--goo-theme-space-2xs, 0.125rem) * 0.5
+		var(--goo-theme-control-height-md) + var(--goo-theme-space-md) +
+			var(--goo-theme-space-2xs) * 0.5
 	);
 	--goo-panel-scrollbar-size: calc(
-		var(--goo-theme-space-sm, 0.5rem) - var(--goo-theme-space-2xs, 0.125rem)
+		var(--goo-theme-space-sm) - var(--goo-theme-space-2xs)
 	);
 
 	display: block;
@@ -29,12 +34,12 @@
 	width: var(--goo-panel-width);
 	max-height: var(--goo-panel-max-height);
 	background: var(--goo-panel-bg);
-	border: 1px solid var(--goo-panel-border);
+	border: var(--goo-panel-border-width) solid var(--goo-panel-border);
 	border-radius: var(--goo-panel-radius);
 	box-shadow: var(--goo-panel-shadow);
 	color: var(--goo-panel-fg);
-	font-family: var(--goo-theme-font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
-	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
+	font-family: var(--goo-theme-font-sans);
+	font-size: var(--goo-theme-font-size-sm);
 	z-index: var(--goo-panel-z-index);
 	overflow: hidden;
 }
@@ -65,9 +70,9 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: var(--goo-theme-space-sm, 8px) var(--goo-theme-space-md, 12px);
+	padding: var(--goo-theme-space-sm) var(--goo-theme-space-md);
 	background: var(--goo-panel-header-bg);
-	border-bottom: 1px solid var(--goo-panel-border);
+	border-bottom: var(--goo-panel-border-width) solid var(--goo-panel-border);
 	cursor: grab;
 	user-select: none;
 }
@@ -78,11 +83,11 @@
 
 /* Title */
 .goo-panel__title {
-	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
-	font-weight: var(--goo-theme-font-weight-semibold, 600);
+	font-size: var(--goo-theme-font-size-sm);
+	font-weight: var(--goo-theme-font-weight-semibold);
 	text-transform: uppercase;
-	letter-spacing: 0.07em;
-	color: var(--goo-theme-fg, var(--goo-panel-fg));
+	letter-spacing: var(--goo-panel-title-letter-spacing);
+	color: var(--goo-panel-fg);
 }
 
 /* Toggle button */
@@ -95,29 +100,29 @@
 	padding: 0;
 	background: transparent;
 	border: none;
-	border-radius: var(--goo-theme-radius-sm, 4px);
+	border-radius: var(--goo-theme-radius-sm);
 	cursor: pointer;
 	color: var(--goo-panel-fg);
 	opacity: 0.6;
 	transition:
-		opacity 0.15s,
-		background 0.15s,
-		transform 0.2s;
+		opacity var(--goo-panel-toggle-transition),
+		background var(--goo-panel-toggle-transition),
+		transform var(--goo-panel-toggle-transition);
 }
 
 .goo-panel__toggle:hover {
 	opacity: 1;
-	background: color-mix(in srgb, var(--goo-theme-fg, #fff) 10%, transparent);
+	background: color-mix(in srgb, var(--goo-theme-fg) 10%, transparent);
 }
 
 .goo-panel__toggle:focus-visible {
-	outline: 2px solid var(--goo-theme-focus-ring, #007bff);
-	outline-offset: 1px;
+	outline: var(--goo-panel-focus-outline-width) solid var(--goo-theme-focus-ring);
+	outline-offset: var(--goo-panel-focus-outline-offset);
 }
 
 .goo-panel__toggle-icon {
 	display: block;
-	transition: transform var(--goo-theme-transition-normal, 0.15s ease);
+	transition: transform var(--goo-theme-transition-normal);
 }
 
 /* Rotate icon when closed */
@@ -149,12 +154,12 @@
 }
 
 .goo-panel__content::-webkit-scrollbar-thumb {
-	background: color-mix(in srgb, var(--goo-theme-fg, #fff) 20%, transparent);
-	border-radius: var(--goo-theme-radius-sm, 2px);
+	background: color-mix(in srgb, var(--goo-theme-fg) 20%, transparent);
+	border-radius: var(--goo-theme-radius-sm);
 }
 
 .goo-panel__content::-webkit-scrollbar-thumb:hover {
-	background: color-mix(in srgb, var(--goo-theme-fg, #fff) 30%, transparent);
+	background: color-mix(in srgb, var(--goo-theme-fg) 30%, transparent);
 }
 
 /* Dragging state */
@@ -181,7 +186,7 @@
 /* Animation for smooth open/close */
 @media (prefers-reduced-motion: no-preference) {
 	.goo-panel__content {
-		animation: goo-panel-expand var(--goo-theme-transition-normal, 0.15s ease);
+		animation: goo-panel-expand var(--goo-theme-transition-normal);
 	}
 }
 
@@ -222,7 +227,7 @@
 	border-radius: 0;
 	box-shadow: none;
 	border: none;
-	border-left: 1px solid var(--goo-panel-border);
+	border-left: var(--goo-panel-border-width) solid var(--goo-panel-border);
 	flex-shrink: 0;
 }
 
@@ -236,7 +241,12 @@
 		var(--goo-theme-fg) 10%,
 		var(--goo-theme-bg)
 	);
-	--goo-settings-pane-width: 350px;
+	--goo-settings-pane-width: calc(var(--goo-theme-control-height-lg) * 8.75);
+	--goo-settings-pane-category-border-width: 3px;
+	--goo-settings-pane-category-letter-spacing: 0;
+	--goo-settings-pane-scroll-max-height: calc(
+		100vh - var(--goo-theme-control-height-lg) - var(--goo-theme-space-sm)
+	);
 
 	background: var(--goo-settings-pane-bg);
 	color: var(--goo-settings-pane-fg);
@@ -251,7 +261,7 @@
 }
 
 .goo-settings-surface-dialog .dialog__content {
-	padding: var(--goo-theme-space-xl, 24px);
+	padding: var(--goo-theme-space-xl);
 }
 
 .goo-settings-pane {
@@ -271,11 +281,11 @@
 .goo-settings-pane__field {
 	background: var(--goo-settings-pane-bg);
 	color: var(--goo-settings-pane-fg);
-	padding: var(--goo-theme-space-lg, 16px) var(--goo-theme-space-xl, 24px);
+	padding: var(--goo-theme-space-lg) var(--goo-theme-space-xl);
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	transition: background var(--goo-theme-transition-normal, 0.15s ease);
+	transition: background var(--goo-theme-transition-normal);
 }
 
 .goo-settings-pane__title,
@@ -297,7 +307,7 @@
 	align-items: center;
 	top: 0;
 	font-weight: 400;
-	gap: var(--goo-theme-space-sm, 8px);
+	gap: var(--goo-theme-space-sm);
 }
 
 .goo-settings-pane__category {
@@ -307,16 +317,16 @@
 		var(--goo-settings-pane-bg),
 		color-mix(in srgb, var(--goo-settings-pane-fg) 4%, var(--goo-settings-pane-bg))
 	);
-	border-top: 3px solid var(--goo-settings-pane-border);
+	border-top: var(--goo-settings-pane-category-border-width) solid var(--goo-settings-pane-border);
 	display: block;
 	font-weight: var(--goo-theme-font-weight-semibold);
 	margin: 0;
-	padding: var(--goo-theme-space-lg, 16px) var(--goo-theme-space-xl, 24px);
+	padding: var(--goo-theme-space-lg) var(--goo-theme-space-xl);
 	width: 100%;
 	color: var(--goo-settings-pane-muted-fg);
 	font-size: var(--goo-theme-font-size-md);
-	line-height: var(--goo-theme-space-xl, 32px);
-	letter-spacing: 0.25px;
+	line-height: var(--goo-theme-space-xl);
+	letter-spacing: var(--goo-settings-pane-category-letter-spacing);
 }
 
 .goo-settings-pane__category-content {
@@ -338,8 +348,8 @@
 [dir='rtl'] .goo-settings-pane__field {
 	background: var(--goo-settings-pane-bg);
 	color: var(--goo-settings-pane-fg);
-	padding: var(--goo-theme-space-sm, 8px) var(--goo-theme-space-lg, 24px)
-		var(--goo-theme-space-sm, 8px) var(--goo-theme-space-xs, 4px);
+	padding: var(--goo-theme-space-sm) var(--goo-theme-space-lg)
+		var(--goo-theme-space-sm) var(--goo-theme-space-xs);
 }
 
 @media (max-width: 450px) {
@@ -355,7 +365,7 @@
 
 	.goo-settings-dialog .dialog__content-scroll,
 	.goo-settings-surface-dialog .dialog__content-scroll {
-		max-height: calc(100vh - 3rem - 1px);
+		max-height: var(--goo-settings-pane-scroll-max-height);
 	}
 }
 

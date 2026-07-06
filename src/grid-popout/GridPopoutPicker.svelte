@@ -450,20 +450,35 @@ function escapeSelectorValue(value: string): string {
 <style>
 :global(goo-popout.goo-grid-popout:not(.goo-grid-popout--blend)),
 :global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend)) {
-	max-width: 320px;
+	--goo-grid-picker-icon-grid-inline-size: calc(var(--goo-theme-control-height-lg) * 8);
+	--goo-grid-picker-icon-item-min-height: calc(var(--goo-theme-control-height-lg) * 2 + var(--goo-theme-space-xs));
+	--goo-grid-picker-item-min-height: calc(
+		var(--goo-theme-control-height-lg) + var(--goo-theme-space-xs) + var(--goo-theme-space-2xs)
+	);
+	--goo-grid-picker-max-inline-size: calc(var(--goo-theme-control-height-lg) * 8);
+	--goo-grid-picker-preset-inline-size: calc(var(--goo-theme-control-height-lg) * 13 + var(--goo-theme-space-xl));
+	--goo-grid-picker-preset-item-min-height: calc(
+		var(--goo-theme-control-height-lg) * 2 + var(--goo-theme-space-xl) + var(--goo-theme-space-xs) +
+			var(--goo-theme-space-2xs)
+	);
+	--goo-grid-picker-small-max-inline-size: calc(var(--goo-theme-control-height-lg) * 6.5);
+	--goo-grid-picker-title-gap: calc(var(--goo-theme-space-2xs) * 0.5);
+	--goo-grid-picker-viewport-inset: var(--goo-theme-control-height-md);
+
+	max-width: var(--goo-grid-picker-max-inline-size);
 	user-select: none;
 	-webkit-user-select: none;
 }
 
 :global(goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) goo-popout-content),
 :global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .goo-popout__content) {
-	padding: var(--goo-theme-space-sm, 8px);
+	padding: var(--goo-theme-space-sm);
 }
 
 :global(goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .goo-grid-picker),
 :global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .goo-grid-picker) {
 	display: grid;
-	gap: var(--goo-theme-space-sm, 8px);
+	gap: var(--goo-theme-space-sm);
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 	justify-items: stretch;
 }
@@ -474,10 +489,10 @@ function escapeSelectorValue(value: string): string {
 	border: 1px solid transparent;
 	border-radius: var(--goo-theme-radius-sm);
 	display: flex;
-	gap: var(--goo-theme-space-sm, 8px);
+	gap: var(--goo-theme-space-sm);
 	justify-content: flex-start;
-	min-height: 2.9rem;
-	padding: var(--goo-theme-space-sm, 8px);
+	min-height: var(--goo-grid-picker-item-min-height);
+	padding: var(--goo-theme-space-sm);
 	position: relative;
 	width: 100%;
 }
@@ -503,7 +518,7 @@ function escapeSelectorValue(value: string): string {
 :global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) grid-title) {
 	display: flex;
 	flex-direction: column;
-	gap: 1px;
+	gap: var(--goo-grid-picker-title-gap);
 	line-height: 1.2;
 	order: 2;
 }
@@ -513,7 +528,7 @@ function escapeSelectorValue(value: string): string {
 	color: var(--goo-theme-muted);
 	font-size: var(--goo-theme-font-size-xs);
 	font-weight: var(--goo-theme-font-weight-semibold);
-	letter-spacing: 0.07em;
+	letter-spacing: 0;
 	text-transform: uppercase;
 }
 
@@ -528,12 +543,12 @@ function escapeSelectorValue(value: string): string {
 
 :global(goo-popout.goo-grid-popout--one-column),
 :global(.goo-popout.goo-grid-popout--one-column) {
-	max-width: 260px;
+	max-width: var(--goo-grid-picker-small-max-inline-size);
 }
 
 :global(goo-popout.goo-grid-popout--one-column goo-popout-content),
 :global(.goo-popout.goo-grid-popout--one-column .goo-popout__content) {
-	padding: var(--goo-theme-space-sm, 8px);
+	padding: var(--goo-theme-space-sm);
 }
 
 :global(goo-popout.goo-grid-popout--one-column .goo-grid-picker),
@@ -543,33 +558,33 @@ function escapeSelectorValue(value: string): string {
 
 :global(goo-popout.goo-grid-popout--small),
 :global(.goo-popout.goo-grid-popout--small) {
-	max-width: 260px;
+	max-width: var(--goo-grid-picker-small-max-inline-size);
 }
 
 :global(goo-popout.goo-grid-popout--small goo-popout-content),
 :global(.goo-popout.goo-grid-popout--small .goo-popout__content) {
-	padding: var(--goo-theme-space-sm, 8px);
+	padding: var(--goo-theme-space-sm);
 }
 
 :global(goo-popout.goo-grid-popout--small .goo-grid-picker),
 :global(.goo-popout.goo-grid-popout--small .goo-grid-picker) {
-	gap: var(--goo-theme-space-xs, 4px);
+	gap: var(--goo-theme-space-xs);
 }
 
 :global(goo-popout.goo-grid-popout--icon-grid),
 :global(.goo-popout.goo-grid-popout--icon-grid) {
-	inline-size: min(20rem, calc(100vw - 2rem));
+	inline-size: min(var(--goo-grid-picker-icon-grid-inline-size), calc(100vw - var(--goo-grid-picker-viewport-inset)));
 	max-width: none;
 }
 
 :global(goo-popout.goo-grid-popout--icon-grid goo-popout-content),
 :global(.goo-popout.goo-grid-popout--icon-grid .goo-popout__content) {
-	padding: var(--goo-theme-space-sm, 8px);
+	padding: var(--goo-theme-space-sm);
 }
 
 :global(goo-popout.goo-grid-popout.goo-grid-popout--icon-grid .goo-grid-picker),
 :global(.goo-popout.goo-grid-popout.goo-grid-popout--icon-grid .goo-grid-picker) {
-	gap: var(--goo-theme-space-sm, 8px);
+	gap: var(--goo-theme-space-sm);
 	grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
@@ -577,11 +592,11 @@ function escapeSelectorValue(value: string): string {
 :global(.goo-popout.goo-grid-popout--icon-grid sketch-grid-item) {
 	align-items: center;
 	flex-direction: column;
-	gap: var(--goo-theme-space-xs, 4px);
+	gap: var(--goo-theme-space-xs);
 	justify-content: flex-start;
-	min-height: 5.25rem;
+	min-height: var(--goo-grid-picker-icon-item-min-height);
 	min-width: 0;
-	padding: var(--goo-theme-space-xs, 4px);
+	padding: var(--goo-theme-space-xs);
 	text-align: center;
 }
 
@@ -609,13 +624,13 @@ function escapeSelectorValue(value: string): string {
 :global(.goo-popout.goo-grid-popout--icon-grid img.icon) {
 	align-items: center;
 	display: inline-flex;
-	flex: 0 0 var(--goo-theme-control-height-lg, 40px);
+	flex: 0 0 var(--goo-theme-control-height-lg);
 	font-size: var(--goo-theme-icon-lg);
-	height: var(--goo-theme-control-height-lg, 40px);
+	height: var(--goo-theme-control-height-lg);
 	justify-content: center;
 	line-height: 1;
 	margin: 0;
-	width: var(--goo-theme-control-height-lg, 40px);
+	width: var(--goo-theme-control-height-lg);
 }
 
 :global(goo-popout.goo-grid-popout--icon-grid .icon svg),
@@ -626,13 +641,13 @@ function escapeSelectorValue(value: string): string {
 
 :global(goo-popout.goo-grid-popout--preset),
 :global(.goo-popout.goo-grid-popout--preset) {
-	inline-size: min(34rem, calc(100vw - 2rem));
+	inline-size: min(var(--goo-grid-picker-preset-inline-size), calc(100vw - var(--goo-grid-picker-viewport-inset)));
 	max-width: none;
 }
 
 :global(goo-popout.goo-grid-popout--preset .goo-grid-picker),
 :global(.goo-popout.goo-grid-popout--preset .goo-grid-picker) {
-	gap: var(--goo-theme-space-sm, 8px);
+	gap: var(--goo-theme-space-sm);
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
@@ -640,8 +655,8 @@ function escapeSelectorValue(value: string): string {
 :global(.goo-popout.goo-grid-popout--preset sketch-grid-item) {
 	align-items: stretch;
 	flex-direction: column;
-	min-height: 6.9rem;
-	padding: var(--goo-theme-space-xs, 4px);
+	min-height: var(--goo-grid-picker-preset-item-min-height);
+	padding: var(--goo-theme-space-xs);
 }
 
 :global(goo-popout.goo-grid-popout--preset grid-title),

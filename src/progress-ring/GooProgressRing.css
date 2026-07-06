@@ -1,16 +1,18 @@
 .goo-progress-ring-timer {
-	--goo-progress-ring-size: 120px;
-	--goo-progress-ring-stroke: max(4px, calc(var(--goo-progress-ring-size) * 0.08));
+	--goo-progress-ring-size: calc(var(--goo-theme-control-height-lg) * 3);
+	--goo-progress-ring-stroke: max(var(--goo-theme-space-xs), calc(var(--goo-progress-ring-size) * 0.08));
+	--goo-progress-ring-padding: var(--goo-theme-space-2xs);
+	--goo-progress-ring-transition: var(--goo-theme-transition-slow);
 	--goo-progress-ring-progress: 0deg;
-	--goo-progress-ring-backdrop-z-index: var(--goo-theme-layer-modal, 100000);
-	--goo-progress-ring-color: var(--goo-theme-accent, #378cff);
+	--goo-progress-ring-backdrop-z-index: var(--goo-theme-layer-modal);
+	--goo-progress-ring-color: var(--goo-theme-accent);
 	--goo-progress-ring-track: color-mix(
 		in srgb,
-		var(--goo-theme-fg, currentColor) 15%,
+		var(--goo-theme-fg) 15%,
 		transparent
 	);
-	--goo-progress-ring-surface: var(--goo-theme-bg, #111);
-	--goo-progress-ring-text: var(--goo-theme-fg, #fff);
+	--goo-progress-ring-surface: var(--goo-theme-bg);
+	--goo-progress-ring-text: var(--goo-theme-fg);
 
 	color: var(--goo-progress-ring-text);
 	display: block;
@@ -27,7 +29,7 @@
 	background: rgb(0 0 0 / 25%);
 	opacity: 0;
 	position: fixed;
-	transition: opacity 0.35s;
+	transition: opacity var(--goo-progress-ring-transition);
 	z-index: var(--goo-progress-ring-backdrop-z-index);
 }
 
@@ -58,11 +60,11 @@
 	box-sizing: border-box;
 	color: var(--goo-progress-ring-text);
 	display: inline-flex;
-	font-family: var(--goo-theme-font-sans, system-ui, sans-serif);
+	font-family: var(--goo-theme-font-sans);
 	height: var(--goo-progress-ring-size);
 	justify-content: center;
 	overflow: hidden;
-	padding: 2px;
+	padding: var(--goo-progress-ring-padding);
 	position: relative;
 	width: var(--goo-progress-ring-size);
 }

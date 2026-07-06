@@ -687,13 +687,13 @@ Core components should use this contract directly:
 | ----- | ------ |
 | Text | `--goo-theme-fg`, `--goo-theme-muted`, `--goo-theme-text-disabled` |
 | Surfaces | `--goo-theme-bg`, `--goo-theme-surface`, `--goo-theme-surface-raised`, `--goo-theme-surface-sunken` |
-| Borders | `--goo-theme-border`, `--goo-theme-border-strong`, `--goo-theme-focus-ring` |
+| Borders | `--goo-theme-border`, `--goo-theme-border-strong`, `--goo-theme-focus-ring`, `--goo-theme-focus-ring-width` |
 | Accent | `--goo-theme-accent`, `--goo-theme-accent-fg` |
 | Status | `--goo-theme-positive`, `--goo-theme-positive-fg`, `--goo-theme-danger`, `--goo-theme-danger-fg`, `--goo-theme-warning`, `--goo-theme-warning-fg` |
-| Typography | `--goo-theme-font-sans`, `--goo-theme-font-mono`, `--goo-theme-font-size-xs/sm/base/md/lg/xl`, `--goo-theme-font-weight-medium/semibold/bold` |
+| Typography | `--goo-theme-font-sans`, `--goo-theme-font-mono`, `--goo-theme-font-size-xs/sm/base/md/lg/xl`, `--goo-theme-line-height-tight/base/loose`, `--goo-theme-font-weight-medium/semibold/bold` |
 | Radius/space | `--goo-theme-radius-sm/md/lg/full`, `--goo-theme-space-2xs/xs/sm/md/lg/xl` |
 | Icons/shadows | `--goo-theme-icon-xs/sm/md/lg`, `--goo-theme-shadow-sm/md/lg` |
-| Controls | `--goo-theme-control-height-sm/md/lg/touch`, `--goo-theme-control-padding-sm/md/lg`, `--goo-theme-control-row-padding` |
+| Controls | `--goo-theme-control-height-sm/md/lg/touch`, `--goo-theme-control-padding-sm/md/lg` |
 | State/motion | `--goo-theme-disabled-opacity`, `--goo-theme-transition-fast/normal/slow` |
 | Layers | `--goo-theme-layer-dropdown`, `--goo-theme-layer-popout`, `--goo-theme-layer-toast`, `--goo-theme-layer-modal`, `--goo-theme-layer-system` |
 
@@ -707,7 +707,24 @@ background: color-mix(in srgb, var(--goo-theme-accent) 18%, transparent);
 
 Do not add legacy aliases such as `--goo-theme-fg-muted`, `--goo-theme-fg-secondary`,
 `--goo-theme-bg-elevated`, `--goo-theme-bg-hover`, `--goo-theme-bg-active`,
-`--goo-theme-accent-subtle`, or `--goo-theme-radius-xs`.
+`--goo-theme-accent-subtle`, `--goo-theme-heading`,
+`--goo-theme-control-row-padding`, or `--goo-theme-radius-xs`.
+
+Keep the public theme surface small. Shared app chrome dimensions belong in the
+owning app shell, such as Sketchpad's `--sketchpad-chrome-*` tokens, and complex
+component geometry belongs behind local component variables such as
+`--goo-select-*`, `--goo-slider-*`, or `--goo-layer-*`. Do not promote one-off
+preview sizes, checkerboards, rail math, swatch geometry, animation timings, or
+promo art colors into `--goo-theme-*` unless multiple unrelated components need
+the same semantic value.
+
+Design-token enforcement lives outside component code:
+
+- `@sketchapi/theme` owns the public `--goo-theme-*` root contract.
+- `@sketchapi/sketchpad-ui` owns audits that keep Sketchpad/Goo consumers on
+  canonical tokens and block retired aliases.
+- `pnpm run check:sketchpad-geometry-tokens` rejects direct geometry literals in
+  monitored Sketchpad, Goo, panel, editor, token-owner, and canvas-guide files.
 
 For muted text on a colored background, mix the foreground token instead of using the base muted token:
 

@@ -1,25 +1,24 @@
 .goo-data-grid {
 	--goo-data-grid-bg: var(--goo-theme-surface-raised);
-	--goo-data-grid-border: var(
-		--goo-theme-border,
-		color-mix(in srgb, var(--goo-theme-fg, #fff) 14%, transparent)
-	);
-	--goo-data-grid-border-subtle: var(
-		--goo-theme-border,
-		color-mix(in srgb, var(--goo-theme-fg, #fff) 9%, transparent)
-	);
-	--goo-data-grid-fg: var(--goo-theme-fg, rgba(255, 255, 255, 0.92));
+	--goo-data-grid-border: var(--goo-theme-border);
+	--goo-data-grid-border-subtle: var(--goo-theme-border);
+	--goo-data-grid-fg: var(--goo-theme-fg);
 	--goo-data-grid-muted: var(--goo-theme-muted);
-	--goo-data-grid-hover: color-mix(in srgb, var(--goo-theme-accent, #3b82f6) 10%, transparent);
-	--goo-data-grid-radius: var(--goo-theme-radius-md, 6px);
-	--goo-data-grid-row-height: 2.75rem;
+	--goo-data-grid-hover: color-mix(in srgb, var(--goo-theme-accent) 10%, transparent);
+	--goo-data-grid-radius: var(--goo-theme-radius-md);
+	--goo-data-grid-row-height: calc(var(--goo-theme-control-height-lg) + var(--goo-theme-space-xs));
+	--goo-data-grid-row-height-compact: calc(var(--goo-theme-control-height-md) + var(--goo-theme-space-xs));
+	--goo-data-grid-row-height-comfortable: calc(var(--goo-theme-control-height-lg) + var(--goo-theme-space-md));
+	--goo-data-grid-scrollbar-size: calc(var(--goo-theme-space-sm) + var(--goo-theme-space-2xs));
+	--goo-data-grid-scrollbar-border-size: calc(var(--goo-theme-space-2xs) + 1px);
+	--goo-data-grid-header-cell-height: var(--goo-data-grid-row-height-compact);
 
 	background: var(--goo-data-grid-bg);
 	border: 1px solid var(--goo-data-grid-border);
 	border-radius: var(--goo-data-grid-radius);
 	color: var(--goo-data-grid-fg);
 	display: grid;
-	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
+	font-size: var(--goo-theme-font-size-sm);
 	min-width: 0;
 	overflow: auto;
 	scrollbar-color: color-mix(in srgb, var(--goo-data-grid-fg) 24%, transparent) transparent;
@@ -28,8 +27,8 @@
 }
 
 .goo-data-grid::-webkit-scrollbar {
-	height: 10px;
-	width: 10px;
+	height: var(--goo-data-grid-scrollbar-size);
+	width: var(--goo-data-grid-scrollbar-size);
 }
 
 .goo-data-grid::-webkit-scrollbar-track {
@@ -38,8 +37,8 @@
 
 .goo-data-grid::-webkit-scrollbar-thumb {
 	background: color-mix(in srgb, var(--goo-data-grid-fg) 18%, transparent);
-	border: 3px solid transparent;
-	border-radius: var(--goo-theme-radius-full, 999px);
+	border: var(--goo-data-grid-scrollbar-border-size) solid transparent;
+	border-radius: var(--goo-theme-radius-full);
 	background-clip: padding-box;
 }
 
@@ -49,12 +48,12 @@
 }
 
 .goo-data-grid--compact {
-	--goo-data-grid-row-height: 2.25rem;
-	font-size: var(--goo-theme-font-size-xs, 0.6875rem);
+	--goo-data-grid-row-height: var(--goo-data-grid-row-height-compact);
+	font-size: var(--goo-theme-font-size-xs);
 }
 
 .goo-data-grid--comfortable {
-	--goo-data-grid-row-height: 3.25rem;
+	--goo-data-grid-row-height: var(--goo-data-grid-row-height-comfortable);
 }
 
 .goo-data-grid__header {
@@ -87,7 +86,7 @@
 	}
 
 	&:focus-visible {
-		box-shadow: inset 0 0 0 1px var(--goo-theme-accent, #3b82f6);
+		box-shadow: inset 0 0 0 1px var(--goo-theme-accent);
 		outline: none;
 	}
 }
@@ -96,20 +95,20 @@
 .goo-data-grid__cell {
 	align-items: center;
 	display: flex;
-	gap: var(--goo-theme-space-sm, 8px);
+	gap: var(--goo-theme-space-sm);
 	min-width: 0;
 	overflow: hidden;
-	padding: 0 var(--goo-theme-space-lg, 16px);
+	padding: 0 var(--goo-theme-space-lg);
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
 .goo-data-grid__header-cell {
 	color: var(--goo-data-grid-muted);
-	font-size: var(--goo-theme-font-size-xs, 0.6875rem);
+	font-size: var(--goo-theme-font-size-xs);
 	font-weight: var(--goo-theme-font-weight-bold);
 	letter-spacing: 0;
-	min-height: 2.25rem;
+	min-height: var(--goo-data-grid-header-cell-height);
 	text-transform: none;
 }
 
@@ -123,7 +122,7 @@
 	display: inline-flex;
 	font: inherit;
 	font-weight: inherit;
-	gap: var(--goo-theme-space-xs, 4px);
+	gap: var(--goo-theme-space-xs);
 	justify-content: inherit;
 	min-width: 0;
 	padding: 0;
@@ -132,8 +131,8 @@
 }
 
 .goo-data-grid__sort-button:focus-visible {
-	border-radius: var(--goo-theme-radius-sm, 0.25rem);
-	box-shadow: 0 0 0 2px color-mix(in srgb, var(--goo-theme-accent, #3b82f6) 45%, transparent);
+	border-radius: var(--goo-theme-radius-sm);
+	box-shadow: 0 0 0 2px color-mix(in srgb, var(--goo-theme-accent) 45%, transparent);
 	outline: 0;
 }
 
@@ -184,6 +183,6 @@
 	display: flex;
 	justify-content: center;
 	min-height: calc(var(--goo-data-grid-row-height) * 2);
-	padding: var(--goo-theme-space-xl, 24px);
+	padding: var(--goo-theme-space-xl);
 	text-align: center;
 }

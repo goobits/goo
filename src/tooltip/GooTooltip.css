@@ -10,38 +10,46 @@
    ============================================================================= */
 
 .goo-popout.goo-tooltip {
+	--goo-tooltip-arrow-size: calc(var(--goo-theme-space-sm) - var(--goo-theme-space-2xs));
 	/* Override popout variables for tooltip appearance */
-	--goo-popout-bg: var(--goo-tooltip-bg, var(--goo-theme-surface, rgba(30, 30, 35, 0.95)));
-	--goo-popout-fg: var(--goo-tooltip-fg, var(--goo-theme-fg, rgba(255, 255, 255, 0.9)));
+	--goo-popout-bg: var(--goo-tooltip-bg, var(--goo-theme-surface));
+	--goo-popout-fg: var(--goo-tooltip-fg, var(--goo-theme-fg));
 	--goo-popout-border: var(
 		--goo-tooltip-border,
-		var(--goo-theme-border, rgba(255, 255, 255, 0.1))
+		var(--goo-theme-border)
 	);
-	--goo-popout-shadow: var(--goo-tooltip-shadow, drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3)));
-	--goo-popout-radius: var(--goo-tooltip-radius, var(--goo-theme-radius-md, 0.5rem));
-	--goo-popout-arrow-size: var(--goo-tooltip-arrow-size, 6px);
+	--goo-tooltip-shadow: drop-shadow(0 var(--goo-theme-space-xs) var(--goo-theme-space-md) rgb(0 0 0 / 30%));
+	--goo-popout-shadow: var(--goo-tooltip-shadow);
+	--goo-popout-radius: var(--goo-tooltip-radius, var(--goo-theme-radius-md));
+	--goo-popout-arrow-size: var(--goo-tooltip-arrow-size);
 	/* Arrow's outer triangle is the border ring; track the tip's border colour so
 	   it forms one continuous 1px outline around body + arrow. */
 	--goo-popout-arrow-border: var(--goo-popout-border);
+	--goo-tooltip-max-width: calc(var(--goo-theme-control-height-lg) * 6.25);
+	--goo-tooltip-padding-block: calc(var(--goo-theme-space-sm) - var(--goo-theme-space-2xs) * 0.5);
+	--goo-tooltip-padding-inline: calc(var(--goo-theme-space-md) - var(--goo-theme-space-2xs));
+	--goo-tooltip-padding: var(--goo-tooltip-padding-block) var(--goo-tooltip-padding-inline);
+	--goo-tooltip-outline-width: calc(var(--goo-theme-focus-ring-width) * 0.5);
+	--goo-tooltip-line-height: var(--goo-theme-line-height-loose);
 
 	/* 1px outline outside the body via box-shadow spread (no layout impact, follows
 	   the radius). The arrow's outer-triangle border (1px in the same colour)
 	   continues this line on its diagonal edges; the arrow's back merges with the
 	   body in bg colour, so no border line crosses the seam. */
-	box-shadow: 0 0 0 1px var(--goo-popout-border);
+	box-shadow: 0 0 0 var(--goo-tooltip-outline-width) var(--goo-popout-border);
 
 	/* Tooltip-specific sizing */
-	max-width: var(--goo-tooltip-max-width, 250px);
-	padding: var(--goo-tooltip-padding, 7px 10px);
+	max-width: var(--goo-tooltip-max-width);
+	padding: var(--goo-tooltip-padding);
 
 	/* Typography */
-	font-size: var(--goo-tooltip-font-size, var(--goo-theme-font-size-sm, 0.8125rem));
-	line-height: var(--goo-tooltip-line-height, 1.4);
+	font-size: var(--goo-tooltip-font-size, var(--goo-theme-font-size-sm));
+	line-height: var(--goo-tooltip-line-height);
 	text-align: left;
 
 	/* Non-interactive by default */
 	pointer-events: none;
-	z-index: var(--goo-tooltip-z-index, var(--goo-theme-layer-system, 2147483000));
+	z-index: var(--goo-tooltip-z-index, var(--goo-theme-layer-system));
 }
 
 /* Interactive tooltips can receive pointer events */
@@ -69,12 +77,12 @@
 
 /* Cursor/drag tooltips sit over artwork and need a clearly visible pointer. */
 .goo-popout.goo-tooltip.goo-tooltip--cursor-tip {
-	--goo-tooltip-arrow-size: 8px;
+	--goo-tooltip-arrow-size: var(--goo-theme-space-sm);
 	--goo-popout-arrow-border: color-mix(in srgb, var(--goo-popout-bg) 80%, white 20%);
 }
 
 .goo-popout.goo-tooltip.goo-tooltip--cursor-tip .goo-popout__arrow {
-	filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
+	filter: drop-shadow(0 1px var(--goo-theme-space-2xs) rgb(0 0 0 / 35%));
 }
 
 /* =============================================================================
@@ -83,22 +91,22 @@
 
 /* Error tooltip */
 .goo-popout.goo-tooltip--error {
-	--goo-popout-bg: var(--goo-theme-danger, #ef4444);
-	--goo-popout-fg: var(--goo-theme-danger-fg, #fff);
+	--goo-popout-bg: var(--goo-theme-danger);
+	--goo-popout-fg: var(--goo-theme-danger-fg);
 	--goo-popout-border: transparent;
 }
 
 /* Warning tooltip */
 .goo-popout.goo-tooltip--warning {
-	--goo-popout-bg: var(--goo-theme-warning, #f59e0b);
-	--goo-popout-fg: var(--goo-theme-warning-fg, #000);
+	--goo-popout-bg: var(--goo-theme-warning);
+	--goo-popout-fg: var(--goo-theme-warning-fg);
 	--goo-popout-border: transparent;
 }
 
 /* Success tooltip */
 .goo-popout.goo-tooltip--success {
-	--goo-popout-bg: var(--goo-theme-positive, #22c55e);
-	--goo-popout-fg: var(--goo-theme-positive-fg, #fff);
+	--goo-popout-bg: var(--goo-theme-positive);
+	--goo-popout-fg: var(--goo-theme-positive-fg);
 	--goo-popout-border: transparent;
 }
 
@@ -108,5 +116,5 @@
 
 [data-theme='light'] .goo-popout.goo-tooltip {
 	--goo-popout-bg: var(--goo-tooltip-bg, rgba(50, 50, 55, 0.95));
-	--goo-popout-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	--goo-tooltip-shadow: drop-shadow(0 var(--goo-theme-space-xs) var(--goo-theme-space-md) rgb(0 0 0 / 15%));
 }

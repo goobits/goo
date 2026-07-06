@@ -6,13 +6,13 @@
 .goo-error-boundary {
 	/* Customizable via CSS custom properties */
 	--goo-error-boundary-bg: var(--goo-theme-surface-raised);
-	--goo-error-boundary-border: var(--goo-theme-danger, #ef4444);
-	--goo-error-boundary-fg: var(--goo-theme-fg, rgba(255, 255, 255, 0.9));
+	--goo-error-boundary-border: var(--goo-theme-danger);
+	--goo-error-boundary-fg: var(--goo-theme-fg);
 	--goo-error-boundary-muted: var(--goo-theme-muted);
-	--goo-error-boundary-radius: var(--goo-theme-radius-md, 0.375rem);
-	--goo-error-boundary-padding: var(--goo-theme-space-lg, 2rem);
-	--goo-error-boundary-accent: var(--goo-theme-accent, #3b82f6);
-	--goo-error-boundary-accent-fg: var(--goo-theme-accent-fg, #ffffff);
+	--goo-error-boundary-radius: var(--goo-theme-radius-md);
+	--goo-error-boundary-padding: var(--goo-theme-space-lg);
+	--goo-error-boundary-accent: var(--goo-theme-accent);
+	--goo-error-boundary-accent-fg: var(--goo-theme-accent-fg);
 
 	display: flex;
 	align-items: center;
@@ -31,16 +31,16 @@
 }
 
 .goo-error-boundary__title {
-	margin: 0 0 var(--goo-theme-space-md, 0.75rem);
-	font-size: var(--goo-theme-font-size-lg, 1.125rem);
+	margin: 0 0 var(--goo-theme-space-md);
+	font-size: var(--goo-theme-font-size-lg);
 	font-weight: var(--goo-theme-font-weight-semibold);
 	color: var(--goo-error-boundary-border);
 }
 
 .goo-error-boundary__message {
-	margin: 0 0 calc(var(--goo-theme-space-lg, 1rem) + var(--goo-theme-space-xs, 0.25rem));
-	font-family: var(--goo-theme-font-mono, ui-monospace, monospace);
-	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
+	margin: 0 0 calc(var(--goo-theme-space-lg) + var(--goo-theme-space-xs));
+	font-family: var(--goo-theme-font-mono);
+	font-size: var(--goo-theme-font-size-sm);
 	color: var(--goo-error-boundary-muted);
 	word-break: break-word;
 }
@@ -49,13 +49,13 @@
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	padding: var(--goo-theme-space-sm, 8px) var(--goo-theme-space-xl, 20px);
+	padding: var(--goo-theme-space-sm) var(--goo-theme-space-xl);
 	font: inherit;
-	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
+	font-size: var(--goo-theme-font-size-sm);
 	color: var(--goo-error-boundary-accent-fg);
 	background: var(--goo-error-boundary-accent);
 	border: 1px solid transparent;
-	border-radius: var(--goo-theme-radius-sm, 4px);
+	border-radius: var(--goo-theme-radius-sm);
 	cursor: pointer;
 	transition: filter 0.15s;
 

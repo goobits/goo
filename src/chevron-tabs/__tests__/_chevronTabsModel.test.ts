@@ -26,7 +26,7 @@ describe('chevron tabs model', () => {
 	})
 
 	it('resolves drag insertion before, between, and after other tab centers', () => {
-		const centers = [50, 150, 250]
+		const centers = [ 50, 150, 250 ]
 
 		expect(resolveChevronTabDragInsertion(20, centers)).toBe(0)
 		expect(resolveChevronTabDragInsertion(100, centers)).toBe(1)

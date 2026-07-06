@@ -177,6 +177,26 @@ describe('GooSelect', () => {
 		expect(document.querySelector('.goo-popout.goo-select-popout.sketch-contextual-menu-popout')).not.toBeNull()
 	})
 
+	it('applies option row class names without treating labels as markup', async() => {
+		const { container } = render(GooSelect, {
+			props: {
+				value: '',
+				options: [
+					{ id: 'filter', label: '<b>Filter</b>', className: 'filter-row' }
+				]
+			}
+		})
+		const element = container.querySelector<GooSelectElement>('.goo-select')!
+
+		expect(element.open({ autoFocus: false })).toBe(true)
+		await tick()
+
+		const option = document.querySelector('.goo-select__option.filter-row')
+		expect(option).not.toBeNull()
+		expect(option?.querySelector('.goo-select__label')?.textContent).toBe('<b>Filter</b>')
+		expect(option?.querySelector('b')).toBeNull()
+	})
+
 	it('hides active tooltips before opening menu popouts', async() => {
 		const hideTooltip = vi.spyOn(gooTooltipRuntime, 'hide')
 		const { container } = render(GooSelect, {

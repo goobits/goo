@@ -525,7 +525,8 @@ export class DropdownPanel {
 			isDisabled ? 'goo-select__option--disabled' : '',
 			isSelected ? 'goo-select__option--selected' : '',
 			isSubmenu ? 'goo-select__option--submenu' : '',
-			opt.tone === 'danger' ? 'goo-select__option--danger' : ''
+			opt.tone === 'danger' ? 'goo-select__option--danger' : '',
+			opt.className ?? ''
 		]
 			.filter(Boolean)
 			.join(' ')

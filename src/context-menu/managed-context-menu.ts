@@ -195,9 +195,9 @@ function createRegisteredContextMenu(
 	const menuOptions = normalizeContextMenuItems(items, () => getManagedMenuHandle(handleRef))
 	const contextMenu = createGooContextMenu({
 		actionContext: config.actionContext,
-		className: [id, 'goo-managed-context-menu'].join(' '),
+		className: [ id, 'goo-managed-context-menu' ].join(' '),
 		enableKeyboard: config.enableKeyboard,
-		id: `goo-contextmenu-${id}`,
+		id: `goo-contextmenu-${ id }`,
 		menu: {
 			arrow: config.showPopoutArrow ?? true,
 			backdrop: config.showPopoutBackdrop ?? false,
@@ -260,7 +260,7 @@ function createRegisteredContextMenu(
 				actionContext: options.actionContext || config.actionContext
 			})
 		},
-		setOptions: (options) => {
+		setOptions: options => {
 			if (destroyed) return
 			contextMenu.setOptions(options)
 		},
@@ -339,7 +339,7 @@ function normalizeContextMenuItems(
 
 	if (!Array.isArray(items) && typeof items === 'object') {
 		return Object.entries(items)
-			.map(([itemId, label]) =>
+			.map(([ itemId, label ]) =>
 				isManagedContextMenuObjectItem(label)
 					? normalizeContextMenuItem({ id: itemId, ...label }, getMenu)
 					: normalizeContextMenuItem({ id: itemId, label }, getMenu)
@@ -348,7 +348,7 @@ function normalizeContextMenuItems(
 	}
 
 	return items
-		.map((item) => normalizeContextMenuItem(item, getMenu))
+		.map(item => normalizeContextMenuItem(item, getMenu))
 		.filter(Boolean) as GooContextMenuOption[]
 }
 
@@ -415,7 +415,7 @@ function normalizeAction(
 	id: string
 ): GooContextMenuOption['onChoose'] {
 	if (!action) return undefined
-	return function (this: GooContextMenuElement | ManagedGooContextMenu, value: string) {
+	return function(this: GooContextMenuElement | ManagedGooContextMenu, value: string) {
 		const menu = getMenu()
 		const context = this && this !== menu.element ? this : menu
 		return action.call(context as ManagedGooContextMenu, value || id)

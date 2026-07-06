@@ -3,11 +3,11 @@
  */
 
 .goo-vortex {
-	--goo-vortex-image-z-index: 10;
-	--goo-vortex-message-radius: var(--goo-theme-radius-lg, 10px);
-	--goo-vortex-message-z-index: 11;
-	--goo-vortex-size: 250px;
-	--goo-vortex-z-index: var(--goo-theme-layer-popout, 10000);
+	--goo-vortex-image-z-index: 1;
+	--goo-vortex-message-radius: var(--goo-theme-radius-lg);
+	--goo-vortex-message-z-index: 2;
+	--goo-vortex-size: calc(var(--goo-theme-control-height-lg) * 6.25);
+	--goo-vortex-z-index: var(--goo-theme-layer-popout);
 
 	display: block;
 	height: var(--goo-vortex-size);
