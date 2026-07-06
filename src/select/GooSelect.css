@@ -83,13 +83,15 @@
 	--goo-select-scrollbar-radius: var(--goo-theme-radius-full);
 	--goo-select-scrollbar-thumb: color-mix(in srgb, var(--goo-select-fg-muted) 70%, transparent);
 	--goo-select-scrollbar-thumb-hover: color-mix(in srgb, var(--goo-select-fg) 55%, transparent);
+	--goo-select-focus-ring-inner-width: calc(var(--goo-theme-focus-ring-width) * 0.5);
+	--goo-select-focus-ring-outer-width: calc(var(--goo-theme-focus-ring-width) * 1.5);
 }
 
 .goo-select {
 	display: inline-block;
 	position: relative;
 	font-size: var(--goo-select-font-size);
-	line-height: 1;
+	line-height: var(--goo-theme-line-height-tight);
 	letter-spacing: 0;
 }
 
@@ -139,9 +141,9 @@
 	text-align: left;
 	cursor: pointer;
 	transition:
-		background 0.15s,
-		border-color 0.15s,
-		box-shadow 0.15s;
+		background var(--goo-select-motion-normal),
+		border-color var(--goo-select-motion-normal),
+		box-shadow var(--goo-select-motion-normal);
 }
 
 .goo-select__trigger:hover {
@@ -157,8 +159,8 @@
 	outline: none;
 	border-color: var(--goo-select-border-focus);
 	box-shadow:
-		0 0 0 1px var(--goo-select-border-focus),
-		0 0 0 3px color-mix(in srgb, var(--goo-select-border-focus) 22%, transparent);
+		0 0 0 var(--goo-select-focus-ring-inner-width) var(--goo-select-border-focus),
+		0 0 0 var(--goo-select-focus-ring-outer-width) color-mix(in srgb, var(--goo-select-border-focus) 22%, transparent);
 }
 
 .goo-select--open .goo-select__trigger {

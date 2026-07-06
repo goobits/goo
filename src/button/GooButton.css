@@ -20,7 +20,7 @@
 	--goo-button-compact-height: var(--goo-theme-control-height-sm);
 	--goo-button-compact-padding: var(--goo-theme-control-padding-sm);
 	--goo-button-stacked-gap: calc(var(--goo-theme-space-2xs) * 1.5);
-	--goo-button-stacked-line-height: 1.2;
+	--goo-button-stacked-line-height: var(--goo-theme-line-height-base);
 
 	/* Base styles - flat background, no gradient */
 	background: var(--goo-button-bg);
@@ -34,7 +34,7 @@
 	gap: var(--goo-button-gap);
 	font-size: var(--goo-button-font-size);
 	font-weight: var(--goo-theme-font-weight-semibold);
-	line-height: 1;
+	line-height: var(--goo-theme-line-height-tight);
 	height: var(--goo-button-height);
 	min-height: 0;
 	outline: none;
@@ -191,7 +191,7 @@
 	height: var(--goo-button-full-row-height);
 	inline-size: 100%;
 	justify-content: center;
-	line-height: 1;
+	line-height: var(--goo-theme-line-height-tight);
 	min-height: var(--goo-button-full-row-height);
 	min-inline-size: 100%;
 	padding-block: 0;
@@ -211,7 +211,7 @@
 .goo-button__title {
 	display: inline-flex;
 	align-items: center;
-	line-height: 1;
+	line-height: var(--goo-theme-line-height-tight);
 }
 
 /* Disabled state - flat selector for button and custom-element hosts */
