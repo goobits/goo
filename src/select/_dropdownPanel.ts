@@ -158,7 +158,9 @@ export class DropdownPanel {
 		const $item = this.getOptionElementById(id)
 		if ($item) {
 			$item.classList.add('goo-select__option--hovered')
-			$item.scrollIntoView({ block: 'nearest' })
+			if (typeof $item.scrollIntoView === 'function') {
+				$item.scrollIntoView({ block: 'nearest' })
+			}
 			this.$container.setAttribute('aria-activedescendant', $item.id)
 		} else {
 			this.$container.removeAttribute('aria-activedescendant')
@@ -588,6 +590,8 @@ export class DropdownPanel {
 	}
 
 	#bindOptionEvents($item: HTMLElement, opt: GooSelectOption, isDisabled: boolean) {
+		let handledPointerSelection = false
+
 		// Hover (also handles drag-to-select hover)
 		$item.addEventListener('mouseenter', () => {
 			if (isDisabled) return
@@ -603,13 +607,26 @@ export class DropdownPanel {
 			$item.addEventListener('pointerup', event => {
 				if (event.button !== 0) return
 				event.preventDefault()
-				if (opt.type === 'submenu') {
-					this.#openSubmenuOption($item, opt)
+				handledPointerSelection = true
+				this.#chooseOption($item, opt)
+			})
+			$item.addEventListener('click', event => {
+				if (handledPointerSelection) {
+					handledPointerSelection = false
 					return
 				}
-				this.#ctx.onSelect(opt, $item)
+				event.preventDefault()
+				this.#chooseOption($item, opt)
 			})
 		}
+	}
+
+	#chooseOption($item: HTMLElement, opt: GooSelectOption): void {
+		if (opt.type === 'submenu') {
+			this.#openSubmenuOption($item, opt)
+			return
+		}
+		this.#ctx.onSelect(opt, $item)
 	}
 
 	#hoverOption($item: HTMLElement, opt: GooSelectOption): void {

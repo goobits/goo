@@ -249,6 +249,7 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 	panel.render(normalizedOptions)
 	listboxId = panel.listboxId
 	syncPanelTypography()
+	if (autoFocus) focusInitialPanelOption()
 
 	const currentMenu = selectMenu
 	const positionAt = getPositionTarget(at)
@@ -280,9 +281,7 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 			clearFocusFrame()
 			focusFrame = requestAnimationFrame(() => {
 				focusFrame = 0
-				if (!panel || !opened) return
-				const toFocus = selectedValue || panel.getNavigableOptions()[0]?.dataset.id
-				if (toFocus) panel.setHovered(toFocus)
+				focusInitialPanelOption()
 			})
 		}
 	})
@@ -301,6 +300,13 @@ function syncPanelTypography(): void {
 		'--goo-select-font-size',
 		style.getPropertyValue('--goo-select-font-size').trim() || style.fontSize
 	)
+}
+
+function focusInitialPanelOption(): void {
+	if (!panel) return
+
+	const toFocus = selectedValue || panel.getNavigableOptions()[0]?.dataset.id
+	if (toFocus) panel.setHovered(toFocus)
 }
 
 export function close({ quiet = false, fromPopout = false }: { quiet?: boolean; fromPopout?: boolean } = {}): void {
@@ -523,7 +529,7 @@ function selectOption(option: GooSelectOption, item?: HTMLElement | null): void 
 	}
 
 	const optionElement = item ?? panel?.getOptionElementById(selectedValue)
-	if (optionElement && panel) {
+	if (showSelectionIndicator && optionElement && panel) {
 		const token = selectLifecycleToken
 		panel.animateSelection(optionElement).then(() => {
 			if (token !== selectLifecycleToken || !selectElement) return
