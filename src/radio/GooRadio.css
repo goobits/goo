@@ -3,16 +3,18 @@
  */
 
 .goo-radio {
-	--goo-radio-size: var(--goo-theme-control-height-sm, 1.5rem);
-	--goo-radio-dot-size: calc(var(--goo-theme-control-height-sm, 1.5rem) - 14px);
-	--goo-radio-border-color: var(--goo-theme-border-strong, rgba(128, 128, 128, 0.3));
-	--goo-radio-border-color-checked: var(--goo-theme-selected, var(--goo-theme-accent, #3b82f6));
-	--goo-radio-dot-color: var(--goo-theme-selected, var(--goo-theme-accent, #3b82f6));
-	--goo-radio-transition: var(--goo-theme-transition-fast, 0.15s ease);
+	--goo-radio-size: var(--goo-theme-control-height-sm);
+	--goo-radio-dot-size: calc(var(--goo-radio-size) - var(--goo-theme-space-md) - var(--goo-theme-space-2xs));
+	--goo-radio-border-width: var(--goo-theme-space-2xs);
+	--goo-radio-border-color: var(--goo-theme-border-strong);
+	--goo-radio-border-color-checked: var(--goo-theme-accent);
+	--goo-radio-dot-color: var(--goo-theme-accent);
+	--goo-radio-focus-ring-size: calc(var(--goo-theme-space-xs) - var(--goo-theme-space-2xs) * 0.5);
+	--goo-radio-transition: var(--goo-theme-transition-fast);
 
 	display: inline-flex;
 	align-items: center;
-	gap: 8px;
+	gap: var(--goo-theme-space-sm);
 	background: transparent;
 	border: 0;
 	color: inherit;
@@ -24,7 +26,7 @@
 }
 
 .goo-radio:focus-visible .goo-radio__circle {
-	box-shadow: 0 0 0 3px var(--goo-theme-focus-ring, rgba(59, 130, 246, 0.4));
+	box-shadow: 0 0 0 var(--goo-radio-focus-ring-size) var(--goo-theme-focus-ring);
 }
 
 /* Circle (outer ring) */
@@ -32,8 +34,8 @@
 	position: relative;
 	width: var(--goo-radio-size);
 	height: var(--goo-radio-size);
-	border: 2px solid var(--goo-radio-border-color);
-	border-radius: 50%;
+	border: var(--goo-radio-border-width) solid var(--goo-radio-border-color);
+	border-radius: var(--goo-theme-radius-full);
 	transition: border-color var(--goo-radio-transition);
 	flex-shrink: 0;
 }
@@ -46,15 +48,15 @@
 	width: var(--goo-radio-dot-size);
 	height: var(--goo-radio-dot-size);
 	background: var(--goo-radio-dot-color);
-	border-radius: 50%;
+	border-radius: var(--goo-theme-radius-full);
 	transform: translate(-50%, -50%) scale(0);
 	transition: transform var(--goo-radio-transition);
 }
 
 /* Label */
 .goo-radio__label {
-	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
-	color: var(--goo-theme-fg, inherit);
+	font-size: var(--goo-theme-font-size-sm);
+	color: var(--goo-theme-fg);
 }
 
 /* Checked state */

@@ -300,7 +300,7 @@ function chooseAvoidancePosition(
 		{ x: avoidRect.right, y: result.y },
 		{ x: result.x, y: avoidRect.top - popoutRect.height },
 		{ x: result.x, y: avoidRect.bottom }
-	].map((candidate) => scoreAvoidCandidate(candidate, base, popoutRect, bounds, avoidRect))
+	].map(candidate => scoreAvoidCandidate(candidate, base, popoutRect, bounds, avoidRect))
 
 	return candidates.reduce((best, next) => {
 		if (next.overlap !== best.overlap) return next.overlap < best.overlap ? next : best

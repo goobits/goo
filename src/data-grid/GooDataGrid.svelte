@@ -6,6 +6,10 @@ import ArrowDownUp from '@lucide/svelte/icons/arrow-down-up'
 import ArrowUp from '@lucide/svelte/icons/arrow-up'
 import { tick, untrack } from 'svelte'
 
+import {
+	containKeyboardEvent,
+	isKeyboardActivationKey
+} from '../support/keyboard/_keyboardActivation.ts'
 import { calculateVirtualGridWindow, virtualGridSpacerHeight, virtualGridWindowsEqual } from '../virtualGrid/virtualWindow.ts'
 import type { VirtualGridWindow } from '../virtualGrid/types.ts'
 import type {
@@ -225,26 +229,27 @@ function handleRowClick(row: T, rowIndex: number, event: MouseEvent): void {
 }
 
 function handleRowKeydown(row: T, rowIndex: number, slot: number, event: KeyboardEvent): void {
+	if (isKeyboardActivationKey(event.key)) {
+		containKeyboardEvent(event)
+		onrowactivate?.(row, rowIndex, event)
+		return
+	}
+
 	switch (event.key) {
-		case 'Enter':
-		case ' ':
-			event.preventDefault()
-			onrowactivate?.(row, rowIndex, event)
-			return
 		case 'ArrowDown':
-			event.preventDefault()
+			containKeyboardEvent(event)
 			void focusSlot(slot + 1)
 			return
 		case 'ArrowUp':
-			event.preventDefault()
+			containKeyboardEvent(event)
 			void focusSlot(slot - 1)
 			return
 		case 'Home':
-			event.preventDefault()
+			containKeyboardEvent(event)
 			void focusSlot(0)
 			return
 		case 'End':
-			event.preventDefault()
+			containKeyboardEvent(event)
 			void focusSlot(sortedRows.length - 1)
 	}
 }
@@ -380,7 +385,7 @@ $effect(() => {
 					tabindex={onrowactivate ? (slot === activeSlot ? 0 : -1) : undefined}
 					style:grid-template-columns={templateColumns}
 					onclick={(event) => handleRowClick(entry.row, entry.rowIndex, event)}
-					onkeydown={(event) => handleRowKeydown(entry.row, entry.rowIndex, slot, event)}
+					onkeydowncapture={(event) => handleRowKeydown(entry.row, entry.rowIndex, slot, event)}
 					onfocus={() => { activeSlot = slot }}
 					data-row-index={entry.rowIndex}
 					data-slot={slot}

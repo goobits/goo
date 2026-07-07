@@ -24,7 +24,7 @@ export function getGridItem<T extends VirtualGridItem>(
 	switch (typeof ref) {
 		case 'string':
 			return items.find(
-				(item) => item?.key !== null && item?.key !== undefined && String(item.key) === ref
+				item => item?.key !== null && item?.key !== undefined && String(item.key) === ref
 			)
 
 		case 'number':
@@ -48,15 +48,15 @@ export function getGridItemElement<T extends VirtualGridItem>(
 
 	if (item.key !== null && item.key !== undefined) {
 		return rootElement.querySelector<HTMLElement>(
-			`[data-key="${escapeSelectorValue(String(item.key))}"]`
+			`[data-key="${ escapeSelectorValue(String(item.key)) }"]`
 		)
 	}
 
-	return rootElement.querySelector<HTMLElement>(`[data-index="${items.indexOf(item)}"]`)
+	return rootElement.querySelector<HTMLElement>(`[data-index="${ items.indexOf(item) }"]`)
 }
 
 export function getSelectedGridItem<T extends VirtualGridItem>(items: T[]): T | undefined {
-	return items.find((item) => item?.selected)
+	return items.find(item => item?.selected)
 }
 
 export function setGridItemSelected<T extends VirtualGridItem>(
@@ -135,14 +135,14 @@ function findMatchingItem<T extends VirtualGridItem>(items: T[], ref: T): T | un
 	if (ref.key !== null && ref.key !== undefined) {
 		const key = String(ref.key)
 		return items.find(
-			(item) => item?.key !== null && item?.key !== undefined && String(item.key) === key
+			item => item?.key !== null && item?.key !== undefined && String(item.key) === key
 		)
 	}
 
 	if (ref.id !== null && ref.id !== undefined) {
 		const id = String(ref.id)
 		return items.find(
-			(item) => item?.id !== null && item?.id !== undefined && String(item.id) === id
+			item => item?.id !== null && item?.id !== undefined && String(item.id) === id
 		)
 	}
 

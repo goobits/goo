@@ -56,6 +56,29 @@ describe('GooInput', () => {
 
 		expect(root.classList.contains('goo-input--changed')).toBe(true)
 	})
+
+	it('contains handled editor keys without blocking native typing keys', () => {
+		const { container } = render(GooInput, {
+			props: {
+				value: 'draft'
+			}
+		})
+		const input = container.querySelector<HTMLInputElement>('.goo-input__content')!
+		const parentKeydown = vi.fn()
+		container.addEventListener('keydown', parentKeydown)
+
+		const typingEvent = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: 'a' })
+		input.dispatchEvent(typingEvent)
+
+		expect(typingEvent.defaultPrevented).toBe(false)
+		expect(parentKeydown).not.toHaveBeenCalled()
+
+		const enterEvent = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: 'Enter' })
+		input.dispatchEvent(enterEvent)
+
+		expect(enterEvent.defaultPrevented).toBe(true)
+		expect(parentKeydown).not.toHaveBeenCalled()
+	})
 })
 
 describe('GooNumber', () => {
@@ -205,6 +228,82 @@ describe('GooNumber', () => {
 		await tick()
 
 		expect(upButton.classList.contains('goo-number__arrow--pressed')).toBe(false)
+	})
+
+	it('contains handled number keys inside the input', () => {
+		const onenter = vi.fn()
+		const { container } = render(GooNumber, {
+			props: {
+				value: 4,
+				onenter
+			}
+		})
+		const input = container.querySelector<HTMLInputElement>('.goo-number__content')!
+		const parentKeydown = vi.fn()
+		container.addEventListener('keydown', parentKeydown)
+
+		const enterEvent = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: 'Enter' })
+		input.dispatchEvent(enterEvent)
+
+		expect(enterEvent.defaultPrevented).toBe(true)
+		expect(parentKeydown).not.toHaveBeenCalled()
+		expect(onenter).toHaveBeenCalledExactlyOnceWith()
+
+		const arrowEvent = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: 'ArrowUp' })
+		input.dispatchEvent(arrowEvent)
+
+		expect(arrowEvent.defaultPrevented).toBe(true)
+		expect(parentKeydown).not.toHaveBeenCalled()
+	})
+
+	it('supports spinbutton keyboard stepping and bounds', async() => {
+		const oninput = vi.fn()
+		const { container } = render(GooNumber, {
+			props: {
+				value: 4,
+				min: 0,
+				max: 10,
+				step: 0.5,
+				oninput
+			}
+		})
+		const input = container.querySelector<HTMLInputElement>('.goo-number__content')!
+
+		input.dispatchEvent(new KeyboardEvent('keydown', {
+			bubbles: true,
+			cancelable: true,
+			key: 'ArrowUp'
+		}))
+		await tick()
+		expect(input.getAttribute('aria-valuenow')).toBe('4.5')
+		expect(oninput).toHaveBeenLastCalledWith(4.5, 4)
+
+		input.dispatchEvent(new KeyboardEvent('keydown', {
+			bubbles: true,
+			cancelable: true,
+			key: 'PageUp'
+		}))
+		await tick()
+		expect(input.getAttribute('aria-valuenow')).toBe('10')
+		expect(oninput).toHaveBeenLastCalledWith(10, 4.5)
+
+		input.dispatchEvent(new KeyboardEvent('keydown', {
+			bubbles: true,
+			cancelable: true,
+			key: 'Home'
+		}))
+		await tick()
+		expect(input.getAttribute('aria-valuenow')).toBe('0')
+		expect(oninput).toHaveBeenLastCalledWith(0, 10)
+
+		input.dispatchEvent(new KeyboardEvent('keydown', {
+			bubbles: true,
+			cancelable: true,
+			key: 'End'
+		}))
+		await tick()
+		expect(input.getAttribute('aria-valuenow')).toBe('10')
+		expect(oninput).toHaveBeenLastCalledWith(10, 0)
 	})
 
 	it('keeps only one active pointer-hold repeat for number arrows', () => {

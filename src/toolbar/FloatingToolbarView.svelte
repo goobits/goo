@@ -36,6 +36,7 @@
 	class="goo-floating-toolbar"
 	role="toolbar"
 	aria-label="Floating tool options"
+	aria-orientation="vertical"
 	tabindex="0"
 >
 	{#each groups as tools, groupIndex}
@@ -51,7 +52,9 @@
 				data-affordance-quick-tool-id={tool.affordanceQuickToolId}
 				data-exec={tool.exec}
 				data-tooltip={tool.tooltip}
+				aria-disabled={tool.disabled ? 'true' : undefined}
 				aria-pressed={tool.affordanceKind ? 'false' : undefined}
+				disabled={tool.disabled}
 				type="button"
 				use:mountFunctionIcon={tool.icon}
 			></button>

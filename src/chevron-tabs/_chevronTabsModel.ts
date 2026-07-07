@@ -23,6 +23,6 @@ export const resolveChevronTabDragInsertion = (
 	draggedCenter: number,
 	otherCenters: readonly number[]
 ): number => {
-	const firstGreaterCenter = otherCenters.findIndex((center) => draggedCenter < center)
+	const firstGreaterCenter = otherCenters.findIndex(center => draggedCenter < center)
 	return firstGreaterCenter === -1 ? otherCenters.length : firstGreaterCenter
 }

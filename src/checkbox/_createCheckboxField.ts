@@ -47,9 +47,10 @@ export function createCheckboxField(options: CheckboxFieldOptions = {}): Checkbo
 		if (instance) {
 			unmount(instance)
 			instance = null
+		} else {
+			field.replaceChildren()
 		}
 		checkboxElement = null
-		field.replaceChildren()
 	}
 
 	function render(): void {
@@ -95,7 +96,7 @@ export function createCheckboxField(options: CheckboxFieldOptions = {}): Checkbo
 		}
 	})
 	field.getValue = () => currentValue
-	field.setValue = (value) => {
+	field.setValue = value => {
 		if (destroyed) return
 		currentValue = Boolean(value)
 		if (checkboxElement?.setValue) {
@@ -105,7 +106,7 @@ export function createCheckboxField(options: CheckboxFieldOptions = {}): Checkbo
 			render()
 		}
 	}
-	field.toggle = (value) => {
+	field.toggle = value => {
 		if (destroyed) return false
 		if (checkboxElement?.toggle) {
 			const changed = checkboxElement.toggle(value)

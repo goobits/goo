@@ -7,6 +7,7 @@
 import { createSelectField } from '../select/_createSelectField.ts'
 import type {
 	GooSelectActionContext,
+	GooSelectDropdownSemantics,
 	GooSelectElement,
 	GooSelectMenuOptions,
 	GooSelectOpenOptions,
@@ -14,6 +15,16 @@ import type {
 	GooSelectOptionsInput
 } from '../select/index.ts'
 import { createLifecycleBag } from '../support/utils/lifecycleBag.ts'
+
+const DEFAULT_CURSOR_GAP_X = 16
+const DEFAULT_CURSOR_ARROW_TIP_OFFSET_Y = 17
+const POINTER_CONTEXT_MENU_GESTURE_MS = 500
+const CONTEXT_MENU_SEMANTICS: GooSelectDropdownSemantics = {
+	containerRole: 'menu',
+	optionRole: 'menuitem',
+	popupRole: 'menu',
+	usesSelectedState: false
+}
 
 /**
  * Goo context menu option.
@@ -94,6 +105,8 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 	} = options
 
 	let contextMenuOpened = false
+	let contextMenuAnchor: HTMLElement | null = null
+	let releasePageUnfocus: (() => void) | null = null
 
 	// Create GooSelect with context menu defaults
 	const select = createSelectField({
@@ -106,17 +119,20 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 		menu: {
 			arrow: true,
 			backdrop: false,
-			popoutClassName: [ 'goo-context-menu-popout', className ].filter(Boolean).join(' '),
-			...menu
+			...menu,
+			popoutClassName: [ 'goo-context-menu-popout', className, menu.popoutClassName ].filter(Boolean).join(' '),
+			semantics: menu.semantics ?? CONTEXT_MENU_SEMANTICS
 		},
 		className: `goo-context-menu ${ className }`.trim(),
 		actionContext,
 		onopen: () => {
 			contextMenuOpened = true
+			bindPageUnfocus()
 			onopen?.()
 		},
 		onclose: () => {
 			contextMenuOpened = false
+			unbindPageUnfocus()
 			onclose?.()
 		}
 	})
@@ -135,34 +151,95 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 		if (x !== undefined || y !== undefined) {
 			positionAt = { x: x ?? 0, y: y ?? 0 }
 		}
+		positionAt = getPointOpenAnchor(positionAt, restOpts)
+		const anchorElement = positionAt instanceof HTMLElement ? positionAt : null
+		contextMenuAnchor = anchorElement
+		const pointDefaults = getPointOpenDefaults(positionAt, restOpts)
+		const openOpts = {
+			...restOpts,
+			...pointDefaults
+		}
 
 		if (contextMenuOpened || contextMenu.isOpen()) {
 			return contextMenu.updatePosition({
-				...restOpts,
+				...openOpts,
 				at: positionAt
 			})
 		}
 
+		const shouldFocusPanel = opts.autoFocus === true
 		const didOpen = originalOpen({
-			...restOpts,
+			...openOpts,
 			at: positionAt,
-			autoFocus: opts.autoFocus !== false
+			autoFocus: shouldFocusPanel,
+			clickToClose: openOpts.clickToClose ?? getAnchorAwareClickToClose(anchorElement),
+			initialFocus: shouldFocusPanel ? 'none' : openOpts.initialFocus
 		})
 		if (didOpen) {
 			contextMenuOpened = true
+			bindPageUnfocus()
+			if (shouldFocusPanel) focusOpenContextMenuPanelWhenVisible()
 		}
 		return didOpen
 	}
 	contextMenu.close = function closeContextMenu(opts = {}) {
 		contextMenuOpened = false
+		contextMenuAnchor = null
+		unbindPageUnfocus()
 		originalClose(opts)
 	}
 
 	// Add convenience method for right-click handling
 	contextMenu.attachTo = function attachTo($element, handler) {
+		let closeOnlyContextMenuGesture = false
+		let closeOnlyContextMenuReset: ReturnType<typeof setTimeout> | null = null
+		let pointerContextMenuGesture = false
+		let pointerContextMenuReset: ReturnType<typeof setTimeout> | null = null
+		const clearPointerContextMenuGesture = () => {
+			pointerContextMenuGesture = false
+			if (pointerContextMenuReset) {
+				clearTimeout(pointerContextMenuReset)
+				pointerContextMenuReset = null
+			}
+		}
+		const markPointerContextMenuGesture = () => {
+			pointerContextMenuGesture = true
+			if (pointerContextMenuReset) clearTimeout(pointerContextMenuReset)
+			pointerContextMenuReset = setTimeout(clearPointerContextMenuGesture, POINTER_CONTEXT_MENU_GESTURE_MS)
+		}
+		const clearCloseOnlyContextMenuGesture = () => {
+			closeOnlyContextMenuGesture = false
+			if (closeOnlyContextMenuReset) {
+				clearTimeout(closeOnlyContextMenuReset)
+				closeOnlyContextMenuReset = null
+			}
+		}
+		const pointerHandler = (e: PointerEvent) => {
+			if (e.button !== 2 || !isEventInsideElement(e, $element)) return
+			markPointerContextMenuGesture()
+			if (!(contextMenuOpened || contextMenu.isOpen())) return
+
+			closeOnlyContextMenuGesture = true
+			if (closeOnlyContextMenuReset) clearTimeout(closeOnlyContextMenuReset)
+			closeOnlyContextMenuReset = setTimeout(clearCloseOnlyContextMenuGesture, POINTER_CONTEXT_MENU_GESTURE_MS)
+			contextMenu.close()
+		}
 		const contextHandler = (e: MouseEvent) => {
 			e.preventDefault()
 			e.stopPropagation()
+			focusContextMenuOwner($element)
+			const openedFromPointer = pointerContextMenuGesture
+			clearPointerContextMenuGesture()
+
+			if (closeOnlyContextMenuGesture) {
+				clearCloseOnlyContextMenuGesture()
+				return
+			}
+
+			if (contextMenuOpened || contextMenu.isOpen()) {
+				contextMenu.close()
+				return
+			}
 
 			// Allow handler to modify options or cancel
 			if (handler) {
@@ -173,18 +250,153 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 				}
 			}
 
-			contextMenu.open({ x: e.clientX, y: e.clientY })
+			const didOpen = openedFromPointer
+				? contextMenu.open({ x: e.clientX, y: e.clientY, initialFocus: 'none' })
+				: contextMenu.open({ at: $element, autoFocus: true, initialFocus: 'none' })
+			if (didOpen && !openedFromPointer) {
+				focusOpenContextMenuPanel()
+			}
 		}
 
+		document.addEventListener('pointerdown', pointerHandler as EventListener, true)
 		$element.addEventListener('contextmenu', contextHandler as EventListener)
-		return attachments.add(() => $element.removeEventListener('contextmenu', contextHandler as EventListener))
+		return attachments.add(() => {
+			clearPointerContextMenuGesture()
+			clearCloseOnlyContextMenuGesture()
+			document.removeEventListener('pointerdown', pointerHandler as EventListener, true)
+			$element.removeEventListener('contextmenu', contextHandler as EventListener)
+		})
 	}
 
 	contextMenu.destroy = function destroyContextMenu() {
 		attachments.destroy()
+		unbindPageUnfocus()
 		contextMenuOpened = false
 		originalDestroy()
 	}
 
 	return contextMenu
+
+	function bindPageUnfocus(): void {
+		if (releasePageUnfocus) return
+
+		const closeForPageUnfocus = () => {
+			if (contextMenuOpened || contextMenu.isOpen()) {
+				contextMenu.close()
+			}
+		}
+		const closeForVisibilityChange = () => {
+			if (document.visibilityState === 'hidden') {
+				closeForPageUnfocus()
+			}
+		}
+		const closeForOutsidePointer = (event: PointerEvent) => {
+			const target = event.target
+			if (target instanceof Element && target.closest('.goo-popout')) return
+			if (contextMenuAnchor && isEventOnElement(event, contextMenuAnchor)) return
+			closeForPageUnfocus()
+		}
+
+		window.addEventListener('blur', closeForPageUnfocus)
+		window.addEventListener('pagehide', closeForPageUnfocus)
+		document.addEventListener('pointerdown', closeForOutsidePointer, true)
+		document.addEventListener('visibilitychange', closeForVisibilityChange)
+		releasePageUnfocus = () => {
+			window.removeEventListener('blur', closeForPageUnfocus)
+			window.removeEventListener('pagehide', closeForPageUnfocus)
+			document.removeEventListener('pointerdown', closeForOutsidePointer, true)
+			document.removeEventListener('visibilitychange', closeForVisibilityChange)
+			releasePageUnfocus = null
+		}
+	}
+
+	function unbindPageUnfocus(): void {
+		releasePageUnfocus?.()
+	}
+}
+
+function isEventInsideElement(event: Event, element: HTMLElement): boolean {
+	const target = event.target
+	return target instanceof Node && element.contains(target)
+}
+
+function focusContextMenuOwner(element: HTMLElement): void {
+	if (element.contains(document.activeElement)) return
+	element.focus({ preventScroll: true })
+}
+
+function focusOpenContextMenuPanel(): void {
+	const panels = document.querySelectorAll<HTMLElement>('.goo-context-menu-popout .goo-select__options')
+	panels.item(panels.length - 1)?.focus({ preventScroll: true })
+}
+
+function focusOpenContextMenuPanelWhenVisible(attempts = 30): void {
+	const panel = getLatestOpenContextMenuPanel()
+	if (panel && getComputedStyle(panel).visibility !== 'hidden') {
+		panel.focus({ preventScroll: true })
+		return
+	}
+
+	if (attempts <= 0) {
+		focusOpenContextMenuPanel()
+		return
+	}
+
+	requestAnimationFrame(() => focusOpenContextMenuPanelWhenVisible(attempts - 1))
+}
+
+function getLatestOpenContextMenuPanel(): HTMLElement | null {
+	const panels = document.querySelectorAll<HTMLElement>('.goo-context-menu-popout .goo-select__options')
+	return panels.item(panels.length - 1) ?? null
+}
+
+function getAnchorAwareClickToClose(anchor: HTMLElement | null): GooContextMenuOpenOptions['clickToClose'] | undefined {
+	if (!anchor) return undefined
+
+	return (event, isInsidePopout) => {
+		if (isInsidePopout) return false
+		if (event.originalEvent && isEventOnElement(event.originalEvent, anchor)) return false
+		return true
+	}
+}
+
+function isEventOnElement(event: Event, element: HTMLElement): boolean {
+	if (event.composedPath().includes(element)) return true
+	const target = event.target
+	return target instanceof Node && element.contains(target)
+}
+
+function getPointOpenDefaults(
+	positionAt: GooContextMenuOpenOptions['at'],
+	opts: Omit<GooContextMenuOpenOptions, 'at' | 'x' | 'y'>
+): Pick<GooContextMenuOpenOptions, 'align' | 'offset'> {
+	if (!isPointAnchor(positionAt)) return {}
+	return {
+		align: opts.align ?? positionAt.align ?? 'left top to right top',
+		offset: opts.offset ?? positionAt.offset ?? { x: DEFAULT_CURSOR_GAP_X, y: 0 }
+	}
+}
+
+function getPointOpenAnchor(
+	positionAt: GooContextMenuOpenOptions['at'],
+	opts: Omit<GooContextMenuOpenOptions, 'at' | 'x' | 'y'>
+): GooContextMenuOpenOptions['at'] {
+	if (!isPointAnchor(positionAt)) return positionAt
+	if (opts.align || opts.offset || positionAt.align || positionAt.offset) return positionAt
+
+	const pointX = positionAt.point?.x ?? positionAt.x ?? 0
+	const pointY = positionAt.point?.y ?? positionAt.y ?? 0
+	return {
+		...positionAt,
+		point: {
+			x: pointX,
+			y: pointY - DEFAULT_CURSOR_ARROW_TIP_OFFSET_Y
+		}
+	}
+}
+
+function isPointAnchor(positionAt: GooContextMenuOpenOptions['at']): positionAt is Exclude<GooContextMenuOpenOptions['at'], HTMLElement | undefined> {
+	if (!positionAt || positionAt instanceof HTMLElement) return false
+	if (positionAt.element) return false
+	return Boolean(positionAt.point || positionAt.x !== undefined || positionAt.y !== undefined)
 }

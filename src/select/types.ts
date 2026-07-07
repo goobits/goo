@@ -5,7 +5,7 @@
 
 import type { Snippet } from 'svelte'
 
-import type { GooPopoutAt, GooPopoutOptions } from '../popout/popout.ts'
+import type { GooPopoutAt, GooPopoutOptions } from '../popout/popoutTypes.ts'
 import type { GooForwardedAttributes } from '../support/types/forwardedAttributes.ts'
 
 /** Host-owned action context passed through menu/select actions. */
@@ -26,6 +26,8 @@ export interface GooSelectOption {
 	id?: string
 	/** Visual tone. `'danger'` styles the row as destructive (negative color). */
 	tone?: 'danger'
+	/** Extra class names applied to the rendered option row. */
+	className?: string
 	icon?: GooSelectRenderable
 	shortcut?: GooSelectShortcut
 	isDisabled?: boolean | (() => boolean)
@@ -77,9 +79,21 @@ export type GooSelectMenuPlacement =
   | 'bottom'
   | 'bottom-start'
   | 'bottom-end'
-  | 'left'
-  | 'left-start'
-  | 'left-end'
+	| 'left'
+	| 'left-start'
+	| 'left-end'
+
+/** ARIA semantics used by the shared dropdown renderer. */
+export type GooSelectDropdownSemantics = {
+	/** Role applied to the dropdown content element. */
+	containerRole: 'listbox' | 'menu'
+	/** Role applied to selectable rows. */
+	optionRole: 'option' | 'menuitem'
+	/** Role announced by a trigger that opens this dropdown. */
+	popupRole: 'listbox' | 'menu'
+	/** Whether rows should expose `aria-selected`. */
+	usesSelectedState: boolean
+}
 
 /** Display options for the dropdown menu owned by a GooSelect. */
 export type GooSelectMenuOptions = {
@@ -89,6 +103,7 @@ export type GooSelectMenuOptions = {
 	outline?: boolean
 	placement?: GooSelectMenuPlacement
 	popoutClassName?: string
+	semantics?: GooSelectDropdownSemantics
 	variant?: 'attached' | 'floating'
 	width?: 'auto' | 'content' | 'trigger'
 }
@@ -228,6 +243,7 @@ export interface GooSelectOpenOptions {
 	autoFocus?: boolean
 	at?: HTMLElement | GooPopoutAt
 	clickToClose?: GooPopoutOptions['clickToClose']
+	initialFocus?: GooPopoutOptions['initialFocus']
 	keepWithin?: { element?: HTMLElement; margin?: number }
 	parentElement?: HTMLElement
 	actionContext?: GooSelectActionContext

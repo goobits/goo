@@ -1,4 +1,8 @@
-import type { GooSelectMenuOptions, GooSelectMenuPlacement } from './types.ts'
+import type {
+	GooSelectDropdownSemantics,
+	GooSelectMenuOptions,
+	GooSelectMenuPlacement
+} from './types.ts'
 
 export type NormalizedGooSelectMenu = {
 	arrow: boolean
@@ -7,6 +11,7 @@ export type NormalizedGooSelectMenu = {
 	outline: boolean
 	placement: GooSelectMenuPlacement
 	popoutClassName?: string
+	semantics?: GooSelectDropdownSemantics
 	variant: 'attached' | 'floating'
 	width: 'auto' | 'content' | 'trigger'
 }

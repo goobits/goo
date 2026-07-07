@@ -4,19 +4,39 @@
  * @module goobits/select/keyboardHandler
  */
 
+import {
+	containKeyboardEvent,
+	isKeyboardActivationKey
+} from '../support/keyboard/_keyboardActivation.ts'
 import type { GooSelectOption, GooSelectState } from './types.ts'
+
+export type GooSelectNavigationCommand =
+	| 'down'
+	| 'enter'
+	| 'escape'
+	| 'first'
+	| 'last'
+	| 'left'
+	| 'right'
+	| 'space'
+	| 'tab'
+	| 'up'
 
 /** Keyboard command event used by GooSelect navigation. */
 export interface GooSelectKeyCommand {
+	command: GooSelectNavigationCommand
+	cancel: () => void
+}
+
+export interface GooSelectTypeaheadCommand {
 	command: string
 	cancel: () => void
 }
 
-type KeyboardHandlerHost = GooSelectKeyboardHost
-
 type GooSelectPanelHost = {
 	hoveredId: string | null
 	navigate(dir: 1 | -1): void
+	navigateToBoundary(boundary: 'first' | 'last'): void
 	getHoveredElement(): HTMLElement | null
 	findOptionById(id: string): GooSelectOption | null
 	openSubmenu($item: HTMLElement, opt: GooSelectOption): void
@@ -41,14 +61,14 @@ export type GooSelectKeyboardHost = {
 // Key Mapping
 // ============================================================================
 
-const KEY_TO_COMMAND: Record<string, string> = {
+const KEY_TO_COMMAND: Record<string, GooSelectNavigationCommand> = {
 	ArrowDown: 'down',
 	ArrowUp: 'up',
 	ArrowLeft: 'left',
 	ArrowRight: 'right',
-	Enter: 'enter',
-	' ': 'space',
+	End: 'last',
 	Escape: 'escape',
+	Home: 'first',
 	Tab: 'tab'
 }
 
@@ -62,12 +82,23 @@ const KEY_TO_COMMAND: Record<string, string> = {
  * @returns Keyboard command event or null if not mapped
  */
 export function mapNativeKeyToCommand(e: KeyboardEvent): GooSelectKeyCommand | null {
-	const command = KEY_TO_COMMAND[e.key]
+	const command = activationCommandForKey(e.key) ?? KEY_TO_COMMAND[e.key]
 	if (!command) return null
 
 	return {
 		command,
-		cancel: () => e.preventDefault()
+		cancel: () => containKeyboardEvent(e)
+	}
+}
+
+export function mapNativeTypeaheadKeyToCommand(e: KeyboardEvent): GooSelectTypeaheadCommand | null {
+	if (e.altKey || e.ctrlKey || e.metaKey) return null
+	if (e.key.length !== 1) return null
+	if (e.key.trim() === '') return null
+
+	return {
+		command: e.key,
+		cancel: () => containKeyboardEvent(e, { stopImmediatePropagation: true })
 	}
 }
 
@@ -76,7 +107,7 @@ export function mapNativeKeyToCommand(e: KeyboardEvent): GooSelectKeyCommand | n
  * @param host - The select component
  * @param event - Keyboard command event
  */
-export function handleKeyboard(host: KeyboardHandlerHost, event: GooSelectKeyCommand): void {
+export function handleKeyboard(host: GooSelectKeyboardHost, event: GooSelectKeyCommand): void {
 	if (host.state.disabled) return
 
 	const { command } = event
@@ -101,6 +132,16 @@ export function handleKeyboard(host: KeyboardHandlerHost, event: GooSelectKeyCom
 		case 'up':
 			event.cancel()
 			host._panel.navigate(-1)
+			break
+
+		case 'first':
+			event.cancel()
+			host._panel.navigateToBoundary('first')
+			break
+
+		case 'last':
+			event.cancel()
+			host._panel.navigateToBoundary('last')
 			break
 
 		case 'right': {
@@ -148,16 +189,17 @@ export function handleKeyboard(host: KeyboardHandlerHost, event: GooSelectKeyCom
  * Handle typeahead keystrokes for GooSelect.
  * Filters to only single printable characters.
  * @param host - The select component
- * @param event - Keyboard command event
+ * @param event - Typeahead command event
  */
-export function handleTypeahead(host: KeyboardHandlerHost, event: GooSelectKeyCommand): void {
+export function handleTypeahead(host: GooSelectKeyboardHost, event: GooSelectTypeaheadCommand): void {
 	if (!host._opened || host.state.disabled || !host._panel) return
 
-	const { command } = event
+	event.cancel()
+	host._panel.handleTypeahead(event.command)
+}
 
-	// Skip modifier combos and navigation keys
-	if (command.includes('+') || command.length > 1) return
-
-	// Single character - delegate to panel
-	host._panel.handleTypeahead(command)
+function activationCommandForKey(key: string): GooSelectNavigationCommand | null {
+	if (key === 'Enter') return 'enter'
+	if (isKeyboardActivationKey(key)) return 'space'
+	return null
 }

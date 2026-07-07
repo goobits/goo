@@ -118,6 +118,44 @@ describe('GooSelect', () => {
 		expect(document.querySelectorAll('.goo-select__option').length).toBe(2)
 	})
 
+	it('omits optgroup headers when supported contents collapse to dividers only', async() => {
+		const { container } = render(GooSelect, {
+			props: {
+				value: '',
+				options: [
+					{
+						type: 'optgroup',
+						label: 'Path',
+						options: [
+							{ id: 'offset-path', label: 'Offset Path', isSupported: () => false },
+							{ type: 'divider' },
+							{ id: 'convert-outline', label: 'Convert Outline', isSupported: () => false }
+						]
+					},
+					{
+						type: 'optgroup',
+						label: 'Edit',
+						options: [
+							{ id: 'copy', label: 'Copy' }
+						]
+					}
+				]
+			}
+		})
+		const element = container.querySelector<GooSelectElement>('.goo-select')!
+
+		expect(element.open({ autoFocus: false })).toBe(true)
+		await tick()
+
+		const labels = Array.from(
+			document.querySelectorAll<HTMLElement>('.goo-select__optgroup-label')
+		).map(label => label.textContent)
+
+		expect(labels).toEqual([ 'Edit' ])
+		expect(document.querySelector('.goo-select__option[data-id="copy"]')).not.toBeNull()
+		expect(document.querySelector('.goo-select__divider')).toBeNull()
+	})
+
 	it('appends open-time popout class names', async() => {
 		const { container } = render(GooSelect, {
 			props: {
@@ -137,6 +175,26 @@ describe('GooSelect', () => {
 		await tick()
 
 		expect(document.querySelector('.goo-popout.goo-select-popout.sketch-contextual-menu-popout')).not.toBeNull()
+	})
+
+	it('applies option row class names without treating labels as markup', async() => {
+		const { container } = render(GooSelect, {
+			props: {
+				value: '',
+				options: [
+					{ id: 'filter', label: '<b>Filter</b>', className: 'filter-row' }
+				]
+			}
+		})
+		const element = container.querySelector<GooSelectElement>('.goo-select')!
+
+		expect(element.open({ autoFocus: false })).toBe(true)
+		await tick()
+
+		const option = document.querySelector('.goo-select__option.filter-row')
+		expect(option).not.toBeNull()
+		expect(option?.querySelector('.goo-select__label')?.textContent).toBe('<b>Filter</b>')
+		expect(option?.querySelector('b')).toBeNull()
 	})
 
 	it('hides active tooltips before opening menu popouts', async() => {
@@ -179,7 +237,9 @@ describe('GooSelect', () => {
 		expect(element.open({ autoFocus: false })).toBe(true)
 		await tick()
 
+		expect(document.querySelector('.goo-select__options')?.getAttribute('role')).toBe('listbox')
 		const selected = document.querySelector<HTMLElement>('.goo-select__option[data-id="b"]')!
+		expect(selected.getAttribute('role')).toBe('option')
 		expect(selected.getAttribute('aria-selected')).toBe('true')
 		expect(selected.querySelector('.goo-select__check svg')).not.toBeNull()
 	})

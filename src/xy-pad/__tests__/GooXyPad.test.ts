@@ -147,7 +147,39 @@ describe('GooXyPad', () => {
 		expect(onchange.mock.calls[1]?.[0]).toEqual({ x: 0, y: 10 })
 		expect(onchange.mock.calls.at(-1)?.[0]).toEqual({ x: 0, y: 0 })
 	})
+
+	it('contains handled keyboard nudges', () => {
+		const onchange = vi.fn()
+		const { container } = render(GooXyPad, {
+			props: {
+				value: { x: 0, y: 0 },
+				min: -10,
+				max: 10,
+				step: 1,
+				onchange
+			}
+		})
+		const surface = container.querySelector<HTMLButtonElement>('.goo-xy-pad__surface')!
+		const parentKeydown = vi.fn()
+		container.addEventListener('keydown', parentKeydown)
+
+		const event = dispatchKey(surface, 'ArrowRight')
+
+		expect(event.defaultPrevented).toBe(true)
+		expect(parentKeydown).not.toHaveBeenCalled()
+		expect(onchange.mock.calls[0]?.[0]).toEqual({ x: 1, y: 0 })
+	})
 })
+
+function dispatchKey(element: HTMLElement, key: string): KeyboardEvent {
+	const event = new KeyboardEvent('keydown', {
+		bubbles: true,
+		cancelable: true,
+		key
+	})
+	element.dispatchEvent(event)
+	return event
+}
 
 function rect(x: number, y: number, width: number, height: number): DOMRect {
 	return {

@@ -49,13 +49,16 @@ describe('GooRadio', () => {
 			}
 		})
 		const radio = container.querySelector<HTMLButtonElement>('.goo-radio')!
+		const parentKeydown = vi.fn()
+		container.addEventListener('keydown', parentKeydown)
 
-		for (const key of [ 'Enter', ' ' ]) {
+		for (const key of [ 'Enter', ' ', 'Spacebar' ]) {
 			const event = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key })
 			radio.dispatchEvent(event)
 
 			expect(event.defaultPrevented).toBe(true)
 		}
+		expect(parentKeydown).not.toHaveBeenCalled()
 	})
 })
 
@@ -132,11 +135,16 @@ describe('GooRadioGroup', () => {
 		})
 		const radioA = container.querySelector<HTMLButtonElement>('.goo-radio[value="a"]')!
 		const radioB = container.querySelector<HTMLButtonElement>('.goo-radio[value="b"]')!
+		const parentKeydown = vi.fn()
+		container.addEventListener('keydown', parentKeydown)
 
 		radioA.focus()
-		await fireEvent.keyDown(radioA, { key: 'ArrowDown' })
+		const event = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: 'ArrowDown' })
+		radioA.dispatchEvent(event)
 		await tick()
 
+		expect(event.defaultPrevented).toBe(true)
+		expect(parentKeydown).not.toHaveBeenCalled()
 		expect(document.activeElement).toBe(radioB)
 		expect(radioA.getAttribute('tabindex')).toBe('-1')
 		expect(radioB.getAttribute('tabindex')).toBe('0')

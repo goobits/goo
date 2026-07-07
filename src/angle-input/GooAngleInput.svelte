@@ -15,6 +15,7 @@ export const controlSchema: SvelteControlSchema = {
 import './GooAngleInput.css'
 
 import GooNumber from '../input/GooNumber.svelte'
+import { containKeyboardEvent } from '../support/keyboard/_keyboardActivation.ts'
 import { createPointerDrag, type GooPointerDragEvent, type GooPointerDragHandle } from '../support/utils/pointerDrag.ts'
 import type {
 	GooAngleInputElement,
@@ -208,6 +209,34 @@ function handlePointerDrag(event: GooPointerDragEvent): void | false {
 	}
 }
 
+function handleTrackKeydown(event: KeyboardEvent): void {
+	if (effectiveDisabled) return
+
+	const multiplier = event.shiftKey ? 10 : event.altKey ? 0.1 : 1
+	let nextDegrees: number | null = null
+	switch (event.key) {
+		case 'ArrowLeft':
+		case 'ArrowDown':
+			nextDegrees = degrees - multiplier
+			break
+		case 'ArrowRight':
+		case 'ArrowUp':
+			nextDegrees = degrees + multiplier
+			break
+		case 'Home':
+			nextDegrees = 0
+			break
+		case 'End':
+			nextDegrees = 359
+			break
+		default:
+			return
+	}
+
+	containKeyboardEvent(event)
+	setAngleFromDegrees(nextDegrees, 'change', event)
+}
+
 function setAngleFromPointer(event: PointerEvent, state: GooAngleInputEventData['state']): void {
 	if (!trackElement) return
 
@@ -290,8 +319,9 @@ function syncBoundValue(nextValue: number): void {
 		type="button"
 		class="goo-angle-input__track"
 		class:is-dragging={activePointerId !== null}
-		tabindex="-1"
+		tabindex={effectiveDisabled ? -1 : tabIndex}
 		aria-label={ariaLabel || 'Set angle'}
+		onkeydowncapture={handleTrackKeydown}
 	>
 		<div
 			class="goo-angle-input__handle"

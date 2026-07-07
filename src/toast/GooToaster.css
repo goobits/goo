@@ -4,10 +4,13 @@
  */
 
 .goo-toaster {
-	--goo-toaster-width: min(100vw - 2rem, 24rem);
-	--goo-toaster-gap: 0.75rem;
-	--goo-toaster-z-index: 999;
-	--goo-toaster-edge: 1rem;
+	--goo-toaster-width: min(
+		100vw - calc(var(--goo-theme-space-xl) + var(--goo-theme-space-sm)),
+		24rem
+	);
+	--goo-toaster-gap: var(--goo-theme-space-md);
+	--goo-toaster-z-index: var(--goo-theme-layer-toast);
+	--goo-toaster-edge: var(--goo-theme-space-lg);
 
 	position: fixed;
 	display: flex;

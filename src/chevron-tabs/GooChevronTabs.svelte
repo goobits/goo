@@ -2,6 +2,14 @@
 	import { BellRing, Bot, ChevronDown, CircleAlert, Plus, X } from '@lucide/svelte'
 	import { tooltip } from '../tooltip/index.ts'
 	import './GooChevronTabs.css'
+	import {
+		focusFirstMenuItem,
+		handleMenuKeyboardEvent
+	} from '../support/keyboard/_composite.ts'
+	import {
+		containKeyboardEvent,
+		isKeyboardActivationKey
+	} from '../support/keyboard/_keyboardActivation.ts'
 	import type { GooChevronTab, GooChevronTabStatus, GooChevronTabsProps } from './types.ts'
 	import {
 		hasChevronTabDragIntent,
@@ -73,6 +81,7 @@
 	let dragVisualOffset = $state(0)
 
 	let railElement: HTMLElement | null = $state(null)
+	let menuElement: HTMLElement | null = $state(null)
 	const tabElements = $state<Record<string, HTMLElement>>({})
 	const nameElements = $state<Record<string, HTMLElement>>({})
 	let originalName = ''
@@ -162,12 +171,12 @@
 
 	const handleNameKeydown = (event: KeyboardEvent): void => {
 		if (event.key === 'Enter') {
-			event.preventDefault()
+			containKeyboardEvent(event)
 			;(event.currentTarget as HTMLElement).blur()
 			return
 		}
 		if (event.key === 'Escape') {
-			event.preventDefault()
+			containKeyboardEvent(event)
 			canceledRename = true
 			;(event.currentTarget as HTMLElement).blur()
 		}
@@ -194,22 +203,22 @@
 			event.key
 		)
 		if (keyboardTargetIndex !== null) {
-			event.preventDefault()
+			containKeyboardEvent(event)
 			selectTabAt(keyboardTargetIndex)
 			return
 		}
-		if (event.key === 'Enter' || event.key === ' ') {
-			event.preventDefault()
+		if (isKeyboardActivationKey(event.key)) {
+			containKeyboardEvent(event)
 			selectTab(tab)
 			return
 		}
 		if (event.key === 'F2') {
-			event.preventDefault()
+			containKeyboardEvent(event)
 			startRename(tab)
 			return
 		}
 		if (event.key === 'Delete' || event.key === 'Backspace') {
-			event.preventDefault()
+			containKeyboardEvent(event)
 			closeTab(tab)
 		}
 	}
@@ -306,6 +315,21 @@
 		railElement.scrollLeft += left
 	}
 
+	const setMenuOpen = (open: boolean): void => {
+		menuOpen = open
+		if (open) {
+			queueMicrotask(() => {
+				if (menuElement) focusFirstMenuItem(menuElement)
+			})
+		}
+	}
+
+	const handleMenuKeydown = (event: KeyboardEvent): void => {
+		handleMenuKeyboardEvent(event, event.currentTarget as HTMLElement, {
+			close: () => setMenuOpen(false)
+		})
+	}
+
 	$effect(() => {
 		tabs.length
 		const rail = railElement
@@ -368,7 +392,7 @@
 				bind:this={tabElements[tab.id]}
 				onpointerdown={(event) => beginDrag(event, tab)}
 				ondblclick={() => startRename(tab)}
-				onkeydown={(event) => handleTabKeydown(event, tab)}
+				onkeydowncapture={(event) => handleTabKeydown(event, tab)}
 			>
 				{#if activity}
 					<span
@@ -465,7 +489,7 @@
 				aria-label="All sessions"
 				title="All sessions"
 				onclick={() => {
-					menuOpen = !menuOpen
+					setMenuOpen(!menuOpen)
 				}}
 			>
 				<ChevronDown size={14} strokeWidth={2.2} aria-hidden="true" />
@@ -484,10 +508,17 @@
 			type="button"
 			aria-label="Close session menu"
 			onclick={() => {
-				menuOpen = false
+				setMenuOpen(false)
 			}}
 		></button>
-		<div class="goo-chevron-tabs__menu" role="menu" aria-label="Sessions">
+		<div
+			bind:this={menuElement}
+			class="goo-chevron-tabs__menu"
+			role="menu"
+			aria-label="Sessions"
+			tabindex="-1"
+			onkeydowncapture={handleMenuKeydown}
+		>
 			{#each tabs as tab (tab.id)}
 				<button
 					class="goo-chevron-tabs__menu-row"
@@ -496,7 +527,7 @@
 					role="menuitem"
 					onclick={() => {
 						onselect?.(tab.id)
-						menuOpen = false
+						setMenuOpen(false)
 					}}
 				>
 					<span

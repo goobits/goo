@@ -3,20 +3,26 @@
  */
 
 .goo-color {
-	--goo-color-swatch-size: 24px;
-	--goo-color-input-width: 70px;
-	--goo-color-border: var(--goo-theme-border, rgba(128, 128, 128, 0.2));
-	--goo-color-bg: var(
-		--goo-theme-surface-sunken,
-		color-mix(in srgb, var(--goo-theme-fg, #fff) 5%, transparent)
-	);
-	--goo-color-fg: var(--goo-theme-fg, rgba(255, 255, 255, 0.9));
-	--goo-color-radius: var(--goo-theme-radius-md, 0.375rem);
+	--goo-color-swatch-size: var(--goo-theme-control-height-sm);
+	--goo-color-input-width: calc(var(--goo-theme-control-height-lg) + var(--goo-theme-control-height-md) - var(--goo-theme-space-2xs));
+	--goo-color-alpha-width: calc(var(--goo-theme-control-height-lg) + var(--goo-theme-control-height-md) - var(--goo-theme-space-md));
+	--goo-color-alpha-height: var(--goo-theme-space-xs);
+	--goo-color-alpha-thumb-size: var(--goo-theme-icon-xs);
+	--goo-color-alpha-thumb-border-size: var(--goo-theme-space-2xs);
+	--goo-color-checker-size: var(--goo-theme-space-sm);
+	--goo-color-checker-step: calc(var(--goo-color-checker-size) * 0.5);
+	--goo-color-checker-light: #fff;
+	--goo-color-checker-dark: #ccc;
+	--goo-color-swatch-fallback: #000;
+	--goo-color-border: var(--goo-theme-border);
+	--goo-color-bg: var(--goo-theme-surface-sunken);
+	--goo-color-fg: var(--goo-theme-fg);
+	--goo-color-radius: var(--goo-theme-radius-md);
 
 	display: inline-flex;
 	align-items: center;
-	gap: 0.5rem;
-	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
+	gap: var(--goo-theme-space-sm);
+	font-size: var(--goo-theme-font-size-sm);
 }
 
 /* Pill container for swatch + hex input */
@@ -29,7 +35,7 @@
 	background: var(--goo-color-bg);
 
 	&:focus-within {
-		border-color: var(--goo-theme-accent, #3b82f6);
+		border-color: var(--goo-theme-accent);
 	}
 }
 
@@ -45,25 +51,25 @@
 	padding: 0;
 
 	/* Checkerboard background for alpha preview (only visible with transparent colors) */
-	background-color: #fff;
+	background-color: var(--goo-color-checker-light);
 	background-image:
-		linear-gradient(45deg, #ccc 25%, transparent 25%),
-		linear-gradient(-45deg, #ccc 25%, transparent 25%),
-		linear-gradient(45deg, transparent 75%, #ccc 75%),
-		linear-gradient(-45deg, transparent 75%, #ccc 75%);
-	background-size: 8px 8px;
+		linear-gradient(45deg, var(--goo-color-checker-dark) 25%, transparent 25%),
+		linear-gradient(-45deg, var(--goo-color-checker-dark) 25%, transparent 25%),
+		linear-gradient(45deg, transparent 75%, var(--goo-color-checker-dark) 75%),
+		linear-gradient(-45deg, transparent 75%, var(--goo-color-checker-dark) 75%);
+	background-size: var(--goo-color-checker-size) var(--goo-color-checker-size);
 	background-position:
 		0 0,
-		0 4px,
-		4px -4px,
-		-4px 0px;
+		0 var(--goo-color-checker-step),
+		var(--goo-color-checker-step) calc(var(--goo-color-checker-step) * -1),
+		calc(var(--goo-color-checker-step) * -1) 0;
 
 	/* Color overlay - set via inline style on this pseudo-element */
 	&::after {
 		content: '';
 		position: absolute;
 		inset: 0;
-		background-color: var(--swatch-color, #000);
+		background-color: var(--swatch-color, var(--goo-color-swatch-fallback));
 	}
 
 	&:hover::after {
@@ -91,12 +97,12 @@
 /* Hex input field */
 .goo-color__input {
 	width: var(--goo-color-input-width);
-	padding: 0.25rem 0.5rem;
+	padding: var(--goo-theme-space-xs) var(--goo-theme-space-sm);
 	background: transparent;
 	border: none;
 	color: var(--goo-color-fg);
 	font-family: monospace;
-	font-size: var(--goo-theme-font-size-xs, 0.75rem);
+	font-size: var(--goo-theme-font-size-xs);
 	text-transform: uppercase;
 
 	&:focus {
@@ -106,31 +112,31 @@
 
 /* Alpha slider */
 .goo-color__alpha {
-	width: 60px;
-	height: 4px;
+	width: var(--goo-color-alpha-width);
+	height: var(--goo-color-alpha-height);
 	-webkit-appearance: none;
 	appearance: none;
 	background: linear-gradient(to right, transparent, var(--goo-color-fg));
-	border-radius: 2px;
+	border-radius: var(--goo-theme-radius-sm);
 	cursor: pointer;
 
 	&::-webkit-slider-thumb {
 		-webkit-appearance: none;
-		width: 12px;
-		height: 12px;
+		width: var(--goo-color-alpha-thumb-size);
+		height: var(--goo-color-alpha-thumb-size);
 		background: var(--goo-color-fg);
-		border-radius: 50%;
+		border-radius: var(--goo-theme-radius-full);
 		cursor: pointer;
-		border: 2px solid var(--goo-theme-bg, #1a1a1a);
+		border: var(--goo-color-alpha-thumb-border-size) solid var(--goo-theme-bg);
 	}
 
 	&::-moz-range-thumb {
-		width: 12px;
-		height: 12px;
+		width: var(--goo-color-alpha-thumb-size);
+		height: var(--goo-color-alpha-thumb-size);
 		background: var(--goo-color-fg);
 		border-radius: 50%;
 		cursor: pointer;
-		border: 2px solid var(--goo-theme-bg, #1a1a1a);
+		border: var(--goo-color-alpha-thumb-border-size) solid var(--goo-theme-bg);
 	}
 }
 

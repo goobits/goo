@@ -47,9 +47,10 @@ export function createRadioGroupField(
 		if (instance) {
 			unmount(instance)
 			instance = null
+		} else {
+			field.replaceChildren()
 		}
 		radioElement = null
-		field.replaceChildren()
 	}
 
 	function render(): void {
@@ -87,7 +88,7 @@ export function createRadioGroupField(
 		}
 	})
 	field.getValue = () => currentValue
-	field.setValue = (value) => {
+	field.setValue = value => {
 		if (destroyed) return
 		currentValue = String(value)
 		if (radioElement?.setValue) {

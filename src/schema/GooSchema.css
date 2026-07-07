@@ -4,51 +4,70 @@
  */
 
 .goo-schema {
-	display: contents;
+	display: block;
+	min-width: 0;
+	outline: none;
+}
+
+.goo-schema:focus-visible {
+	border-radius: var(--goo-theme-radius-sm);
+	box-shadow:
+		0 0 0 1px var(--goo-theme-accent),
+		0 0 0 3px color-mix(in srgb, var(--goo-theme-accent) 24%, transparent);
+}
+
+.goo-schema {
+	--goo-schema-row-padding: var(--goo-theme-space-sm) var(--goo-theme-space-md);
+}
+
+@media (hover: none) and (pointer: coarse) {
+	.goo-schema {
+		--goo-schema-action-height: var(--goo-theme-control-height-touch);
+	}
 }
 
 /* Bare mode - controls without panel wrapper */
 .goo-schema__bare {
 	display: flex;
 	flex-direction: column;
-	gap: var(--goo-theme-space-xs, 0.25rem);
+	gap: var(--goo-theme-space-xs);
 }
 
 .goo-schema__actions {
 	display: flex;
 	align-items: center;
-	gap: var(--goo-theme-space-xs, 0.25rem);
+	gap: var(--goo-theme-space-xs);
 	min-width: 0;
-	padding: 0 0 0.375rem;
+	padding: 0 0 calc(var(--goo-theme-space-xs) + var(--goo-theme-space-2xs));
 }
 
 .goo-schema__preset-select,
 .goo-schema__reset {
 	box-sizing: border-box;
-	height: var(--goo-theme-control-height-sm, 1.5rem);
-	border: 1px solid var(--goo-theme-border-strong, var(--goo-theme-border));
-	border-radius: var(--goo-theme-radius-sm, 0.375rem);
-	background: var(--goo-theme-surface-raised, color-mix(in srgb, var(--goo-theme-fg, #fff) 6%, transparent));
-	color: var(--goo-theme-fg, inherit);
+	height: var(--goo-schema-action-height, var(--goo-theme-control-height-sm));
+	border: 1px solid var(--goo-theme-border-strong);
+	border-radius: var(--goo-theme-radius-sm);
+	background: var(--goo-theme-surface-raised);
+	color: var(--goo-theme-fg);
 	font: inherit;
-	font-size: var(--goo-theme-font-size-xs, 0.75rem);
+	font-size: var(--goo-theme-font-size-xs);
 	line-height: 1;
 }
 
 .goo-schema__preset-select {
 	min-width: 0;
 	flex: 1 1 auto;
-	padding: 0 1.5rem 0 0.5rem;
+	padding: 0 var(--goo-theme-space-xl) 0 var(--goo-theme-space-sm);
 }
 
 .goo-schema__reset {
 	flex: 0 0 auto;
-	padding: 0 0.5rem;
+	padding: 0 var(--goo-theme-space-sm);
 	cursor: pointer;
 }
 
 .goo-schema__reset:hover:not(:disabled) {
-	background: color-mix(in srgb, var(--goo-theme-fg, #fff) 10%, transparent);
+	background: color-mix(in srgb, var(--goo-theme-fg) 10%, transparent);
 }
 
 .goo-schema__reset:disabled {
@@ -60,20 +79,40 @@
 .goo-schema__reset:focus-visible {
 	outline: none;
 	box-shadow:
-		0 0 0 1px var(--goo-theme-accent, #3b82f6),
-		0 0 0 3px color-mix(in srgb, var(--goo-theme-accent, #3b82f6) 24%, transparent);
+		0 0 0 1px var(--goo-theme-accent),
+		0 0 0 3px color-mix(in srgb, var(--goo-theme-accent) 24%, transparent);
+}
+
+.goo-schema .goo-schema__data-motion {
+	animation: goo-schema-data-motion var(--goo-theme-transition-slow);
+}
+
+@keyframes goo-schema-data-motion {
+	from {
+		box-shadow: inset 0 0 0 999px color-mix(in srgb, var(--goo-theme-accent) 18%, transparent);
+	}
+
+	to {
+		box-shadow: inset 0 0 0 999px transparent;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.goo-schema .goo-schema__data-motion {
+		animation: none;
+	}
 }
 
 /* Add dividers and consistent row padding between controls in bare mode */
 .goo-schema__bare > .goo-controller {
-	--goo-controller-padding: var(--goo-theme-control-row-padding, 0.5rem 0.75rem);
-	border-bottom: 1px solid color-mix(in srgb, var(--goo-theme-control-divider, rgba(128, 128, 128, 0.1)) 72%, transparent);
+	--goo-controller-padding: var(--goo-schema-row-padding);
+	border-bottom: 1px solid color-mix(in srgb, var(--goo-theme-border) 72%, transparent);
 }
 
 .goo-schema__bare > .goo-svelte-control,
 .goo-schema__bare > .goo-native-control {
-	padding: var(--goo-theme-control-row-padding, 0.5rem 0.75rem);
-	border-bottom: 1px solid color-mix(in srgb, var(--goo-theme-control-divider, rgba(128, 128, 128, 0.1)) 72%, transparent);
+	padding: var(--goo-schema-row-padding);
+	border-bottom: 1px solid color-mix(in srgb, var(--goo-theme-border) 72%, transparent);
 }
 
 .goo-schema__bare > .goo-svelte-control {
@@ -89,7 +128,7 @@
 
 /* Native control wrapper */
 .goo-native-control {
-	padding: var(--goo-theme-control-row-padding, 0.5rem 0.75rem);
+	padding: var(--goo-schema-row-padding);
 }
 
 /* Folder content: keep row separation consistent inside groups */
@@ -99,21 +138,21 @@
 }
 
 :is(.goo-schema, .goo-schema__bare) .goo-folder .goo-folder__content > .goo-controller {
-	--goo-controller-padding: var(--goo-theme-control-row-padding, 0.5rem 0.75rem);
-	border-bottom: 1px solid color-mix(in srgb, var(--goo-theme-control-divider, rgba(128, 128, 128, 0.1)) 72%, transparent);
+	--goo-controller-padding: var(--goo-schema-row-padding);
+	border-bottom: 1px solid color-mix(in srgb, var(--goo-theme-border) 72%, transparent);
 }
 
 :is(.goo-schema, .goo-schema__bare)
 	.goo-folder
 	.goo-folder__content
 	> .goo-controller.goo-controller--slider-field {
-	--goo-controller-padding: 0.5rem 0;
+	--goo-controller-padding: var(--goo-theme-space-sm) 0;
 }
 
 :is(.goo-schema, .goo-schema__bare) .goo-folder .goo-folder__content > .goo-svelte-control,
 :is(.goo-schema, .goo-schema__bare) .goo-folder .goo-folder__content > .goo-native-control {
-	padding: var(--goo-theme-control-row-padding, 0.5rem 0.75rem);
-	border-bottom: 1px solid color-mix(in srgb, var(--goo-theme-control-divider, rgba(128, 128, 128, 0.1)) 72%, transparent);
+	padding: var(--goo-schema-row-padding);
+	border-bottom: 1px solid color-mix(in srgb, var(--goo-theme-border) 72%, transparent);
 }
 
 :is(.goo-schema, .goo-schema__bare) .goo-folder .goo-folder__content > .goo-svelte-control {

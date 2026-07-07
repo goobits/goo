@@ -1,18 +1,20 @@
 .goo-progress-toast {
+	--goo-progress-toast-z-index: var(--goo-theme-layer-toast);
+
 	position: fixed;
-	right: 16px;
-	bottom: 16px;
-	z-index: 100000;
+	right: var(--goo-theme-space-lg);
+	bottom: var(--goo-theme-space-lg);
+	z-index: var(--goo-progress-toast-z-index);
 	display: grid;
-	grid-template-columns: 32px minmax(160px, auto);
-	gap: 8px 12px;
+	grid-template-columns: var(--goo-theme-control-height-md) minmax(160px, auto);
+	gap: var(--goo-theme-space-sm) var(--goo-theme-space-md);
 	align-items: center;
-	max-width: min(360px, calc(100vw - 32px));
-	padding: 12px;
+	max-width: min(360px, calc(100vw - var(--goo-theme-space-xl) - var(--goo-theme-space-sm)));
+	padding: var(--goo-theme-space-md);
 	color: var(--goo-toast-color, #fff);
 	background: var(--goo-toast-background, #1f2937);
-	border-radius: 6px;
-	box-shadow: 0 12px 32px rgb(0 0 0 / 22%);
+	border-radius: var(--goo-theme-radius-md);
+	box-shadow: var(--goo-theme-shadow-lg);
 }
 
 .goo-progress-toast__ring {

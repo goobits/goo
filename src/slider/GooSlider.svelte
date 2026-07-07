@@ -39,6 +39,7 @@
 	import { onDestroy } from 'svelte'
 
 	import { formatNumber } from '../support/utils/formatNumber.ts'
+	import { containKeyboardEvent } from '../support/keyboard/_keyboardActivation.ts'
 	import { clamp } from '../support/utils/numberUtils.ts'
 	import {
 		createPointerDrag,
@@ -424,7 +425,7 @@
 		const nextValue = keyToNextValue(currentValues[index] ?? numericMin, event)
 		if (nextValue === null) return
 
-		event.preventDefault()
+		containKeyboardEvent(event)
 		updateThumbValue(index, nextValue, 'change', event)
 	}
 
@@ -709,7 +710,7 @@
 	tabindex={isMulti ? undefined : tabIndex}
 	draggable="false"
 	style={rootStyle || undefined}
-	onkeydown={isMulti ? undefined : handleKeydown}
+	onkeydowncapture={isMulti ? undefined : handleKeydown}
 	{...hostAttributes}
 	aria-disabled={effectiveDisabled ? 'true' : undefined}
 >
@@ -756,7 +757,7 @@
 					: undefined}
 				aria-label={isMulti ? getThumbAriaLabel(index) : undefined}
 				aria-disabled={isMulti && effectiveDisabled ? 'true' : undefined}
-				onkeydown={isMulti ? (event) => moveThumbByKey(index, event) : undefined}
+				onkeydowncapture={isMulti ? (event) => moveThumbByKey(index, event) : undefined}
 			>
 				{#if valueBubble}
 					<span class="goo-slider__value-bubble">{thumbValueText(thumbValue)}</span>

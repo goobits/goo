@@ -124,7 +124,36 @@ describe('GooAngleInput', () => {
 		expect(oninput).toHaveBeenCalled()
 		expect(onchange).not.toHaveBeenCalled()
 	})
+
+	it('changes the visual dial from keyboard arrows and contains the event', () => {
+		const onchange = vi.fn()
+		const { container } = render(GooAngleInput, {
+			props: {
+				value: 20,
+				onchange
+			}
+		})
+		const track = container.querySelector<HTMLButtonElement>('.goo-angle-input__track')!
+		const parentKeydown = vi.fn()
+		container.addEventListener('keydown', parentKeydown)
+
+		const event = dispatchKey(track, 'ArrowRight')
+
+		expect(event.defaultPrevented).toBe(true)
+		expect(parentKeydown).not.toHaveBeenCalled()
+		expect(onchange.mock.calls[0]?.[0]).toBe(21)
+	})
 })
+
+function dispatchKey(element: HTMLElement, key: string): KeyboardEvent {
+	const event = new KeyboardEvent('keydown', {
+		bubbles: true,
+		cancelable: true,
+		key
+	})
+	element.dispatchEvent(event)
+	return event
+}
 
 function rect(x: number, y: number, width: number, height: number): DOMRect {
 	return {

@@ -43,18 +43,62 @@ test.describe('GooSchema', () => {
 			size: 32
 		})
 	})
+
+	test('supports direct keyboard navigation without stealing input keys', async({ page }) => {
+		await page.evaluate(() => {
+			const schema = (window as unknown as GooHarnessWindow).goo.createGooSchema({
+				schema: [
+					{
+						type: 'folder',
+						title: 'Shape',
+						open: true,
+						children: [
+							{ path: 'size', min: 0, max: 100 },
+							{ path: 'name' }
+						]
+					}
+				],
+				data: { size: 12, name: 'Marker' },
+				bare: true
+			})
+			document.getElementById('test-container')!.appendChild(schema)
+		})
+		await page.waitForSelector('.goo-schema .goo-folder__header')
+		await page.waitForSelector('.goo-schema .goo-input__content')
+
+		const schema = page.locator('.goo-schema').first()
+		const folderHeader = page.locator('.goo-schema .goo-folder__header').first()
+		const textInput = page.locator('.goo-schema .goo-input__content').first()
+
+		await schema.focus()
+		await expect(schema).toBeFocused()
+		await page.keyboard.press('ArrowDown')
+		await expect(folderHeader).toBeFocused()
+
+		await textInput.focus()
+		await page.keyboard.press('Home')
+		await expect(textInput).toBeFocused()
+	})
 })
 
 interface GooHarnessWindow extends Window {
 	goo: {
-		createGooSchema: (options?: { schema?: GooSchemaField[] | GooSchemaField, data?: Record<string, unknown> }) => GooSchemaElement
+		createGooSchema: (options?: {
+			bare?: boolean
+			data?: Record<string, unknown>
+			schema?: GooSchemaField[] | GooSchemaField
+		}) => GooSchemaElement
 	}
 }
 
 interface GooSchemaField {
+	children?: GooSchemaField[]
 	path?: string
+	open?: boolean
 	min?: number
 	max?: number
+	title?: string
+	type?: string
 }
 
 interface GooSchemaElement extends HTMLElement {

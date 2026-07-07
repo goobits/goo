@@ -8,6 +8,8 @@ export type {
 	GooSchemaChangeHandler,
 	GooSchemaControlType,
 	GooSchemaData,
+	GooSchemaDataUpdateOptions,
+	GooSchemaDataUpdateReason,
 	GooSchema as GooSchemaElement,
 	GooSchemaEvent,
 	GooSchemaEventDetail,

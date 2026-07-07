@@ -17,6 +17,10 @@ export const controlSchema: SvelteControlSchema = {
 import { onDestroy, untrack } from 'svelte'
 import './GooCheckbox.css'
 import { isRTL } from '../support/i18n/index.ts'
+import {
+	containKeyboardEvent,
+	handleKeyboardActivation
+} from '../support/keyboard/_keyboardActivation.ts'
 import { clamp } from '../support/utils/numberUtils.ts'
 import { createPointerDrag, type GooPointerDragEvent, type GooPointerDragHandle } from '../support/utils/pointerDrag.ts'
 import type { GooCheckboxProps } from './types.ts'
@@ -155,21 +159,15 @@ function handleClick(event: MouseEvent): void {
 
 function handleKeydown(event: KeyboardEvent): void {
 	if (disabled) return
+	if (handleKeyboardActivation(event, () => toggle())) return
+
 	switch (event.key) {
-		case 'Enter':
-			event.preventDefault()
-			toggle()
-			break
-		case ' ':
-			event.preventDefault()
-			toggle()
-			break
 		case 'ArrowLeft':
-			event.preventDefault()
+			containKeyboardEvent(event)
 			toggle(isRTL())
 			break
 		case 'ArrowRight':
-			event.preventDefault()
+			containKeyboardEvent(event)
 			toggle(!isRTL())
 			break
 	}
@@ -244,7 +242,7 @@ function clearFinishDragTimer(): void {
 	{...hostAttributes}
 	tabindex={disabled ? undefined : tabIndex}
 	onclick={handleClick}
-	onkeydown={handleKeydown}
+	onkeydowncapture={handleKeydown}
 >
 	<span bind:this={trackElement} class="goo-checkbox__track" aria-hidden="true"></span>
 	<span bind:this={thumbElement} class="goo-checkbox__thumb" aria-hidden="true"></span>

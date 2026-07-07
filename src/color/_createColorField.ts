@@ -39,9 +39,10 @@ export function createColorField(options: ColorFieldOptions = {}): ColorFieldEle
 		if (instance) {
 			unmount(instance)
 			instance = null
+		} else {
+			field.replaceChildren()
 		}
 		colorElement = null
-		field.replaceChildren()
 	}
 
 	function render(): void {
@@ -87,7 +88,7 @@ export function createColorField(options: ColorFieldOptions = {}): ColorFieldEle
 		}
 	})
 	field.getValue = () => currentValue
-	field.setValue = (value) => {
+	field.setValue = value => {
 		if (destroyed) return
 		currentValue = value
 		if (colorElement?.setValue) {

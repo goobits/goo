@@ -34,6 +34,9 @@ export interface ButtonGroupOption {
 
 	/** Additional class names for the button. */
 	className?: string
+
+	/** Disable this option while keeping it visible in the group. */
+	disabled?: boolean
 }
 
 /** Normalized button group option with an explicit key. */
@@ -59,6 +62,9 @@ export interface NormalizedButtonGroupOption {
 
 	/** Additional class names for the button. */
 	className?: string
+
+	/** Disable this option while keeping it visible in the group. */
+	disabled?: boolean
 }
 
 /** Button group options collection. */

@@ -1,19 +1,19 @@
 .goo-preview {
 	--goo-preview-height: 7.25rem;
-	--goo-preview-radius: var(--goo-theme-radius-lg, 0.5rem);
-	--goo-preview-tint: var(--goo-theme-accent, #8b5cf6);
-	--goo-preview-bg: var(--goo-theme-surface-sunken, #171821);
-	--goo-preview-border: var(--goo-theme-border-subtle, rgba(255, 255, 255, 0.12));
-	--goo-preview-dot: color-mix(in srgb, var(--goo-theme-fg, #fff) 14%, transparent);
-	--goo-preview-badge-bg: color-mix(in srgb, var(--goo-theme-bg, #111) 76%, transparent);
-	--goo-preview-badge-fg: var(--goo-theme-muted, rgba(255, 255, 255, 0.65));
+	--goo-preview-radius: var(--goo-theme-radius-lg);
+	--goo-preview-tint: var(--goo-theme-accent);
+	--goo-preview-bg: var(--goo-theme-surface-sunken);
+	--goo-preview-border: var(--goo-theme-border);
+	--goo-preview-dot: color-mix(in srgb, var(--goo-theme-fg) 14%, transparent);
+	--goo-preview-badge-bg: color-mix(in srgb, var(--goo-theme-bg) 76%, transparent);
+	--goo-preview-badge-fg: var(--goo-theme-muted);
 	background:
 		radial-gradient(120% 140% at 50% 0%, color-mix(in oklab, var(--goo-preview-tint), transparent 88%), transparent 62%),
 		var(--goo-preview-bg);
 	border: 1px solid var(--goo-preview-border);
 	border-radius: var(--goo-preview-radius);
 	box-sizing: border-box;
-	color: var(--goo-theme-fg, #fff);
+	color: var(--goo-theme-fg);
 	display: grid;
 	min-height: var(--goo-preview-height);
 	overflow: hidden;
@@ -36,10 +36,10 @@
 
 .goo-preview--background-checker::before {
 	background:
-		linear-gradient(45deg, color-mix(in srgb, var(--goo-theme-fg, #fff) 7%, transparent) 25%, transparent 25%),
-		linear-gradient(-45deg, color-mix(in srgb, var(--goo-theme-fg, #fff) 7%, transparent) 25%, transparent 25%),
-		linear-gradient(45deg, transparent 75%, color-mix(in srgb, var(--goo-theme-fg, #fff) 7%, transparent) 75%),
-		linear-gradient(-45deg, transparent 75%, color-mix(in srgb, var(--goo-theme-fg, #fff) 7%, transparent) 75%);
+		linear-gradient(45deg, color-mix(in srgb, var(--goo-theme-fg) 7%, transparent) 25%, transparent 25%),
+		linear-gradient(-45deg, color-mix(in srgb, var(--goo-theme-fg) 7%, transparent) 25%, transparent 25%),
+		linear-gradient(45deg, transparent 75%, color-mix(in srgb, var(--goo-theme-fg) 7%, transparent) 75%),
+		linear-gradient(-45deg, transparent 75%, color-mix(in srgb, var(--goo-theme-fg) 7%, transparent) 75%);
 	background-position: 0 0, 0 6px, 6px -6px, -6px 0;
 	background-size: 12px 12px;
 }
@@ -50,7 +50,7 @@
 
 .goo-preview--sm {
 	--goo-preview-height: 2rem;
-	--goo-preview-radius: var(--goo-theme-radius-sm, 0.25rem);
+	--goo-preview-radius: var(--goo-theme-radius-sm);
 }
 
 .goo-preview--md {
@@ -88,30 +88,30 @@
 
 .goo-preview__badge {
 	background: var(--goo-preview-badge-bg);
-	border-radius: var(--goo-theme-radius-full, 9999px);
-	bottom: var(--goo-theme-space-sm, 0.5rem);
+	border-radius: var(--goo-theme-radius-full);
+	bottom: var(--goo-theme-space-sm);
 	color: var(--goo-preview-badge-fg);
-	font-family: var(--goo-theme-font-mono, ui-monospace, monospace);
-	font-size: 0.6875rem;
+	font-family: var(--goo-theme-font-mono);
+	font-size: var(--goo-theme-font-size-xs);
 	line-height: 1.2;
 	padding: 0.125rem 0.4375rem;
 	pointer-events: none;
 	position: absolute;
-	right: var(--goo-theme-space-sm, 0.5rem);
+	right: var(--goo-theme-space-sm);
 	white-space: nowrap;
 	z-index: 2;
 }
 
 .goo-preview__title {
-	bottom: var(--goo-theme-space-sm, 0.5rem);
-	color: var(--goo-theme-muted, rgba(255, 255, 255, 0.65));
-	font-size: var(--goo-theme-font-size-xs, 0.75rem);
-	left: var(--goo-theme-space-sm, 0.5rem);
+	bottom: var(--goo-theme-space-sm);
+	color: var(--goo-theme-muted);
+	font-size: var(--goo-theme-font-size-xs);
+	left: var(--goo-theme-space-sm);
 	line-height: 1.2;
 	overflow: hidden;
 	pointer-events: none;
 	position: absolute;
-	right: var(--goo-theme-space-sm, 0.5rem);
+	right: var(--goo-theme-space-sm);
 	text-overflow: ellipsis;
 	white-space: nowrap;
 	z-index: 2;

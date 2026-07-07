@@ -24,6 +24,7 @@ import './GooXyPad.css'
 import { onDestroy } from 'svelte'
 
 import GooNumber from '../input/GooNumber.svelte'
+import { containKeyboardEvent } from '../support/keyboard/_keyboardActivation.ts'
 import { clamp, roundToStep } from '../support/utils/numberUtils.ts'
 import { createPointerDrag, type GooPointerDragEvent, type GooPointerDragHandle } from '../support/utils/pointerDrag.ts'
 import type { GooXyPadElement, GooXyPadEventData, GooXyPadProps, GooXyPadValue } from './types.ts'
@@ -221,7 +222,7 @@ function handleKeydown(event: KeyboardEvent): void {
 	if (event.key === 'ArrowUp') nextValue = { ...latestValue, y: latestValue.y + delta }
 	if (event.key === 'Home') nextValue = { x: centerValue, y: centerValue }
 	if (!nextValue) return
-	event.preventDefault()
+	containKeyboardEvent(event)
 	updateValue(nextValue, 'change', event)
 }
 
@@ -344,7 +345,7 @@ function syncBoundValue(nextValue: GooXyPadValue): void {
 		aria-valuetext={`X ${ currentValue.x }, Y ${ currentValue.y }`}
 		role="slider"
 		style={`--goo-xy-pad-dot-x: ${ xPct }%; --goo-xy-pad-dot-y: ${ yPct }%;`}
-		onkeydown={handleKeydown}
+		onkeydowncapture={handleKeydown}
 	>
 		<span class="goo-xy-pad__dot" aria-hidden="true"></span>
 	</button>

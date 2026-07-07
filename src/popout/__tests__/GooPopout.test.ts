@@ -28,6 +28,35 @@ describe('GooPopout', () => {
 		target.remove()
 	})
 
+	it('uses explicit accessible label references when provided', () => {
+		const target = document.createElement('button')
+		const title = document.createElement('h2')
+		const description = document.createElement('p')
+		const content = document.createElement('div')
+		title.id = 'popout-title'
+		description.id = 'popout-description'
+		content.append(title, description)
+		document.body.appendChild(target)
+		const instance = createGooPopout({
+			at: target,
+			content,
+			ariaLabel: 'Fallback label',
+			ariaLabelledby: 'popout-title',
+			ariaDescribedby: 'popout-description',
+			openImmediately: false
+		})
+
+		instance.open()
+
+		const popout = document.querySelector<HTMLElement>('.goo-popout')!
+		expect(popout.getAttribute('aria-labelledby')).toBe('popout-title')
+		expect(popout.getAttribute('aria-describedby')).toBe('popout-description')
+		expect(popout.hasAttribute('aria-label')).toBe(false)
+
+		instance.destroy()
+		target.remove()
+	})
+
 	it('positions after opening content settles', async() => {
 		const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect
 		const target = document.createElement('button')
@@ -164,6 +193,47 @@ describe('GooPopout', () => {
 			expect(Number.parseFloat(popout.style.left)).toBe(140)
 			expect(Number.parseFloat(popout.style.top)).toBe(20)
 		})
+	})
+
+	it('reports the resolved arrow side after avoid rectangles move placement sideways', async() => {
+		const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect
+		const target = document.createElement('button')
+		const content = document.createElement('div')
+
+		document.body.appendChild(target)
+		HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
+			if (this === document.documentElement) return rect(0, 0, 420, 240)
+			if (this === target) return rect(210, 100, 0, 0)
+			if (this.classList.contains('goo-popout')) return rect(0, 0, 90, 60)
+			return originalGetBoundingClientRect.call(this)
+		}
+
+		try {
+			const instance = createGooPopout({
+				at: {
+					avoidRects: [ { bottom: 240, left: 120, right: 220, top: 0 } ],
+					point: { x: 210, y: 100 }
+				},
+				content: content,
+				align: 'top left to bottom left',
+				offset: { x: 0, y: 4 },
+				keepWithin: { element: document.documentElement, margin: 12 },
+				openImmediately: false
+			})
+
+			await instance.open()
+
+			const popout = document.querySelector<HTMLElement>('.goo-popout')!
+			expect(Number.parseFloat(popout.style.left)).toBe(220)
+			expect(Number.parseFloat(popout.style.top)).toBe(104)
+			expect(instance.position?.arrowPosition).toBe('left')
+			expect(document.querySelector('.goo-popout__arrow')?.classList.contains('left')).toBe(true)
+
+			await instance.destroy()
+		} finally {
+			target.remove()
+			HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect
+		}
 	})
 
 	it('clears avoid rectangles when updating to an anchor without them', async() => {
@@ -328,6 +398,43 @@ describe('GooPopout', () => {
 		expect(instance.isOpen()).toBe(false)
 
 		target.remove()
+	})
+
+	it('closes on Escape before opening layout settles without owning focus', async() => {
+		const target = document.createElement('button')
+		const content = document.createElement('div')
+		document.body.appendChild(target)
+		target.focus()
+		const instance = createGooPopout({
+			at: target,
+			content,
+			initialFocus: 'none',
+			openImmediately: false
+		})
+		const leakedKeydown = vi.fn()
+
+		try {
+			const openPromise = instance.open()
+			document.addEventListener('keydown', leakedKeydown)
+			const escape = new KeyboardEvent('keydown', {
+				bubbles: true,
+				cancelable: true,
+				key: 'Escape'
+			})
+			document.dispatchEvent(escape)
+			await openPromise
+			await delay(180)
+
+			expect(escape.defaultPrevented).toBe(true)
+			expect(leakedKeydown).not.toHaveBeenCalled()
+			expect(instance.isOpen()).toBe(false)
+			expect(document.querySelector('.goo-popout')).toBeNull()
+			expect(document.activeElement).toBe(target)
+		} finally {
+			document.removeEventListener('keydown', leakedKeydown)
+			await instance.destroy()
+			target.remove()
+		}
 	})
 
 	it('binds the Svelte component instance for imperative control', async() => {

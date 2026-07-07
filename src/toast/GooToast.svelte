@@ -93,6 +93,7 @@ const progressPercent = $derived(
 	class="goo-toast goo-toast--{ toast.variant } { className }"
 	role={isUrgent ? 'alert' : 'status'}
 	aria-live={isUrgent ? 'assertive' : 'polite'}
+	aria-atomic="true"
 	onmouseenter={pause}
 	onmouseleave={resume}
 	onfocusin={pause}

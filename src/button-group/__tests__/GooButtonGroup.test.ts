@@ -46,6 +46,30 @@ describe('GooButtonGroup', () => {
 		expect(container.querySelector('.goo-button[data-key="right"]')?.classList.contains('goo-button--selected')).toBe(true)
 	})
 
+	it('keeps disabled options visible but unavailable', async() => {
+		const onchange = vi.fn()
+		const { container } = render(GooButtonGroup, {
+			props: {
+				onchange,
+				options: [
+					{ key: 'previous', value: 'Previous', disabled: true },
+					{ key: 'next', value: 'Next' }
+				]
+			}
+		})
+		const previous = container.querySelector<HTMLButtonElement>('.goo-button[data-key="previous"]')!
+		const next = container.querySelector<HTMLButtonElement>('.goo-button[data-key="next"]')!
+
+		expect(previous.disabled).toBe(true)
+		expect(previous.classList.contains('goo-button--disabled')).toBe(true)
+		expect(previous.getAttribute('tabindex')).toBe('-1')
+		expect(next.getAttribute('tabindex')).toBe('0')
+
+		await fireEvent.click(previous)
+
+		expect(onchange).not.toHaveBeenCalled()
+	})
+
 	it('exposes selected index CSS variables for animated single selection', async() => {
 		const { container } = render(GooButtonGroup, {
 			props: {
@@ -133,5 +157,135 @@ describe('GooButtonGroup', () => {
 		expect(right.getAttribute('tabindex')).toBe('0')
 		expect(right.classList.contains('goo-button--selected')).toBe(true)
 		expect(onchange).toHaveBeenCalledExactlyOnceWith('right')
+	})
+
+	it('wraps horizontal keyboard navigation at both boundaries', async() => {
+		const onchange = vi.fn()
+		const { container } = render(GooButtonGroup, {
+			props: {
+				value: 'right',
+				onchange,
+				options: [
+					{ key: 'left', value: 'Left' },
+					{ key: 'center', value: 'Center' },
+					{ key: 'right', value: 'Right' }
+				]
+			}
+		})
+		const left = container.querySelector<HTMLButtonElement>('.goo-button[data-key="left"]')!
+		const right = container.querySelector<HTMLButtonElement>('.goo-button[data-key="right"]')!
+
+		right.focus()
+		await fireEvent.keyDown(right, { key: 'ArrowRight' })
+		await Promise.resolve()
+
+		expect(document.activeElement).toBe(left)
+		expect(left.classList.contains('goo-button--selected')).toBe(true)
+		expect(onchange).toHaveBeenLastCalledWith('left')
+
+		await fireEvent.keyDown(left, { key: 'ArrowLeft' })
+		await Promise.resolve()
+
+		expect(document.activeElement).toBe(right)
+		expect(right.classList.contains('goo-button--selected')).toBe(true)
+		expect(onchange).toHaveBeenLastCalledWith('right')
+	})
+
+	it('uses vertical arrows for vertical groups and leaves horizontal arrows untouched', async() => {
+		const parentKeydown = vi.fn()
+		const { container } = render(GooButtonGroup, {
+			props: {
+				value: 'center',
+				layout: 'vertical',
+				options: [
+					{ key: 'left', value: 'Left' },
+					{ key: 'center', value: 'Center' },
+					{ key: 'right', value: 'Right' }
+				]
+			}
+		})
+		const left = container.querySelector<HTMLButtonElement>('.goo-button[data-key="left"]')!
+		const center = container.querySelector<HTMLButtonElement>('.goo-button[data-key="center"]')!
+		container.addEventListener('keydown', parentKeydown)
+
+		center.focus()
+		await fireEvent.keyDown(center, { key: 'ArrowUp' })
+		await Promise.resolve()
+
+		expect(document.activeElement).toBe(left)
+		expect(left.classList.contains('goo-button--selected')).toBe(true)
+		expect(parentKeydown).not.toHaveBeenCalled()
+
+		const event = new KeyboardEvent('keydown', {
+			bubbles: true,
+			cancelable: true,
+			key: 'ArrowRight'
+		})
+		left.dispatchEvent(event)
+		await Promise.resolve()
+
+		expect(event.defaultPrevented).toBe(false)
+		expect(parentKeydown).toHaveBeenCalledExactlyOnceWith(expect.any(KeyboardEvent))
+		expect(document.activeElement).toBe(left)
+	})
+
+	it('moves focus without changing selection in multi-select groups', async() => {
+		const onchange = vi.fn()
+		const { container } = render(GooButtonGroup, {
+			props: {
+				allowMultiple: true,
+				value: [ 'bold' ],
+				onchange,
+				options: [
+					{ key: 'bold', value: 'Bold' },
+					{ key: 'italic', value: 'Italic' }
+				]
+			}
+		})
+		const bold = container.querySelector<HTMLButtonElement>('.goo-button[data-key="bold"]')!
+		const italic = container.querySelector<HTMLButtonElement>('.goo-button[data-key="italic"]')!
+
+		bold.focus()
+		await fireEvent.keyDown(bold, { key: 'ArrowRight' })
+		await Promise.resolve()
+
+		expect(document.activeElement).toBe(italic)
+		expect(bold.classList.contains('goo-button--selected')).toBe(true)
+		expect(italic.classList.contains('goo-button--selected')).toBe(false)
+		expect(bold.getAttribute('tabindex')).toBe('-1')
+		expect(italic.getAttribute('tabindex')).toBe('0')
+		expect(onchange).not.toHaveBeenCalled()
+	})
+
+	it('selects the focused button from activation aliases and contains handled keys', async() => {
+		const onchange = vi.fn()
+		const { container } = render(GooButtonGroup, {
+			props: {
+				value: 'left',
+				onchange,
+				allowMultiple: true,
+				options: [
+					{ key: 'left', value: 'Left' },
+					{ key: 'right', value: 'Right' }
+				]
+			}
+		})
+		const left = container.querySelector<HTMLButtonElement>('.goo-button[data-key="left"]')!
+		const parentKeydown = vi.fn()
+		container.addEventListener('keydown', parentKeydown)
+
+		left.focus()
+		const event = new KeyboardEvent('keydown', {
+			bubbles: true,
+			cancelable: true,
+			key: 'Spacebar'
+		})
+		left.dispatchEvent(event)
+		await Promise.resolve()
+
+		expect(event.defaultPrevented).toBe(true)
+		expect(parentKeydown).not.toHaveBeenCalled()
+		expect(onchange).toHaveBeenCalledExactlyOnceWith([])
+		expect(left.classList.contains('goo-button--selected')).toBe(false)
 	})
 })

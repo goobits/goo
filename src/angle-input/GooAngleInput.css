@@ -5,31 +5,32 @@
  */
 
 .goo-angle-input {
-	--goo-angle-bg: var(
-		--goo-theme-border,
-		color-mix(in srgb, var(--goo-theme-fg, #fff) 10%, transparent)
-	);
-	--goo-angle-fg: var(--goo-theme-fg, rgba(255, 255, 255, 0.9));
-	--goo-angle-input-bg: var(
-		--goo-theme-surface-sunken,
-		color-mix(in srgb, var(--goo-theme-fg, #fff) 5%, transparent)
-	);
-	--goo-angle-border: var(--goo-theme-border, rgba(128, 128, 128, 0.3));
-	--goo-angle-track-size: var(--goo-angle-input-size, var(--goo-theme-control-height-md, 2rem));
+	--goo-angle-bg: var(--goo-theme-border);
+	--goo-angle-fg: var(--goo-theme-fg);
+	--goo-angle-input-bg: var(--goo-theme-surface-sunken);
+	--goo-angle-border: var(--goo-theme-border);
+	--goo-angle-border-width: 1px;
+	--goo-angle-center-dot-size: calc(var(--goo-theme-space-xs) + var(--goo-theme-space-2xs) * 0.5);
+	--goo-angle-focus-ring-size: var(--goo-theme-space-2xs);
+	--goo-angle-handle-height: var(--goo-theme-space-lg);
+	--goo-angle-handle-width: calc(var(--goo-theme-space-2xs) * 0.5);
+	--goo-angle-inline-size: calc(var(--goo-theme-control-height-lg) * 5);
+	--goo-angle-track-size: var(--goo-angle-input-size, var(--goo-theme-control-height-md));
+	--goo-angle-track-z-index: 1;
 
 	align-items: center;
 	display: flex;
 	justify-content: flex-start;
 	position: relative;
-	width: 200px;
+	width: var(--goo-angle-inline-size);
 }
 
 /* Circular dial/track - positioned absolutely inside the input */
 .goo-angle-input__track {
 	background: var(--goo-angle-bg);
-	border-radius: 50%;
+	border-radius: var(--goo-theme-radius-full);
 	border: 0;
-	border-right: 1px solid var(--goo-angle-border);
+	border-right: var(--goo-angle-border-width) solid var(--goo-angle-border);
 	cursor: grab;
 	display: block;
 	height: var(--goo-angle-track-size);
@@ -37,7 +38,7 @@
 	position: absolute;
 	left: 0;
 	padding: 0;
-	z-index: 10; /* Higher than number input to ensure track receives clicks */
+	z-index: var(--goo-angle-track-z-index); /* Higher than number input to ensure track receives clicks */
 }
 
 .goo-angle-input__track:active {
@@ -45,7 +46,7 @@
 }
 
 .goo-angle-input__track:focus-visible {
-	box-shadow: 0 0 0 2px var(--goo-theme-focus-ring, var(--goo-theme-accent, #3b82f6));
+	box-shadow: 0 0 0 var(--goo-angle-focus-ring-size) var(--goo-theme-focus-ring);
 	outline: none;
 }
 
@@ -53,12 +54,13 @@
 .goo-angle-input__track::after {
 	content: '';
 	background: var(--goo-angle-fg);
-	border-radius: 50%;
-	height: 5px;
-	width: 5px;
+	border-radius: var(--goo-theme-radius-full);
+	height: var(--goo-angle-center-dot-size);
+	width: var(--goo-angle-center-dot-size);
 	position: absolute;
-	left: calc(50% - 2.5px);
-	top: calc(50% - 2.5px);
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
 	z-index: 2;
 }
 
@@ -67,15 +69,15 @@
    `is-dragging` class on the track disables the transition for 1:1 drag feel. */
 .goo-angle-input__handle {
 	display: block;
-	width: 1px;
-	height: 16px;
+	width: var(--goo-angle-handle-width);
+	height: var(--goo-angle-handle-height);
 	background: var(--goo-angle-fg);
 	position: absolute;
-	left: calc(50% - 0.5px);
+	left: calc(50% - var(--goo-angle-handle-width) * 0.5);
 	top: 50%;
 	transform: rotate(180deg);
-	transform-origin: 0.5px 0;
-	transition: transform var(--goo-theme-transition-normal, 0.2s ease);
+	transform-origin: calc(var(--goo-angle-handle-width) * 0.5) 0;
+	transition: transform var(--goo-theme-transition-normal);
 }
 
 .goo-angle-input__track.is-dragging .goo-angle-input__handle {
@@ -84,7 +86,7 @@
 
 /* Number input wrapper - rounded left edge wraps around dial */
 .goo-angle-input .goo-number {
-	--goo-number-arrows-width: 0px;
+	--goo-number-arrows-width: 0;
 
 	align-items: center;
 	box-shadow: inset 0 0 0 1px var(--goo-angle-border);
@@ -114,7 +116,7 @@
 	inline-size: auto;
 	min-inline-size: 1ch;
 	max-inline-size: 4ch;
-	padding: 0 0 0 0.5rem;
+	padding: 0 0 0 var(--goo-theme-space-sm);
 	text-align: left;
 	z-index: -1;
 }
@@ -123,7 +125,11 @@
 	position: static;
 	width: auto;
 	height: auto;
-	padding: 0 0.35rem 0 0.1rem;
+	padding:
+		0
+		calc(var(--goo-theme-space-xs) + var(--goo-theme-space-2xs) * 0.8)
+		0
+		calc(var(--goo-theme-space-2xs) * 0.8);
 }
 
 /* Disabled state */

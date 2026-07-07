@@ -19,11 +19,15 @@ export const controlSchema: SvelteControlSchema = {
 import '../button/GooButton.css'
 import './GooButtonGroup.css'
 
+import { handleLinearNavigationKeyboardEvent } from '../support/keyboard/_composite.ts'
 import {
 	normalizeButtonGroupOptions,
 	normalizeButtonGroupValue,
 	readButtonGroupValue
 } from './_model.ts'
+import {
+	handleKeyboardActivation
+} from '../support/keyboard/_keyboardActivation.ts'
 import type { GooButtonGroupProps, NormalizedButtonGroupOption } from './types.ts'
 
 let groupElement: HTMLDivElement | undefined = $state()
@@ -117,56 +121,29 @@ function handleGroupClick(event: MouseEvent): void {
 }
 
 function handleGroupKeydown(event: KeyboardEvent): void {
-	if (disabled) return
+	if (disabled || !groupElement) return
 
-	switch (event.key) {
-		case 'ArrowLeft':
-			if (layout !== 'vertical') {
-				event.preventDefault()
-				navigateButton(-1)
-			}
-			break
-		case 'ArrowRight':
-			if (layout !== 'vertical') {
-				event.preventDefault()
-				navigateButton(1)
-			}
-			break
-		case 'ArrowUp':
-			if (layout === 'vertical') {
-				event.preventDefault()
-				navigateButton(-1)
-			}
-			break
-		case 'ArrowDown':
-			if (layout === 'vertical') {
-				event.preventDefault()
-				navigateButton(1)
-			}
-			break
-		case 'Enter':
-		case ' ':
-			event.preventDefault()
-			if (focusedKey) {
-				selectKey(focusedKey, { emit: true })
-			}
-			break
+	if (handleKeyboardActivation(event, () => {
+		const button = getKeyboardButton(event)
+		if (button) {
+			selectKey(readButtonKey(button), { emit: true })
+		}
+	})) {
+		return
 	}
-}
 
-function navigateButton(direction: number): void {
-	const keys = getSelectableKeys()
-	if (keys.length === 0) return
-
-	const currentIndex = Math.max(0, keys.indexOf(focusedKey ?? keys[0]))
-	const nextKey = keys[currentIndex + direction]
-	if (!nextKey) return
-
-	focusedKey = nextKey
-	if (!allowMultiple) {
-		selectKey(nextKey, { emit: true })
-	}
-	void Promise.resolve().then(() => focusButton(nextKey))
+	handleLinearNavigationKeyboardEvent(event, groupElement, {
+		activeItem: getFocusedButton(),
+		itemSelector: ':scope > .goo-button',
+		orientation: layout === 'vertical' ? 'vertical' : 'horizontal',
+		activate: item => {
+			const nextKey = readButtonKey(item as HTMLButtonElement)
+			focusedKey = nextKey
+			if (!allowMultiple) {
+				selectKey(nextKey, { emit: true })
+			}
+		}
+	})
 }
 
 function selectKey(key: string, { emit }: { emit: boolean }): void {
@@ -207,13 +184,15 @@ function getOptionButtonClass(option: NormalizedButtonGroupOption): string {
 	const values = [ 'goo-button' ]
 	if (isSelected(option.key)) values.push('goo-button--selected')
 	if (focusedKey === option.key) values.push('goo-button--focused')
-	if (disabled) values.push('goo-button--disabled')
+	if (disabled || option.disabled) values.push('goo-button--disabled')
 	if (option.hideLabel) values.push('goo-button--icon-only')
 	if (option.className) values.push(...option.className.split(' ').filter(Boolean))
 	return values.join(' ')
 }
 
 function getButtonTabIndex(key: string): number {
+	const option = normalizedOptions.find(item => item.key === key)
+	if (option?.disabled) return -1
 	if (disabled) return -1
 	return focusedKey === key ? tabIndex : -1
 }
@@ -225,7 +204,9 @@ function getPreferredFocusKey(nextSelected: Set<string>): string | null {
 
 function getSelectableKeys(): string[] {
 	if (normalizedOptions.length > 0) {
-		return normalizedOptions.map(option => option.key)
+		return normalizedOptions
+			.filter(option => !option.disabled)
+			.map(option => option.key)
 	}
 
 	return getChildButtons().map(readButtonKey)
@@ -250,10 +231,6 @@ function getChildButtons(): HTMLButtonElement[] {
 	return Array.from(groupElement?.querySelectorAll<HTMLButtonElement>(':scope > .goo-button') ?? [])
 }
 
-function focusButton(key: string): void {
-	getChildButtons().find(button => readButtonKey(button) === key)?.focus()
-}
-
 function getEventButton(event: MouseEvent): HTMLButtonElement | null {
 	const target = event.target
 	if (!(target instanceof Element)) return null
@@ -261,6 +238,26 @@ function getEventButton(event: MouseEvent): HTMLButtonElement | null {
 	const button = target.closest<HTMLButtonElement>('.goo-button')
 	if (!button || button.parentElement !== groupElement || button.disabled) return null
 	return button
+}
+
+function getKeyboardButton(event: KeyboardEvent): HTMLButtonElement | null {
+	const target = event.target instanceof Element ? event.target : null
+	const button = target?.closest<HTMLButtonElement>('.goo-button')
+	if (button && button.parentElement === groupElement && !button.disabled) {
+		return button
+	}
+	return getFocusedButton()
+}
+
+function getFocusedButton(): HTMLButtonElement | null {
+	const active = document.activeElement
+	if (active instanceof HTMLButtonElement && active.parentElement === groupElement && !active.disabled) {
+		return active
+	}
+	if (!focusedKey) {
+		return null
+	}
+	return getChildButtons().find(button => readButtonKey(button) === focusedKey) ?? null
 }
 
 function readButtonKey(button: HTMLButtonElement): string {
@@ -300,7 +297,7 @@ function mountIcon(node: HTMLSpanElement, iconFactory: () => Element) {
 	aria-disabled={disabled ? 'true' : undefined}
 	style={rootStyle || undefined}
 	onclick={handleGroupClick}
-	onkeydown={handleGroupKeydown}
+	onkeydowncapture={handleGroupKeydown}
 >
 	{#if normalizedOptions.length > 0}
 		{#each normalizedOptions as option (option.key)}
@@ -309,8 +306,8 @@ function mountIcon(node: HTMLSpanElement, iconFactory: () => Element) {
 				class={getOptionButtonClass(option)}
 				data-key={option.key}
 				tabindex={getButtonTabIndex(option.key)}
-				disabled={disabled ? true : undefined}
-				aria-disabled={disabled ? 'true' : undefined}
+				disabled={disabled || option.disabled ? true : undefined}
+				aria-disabled={disabled || option.disabled ? 'true' : undefined}
 				aria-label={option.ariaLabel || option.tooltip || option.value || undefined}
 				aria-pressed={isSelected(option.key)}
 				title={option.tooltip || undefined}

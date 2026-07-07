@@ -16,6 +16,7 @@ export const controlSchema: SvelteControlSchema = {
 import { untrack } from 'svelte'
 import './GooRadioGroup.css'
 import GooRadio from './GooRadio.svelte'
+import { containKeyboardEvent } from '../support/keyboard/_keyboardActivation.ts'
 import { normalizeRadioOptions } from './_model.ts'
 import type { GooRadioGroupProps } from './types.ts'
 
@@ -149,7 +150,7 @@ function handleKeydown(event: KeyboardEvent): void {
 	if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') direction = -1
 	if (event.key === 'ArrowDown' || event.key === 'ArrowRight') direction = 1
 	if (!direction) return
-	event.preventDefault()
+	containKeyboardEvent(event)
 	const focusedIndex = radios.findIndex(radio => radio === document.activeElement)
 	const checkedIndex = radios.findIndex(radio => radio.checked)
 	const currentIndex = Math.max(0, focusedIndex >= 0 ? focusedIndex : checkedIndex)
@@ -175,7 +176,7 @@ function getRadioTabIndex(nextValue: string): number {
 	data-layout={layout}
 	{...hostAttributes}
 	onchange={handleChange}
-	onkeydown={handleKeydown}
+	onkeydowncapture={handleKeydown}
 >
 	<div class="goo-radio-group__options">
 		{#if children}

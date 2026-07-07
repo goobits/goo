@@ -75,8 +75,9 @@ export function createInputField<T = string>(
 		if (instance) {
 			unmount(instance)
 			instance = null
+		} else {
+			field.replaceChildren()
 		}
-		field.replaceChildren()
 	}
 
 	function render(): void {
@@ -122,7 +123,7 @@ export function createInputField<T = string>(
 		}
 	})
 	field.getValue = () => currentValue
-	field.setValue = (value) => {
+	field.setValue = value => {
 		if (destroyed) return
 		currentValue = value
 		if (instance?.setValue) {
@@ -154,8 +155,9 @@ export function createNumberField(options: NumberInputFieldOptions = {}): Number
 		if (instance) {
 			unmount(instance)
 			instance = null
+		} else {
+			field.replaceChildren()
 		}
-		field.replaceChildren()
 	}
 
 	function render(): void {
@@ -200,7 +202,7 @@ export function createNumberField(options: NumberInputFieldOptions = {}): Number
 		}
 	})
 	field.getValue = () => currentValue
-	field.setValue = (value) => {
+	field.setValue = value => {
 		if (destroyed) return
 		currentValue = Number(value)
 		if (instance?.setValue) {

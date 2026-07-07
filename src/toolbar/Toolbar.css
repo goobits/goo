@@ -1,4 +1,11 @@
 .goo-floating-toolbar {
+	--goo-floating-toolbar-icon-size: var(--goo-theme-icon-lg);
+	--goo-floating-toolbar-tool-size: var(--goo-theme-control-height-touch);
+	--goo-floating-toolbar-width: calc(
+		var(--goo-theme-control-height-touch) + var(--goo-theme-space-sm) + var(--goo-theme-space-2xs)
+	);
+	--goo-floating-toolbar-z-index: var(--goo-theme-layer-dropdown);
+
 	-webkit-touch-callout: none;
 	backdrop-filter: blur(18px) saturate(1.35);
 	background: color-mix(in srgb, var(--goo-theme-bg) 82%, transparent);
@@ -22,8 +29,8 @@
 	text-align: center;
 	top: 0;
 	user-select: none;
-	width: 54px;
-	z-index: 101;
+	width: var(--goo-floating-toolbar-width);
+	z-index: var(--goo-floating-toolbar-z-index);
 }
 
 [dir='rtl'] .goo-floating-toolbar {
@@ -53,9 +60,9 @@
 	color: inherit;
 	cursor: pointer;
 	display: block;
-	font-size: var(--goo-theme-icon-lg);
-	height: 44px;
-	line-height: 44px !important;
+	font-size: var(--goo-floating-toolbar-icon-size);
+	height: var(--goo-floating-toolbar-tool-size);
+	line-height: var(--goo-floating-toolbar-tool-size) !important;
 	margin: 0;
 	position: relative;
 	transition:
@@ -84,16 +91,16 @@
 }
 
 .goo-floating-toolbar__tool svg {
-	height: var(--goo-theme-icon-lg);
+	height: var(--goo-floating-toolbar-icon-size);
 	pointer-events: none;
 	stroke-width: 2.25;
 	transform: none;
-	width: var(--goo-theme-icon-lg);
+	width: var(--goo-floating-toolbar-icon-size);
 }
 
 .goo-floating-toolbar__glyph {
-	font-size: 0.7rem;
-	font-weight: 700;
+	font-size: var(--goo-theme-font-size-xs);
+	font-weight: var(--goo-theme-font-weight-bold);
 	letter-spacing: 0;
 	line-height: 1;
 }
@@ -145,7 +152,7 @@
 	display: inline-flex;
 	gap: var(--goo-theme-space-sm);
 	justify-content: center;
-	min-height: 2.25rem;
+	min-height: var(--goo-theme-control-height-lg);
 	padding: var(--goo-theme-space-xs) var(--goo-theme-space-sm);
 }
 

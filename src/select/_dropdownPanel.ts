@@ -6,7 +6,7 @@
 import { findOptionById } from './_normalizeOptions.ts'
 import { SubmenuPopoutController } from './_submenuPopout.ts'
 import { createIcon, createShortcut, evaluate } from './selectDom.ts'
-import type { GooSelectOption } from './types.ts'
+import type { GooSelectDropdownSemantics, GooSelectOption } from './types.ts'
 
 // ============================================================================
 // Constants
@@ -14,6 +14,12 @@ import type { GooSelectOption } from './types.ts'
 
 const SUBMENU_DELAY = 250
 const TYPEAHEAD_TIMEOUT = 750
+const DEFAULT_DROPDOWN_SEMANTICS: GooSelectDropdownSemantics = {
+	containerRole: 'listbox',
+	optionRole: 'option',
+	popupRole: 'listbox',
+	usesSelectedState: true
+}
 
 /** Monotonic counter giving each panel instance a unique id namespace for ARIA wiring. */
 let panelInstanceCount = 0
@@ -28,6 +34,9 @@ type OptionElement = HTMLElement
  * Context provided by GooSelect to the panel.
  */
 export interface DropdownPanelContext {
+	/** ARIA semantics for the rendered dropdown. */
+	semantics?: GooSelectDropdownSemantics
+
 	/** Whether to show current-value checkmarks. */
 	showSelectionIndicator: boolean
 
@@ -78,15 +87,16 @@ export class DropdownPanel {
 		this.#scheduleSubmenuClose(event.relatedTarget)
 
 	constructor(ctx: DropdownPanelContext) {
-		this.#ctx = ctx
-		this.listboxId = `${ this.#instanceId }-listbox`
+		this.#ctx = this.#normalizeContext(ctx)
+		this.listboxId = `${ this.#instanceId }-${ this.#semantics.containerRole }`
 		this.$container = document.createElement('div')
 		this.$container.className = 'goo-select__options'
 		this.$container.id = this.listboxId
-		this.$container.setAttribute('role', 'listbox')
+		this.$container.setAttribute('role', this.#semantics.containerRole)
 		this.$container.setAttribute('tabindex', '-1')
 		this.#submenuPopout = new SubmenuPopoutController(
 			(options, container) => this.#renderOptionsList(options, container),
+			() => this.#semantics.containerRole,
 			{
 				onMouseEnter: () => this.#cancelSubmenuTimer(),
 				onMouseLeave: event => this.#scheduleSubmenuClose(event.relatedTarget)
@@ -106,6 +116,8 @@ export class DropdownPanel {
 	 */
 	updateContext(ctx: Partial<DropdownPanelContext>) {
 		Object.assign(this.#ctx, ctx)
+		this.#ctx.semantics = this.#normalizeSemantics(this.#ctx.semantics)
+		this.$container.setAttribute('role', this.#semantics.containerRole)
 	}
 
 	/**
@@ -146,7 +158,9 @@ export class DropdownPanel {
 		const $item = this.getOptionElementById(id)
 		if ($item) {
 			$item.classList.add('goo-select__option--hovered')
-			$item.scrollIntoView({ block: 'nearest' })
+			if (typeof $item.scrollIntoView === 'function') {
+				$item.scrollIntoView({ block: 'nearest' })
+			}
 			this.$container.setAttribute('aria-activedescendant', $item.id)
 		} else {
 			this.$container.removeAttribute('aria-activedescendant')
@@ -184,6 +198,18 @@ export class DropdownPanel {
 	}
 
 	/**
+	 * Navigate directly to the first or last option.
+	 * @param boundary - Target menu boundary.
+	 */
+	navigateToBoundary(boundary: 'first' | 'last') {
+		const items = this.getNavigableOptions()
+		if (!items.length) return
+
+		const item = boundary === 'first' ? items[0] : items[items.length - 1]
+		this.setHovered(item.dataset.id!)
+	}
+
+	/**
 	 * Update selection visual (checkmark) to a new option.
 	 * @param id - id.
 	 */
@@ -192,7 +218,9 @@ export class DropdownPanel {
 		const $prev = this.$container.querySelector('.goo-select__option--selected')
 		if ($prev) {
 			$prev.classList.remove('goo-select__option--selected')
-			$prev.setAttribute('aria-selected', 'false')
+			if (this.#semantics.usesSelectedState) {
+				$prev.setAttribute('aria-selected', 'false')
+			}
 			const $check = $prev.querySelector('.goo-select__check')
 			if ($check) $check.innerHTML = ''
 		}
@@ -201,7 +229,9 @@ export class DropdownPanel {
 		const $item = this.getOptionElementById(id)
 		if ($item) {
 			$item.classList.add('goo-select__option--selected')
-			$item.setAttribute('aria-selected', 'true')
+			if (this.#semantics.usesSelectedState) {
+				$item.setAttribute('aria-selected', 'true')
+			}
 			const $check = $item.querySelector('.goo-select__check')
 			if ($check) {
 				$check.innerHTML =
@@ -413,6 +443,15 @@ export class DropdownPanel {
 	// --------------------------------------------------------------------------
 
 	#renderOptionsList(opts: GooSelectOption[], container: HTMLElement, depth = 0) {
+		for (const $item of this.#renderOptionElements(opts, depth)) {
+			container.appendChild($item)
+		}
+	}
+
+	#renderOptionElements(opts: GooSelectOption[], depth: number): HTMLElement[] {
+		const items: HTMLElement[] = []
+		let lastWasDivider = true
+
 		for (const opt of opts) {
 			// Check if supported
 			if (
@@ -423,12 +462,30 @@ export class DropdownPanel {
 			}
 
 			const $item = this.#renderOption(opt, depth)
-			if ($item) container.appendChild($item)
+			if (!$item) continue
+
+			const isDivider = $item.classList.contains('goo-select__divider')
+			if (isDivider) {
+				if (lastWasDivider) continue
+				items.push($item)
+				lastWasDivider = true
+				continue
+			}
+
+			items.push($item)
+			lastWasDivider = false
 		}
+
+		while (items.at(-1)?.classList.contains('goo-select__divider')) {
+			items.pop()
+		}
+
+		return items
 	}
 
 	#renderOption(opt: GooSelectOption, depth: number): HTMLElement | null {
 		const { showSelectionIndicator, value } = this.#ctx
+		const semantics = this.#semantics
 
 		// Divider
 		if (opt.type === 'divider') {
@@ -440,6 +497,9 @@ export class DropdownPanel {
 
 		// Option group
 		if (opt.type === 'optgroup') {
+			const childItems = this.#renderOptionElements(opt.options || [], depth + 1)
+			if (!childItems.some(item => this.#containsOptionRow(item))) return null
+
 			const $group = document.createElement('div')
 			$group.className = 'goo-select__optgroup'
 			$group.setAttribute('role', 'group')
@@ -449,7 +509,9 @@ export class DropdownPanel {
 			$label.textContent = evaluate(opt.label) as string
 			$group.appendChild($label)
 
-			this.#renderOptionsList(opt.options || [], $group, depth + 1)
+			for (const $item of childItems) {
+				$group.appendChild($item)
+			}
 			return $group
 		}
 
@@ -457,6 +519,7 @@ export class DropdownPanel {
 		const isDisabled = evaluate(opt.isDisabled, this.#ctx.getContext())
 		const isSelected = showSelectionIndicator && value === opt.id
 		const isSubmenu = opt.type === 'submenu'
+		if (isSubmenu && !this.#hasSupportedOptionRow(opt.options || [])) return null
 
 		const $item = document.createElement('div')
 		$item.className = [
@@ -464,14 +527,17 @@ export class DropdownPanel {
 			isDisabled ? 'goo-select__option--disabled' : '',
 			isSelected ? 'goo-select__option--selected' : '',
 			isSubmenu ? 'goo-select__option--submenu' : '',
-			opt.tone === 'danger' ? 'goo-select__option--danger' : ''
+			opt.tone === 'danger' ? 'goo-select__option--danger' : '',
+			opt.className ?? ''
 		]
 			.filter(Boolean)
 			.join(' ')
 		$item.id = `${ this.#instanceId }-opt-${ this.#optionSeq++ }`
-		$item.setAttribute('role', 'option')
+		$item.setAttribute('role', semantics.optionRole)
 		$item.setAttribute('data-id', opt.id!)
-		$item.setAttribute('aria-selected', String(isSelected))
+		if (semantics.usesSelectedState) {
+			$item.setAttribute('aria-selected', String(isSelected))
+		}
 		if (isDisabled) $item.setAttribute('aria-disabled', 'true')
 
 		// Selection checkmark
@@ -524,6 +590,8 @@ export class DropdownPanel {
 	}
 
 	#bindOptionEvents($item: HTMLElement, opt: GooSelectOption, isDisabled: boolean) {
+		let handledPointerSelection = false
+
 		// Hover (also handles drag-to-select hover)
 		$item.addEventListener('mouseenter', () => {
 			if (isDisabled) return
@@ -539,13 +607,26 @@ export class DropdownPanel {
 			$item.addEventListener('pointerup', event => {
 				if (event.button !== 0) return
 				event.preventDefault()
-				if (opt.type === 'submenu') {
-					this.#openSubmenuOption($item, opt)
+				handledPointerSelection = true
+				this.#chooseOption($item, opt)
+			})
+			$item.addEventListener('click', event => {
+				if (handledPointerSelection) {
+					handledPointerSelection = false
 					return
 				}
-				this.#ctx.onSelect(opt, $item)
+				event.preventDefault()
+				this.#chooseOption($item, opt)
 			})
 		}
+	}
+
+	#chooseOption($item: HTMLElement, opt: GooSelectOption): void {
+		if (opt.type === 'submenu') {
+			this.#openSubmenuOption($item, opt)
+			return
+		}
+		this.#ctx.onSelect(opt, $item)
 	}
 
 	#hoverOption($item: HTMLElement, opt: GooSelectOption): void {
@@ -602,8 +683,51 @@ export class DropdownPanel {
 		)
 	}
 
+	#containsOptionRow(item: HTMLElement): boolean {
+		return item.classList.contains('goo-select__option') ||
+			item.querySelector('.goo-select__option') !== null
+	}
+
+	#hasSupportedOptionRow(opts: GooSelectOption[]): boolean {
+		for (const opt of opts) {
+			if (
+				opt.isSupported !== undefined &&
+				!evaluate(opt.isSupported, this.#ctx.getContext())
+			) {
+				continue
+			}
+			if (opt.type === 'divider') continue
+			if (opt.type === 'optgroup' || opt.type === 'submenu') {
+				if (this.#hasSupportedOptionRow(opt.options || [])) return true
+				continue
+			}
+			return true
+		}
+		return false
+	}
+
 	#readOptionFromElement(item: HTMLElement): GooSelectOption | null {
 		const optionId = item.dataset.id
 		return optionId ? this.findOptionById(optionId) : null
+	}
+
+	get #semantics(): GooSelectDropdownSemantics {
+		return this.#normalizeSemantics(this.#ctx.semantics)
+	}
+
+	#normalizeContext(ctx: DropdownPanelContext): DropdownPanelContext {
+		return {
+			...ctx,
+			semantics: this.#normalizeSemantics(ctx.semantics)
+		}
+	}
+
+	#normalizeSemantics(
+		semantics: GooSelectDropdownSemantics | undefined
+	): GooSelectDropdownSemantics {
+		return {
+			...DEFAULT_DROPDOWN_SEMANTICS,
+			...semantics
+		}
 	}
 }

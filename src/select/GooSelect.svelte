@@ -24,6 +24,7 @@ import {
 	handleKeyboard,
 	handleTypeahead,
 	mapNativeKeyToCommand,
+	mapNativeTypeaheadKeyToCommand,
 	type GooSelectKeyboardHost
 } from './_keyboardHandler.ts'
 import { findOptionById, normalizeOptions } from './_normalizeOptions.ts'
@@ -54,6 +55,7 @@ const selectElement = $derived(selectRoot as GooSelectElement | undefined)
 let triggerElement: HTMLButtonElement | undefined = $state()
 let panel = $state<DropdownPanel | null>(null)
 let popout = $state<SelectPopout | null>(null)
+let opened = $state(false)
 let normalizedOptions: GooSelectOption[] = $state([])
 let selectedValue = $state('')
 let effectiveDisabled = $state(false)
@@ -93,9 +95,9 @@ let {
 	...rest
 }: GooSelectProps = $props()
 
-const opened = $derived(Boolean(popout?.isOpen()))
 const selectedOption = $derived(findOptionById(normalizedOptions, selectedValue))
 const selectMenu = $derived(normalizeSelectMenu(menu))
+const dropdownSemantics = $derived(selectMenu.semantics)
 const triggerLabel = $derived(getOptionLabel(selectedOption) || placeholder)
 const triggerAccessibleName = $derived(readTriggerAccessibleName())
 const showPlaceholder = $derived(!selectedOption)
@@ -165,6 +167,7 @@ $effect(() => () => {
 	selectLifecycleToken += 1
 	clearFocusFrame()
 	stopTriggerPointerSelection()
+	opened = false
 	panel?.destroy()
 	popout?.destroy()
 })
@@ -199,12 +202,13 @@ export function setTriggerIcon(icon: string | HTMLElement | (() => HTMLElement) 
 }
 
 export function open(options: GooSelectOpenOptions = {}): boolean {
-	if (!selectElement || opened || effectiveDisabled) return false
+	if (!selectElement || opened || popout?.isOpen() || effectiveDisabled) return false
 
 	const {
 		autoFocus = true,
 		at,
 		clickToClose = true,
+		initialFocus,
 		keepWithin,
 		parentElement,
 		actionContext: contextOverride,
@@ -220,6 +224,7 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 
 	if (!panel) {
 		panel = new DropdownPanel({
+			semantics: dropdownSemantics,
 			showSelectionIndicator,
 			value: selectedValue,
 			getContext: () => getContext(),
@@ -235,6 +240,7 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 		})
 	} else {
 		panel.updateContext({
+			semantics: dropdownSemantics,
 			showSelectionIndicator,
 			value: selectedValue
 		})
@@ -243,9 +249,10 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 	panel.render(normalizedOptions)
 	listboxId = panel.listboxId
 	syncPanelTypography()
+	if (autoFocus) focusInitialPanelOption()
 
 	const currentMenu = selectMenu
-		const positionAt = getPositionTarget(at)
+	const positionAt = getPositionTarget(at)
 	const triggerWidth = positionAt instanceof HTMLElement
 		? Math.max(1, Math.round(positionAt.getBoundingClientRect().width))
 		: undefined
@@ -259,6 +266,7 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 		className: getSelectMenuPopoutClass(currentMenu, popoutClassName),
 		clickToClose,
 		escapeToClose: true,
+		initialFocus,
 		keepWithin: keepWithin || { element: document.body, margin: 15 },
 		showArrow: currentMenu.arrow,
 		showBackdrop: currentMenu.backdrop,
@@ -273,12 +281,11 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 			clearFocusFrame()
 			focusFrame = requestAnimationFrame(() => {
 				focusFrame = 0
-				if (!panel || !opened) return
-				const toFocus = selectedValue || panel.getNavigableOptions()[0]?.dataset.id
-				if (toFocus) panel.setHovered(toFocus)
+				focusInitialPanelOption()
 			})
 		}
 	})
+	opened = true
 
 	selectElement.dispatchEvent(new CustomEvent('open', { bubbles: true }))
 	onopen?.()
@@ -295,8 +302,15 @@ function syncPanelTypography(): void {
 	)
 }
 
+function focusInitialPanelOption(): void {
+	if (!panel) return
+
+	const toFocus = selectedValue || panel.getNavigableOptions()[0]?.dataset.id
+	if (toFocus) panel.setHovered(toFocus)
+}
+
 export function close({ quiet = false, fromPopout = false }: { quiet?: boolean; fromPopout?: boolean } = {}): void {
-	if (!selectElement || !opened) return
+	if (!selectElement || (!opened && !popout?.isOpen())) return
 
 	stopTriggerPointerSelection()
 	clearFocusFrame()
@@ -305,6 +319,7 @@ export function close({ quiet = false, fromPopout = false }: { quiet?: boolean; 
 	if (panel) panel.hoveredId = null
 	activeDescendant = ''
 	listboxId = ''
+	opened = false
 
 	if (!fromPopout && popout?.isOpen()) {
 		popout.destroy()
@@ -398,6 +413,7 @@ function assignSelectApi(select: GooSelectRuntimeElement): void {
 			configurable: true,
 			get: () => opened,
 			set: value => {
+				opened = Boolean(value)
 				if (!value) popout = null
 			}
 		},
@@ -492,12 +508,11 @@ function handleKeydown(event: KeyboardEvent): void {
 	const command = mapNativeKeyToCommand(event)
 	if (command) {
 		handleKeyboard(selectElement as unknown as GooSelectKeyboardHost, command)
-	} else if (event.key.length === 1) {
-		handleTypeahead(selectElement as unknown as GooSelectKeyboardHost, {
-			command: event.key,
-			cancel: () => event.preventDefault()
-		})
+		return
 	}
+
+	const typeaheadCommand = mapNativeTypeaheadKeyToCommand(event)
+	if (typeaheadCommand) handleTypeahead(selectElement as unknown as GooSelectKeyboardHost, typeaheadCommand)
 }
 
 function selectOption(option: GooSelectOption, item?: HTMLElement | null): void {
@@ -514,7 +529,7 @@ function selectOption(option: GooSelectOption, item?: HTMLElement | null): void 
 	}
 
 	const optionElement = item ?? panel?.getOptionElementById(selectedValue)
-	if (optionElement && panel) {
+	if (showSelectionIndicator && optionElement && panel) {
 		const token = selectLifecycleToken
 		panel.animateSelection(optionElement).then(() => {
 			if (token !== selectLifecycleToken || !selectElement) return
@@ -601,7 +616,7 @@ function getTriggerIconClasses(icon: unknown): string {
 			type="button"
 			class="goo-select__trigger"
 			role="combobox"
-			aria-haspopup="listbox"
+			aria-haspopup={dropdownSemantics?.popupRole ?? 'listbox'}
 			aria-expanded={opened ? 'true' : 'false'}
 			aria-controls={opened && listboxId ? listboxId : undefined}
 			aria-activedescendant={opened && activeDescendant ? activeDescendant : undefined}

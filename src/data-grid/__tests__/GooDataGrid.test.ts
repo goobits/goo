@@ -83,6 +83,26 @@ describe('GooDataGrid', () => {
 		expect(onrowactivate.mock.calls[0]?.[1]).toBe(0)
 	})
 
+	it('activates rows from Spacebar and contains handled row keys', () => {
+		const onrowactivate = vi.fn()
+		const { container } = render(GooDataGrid, {
+			props: {
+				columns: [ { key: 'email', label: 'Email' } ],
+				onrowactivate,
+				rows: [ { email: 'buyer@example.com' } ]
+			}
+		})
+		const row = container.querySelector<HTMLElement>('.goo-data-grid__row--body')!
+		const parentKeydown = vi.fn()
+		container.addEventListener('keydown', parentKeydown)
+
+		const event = dispatchKey(row, 'Spacebar')
+
+		expect(event.defaultPrevented).toBe(true)
+		expect(parentKeydown).not.toHaveBeenCalled()
+		expect(onrowactivate).toHaveBeenCalledOnce()
+	})
+
 	it('uses role="grid" and a single roving-tabindex row in interactive mode', () => {
 		const { container } = render(GooDataGrid, {
 			props: {
@@ -128,3 +148,13 @@ describe('GooDataGrid', () => {
 		expect([ ...rows() ].map(r => r.getAttribute('tabindex'))).toEqual([ '-1', '0', '-1' ])
 	})
 })
+
+function dispatchKey(element: HTMLElement, key: string): KeyboardEvent {
+	const event = new KeyboardEvent('keydown', {
+		bubbles: true,
+		cancelable: true,
+		key
+	})
+	element.dispatchEvent(event)
+	return event
+}

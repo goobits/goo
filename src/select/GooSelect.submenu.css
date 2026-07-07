@@ -4,18 +4,18 @@
 	align-items: center;
 	justify-content: center;
 	flex-shrink: 0;
-	width: var(--goo-select-item-box-size, 1.25rem);
-	height: var(--goo-select-item-box-size, 1.25rem);
+	width: var(--goo-select-item-box-size);
+	height: var(--goo-select-item-box-size);
 	margin-inline-start: auto;
-	font-size: var(--goo-theme-icon-xs, 0.75rem);
+	font-size: var(--goo-theme-icon-xs);
 	color: var(--goo-select-fg-muted);
 }
 
 .goo-select__submenu-arrow svg {
 	display: block;
-	height: 1rem;
+	height: var(--goo-select-trigger-icon-size);
 	transform: scaleX(var(--goo-select-submenu-arrow-scale, 1));
-	width: 1rem;
+	width: var(--goo-select-trigger-icon-size);
 }
 
 [dir='rtl'] .goo-select__option--submenu {
@@ -44,9 +44,16 @@
 
 /* Submenu content inside GooPopout */
 .goo-select__submenu-frame {
+	--goo-select-submenu-slide-distance: var(--goo-theme-space-sm);
+	--goo-select-submenu-morph-duration: 160ms;
+	--goo-select-submenu-morph-delay: 100ms;
+	--goo-select-submenu-enter-duration: 150ms;
+	--goo-select-submenu-enter-delay: 260ms;
+	--goo-select-submenu-fade-duration: var(--goo-theme-transition-fast);
+
 	box-sizing: border-box;
-	min-width: 10rem;
-	max-height: 20rem;
+	min-width: var(--goo-select-min-width);
+	max-height: var(--goo-select-max-height);
 	background: var(--goo-popout-bg);
 	border-radius: inherit;
 	overflow: hidden;
@@ -55,7 +62,7 @@
 
 .goo-select__submenu-viewport {
 	box-sizing: border-box;
-	max-height: 20rem;
+	max-height: var(--goo-select-max-height);
 	padding: var(--goo-select-padding);
 	overflow-y: auto;
 	overscroll-behavior: contain;
@@ -68,7 +75,7 @@
 	box-sizing: border-box;
 	display: flex;
 	flex-direction: column;
-	gap: 1px;
+	gap: var(--goo-select-options-gap);
 	width: max-content;
 	min-width: 100%;
 }
@@ -79,9 +86,12 @@
    the new size (260-400ms). The resize is therefore delayed until the fade-out finishes. */
 .goo-select-submenu-popout--morph .goo-select__submenu-frame {
 	transition:
-		width 160ms cubic-bezier(0.16, 1, 0.3, 1) 100ms,
-		height 160ms cubic-bezier(0.16, 1, 0.3, 1) 100ms,
-		transform 160ms cubic-bezier(0.16, 1, 0.3, 1) 100ms;
+		width var(--goo-select-submenu-morph-duration) cubic-bezier(0.16, 1, 0.3, 1)
+			var(--goo-select-submenu-morph-delay),
+		height var(--goo-select-submenu-morph-duration) cubic-bezier(0.16, 1, 0.3, 1)
+			var(--goo-select-submenu-morph-delay),
+		transform var(--goo-select-submenu-morph-duration) cubic-bezier(0.16, 1, 0.3, 1)
+			var(--goo-select-submenu-morph-delay);
 }
 
 .goo-select__submenu-frame--morph {
@@ -120,19 +130,20 @@
 }
 
 .goo-select__submenu--entering.goo-select__submenu--down {
-	transform: translateY(8px);
+	transform: translateY(var(--goo-select-submenu-slide-distance));
 }
 
 .goo-select__submenu--entering.goo-select__submenu--up {
-	transform: translateY(-8px);
+	transform: translateY(calc(var(--goo-select-submenu-slide-distance) * -1));
 }
 
 .goo-select__submenu--entering.goo-select__submenu--entering-active {
 	opacity: 1;
 	transform: translateY(0);
 	transition:
-		opacity 140ms ease-out 260ms,
-		transform 150ms cubic-bezier(0.16, 1, 0.3, 1) 260ms;
+		opacity var(--goo-select-submenu-fade-duration) ease-out var(--goo-select-submenu-enter-delay),
+		transform var(--goo-select-submenu-enter-duration) cubic-bezier(0.16, 1, 0.3, 1)
+			var(--goo-select-submenu-enter-delay);
 }
 
 /* Phase 1: old content fades out first, at the old size, before the box resizes. */
@@ -142,7 +153,7 @@
 
 .goo-select__submenu--leaving-active {
 	opacity: 0;
-	transition: opacity 100ms ease-in;
+	transition: opacity var(--goo-select-submenu-fade-duration) ease-in;
 }
 
 .goo-select__submenu-viewport::-webkit-scrollbar {
@@ -157,8 +168,8 @@
 .goo-select__submenu-viewport::-webkit-scrollbar-thumb {
 	background: var(--goo-select-scrollbar-thumb);
 	background-clip: padding-box;
-	border: 2px solid transparent;
-	border-radius: 999px;
+	border: var(--goo-select-scrollbar-border) solid transparent;
+	border-radius: var(--goo-select-scrollbar-radius);
 }
 
 .goo-select__submenu-viewport::-webkit-scrollbar-thumb:hover {

@@ -19,8 +19,13 @@ export const controlSchema: SvelteControlSchema = {
 import { onDestroy } from 'svelte'
 import './GooNumber.css'
 
+import { containKeyboardEvent } from '../support/keyboard/_keyboardActivation.ts'
 import { formatNumber } from '../support/utils/formatNumber.ts'
 import { clamp, roundToStep } from '../support/utils/numberUtils.ts'
+import {
+	type GooNumberStepDirection,
+	readNumberKeyboardAction
+} from './_numberKeyboard.ts'
 import type { GooNumberProps } from './types.ts'
 
 const HOLD_DELAY = 250
@@ -197,23 +202,34 @@ function handleBlur(event: Event): void {
 }
 
 function handleKeydown(event: KeyboardEvent): void {
-	event.stopPropagation()
+	containKeyboardEvent(event, { preventDefault: false, immediate: false })
 	if (disabled) return
 
-	if (event.key === 'Escape' || event.key === 'Enter') {
-		event.preventDefault()
-		if (event.key === 'Enter') {
+	const action = readNumberKeyboardAction(event, {
+		hasMaximum: Number.isFinite(max),
+		hasMinimum: Number.isFinite(min)
+	})
+	if (!action) return
+
+	containKeyboardEvent(event, { immediate: false })
+	switch (action.type) {
+		case 'commit':
 			onenter?.()
 			numberElement?.dispatchEvent(new CustomEvent('enter', {
 				bubbles: true,
 				detail: { value: currentValue, target: numberElement }
 			}))
-		}
-		contentElement?.blur()
-	}
-	if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
-		event.preventDefault()
-		increment(event.key === 'ArrowUp' ? 'up' : 'down', event.shiftKey)
+			contentElement?.blur()
+			break
+		case 'blur':
+			contentElement?.blur()
+			break
+		case 'set-bound':
+			setKeyboardValue(action.bound === 'min' ? min : max)
+			break
+		case 'step':
+			increment(action.direction, action.multiplier)
+			break
 	}
 }
 
@@ -221,14 +237,14 @@ function handleWheel(event: WheelEvent): void {
 	if (disabled || document.activeElement !== contentElement) return
 
 	event.preventDefault()
-	increment(event.deltaY < 0 ? 'up' : 'down', event.shiftKey)
+	increment(event.deltaY < 0 ? 'up' : 'down', event.shiftKey ? 10 : 1)
 }
 
-function startHold(direction: 'down' | 'up', shift: boolean): void {
+function startHold(direction: GooNumberStepDirection, multiplier: number): void {
 	stopHold()
-	increment(direction, shift)
+	increment(direction, multiplier)
 	holdTimeout = setTimeout(() => {
-		repeatInterval = setInterval(() => increment(direction, shift), REPEAT_INTERVAL)
+		repeatInterval = setInterval(() => increment(direction, multiplier), REPEAT_INTERVAL)
 	}, HOLD_DELAY)
 }
 
@@ -239,13 +255,15 @@ function stopHold(): void {
 	repeatInterval = null
 }
 
-function increment(direction: 'down' | 'up', shift = false): void {
-	let stepValue = getStepValue()
-	if (shift) stepValue *= 10
-
-	const oldValue = currentValue
+function increment(direction: GooNumberStepDirection, multiplier = 1): void {
+	const stepValue = getStepValue() * multiplier
 	const nextValue = direction === 'up' ? currentValue + stepValue : currentValue - stepValue
-	syncValue(roundToStep(clamp(nextValue, min, max), stepValue, min), { format: true })
+	setKeyboardValue(roundToStep(clamp(nextValue, min, max), stepValue, min))
+}
+
+function setKeyboardValue(nextValue: number): void {
+	const oldValue = currentValue
+	syncValue(nextValue, { format: true })
 	if (oldValue !== currentValue) {
 		emitInput(oldValue)
 	}
@@ -353,8 +371,8 @@ function pulseValueChange(): void {
 		oninput={handleInput}
 		onfocus={handleFocus}
 		onblur={handleBlur}
-		onkeydown={handleKeydown}
-		onkeyup={(event) => event.stopPropagation()}
+		onkeydowncapture={handleKeydown}
+		onkeyupcapture={(event) => containKeyboardEvent(event, { preventDefault: false, immediate: false })}
 		onwheel={handleWheel}
 	/>
 	{#if unitSuffix}
@@ -372,7 +390,7 @@ function pulseValueChange(): void {
 				event.stopPropagation()
 				if (!disabled) {
 					contentElement?.focus()
-					startHold('up', event.shiftKey)
+					startHold('up', event.shiftKey ? 10 : 1)
 				}
 			}}
 			onpointerup={stopHold}
@@ -390,7 +408,7 @@ function pulseValueChange(): void {
 				event.stopPropagation()
 				if (!disabled) {
 					contentElement?.focus()
-					startHold('down', event.shiftKey)
+					startHold('down', event.shiftKey ? 10 : 1)
 				}
 			}}
 			onpointerup={stopHold}

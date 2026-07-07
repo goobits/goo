@@ -5,18 +5,22 @@
 
 .goo-button {
 	/* Customizable via CSS custom properties */
-	--goo-button-bg: var(--goo-theme-surface-raised, color-mix(in srgb, var(--goo-theme-fg, #fff) 6%, transparent));
-	--goo-button-bg-hover: var(
-		--goo-theme-border,
-		color-mix(in srgb, var(--goo-theme-fg, #fff) 18%, transparent)
-	);
-	--goo-button-border: var(
-		--goo-theme-border,
-		color-mix(in srgb, var(--goo-theme-fg, #fff) 15%, transparent)
-	);
-	--goo-button-fg: var(--goo-theme-fg, rgba(255, 255, 255, 0.9));
-	--goo-button-radius: var(--goo-theme-radius-md, 0.5rem);
-	--goo-button-focus: var(--goo-theme-accent, #3b82f6);
+	--goo-button-bg: var(--goo-theme-surface-raised);
+	--goo-button-bg-hover: var(--goo-theme-border);
+	--goo-button-border: var(--goo-theme-border);
+	--goo-button-fg: var(--goo-theme-fg);
+	--goo-button-radius: var(--goo-theme-radius-md);
+	--goo-button-focus: var(--goo-theme-accent);
+	--goo-button-gap: var(--goo-theme-space-sm);
+	--goo-button-font-size: var(--goo-theme-font-size-sm);
+	--goo-button-height: var(--goo-theme-control-height-md);
+	--goo-button-icon-size: var(--goo-theme-icon-md);
+	--goo-button-padding: var(--goo-theme-control-padding-md);
+	--goo-button-compact-font-size: var(--goo-theme-font-size-xs);
+	--goo-button-compact-height: var(--goo-theme-control-height-sm);
+	--goo-button-compact-padding: var(--goo-theme-control-padding-sm);
+	--goo-button-stacked-gap: calc(var(--goo-theme-space-2xs) * 1.5);
+	--goo-button-stacked-line-height: var(--goo-theme-line-height-base);
 
 	/* Base styles - flat background, no gradient */
 	background: var(--goo-button-bg);
@@ -27,22 +31,22 @@
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	gap: 0.5em;
-	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
-	font-weight: 600;
-	line-height: 1;
-	height: var(--goo-theme-control-height-md, 2rem);
+	gap: var(--goo-button-gap);
+	font-size: var(--goo-button-font-size);
+	font-weight: var(--goo-theme-font-weight-semibold);
+	line-height: var(--goo-theme-line-height-tight);
+	height: var(--goo-button-height);
 	min-height: 0;
 	outline: none;
-	padding: var(--goo-theme-control-padding-md, 0 1rem);
+	padding: var(--goo-button-padding);
 	pointer-events: auto;
 	position: relative;
 	text-align: center;
 	text-transform: none;
 	transition:
-		background 0.15s,
-		border-color 0.15s,
-		box-shadow 0.15s;
+		background var(--goo-theme-transition-normal),
+		border-color var(--goo-theme-transition-normal),
+		box-shadow var(--goo-theme-transition-normal);
 
 	&:focus {
 		outline: none;
@@ -59,68 +63,56 @@
 	/* Hover state */
 	&:hover:not([disabled]):not(.goo-button--disabled) {
 		background: var(--goo-button-bg-hover);
-		border-color: var(--goo-theme-border-strong, var(--goo-button-border));
+		border-color: var(--goo-theme-border-strong);
 	}
 
 	/* Active/pressed state */
 	&:active:not([disabled]):not(.goo-button--disabled) {
 		background: var(--goo-button-bg-hover);
-		border-color: var(--goo-theme-border-strong, var(--goo-button-border));
+		border-color: var(--goo-theme-border-strong);
 	}
 
 	/* Primary variant - main call to action */
 	&.goo-button--primary,
 	&[variant='primary'] {
-		--goo-button-fg: var(--goo-theme-accent-fg, #fff);
-		--goo-button-bg: var(--goo-theme-accent, #3b82f6);
-		--goo-button-bg-hover: var(--goo-theme-secondary, #2563eb);
-		--goo-button-border: var(--goo-theme-accent, #3b82f6);
+		--goo-button-fg: var(--goo-theme-accent-fg);
+		--goo-button-bg: var(--goo-theme-accent);
+		--goo-button-bg-hover: var(--goo-theme-accent);
+		--goo-button-border: var(--goo-theme-accent);
 	}
 
 	/* Secondary variant */
 	&.goo-button--secondary,
 	&[variant='secondary'] {
-		--goo-button-fg: var(--goo-theme-accent, #3b82f6);
-		--goo-button-bg: color-mix(in srgb, var(--goo-theme-fg, #fff) 5%, transparent);
-		--goo-button-bg-hover: color-mix(in srgb, var(--goo-theme-fg, #fff) 10%, transparent);
-		--goo-button-border: var(--goo-theme-accent, #3b82f6);
+		--goo-button-fg: var(--goo-theme-accent);
+		--goo-button-bg: color-mix(in srgb, var(--goo-theme-fg) 5%, transparent);
+		--goo-button-bg-hover: color-mix(in srgb, var(--goo-theme-fg) 10%, transparent);
+		--goo-button-border: var(--goo-theme-accent);
 	}
 
 	/* Attention/warning variant */
 	&.goo-button--attention,
 	&[variant='attention'] {
-		--goo-button-fg: var(--goo-theme-warning, #fbbf24);
-		--goo-button-bg: color-mix(in srgb, var(--goo-theme-warning, #fbbf24) 5%, transparent);
-		--goo-button-bg-hover: color-mix(
-			in srgb,
-			var(--goo-theme-warning, #fbbf24) 10%,
-			transparent
-		);
-		--goo-button-border: color-mix(in srgb, var(--goo-theme-warning, #fbbf24) 20%, transparent);
+		--goo-button-fg: var(--goo-theme-warning);
+		--goo-button-bg: color-mix(in srgb, var(--goo-theme-warning) 5%, transparent);
+		--goo-button-bg-hover: color-mix(in srgb, var(--goo-theme-warning) 10%, transparent);
+		--goo-button-border: color-mix(in srgb, var(--goo-theme-warning) 20%, transparent);
 	}
 
 	/* Danger variant - destructive actions */
 	&.goo-button--danger,
 	&[variant='danger'] {
-		--goo-button-fg: var(--goo-theme-negative, #f87171);
-		--goo-button-bg: color-mix(in srgb, var(--goo-theme-negative, #ef4444) 5%, transparent);
-		--goo-button-bg-hover: color-mix(
-			in srgb,
-			var(--goo-theme-negative, #ef4444) 10%,
-			transparent
-		);
-		--goo-button-border: color-mix(
-			in srgb,
-			var(--goo-theme-negative, #ef4444) 20%,
-			transparent
-		);
+		--goo-button-fg: var(--goo-theme-danger);
+		--goo-button-bg: color-mix(in srgb, var(--goo-theme-danger) 5%, transparent);
+		--goo-button-bg-hover: color-mix(in srgb, var(--goo-theme-danger) 10%, transparent);
+		--goo-button-border: color-mix(in srgb, var(--goo-theme-danger) 20%, transparent);
 	}
 
 	/* Ghost variant - minimal/subtle appearance */
 	&.goo-button--ghost,
 	&[variant='ghost'] {
 		--goo-button-bg: transparent;
-		--goo-button-bg-hover: color-mix(in srgb, var(--goo-theme-fg, #fff) 10%, transparent);
+		--goo-button-bg-hover: color-mix(in srgb, var(--goo-theme-fg) 10%, transparent);
 		--goo-button-border: transparent;
 		background: transparent;
 	}
@@ -129,10 +121,10 @@
 	&.goo-button--selected,
 	&[selected],
 	&[variant='selected'] {
-		--goo-button-bg: var(--goo-theme-accent, #3b82f6);
-		--goo-button-bg-hover: var(--goo-theme-secondary, #2563eb);
-		--goo-button-fg: var(--goo-theme-accent-fg, #fff);
-		--goo-button-border: var(--goo-theme-accent, #3b82f6);
+		--goo-button-bg: var(--goo-theme-accent);
+		--goo-button-bg-hover: var(--goo-theme-accent);
+		--goo-button-fg: var(--goo-theme-accent-fg);
+		--goo-button-border: var(--goo-theme-accent);
 	}
 
 	/* Link variant */
@@ -169,8 +161,8 @@
 	align-items: center;
 	justify-content: center;
 	flex-shrink: 0;
-	height: var(--goo-button-icon-size, 1em);
-	width: var(--goo-button-icon-size, 1em);
+	height: var(--goo-button-icon-size);
+	width: var(--goo-button-icon-size);
 }
 
 /* Ensure SVGs inside icons are properly centered */
@@ -190,16 +182,16 @@
 
 .goo-button--full-row,
 .goo-button--block {
-	--goo-button-full-row-height: 40px;
-	--goo-button-icon-size: var(--goo-theme-icon-md, 1rem);
+	--goo-button-full-row-height: var(--goo-theme-control-height-lg);
+	--goo-button-icon-size: var(--goo-theme-icon-md);
 
 	box-sizing: border-box;
 	border-radius: 0;
-	gap: 0.5rem;
+	gap: var(--goo-theme-space-sm);
 	height: var(--goo-button-full-row-height);
 	inline-size: 100%;
 	justify-content: center;
-	line-height: 1;
+	line-height: var(--goo-theme-line-height-tight);
 	min-height: var(--goo-button-full-row-height);
 	min-inline-size: 100%;
 	padding-block: 0;
@@ -210,51 +202,48 @@
 .goo-button--full-row[variant='attention'],
 .goo-button--block.goo-button--attention,
 .goo-button--block[variant='attention'] {
-	--goo-button-bg: color-mix(in srgb, var(--goo-theme-warning, #fbbf24) 12%, transparent);
-	--goo-button-bg-hover: color-mix(in srgb, var(--goo-theme-warning, #fbbf24) 18%, transparent);
-	--goo-button-border: color-mix(in srgb, var(--goo-theme-warning, #fbbf24) 32%, transparent);
+	--goo-button-bg: color-mix(in srgb, var(--goo-theme-warning) 12%, transparent);
+	--goo-button-bg-hover: color-mix(in srgb, var(--goo-theme-warning) 18%, transparent);
+	--goo-button-border: color-mix(in srgb, var(--goo-theme-warning) 32%, transparent);
 }
 
 /* Title element */
 .goo-button__title {
 	display: inline-flex;
 	align-items: center;
-	line-height: 1;
+	line-height: var(--goo-theme-line-height-tight);
 }
 
 /* Disabled state - flat selector for button and custom-element hosts */
 /* Uses theme-aware variables for light/dark mode support */
 .goo-button[disabled],
 .goo-button.goo-button--disabled {
-	--goo-button-bg: color-mix(in srgb, var(--goo-theme-fg, #888) 15%, transparent) !important;
-	--goo-button-bg-hover: color-mix(
-		in srgb,
-		var(--goo-theme-fg, #888) 15%,
-		transparent
-	) !important;
-	--goo-button-border: color-mix(in srgb, var(--goo-theme-fg, #888) 20%, transparent) !important;
-	--goo-button-fg: var(--goo-theme-text-disabled, rgba(128, 128, 128, 0.5)) !important;
-	background: color-mix(in srgb, var(--goo-theme-fg, #888) 15%, transparent) !important;
-	border-color: color-mix(in srgb, var(--goo-theme-fg, #888) 20%, transparent) !important;
-	color: var(--goo-theme-text-disabled, rgba(128, 128, 128, 0.5)) !important;
+	--goo-button-bg: color-mix(in srgb, var(--goo-theme-fg) 15%, transparent) !important;
+	--goo-button-bg-hover: color-mix(in srgb, var(--goo-theme-fg) 15%, transparent) !important;
+	--goo-button-border: color-mix(in srgb, var(--goo-theme-fg) 20%, transparent) !important;
+	--goo-button-fg: var(--goo-theme-text-disabled) !important;
+	background: var(--goo-button-bg) !important;
+	border-color: var(--goo-button-border) !important;
+	color: var(--goo-button-fg) !important;
 	cursor: not-allowed;
+	opacity: var(--goo-theme-disabled-opacity);
 	pointer-events: none;
 }
 
 /* Compact size variant - for dense UIs like editors */
 .goo-button[size='compact'] {
-	font-size: var(--goo-theme-font-size-xs, 0.75rem);
-	height: var(--goo-theme-control-height-sm, 1.5rem);
-	padding: var(--goo-theme-control-padding-sm, 0 0.5rem);
-	gap: 0.25em;
+	font-size: var(--goo-button-compact-font-size);
+	height: var(--goo-button-compact-height);
+	padding: var(--goo-button-compact-padding);
+	gap: var(--goo-button-stacked-gap);
 }
 
 /* Stacked layout - icon on top, label below */
 .goo-button[layout='stacked'] {
 	flex-direction: column;
-	gap: 0.25em;
-	padding: 0.5rem 0.75rem;
-	line-height: 1.2;
+	gap: var(--goo-button-stacked-gap);
+	padding: var(--goo-theme-space-sm) var(--goo-theme-space-md);
+	line-height: var(--goo-button-stacked-line-height);
 	min-height: unset;
 	text-transform: none;
 }
@@ -268,13 +257,28 @@
 
 .goo-button[layout='stacked'] .goo-button__title,
 .goo-button[layout='stacked'] > span {
-	font-size: var(--goo-theme-font-size-xs, 0.75rem);
-	font-weight: 500;
-	letter-spacing: 0.02em;
+	font-size: var(--goo-theme-font-size-xs);
+	font-weight: var(--goo-theme-font-weight-medium);
+	letter-spacing: 0;
+}
+
+@media (hover: none) and (pointer: coarse) {
+	.goo-button {
+		height: max(var(--goo-theme-control-height-touch), var(--goo-theme-control-height-md));
+		min-height: max(var(--goo-theme-control-height-touch), var(--goo-theme-control-height-md));
+	}
+
+	.goo-button[size='compact'] {
+		height: max(var(--goo-theme-control-height-touch), var(--goo-theme-control-height-sm));
+	}
+
+	.goo-button[layout='stacked'] {
+		min-height: max(var(--goo-theme-control-height-touch), var(--goo-theme-control-height-md));
+	}
 }
 
 @media (prefers-reduced-motion: reduce) {
 	.goo-button {
-		transition-duration: 0.01ms;
+		transition: none;
 	}
 }

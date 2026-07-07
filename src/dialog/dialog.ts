@@ -6,8 +6,12 @@
 import './GooDialog.css'
 
 import type { CheckboxFieldElement } from '../checkbox/_createCheckboxField.ts'
-import { focusFirst, focusLast, getFocusableElements } from '../support/utils/focusUtils.ts'
+import {
+	activateModalIsolation,
+	handleFocusTrapKeyboardEvent
+} from '../support/keyboard/_focus.ts'
 import { createLifecycleBag, type GooLifecycleBag } from '../support/utils/lifecycleBag.ts'
+import { handleDialogKeyboardEvent } from './_dialogKeyboard.ts'
 import {
 	appendContent,
 	buildFields,
@@ -15,7 +19,6 @@ import {
 	buildNotifyLayout,
 	buildOverlayLayout,
 	buildStandardLayout,
-	createFocusTrapSentinels,
 	type DialogField,
 	type DialogLabels
 } from './dialogBuilder.ts'
@@ -58,6 +61,7 @@ export interface GooDialogOptions<TValues extends DialogValues = DialogValues> {
 	labels?: DialogLabels
 	fields?: DialogField[]
 	verify?: DialogVerifyHandler<TValues>
+	modal?: boolean
 	showBackdrop?: boolean
 	showClose?: boolean
 	closeOnBackdrop?: boolean
@@ -90,6 +94,7 @@ export interface GooDialogState {
 	ariaLabel?: string
 	type: string
 	heading: string
+	modal: boolean
 	showBackdrop: boolean
 	showClose: boolean
 	closeOnBackdrop: boolean
@@ -165,8 +170,6 @@ class GooDialogControllerRuntime {
 	declare _resolve: ((result: DialogResult) => void) | null
 	declare _fieldElements: DialogFieldElements
 	declare _$backdrop: HTMLElement | null
-	declare _$focusTrapStart: HTMLElement | null
-	declare _$focusTrapEnd: HTMLElement | null
 	declare _isOpen: boolean
 	declare _autoDismissTimer: ReturnType<typeof setTimeout> | null
 	declare _previousActiveElement: HTMLElement | null
@@ -192,6 +195,7 @@ class GooDialogControllerRuntime {
 			ariaLabel: undefined,
 			type: 'alert',
 			heading: '',
+			modal: true,
 			showBackdrop: true,
 			showClose: true,
 			closeOnBackdrop: true,
@@ -245,22 +249,26 @@ class GooDialogControllerRuntime {
 		const { type, width, height, heading, showClose } = this.state
 
 		// Apply type class
-		this.$element.classList.add(`goo-dialog--${type}`)
+		this.$element.classList.add(`goo-dialog--${ type }`)
 		for (const name of this._classNames()) {
 			this.$element.classList.add(name)
 		}
 
 		// Set dimensions
 		if (width !== 'auto') {
-			this.$element.style.width = typeof width === 'number' ? `${width}px` : String(width)
+			this.$element.style.width = typeof width === 'number' ? `${ width }px` : String(width)
 		}
 		if (height !== 'auto') {
-			this.$element.style.height = typeof height === 'number' ? `${height}px` : String(height)
+			this.$element.style.height = typeof height === 'number' ? `${ height }px` : String(height)
 		}
 
 		// Accessibility
 		this.$element.setAttribute('role', 'dialog')
-		this.$element.setAttribute('aria-modal', 'true')
+		if (this._isModalDialog()) {
+			this.$element.setAttribute('aria-modal', 'true')
+		} else {
+			this.$element.removeAttribute('aria-modal')
+		}
 		this.$element.tabIndex = -1
 
 		// Build structure based on type using dialog builder functions
@@ -313,14 +321,6 @@ class GooDialogControllerRuntime {
 		// Give the dialog an accessible name from its title, explicit label, or short text content.
 		this._applyAccessibleName()
 
-		// Focus trap sentinels
-		const { $start, $end } = createFocusTrapSentinels()
-		this._$focusTrapStart = $start
-		this._$focusTrapEnd = $end
-
-		this.$element.insertBefore(this._$focusTrapStart, this.$element.firstChild)
-		this.$element.appendChild(this._$focusTrapEnd)
-
 		this._bindEvents()
 	}
 
@@ -353,9 +353,9 @@ class GooDialogControllerRuntime {
 	 * Reference the title, or use an explicit/string label, so `role="dialog"` exposes an accessible name.
 	 */
 	_applyAccessibleName() {
-		const instanceId = `goo-dialog-${++dialogInstanceCount}`
+		const instanceId = `goo-dialog-${ ++dialogInstanceCount }`
 		if (this.$title) {
-			if (!this.$title.id) this.$title.id = `${instanceId}-title`
+			if (!this.$title.id) this.$title.id = `${ instanceId }-title`
 			this.$element.setAttribute('aria-labelledby', this.$title.id)
 			this.$element.removeAttribute('aria-label')
 			return
@@ -397,15 +397,7 @@ class GooDialogControllerRuntime {
 		}
 
 		// Keyboard
-		this._listen(this.$element, 'keydown', (e) => this._handleKeydown(e as KeyboardEvent))
-
-		// Focus trap
-		if (this._$focusTrapStart) {
-			this._listen(this._$focusTrapStart, 'focus', () => this._focusLast())
-		}
-		if (this._$focusTrapEnd) {
-			this._listen(this._$focusTrapEnd, 'focus', () => this._focusFirst())
-		}
+		this._listen(this.$element, 'keydown', e => this._handleKeydown(e as KeyboardEvent))
 	}
 
 	_listen(
@@ -448,25 +440,18 @@ class GooDialogControllerRuntime {
 	 * @param e - e.
 	 */
 	_handleKeydown(e: KeyboardEvent) {
-		// Only the topmost dialog reacts to keys, so stacked dialogs close one at a time.
-		if (dialogManager.getTopDialog() !== this) return
-
-		if (e.key === 'Escape' && this.state.closeOnEscape) {
-			e.preventDefault()
-			e.stopPropagation()
-			this._handleCancel()
+		if (this._isModalDialog() && e.key === 'Tab' && dialogManager.getTopDialog() === this) {
+			handleFocusTrapKeyboardEvent(e, { root: this.$element })
+			return
 		}
 
-		if (e.key === 'Enter') {
-			// If focused on OK button or no input is focused
-			const activeEl = document.activeElement
-			const isInput = activeEl?.tagName === 'INPUT' || activeEl?.tagName === 'TEXTAREA'
-
-			if (activeEl === this.$okBtn || !isInput) {
-				e.preventDefault()
-				this._handleOk()
-			}
-		}
+		handleDialogKeyboardEvent(e, {
+			closeOnEscape: this.state.closeOnEscape,
+			isTopDialog: () => dialogManager.getTopDialog() === this,
+			okButton: this.$okBtn,
+			onCancel: () => this._handleCancel(),
+			onOk: () => void this._handleOk()
+		})
 	}
 
 	// --------------------------------------------------------------------------
@@ -530,7 +515,7 @@ class GooDialogControllerRuntime {
 	 */
 	_getFieldValues(): DialogValues {
 		const values: DialogValues = {}
-		for (const [name, $el] of this._fieldElements) {
+		for (const [ name, $el ] of this._fieldElements) {
 			const elWithValue = $el as unknown as {
 				value?: unknown
 				getValue?: () => unknown
@@ -553,7 +538,7 @@ class GooDialogControllerRuntime {
 		if (this.state.type === 'prompt' && this._fieldElements.size > 0) {
 			const firstField = this._fieldElements.entries().next()
 			if (firstField.done) return
-			const [, $first] = firstField.value
+			const [ , $first ] = firstField.value
 			const firstWithFocus = $first as unknown as { focus?: () => void; select?: () => void }
 			if (firstWithFocus?.focus) {
 				firstWithFocus.focus()
@@ -579,27 +564,6 @@ class GooDialogControllerRuntime {
 		} else {
 			this.$element.focus()
 		}
-	}
-
-	/**
-	 * Focus first.
-	 */
-	_focusFirst() {
-		focusFirst(this.$element, '.goo-dialog__focus-trap')
-	}
-
-	/**
-	 * Focus last.
-	 */
-	_focusLast() {
-		focusLast(this.$element, '.goo-dialog__focus-trap')
-	}
-
-	/**
-	 * Gets focusable elements.
-	 */
-	_getFocusableElements() {
-		return getFocusableElements(this.$element, '.goo-dialog__focus-trap')
 	}
 
 	// --------------------------------------------------------------------------
@@ -639,7 +603,7 @@ class GooDialogControllerRuntime {
 	open(): Promise<DialogResult> {
 		if (this._destroyed || this._isOpen) return Promise.resolve({ cancel: true })
 
-		return new Promise<DialogResult>((resolve) => {
+		return new Promise<DialogResult>(resolve => {
 			this._cleanupOpenResources()
 			this._resolve = resolve
 			this._isOpen = true
@@ -677,6 +641,12 @@ class GooDialogControllerRuntime {
 
 			// Append to body
 			document.body.appendChild(this.$element)
+			if (this._isModalDialog()) {
+				this._openLifecycle.add(activateModalIsolation({
+					modal: this.$element,
+					preserve: [ this._$backdrop ]
+				}))
+			}
 
 			// Animate in
 			this._requestOpenFrame(() => {
@@ -724,7 +694,7 @@ class GooDialogControllerRuntime {
 		}
 
 		// Wait for animation
-		await new Promise<void>((resolve) => {
+		await new Promise<void>(resolve => {
 			this._openLifecycle.timeout(resolve, TRANSITION_DURATION)
 		})
 
@@ -743,7 +713,7 @@ class GooDialogControllerRuntime {
 		dialogManager.unregister(this)
 
 		// Restore focus
-		if (this._previousActiveElement?.focus) {
+		if (this._previousActiveElement?.isConnected && this._previousActiveElement.focus) {
 			this._previousActiveElement.focus()
 		}
 
@@ -786,6 +756,10 @@ class GooDialogControllerRuntime {
 	 */
 	get isOpen() {
 		return this._isOpen
+	}
+
+	_isModalDialog(): boolean {
+		return this.state.modal && this.state.type !== 'notify'
 	}
 
 	/**

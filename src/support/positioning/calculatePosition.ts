@@ -78,9 +78,13 @@ export function calculatePosition(
 		)
 	}
 
-	// Calculate arrow position
-	result.arrowPosition = getArrowPosition(align, direction)
-	result.arrowOffset = calculateArrowOffset(targetRect, result, direction)
+	// Calculate arrow position from the final placed rectangle. Containment and
+	// avoid-rect handling can move a popout to a different side than requested.
+	const arrowPosition = getFinalArrowPosition(targetRect, popoutRect, result, getArrowPosition(align, direction))
+	const arrowDirection = getArrowDirection(arrowPosition)
+	result.direction = arrowDirection
+	result.arrowPosition = arrowPosition
+	result.arrowOffset = calculateArrowOffset(targetRect, result, arrowDirection)
 
 	return result
 }
@@ -398,6 +402,51 @@ function getArrowPosition(align: AlignmentConfig, direction: number): string {
 		// Arrow points up/down
 		return align.edge === 'top' ? 'top' : 'bottom'
 	}
+}
+
+function getFinalArrowPosition(
+	targetRect: Rect,
+	popoutRect: Rect,
+	position: PositionResult,
+	fallback: string
+): string {
+	const targetCenterX = targetRect.x + targetRect.width / 2
+	const targetCenterY = targetRect.y + targetRect.height / 2
+	const popoutLeft = position.x
+	const popoutRight = position.x + popoutRect.width
+	const popoutTop = position.y
+	const popoutBottom = position.y + popoutRect.height
+	const canPointFromTopOrBottom = targetCenterX >= popoutLeft && targetCenterX <= popoutRight
+	const canPointFromLeftOrRight = targetCenterY >= popoutTop && targetCenterY <= popoutBottom
+
+	if ((fallback === 'top' || fallback === 'bottom') && canPointFromTopOrBottom) {
+		return fallback
+	}
+	if ((fallback === 'left' || fallback === 'right') && canPointFromLeftOrRight) {
+		return fallback
+	}
+
+	if (targetCenterX < popoutLeft) return 'left'
+	if (targetCenterX > popoutRight) return 'right'
+	if (targetCenterY < popoutTop) return 'top'
+	if (targetCenterY > popoutBottom) return 'bottom'
+
+	const edgeDistances = [
+		{ position: 'left', distance: Math.abs(targetCenterX - popoutLeft) },
+		{ position: 'right', distance: Math.abs(popoutRight - targetCenterX) },
+		{ position: 'top', distance: Math.abs(targetCenterY - popoutTop) },
+		{ position: 'bottom', distance: Math.abs(popoutBottom - targetCenterY) }
+	]
+	return edgeDistances.reduce((best, next) => next.distance < best.distance ? next : best, {
+		position: fallback,
+		distance: Number.POSITIVE_INFINITY
+	}).position
+}
+
+function getArrowDirection(arrowPosition: string): number {
+	return arrowPosition === 'left' || arrowPosition === 'right'
+		? HORIZONTAL
+		: VERTICAL
 }
 
 /**

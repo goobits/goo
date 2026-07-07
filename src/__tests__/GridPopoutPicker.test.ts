@@ -343,6 +343,7 @@ describe('GridPopoutPicker', () => {
 
 	it('removes the document keydown listener as soon as the popout closes', async() => {
 		const removeEventListenerSpy = vi.spyOn(document, 'removeEventListener')
+		const leakedKeydown = vi.fn()
 		const { getByRole } = render(GridPopoutPicker, {
 			props: {
 				ariaLabel: 'Subtool',
@@ -353,9 +354,15 @@ describe('GridPopoutPicker', () => {
 		const trigger = getByRole('button', { name: 'Subtool' })
 
 		await fireEvent.click(trigger)
-		await fireEvent.keyDown(document, { key: 'Escape' })
+		document.addEventListener('keydown', leakedKeydown)
+		try {
+			await fireEvent.keyDown(document, { key: 'Escape' })
+		} finally {
+			document.removeEventListener('keydown', leakedKeydown)
+		}
 
 		expect(removeEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function), true)
+		expect(leakedKeydown).not.toHaveBeenCalled()
 	})
 
 	it('destroys tooltip handles owned by imperative grid popout triggers', () => {

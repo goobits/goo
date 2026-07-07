@@ -35,4 +35,4 @@ export type GooChevronTabsProps = {
 	onclose?: (_tabId: string) => void
 	onrename?: (_tabId: string, _name: string) => void
 	onmove?: (_tabId: string, _targetIndex: number) => void
-} & Record<`data-${string}`, string | undefined>
+} & Record<`data-${ string }`, string | undefined>

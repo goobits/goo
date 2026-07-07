@@ -1,8 +1,8 @@
 <script lang="ts">
-import { untrack } from 'svelte'
-import type { Snippet } from 'svelte'
-import { createGooPopout } from './popout.ts'
-import type { GooPopoutAt, GooPopoutInstance, GooPopoutOptions } from './popout.ts'
+	import { untrack } from 'svelte'
+	import type { Snippet } from 'svelte'
+	import { createGooPopout } from './popout.ts'
+	import type { GooPopoutAt, GooPopoutInstance, GooPopoutOptions } from './popoutTypes.ts'
 
 type GooPopoutTarget = HTMLElement | string | GooPopoutAt | null | undefined
 

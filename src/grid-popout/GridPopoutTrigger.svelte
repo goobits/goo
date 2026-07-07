@@ -269,19 +269,48 @@ function getLegacyPreview(src: string, alt: string): GridPopoutPreview | undefin
 
 <style>
 goo-grid-popout-trigger {
-	--goo-grid-trigger-arrow-size: var(--goo-theme-icon-md, 1rem);
-	--goo-grid-trigger-arrow-inline-size: 38px;
-	--goo-grid-trigger-icon-inline-size: 50px;
-	--goo-grid-trigger-title-inline-start: var(--goo-grid-trigger-icon-inline-size);
+	--goo-grid-trigger-arrow-size: var(--goo-theme-icon-md);
+	--goo-grid-trigger-arrow-block-size: var(--goo-theme-control-height-sm);
+	--goo-grid-trigger-arrow-inline-size: calc(var(--goo-theme-control-height-lg) - var(--goo-theme-space-2xs));
+	--goo-grid-trigger-focus-layer: 2;
+	--goo-grid-trigger-height: calc(var(--goo-theme-control-height-lg) + var(--goo-theme-space-xl));
+	--goo-grid-trigger-icon-size: calc(var(--goo-grid-trigger-height) - var(--goo-theme-space-xs));
+	--goo-grid-trigger-icon-inline-size: calc(
+		var(--goo-theme-control-height-lg) + var(--goo-theme-space-sm) +
+			var(--goo-theme-space-2xs)
+	);
+	--goo-grid-trigger-icon-line-height: calc(
+		var(--goo-grid-trigger-icon-size) - var(--goo-theme-space-xs) +
+			var(--goo-theme-space-2xs) * 0.5
+	);
+	--goo-grid-trigger-title-inline-start: calc(
+		var(--goo-grid-trigger-icon-size) + var(--goo-theme-space-xs) +
+			var(--goo-theme-space-2xs) * 0.5
+	);
+	--goo-grid-trigger-line-height: calc(
+		var(--goo-grid-trigger-height) - var(--goo-theme-space-sm) -
+			var(--goo-theme-space-2xs) * 0.5
+	);
+	--goo-grid-trigger-small-icon-size: var(--goo-theme-control-height-lg);
+	--goo-grid-trigger-small-line-height: calc(
+		var(--goo-grid-trigger-small-icon-size) - var(--goo-theme-space-xs) +
+			var(--goo-theme-space-2xs) * 0.5
+	);
+	--goo-grid-trigger-preset-height: calc(
+		var(--goo-theme-control-height-lg) + var(--goo-theme-space-xs) +
+			var(--goo-theme-space-2xs)
+	);
+	--goo-grid-trigger-preset-preview-size: var(--goo-theme-control-height-md);
+	--goo-grid-trigger-preview-transition: opacity var(--goo-theme-transition-fast);
 	box-sizing: border-box;
 	clear: both;
 	color: var(--goo-theme-fg);
 	cursor: pointer;
 	display: block;
 	fill: var(--goo-theme-fg);
-	height: 4rem;
+	height: var(--goo-grid-trigger-height);
 	inline-size: 100%;
-	line-height: 55px;
+	line-height: var(--goo-grid-trigger-line-height);
 	outline: none;
 	position: relative;
 	user-select: none;
@@ -299,7 +328,7 @@ goo-grid-popout-trigger:focus::after {
 	position: absolute;
 	top: 0;
 	width: 100%;
-	z-index: 2;
+	z-index: var(--goo-grid-trigger-focus-layer);
 }
 
 goo-grid-popout-trigger[aria-disabled="true"] {
@@ -319,10 +348,10 @@ goo-grid-popout-trigger :global(grid-title) {
 	display: flex;
 	flex-direction: column;
 	color: var(--goo-theme-fg);
-	gap: 1px;
-	height: 60px;
+	gap: var(--goo-theme-space-2xs);
+	height: var(--goo-grid-trigger-icon-size);
 	justify-content: center;
-	inset-inline-start: 65px;
+	inset-inline-start: var(--goo-grid-trigger-title-inline-start);
 	line-height: 1.2;
 	overflow: hidden;
 	position: absolute;
@@ -330,21 +359,21 @@ goo-grid-popout-trigger :global(grid-title) {
 	top: 50%;
 	transform: translateY(-50%);
 	white-space: nowrap;
-	width: calc(100% - 65px - var(--goo-grid-trigger-arrow-inline-size));
+	width: calc(100% - var(--goo-grid-trigger-title-inline-start) - var(--goo-grid-trigger-arrow-inline-size));
 }
 
 .goo-grid-popout-trigger__kicker {
 	color: var(--goo-theme-muted);
-	font-size: 0.625rem;
-	font-weight: 600;
-	letter-spacing: 0.07em;
+	font-size: var(--goo-theme-font-size-xs);
+	font-weight: var(--goo-theme-font-weight-semibold);
+	letter-spacing: 0;
 	text-transform: uppercase;
 }
 
 .goo-grid-popout-trigger__title {
 	color: var(--goo-theme-fg);
-	font-size: var(--goo-theme-font-size-sm, 0.8125rem);
-	font-weight: 600;
+	font-size: var(--goo-theme-font-size-sm);
+	font-weight: var(--goo-theme-font-weight-semibold);
 	overflow: hidden;
 	text-overflow: ellipsis;
 	width: 100%;
@@ -352,17 +381,17 @@ goo-grid-popout-trigger :global(grid-title) {
 
 goo-grid-popout-trigger :global(.icon),
 goo-grid-popout-trigger :global(.goo-grid-trigger__icon) {
-	font-size: calc(var(--goo-theme-icon-lg, 1.125rem) * 1.7);
-	height: 60px !important;
+	font-size: calc(var(--goo-theme-icon-lg) * 1.7);
+	height: var(--goo-grid-trigger-icon-size) !important;
 	inset-inline-start: 0;
-	line-height: 57px;
-	margin-left: 4px;
+	line-height: var(--goo-grid-trigger-icon-line-height);
+	margin-left: var(--goo-theme-space-xs);
 	object-fit: contain;
 	position: absolute;
 	text-align: center;
 	top: 50%;
 	transform: translateY(-50%);
-	width: 60px;
+	width: var(--goo-grid-trigger-icon-size);
 }
 
 goo-grid-popout-trigger :global(.icon svg),
@@ -374,16 +403,16 @@ goo-grid-popout-trigger :global(canvas.icon),
 goo-grid-popout-trigger :global(img.icon),
 goo-grid-popout-trigger :global(canvas.goo-grid-trigger__icon),
 goo-grid-popout-trigger :global(img.goo-grid-trigger__icon) {
-	padding: 8px;
+	padding: var(--goo-theme-space-sm);
 }
 
 goo-grid-popout-trigger .goo-grid-trigger__arrow {
 	align-items: center;
-	border-radius: var(--goo-theme-radius-sm, 0.375rem);
-	color: var(--goo-theme-muted, currentColor);
+	border-radius: var(--goo-theme-radius-sm);
+	color: var(--goo-theme-muted);
 	display: inline-flex;
 	font-size: var(--goo-grid-trigger-arrow-size);
-	height: 1.5rem;
+	height: var(--goo-grid-trigger-arrow-block-size);
 	justify-content: center;
 	line-height: 1;
 	min-width: var(--goo-grid-trigger-arrow-inline-size);
@@ -393,16 +422,16 @@ goo-grid-popout-trigger .goo-grid-trigger__arrow {
 	transform: translateY(-50%);
 	transform-origin: center;
 	transition:
-		background-color var(--goo-theme-transition-fast, 150ms ease),
-		color var(--goo-theme-transition-fast, 150ms ease),
-		transform 150ms ease;
+		background-color var(--goo-theme-transition-fast),
+		color var(--goo-theme-transition-fast),
+		transform var(--goo-theme-transition-fast);
 	width: var(--goo-grid-trigger-arrow-inline-size);
 }
 
 goo-grid-popout-trigger:hover .goo-grid-trigger__arrow,
 goo-grid-popout-trigger:focus .goo-grid-trigger__arrow {
-	background: color-mix(in srgb, var(--goo-theme-fg, currentColor) 8%, transparent);
-	color: var(--goo-theme-fg, currentColor);
+	background: color-mix(in srgb, var(--goo-theme-fg) 8%, transparent);
+	color: var(--goo-theme-fg);
 }
 
 goo-grid-popout-trigger.goo-grid-trigger--opened {
@@ -441,20 +470,20 @@ goo-grid-popout-trigger.goo-grid-trigger--opened .goo-grid-trigger__arrow {
 
 :global([dir="rtl"]) goo-grid-popout-trigger :global(grid-title) {
 	left: auto;
-	right: 60px;
+	right: var(--goo-grid-trigger-icon-size);
 }
 
 goo-grid-popout-trigger.goo-grid-trigger--small {
 	align-items: center;
 	display: flex;
-	height: 4rem;
-	line-height: 37px;
+	height: var(--goo-grid-trigger-height);
+	line-height: var(--goo-grid-trigger-small-line-height);
 }
 
 goo-grid-popout-trigger.goo-grid-trigger--small :global(grid-title) {
 	align-items: center;
 	display: flex;
-	height: 40px;
+	height: var(--goo-grid-trigger-small-icon-size);
 	inset-inline-start: var(--goo-grid-trigger-title-inline-start);
 	line-height: 1.2;
 	width: calc(100% - var(--goo-grid-trigger-title-inline-start) - var(--goo-grid-trigger-arrow-inline-size));
@@ -462,11 +491,11 @@ goo-grid-popout-trigger.goo-grid-trigger--small :global(grid-title) {
 
 goo-grid-popout-trigger.goo-grid-trigger--small :global(.icon),
 goo-grid-popout-trigger.goo-grid-trigger--small :global(.goo-grid-trigger__icon) {
-	font-size: var(--goo-theme-icon-lg, 1.125rem);
-	height: 40px !important;
-	line-height: 37px;
-	margin-left: 8px;
-	width: 40px;
+	font-size: var(--goo-theme-icon-lg);
+	height: var(--goo-grid-trigger-small-icon-size) !important;
+	line-height: var(--goo-grid-trigger-small-line-height);
+	margin-left: var(--goo-theme-space-sm);
+	width: var(--goo-grid-trigger-small-icon-size);
 }
 
 goo-grid-popout-trigger.goo-grid-trigger--font :global(grid-title) {
@@ -479,53 +508,53 @@ goo-grid-popout-trigger.goo-grid-trigger--font :global(.goo-grid-trigger__icon) 
 }
 
 .goo-grid-popout-trigger__preview {
-	border-radius: var(--goo-theme-radius-sm, 0.25rem);
+	border-radius: var(--goo-theme-radius-sm);
 	object-fit: cover;
-	transition: opacity 140ms ease-out;
+	transition: var(--goo-grid-trigger-preview-transition);
 	will-change: opacity;
 }
 
 goo-grid-popout-trigger.goo-grid-trigger--preset {
-	--goo-grid-trigger-arrow-inline-size: 1.5rem;
+	--goo-grid-trigger-arrow-inline-size: var(--goo-theme-control-height-sm);
 
-	background: var(--goo-theme-surface-raised, color-mix(in srgb, var(--goo-theme-fg) 5%, var(--goo-theme-bg)));
-	border: 1px solid var(--goo-theme-border-strong, var(--goo-theme-border));
-	border-radius: var(--goo-theme-radius-lg, 0.5rem);
-	height: 2.875rem;
+	background: var(--goo-theme-surface-raised);
+	border: 1px solid var(--goo-theme-border-strong);
+	border-radius: var(--goo-theme-radius-lg);
+	height: var(--goo-grid-trigger-preset-height);
 	line-height: 1.2;
 	overflow: hidden;
 }
 
 goo-grid-popout-trigger.goo-grid-trigger--preset:hover {
 	background: color-mix(in srgb, var(--goo-theme-fg) 8%, var(--goo-theme-bg));
-	border-color: var(--goo-theme-border-strong, var(--goo-theme-border));
+	border-color: var(--goo-theme-border-strong);
 }
 
 goo-grid-popout-trigger.goo-grid-trigger--preset :global(grid-title) {
-	inset-inline-start: 3.125rem;
-	width: calc(100% - 3.125rem - var(--goo-grid-trigger-arrow-inline-size));
+	inset-inline-start: var(--goo-grid-trigger-icon-inline-size);
+	width: calc(100% - var(--goo-grid-trigger-icon-inline-size) - var(--goo-grid-trigger-arrow-inline-size));
 	align-items: flex-start;
 	text-align: left;
 }
 
 goo-grid-popout-trigger.goo-grid-trigger--preset :global(.goo-grid-popout-trigger__preview) {
-	height: 2rem !important;
-	inset-inline-start: 0.5rem;
+	height: var(--goo-grid-trigger-preset-preview-size) !important;
+	inset-inline-start: var(--goo-theme-space-sm);
 	margin-left: 0;
-	min-height: 2rem;
+	min-height: var(--goo-grid-trigger-preset-preview-size);
 	padding: 0;
-	width: 2rem !important;
+	width: var(--goo-grid-trigger-preset-preview-size) !important;
 }
 
 goo-grid-popout-trigger.goo-grid-trigger--preset :global(.goo-preview) {
-	--goo-preview-height: 2rem;
+	--goo-preview-height: var(--goo-grid-trigger-preset-preview-size);
 
-	height: 2rem !important;
-	inset-inline-start: 0.5rem;
+	height: var(--goo-grid-trigger-preset-preview-size) !important;
+	inset-inline-start: var(--goo-theme-space-sm);
 	margin-left: 0;
-	min-height: 2rem;
+	min-height: var(--goo-grid-trigger-preset-preview-size);
 	padding: 0;
-	width: 2rem !important;
+	width: var(--goo-grid-trigger-preset-preview-size) !important;
 }
 
 .goo-grid-popout-trigger__preview--next {

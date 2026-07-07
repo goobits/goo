@@ -46,8 +46,9 @@ export function createTextareaField(options: TextareaFieldOptions = {}): Textare
 		if (instance) {
 			unmount(instance)
 			instance = null
+		} else {
+			field.replaceChildren()
 		}
-		field.replaceChildren()
 	}
 
 	function render(): void {
@@ -92,7 +93,7 @@ export function createTextareaField(options: TextareaFieldOptions = {}): Textare
 		}
 	})
 	field.getValue = () => currentValue
-	field.setValue = (value) => {
+	field.setValue = value => {
 		if (destroyed) return
 		currentValue = String(value)
 		if (instance?.setValue) {

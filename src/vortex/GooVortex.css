@@ -3,8 +3,11 @@
  */
 
 .goo-vortex {
-	--goo-vortex-size: 250px;
-	--goo-vortex-z-index: 99;
+	--goo-vortex-image-z-index: 1;
+	--goo-vortex-message-radius: var(--goo-theme-radius-lg);
+	--goo-vortex-message-z-index: 2;
+	--goo-vortex-size: calc(var(--goo-theme-control-height-lg) * 6.25);
+	--goo-vortex-z-index: var(--goo-theme-layer-popout);
 
 	display: block;
 	height: var(--goo-vortex-size);
@@ -20,13 +23,13 @@
 		height: inherit;
 		position: absolute;
 		width: inherit;
-		z-index: 10;
+		z-index: var(--goo-vortex-image-z-index);
 	}
 
 	[data-goo-vortex-message] {
 		background: rgb(0 0 0 / 25%);
 		border: 1px solid rgb(0 0 0 / 15%);
-		border-radius: 10px;
+		border-radius: var(--goo-vortex-message-radius);
 		box-sizing: border-box;
 		color: #fff;
 		display: block;
@@ -36,7 +39,7 @@
 		text-align: center;
 		text-shadow: 0 0 3px #000;
 		width: inherit;
-		z-index: 11;
+		z-index: var(--goo-vortex-message-z-index);
 	}
 
 	&[data-has-message='false'] [data-goo-vortex-message] {

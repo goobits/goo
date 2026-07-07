@@ -5,22 +5,22 @@
 .goo-radio-group {
 	display: flex;
 	flex-direction: column;
-	gap: var(--goo-theme-space-sm, 0.5rem);
+	gap: var(--goo-theme-space-sm);
 	outline: none;
 	width: 100%;
 }
 
 .goo-radio-group:focus-visible {
-	outline: 2px solid var(--goo-theme-focus-ring, #3b82f6);
+	outline: 2px solid var(--goo-theme-focus-ring);
 	outline-offset: 2px;
-	border-radius: 4px;
+	border-radius: var(--goo-theme-radius-sm);
 }
 
 /* Options container */
 .goo-radio-group__options {
 	display: flex;
 	flex-direction: column;
-	gap: var(--goo-theme-space-sm, 0.5rem);
+	gap: var(--goo-theme-space-sm);
 	width: 100%;
 }
 
@@ -28,7 +28,7 @@
 .goo-radio-group[data-layout='horizontal'] .goo-radio-group__options {
 	flex-direction: row;
 	flex-wrap: wrap;
-	gap: var(--goo-theme-space-md, 0.75rem);
+	gap: var(--goo-theme-space-md);
 }
 
 /* Disabled state */

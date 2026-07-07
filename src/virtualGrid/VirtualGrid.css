@@ -1,7 +1,12 @@
 .goo-virtual-grid {
+	--goo-virtual-grid-cell-min-inline-size: calc(var(--goo-theme-control-height-lg) * 3);
+
 	display: grid;
-	gap: var(--goo-virtual-grid-gap, var(--goo-theme-space-md, 1rem));
-	grid-template-columns: var(--goo-virtual-grid-columns, repeat(auto-fill, minmax(120px, 1fr)));
+	gap: var(--goo-virtual-grid-gap, var(--goo-theme-space-md));
+	grid-template-columns: var(
+		--goo-virtual-grid-columns,
+		repeat(auto-fill, minmax(var(--goo-virtual-grid-cell-min-inline-size), 1fr))
+	);
 }
 
 .goo-virtual-grid-spacer {

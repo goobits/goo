@@ -387,18 +387,3 @@ export function buildFooter(
 
 	return elements
 }
-
-/**
- * Create focus trap sentinels for a dialog.
- */
-export function createFocusTrapSentinels(): { $start: HTMLElement; $end: HTMLElement } {
-	const $start = document.createElement('div')
-	$start.className = 'goo-dialog__focus-trap'
-	$start.tabIndex = 0
-
-	const $end = document.createElement('div')
-	$end.className = 'goo-dialog__focus-trap'
-	$end.tabIndex = 0
-
-	return { $start, $end }
-}

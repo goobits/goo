@@ -24,6 +24,10 @@
 		var(--goo-theme-accent-fg, #fff)
 	);
 	--goo-button-group-height: var(--goo-theme-control-height-md, 2rem);
+	--goo-button-group-indicator-motion: var(--goo-theme-transition-normal);
+	--goo-button-group-indicator-radius-inset: calc(var(--goo-theme-space-2xs) * 0.5);
+	--goo-button-group-motion-fast: var(--goo-theme-transition-fast);
+	--goo-button-group-stacked-gap: var(--goo-theme-space-xs);
 
 	box-sizing: border-box;
 	display: inline-flex;
@@ -31,7 +35,7 @@
 	background: var(--goo-button-group-bg);
 	border: 1px solid var(--goo-button-group-border);
 	border-radius: var(--goo-button-group-radius);
-	box-shadow: inset 0 1px 0 color-mix(in srgb, var(--goo-theme-fg, #fff) 5%, transparent);
+	box-shadow: inset 0 1px 0 color-mix(in srgb, var(--goo-theme-fg) 5%, transparent);
 	height: var(--goo-button-group-height);
 	overflow: hidden;
 	outline: none;
@@ -47,15 +51,15 @@
 	inset: 0 auto 0 0;
 	z-index: 0;
 	width: calc(100% / var(--goo-button-group-option-count));
-	border-radius: max(0px, calc(var(--goo-button-group-radius) - 1px));
+	border-radius: max(0px, calc(var(--goo-button-group-radius) - var(--goo-button-group-indicator-radius-inset, 1px)));
 	background: var(--goo-button-group-selected-bg);
 	opacity: 0;
 	pointer-events: none;
 	transform: translateX(calc(var(--goo-button-group-selected-index) * 100%));
 	transition:
-		opacity 0.12s ease,
-		transform var(--goo-theme-transition-normal, 0.2s ease),
-		background-color var(--goo-theme-transition-fast, 0.15s ease);
+		opacity var(--goo-button-group-motion-fast),
+		transform var(--goo-button-group-indicator-motion),
+		background-color var(--goo-button-group-motion-fast);
 }
 
 .goo-button-group.goo-button-group--single-select::before {
@@ -63,7 +67,7 @@
 }
 
 .goo-button-group:focus-visible {
-	outline: 2px solid var(--goo-theme-focus-ring, #3b82f6);
+	outline: 2px solid var(--goo-theme-focus-ring);
 	outline-offset: 2px;
 }
 
@@ -71,12 +75,12 @@
 .goo-button-group > .goo-button {
 	/* Reset gradient to flat background */
 	--goo-button-bg: transparent;
-	--goo-button-bg-hover: var(--goo-theme-border, rgba(128, 128, 128, 0.15));
+	--goo-button-bg-hover: var(--goo-theme-border);
 	--goo-button-border: transparent;
 	background: var(--goo-button-bg);
 	border: none;
 	border-radius: 0;
-	border-right: 1px solid var(--goo-theme-border, rgba(128, 128, 128, 0.2));
+	border-right: 1px solid var(--goo-theme-border);
 	flex: 1 1 0;
 	justify-content: center;
 	height: 100%;
@@ -87,9 +91,9 @@
 	transform: none !important;
 	text-transform: none;
 	transition:
-		background-color var(--goo-theme-transition-fast, 0.15s ease),
-		color var(--goo-theme-transition-fast, 0.15s ease),
-		box-shadow var(--goo-theme-transition-fast, 0.15s ease);
+		background-color var(--goo-button-group-motion-fast),
+		color var(--goo-button-group-motion-fast),
+		box-shadow var(--goo-button-group-motion-fast);
 	position: relative;
 	z-index: 1;
 	text-align: center;
@@ -159,7 +163,7 @@
 
 /* Focused state (keyboard nav) */
 .goo-button-group > .goo-button.goo-button--focused {
-	box-shadow: inset 0 0 0 2px var(--goo-theme-focus-ring, rgba(59, 130, 246, 0.5));
+	box-shadow: inset 0 0 0 2px var(--goo-theme-focus-ring);
 }
 
 /* Disabled state */
@@ -170,12 +174,12 @@
 
 /* Compact size variant - for dense UIs like editors */
 .goo-button-group[size='compact'] {
-	--goo-button-group-height: var(--goo-theme-control-height-sm, 1.5rem);
+	--goo-button-group-height: var(--goo-theme-control-height-sm);
 }
 
 .goo-button-group[size='compact'] > .goo-button {
-	padding: 0 0.625rem;
-	font-size: var(--goo-theme-font-size-xs, 0.75rem);
+	padding: var(--goo-theme-control-padding-sm);
+	font-size: var(--goo-theme-font-size-xs);
 }
 
 .goo-button-group[size='compact'] > .goo-button.goo-button--icon-only {
@@ -198,9 +202,9 @@
 
 .goo-button-group[data-layout='vertical'] > .goo-button {
 	border-right: none;
-	border-bottom: 1px solid var(--goo-theme-border, rgba(128, 128, 128, 0.2));
+	border-bottom: 1px solid var(--goo-theme-border);
 	width: 100%;
-	height: var(--goo-theme-control-height-md, 2rem);
+	height: var(--goo-theme-control-height-md);
 	flex: 0 0 auto;
 	justify-content: center;
 }
@@ -236,23 +240,38 @@
 
 .goo-button-group > .goo-button[layout='stacked'] {
 	flex-direction: column;
-	gap: 0.25em;
+	gap: var(--goo-button-group-stacked-gap);
 	height: auto;
-	padding: 0.5rem 0.75rem;
+	padding: var(--goo-theme-space-sm) var(--goo-theme-space-md);
 	line-height: 1.2;
 	min-height: unset;
 	text-transform: none;
 }
 
 .goo-button-group > .goo-button[layout='stacked'] > span {
-	font-size: var(--goo-theme-font-size-xs, 0.75rem);
-	font-weight: 500;
-	letter-spacing: 0.02em;
+	font-size: var(--goo-theme-font-size-xs);
+	font-weight: var(--goo-theme-font-weight-medium);
+	letter-spacing: 0;
+}
+
+@media (hover: none) and (pointer: coarse) {
+	.goo-button-group,
+	.goo-button-group[size='compact'] {
+		--goo-button-group-height: max(var(--goo-theme-control-height-touch), var(--goo-theme-control-height-md));
+	}
+
+	.goo-button-group[data-layout='vertical'] > .goo-button {
+		height: max(var(--goo-theme-control-height-touch), var(--goo-theme-control-height-md));
+	}
+
+	.goo-button-group > .goo-button[layout='stacked'] {
+		min-height: max(var(--goo-theme-control-height-touch), var(--goo-theme-control-height-md));
+	}
 }
 
 @media (prefers-reduced-motion: reduce) {
 	.goo-button-group::before,
 	.goo-button-group > .goo-button {
-		transition-duration: 0.01ms;
+		transition: none;
 	}
 }

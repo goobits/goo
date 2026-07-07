@@ -47,7 +47,6 @@ export function createSelectField(options: SelectFieldOptions = {}): GooSelectEl
 			unmount(instance)
 			instance = null
 		}
-		field.replaceChildren()
 	}
 
 	function render(): void {
@@ -119,7 +118,7 @@ export function createSelectField(options: SelectFieldOptions = {}): GooSelectEl
 			? normalizeOptions(options.options)
 			: ((component().getOptions as (() => GooSelectOption[]) | undefined)?.() ??
 				normalizeOptions(options.options))
-	field.setOptions = (nextOptions) => {
+	field.setOptions = nextOptions => {
 		if (destroyed) return
 		options.options = nextOptions
 		const setOptions = component().setOptions as
@@ -131,7 +130,7 @@ export function createSelectField(options: SelectFieldOptions = {}): GooSelectEl
 			render()
 		}
 	}
-	field.setTriggerIcon = (icon) => {
+	field.setTriggerIcon = icon => {
 		if (destroyed) return
 		options.triggerIcon = icon ?? undefined
 		const setTriggerIcon = component().setTriggerIcon as
