@@ -385,7 +385,7 @@ $effect(() => {
 					tabindex={onrowactivate ? (slot === activeSlot ? 0 : -1) : undefined}
 					style:grid-template-columns={templateColumns}
 					onclick={(event) => handleRowClick(entry.row, entry.rowIndex, event)}
-					onkeydowncapture={(event) => handleRowKeydown(entry.row, entry.rowIndex, slot, event)}
+					onkeydown={(event) => handleRowKeydown(entry.row, entry.rowIndex, slot, event)}
 					onfocus={() => { activeSlot = slot }}
 					data-row-index={entry.rowIndex}
 					data-slot={slot}
