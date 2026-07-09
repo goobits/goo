@@ -9,7 +9,7 @@
 	background: var(--goo-dialog-backdrop, rgba(0, 0, 0, 0.7));
 	backdrop-filter: var(--goo-dialog-backdrop-filter, none);
 	-webkit-backdrop-filter: var(--goo-dialog-backdrop-filter, none);
-	z-index: var(--goo-dialog-z-index, var(--goo-theme-layer-modal, 99999));
+	z-index: var(--goo-dialog-z-index, var(--goo-theme-layer-modal));
 	opacity: 0;
 	transition: opacity var(--goo-dialog-backdrop-transition-duration, var(--goo-dialog-transition, var(--goo-theme-transition-normal))) ease-out;
 }

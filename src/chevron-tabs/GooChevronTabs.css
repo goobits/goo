@@ -63,16 +63,16 @@
 	);
 	--goo-chevron-tabs-tab-bg: color-mix(
 		in srgb,
-		var(--goo-theme-surface-raised, #181a22) 72%,
-		var(--goo-theme-bg, #05070a)
+		var(--goo-theme-surface-raised) 72%,
+		var(--goo-theme-bg)
 	);
 	--goo-chevron-tabs-hover-bg: color-mix(
 		in srgb,
 		var(--goo-chevron-tabs-selected-color) 26%,
 		var(--goo-chevron-tabs-tab-bg)
 	);
-	--goo-chevron-tabs-selected-color: var(--goo-theme-selected, var(--goo-theme-accent, #79f2b0));
-	--goo-chevron-tabs-selected-foreground: var(--goo-theme-selected-fg, var(--goo-theme-accent-fg, #0c0e14));
+	--goo-chevron-tabs-selected-color: var(--goo-theme-accent);
+	--goo-chevron-tabs-selected-foreground: var(--goo-theme-accent-fg);
 	--goo-chevron-tabs-control-hover-bg: color-mix(in srgb, var(--goo-chevron-tabs-fg) 22%, transparent);
 	--goo-chevron-tabs-control-pressed-bg: color-mix(in srgb, var(--goo-chevron-tabs-fg) 34%, transparent);
 	height: var(--goo-chevron-tabs-height);
@@ -231,11 +231,11 @@
 }
 
 .goo-popout.goo-tooltip.goo-chevron-tabs__activity-tooltip {
-	--goo-tooltip-bg: var(--goo-theme-bg, #11151c);
-	--goo-tooltip-fg: var(--goo-theme-fg, #f7fbf8);
-	--goo-tooltip-border: var(--goo-theme-border, color-mix(in srgb, var(--goo-tooltip-fg) 22%, transparent));
+	--goo-tooltip-bg: var(--goo-theme-bg);
+	--goo-tooltip-fg: var(--goo-theme-fg);
+	--goo-tooltip-border: var(--goo-theme-border);
 	--goo-tooltip-padding: 0.45rem 0.55rem;
-	--goo-tooltip-radius: var(--goo-theme-radius-sm, 6px);
+	--goo-tooltip-radius: var(--goo-theme-radius-sm);
 	--goo-tooltip-font-size: 0.72rem;
 	--goo-tooltip-line-height: 1.35;
 }
