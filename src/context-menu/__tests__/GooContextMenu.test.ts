@@ -220,6 +220,36 @@ describe('createGooContextMenu', () => {
 		}
 	})
 
+	it('toggles closed when reopened from the same element anchor', async() => {
+		const anchor = document.createElement('button')
+		const otherAnchor = document.createElement('button')
+		document.body.append(anchor, otherAnchor)
+		const menu = createGooContextMenu({
+			options: [
+				{ id: 'copy', label: 'Copy' }
+			]
+		})
+		await tick()
+
+		expect(menu.open({ at: anchor })).toBe(true)
+		await Promise.resolve()
+		expect(menu.isOpen()).toBe(true)
+
+		// Same anchor: toggle closed without wiring anything in the owner.
+		expect(menu.open({ at: anchor })).toBe(false)
+		expect(menu.isOpen()).toBe(false)
+
+		// A different anchor while open repositions instead of closing.
+		expect(menu.open({ at: anchor })).toBe(true)
+		await Promise.resolve()
+		expect(menu.open({ at: otherAnchor })).toBe(true)
+		expect(menu.isOpen()).toBe(true)
+
+		await menu.destroy()
+		anchor.remove()
+		otherAnchor.remove()
+	})
+
 	it('suppresses the browser context menu over the open menu popout', async() => {
 		const menu = createGooContextMenu({
 			options: [

@@ -117,6 +117,10 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 		menu: {
 			arrow: true,
 			backdrop: false,
+			/* Menus size to their items, not to the (often tiny icon-button)
+			   trigger: trigger-width sizing writes an inline width on the list,
+			   leaving rows narrower than the menu's width floor. */
+			width: 'content',
 			...menu,
 			popoutClassName: [ 'goo-context-menu-popout', className, menu.popoutClassName ].filter(Boolean).join(' '),
 			semantics: menu.semantics ?? CONTEXT_MENU_SEMANTICS
@@ -150,18 +154,29 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 			positionAt = { x: x ?? 0, y: y ?? 0 }
 		}
 		const anchorElement = positionAt instanceof HTMLElement ? positionAt : null
+
+		if (contextMenuOpened || contextMenu.isOpen()) {
+			// Opening again from the same element anchor toggles the menu
+			// closed, like a native menu button; trigger owners get this
+			// without wiring their own toggle.
+			if (anchorElement && anchorElement === contextMenuAnchor) {
+				contextMenu.close()
+				return false
+			}
+			contextMenuAnchor = anchorElement
+			const pointDefaults = getPointOpenDefaults(positionAt, restOpts)
+			return contextMenu.updatePosition({
+				...restOpts,
+				...pointDefaults,
+				at: positionAt
+			})
+		}
+
 		contextMenuAnchor = anchorElement
 		const pointDefaults = getPointOpenDefaults(positionAt, restOpts)
 		const openOpts = {
 			...restOpts,
 			...pointDefaults
-		}
-
-		if (contextMenuOpened || contextMenu.isOpen()) {
-			return contextMenu.updatePosition({
-				...openOpts,
-				at: positionAt
-			})
 		}
 
 		const shouldFocusPanel = opts.autoFocus === true
