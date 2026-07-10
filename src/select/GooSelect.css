@@ -262,6 +262,10 @@
 	margin-top: 0;
 	box-shadow: none;
 	background: transparent;
+	/* Fill the shell: width floors and keepWithin can make the popout wider
+	   than the list's content width, and rows must span the full menu. The
+	   shell still shrink-wraps to the list's max-content size. */
+	width: auto;
 }
 
 .goo-select__options--width-content {
