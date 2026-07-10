@@ -254,6 +254,9 @@ export interface GooSelectOpenOptions {
 	/** Override the popout offset. */
 	offset?: { x?: number; y?: number }
 
+	/** Override whether this open call's popout shows an anchor arrow. */
+	showArrow?: boolean
+
 	/** Extra class names appended to this open call's popout. */
 	popoutClassName?: string
 }

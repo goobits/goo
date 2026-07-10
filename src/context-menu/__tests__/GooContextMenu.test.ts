@@ -188,7 +188,7 @@ describe('createGooContextMenu', () => {
 		expect(Number.parseFloat(popout?.style.top ?? '')).toBe(80)
 	})
 
-	it('opens point menus to the right of the cursor by default', async() => {
+	it('opens point menus flush at the cursor with no arrow by default', async() => {
 		const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect
 		const menu = createGooContextMenu({
 			options: [
@@ -208,12 +208,10 @@ describe('createGooContextMenu', () => {
 			await Promise.resolve()
 
 			const popout = document.querySelector<HTMLElement>('.goo-popout.goo-context-menu-popout')
-			const arrow = popout?.querySelector<HTMLElement>('.goo-popout__arrow')
 
-			expect(Number.parseFloat(popout?.style.left ?? '')).toBe(116)
-			expect(Number.parseFloat(popout?.style.top ?? '')).toBe(63)
-			expect(arrow?.classList.contains('left')).toBe(true)
-			expect(Number.parseFloat(arrow?.style.top ?? '')).toBe(8)
+			expect(Number.parseFloat(popout?.style.left ?? '')).toBe(100)
+			expect(Number.parseFloat(popout?.style.top ?? '')).toBe(80)
+			expect(popout?.querySelector('.goo-popout__arrow')).toBeNull()
 			expect(menu.getHoveredOptionId()).toBeNull()
 			expect(document.querySelector('.goo-select__option--hovered')).toBeNull()
 		} finally {

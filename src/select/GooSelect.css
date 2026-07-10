@@ -217,7 +217,7 @@
 }
 
 .goo-select--open .goo-select__trigger-arrow {
-	transform: rotate(90deg);
+	transform: rotate(180deg);
 }
 
 /* ============================================================================
@@ -289,6 +289,7 @@
 	--goo-menu-shadow: var(--goo-select-popout-shadow);
 	--goo-menu-hover-bg: var(--goo-theme-accent);
 	--goo-menu-hover-fg: var(--goo-theme-accent-fg);
+	--goo-menu-selected-bg: color-mix(in srgb, var(--goo-theme-accent) 16%, transparent);
 	--goo-menu-layer: var(--goo-theme-layer-popout);
 	--goo-context-menu-min-width: calc(var(--goo-theme-control-height-lg) * 4.8);
 	--goo-select-padding: var(--goo-theme-space-xs);
@@ -636,17 +637,27 @@
 	color: var(--goo-select-fg);
 }
 
-/* Menu active rows live after the base item states so pointer hover, keyboard
-   hover, selected rows, and ARIA-selected rows resolve through one foreground. */
+/* Selected rows read as state, not cursor: checkmark plus a soft accent tint.
+   The full accent pill is reserved for the active row so hovering never shows
+   two filled rows at once. */
 .goo-popout.goo-menu-popout
-	.goo-select__option:is(:hover, .goo-select__option--hovered, .goo-select__option--selected, [aria-selected='true']) {
+	.goo-select__option:is(.goo-select__option--selected, [aria-selected='true']) {
+	background: var(--goo-menu-selected-bg);
+	color: var(--goo-select-fg);
+	box-shadow: none;
+}
+
+/* Menu active rows live after the selected state so pointer hover and keyboard
+   hover (including on the selected row itself) resolve through one accent pill. */
+.goo-popout.goo-menu-popout
+	.goo-select__option:is(:hover, .goo-select__option--hovered) {
 	background: var(--goo-menu-hover-bg);
 	color: var(--goo-menu-hover-fg);
 	box-shadow: none;
 }
 
 .goo-popout.goo-menu-popout
-	.goo-select__option:is(:hover, .goo-select__option--hovered, .goo-select__option--selected, [aria-selected='true'])
+	.goo-select__option:is(:hover, .goo-select__option--hovered)
 	:is(.goo-select__icon, .goo-select__check, .goo-select__submenu-arrow, .goo-select__shortcut-key) {
 	color: var(--goo-menu-hover-fg);
 }
@@ -739,4 +750,20 @@
 .goo-select__options::-webkit-scrollbar-thumb:hover {
 	background: var(--goo-select-scrollbar-thumb-hover);
 	background-clip: padding-box;
+}
+
+/* ============================================================================
+   Reduced Motion
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+	.goo-select__trigger,
+	.goo-select__trigger-arrow,
+	.goo-select__option {
+		transition: none;
+	}
+
+	.goo-select--open .goo-select__options {
+		animation: none;
+	}
 }

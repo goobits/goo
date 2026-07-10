@@ -214,6 +214,7 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 		actionContext: contextOverride,
 		align: alignOverride,
 		offset: offsetOverride,
+		showArrow,
 		popoutClassName
 	} = options
 	if (contextOverride) {
@@ -268,7 +269,7 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 		escapeToClose: true,
 		initialFocus,
 		keepWithin: keepWithin || { element: document.body, margin: 15 },
-		showArrow: currentMenu.arrow,
+		showArrow: showArrow ?? currentMenu.arrow,
 		showBackdrop: currentMenu.backdrop,
 		at: positionAt,
 		align: alignOverride ?? getSelectMenuAlign(currentMenu),
@@ -634,7 +635,7 @@ function getTriggerIconClasses(icon: unknown): string {
 			>{triggerLabel}</span>
 			<span class="goo-select__trigger-arrow">
 				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-					<path d="m9 18 6-6-6-6"></path>
+					<path d="m6 9 6 6 6-6"></path>
 				</svg>
 			</span>
 		</button>

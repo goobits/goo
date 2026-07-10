@@ -2,6 +2,10 @@ export type PopoutAnimationState = {
 	cleanup: (() => void) | null
 }
 
+function prefersReducedMotion(): boolean {
+	return globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+}
+
 export function cancelPopoutAnimation(state: PopoutAnimationState): void {
 	state.cleanup?.()
 	state.cleanup = null
@@ -32,6 +36,13 @@ export function animatePopoutIn({
 			resolve()
 		}
 		state.cleanup = finish
+
+		if (prefersReducedMotion()) {
+			element.style.transform = 'translateY(0)'
+			element.style.opacity = '1'
+			finish()
+			return
+		}
 
 		element.style.transition = 'opacity 150ms ease-out, transform 150ms ease-out'
 		element.style.transform = 'translateY(-4px)'
@@ -72,6 +83,12 @@ export function animatePopoutOut(
 			resolve()
 		}
 		state.cleanup = finish
+
+		if (prefersReducedMotion()) {
+			element.style.opacity = '0'
+			finish()
+			return
+		}
 
 		element.style.transition = 'opacity 150ms ease-out'
 		element.style.opacity = '0'

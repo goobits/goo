@@ -16,8 +16,6 @@ import type {
 } from '../select/index.ts'
 import { createLifecycleBag } from '../support/utils/lifecycleBag.ts'
 
-const DEFAULT_CURSOR_GAP_X = 16
-const DEFAULT_CURSOR_ARROW_TIP_OFFSET_Y = 17
 const POINTER_CONTEXT_MENU_GESTURE_MS = 500
 const CONTEXT_MENU_SEMANTICS: GooSelectDropdownSemantics = {
 	containerRole: 'menu',
@@ -151,7 +149,6 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 		if (x !== undefined || y !== undefined) {
 			positionAt = { x: x ?? 0, y: y ?? 0 }
 		}
-		positionAt = getPointOpenAnchor(positionAt, restOpts)
 		const anchorElement = positionAt instanceof HTMLElement ? positionAt : null
 		contextMenuAnchor = anchorElement
 		const pointDefaults = getPointOpenDefaults(positionAt, restOpts)
@@ -366,32 +363,18 @@ function isEventOnElement(event: Event, element: HTMLElement): boolean {
 	return target instanceof Node && element.contains(target)
 }
 
+/* Point opens (right-click) place the menu flush at the pointer like native
+   context menus: top-left corner on the cursor, no anchor arrow. Element
+   anchors keep the configured arrow. */
 function getPointOpenDefaults(
 	positionAt: GooContextMenuOpenOptions['at'],
 	opts: Omit<GooContextMenuOpenOptions, 'at' | 'x' | 'y'>
-): Pick<GooContextMenuOpenOptions, 'align' | 'offset'> {
+): Pick<GooContextMenuOpenOptions, 'align' | 'offset' | 'showArrow'> {
 	if (!isPointAnchor(positionAt)) return {}
 	return {
 		align: opts.align ?? positionAt.align ?? 'left top to right top',
-		offset: opts.offset ?? positionAt.offset ?? { x: DEFAULT_CURSOR_GAP_X, y: 0 }
-	}
-}
-
-function getPointOpenAnchor(
-	positionAt: GooContextMenuOpenOptions['at'],
-	opts: Omit<GooContextMenuOpenOptions, 'at' | 'x' | 'y'>
-): GooContextMenuOpenOptions['at'] {
-	if (!isPointAnchor(positionAt)) return positionAt
-	if (opts.align || opts.offset || positionAt.align || positionAt.offset) return positionAt
-
-	const pointX = positionAt.point?.x ?? positionAt.x ?? 0
-	const pointY = positionAt.point?.y ?? positionAt.y ?? 0
-	return {
-		...positionAt,
-		point: {
-			x: pointX,
-			y: pointY - DEFAULT_CURSOR_ARROW_TIP_OFFSET_Y
-		}
+		offset: opts.offset ?? positionAt.offset ?? { x: 0, y: 0 },
+		showArrow: opts.showArrow ?? false
 	}
 }
 
