@@ -293,15 +293,27 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 			if (contextMenuAnchor && isEventOnElement(event, contextMenuAnchor)) return
 			closeForPageUnfocus()
 		}
+		// Point opens sit flush under the cursor, so a repeat right-click lands on
+		// the open menu itself; native menus swallow that instead of showing the
+		// browser context menu.
+		const suppressMenuContextMenu = (event: MouseEvent) => {
+			const target = event.target
+			if (target instanceof Element && target.closest('.goo-popout')) {
+				event.preventDefault()
+				event.stopPropagation()
+			}
+		}
 
 		window.addEventListener('blur', closeForPageUnfocus)
 		window.addEventListener('pagehide', closeForPageUnfocus)
 		document.addEventListener('pointerdown', closeForOutsidePointer, true)
+		document.addEventListener('contextmenu', suppressMenuContextMenu, true)
 		document.addEventListener('visibilitychange', closeForVisibilityChange)
 		releasePageUnfocus = () => {
 			window.removeEventListener('blur', closeForPageUnfocus)
 			window.removeEventListener('pagehide', closeForPageUnfocus)
 			document.removeEventListener('pointerdown', closeForOutsidePointer, true)
+			document.removeEventListener('contextmenu', suppressMenuContextMenu, true)
 			document.removeEventListener('visibilitychange', closeForVisibilityChange)
 			releasePageUnfocus = null
 		}

@@ -220,6 +220,29 @@ describe('createGooContextMenu', () => {
 		}
 	})
 
+	it('suppresses the browser context menu over the open menu popout', async() => {
+		const menu = createGooContextMenu({
+			options: [
+				{ id: 'copy', label: 'Copy' }
+			]
+		})
+		await tick()
+
+		expect(menu.open({ x: 40, y: 40 })).toBe(true)
+		await Promise.resolve()
+		expect(menu.isOpen()).toBe(true)
+
+		const option = document.querySelector<HTMLElement>('.goo-popout .goo-select__option')
+		expect(option).not.toBeNull()
+		const rightClick = new MouseEvent('contextmenu', { bubbles: true, cancelable: true })
+		option?.dispatchEvent(rightClick)
+
+		expect(rightClick.defaultPrevented).toBe(true)
+		expect(menu.isOpen()).toBe(true)
+
+		await menu.destroy()
+	})
+
 	it('closes when the page loses focus', async() => {
 		const menu = createGooContextMenu({
 			options: [

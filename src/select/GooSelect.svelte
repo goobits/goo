@@ -377,6 +377,14 @@ export function toggle(): void {
 	}
 }
 
+export function isOpen(): boolean {
+	return opened
+}
+
+export function getHoveredOptionId(): string | null {
+	return panel?.hoveredId ?? null
+}
+
 export function enable(): void {
 	effectiveDisabled = false
 }

@@ -55,7 +55,6 @@
 	--goo-select-motion-fast: var(--goo-theme-transition-fast);
 	--goo-select-motion-normal: var(--goo-theme-transition-normal);
 	--goo-select-shortcut-gap: calc(var(--goo-theme-space-2xs) * 1.5);
-	--goo-select-shortcut-plain-gap: var(--goo-select-options-gap);
 	--goo-select-shortcut-plain-padding-start: var(--goo-select-item-box-size);
 	--goo-select-shortcut-padding-start: calc(var(--goo-theme-control-height-sm) * 0.75);
 	--goo-select-shortcut-key-min-width: calc(var(--goo-theme-control-height-sm) * 0.9);
@@ -216,8 +215,9 @@
 	height: var(--goo-select-trigger-icon-size);
 }
 
+/* Negative angle so the open flip sweeps up the right side. */
 .goo-select--open .goo-select__trigger-arrow {
-	transform: rotate(180deg);
+	transform: rotate(-180deg);
 }
 
 /* ============================================================================
@@ -281,7 +281,9 @@
 	--goo-menu-font-size: var(--goo-theme-font-size-sm);
 	--goo-menu-row-height: var(--goo-theme-control-height-sm);
 	--goo-menu-row-padding-y: var(--goo-theme-space-xs);
-	--goo-menu-row-padding-x: var(--goo-theme-space-sm);
+	/* Slightly wider than space-sm so row contents never butt against the
+	   highlight pill's edges. */
+	--goo-menu-row-padding-x: calc(var(--goo-theme-space-sm) + var(--goo-theme-space-2xs));
 	--goo-menu-radius: var(--goo-theme-radius-lg);
 	--goo-menu-row-radius: var(--goo-theme-radius-md);
 	--goo-menu-bg: color-mix(in srgb, var(--goo-theme-bg) 92%, transparent);
@@ -293,7 +295,9 @@
 	--goo-menu-layer: var(--goo-theme-layer-popout);
 	--goo-context-menu-min-width: calc(var(--goo-theme-control-height-lg) * 4.8);
 	--goo-select-padding: var(--goo-theme-space-xs);
-	--goo-select-item-bleed-x: 0;
+	/* Typed zero: this feeds calc() subtraction, and a unitless 0 makes the
+	   whole padding declaration invalid (rows lose their side padding). */
+	--goo-select-item-bleed-x: 0px;
 	--goo-select-item-gap: var(--goo-theme-space-sm);
 	--goo-select-font-size: var(--goo-menu-font-size);
 	--goo-select-item-padding-x: var(--goo-menu-row-padding-x);
@@ -343,14 +347,11 @@
 	}
 }
 
-/* Container insets the highlight from the menu edges (macOS gutter). */
+/* Container insets the highlight from the menu edges (macOS gutter). The
+   base .goo-select__options rule applies the uniform --goo-select-padding,
+   so the gutter is the same on all four sides. */
 .goo-popout.goo-menu-popout .goo-popout__content {
 	padding: 0;
-}
-
-.goo-popout.goo-select-popout .goo-select__options {
-	padding: var(--goo-theme-space-xs)
-		calc(var(--goo-theme-space-sm) - var(--goo-theme-space-2xs));
 }
 
 /* Compact rows with a rounded highlight box. */
@@ -390,26 +391,29 @@
 	color: var(--goo-theme-accent-fg);
 }
 
-/* Plain-text shortcuts, secondary color, white on the active row (4-class beats base hover). */
 .goo-popout.goo-menu-popout .goo-select__shortcut {
-	gap: var(--goo-select-shortcut-plain-gap);
+	gap: calc(var(--goo-theme-space-2xs) * 1.5);
 	padding-left: var(--goo-select-shortcut-plain-padding-start);
 }
 
+/* Contained flat keycaps so single letters read as keys rather than stray
+   text at the row's edge. No gradient or shadow; menu rows stay calm. */
 .goo-popout.goo-menu-popout .goo-select__shortcut .goo-select__shortcut-key {
-	min-width: 0;
-	height: auto;
-	padding: 0;
-	background: none;
-	border: 0;
+	min-width: calc(var(--goo-theme-icon-lg) * 0.9);
+	height: calc(var(--goo-theme-icon-lg) * 0.9);
+	padding: 0 var(--goo-theme-space-2xs);
+	background: color-mix(in srgb, var(--goo-select-fg) 7%, transparent);
+	border: 1px solid color-mix(in srgb, var(--goo-select-fg) 14%, transparent);
+	border-radius: var(--goo-theme-radius-sm);
 	box-shadow: none;
-	color: color-mix(in srgb, var(--goo-select-fg) 55%, transparent);
-	font-weight: 400;
+	color: color-mix(in srgb, var(--goo-select-fg) 62%, transparent);
+	font-weight: var(--goo-theme-font-weight-medium);
 }
 
-/* Hairline divider, inset to match the highlight gutter. */
+/* Hairline divider, bleeding through the container gutter so section breaks
+   run edge to edge. */
 .goo-popout.goo-menu-popout .goo-select__divider {
-	margin: var(--goo-theme-space-xs) calc(var(--goo-theme-space-sm) - var(--goo-theme-space-2xs));
+	margin: var(--goo-theme-space-xs) calc(var(--goo-select-padding) * -1);
 	background: color-mix(in srgb, var(--goo-theme-fg) 12%, transparent);
 }
 
@@ -660,6 +664,15 @@
 	.goo-select__option:is(:hover, .goo-select__option--hovered)
 	:is(.goo-select__icon, .goo-select__check, .goo-select__submenu-arrow, .goo-select__shortcut-key) {
 	color: var(--goo-menu-hover-fg);
+}
+
+/* Keycap chrome re-tints from the hover foreground so caps stay visible on
+   the accent pill. */
+.goo-popout.goo-menu-popout
+	.goo-select__option:is(:hover, .goo-select__option--hovered)
+	.goo-select__shortcut-key {
+	background: color-mix(in srgb, var(--goo-menu-hover-fg) 14%, transparent);
+	border-color: color-mix(in srgb, var(--goo-menu-hover-fg) 26%, transparent);
 }
 
 /* ============================================================================

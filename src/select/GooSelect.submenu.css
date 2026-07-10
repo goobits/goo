@@ -49,7 +49,10 @@
 	--goo-select-submenu-morph-delay: 100ms;
 	--goo-select-submenu-enter-duration: 150ms;
 	--goo-select-submenu-enter-delay: 260ms;
-	--goo-select-submenu-fade-duration: var(--goo-theme-transition-fast);
+	/* Must be a bare duration: theme transition tokens bundle an easing
+	   keyword, which makes the composed transition shorthand invalid and the
+	   fade snap instead of animating. */
+	--goo-select-submenu-fade-duration: 100ms;
 
 	box-sizing: border-box;
 	min-width: var(--goo-select-min-width);
@@ -64,6 +67,9 @@
 	box-sizing: border-box;
 	max-height: var(--goo-select-max-height);
 	padding: var(--goo-select-padding);
+	/* Submenus live in their own popout, so without this they inherit the page
+	   font and render larger than their parent menu rows. */
+	font-size: var(--goo-select-font-size);
 	overflow-y: auto;
 	overscroll-behavior: contain;
 	position: relative;
@@ -178,7 +184,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.goo-select-submenu-popout--morph .goo-select__submenu-frame {
+	.goo-select-submenu-popout--morph .goo-select__submenu-frame,
+	.goo-select__submenu--entering.goo-select__submenu--entering-active,
+	.goo-select__submenu--leaving-active {
 		transition: none;
 	}
 }
