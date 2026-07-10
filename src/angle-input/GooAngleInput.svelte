@@ -276,10 +276,11 @@ function emitAngleInputEvent(state: GooAngleInputEventData['state'], event?: Eve
 }
 
 /* Wraps into [0, 360) without rounding: display precision is the number
-   field's concern (degrees format at hundredths); the bound value keeps
-   full precision. */
+   field's concern; the bound value keeps full precision. In-range values
+   pass through untouched so the modulo's float noise cannot mutate them. */
 function normalizeDegrees(nextValue: number): number {
 	if (!Number.isFinite(nextValue)) return 0
+	if (nextValue >= 0 && nextValue < 360) return nextValue
 	return ((nextValue % 360) + 360) % 360
 }
 

@@ -133,8 +133,13 @@ function convertToUnit(
 			return Math.round(value)
 
 		case 'degree':
-			// Interface rounding only: angles display at hundredth precision
+			// Interface rounding only: degrees display at tenth precision
 			// while the stored value keeps full precision.
+			return formatFixedNumber(value, 1)
+
+		case 'rad':
+		case 'radian':
+			// Radians pack more meaning per digit: hundredth precision.
 			return formatFixedNumber(value, 2)
 
 		case 'in':
