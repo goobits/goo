@@ -171,6 +171,31 @@ describe('GooNumber', () => {
 		expect(input?.getAttribute('aria-valuenow')).toBe('2')
 	})
 
+	it('formats degrees and radians without changing their stored precision', () => {
+		const degrees = render(GooNumber, {
+			props: {
+				value: 12.3456,
+				unit: 'degree'
+			}
+		})
+		const degreeInput = degrees.container.querySelector<HTMLInputElement>('.goo-number__content')
+
+		expect(degreeInput?.value).toBe('12.3')
+		expect(degreeInput?.getAttribute('aria-valuenow')).toBe('12.3456')
+		degrees.unmount()
+
+		const radians = render(GooNumber, {
+			props: {
+				value: 1.2345,
+				unit: 'radian'
+			}
+		})
+		const radianInput = radians.container.querySelector<HTMLInputElement>('.goo-number__content')
+
+		expect(radianInput?.value).toBe('1.23')
+		expect(radianInput?.getAttribute('aria-valuenow')).toBe('1.2345')
+	})
+
 	it('sizes unit suffix spacing from the rendered suffix', () => {
 		const { container } = render(GooNumber, {
 			props: {

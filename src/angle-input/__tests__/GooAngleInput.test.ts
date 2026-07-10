@@ -56,13 +56,13 @@ describe('GooAngleInput', () => {
 		const input = container.querySelector<HTMLInputElement>('.goo-number__content')!
 
 		await fireEvent.focus(input)
-		await fireEvent.input(input, { target: { value: '80 degree' } })
+		await fireEvent.input(input, { target: { value: '80.123456 degree' } })
 		await fireEvent.blur(input)
 
 		expect(oninput).toHaveBeenCalledOnce()
-		expect(oninput.mock.calls[0]?.[0]).toBe(80)
+		expect(oninput.mock.calls[0]?.[0]).toBe(80.123456)
 		expect(onchange).toHaveBeenCalledOnce()
-		expect(onchange.mock.calls[0]?.[0]).toBe(80)
+		expect(onchange.mock.calls[0]?.[0]).toBe(80.123456)
 	})
 
 	it('disables the hidden form value when the angle input is disabled', () => {
