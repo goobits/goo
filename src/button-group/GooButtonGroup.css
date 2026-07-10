@@ -22,7 +22,12 @@
 	--goo-button-group-stacked-gap: var(--goo-theme-space-xs);
 
 	box-sizing: border-box;
-	display: inline-flex;
+	/* Equal columns sized by the widest option: the sliding indicator assumes
+	   uniform column widths, and flex's sum-of-contents intrinsic width would
+	   squeeze (clip) the widest label to make room for the others. */
+	display: inline-grid;
+	grid-auto-columns: 1fr;
+	grid-auto-flow: column;
 	gap: 0;
 	background: var(--goo-button-group-bg);
 	border: 1px solid var(--goo-button-group-border);
@@ -76,7 +81,6 @@
 	border: none;
 	border-radius: 0;
 	border-right: 1px solid var(--goo-theme-border);
-	flex: 1 1 0;
 	justify-content: center;
 	height: 100%;
 	line-height: 1;
@@ -96,7 +100,7 @@
 
 .goo-button-group > .goo-button.goo-button--icon-only {
 	aspect-ratio: 1;
-	flex: 0 0 var(--goo-button-group-height);
+	width: var(--goo-button-group-height);
 	padding: 0;
 }
 
@@ -184,7 +188,9 @@
 /* Vertical layout variant, let the group's height grow to fit N stacked buttons
    instead of inheriting the horizontal-mode `height: 2rem` that would squash them. */
 .goo-button-group[data-layout='vertical'] {
-	flex-direction: column;
+	grid-auto-flow: row;
+	grid-auto-columns: none;
+	grid-auto-rows: auto;
 	height: auto;
 }
 
@@ -200,7 +206,6 @@
 	border-bottom: 1px solid var(--goo-theme-border);
 	width: 100%;
 	height: var(--goo-theme-control-height-md);
-	flex: 0 0 auto;
 	justify-content: center;
 }
 

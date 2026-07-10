@@ -14,7 +14,9 @@
 	--goo-number-change-pulse: color-mix(in srgb, var(--goo-number-border-focus) 18%, transparent);
 	--goo-number-fg: var(--goo-theme-fg);
 	--goo-number-unit-fg: color-mix(in srgb, var(--goo-number-fg) 58%, transparent);
-	--goo-number-unit-width: 0;
+	/* Typed zeros: these feed calc() sums with lengths, and a unitless 0 makes
+	   the whole declaration invalid (text stops reserving stepper/unit space). */
+	--goo-number-unit-width: 0em;
 	--goo-number-arrows-bg: var(--goo-theme-surface-raised);
 	--goo-number-arrows-hover: color-mix(in srgb, var(--goo-theme-fg) 10%, transparent);
 	--goo-number-arrow-divider-inset: var(--goo-theme-space-2xs);
@@ -28,10 +30,10 @@
 	--goo-number-compact-arrow-height: var(--goo-theme-space-xs);
 	--goo-number-compact-arrow-width: calc(var(--goo-theme-space-xs) - var(--goo-theme-space-2xs) * 0.5);
 	--goo-number-compact-edge-padding: calc(var(--goo-theme-space-xs) + var(--goo-theme-space-2xs) * 0.5);
-	--goo-number-stepper-space: 0;
+	--goo-number-stepper-space: 0px;
 	--goo-number-edge-padding: var(--goo-theme-space-sm);
 	--goo-number-leading-padding: var(--goo-number-edge-padding);
-	--goo-number-trailing-padding: calc(var(--goo-number-stepper-space) + var(--goo-number-unit-padding, 0));
+	--goo-number-trailing-padding: calc(var(--goo-number-stepper-space) + var(--goo-number-unit-padding, 0px));
 	--goo-number-unit-left: auto;
 	--goo-number-unit-right: var(--goo-number-stepper-space);
 	--goo-number-arrow-slide: var(--goo-theme-space-xs);
@@ -73,7 +75,9 @@
 }
 
 .goo-number:is(:hover, :focus-within) {
-	--goo-number-stepper-space: var(--goo-number-arrows-width);
+	/* Arrows width plus a breathing gap so the value never touches the
+	   stepper's edge. */
+	--goo-number-stepper-space: calc(var(--goo-number-arrows-width) + var(--goo-theme-space-2xs));
 
 	background: color-mix(in srgb, var(--goo-theme-fg) 7%, transparent);
 }
@@ -298,7 +302,7 @@
 
 /* RTL support */
 [dir='rtl'] .goo-number {
-	--goo-number-leading-padding: calc(var(--goo-number-stepper-space) + var(--goo-number-unit-padding, 0));
+	--goo-number-leading-padding: calc(var(--goo-number-stepper-space) + var(--goo-number-unit-padding, 0px));
 	--goo-number-trailing-padding: var(--goo-number-edge-padding);
 	--goo-number-unit-left: var(--goo-number-stepper-space);
 	--goo-number-unit-right: auto;
