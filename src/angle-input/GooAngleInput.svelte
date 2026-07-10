@@ -275,10 +275,12 @@ function emitAngleInputEvent(state: GooAngleInputEventData['state'], event?: Eve
 	}
 }
 
+/* Wraps into [0, 360) without rounding: display precision is the number
+   field's concern (degrees format at hundredths); the bound value keeps
+   full precision. */
 function normalizeDegrees(nextValue: number): number {
 	if (!Number.isFinite(nextValue)) return 0
-	const rounded = Math.round(nextValue)
-	return ((rounded % 360) + 360) % 360
+	return ((nextValue % 360) + 360) % 360
 }
 
 function toDegrees(nextValue: number, nextUnit: GooAngleInputUnit): number {

@@ -132,6 +132,11 @@ function convertToUnit(
 			if (stepDecimals > 0) return formatFixedNumber(value, stepDecimals)
 			return Math.round(value)
 
+		case 'degree':
+			// Interface rounding only: angles display at hundredth precision
+			// while the stored value keeps full precision.
+			return formatFixedNumber(value, 2)
+
 		case 'in':
 			return roundNumber(value, 2) // 2 decimal places
 

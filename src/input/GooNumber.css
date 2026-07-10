@@ -77,7 +77,7 @@
 .goo-number:is(:hover, :focus-within) {
 	/* Arrows width plus a breathing gap so the value never touches the
 	   stepper's edge. */
-	--goo-number-stepper-space: calc(var(--goo-number-arrows-width) + var(--goo-theme-space-2xs));
+	--goo-number-stepper-space: calc(var(--goo-number-arrows-width) + var(--goo-theme-space-xs));
 
 	background: color-mix(in srgb, var(--goo-theme-fg) 7%, transparent);
 }
