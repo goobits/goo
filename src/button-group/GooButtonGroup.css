@@ -6,7 +6,7 @@
 .goo-button-group {
 	/* Customizable - matches standalone button defaults */
 	--goo-button-group-radius: var(--goo-theme-radius-md);
-	--goo-button-group-bg: color-mix(in srgb, var(--goo-theme-fg) 12%, transparent);
+	--goo-button-group-bg: var(--goo-theme-surface-raised);
 	--goo-button-group-border: var(--goo-theme-border);
 	--goo-button-group-selected-bg: var(--goo-theme-accent);
 	--goo-button-group-selected-bg-hover: color-mix(
@@ -181,8 +181,10 @@
 	color: var(--goo-button-group-selected-fg);
 }
 
-/* Focused state (keyboard nav) */
-.goo-button-group > .goo-button.goo-button--focused {
+/* Focused state (keyboard nav). The --focused class tracks the roving
+   tabindex at all times, so gate the ring on the group actually holding
+   focus; otherwise every group paints a ring on its selected segment at rest. */
+.goo-button-group:focus-within > .goo-button.goo-button--focused {
 	box-shadow: inset 0 0 0 2px var(--goo-theme-focus-ring);
 }
 
