@@ -18,10 +18,13 @@
 	   (canvas/WebGL) backdrops where backdrop-filter contributes nothing:
 	   crisp 0.5px ring, tight contact shadow, soft ambient, mid lift. */
 	--goo-popout-shadow:
-		drop-shadow(0 0 0.5px color-mix(in srgb, var(--goo-theme-fg) 26%, transparent))
+		drop-shadow(0 0 0.5px var(--goo-popout-ring))
 		drop-shadow(0 1px 1px rgb(0 0 0 / 22%))
 		drop-shadow(0 16px 36px rgb(0 0 0 / 40%))
 		drop-shadow(0 4px 12px rgb(0 0 0 / 26%));
+	/* Outline rides the drop-shadow ring so it wraps body + arrow as one
+	   silhouette; a real border would draw a seam line behind the arrow. */
+	--goo-popout-ring: color-mix(in srgb, var(--goo-popout-border) 65%, var(--goo-theme-fg));
 	--goo-popout-edge-shadow:
 		inset 0 1px 0 color-mix(in srgb, var(--goo-theme-fg) 20%, transparent),
 		inset 0 0 0 1px color-mix(in srgb, var(--goo-theme-fg) 5%, transparent);
@@ -50,7 +53,7 @@
 	z-index: var(--goo-popout-z-index);
 	display: block;
 	background: var(--goo-popout-bg);
-	border: 1px solid var(--goo-popout-border);
+	border: 1px solid transparent;
 	border-radius: var(--goo-popout-radius);
 	filter: var(--goo-popout-shadow);
 	outline: none;
@@ -149,7 +152,7 @@
 
 .goo-popout__arrow.left::after {
 	top: calc(var(--goo-popout-arrow-size) * -1);
-	left: calc(var(--goo-popout-arrow-size) * -1 + var(--goo-popout-hairline));
+	left: calc(var(--goo-popout-arrow-size) * -1 + var(--goo-popout-hairline) * 2);
 	border-right-color: var(--goo-popout-bg);
 }
 
@@ -162,7 +165,7 @@
 
 .goo-popout__arrow.right::after {
 	top: calc(var(--goo-popout-arrow-size) * -1);
-	right: calc(var(--goo-popout-arrow-size) * -1 + var(--goo-popout-hairline));
+	right: calc(var(--goo-popout-arrow-size) * -1 + var(--goo-popout-hairline) * 2);
 	border-left-color: var(--goo-popout-bg);
 }
 
@@ -173,7 +176,7 @@
 }
 
 .goo-popout__arrow.top::after {
-	top: calc(var(--goo-popout-arrow-size) * -1 + var(--goo-popout-hairline));
+	top: calc(var(--goo-popout-arrow-size) * -1 + var(--goo-popout-hairline) * 2);
 	left: calc(var(--goo-popout-arrow-size) * -1);
 	border-bottom-color: var(--goo-popout-bg);
 }
@@ -186,7 +189,7 @@
 }
 
 .goo-popout__arrow.bottom::after {
-	bottom: calc(var(--goo-popout-arrow-size) * -1 + var(--goo-popout-hairline));
+	bottom: calc(var(--goo-popout-arrow-size) * -1 + var(--goo-popout-hairline) * 2);
 	left: calc(var(--goo-popout-arrow-size) * -1);
 	border-top-color: var(--goo-popout-bg);
 }
