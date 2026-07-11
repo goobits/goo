@@ -7,6 +7,7 @@
 	/* Customizable via CSS custom properties */
 	--goo-button-bg: var(--goo-theme-surface-raised);
 	--goo-button-bg-hover: var(--goo-theme-border);
+	--goo-button-bg-active: color-mix(in srgb, var(--goo-button-bg-hover) 84%, black);
 	--goo-button-border: var(--goo-theme-border);
 	--goo-button-fg: var(--goo-theme-fg);
 	--goo-button-radius: var(--goo-theme-radius-md);
@@ -46,7 +47,8 @@
 	transition:
 		background var(--goo-theme-transition-normal),
 		border-color var(--goo-theme-transition-normal),
-		box-shadow var(--goo-theme-transition-normal);
+		box-shadow var(--goo-theme-transition-normal),
+		transform var(--goo-theme-transition-fast);
 
 	&:focus {
 		outline: none;
@@ -66,10 +68,14 @@
 		border-color: var(--goo-theme-border-strong);
 	}
 
-	/* Active/pressed state */
+	/* Active/pressed state: darker fill, inset depth, and a nudge down so a
+	   press reads instantly (zero-duration on the way in, eased release). */
 	&:active:not([disabled]):not(.goo-button--disabled) {
-		background: var(--goo-button-bg-hover);
+		background: var(--goo-button-bg-active);
 		border-color: var(--goo-theme-border-strong);
+		box-shadow: inset 0 1px 2px color-mix(in srgb, black 22%, transparent);
+		transform: translateY(1px);
+		transition-duration: 0s;
 	}
 
 	/* Primary variant - main call to action */
