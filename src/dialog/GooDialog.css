@@ -241,9 +241,16 @@
 	transform: scale(1.1);
 }
 
-/* Notify type - top banner */
+/* Notify type - top banner. Stacked banners offset below one another via
+   --goo-notify-offset (set by the dialog runtime); `overlap: true` keeps
+   every banner at the top edge. */
 .goo-dialog.goo-dialog--notify {
-	top: 0;
+	top: var(--goo-notify-offset, 0px);
+	transition:
+		opacity var(--goo-dialog-transition-duration, 0.15s) ease-out,
+		transform var(--goo-dialog-transition-duration, 0.15s)
+			var(--goo-dialog-transition-easing, ease-out),
+		top var(--goo-dialog-transition-duration, 0.15s) ease-out;
 	bottom: auto;
 	left: 0;
 	right: 0;

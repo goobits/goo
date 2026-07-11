@@ -71,6 +71,8 @@ export interface GooDialogOptions<TValues extends DialogValues = DialogValues> {
 	height?: string | number
 	className?: string
 	autoDismiss?: number
+	/** Notify only: cover earlier notifications instead of stacking below them. */
+	overlap?: boolean
 	onOk?: (result: DialogResult<TValues>) => void
 	onCancel?: (result: DialogResult<TValues>) => void
 	onClose?: () => void
@@ -103,6 +105,7 @@ export interface GooDialogState {
 	width: string | number
 	height: string | number
 	autoDismiss: number
+	overlap: boolean
 }
 
 // ============================================================================
@@ -204,6 +207,7 @@ class GooDialogControllerRuntime {
 			width: 'auto',
 			height: 'auto',
 			autoDismiss: 0,
+			overlap: false,
 			...options
 		}
 
@@ -651,6 +655,7 @@ class GooDialogControllerRuntime {
 			// Animate in
 			this._requestOpenFrame(() => {
 				if (!document.body.contains(this.$element)) return
+				reflowNotifyStack()
 				this.$element.setAttribute('open', '')
 				this._setInitialFocus()
 				this._startAutoDismiss()
@@ -711,6 +716,7 @@ class GooDialogControllerRuntime {
 
 		// Unregister
 		dialogManager.unregister(this)
+		reflowNotifyStack()
 
 		// Restore focus
 		if (this._previousActiveElement?.isConnected && this._previousActiveElement.focus) {
@@ -771,6 +777,22 @@ class GooDialogControllerRuntime {
 }
 
 interface GooDialogControllerRuntime extends GooDialogController {}
+
+/**
+ * Offset open notify banners below one another (newest last) so none of
+ * them cover an earlier message. Notifies opened with `overlap: true` keep
+ * the classic cover-the-previous behavior.
+ */
+function reflowNotifyStack(): void {
+	let offset = 0
+	for (const managed of dialogManager.getDialogs()) {
+		if (!(managed instanceof GooDialogControllerRuntime)) continue
+		if (managed.state.type !== 'notify' || managed.state.overlap) continue
+		if (!document.body.contains(managed.$element)) continue
+		managed.$element.style.setProperty('--goo-notify-offset', `${ offset }px`)
+		offset += managed.$element.offsetHeight
+	}
+}
 
 // ============================================================================
 // Registration & Export

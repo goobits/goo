@@ -52,6 +52,9 @@ export interface GooNotifyOptions {
 	autoDismiss?: number
 	className?: string
 	content: string | Node
+
+	/** Cover earlier notifications instead of stacking below them. */
+	overlap?: boolean
 	showClose?: boolean
 }
 
