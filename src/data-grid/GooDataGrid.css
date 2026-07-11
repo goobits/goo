@@ -20,6 +20,8 @@
 	display: grid;
 	font-size: var(--goo-theme-font-size-sm);
 	min-width: 0;
+	/* Data grids fill their container; columns size the scroll area inside. */
+	width: 100%;
 	overflow: auto;
 	position: relative;
 	scrollbar-color: color-mix(in srgb, var(--goo-data-grid-fg) 24%, transparent) transparent;
