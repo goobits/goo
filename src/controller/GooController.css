@@ -137,15 +137,16 @@
 	max-width: var(--goo-controller-color-max-width);
 }
 
-/* Checkbox type - compact toggle */
+/* Checkbox type - compact toggle. Left-aligned like every other compact
+   widget (color, angle) so controls share one edge down a panel. */
 .goo-controller.goo-controller--checkbox .goo-controller__widget {
 	flex: 1;
-	justify-content: flex-end;
+	justify-content: flex-start;
 }
 
 .goo-controller.goo-controller--checkbox .goo-svelte-control {
 	display: flex;
-	justify-content: flex-end;
+	justify-content: flex-start;
 }
 
 .goo-controller.goo-controller--radio .goo-controller__widget {
@@ -162,7 +163,7 @@
 }
 
 .goo-controller.goo-controller--radio .goo-radio-group__options {
-	align-items: flex-end;
+	align-items: flex-start;
 }
 
 /* Angle type - circular dial */
