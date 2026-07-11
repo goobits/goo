@@ -78,6 +78,13 @@ function toggle(): boolean {
 	return open
 }
 
+function handleHeaderDblclick(event: MouseEvent): void {
+	// The chevron's own clicks already toggled twice; skip so a double-click
+	// on it nets one toggle, same as a double-click on the header.
+	if ((event.target as HTMLElement).closest('.goo-panel__toggle')) return
+	toggle()
+}
+
 function assignApi(): void {
 	if (!root) return
 	if (!apiReady) {
@@ -218,7 +225,8 @@ $effect(() => {
 	style:--goo-panel-width={panelWidth}
 >
 	{#if showHeader}
-		<div bind:this={headerElement} class="goo-panel__header">
+		<!-- Convenience duplicate of the toggle button (the accessible path). -->
+		<div bind:this={headerElement} class="goo-panel__header" role="presentation" ondblclick={handleHeaderDblclick}>
 			<div bind:this={titleElement} class="goo-panel__title">{title}</div>
 			{#if collapsible}
 				<button

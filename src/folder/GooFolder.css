@@ -18,6 +18,7 @@
 	--goo-folder-radius: var(--goo-theme-radius-md);
 	--goo-folder-transition: var(--goo-theme-transition-normal);
 	--goo-folder-indent: 0px;
+	--goo-folder-header-padding-inline: var(--goo-theme-space-2xs);
 	/* Row rhythm for bare controls dropped into a folder; controller/panel
 	   rows manage their own spacing, so the default stays flush. */
 	--goo-folder-content-gap: 0px;
@@ -44,7 +45,7 @@
 	width: 100%;
 	margin: 0;
 	min-height: var(--goo-folder-header-height);
-	padding: 0 var(--goo-theme-space-2xs);
+	padding: 0 var(--goo-folder-header-padding-inline);
 	background: var(--goo-folder-header-bg);
 	border: none;
 	border-radius: var(--goo-folder-radius);

@@ -131,6 +131,12 @@
 }
 
 /* Content container */
+/* Folders share the panel's horizontal gutter so their titles and chevrons
+   line up with the panel header and toggle. */
+.goo-panel .goo-folder {
+	--goo-folder-header-padding-inline: var(--goo-theme-space-md);
+}
+
 .goo-panel__content {
 	display: none;
 	flex-direction: column;
