@@ -18,6 +18,7 @@
 	--goo-button-group-height: var(--goo-theme-control-height-md);
 	--goo-button-group-indicator-motion: var(--goo-theme-transition-normal);
 	--goo-button-group-indicator-radius-inset: calc(var(--goo-theme-space-2xs) * 0.5);
+	--goo-button-group-divider-inset: 18%;
 	--goo-button-group-motion-fast: var(--goo-theme-transition-fast);
 	--goo-button-group-stacked-gap: var(--goo-theme-space-xs);
 
@@ -80,7 +81,6 @@
 	background: var(--goo-button-bg);
 	border: none;
 	border-radius: 0;
-	border-right: 1px solid var(--goo-theme-border);
 	justify-content: center;
 	height: 100%;
 	line-height: 1;
@@ -111,6 +111,28 @@
 	white-space: nowrap;
 }
 
+/* Inset hairline dividers between segments. Dividers touching a selected
+   segment fade out so the rounded selection never has a line butting against
+   its corners (the native segmented-control treatment). */
+.goo-button-group > .goo-button:not(:last-child)::after {
+	content: '';
+	position: absolute;
+	top: var(--goo-button-group-divider-inset);
+	bottom: var(--goo-button-group-divider-inset);
+	right: 0;
+	width: 1px;
+	background: var(--goo-theme-border);
+	pointer-events: none;
+	transition: opacity var(--goo-button-group-motion-fast);
+}
+
+.goo-button-group > .goo-button.goo-button--selected::after,
+.goo-button-group > .goo-button[selected]::after,
+.goo-button-group > .goo-button:has(+ .goo-button--selected)::after,
+.goo-button-group > .goo-button:has(+ .goo-button[selected])::after {
+	opacity: 0;
+}
+
 .goo-button-group > .goo-button:hover:not(.goo-button--selected) {
 	background: var(--goo-button-bg-hover);
 }
@@ -127,7 +149,6 @@
 
 .goo-button-group > .goo-button:last-child {
 	border-radius: 0 var(--goo-button-group-radius) var(--goo-button-group-radius) 0;
-	border-right: none;
 }
 
 .goo-button-group > .goo-button:only-child {
@@ -202,11 +223,19 @@
 }
 
 .goo-button-group[data-layout='vertical'] > .goo-button {
-	border-right: none;
-	border-bottom: 1px solid var(--goo-theme-border);
 	width: 100%;
 	height: var(--goo-theme-control-height-md);
 	justify-content: center;
+}
+
+/* Stacked layout swaps the hairline to the segment's bottom edge. */
+.goo-button-group[data-layout='vertical'] > .goo-button:not(:last-child)::after {
+	top: auto;
+	right: var(--goo-button-group-divider-inset);
+	bottom: 0;
+	left: var(--goo-button-group-divider-inset);
+	width: auto;
+	height: 1px;
 }
 
 .goo-button-group[data-layout='vertical'] > .goo-button:first-child {
@@ -215,12 +244,10 @@
 
 .goo-button-group[data-layout='vertical'] > .goo-button:last-child {
 	border-radius: 0 0 var(--goo-button-group-radius) var(--goo-button-group-radius);
-	border-bottom: none;
 }
 
 .goo-button-group[data-layout='vertical'] > .goo-button:only-child {
 	border-radius: var(--goo-button-group-radius);
-	border-bottom: none;
 }
 
 /* Ensure icons are centered in button group buttons */
