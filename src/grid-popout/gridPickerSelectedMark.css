@@ -7,8 +7,11 @@
 	height: 1rem;
 	justify-content: center;
 	position: absolute;
-	right: var(--goo-theme-space-xs);
-	top: var(--goo-theme-space-xs);
+	/* Badge hangs on the corner boundary so it never covers the tile's
+	   label; the ring separates it from the tile border underneath. */
+	right: calc(var(--goo-theme-space-2xs) * -1);
+	top: calc(var(--goo-theme-space-2xs) * -1);
+	box-shadow: 0 0 0 2px var(--goo-theme-bg);
 	width: 1rem;
 	z-index: 1;
 }

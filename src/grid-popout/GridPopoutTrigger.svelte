@@ -428,9 +428,10 @@ goo-grid-popout-trigger .goo-grid-trigger__arrow {
 	width: var(--goo-grid-trigger-arrow-inline-size);
 }
 
+/* The arrow is a state indicator, not a nested button: brighten it on
+   hover but never give it its own background pill. */
 goo-grid-popout-trigger:hover .goo-grid-trigger__arrow,
 goo-grid-popout-trigger:focus .goo-grid-trigger__arrow {
-	background: color-mix(in srgb, var(--goo-theme-fg) 8%, transparent);
 	color: var(--goo-theme-fg);
 }
 
