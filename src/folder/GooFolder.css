@@ -18,6 +18,9 @@
 	--goo-folder-radius: var(--goo-theme-radius-md);
 	--goo-folder-transition: var(--goo-theme-transition-normal);
 	--goo-folder-indent: 0px;
+	/* Row rhythm for bare controls dropped into a folder; controller/panel
+	   rows manage their own spacing, so the default stays flush. */
+	--goo-folder-content-gap: 0px;
 
 	display: block;
 	position: relative;
@@ -123,7 +126,7 @@
 .goo-folder__content {
 	display: flex;
 	flex-direction: column;
-	gap: 0;
+	gap: var(--goo-folder-content-gap);
 	max-height: 0;
 	opacity: 0;
 	overflow: hidden;
