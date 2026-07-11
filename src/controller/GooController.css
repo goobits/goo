@@ -192,6 +192,10 @@
 .goo-controller .goo-input {
 	--goo-input-height: var(--goo-theme-control-height-md);
 	font-size: var(--goo-theme-font-size-sm);
+	/* Fill the widget column instead of the input's fixed default width,
+	   which overflowed narrow controller rows. */
+	width: 100%;
+	min-width: 0;
 }
 
 .goo-controller .goo-checkbox {
