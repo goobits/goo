@@ -34,6 +34,8 @@
 	position: relative;
 	width: var(--goo-checkbox-width);
 	height: var(--goo-checkbox-height);
+	/* Wrapping labels must not compress the track (the thumb would overflow). */
+	flex-shrink: 0;
 	background: var(--goo-checkbox-track-color);
 	border: 1px solid var(--goo-theme-border);
 	border-radius: calc(var(--goo-checkbox-height) / 2);

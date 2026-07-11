@@ -155,6 +155,11 @@ function convertToUnit(
 				return value.toFixed(stepDecimals)
 			}
 
+			// An explicit whole-number step means integer display (0, not 0.00).
+			if (typeof step === 'number' && Number.isFinite(step)) {
+				return Math.round(value)
+			}
+
 			// For large numbers, round to integer
 			const isLargeNumber = max >= 10 && value >= 10
 			if (isLargeNumber) {

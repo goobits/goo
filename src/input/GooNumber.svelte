@@ -16,7 +16,7 @@ export const controlSchema: SvelteControlSchema = {
 </script>
 
 <script lang="ts">
-import { onDestroy } from 'svelte'
+import { onDestroy, untrack } from 'svelte'
 import './GooNumber.css'
 
 import { containKeyboardEvent } from '../support/keyboard/_keyboardActivation.ts'
@@ -124,6 +124,44 @@ const rootStyle = $derived.by(() => {
 		values.push(`--goo-number-unit-width: ${ unitWidth.toFixed(2) }em`)
 	}
 	return values.join('; ')
+})
+
+let apiElement: HTMLDivElement | undefined
+
+// Mirror the element API GooCheckbox/GooRadioGroup attach to their roots so
+// element-driven consumers get one calling convention across controls:
+// `.value =` is silent, `setValue()` emits.
+$effect(() => {
+	const element = numberElement
+	if (!element || apiElement === element) return
+	apiElement = element
+	untrack(() => Object.defineProperties(element, {
+		value: {
+			configurable: true,
+			get: () => currentValue,
+			set: value => setValue(Number(value), { silent: true })
+		},
+		setValue: {
+			configurable: true,
+			value: (value: number, options: { silent?: boolean } = {}) => setValue(value, { silent: options.silent ?? false })
+		},
+		getValue: {
+			configurable: true,
+			value: () => getValue()
+		},
+		focus: {
+			configurable: true,
+			value: () => focus()
+		},
+		blur: {
+			configurable: true,
+			value: () => blur()
+		},
+		select: {
+			configurable: true,
+			value: () => select()
+		}
+	}))
 })
 
 export function setValue(nextValue: number, { silent = true }: { silent?: boolean } = {}): void {

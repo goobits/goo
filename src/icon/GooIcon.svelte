@@ -22,6 +22,7 @@ const inlineStyle = $derived(`width:${sizeValue};height:${sizeValue};${style}`)
 	class={['goo-icon', className].filter(Boolean).join(' ')}
 	style={inlineStyle}
 	data-value={value}
+	data-size={sizeValue}
 	data-stroke={hasStrokeOnlyIcon ? '' : undefined}
 	data-disabled={disabled ? 'true' : undefined}
 	aria-hidden={label ? undefined : 'true'}

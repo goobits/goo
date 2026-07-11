@@ -5,9 +5,10 @@
 
 .goo-number {
 	/* Customizable via CSS custom properties */
-	--goo-number-bg: transparent;
+	/* Match GooInput chrome so number fields read as inputs at rest. */
+	--goo-number-bg: var(--goo-theme-surface-sunken);
 	--goo-number-bg-focus: var(--goo-theme-surface-sunken);
-	--goo-number-border: transparent;
+	--goo-number-border: var(--goo-theme-border);
 	--goo-number-border-focus: var(--goo-theme-accent);
 	--goo-number-border-error: var(--goo-theme-warning);
 	--goo-number-focus-ring: color-mix(in srgb, var(--goo-number-border-focus) 32%, transparent);

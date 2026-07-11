@@ -242,7 +242,8 @@ describe('GooNumber', () => {
 		const upButton = container.querySelector<HTMLButtonElement>('.goo-number__arrow--up')!
 		await tick()
 
-		expect(input.value).toBe('4.00')
+		// The default whole-number step displays integers, not padded decimals.
+		expect(input.value).toBe('4')
 
 		await fireEvent.pointerDown(upButton)
 		await tick()

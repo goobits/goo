@@ -7,7 +7,7 @@
  */
 
 .goo-turnstile-field {
-	--goo-turnstile-margin: 0;
+	--goo-turnstile-margin: 0px;
 	display: inline-block;
 	margin: var(--goo-turnstile-margin);
 }

@@ -252,7 +252,7 @@ sketch-FilterFooter {
 .goo-controller--palette,
 .goo-controller--file-picker,
 .goo-controller--filter-footer {
-	--goo-controller-padding: 0;
+	--goo-controller-padding: 0px;
 
 	padding: 0;
 }

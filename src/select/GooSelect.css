@@ -25,6 +25,9 @@
 	--goo-select-max-height: calc(var(--goo-theme-control-height-lg) * 8);
 	--goo-select-padding: var(--goo-theme-space-xs);
 	--goo-select-check-size: var(--goo-theme-icon-xs);
+	/* Narrower than the icon box: the mark is small, so a full icon-lg
+	   column reads as too much air on both sides. */
+	--goo-select-check-box-size: calc(var(--goo-select-item-box-size) * 0.7);
 	--goo-select-item-box-size: var(--goo-theme-icon-lg);
 	--goo-select-item-padding-x: var(--goo-theme-space-sm);
 	--goo-select-item-padding-y: var(--goo-theme-space-xs);
@@ -538,7 +541,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: var(--goo-select-item-box-size);
+	width: var(--goo-select-check-box-size);
 	height: var(--goo-select-item-box-size);
 	flex-shrink: 0;
 	color: var(--goo-select-accent);

@@ -67,6 +67,11 @@
 	opacity: 1;
 }
 
+/* No phantom selection: hide the indicator until something is selected. */
+.goo-button-group.goo-button-group--no-selection::before {
+	opacity: 0;
+}
+
 .goo-button-group:focus-visible {
 	outline: 2px solid var(--goo-theme-focus-ring);
 	outline-offset: 2px;

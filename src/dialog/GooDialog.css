@@ -11,7 +11,10 @@
 	-webkit-backdrop-filter: var(--goo-dialog-backdrop-filter, none);
 	z-index: var(--goo-dialog-z-index, var(--goo-theme-layer-modal));
 	opacity: 0;
-	transition: opacity var(--goo-dialog-backdrop-transition-duration, var(--goo-dialog-transition, var(--goo-theme-transition-normal))) ease-out;
+	/* Bare duration only: theme transition tokens bundle an easing keyword,
+	   which would make this shorthand (with its explicit easing) invalid and
+	   silently kill the fade. */
+	transition: opacity var(--goo-dialog-backdrop-transition-duration, 0.15s) ease-out;
 }
 
 .goo-dialog-backdrop--visible {
@@ -66,9 +69,11 @@
 	z-index: calc(var(--goo-dialog-z-index, var(--goo-theme-layer-modal)) + 1);
 	opacity: 0;
 	transform: var(--goo-dialog-enter-transform, none);
+	/* Bare durations only (see backdrop note): the bundled theme token would
+	   invalidate these shorthands next to their explicit easings. */
 	transition:
-		opacity var(--goo-dialog-transition-duration, var(--goo-dialog-transition, var(--goo-theme-transition-normal))) ease-out,
-		transform var(--goo-dialog-transition-duration, var(--goo-dialog-transition, var(--goo-theme-transition-normal)))
+		opacity var(--goo-dialog-transition-duration, 0.15s) ease-out,
+		transform var(--goo-dialog-transition-duration, 0.15s)
 			var(--goo-dialog-transition-easing, ease-out);
 }
 

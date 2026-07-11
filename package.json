@@ -230,7 +230,8 @@
 	"scripts": {
 		"dev": "vite --host 127.0.0.1",
 		"test": "vitest run --maxWorkers=2",
-		"check": "pnpm run lint:check && pnpm run check:svelte && pnpm run check:types",
+		"check": "pnpm run lint:check && pnpm run check:css && pnpm run check:svelte && pnpm run check:types",
+		"check:css": "tsx scripts/checkCssConventions.ts",
 		"check:svelte": "tsx scripts/checkSvelteConventions.ts && svelte-check --tsconfig ./tsconfig.json",
 		"check:types": "tsc --noEmit",
 		"lint": "eslint src/ --fix",

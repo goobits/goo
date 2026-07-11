@@ -17,7 +17,7 @@
 	--goo-panel-z-index: var(--goo-theme-layer-popout);
 	--goo-panel-margin: var(--goo-theme-space-md);
 	--goo-panel-toggle-size: var(--goo-theme-control-height-sm);
-	--goo-panel-title-letter-spacing: 0;
+	--goo-panel-title-letter-spacing: 0px;
 	--goo-panel-toggle-transition: var(--goo-theme-transition-normal);
 	--goo-panel-focus-outline-width: 2px;
 	--goo-panel-focus-outline-offset: 1px;
@@ -243,7 +243,7 @@
 	);
 	--goo-settings-pane-width: calc(var(--goo-theme-control-height-lg) * 8.75);
 	--goo-settings-pane-category-border-width: 3px;
-	--goo-settings-pane-category-letter-spacing: 0;
+	--goo-settings-pane-category-letter-spacing: 0px;
 	--goo-settings-pane-scroll-max-height: calc(
 		100vh - var(--goo-theme-control-height-lg) - var(--goo-theme-space-sm)
 	);

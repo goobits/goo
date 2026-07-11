@@ -48,6 +48,9 @@ export function setupPopoutEventHandlers({
 			}
 
 			lifecycle.listen(document, 'pointerdown', handlePointerDown, { capture: true })
+			// Deterministic hook: outside-click closing is live from here on
+			// (the delay exists so the opening click cannot self-close).
+			element.setAttribute('data-click-to-close-armed', '')
 		}, 100)
 	}
 

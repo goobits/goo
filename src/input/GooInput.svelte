@@ -16,7 +16,7 @@ export const controlSchema: SvelteControlSchema = {
 </script>
 
 <script lang="ts" generics="T = string">
-import { onDestroy } from 'svelte'
+import { onDestroy, untrack } from 'svelte'
 import './GooInput.css'
 
 import { containKeyboardEvent } from '../support/keyboard/_keyboardActivation.ts'
@@ -83,6 +83,44 @@ const hostAttributes = $derived<Record<string, string | undefined>>({
 	size,
 	disabled: disabled ? '' : undefined,
 	multiline: multiline ? '' : undefined
+})
+
+let apiElement: HTMLDivElement | undefined
+
+// Mirror the element API GooCheckbox/GooRadioGroup attach to their roots so
+// element-driven consumers get one calling convention across controls:
+// `.value =` is silent, `setValue()` emits change.
+$effect(() => {
+	const element = inputElement
+	if (!element || apiElement === element) return
+	apiElement = element
+	untrack(() => Object.defineProperties(element, {
+		value: {
+			configurable: true,
+			get: () => currentValue,
+			set: value => setValue(value as T, { silent: true })
+		},
+		setValue: {
+			configurable: true,
+			value: (value: T, options: { silent?: boolean } = {}) => setValue(value, { silent: options.silent ?? false })
+		},
+		getValue: {
+			configurable: true,
+			value: () => getValue()
+		},
+		focus: {
+			configurable: true,
+			value: () => focus()
+		},
+		blur: {
+			configurable: true,
+			value: () => blur()
+		},
+		select: {
+			configurable: true,
+			value: () => select()
+		}
+	}))
 })
 
 export function setValue(nextValue: T, { silent = true }: { silent?: boolean } = {}): void {

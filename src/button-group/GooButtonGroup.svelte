@@ -57,6 +57,9 @@ const normalizedOptions = $derived(normalizeButtonGroupOptions(options))
 const classes = $derived.by(() => {
 	const values = [ 'goo-button-group' ]
 	if (!allowMultiple && normalizedOptions.length > 0) values.push('goo-button-group--single-select')
+	// Without this, the sliding indicator paints a phantom selection on the
+	// first segment when nothing is selected yet.
+	if (selectedKeys.size === 0) values.push('goo-button-group--no-selection')
 	if (disabled) values.push('goo-button-group--disabled')
 	if (className) values.push(className)
 	return values.filter(Boolean).join(' ')

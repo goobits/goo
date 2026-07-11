@@ -169,7 +169,7 @@ sketch-label.goo-config-field .goo-config-select__container {
 }
 
 sketch-label.goo-config-field .goo-config-select__container {
-	--goo-select-min-width: 0;
+	--goo-select-min-width: 0px;
 }
 
 sketch-label.goo-config-field[data-tag='checkbox'],

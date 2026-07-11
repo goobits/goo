@@ -17,7 +17,7 @@
 	--goo-folder-inspector-title-size: var(--goo-theme-icon-xs);
 	--goo-folder-radius: var(--goo-theme-radius-md);
 	--goo-folder-transition: var(--goo-theme-transition-normal);
-	--goo-folder-indent: 0;
+	--goo-folder-indent: 0px;
 
 	display: block;
 	position: relative;
@@ -28,7 +28,7 @@
 
 /* Nested folders get indentation */
 .goo-folder .goo-folder {
-	--goo-folder-indent: 0;
+	--goo-folder-indent: 0px;
 	margin-left: 0;
 	border-radius: 0;
 }

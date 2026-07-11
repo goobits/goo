@@ -21,6 +21,7 @@
 	font-size: var(--goo-theme-font-size-sm);
 	min-width: 0;
 	overflow: auto;
+	position: relative;
 	scrollbar-color: color-mix(in srgb, var(--goo-data-grid-fg) 24%, transparent) transparent;
 	scrollbar-gutter: stable;
 	scrollbar-width: thin;
@@ -177,12 +178,22 @@
 	pointer-events: none;
 }
 
+/* Overlays the visible viewport below the header: the body stretches to the
+   column template, which would center an in-flow label off-screen whenever
+   the columns are wider than the grid. */
 .goo-data-grid__state {
 	align-items: center;
 	color: var(--goo-data-grid-muted);
 	display: flex;
 	justify-content: center;
-	min-height: calc(var(--goo-data-grid-row-height) * 2);
 	padding: var(--goo-theme-space-xl);
+	position: absolute;
+	inset: var(--goo-data-grid-header-cell-height) 0 0 0;
 	text-align: center;
+}
+
+/* The overlaid label leaves the body empty in flow; keep the state area's
+   height reserved. */
+.goo-data-grid__body:has(.goo-data-grid__state) {
+	min-height: calc(var(--goo-data-grid-row-height) * 2);
 }

@@ -18,6 +18,7 @@ export const controlSchema: SvelteControlSchema = {
 </script>
 
 <script lang="ts">
+import { untrack } from 'svelte'
 import './GooTextarea.css'
 
 import type { GooTextareaProps } from './types.ts'
@@ -69,6 +70,44 @@ const classes = $derived.by(() => {
 // does not reject it as an unknown attribute.
 const hostAttributes = $derived<Record<string, string | undefined>>({
 	disabled: disabled ? '' : undefined
+})
+
+let apiElement: HTMLDivElement | undefined
+
+// Mirror the element API GooCheckbox/GooRadioGroup attach to their roots so
+// element-driven consumers get one calling convention across controls:
+// `.value =` is silent, `setValue()` emits change.
+$effect(() => {
+	const element = textareaElement
+	if (!element || apiElement === element) return
+	apiElement = element
+	untrack(() => Object.defineProperties(element, {
+		value: {
+			configurable: true,
+			get: () => currentValue,
+			set: value => setValue(String(value), { silent: true })
+		},
+		setValue: {
+			configurable: true,
+			value: (value: string, options: { silent?: boolean } = {}) => setValue(value, { silent: options.silent ?? false })
+		},
+		getValue: {
+			configurable: true,
+			value: () => getValue()
+		},
+		focus: {
+			configurable: true,
+			value: () => focus()
+		},
+		blur: {
+			configurable: true,
+			value: () => blur()
+		},
+		select: {
+			configurable: true,
+			value: () => select()
+		}
+	}))
 })
 
 export function setValue(nextValue: string, { silent = true }: { silent?: boolean } = {}): void {
