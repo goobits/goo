@@ -33,10 +33,13 @@
 	--goo-number-compact-edge-padding: calc(var(--goo-theme-space-xs) + var(--goo-theme-space-2xs) * 0.5);
 	--goo-number-stepper-space: 0px;
 	--goo-number-edge-padding: var(--goo-theme-space-sm);
+	/* At rest the trailing side keeps the input's edge padding; once the
+	   stepper reveals, its (wider) reserved space wins. */
+	--goo-number-trailing-space: max(var(--goo-number-edge-padding), var(--goo-number-stepper-space));
 	--goo-number-leading-padding: var(--goo-number-edge-padding);
-	--goo-number-trailing-padding: calc(var(--goo-number-stepper-space) + var(--goo-number-unit-padding, 0px));
+	--goo-number-trailing-padding: calc(var(--goo-number-trailing-space) + var(--goo-number-unit-padding, 0px));
 	--goo-number-unit-left: auto;
-	--goo-number-unit-right: var(--goo-number-stepper-space);
+	--goo-number-unit-right: var(--goo-number-trailing-space);
 	--goo-number-arrow-slide: var(--goo-theme-space-xs);
 	--goo-number-focus-outline-size: var(--goo-theme-space-2xs);
 	--goo-number-focus-outline-offset: calc(var(--goo-theme-space-xs) - var(--goo-theme-space-2xs) * 0.5);
@@ -303,9 +306,9 @@
 
 /* RTL support */
 [dir='rtl'] .goo-number {
-	--goo-number-leading-padding: calc(var(--goo-number-stepper-space) + var(--goo-number-unit-padding, 0px));
+	--goo-number-leading-padding: calc(var(--goo-number-trailing-space) + var(--goo-number-unit-padding, 0px));
 	--goo-number-trailing-padding: var(--goo-number-edge-padding);
-	--goo-number-unit-left: var(--goo-number-stepper-space);
+	--goo-number-unit-left: var(--goo-number-trailing-space);
 	--goo-number-unit-right: auto;
 	--goo-number-arrow-slide: calc(var(--goo-theme-space-xs) * -1);
 
