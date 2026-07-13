@@ -57,4 +57,34 @@ describe('GooFolder', () => {
 		expect(folder.contentElement?.textContent).toBe('<img src=x onerror=alert(1)>')
 		expect(folder.contentElement?.querySelector('img')).toBeNull()
 	})
+
+	it('keeps header actions separate from the collapse button', () => {
+		const action = document.createElement('button')
+		action.type = 'button'
+		action.textContent = 'Reset'
+		const onAction = vi.fn()
+		action.addEventListener('click', onAction)
+		const folder = createFolder({
+			title: 'Effects',
+			open: true,
+			headerActions: action
+		})
+		document.body.appendChild(folder)
+
+		action.click()
+
+		expect(onAction).toHaveBeenCalledOnce()
+		expect(folder.open).toBe(true)
+		expect(folder.headerActionsElement?.contains(action)).toBe(true)
+		expect(folder.headerElement?.contains(action)).toBe(false)
+	})
+
+	it('destroys a programmatically mounted folder', () => {
+		const folder = createFolder({ title: 'Temporary' })
+		document.body.appendChild(folder)
+
+		folder.destroy()
+
+		expect(document.body.contains(folder)).toBe(false)
+	})
 })

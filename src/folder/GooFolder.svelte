@@ -27,6 +27,7 @@ let {
 	tabIndex = 0,
 	disabled = false,
 	content,
+	headerActions,
 	onadd,
 	onchange,
 	children,
@@ -42,6 +43,7 @@ let rootEl: HTMLDivElement | undefined = $state()
 // expose the augmented type while binding the real element type.
 const root = $derived(rootEl as GooFolderInternalElement | undefined)
 let headerElement: HTMLElement | undefined = $state()
+let headerActionsElement: HTMLElement | undefined = $state()
 let titleElement: HTMLElement | undefined = $state()
 let contentElement: HTMLElement | undefined = $state()
 let chevronElement: HTMLElement | undefined = $state()
@@ -89,6 +91,7 @@ function assignApi(): void {
 		root._pendingChildren = []
 		Object.defineProperties(root, {
 			headerElement: { configurable: true, get: () => headerElement ?? null },
+			headerActionsElement: { configurable: true, get: () => headerActionsElement ?? null },
 			titleElement: { configurable: true, get: () => titleElement ?? null },
 			contentElement: { configurable: true, get: () => contentElement ?? null },
 			chevronElement: { configurable: true, get: () => chevronElement ?? null },
@@ -128,6 +131,7 @@ $effect(() => {
 	mountedRoot = nextRoot
 	untrack(() => {
 		appendContent(nextContent, content)
+		if (headerActionsElement) appendContent(headerActionsElement, headerActions)
 		hydrateChildren(nextRoot)
 		assignApi()
 	})
@@ -151,23 +155,26 @@ $effect(assignApi)
 	aria-label={title || undefined}
 	title={title || undefined}
 >
-	<button
-		bind:this={headerElement}
-		class="goo-folder__header"
-		type="button"
-		tabindex={tabIndex}
-		disabled={disabled || undefined}
-		aria-expanded={open}
-		aria-controls={contentId}
-		onclick={handleHeaderClick}
-	>
-		<span bind:this={chevronElement} class="goo-folder__chevron">
-			<svg class="goo-folder__chevron-icon" width="12" height="12" viewBox="0 0 12 12">
-				<path d="M4 2L8 6L4 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-			</svg>
-		</span>
-		<span bind:this={titleElement} class="goo-folder__title">{title}</span>
-	</button>
+	<div class="goo-folder__header-row">
+		<button
+			bind:this={headerElement}
+			class="goo-folder__header"
+			type="button"
+			tabindex={tabIndex}
+			disabled={disabled || undefined}
+			aria-expanded={open}
+			aria-controls={contentId}
+			onclick={handleHeaderClick}
+		>
+			<span bind:this={chevronElement} class="goo-folder__chevron">
+				<svg class="goo-folder__chevron-icon" width="12" height="12" viewBox="0 0 12 12">
+					<path d="M4 2L8 6L4 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+				</svg>
+			</span>
+			<span bind:this={titleElement} class="goo-folder__title">{title}</span>
+		</button>
+		<div bind:this={headerActionsElement} class="goo-folder__header-actions"></div>
+	</div>
 	<div bind:this={contentElement} id={contentId} class="goo-folder__content">
 		{#if children}
 			{@render children()}

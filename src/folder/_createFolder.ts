@@ -15,6 +15,7 @@ export interface GooFolderOptions {
 	className?: string
 	style?: string
 	content?: string | HTMLElement | Node
+	headerActions?: string | HTMLElement | Node
 	onadd?: (child: HTMLElement) => void
 	onchange?: (value: boolean, oldValue?: boolean) => void
 }
@@ -24,6 +25,7 @@ export interface GooFolderOptions {
  */
 export type GooFolderElement = HTMLDivElement & {
 	headerElement: HTMLElement | null
+	headerActionsElement: HTMLElement | null
 	titleElement: HTMLElement | null
 	contentElement: HTMLElement | null
 	chevronElement: HTMLElement | null
@@ -37,6 +39,7 @@ export type GooFolderElement = HTMLDivElement & {
 	addFolder: (title: string, options?: GooFolderOptions) => GooFolderElement
 	removeElement: (element: HTMLElement) => boolean
 	clear: () => void
+	destroy: () => void
 }
 
 /** Internal mounted folder shape used by GooFolder.svelte and child container helpers. */
@@ -68,6 +71,12 @@ export function createFolder(options: GooFolderOptions = {}): GooFolderElement {
 	if (!folder) {
 		if (instance) unmount(instance)
 		throw new Error('GooFolder did not mount a root element')
+	}
+	let destroyed = false
+	folder.destroy = () => {
+		if (destroyed) return
+		destroyed = true
+		void unmount(instance)
 	}
 
 	return folder
