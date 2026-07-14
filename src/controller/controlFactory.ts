@@ -135,7 +135,7 @@ export async function createControlFromRegistry(
 
 		return { status: 'error' }
 	} catch(err) {
-		log.error(`Failed to create control type "${ controlType }":`, err)
+		log.error(`Failed to create control type "${ controlType }":`, { error: err })
 		return { status: 'error', error: err instanceof Error ? err : new Error(String(err)) }
 	}
 }
