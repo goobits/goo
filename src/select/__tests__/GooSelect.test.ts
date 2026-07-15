@@ -891,6 +891,36 @@ describe('GooSelect', () => {
 		expect(onchange).not.toHaveBeenCalled()
 	})
 
+	it('stops selection cleanup when an option callback unmounts the select', async() => {
+		const onchange = vi.fn()
+		let unmountSelect = () => {}
+		const onChoose = vi.fn(() => unmountSelect())
+		const rendered = render(GooSelect, {
+			props: {
+				value: 'a',
+				showSelectionIndicator: false,
+				options: [
+					{ id: 'a', label: 'A' },
+					{ id: 'b', label: 'B', onChoose }
+				],
+				onchange
+			}
+		})
+		unmountSelect = rendered.unmount
+		const element = rendered.container.querySelector<GooSelectElement>('.goo-select')!
+
+		expect(element.open({ autoFocus: false })).toBe(true)
+		await tick()
+
+		const option = document.querySelector<HTMLElement>('.goo-select__option[data-id="b"]')!
+		option.dispatchEvent(pointerEvent('pointerdown', { pointerId: 13 }))
+		option.dispatchEvent(pointerEvent('pointerup', { pointerId: 13 }))
+		await tick()
+
+		expect(onChoose).toHaveBeenCalledOnce()
+		expect(onchange).not.toHaveBeenCalled()
+	})
+
 	it('opens submenu options under a pen pointer dragged from the trigger', async() => {
 		const originalElementFromPoint = document.elementFromPoint
 		const { container } = render(GooSelect, {

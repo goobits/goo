@@ -17,6 +17,7 @@ export type {
 	GooSchemaField,
 	GooSchemaFolder,
 	GooSchemaNode,
+	GooSchemaNote,
 	GooSchemaOptions,
 	GooSchemaPreset,
 	GooSchemaPresetEvent,
@@ -24,8 +25,11 @@ export type {
 	GooSchemaResetEvent,
 	GooSchemaResetEventDetail,
 	GooSchemaType,
-	GooSchemaUpdateOptions } from './GooSchema.ts'
+	GooSchemaUpdateOptions,
+	GooSchemaWidget
+} from './GooSchema.ts'
 export {
 	createGooSchema,
 	schemaHasConditions
 } from './GooSchema.ts'
+export { getByPath, pathToLabel, resolvePath, setByPath } from './pathUtils.ts'

@@ -1,5 +1,6 @@
 export type {
 	GooBuiltInControlType,
+	GooControlElement,
 	GooControlFactory,
 	GooControlOptionBag,
 	GooControlOptions,

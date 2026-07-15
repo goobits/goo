@@ -3,8 +3,16 @@
  * @module goobits/schema/types
  */
 
-import type { GooControlOptionBag, GooControlType, GooControlTypeRegistry } from '../controller/controlRegistry.ts'
-import type { GooSliderPreset, GooSliderShape } from '../slider/types.ts'
+import type { GooControlOptionBag, GooControlType, GooControlTypeRegistry } from '../controller/controlTypes.ts'
+import type {
+	GooSliderMark,
+	GooSliderMode,
+	GooSliderPreset,
+	GooSliderScale,
+	GooSliderShape,
+	GooSliderSnap,
+	GooSliderValueBubble
+} from '../slider/types.ts'
 
 /**
  * Control field definition type identifiers.
@@ -110,6 +118,24 @@ export interface GooSchemaField {
 	/** Track shape (for sliders). */
 	shape?: GooSliderShape
 
+	/** Slider value-to-track mapping. */
+	scale?: GooSliderScale
+
+	/** Explicit slider interaction mode. */
+	mode?: GooSliderMode
+
+	/** Slider track colors. */
+	gradient?: string[]
+
+	/** Explicit slider track marks. */
+	marks?: GooSliderMark[]
+
+	/** Snap to marks/ticks or explicit values. */
+	snap?: GooSliderSnap
+
+	/** Slider value bubble visibility. */
+	valueBubble?: GooSliderValueBubble
+
 	/** Unit of measurement. */
 	unit?: 'degree' | 'radian' | '%' | 'px' | 'x' | string
 
@@ -203,6 +229,29 @@ export interface GooSchemaFolder {
 	unless?: GooSchemaCondition
 }
 
+/** Static explanatory text rendered between schema controls. */
+export interface GooSchemaNote {
+	type: 'note'
+	text: string
+	className?: string
+	if?: GooSchemaCondition
+	unless?: GooSchemaCondition
+}
+
+/** Registered control that is not bound to schema data. */
+export interface GooSchemaWidget {
+	type: 'widget'
+	widget: GooSchemaControlType
+	id?: string
+	label?: string
+	showLabel?: boolean
+	layout?: GooSchemaFieldLayout
+	className?: string
+	options?: GooControlOptionBag
+	if?: GooSchemaCondition
+	unless?: GooSchemaCondition
+}
+
 /**
 	 * Panel root container.
 	 */
@@ -228,7 +277,7 @@ export interface GooSchemaPanel {
 /**
 	 * Any schema node.
 	 */
-export type GooSchemaNode = GooSchemaField | GooSchemaFolder
+export type GooSchemaNode = GooSchemaField | GooSchemaFolder | GooSchemaNote | GooSchemaWidget
 
 /**
  * Root schema definition.

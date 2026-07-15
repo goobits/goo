@@ -22,8 +22,10 @@ import type {
 	GooSchemaField,
 	GooSchemaFolder,
 	GooSchemaNode,
+	GooSchemaNote,
 	GooSchemaPreset,
-	GooSchemaState
+	GooSchemaState,
+	GooSchemaWidget
 } from './types.ts'
 
 const SCHEMA_DATA_MOTION_CLASS = 'goo-schema__data-motion'
@@ -213,9 +215,52 @@ async function buildNodes(
 
 		if ('type' in node && node.type === 'folder') {
 			await buildFolder(element, node as GooSchemaFolder, parent, token)
+		} else if ('type' in node && node.type === 'note') {
+			buildNote(node as GooSchemaNote, parent)
+		} else if ('type' in node && node.type === 'widget') {
+			buildWidget(element, node as GooSchemaWidget, parent, token)
 		} else if ('path' in node) {
 			await buildField(element, node as GooSchemaField, parent, token)
 		}
+	}
+}
+
+function buildNote(node: GooSchemaNote, parent: HTMLElement): void {
+	const note = document.createElement('div')
+	note.className = mergeClassNames('goo-schema__note', node.className) ?? 'goo-schema__note'
+	note.setAttribute('role', 'note')
+	note.textContent = node.text
+	appendSchemaChild(parent, note)
+}
+
+function buildWidget(
+	element: GooSchemaBuildElement,
+	node: GooSchemaWidget,
+	parent: HTMLElement,
+	token: number
+): void {
+	if (token !== element._rebuildToken) return
+	const controller = createGooController({
+		label: node.showLabel === false ? '' : node.label ?? '',
+		type: node.widget,
+		unbound: true,
+		className: node.className,
+		layout: node.layout === 'inline' || node.layout === 'stacked' ? node.layout : undefined,
+		controlOptions: node.options,
+		controlTypes: element.state.controlTypes
+	})
+	controller.name(node.showLabel === false ? '' : node.label ?? '')
+	const key = node.id ?? `widget:${ node.widget }:${ element._controllers.size }`
+	element._controllers.set(key, controller)
+	controller.addTo(parent)
+}
+
+function appendSchemaChild(parent: HTMLElement, child: HTMLElement): void {
+	const parentContainer = parent as HTMLElement & { add?: (element: HTMLElement) => void }
+	if (typeof parentContainer.add === 'function') {
+		parentContainer.add(child)
+	} else {
+		parent.appendChild(child)
 	}
 }
 

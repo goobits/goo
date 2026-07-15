@@ -12,7 +12,14 @@ import type { GooSliderPreset, GooSliderShape } from '../slider/types.ts'
 import { emitter } from '../support/utils/emitter.ts'
 import { log } from '../support/utils/logger.ts'
 import { createControlFromRegistry } from './controlFactory.ts'
-import { type GooControlOptionBag, type GooControlOptions, type GooControlType, type GooControlTypeRegistry, resolveGooControlTypeConfig } from './controlRegistry.ts'
+import {
+	type GooControlElement,
+	type GooControlOptionBag,
+	type GooControlOptions,
+	type GooControlType,
+	type GooControlTypeRegistry,
+	resolveGooControlTypeConfig
+} from './controlRegistry.ts'
 import {
 	buildControlOptions,
 	buildDualRangeOptions,
@@ -24,24 +31,6 @@ import {
 	humanizePropertyName,
 	type StoredOptions
 } from './controlSetup.ts'
-
-// ============================================================================
-// Internal Types
-// ============================================================================
-
-/**
- * Interface for control elements created by the controller.
- * Controls may implement some or all of these methods.
- */
-interface GooControlElement extends HTMLElement {
-	destroy?: () => void
-	getValue?: () => unknown
-	setValue?: (value: unknown, options?: { silent?: boolean }) => void
-	setOptions?: (options: Record<string, unknown>) => void
-	disable?: () => void
-	enable?: () => void
-	value?: unknown
-}
 
 // ============================================================================
 // Types
@@ -129,6 +118,8 @@ export interface GooControllerOptions {
 	disabled?: boolean
 	className?: string
 	controlOptions?: GooControllerControlOptions
+	/** Treat the control as a self-owned widget instead of a bound value field. */
+	unbound?: boolean
 
 	/** Layout mode: 'inline' (default) or 'stacked' (label row + control row) */
 	layout?: 'inline' | 'stacked'
@@ -229,6 +220,7 @@ interface GooControllerInternal extends GooController {
 	_controlOptions: GooControllerControlOptions | undefined
 	_dualRangeIsMinMax: boolean | undefined
 	_controlTypes: GooControlTypeRegistry | undefined
+	_unbound: boolean
 	_getExistingControl(): HTMLElement | null
 	_attachControl(control: HTMLElement): void
 	_createElement(): void
@@ -307,7 +299,10 @@ class GooControllerRuntime {
 
 		// Apply classes
 		this.classList.add(`goo-controller--${ this._controlType }`)
-		if (disabled) this.classList.add('goo-controller--disabled')
+		if (disabled) {
+			this.classList.add('goo-controller--disabled')
+			this.setAttribute('aria-disabled', 'true')
+		}
 		if (this._layout === 'stacked') this.classList.add('goo-controller--stacked')
 
 		// Set label attribute (displayed via CSS ::before for inline mode)
@@ -353,6 +348,7 @@ class GooControllerRuntime {
 		this._controlPromise = promise
 		try {
 			await promise
+			if (this.state.disabled) this.disable()
 		} finally {
 			if (this._controlPromise === promise) {
 				this._controlPromise = null
@@ -441,15 +437,18 @@ class GooControllerRuntime {
 	 * @param _Control - control.
 	 */
 	_buildDefaultOptions(value: unknown, _Control: unknown) {
-		return buildControlOptions(value, this._controlType, this._getStoredOptions(), {
-			onchange: v => this._handleChange(v),
-			oninput: v => this._handleInput(v),
-			onButtonClick: () => {
-				if (typeof value === 'function') {
-					value.call(this._object)
+		return {
+			...buildControlOptions(value, this._controlType, this._getStoredOptions(), {
+				onchange: v => this._handleChange(v),
+				oninput: v => this._handleInput(v),
+				onButtonClick: () => {
+					if (typeof value === 'function') {
+						value.call(this._object)
+					}
 				}
-			}
-		})
+			}),
+			disabled: Boolean(this.state.disabled)
+		}
 	}
 
 	/**
@@ -457,7 +456,10 @@ class GooControllerRuntime {
 	 * @private
 	 */
 	_getAllOptions() {
-		return getAllOptions(this._getStoredOptions())
+		return {
+			...getAllOptions(this._getStoredOptions()),
+			disabled: Boolean(this.state.disabled)
+		}
 	}
 
 	/**
@@ -774,6 +776,11 @@ class GooControllerRuntime {
 	 * @returns {GooController} this (for chaining)
 	 */
 	refresh() {
+		if (this._unbound) {
+			this._control?.refresh?.()
+			return this
+		}
+
 		const value = this._property ? this._object?.[this._property] : undefined
 
 		if (this._control) {
@@ -839,6 +846,7 @@ class GooControllerRuntime {
 			object !== this._object ||
 			property !== this._property ||
 			options.controlTypes !== this._controlTypes ||
+			Boolean(options.unbound) !== this._unbound ||
 			nextLayout !== this._layout
 
 		if (controlIdentityChanged) {
@@ -867,6 +875,7 @@ class GooControllerRuntime {
 		this._showCoverage = options.coverage ?? options.showCoverage
 		this._shape = options.shape
 		this._controlOptions = extractControlOptions(options)
+		this._unbound = Boolean(options.unbound)
 
 		if (Array.isArray(options.min)) {
 			this._selectOptions = options.min
@@ -1055,6 +1064,7 @@ function initializeController(element: GooControllerInternal, options: GooContro
 	element._layout = layout
 	element._controlOptions = extractControlOptions(options)
 	element._controlTypes = options.controlTypes
+	element._unbound = Boolean(options.unbound)
 
 	if (Array.isArray(options.min)) {
 		element._selectOptions = options.min
@@ -1121,7 +1131,7 @@ export function createGooController(
 	if (
 		property === undefined &&
 		typeof objectOrOptions === 'object' &&
-		'property' in objectOrOptions
+		('property' in objectOrOptions || objectOrOptions.unbound === true)
 	) {
 		return createControllerElement(objectOrOptions as GooControllerOptions)
 	}

@@ -49,9 +49,10 @@ async function waitForSchemaElement<T extends HTMLElement>(schema: HTMLElement, 
 		const element = schema.querySelector<T>(selector)
 		if (element) return element
 		await settleGooSchema()
+		await new Promise(resolve => setTimeout(resolve, 0))
 	}
 
-	throw new Error(`GooSchema test element not found: ${ selector }`)
+	throw new Error(`GooSchema test element not found: ${ selector }\n${ schema.innerHTML }`)
 }
 
 const selfContainedInputControlType = defineSvelteControlType({
@@ -86,6 +87,22 @@ describe('GooSchema', () => {
 		expect(typeof schema.destroy).toBe('function')
 		expect(schema.querySelector('.goo-controller')).not.toBeNull()
 		expect(schema.getController('size')).not.toBeUndefined()
+	})
+
+	it('forwards disabled schema fields to their generated controllers', async() => {
+		const schema = createGooSchema({
+			schema: [ { path: 'size', min: 0, max: 100, disabled: true } ],
+			data: { size: 12 },
+			bare: true
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+
+		const controller = schema.getController('size')
+		const slider = await waitForSchemaElement<HTMLElement>(schema, '.goo-slider')
+		expect(controller?.isDisabled()).toBe(true)
+		expect(controller?.getAttribute('aria-disabled')).toBe('true')
+		expect(slider.getAttribute('aria-disabled')).toBe('true')
 	})
 
 	it('supports direct keyboard navigation from schema-owned focus targets', async() => {
@@ -640,6 +657,55 @@ describe('GooSchema', () => {
 		expect(destroyControl).toHaveBeenCalledOnce()
 	})
 
+	it('renders notes and unbound widgets without adding schema data', async() => {
+		const destroyWidget = vi.fn()
+		const refreshWidget = vi.fn()
+		const setWidgetValue = vi.fn()
+		const schema = createGooSchema({
+			schema: [
+				{ type: 'note', text: 'Choose a source before continuing.' },
+				{
+					type: 'widget',
+					widget: 'camera-preview',
+					id: 'cameraPreview',
+					showLabel: false,
+					options: { compact: true }
+				}
+			],
+			data: {},
+			bare: true,
+			controlTypes: {
+				'camera-preview': {
+					load: () => Promise.resolve({}),
+					extract: () => options => Object.assign(document.createElement('div'), {
+						destroy: destroyWidget,
+						refresh: refreshWidget,
+						setValue: setWidgetValue,
+						textContent: options.compact === true ? 'Camera' : 'Preview'
+					})
+				}
+			}
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+		const widget = await waitForSchemaElement<HTMLElement>(
+			schema,
+			'.goo-controller--camera-preview .goo-controller__widget > div'
+		)
+
+		expect(schema.querySelector('[role="note"]')?.textContent).toBe('Choose a source before continuing.')
+		expect(widget.textContent).toBe('Camera')
+		expect(schema.getData()).toEqual({})
+
+		schema.setData({ unrelated: true })
+		expect(refreshWidget).toHaveBeenCalledOnce()
+		expect(setWidgetValue).not.toHaveBeenCalled()
+		expect(schema.getData()).toEqual({ unrelated: true })
+
+		schema.destroy()
+		expect(destroyWidget).toHaveBeenCalledOnce()
+	})
+
 	it('destroys previous child controllers when rebuilding schema', async() => {
 		const destroyControl = vi.fn()
 		const schema = createGooSchema({
@@ -820,14 +886,14 @@ describe('GooSchema', () => {
 			schema: [
 				{
 					path: 'cropPane',
-					type: 'dom-control',
+					type: 'custom-editor',
 					layout: 'full-bleed'
 				}
 			],
 			data: { cropPane: false },
 			bare: true,
 			controlTypes: {
-				'dom-control': {
+				'custom-editor': {
 					load: () => Promise.resolve({}),
 					extract: () => () => Object.assign(document.createElement('div'), {
 						getValue: () => false,
@@ -853,12 +919,12 @@ describe('GooSchema', () => {
 	it('recognizes full-bleed field layout metadata', () => {
 		expect(isFullBleedField({
 			path: 'cropPane',
-			type: 'dom-control',
+			type: 'custom-editor',
 			layout: 'full-bleed'
 		})).toBe(true)
 		expect(isFullBleedField({
 			path: 'cropPane',
-			type: 'dom-control',
+			type: 'custom-editor',
 			fullBleed: true
 		})).toBe(true)
 	})

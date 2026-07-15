@@ -196,6 +196,24 @@ describe('GooNumber', () => {
 		expect(radianInput?.getAttribute('aria-valuenow')).toBe('1.2345')
 	})
 
+	it('does not commit rounded display text over a precise stored value', async() => {
+		const onchange = vi.fn()
+		const { container } = render(GooNumber, {
+			props: {
+				onchange,
+				unit: 'degree',
+				value: 12.3456
+			}
+		})
+		const input = container.querySelector<HTMLInputElement>('.goo-number__content')!
+
+		await fireEvent.focus(input)
+		await fireEvent.blur(input)
+
+		expect(input.getAttribute('aria-valuenow')).toBe('12.3456')
+		expect(onchange).not.toHaveBeenCalled()
+	})
+
 	it('sizes unit suffix spacing from the rendered suffix', () => {
 		const { container } = render(GooNumber, {
 			props: {

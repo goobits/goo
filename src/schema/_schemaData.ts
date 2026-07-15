@@ -81,6 +81,12 @@ function getNodeVisibilitySignature(node: GooSchemaNode, data: GooSchemaData): s
 	if ('path' in node) {
 		return `field:${ node.path }:${ node.type ?? '' }:${ node.label ?? '' }`
 	}
+	if (node.type === 'widget') {
+		return `widget:${ node.id ?? '' }:${ node.widget }:${ node.label ?? '' }`
+	}
+	if (node.type === 'note') {
+		return `note:${ node.text }:${ node.className ?? '' }`
+	}
 	return ''
 }
 

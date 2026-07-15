@@ -6,6 +6,7 @@
 
 import { log } from '../support/utils/logger.ts'
 import {
+	type GooControlElement,
 	type GooControlExport,
 	type GooControlOptions,
 	type GooControlTypeRegistry,
@@ -22,7 +23,7 @@ import { createSvelteControlHost, type SvelteControlHost } from './SvelteControl
  * Result of a control creation attempt.
  */
 export type ControlCreationResult =
-  | { status: 'created'; control: HTMLElement }
+  | { status: 'created'; control: GooControlElement }
   | { status: 'not_found' }
   | { status: 'error'; error?: Error }
 
@@ -119,13 +120,13 @@ export async function createControlFromRegistry(
 			: options.buildOptions(options.value, Control)
 
 		// Create the control instance
-		let control: HTMLElement | null = null
+		let control: GooControlElement | null = null
 
 		if (typeof Control === 'function') {
 			// Check if it's a factory function or a class.
 			const isClass = Control.prototype && Control.prototype.constructor === Control
-			const GooControlConstructor = Control as new (options: GooControlOptions) => HTMLElement
-			const GooControlFactory = Control as (options: GooControlOptions) => HTMLElement
+			const GooControlConstructor = Control as new (options: GooControlOptions) => GooControlElement
+			const GooControlFactory = Control as (options: GooControlOptions) => GooControlElement
 			control = isClass ? new GooControlConstructor(controlOptions) : GooControlFactory(controlOptions)
 		}
 
@@ -158,6 +159,7 @@ function createSvelteControl(
 		schema: module.controlSchema,
 		value: options.value,
 		options: controlOptions,
+		disabled: Boolean(controlOptions.disabled),
 		onchange: options.onchange,
 		oninput: options.oninput
 	})
@@ -170,6 +172,8 @@ function createSvelteControl(
 			setOptions?: SvelteControlHost['setOptions']
 			getValue?: SvelteControlHost['getValue']
 			updateDisplay?: SvelteControlHost['updateDisplay']
+			disable?: () => void
+			enable?: () => void
 			destroy?: SvelteControlHost['destroy']
 		}
 		controlElement.__svelteControlHost = host
@@ -177,8 +181,10 @@ function createSvelteControl(
 		controlElement.setOptions = options => host.setOptions(options)
 		controlElement.getValue = () => host.getValue()
 		controlElement.updateDisplay = () => host.updateDisplay()
+		controlElement.disable = () => host.setOptions({ disabled: true })
+		controlElement.enable = () => host.setOptions({ disabled: false })
 		controlElement.destroy = () => host.destroy()
-		return { status: 'created', control: element }
+		return { status: 'created', control: controlElement }
 	}
 
 	return { status: 'error' }

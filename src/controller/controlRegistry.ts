@@ -36,122 +36,33 @@ import * as sliderFieldModule from '../slider-field/index.ts'
 import { createTextareaField } from '../textarea/_createTextareaField.ts'
 import * as textareaModule from '../textarea/GooTextarea.svelte'
 import * as xyPadModule from '../xy-pad/GooXyPad.svelte'
-import type { SvelteControlSchema } from './SvelteControl.svelte.ts'
+import type {
+	GooControlFactory,
+	GooControlModule,
+	GooControlTypeConfig,
+	GooControlTypeRegistry,
+	GooFactoryControlTypeConfig,
+	GooSvelteControlModule,
+	GooSvelteControlTypeConfig
+} from './controlTypes.ts'
 
-/** Control module structure loaded for a Goo controller type. */
-export type GooControlModule = Record<string, unknown>
-
-/** Svelte control module shape loaded for schema-native controls. */
-export type GooSvelteControlModule = GooControlModule & {
-	/** Svelte component mounted by the Goo control host after runtime validation. */
-	default: unknown
-	/** Optional binding metadata for value, callbacks, and option props. */
-	controlSchema?: SvelteControlSchema
-}
-
-/** Built-in Goo control ids understood by the default registry. */
-export type GooBuiltInControlType =
-  | 'angle'
-  | 'blend-mode'
-  | 'button'
-  | 'button-group'
-  | 'buttongroup'
-  | 'checkbox'
-  | 'color'
-  | 'email'
-  | 'number'
-  | 'password'
-  | 'radio'
-  | 'radiogroup'
-  | 'range'
-  | 'range-dual'
-  | 'select'
-  | 'slider'
-  | 'slider-field'
-  | 'text'
-  | 'textarea'
-  | 'url'
-  | 'xy-pad'
-
-/** Built-in or host-registered Goo control id. */
-export type GooControlType = GooBuiltInControlType | (string & {})
-
-/** Primitive or object value accepted by control option bags. */
-export type GooControlOptionValue =
-  | string
-  | number
-  | boolean
-  | null
-  | undefined
-  | object
-  | ((...args: unknown[]) => unknown)
-
-/** Component-specific option bag passed through `controlOptions`. */
-export type GooControlOptionBag = Record<string, GooControlOptionValue>
-
-/** Runtime options passed to constructor/factory functions. */
-export interface GooControlOptions {
-	[option: string]: unknown
-}
-
-/** Control factory function type. */
-export type GooControlFactory = (options: GooControlOptions) => HTMLElement
-
-/** Control constructor type. */
-export type GooControlConstructor = new (options: GooControlOptions) => HTMLElement
-
-/** Control factory or class type. */
-export type GooControlExport = GooControlFactory | GooControlConstructor
-
-/** Shared configuration for Goo control type registry entries. */
-export interface GooControlTypeConfigBase {
-	/** Build options to pass to the control constructor or component host. */
-	buildOptions?: (
-		value: unknown,
-		options: GooControlOptions,
-		handleChange: (v: unknown) => void,
-		handleInput?: (v: unknown) => void
-	) => GooControlOptions
-
-	/** Synchronous DOM field factory used by dialog fields. */
-	createField?: (options: GooControlOptions) => HTMLElement
-
-	/** If true, this is a Svelte component that exports controlSchema. */
-	svelte?: boolean
-
-	/** Preferred GooController layout for this control type. */
-	layout?: 'inline' | 'stacked'
-}
-
-/** Explicit registry entry for a Svelte-backed control module. */
-export type GooSvelteControlTypeConfig = GooControlTypeConfigBase & {
-	/** Lazy import function returning a Svelte control module. */
-	load: () => Promise<GooSvelteControlModule>
-	/** Marks the module as a Svelte component control. */
-	svelte: true
-	/** Svelte controls are mounted directly and do not use module extractors. */
-	extract?: never
-}
-
-/** Explicit registry entry for a DOM factory-backed control module. */
-export type GooFactoryControlTypeConfig = GooControlTypeConfigBase & {
-	/** Lazy import function returning the module. */
-	load: () => Promise<GooControlModule>
-	/** Extracts the DOM factory/class from the loaded module. */
-	extract: (module: GooControlModule) => GooControlExport | null
-	/** DOM factory controls are not mounted through the Svelte host. */
-	svelte?: false
-}
-
-/**
- * Goo control type configuration used by GooController and GooSchema extensions.
- */
-export type GooControlTypeConfig = GooSvelteControlTypeConfig | GooFactoryControlTypeConfig
-
-/**
- * Goo control type registry for schema/controller extension points.
- */
-export type GooControlTypeRegistry = Record<string, GooControlTypeConfig>
+export type {
+	GooBuiltInControlType,
+	GooControlConstructor,
+	GooControlElement,
+	GooControlExport,
+	GooControlFactory,
+	GooControlModule,
+	GooControlOptionBag,
+	GooControlOptions,
+	GooControlOptionValue,
+	GooControlType,
+	GooControlTypeConfig,
+	GooControlTypeRegistry,
+	GooFactoryControlTypeConfig,
+	GooSvelteControlModule,
+	GooSvelteControlTypeConfig
+} from './controlTypes.ts'
 
 /** Create an explicit Svelte control registry entry. */
 export function defineSvelteControlType(

@@ -67,12 +67,19 @@ const SCHEMA_FIELD_KEYS = new Set([
 	'presetColor',
 	'presetHue',
 	'shape',
+	'scale',
+	'mode',
+	'gradient',
+	'marks',
+	'snap',
+	'valueBubble',
 	'unit',
 	'displayUnit',
 	'options',
 	'if',
 	'unless',
 	'layout',
+	'disabled',
 	'controlOptions',
 	'selfContained',
 	'format',
@@ -257,8 +264,22 @@ export function buildControllerOptions(
 	// Layout
 	const layout = getControllerFieldLayout(node)
 	if (layout) options.layout = layout
+	if (node.disabled !== undefined) options.disabled = node.disabled
 
 	let controlOptions: GooControlOptionBag | undefined = node.controlOptions ? { ...node.controlOptions } : undefined
+	for (const [ key, value ] of [
+		[ 'scale', node.scale ],
+		[ 'mode', node.mode ],
+		[ 'gradient', node.gradient ],
+		[ 'marks', node.marks ],
+		[ 'snap', node.snap ],
+		[ 'valueBubble', node.valueBubble ]
+	] as const) {
+		if (value !== undefined && isGooControlOptionValue(value)) {
+			controlOptions ??= {}
+			controlOptions[key] = value
+		}
+	}
 	for (const [ key, value ] of Object.entries(valueFormatOptions)) {
 		if (key !== 'unit' && isGooControlOptionValue(value)) {
 			controlOptions ??= {}

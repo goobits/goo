@@ -230,7 +230,7 @@ function handleBlur(event: Event): void {
 	if (disabled) return
 
 	const oldValue = lastCommittedValue
-	syncValue(parseInputValue(textValue), { format: true })
+	syncValue(getCommittedInputValue(), { format: true })
 	if (currentValue !== oldValue) {
 		lastCommittedValue = currentValue
 		emitChange(oldValue)
@@ -345,6 +345,12 @@ function parseInputValue(rawValue: string): number {
 		return parsedValue / 100
 	}
 	return parsedValue
+}
+
+function getCommittedInputValue(): number {
+	return textValue === formatDisplayValue(currentValue)
+		? currentValue
+		: parseInputValue(textValue)
 }
 
 function formatDisplayValue(nextValue: number): string {

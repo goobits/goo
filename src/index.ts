@@ -46,6 +46,7 @@ export type {
 	ControllerOption,
 	ControllerOptionValue,
 	GooBuiltInControlType,
+	GooControlElement,
 	GooControlFactory,
 	GooController,
 	GooControllerBinding,
@@ -136,7 +137,14 @@ export type { GooLabelProps } from './label/index.ts'
 export { GooLabel } from './label/index.ts'
 export type { GooPanelElement, GooPanelOptions } from './panel/index.ts'
 export { GooPanel } from './panel/index.ts'
-export type { GooPopoutAt, GooPopoutInstance, GooPopoutManager, GooPopoutOptions, PopoutKeepWithin } from './popout/index.ts'
+export type {
+	GooPopoutAt,
+	GooPopoutInstance,
+	GooPopoutManager,
+	GooPopoutOptions,
+	GooPopoutPointerEvent,
+	PopoutKeepWithin
+} from './popout/index.ts'
 export { createGooPopout, GooPopout, gooPopoutRuntime } from './popout/index.ts'
 export type { GooPreviewBackground, GooPreviewFit, GooPreviewProps, GooPreviewSize } from './preview/index.ts'
 export { GooPreview } from './preview/index.ts'
@@ -161,6 +169,7 @@ export type {
 	GooSchemaField,
 	GooSchemaFolder,
 	GooSchemaNode,
+	GooSchemaNote,
 	GooSchemaOptions,
 	GooSchemaPreset,
 	GooSchemaPresetEvent,
@@ -168,9 +177,17 @@ export type {
 	GooSchemaResetEvent,
 	GooSchemaResetEventDetail,
 	GooSchemaType,
-	GooSchemaUpdateOptions
+	GooSchemaUpdateOptions,
+	GooSchemaWidget
 } from './schema/index.ts'
-export { createGooSchema, GooSchema } from './schema/index.ts'
+export {
+	createGooSchema,
+	getByPath,
+	GooSchema,
+	pathToLabel,
+	resolvePath,
+	setByPath
+} from './schema/index.ts'
 export type {
 	GooSelectActionContext,
 	GooSelectChangeHandler,

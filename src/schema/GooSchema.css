@@ -41,6 +41,15 @@
 	padding: 0 0 calc(var(--goo-theme-space-xs) + var(--goo-theme-space-2xs));
 }
 
+.goo-schema__note {
+	box-sizing: border-box;
+	margin: 0;
+	padding: var(--goo-schema-row-padding);
+	color: var(--goo-theme-muted);
+	font-size: var(--goo-theme-font-size-sm);
+	line-height: 1.45;
+}
+
 .goo-schema__preset-select,
 .goo-schema__reset {
 	box-sizing: border-box;

@@ -556,7 +556,10 @@ function clearFocusFrame(): void {
 }
 
 function finishSelection(option: GooSelectOption, oldValue: string): void {
-	option.onChoose?.call(getContext(), option.id ?? '')
+	const lifecycleToken = selectLifecycleToken
+	const context = getContext()
+	option.onChoose?.call(context, option.id ?? '')
+	if (lifecycleToken !== selectLifecycleToken) return
 	close({ quiet: true })
 	if (oldValue !== option.id) {
 		emitChange(oldValue)

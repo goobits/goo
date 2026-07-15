@@ -35,11 +35,13 @@ export type {
 	GooSchemaField,
 	GooSchemaFolder,
 	GooSchemaNode,
+	GooSchemaNote,
 	GooSchemaOptions,
 	GooSchemaPanel,
 	GooSchemaPreset,
 	GooSchemaState,
-	GooSchemaType
+	GooSchemaType,
+	GooSchemaWidget
 } from './types.ts'
 
 /** Detail emitted by GooSchema change/input events. */
