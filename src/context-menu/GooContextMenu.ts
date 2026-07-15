@@ -104,6 +104,7 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 
 	let contextMenuOpened = false
 	let contextMenuAnchor: HTMLElement | null = null
+	let delegatesPointerCloseToPopout = false
 	let releasePageUnfocus: (() => void) | null = null
 
 	// Create GooSelect with context menu defaults
@@ -138,6 +139,10 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 			onclose?.()
 		}
 	})
+	// Context menus render their visible panel in a separate popout. Their
+	// controller host must not add an empty line box when an owner appends it
+	// to the document body.
+	select.hidden = true
 
 	// Override open to accept position coordinates directly
 	const contextMenu = select as GooContextMenuElement
@@ -180,11 +185,13 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 		}
 
 		const shouldFocusPanel = opts.autoFocus === true
+		const clickToClose = openOpts.clickToClose ?? getAnchorAwareClickToClose(anchorElement)
+		delegatesPointerCloseToPopout = typeof clickToClose === 'function'
 		const didOpen = originalOpen({
 			...openOpts,
 			at: positionAt,
 			autoFocus: shouldFocusPanel,
-			clickToClose: openOpts.clickToClose ?? getAnchorAwareClickToClose(anchorElement),
+			clickToClose,
 			initialFocus: shouldFocusPanel ? 'none' : openOpts.initialFocus
 		})
 		if (didOpen) {
@@ -197,6 +204,7 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 	contextMenu.close = function closeContextMenu(opts = {}) {
 		contextMenuOpened = false
 		contextMenuAnchor = null
+		delegatesPointerCloseToPopout = false
 		unbindPageUnfocus()
 		originalClose(opts)
 	}
@@ -303,6 +311,7 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 			}
 		}
 		const closeForOutsidePointer = (event: PointerEvent) => {
+			if (delegatesPointerCloseToPopout) return
 			const target = event.target
 			if (target instanceof Element && target.closest('.goo-popout')) return
 			if (contextMenuAnchor && isEventOnElement(event, contextMenuAnchor)) return

@@ -7,5 +7,6 @@ export type {
 	GooPopoutInstance,
 	GooPopoutManager,
 	GooPopoutOptions,
+	GooPopoutPointerEvent,
 	PopoutKeepWithin
 } from './popoutTypes.ts'

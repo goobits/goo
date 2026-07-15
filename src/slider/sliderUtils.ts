@@ -125,7 +125,8 @@ export function toFormattedValue(value: number, isPercent: boolean, state: GooSl
 	return formatNumber(value, state.unit, {
 		appendFormatSuffix: false,
 		max: state.max,
-		min: state.min
+		min: state.min,
+		step: state.step
 	}) as number
 }
 

@@ -37,6 +37,34 @@ describe('GooSliderField', () => {
 		}))
 	})
 
+	it('preserves decimal number edits at the configured step', async() => {
+		const oninput = vi.fn()
+		const field = createSliderField({
+			max: 8,
+			min: 0,
+			oninput,
+			step: 0.1,
+			unit: 'px',
+			value: 0
+		})
+		document.body.appendChild(field)
+		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
+
+		const input = field.querySelector<HTMLInputElement>('.goo-number__content')!
+		await fireEvent.input(input, { target: { value: '2.5' } })
+		await fireEvent.keyDown(input, { key: 'Enter' })
+		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
+
+		expect(field.getValue()).toBe(2.5)
+		expect(field.getSlider().values).toEqual([ 2.5 ])
+		expect(input.value).toBe('2.5')
+		expect(oninput).toHaveBeenCalledWith(2.5, expect.objectContaining({
+			state: 'input',
+			value: 2.5,
+			values: [ 2.5 ]
+		}))
+	})
+
 	it('preserves min/max object values for dual ranges', async() => {
 		const field = createSliderField({
 			max: 64,

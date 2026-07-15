@@ -247,16 +247,9 @@ sketch-toolconfig .goo-angle-input {
 	margin: 0 var(--goo-theme-space-sm);
 }
 
-sketch-FilterFooter {
-	box-sizing: border-box;
-	display: block;
-	inline-size: 100%;
-}
-
 .goo-controller--full-bleed,
 .goo-controller--palette,
-.goo-controller--file-picker,
-.goo-controller--filter-footer {
+.goo-controller--file-picker {
 	--goo-controller-padding: 0px;
 
 	padding: 0;
@@ -270,15 +263,12 @@ sketch-FilterFooter {
 
 .goo-controller--full-bleed .goo-controller__widget,
 .goo-controller--palette .goo-controller__widget,
-.goo-controller--file-picker .goo-controller__widget,
-.goo-controller--filter-footer .goo-controller__widget {
+.goo-controller--file-picker .goo-controller__widget {
 	align-items: stretch;
 	inline-size: 100%;
 }
 
-.goo-controller--file-picker .goo-file-picker,
-.goo-controller--filter-footer .goo-config-button,
-.goo-controller--filter-footer sketch-FilterFooter {
+.goo-controller--file-picker .goo-file-picker {
 	display: flex;
 	inline-size: 100%;
 	margin-inline: 0;

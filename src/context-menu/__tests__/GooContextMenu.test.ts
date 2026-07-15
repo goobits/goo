@@ -55,6 +55,23 @@ describe('createGooContextMenu', () => {
 		expect(submenu?.querySelector('.goo-select__option')?.getAttribute('role')).toBe('menuitem')
 	})
 
+	it('keeps the headless controller host out of document layout', async() => {
+		const menu = createGooContextMenu({
+			options: [
+				{ id: 'copy', label: 'Copy' }
+			]
+		})
+		document.body.append(menu)
+		await tick()
+
+		expect(menu.hidden).toBe(true)
+		expect(menu.open({ x: 10, y: 10 })).toBe(true)
+		await Promise.resolve()
+		expect(document.querySelector('.goo-popout.goo-context-menu-popout')).not.toBeNull()
+
+		await menu.destroy()
+	})
+
 	it('renders managed string labels as text instead of HTML', async() => {
 		const menu = GooContextMenu.register('unsafe-menu', [
 			{
@@ -309,6 +326,48 @@ describe('createGooContextMenu', () => {
 			cancelable: true
 		}))
 
+		expect(menu.isOpen()).toBe(false)
+
+		await menu.destroy()
+		outside.remove()
+	})
+
+	it('lets a custom click-to-close predicate decide outside pointer behavior', async() => {
+		const menu = createGooContextMenu({
+			options: [
+				{ id: 'copy', label: 'Copy' }
+			]
+		})
+		const outside = document.createElement('button')
+		document.body.append(menu, outside)
+		await tick()
+
+		let shouldClose = false
+		const clickToClose = vi.fn(() => shouldClose)
+		expect(menu.open({
+			x: 20,
+			y: 20,
+			clickToClose,
+			initialFocus: 'none'
+		})).toBe(true)
+		await tick()
+		await delay(250)
+
+		outside.dispatchEvent(new PointerEvent('pointerdown', {
+			bubbles: true,
+			cancelable: true
+		}))
+		expect(clickToClose).toHaveBeenLastCalledWith(expect.objectContaining({
+			originalEvent: expect.any(PointerEvent)
+		}), false)
+		expect(menu.isOpen()).toBe(true)
+
+		shouldClose = true
+		outside.dispatchEvent(new PointerEvent('pointerdown', {
+			bubbles: true,
+			cancelable: true
+		}))
+		await Promise.resolve()
 		expect(menu.isOpen()).toBe(false)
 
 		await menu.destroy()

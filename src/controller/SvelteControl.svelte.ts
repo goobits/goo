@@ -147,7 +147,7 @@ export function createSvelteControlHost(opts: SvelteControlHostOptions): SvelteC
 	function buildProps(): Record<string, unknown> {
 		const transformedValue = transformValue(currentValue, currentOptions)
 		const props: Record<string, unknown> = {
-			disabled,
+			disabled: currentOptions.disabled ?? disabled,
 			[changeKey]: (output: unknown) => {
 				const nextValue = transformOutput(output, currentOptions)
 				updateValue(nextValue)

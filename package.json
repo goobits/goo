@@ -196,6 +196,14 @@
 			"svelte": "./src/schema/index.ts",
 			"import": "./src/schema/index.ts"
 		},
+		"./schema/types": {
+			"types": "./src/schema/types.ts",
+			"import": "./src/schema/types.ts"
+		},
+		"./schema/path": {
+			"types": "./src/schema/pathUtils.ts",
+			"import": "./src/schema/pathUtils.ts"
+		},
 		"./diff": {
 			"types": "./src/diff/index.ts",
 			"svelte": "./src/diff/index.ts",
