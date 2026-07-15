@@ -1,4 +1,6 @@
-import { type GooSvelteControlModule, resolveGooControlTypeConfig } from '../controller/controlRegistry.ts'
+import type { GooControlElement, GooControlOptions, GooSvelteControlModule } from '../controller/controlRegistry.ts'
+import { resolveGooControlTypeConfig } from '../controller/controlRegistry.ts'
+import { createControlFromRegistry } from '../controller/controlFactory.ts'
 import { createGooController } from '../controller/GooController.ts'
 import { createSvelteControlHost, type SvelteControlHost } from '../controller/SvelteControl.svelte.ts'
 import { createFolder, type GooFolderElement } from '../folder/_createFolder.ts'
@@ -218,7 +220,7 @@ async function buildNodes(
 		} else if ('type' in node && node.type === 'note') {
 			buildNote(node as GooSchemaNote, parent)
 		} else if ('type' in node && node.type === 'widget') {
-			buildWidget(element, node as GooSchemaWidget, parent, token)
+			await buildWidget(element, node as GooSchemaWidget, parent, token)
 		} else if ('path' in node) {
 			await buildField(element, node as GooSchemaField, parent, token)
 		}
@@ -233,24 +235,47 @@ function buildNote(node: GooSchemaNote, parent: HTMLElement): void {
 	appendSchemaChild(parent, note)
 }
 
-function buildWidget(
+async function buildWidget(
 	element: GooSchemaBuildElement,
 	node: GooSchemaWidget,
 	parent: HTMLElement,
 	token: number
-): void {
+): Promise<void> {
 	if (token !== element._rebuildToken) return
+	const key = node.id ?? `widget:${ node.widget }:${ element._controllers.size }`
+	if (node.layout === 'self-contained') {
+		const control = await createDirectSchemaControl({
+			controlType: node.widget,
+			controlTypes: element.state.controlTypes,
+			onchange: () => {},
+			oninput: () => {},
+			options: node.options ?? {},
+			value: undefined
+		})
+		if (!control || token !== element._rebuildToken) {
+			control?.destroy?.()
+			return
+		}
+		markSelfContainedControl(control, node.widget)
+		if (node.className) control.classList.add(...node.className.split(/\s+/).filter(Boolean))
+		element._controllers.set(key, control)
+		appendSchemaChild(parent, control)
+		return
+	}
+
 	const controller = createGooController({
 		label: node.showLabel === false ? '' : node.label ?? '',
 		type: node.widget,
 		unbound: true,
-		className: node.className,
+		className: mergeClassNames(
+			node.className,
+			node.layout === 'full-bleed' ? 'goo-controller--full-bleed' : undefined
+		),
 		layout: node.layout === 'inline' || node.layout === 'stacked' ? node.layout : undefined,
 		controlOptions: node.options,
 		controlTypes: element.state.controlTypes
 	})
 	controller.name(node.showLabel === false ? '' : node.label ?? '')
-	const key = node.id ?? `widget:${ node.widget }:${ element._controllers.size }`
 	element._controllers.set(key, controller)
 	controller.addTo(parent)
 }
@@ -310,6 +335,18 @@ async function buildField(
 	if (isFullBleedField(node)) {
 		controllerOptions.className = mergeClassNames(controllerOptions.className, 'goo-controller--full-bleed')
 	}
+	if (isSelfContainedField(node) && controllerOptions.type) {
+		await buildDirectSchemaField(
+			element,
+			node,
+			object,
+			property,
+			controllerOptions,
+			parent,
+			token
+		)
+		return
+	}
 
 	if (node.type) {
 		const controlConfig = resolveGooControlTypeConfig(node.type, controlTypes)
@@ -344,6 +381,94 @@ async function buildField(
 	controller.name(controllerOptions.label)
 	element._controllers.set(node.path, controller)
 	controller.addTo(parent)
+}
+
+async function buildDirectSchemaField(
+	element: GooSchemaBuildElement,
+	node: GooSchemaField,
+	object: GooSchemaData,
+	property: string,
+	controllerOptions: ControllerOptions,
+	parent: HTMLElement,
+	token: number
+): Promise<void> {
+	const handleChange = (value: unknown) => {
+		object[property] = value
+		const detail = { path: node.path, value, data: element._data }
+		element.dispatchEvent(new CustomEvent('change', { detail, bubbles: true }))
+		element._changeHandler?.(node.path, value)
+		updateSchemaAfterDataMutation(element)
+	}
+	const handleInput = (value: unknown) => {
+		object[property] = value
+		const detail = { path: node.path, value, data: element._data }
+		element.dispatchEvent(new CustomEvent('input', { detail, bubbles: true }))
+		updateSchemaAfterDataMutation(element)
+	}
+	const control = await createDirectSchemaControl({
+		controlType: controllerOptions.type!,
+		controlTypes: element.state.controlTypes,
+		onchange: handleChange,
+		oninput: handleInput,
+		options: flattenControllerOptions(controllerOptions),
+		value: object[property]
+	})
+	if (!control || token !== element._rebuildToken) {
+		control?.destroy?.()
+		return
+	}
+	markSelfContainedControl(control, controllerOptions.type!)
+
+	const refresh = control.refresh?.bind(control)
+	if (!refresh && control.setValue) {
+		;(control as GooControlElement & { updateDisplay?: () => void }).updateDisplay = () => {
+			control.setValue?.(object[property], { silent: true })
+		}
+	}
+
+	element._controllers.set(node.path, control)
+	appendSchemaChild(parent, control)
+}
+
+type DirectSchemaControlOptions = {
+	controlType: string
+	controlTypes: GooSchemaState['controlTypes']
+	onchange: (value: unknown) => void
+	oninput: (value: unknown) => void
+	options: GooControlOptions
+	value: unknown
+}
+
+async function createDirectSchemaControl(options: DirectSchemaControlOptions): Promise<GooControlElement | null> {
+	const result = await createControlFromRegistry(options.controlType, {
+		value: options.value,
+		controllerOptions: options.options,
+		onchange: options.onchange,
+		oninput: options.oninput,
+		buildOptions: value => ({
+			...options.options,
+			value,
+			onchange: options.onchange,
+			oninput: options.oninput
+		}),
+		controlTypes: options.controlTypes
+	})
+	if (result.status === 'created') return result.control
+	if (result.status === 'not_found') log.warn(`Unknown control type: ${ options.controlType }`)
+	return null
+}
+
+function flattenControllerOptions(options: ControllerOptions): GooControlOptions {
+	const { controlOptions, object: _object, property: _property, ...baseOptions } = options
+	return {
+		...baseOptions,
+		...controlOptions
+	}
+}
+
+function markSelfContainedControl(control: GooControlElement, controlType: string): void {
+	control.classList.add('goo-schema__self-contained')
+	control.dataset.gooControlType = controlType
 }
 
 function resolveFieldPath(

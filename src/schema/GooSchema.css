@@ -33,6 +33,12 @@
 	gap: var(--goo-theme-space-xs);
 }
 
+.goo-schema__self-contained {
+	box-sizing: border-box;
+	inline-size: 100%;
+	min-inline-size: 0;
+}
+
 .goo-schema__actions {
 	display: flex;
 	align-items: center;

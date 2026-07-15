@@ -485,8 +485,7 @@ describe('GooSchema', () => {
 		document.body.appendChild(schema)
 		await settleGooSchema()
 
-		const trigger = schema.querySelector<HTMLElement>('#UISubTool')
-		expect(trigger).not.toBeNull()
+		const trigger = await waitForSchemaElement<HTMLElement>(schema, '#UISubTool')
 		expect(trigger?.getAttribute('data-param')).toBe('type')
 		expect(trigger?.classList.contains('goo-grid-trigger--subtool')).toBe(true)
 		expect(trigger?.textContent).toContain('Star')
@@ -704,6 +703,85 @@ describe('GooSchema', () => {
 
 		schema.destroy()
 		expect(destroyWidget).toHaveBeenCalledOnce()
+	})
+
+	it('renders self-contained widgets without a controller row', async() => {
+		const schema = createGooSchema({
+			schema: [
+				{
+					type: 'widget',
+					widget: 'camera-preview',
+					id: 'cameraPreview',
+					layout: 'self-contained',
+					className: 'camera-preview-host',
+					options: { compact: true }
+				}
+			],
+			data: {},
+			bare: true,
+			controlTypes: {
+				'camera-preview': {
+					load: () => Promise.resolve({}),
+					extract: () => options => Object.assign(document.createElement('div'), {
+						className: 'camera-preview',
+						textContent: options.compact === true ? 'Camera' : 'Preview'
+					})
+				}
+			}
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+
+		const widget = await waitForSchemaElement<HTMLElement>(schema, '.camera-preview')
+		expect(widget.classList.contains('camera-preview-host')).toBe(true)
+		expect(widget.classList.contains('goo-schema__self-contained')).toBe(true)
+		expect(widget.dataset.gooControlType).toBe('camera-preview')
+		expect(widget.textContent).toBe('Camera')
+		expect(schema.querySelector('.goo-controller')).toBeNull()
+		expect(schema.getController('cameraPreview')).toBe(widget)
+	})
+
+	it('binds self-contained factory controls directly to schema data', async() => {
+		const setValue = vi.fn()
+		let change: ((value: unknown) => void) | undefined
+		const schema = createGooSchema({
+			schema: [
+				{
+					path: 'size',
+					type: 'standalone-control',
+					layout: 'self-contained',
+					showLabel: false
+				}
+			],
+			data: { size: 12 },
+			bare: true,
+			controlTypes: {
+				'standalone-control': {
+					load: () => Promise.resolve({}),
+					extract: () => options => {
+						change = options.onchange as (value: unknown) => void
+						return Object.assign(document.createElement('div'), {
+							className: 'standalone-control',
+							setValue
+						})
+					}
+				}
+			}
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+
+		const control = await waitForSchemaElement<HTMLElement>(schema, '.standalone-control')
+		expect(control.classList.contains('goo-schema__self-contained')).toBe(true)
+		expect(control.dataset.gooControlType).toBe('standalone-control')
+		expect(schema.querySelector('.goo-controller')).toBeNull()
+		expect(schema.getController('size')).toBe(control)
+
+		change?.(18)
+		expect(schema.getData()).toEqual({ size: 18 })
+
+		schema.setData({ size: 24 })
+		expect(setValue).toHaveBeenCalledWith(24, { silent: true })
 	})
 
 	it('destroys previous child controllers when rebuilding schema', async() => {

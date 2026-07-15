@@ -247,41 +247,18 @@ sketch-toolconfig .goo-angle-input {
 	margin: 0 var(--goo-theme-space-sm);
 }
 
-.goo-controller--full-bleed,
-.goo-controller--palette,
-.goo-controller--file-picker {
+.goo-controller--full-bleed {
 	--goo-controller-padding: 0px;
 
 	padding: 0;
-}
-
-.goo-controller--full-bleed {
 	--goo-controller-bg-hover: transparent;
 
 	border-bottom: 0;
 }
 
-.goo-controller--full-bleed .goo-controller__widget,
-.goo-controller--palette .goo-controller__widget,
-.goo-controller--file-picker .goo-controller__widget {
+.goo-controller--full-bleed .goo-controller__widget {
 	align-items: stretch;
 	inline-size: 100%;
-}
-
-.goo-controller--file-picker .goo-file-picker {
-	display: flex;
-	inline-size: 100%;
-	margin-inline: 0;
-}
-
-.goo-controller--file-picker .goo-file-picker.sketch-button {
-	margin-inline: 0;
-	width: 100%;
-}
-
-.goo-controller--file-picker .goo-file-picker .goo-button {
-	margin-inline: 0;
-	width: 100%;
 }
 
 /* ==========================================================================
