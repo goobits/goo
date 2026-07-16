@@ -387,4 +387,21 @@ describe('GridPopoutPicker', () => {
 		expect(tooltipHandle.destroy).toHaveBeenCalledOnce()
 		attachSpy.mockRestore()
 	})
+
+	it('chooses updated items through the imperative trigger', async() => {
+		const onChoose = vi.fn()
+		const trigger = createGridPopoutTrigger({
+			ariaLabel: 'Subtool',
+			items: [ items[0] ],
+			onChoose
+		})
+		document.body.append(trigger.element)
+		trigger.setItems(items)
+
+		await fireEvent.click(trigger.element)
+		await fireEvent.click(document.body.querySelector('[data-option-id="warp"]') as HTMLElement)
+
+		expect(onChoose).toHaveBeenCalledExactlyOnceWith('warp')
+		trigger.destroy()
+	})
 })

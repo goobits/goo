@@ -7,11 +7,13 @@ import type { GridPopoutItem } from './types.ts'
 export type GridPopoutTriggerHandle = {
 	readonly element: HTMLElement
 	destroy(): void
+	setItems(items: GridPopoutItem[]): void
 	setValue(value: string): void
 }
 
 type GridPopoutPickerApi = ReturnType<typeof mount> & {
 	getRootElement(): HTMLElement | null
+	setItems(items: GridPopoutItem[]): void
 	setValue(value: string): void
 }
 
@@ -20,6 +22,8 @@ type GridPopoutTooltip = string | (() => string | undefined)
 export type GridPopoutTriggerOptions = {
 	ariaLabel?: string
 	className?: string
+	dataParam?: string
+	id?: string
 	items: GridPopoutItem[]
 	onChoose?: (this: GridPopoutTriggerHandle, value: string) => void | Promise<void>
 	popoutClassName?: string
@@ -33,6 +37,8 @@ export type GridPopoutTriggerOptions = {
 export function createGridPopoutTrigger({
 	ariaLabel = '',
 	className = '',
+	dataParam,
+	id,
 	items,
 	onChoose,
 	popoutClassName = '',
@@ -46,6 +52,8 @@ export function createGridPopoutTrigger({
 		props: {
 			ariaLabel,
 			class: className,
+			dataParam,
+			id,
 			items,
 			popoutClass: popoutClassName,
 			selected,
@@ -89,8 +97,11 @@ export function createGridPopoutTrigger({
 			tooltipHandle?.destroy()
 			void unmount(component)
 		},
+		setItems(nextItems) {
+			flushSync(() => component.setItems(nextItems))
+		},
 		setValue(value) {
-			component.setValue(value)
+			flushSync(() => component.setValue(value))
 		}
 	}
 	handleRef.current = handle

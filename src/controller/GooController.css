@@ -101,7 +101,6 @@
 	max-inline-size: none;
 }
 
-.goo-controller .goo-config-primitive,
 .goo-controller .goo-button-group-field,
 .goo-controller .goo-button-group {
 	box-sizing: border-box;
@@ -231,20 +230,6 @@
 	--goo-angle-track-size: var(--goo-theme-control-height-md);
 	width: var(--goo-controller-angle-width);
 	font-size: var(--goo-theme-font-size-sm);
-}
-
-.goo-tool-config,
-.goo-palette,
-sketch-toolconfig {
-	box-sizing: border-box;
-	inline-size: 100%;
-	min-inline-size: 0;
-}
-
-.goo-tool-config .goo-angle-input,
-.goo-palette .goo-angle-input,
-sketch-toolconfig .goo-angle-input {
-	margin: 0 var(--goo-theme-space-sm);
 }
 
 .goo-controller--full-bleed {

@@ -28,6 +28,44 @@ describe('GooPopout', () => {
 		target.remove()
 	})
 
+	it('keeps every sibling child popout inside its parent click boundary', async() => {
+		const target = document.createElement('button')
+		const parentContent = document.createElement('div')
+		const pickerTarget = document.createElement('button')
+		const tooltipTarget = document.createElement('button')
+		const pickerContent = document.createElement('div')
+		const tooltipContent = document.createElement('div')
+		parentContent.append(pickerTarget, tooltipTarget)
+		document.body.appendChild(target)
+
+		const parent = createGooPopout({ at: target, content: parentContent, openImmediately: false })
+		const picker = createGooPopout({ at: pickerTarget, content: pickerContent, openImmediately: false })
+		const tooltip = createGooPopout({ at: tooltipTarget, content: tooltipContent, openImmediately: false })
+
+		try {
+			await parent.open()
+			await picker.open()
+			await tooltip.open()
+			await delay(120)
+
+			pickerContent.dispatchEvent(new PointerEvent('pointerdown', {
+				bubbles: true,
+				cancelable: true
+			}))
+			await delay(180)
+
+			expect(parent.isOpen()).toBe(true)
+			expect(picker.isOpen()).toBe(true)
+			expect(tooltip.isOpen()).toBe(false)
+
+			await parent.close()
+			expect(picker.isOpen()).toBe(false)
+		} finally {
+			await Promise.all([ parent.destroy(), picker.destroy(), tooltip.destroy() ])
+			target.remove()
+		}
+	})
+
 	it('uses explicit accessible label references when provided', () => {
 		const target = document.createElement('button')
 		const title = document.createElement('h2')

@@ -1,7 +1,6 @@
 /**
  * GooAngleInput - Angle input with circular dial and number input
- * Replicates the exact look of sketch-AngleInput
- * The dial sits INSIDE the input on the left, overlapping it
+ * The dial sits inside the input on the left.
  */
 
 .goo-angle-input {

@@ -97,6 +97,10 @@ export function setValue(nextSelected: string): void {
 	currentSelectedOverride = nextSelected
 }
 
+export function setItems(nextItems: GridPopoutItem[]): void {
+	items = [ ...nextItems ]
+}
+
 export function close(): void {
 	closePopout()
 }
@@ -260,7 +264,8 @@ function getContentSignature(): string {
 }
 
 function createOption(item: GridPopoutItem): HTMLElement {
-	const option = document.createElement('sketch-grid-item')
+	const option = document.createElement('div')
+	option.className = 'goo-grid-picker__item'
 	option.dataset.optionId = item.id
 	option.setAttribute('role', 'option')
 	option.setAttribute('aria-label', item.ariaLabel ?? item.title)
@@ -271,7 +276,8 @@ function createOption(item: GridPopoutItem): HTMLElement {
 		option.appendChild(createGridPickerSelectedMark())
 	}
 
-	const title = document.createElement('grid-title')
+	const title = document.createElement('div')
+	title.className = 'goo-grid-picker__item-title'
 	if (item.kicker) {
 		const kicker = document.createElement('span')
 		kicker.className = 'goo-grid-picker__kicker'
@@ -396,7 +402,7 @@ function focusSiblingOption(option: HTMLElement | null, delta: number): void {
 }
 
 function getOptions(): HTMLElement[] {
-	return Array.from(popout?.element?.querySelectorAll<HTMLElement>('sketch-grid-item') ?? [])
+	return Array.from(popout?.element?.querySelectorAll<HTMLElement>('.goo-grid-picker__item') ?? [])
 }
 
 function chooseItem(id: string): void {
@@ -483,8 +489,8 @@ function escapeSelectorValue(value: string): string {
 	justify-items: stretch;
 }
 
-:global(goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) sketch-grid-item),
-:global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) sketch-grid-item) {
+:global(goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .goo-grid-picker__item),
+:global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .goo-grid-picker__item) {
 	align-items: center;
 	border: 1px solid transparent;
 	border-radius: var(--goo-theme-radius-sm);
@@ -497,25 +503,25 @@ function escapeSelectorValue(value: string): string {
 	width: 100%;
 }
 
-:global(goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) sketch-grid-item:hover),
-:global(goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) sketch-grid-item:focus-visible),
-:global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) sketch-grid-item:hover),
-:global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) sketch-grid-item:focus-visible) {
+:global(goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .goo-grid-picker__item:hover),
+:global(goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .goo-grid-picker__item:focus-visible),
+:global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .goo-grid-picker__item:hover),
+:global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .goo-grid-picker__item:focus-visible) {
 	background: color-mix(in srgb, var(--goo-theme-fg) 15%, transparent);
 	border-color: var(--goo-theme-border);
 	outline: none;
 }
 
-:global(goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) sketch-grid-item.selected),
-:global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) sketch-grid-item.selected) {
+:global(goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .goo-grid-picker__item.selected),
+:global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .goo-grid-picker__item.selected) {
 	background: var(--goo-theme-surface-raised);
 	border-color: var(--goo-theme-accent);
 	box-shadow: inset 0 0 0 1px var(--goo-theme-accent);
 	color: var(--goo-theme-fg);
 }
 
-:global(goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) grid-title),
-:global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) grid-title) {
+:global(goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .goo-grid-picker__item-title),
+:global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .goo-grid-picker__item-title) {
 	display: flex;
 	flex-direction: column;
 	gap: var(--goo-grid-picker-title-gap);
@@ -588,8 +594,8 @@ function escapeSelectorValue(value: string): string {
 	grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-:global(goo-popout.goo-grid-popout--icon-grid sketch-grid-item),
-:global(.goo-popout.goo-grid-popout--icon-grid sketch-grid-item) {
+:global(goo-popout.goo-grid-popout--icon-grid .goo-grid-picker__item),
+:global(.goo-popout.goo-grid-popout--icon-grid .goo-grid-picker__item) {
 	align-items: center;
 	flex-direction: column;
 	gap: var(--goo-theme-space-xs);
@@ -600,8 +606,8 @@ function escapeSelectorValue(value: string): string {
 	text-align: center;
 }
 
-:global(goo-popout.goo-grid-popout--icon-grid grid-title),
-:global(.goo-popout.goo-grid-popout--icon-grid grid-title) {
+:global(goo-popout.goo-grid-popout--icon-grid .goo-grid-picker__item-title),
+:global(.goo-popout.goo-grid-popout--icon-grid .goo-grid-picker__item-title) {
 	color: var(--goo-theme-muted);
 	font-size: var(--goo-theme-font-size-xs);
 	line-height: 1.2;
@@ -611,8 +617,8 @@ function escapeSelectorValue(value: string): string {
 	white-space: nowrap;
 }
 
-:global(goo-popout.goo-grid-popout--icon-grid sketch-grid-item.selected grid-title),
-:global(.goo-popout.goo-grid-popout--icon-grid sketch-grid-item.selected grid-title) {
+:global(goo-popout.goo-grid-popout--icon-grid .goo-grid-picker__item.selected .goo-grid-picker__item-title),
+:global(.goo-popout.goo-grid-popout--icon-grid .goo-grid-picker__item.selected .goo-grid-picker__item-title) {
 	color: var(--goo-theme-fg);
 }
 
@@ -651,16 +657,16 @@ function escapeSelectorValue(value: string): string {
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-:global(goo-popout.goo-grid-popout--preset sketch-grid-item),
-:global(.goo-popout.goo-grid-popout--preset sketch-grid-item) {
+:global(goo-popout.goo-grid-popout--preset .goo-grid-picker__item),
+:global(.goo-popout.goo-grid-popout--preset .goo-grid-picker__item) {
 	align-items: stretch;
 	flex-direction: column;
 	min-height: var(--goo-grid-picker-preset-item-min-height);
 	padding: var(--goo-theme-space-xs);
 }
 
-:global(goo-popout.goo-grid-popout--preset grid-title),
-:global(.goo-popout.goo-grid-popout--preset grid-title) {
+:global(goo-popout.goo-grid-popout--preset .goo-grid-picker__item-title),
+:global(.goo-popout.goo-grid-popout--preset .goo-grid-picker__item-title) {
 	max-width: 100%;
 	order: 2;
 	overflow: hidden;

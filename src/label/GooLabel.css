@@ -56,13 +56,6 @@
 	color: var(--goo-label-color-hover);
 }
 
-sketch-line-break {
-	display: block;
-	margin-bottom: 0.35em;
-	padding-bottom: 0.35em;
-	border-bottom: 1px solid color-mix(in srgb, var(--goo-theme-fg) 3%, var(--goo-theme-bg));
-}
-
 .goo-quote {
 	background: color-mix(in srgb, var(--goo-theme-fg) 15%, var(--goo-theme-bg));
 	border-radius: var(--goo-theme-radius-md);
@@ -74,37 +67,20 @@ sketch-line-break {
 	padding: var(--goo-theme-space-md);
 }
 
-sketch-title {
-	border-bottom-right-radius: var(--goo-theme-radius-sm);
-	cursor: default;
-	display: inline-block;
-	letter-spacing: 0;
-	line-height: var(--goo-label-title-line-height);
-	margin: 0;
-	overflow: hidden;
-	padding: 0 var(--goo-theme-space-sm);
-	position: relative;
-	text-transform: capitalize;
-	z-index: 1;
-}
-
-sketch-title a {
-	pointer-events: all;
-}
-
-sketch-label-group {
+.goo-field-group {
 	display: block;
 	border: 2px solid var(--goo-theme-bg);
 	border-radius: var(--goo-theme-radius-md);
 }
 
-sketch-label-group sketch-label:first-child {
+.goo-field-group > .goo-field:first-child {
 	margin: 0;
 	background: var(--goo-theme-bg);
 	border-top: none;
 }
 
-sketch-label {
+.goo-field {
+	box-sizing: border-box;
 	width: inherit;
 	position: relative;
 	display: block;
@@ -112,70 +88,77 @@ sketch-label {
 	border-top: 1px solid color-mix(in srgb, var(--goo-theme-fg) 5%, var(--goo-theme-bg));
 }
 
-sketch-label:last-child {
+.goo-field:last-child {
 	border-bottom: none;
 }
 
-sketch-label.sk-font-menu {
-	height: auto;
-}
-
-sketch-label[data-tag='textarea'] {
+.goo-field[data-goo-field-type='textarea'] {
 	min-height: var(--goo-label-textarea-min-height);
 }
 
-sketch-label input,
-sketch-label textarea {
+.goo-field input,
+.goo-field textarea {
 	border-radius: var(--goo-theme-radius-md);
 	padding: var(--goo-theme-space-xs) var(--goo-theme-space-sm);
 }
 
-sketch-label[data-tag='checkbox'],
-sketch-label[data-tag='point'],
-sketch-label[data-tag='selectmenu'] {
+.goo-field[data-goo-field-type='checkbox'],
+.goo-field[data-goo-field-type='point'],
+.goo-field[data-goo-field-type='select'] {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	gap: var(--goo-theme-space-sm);
 	height: var(--goo-label-row-height);
 	line-height: var(--goo-label-row-height);
 	padding: 0 var(--goo-theme-space-sm);
 }
 
-sketch-label[data-tag='checkbox'] sketch-title,
-sketch-label[data-tag='point'] sketch-title,
-sketch-label[data-tag='selectmenu'] sketch-title {
+.goo-field__label {
+	border-bottom-right-radius: var(--goo-theme-radius-sm);
+	cursor: default;
+	display: inline-block;
+	flex: 0 1 auto;
+	letter-spacing: 0;
+	line-height: var(--goo-label-title-line-height);
+	margin: 0;
+	min-width: 0;
+	overflow: hidden;
+	padding: 0 var(--goo-theme-space-sm);
+	position: relative;
+	text-transform: capitalize;
+	z-index: 1;
+}
+
+.goo-field__label a {
+	pointer-events: all;
+}
+
+.goo-field[data-goo-field-type='checkbox'] .goo-field__label,
+.goo-field[data-goo-field-type='point'] .goo-field__label,
+.goo-field[data-goo-field-type='select'] .goo-field__label {
 	padding: 0;
 }
 
-[data-tag='ButtonGroup'] {
-	clear: both;
-	border-top: 1px solid color-mix(in srgb, var(--goo-theme-fg) 5%, var(--goo-theme-bg));
-}
-
-sketch-label.goo-config-field .goo-config-field__title {
-	flex: 0 1 auto;
+.goo-field > :not(.goo-field__label) {
 	min-width: 0;
 }
 
-sketch-label.goo-config-field .goo-config-primitive {
-	min-width: 0;
-}
-
-sketch-label.goo-config-field .goo-config-select,
-sketch-label.goo-config-field .goo-config-select__container {
+.goo-field .goo-select,
+.goo-field .goo-select-field {
 	flex: 1 1 auto;
 	min-width: 0;
 	width: 100%;
 }
 
-sketch-label.goo-config-field .goo-config-select__container {
+.goo-field .goo-select {
 	--goo-select-min-width: 0px;
 }
 
-sketch-label.goo-config-field[data-tag='checkbox'],
-sketch-label.goo-config-field[data-tag='selectmenu'],
-sketch-label.goo-config-field[data-tag='input'],
-sketch-label.goo-config-field[data-tag='number'] {
+.goo-field[data-goo-field-type='checkbox'],
+.goo-field[data-goo-field-type='select'],
+.goo-field[data-goo-field-type='input'],
+.goo-field[data-goo-field-type='number'] {
 	align-items: center;
 	display: flex;
 	gap: var(--goo-theme-space-sm);
@@ -185,31 +168,30 @@ sketch-label.goo-config-field[data-tag='number'] {
 	padding: 0 var(--goo-theme-space-sm);
 }
 
-sketch-label.goo-config-field[data-tag='checkbox'] sketch-title,
-sketch-label.goo-config-field[data-tag='selectmenu'] sketch-title,
-sketch-label.goo-config-field[data-tag='input'] sketch-title,
-sketch-label.goo-config-field[data-tag='number'] sketch-title {
+.goo-field[data-goo-field-type='checkbox'] .goo-field__label,
+.goo-field[data-goo-field-type='select'] .goo-field__label,
+.goo-field[data-goo-field-type='input'] .goo-field__label,
+.goo-field[data-goo-field-type='number'] .goo-field__label {
 	line-height: 1;
 	padding: 0;
 }
 
-sketch-label.goo-config-field[data-tag='textarea'] {
+.goo-field[data-goo-field-type='textarea'] {
 	padding: var(--goo-theme-space-sm);
 }
 
-sketch-label.goo-config-field[data-tag='textarea'] .goo-textarea {
+.goo-field[data-goo-field-type='textarea'] .goo-textarea {
 	margin-top: var(--goo-theme-space-sm);
 	width: 100%;
 }
 
-sketch-label.goo-config-field .goo-checkbox,
-sketch-label.goo-config-field .goo-select,
-sketch-label.goo-config-field .goo-input,
-sketch-label.goo-config-field .goo-number {
+.goo-field .goo-checkbox,
+.goo-field .goo-input,
+.goo-field .goo-number {
 	flex: 0 0 auto;
 }
 
-sketch-label.goo-config-field .goo-select.goo-config-select__container {
+.goo-field .goo-select {
 	flex: 1 1 auto;
 }
 

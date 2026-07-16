@@ -73,7 +73,7 @@ export function handleGridPopoutListKeyboardEvent(
 	}: GridPopoutListKeyboardOptions
 ): boolean {
 	const option = event.target instanceof Element
-		? event.target.closest<HTMLElement>('sketch-grid-item')
+		? event.target.closest<HTMLElement>('.goo-grid-picker__item')
 		: null
 
 	switch (event.key) {

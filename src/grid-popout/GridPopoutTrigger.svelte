@@ -223,12 +223,12 @@ function getLegacyPreview(src: string, alt: string): GridPopoutPreview | undefin
 		<ChevronRight aria-hidden="true" focusable="false" />
 	</span>
 	<span class="goo-grid-popout-trigger__content">
-		<grid-title class={titleClassName}>
+		<div class="goo-grid-popout-trigger__title-group {titleClassName}">
 			{#if currentKicker}
 				<span class="goo-grid-popout-trigger__kicker">{currentKicker}</span>
 			{/if}
 			<span class="goo-grid-popout-trigger__title">{currentTitle}</span>
-		</grid-title>
+		</div>
 		{#if currentPreview}
 			<GooPreview
 				class={previewClassName}
@@ -343,7 +343,7 @@ goo-grid-popout-trigger[aria-disabled="true"] {
 	-webkit-user-select: none;
 }
 
-goo-grid-popout-trigger :global(grid-title) {
+goo-grid-popout-trigger .goo-grid-popout-trigger__title-group {
 	align-items: center;
 	display: flex;
 	flex-direction: column;
@@ -469,7 +469,7 @@ goo-grid-popout-trigger.goo-grid-trigger--opened .goo-grid-trigger__arrow {
 	right: auto;
 }
 
-:global([dir="rtl"]) goo-grid-popout-trigger :global(grid-title) {
+:global([dir="rtl"]) goo-grid-popout-trigger .goo-grid-popout-trigger__title-group {
 	left: auto;
 	right: var(--goo-grid-trigger-icon-size);
 }
@@ -481,7 +481,7 @@ goo-grid-popout-trigger.goo-grid-trigger--small {
 	line-height: var(--goo-grid-trigger-small-line-height);
 }
 
-goo-grid-popout-trigger.goo-grid-trigger--small :global(grid-title) {
+goo-grid-popout-trigger.goo-grid-trigger--small .goo-grid-popout-trigger__title-group {
 	align-items: center;
 	display: flex;
 	height: var(--goo-grid-trigger-small-icon-size);
@@ -499,7 +499,7 @@ goo-grid-popout-trigger.goo-grid-trigger--small :global(.goo-grid-trigger__icon)
 	width: var(--goo-grid-trigger-small-icon-size);
 }
 
-goo-grid-popout-trigger.goo-grid-trigger--font :global(grid-title) {
+goo-grid-popout-trigger.goo-grid-trigger--font .goo-grid-popout-trigger__title-group {
 	display: none;
 }
 
@@ -531,7 +531,7 @@ goo-grid-popout-trigger.goo-grid-trigger--preset:hover {
 	border-color: var(--goo-theme-border-strong);
 }
 
-goo-grid-popout-trigger.goo-grid-trigger--preset :global(grid-title) {
+goo-grid-popout-trigger.goo-grid-trigger--preset .goo-grid-popout-trigger__title-group {
 	inset-inline-start: var(--goo-grid-trigger-icon-inline-size);
 	width: calc(100% - var(--goo-grid-trigger-icon-inline-size) - var(--goo-grid-trigger-arrow-inline-size));
 	align-items: flex-start;

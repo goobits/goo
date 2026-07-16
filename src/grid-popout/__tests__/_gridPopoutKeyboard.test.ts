@@ -63,7 +63,8 @@ describe('grid popout keyboard helpers', () => {
 	})
 
 	it.each([ 'Enter', ' ', 'Spacebar' ])('chooses the focused option from list activation key %s', key => {
-		const option = document.createElement('sketch-grid-item')
+		const option = document.createElement('div')
+		option.className = 'goo-grid-picker__item'
 		const choose = vi.fn()
 		option.dataset.optionId = 'brush'
 

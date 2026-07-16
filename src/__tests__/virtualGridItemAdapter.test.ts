@@ -25,7 +25,7 @@ describe('virtualGridItemAdapter', () => {
 
 	it('resolves element refs from data-key and escaped selectors', () => {
 		const root = document.createElement('div')
-		const keyedElement = document.createElement('sketch-grid-item')
+		const keyedElement = document.createElement('div')
 		keyedElement.dataset.key = 'paint"0'
 		root.appendChild(keyedElement)
 
@@ -63,7 +63,7 @@ describe('virtualGridItemAdapter', () => {
 		grid.dataset.columns = '3'
 		root.appendChild(grid)
 
-		const tile = document.createElement('sketch-grid-item')
+		const tile = document.createElement('div')
 		tile.getBoundingClientRect = () => ({
 			bottom: 90,
 			height: 90,

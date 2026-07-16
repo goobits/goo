@@ -105,9 +105,11 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 	let $backdrop: HTMLElement | null = null
 	let opened = false
 	let destroying = false
+	let closePromise: Promise<void> | null = null
+	let destroyPromise: Promise<void> | null = null
 	let lifecycle = createLifecycleBag()
 	let parentPopout: GooPopoutRuntime | null = null
-	let childPopout: GooPopoutRuntime | null = null
+	const childPopouts = new Set<GooPopoutRuntime>()
 	let currentPosition: ReturnType<typeof calculatePosition> | null = null
 	let currentAvoidRects: PositionAvoidRect[] = []
 	let currentAvoidMargin = 0
@@ -155,11 +157,8 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		set parent(p: GooPopoutRuntime | null) {
 			parentPopout = p
 		},
-		get child() {
-			return childPopout
-		},
-		set child(c: GooPopoutRuntime | null) {
-			childPopout = c
+		get children() {
+			return childPopouts
 		},
 
 		open,
@@ -179,7 +178,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 	 * @returns {Promise<void>}
 	 */
 	async function open() {
-		if (opened || destroying) return
+		if (opened || destroying || closePromise) return
 		if (lifecycle.destroyed) lifecycle = createLifecycleBag()
 		previousActiveElement = capturePopoutFocusTarget(initialFocus)
 
@@ -265,23 +264,27 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 	 * Close the popout.
 	 * @returns {Promise<void>}
 	 */
-	async function close() {
-		if (!opened || destroying) return
+	function close(): Promise<void> {
+		if (closePromise) return closePromise
+		if (!opened || destroying) return Promise.resolve()
 
-		opened = false
-		unregisterActivePopout(instance)
+		closePromise = closePopout()
+		return closePromise
+	}
 
-		// Close child popouts first
-		if (childPopout) {
-			await childPopout.close()
-			childPopout = null
+	async function closePopout(): Promise<void> {
+		try {
+			opened = false
+			unregisterActivePopout(instance)
+
+			if (childPopouts.size) await closeChildPopouts()
+
+			if (onClose && $element) onClose({ element: $element, instance })
+
+			await destroy()
+		} finally {
+			closePromise = null
 		}
-
-		// Callback
-		if (onClose && $element) onClose({ element: $element, instance })
-
-		// Animate out and destroy
-		await destroy()
 	}
 
 	/**
@@ -299,40 +302,57 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 	 * Destroy the popout.
 	 * @returns {Promise<void>}
 	 */
-	async function destroy() {
-		if (destroying || !$element) return
+	function destroy(): Promise<void> {
+		if (destroyPromise) return destroyPromise
+		if (!$element) return Promise.resolve()
+
+		destroyPromise = destroyPopout()
+		return destroyPromise
+	}
+
+	async function destroyPopout(): Promise<void> {
 		destroying = true
-		const removedElement = $element
-
-		lifecycle.destroy()
-		cancelScheduledReposition()
-		cancelPopoutAnimation(animationState)
-
-		// Remove from parent chain
-		if (parentPopout) {
-			parentPopout.child = null
-		}
-
-		// Animate out
-		await animatePopoutOut($element, animationState)
-
-		// Remove from DOM
-		if ($backdrop) {
-			$backdrop.remove()
-			$backdrop = null
-		}
-
-		$element.remove()
-		$element = null
-		$arrow = null
-
+		opened = false
 		unregisterActivePopout(instance)
-		destroying = false
-		lifecycle = createLifecycleBag()
+		const removedElement = $element
+		if (!removedElement) {
+			destroying = false
+			destroyPromise = null
+			return
+		}
 
-		// Callback
+		try {
+			if (childPopouts.size) await closeChildPopouts()
+			lifecycle.destroy()
+			cancelScheduledReposition()
+			cancelPopoutAnimation(animationState)
+			parentPopout?.children.delete(instance)
+			parentPopout = null
+
+			await animatePopoutOut(removedElement, animationState)
+
+			if ($backdrop) {
+				$backdrop.remove()
+				$backdrop = null
+			}
+
+			removedElement.remove()
+			$element = null
+			$arrow = null
+			lifecycle = createLifecycleBag()
+		} finally {
+			destroying = false
+			destroyPromise = null
+		}
+
 		if (onDestroy) onDestroy()
 		previousActiveElement = restorePopoutFocus(removedElement, previousActiveElement)
+	}
+
+	async function closeChildPopouts(): Promise<void> {
+		const children = Array.from(childPopouts)
+		await Promise.all(children.map(child => child.close()))
+		childPopouts.clear()
 	}
 
 	/**
@@ -431,13 +451,8 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 
 			// Check if it's a popout
 			const popoutEl = el as PopoutElement
-			if (popoutEl._isGooPopout) {
-				// Check if it's this popout or a descendant
-				let p: GooPopoutRuntime | null = instance
-				while (p) {
-					if (popoutEl._popoutInstance === p) return true
-					p = p.child
-				}
+			if (popoutEl._isGooPopout && isThisPopoutOrDescendant(popoutEl._popoutInstance)) {
+				return true
 			}
 
 			// Check for cancel-destroy class
@@ -446,6 +461,15 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 			}
 
 			el = el.parentElement
+		}
+		return false
+	}
+
+	function isThisPopoutOrDescendant(popout: GooPopoutRuntime | undefined): boolean {
+		let current = popout ?? null
+		while (current) {
+			if (current === instance) return true
+			current = current.parent
 		}
 		return false
 	}
@@ -511,7 +535,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 			const popoutEl = el as PopoutElement
 			if (popoutEl._isGooPopout && popoutEl._popoutInstance) {
 				parentPopout = popoutEl._popoutInstance
-				parentPopout.child = instance
+				parentPopout.children.add(instance)
 				return
 			}
 			el = el.parentElement

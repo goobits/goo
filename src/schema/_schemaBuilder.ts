@@ -1,6 +1,6 @@
+import { createControlFromRegistry } from '../controller/controlFactory.ts'
 import type { GooControlElement, GooControlOptions, GooSvelteControlModule } from '../controller/controlRegistry.ts'
 import { resolveGooControlTypeConfig } from '../controller/controlRegistry.ts'
-import { createControlFromRegistry } from '../controller/controlFactory.ts'
 import { createGooController } from '../controller/GooController.ts'
 import { createSvelteControlHost, type SvelteControlHost } from '../controller/SvelteControl.svelte.ts'
 import { createFolder, type GooFolderElement } from '../folder/_createFolder.ts'

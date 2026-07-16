@@ -2,7 +2,7 @@ import type { GooPopoutInstance } from './popoutTypes.ts'
 
 export type GooPopoutRuntime = GooPopoutInstance & {
 	parent: GooPopoutRuntime | null
-	child: GooPopoutRuntime | null
+	readonly children: Set<GooPopoutRuntime>
 }
 
 const activePopouts = new Set<GooPopoutRuntime>()

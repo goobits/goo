@@ -464,7 +464,7 @@ describe('GooSchema', () => {
 					path: 'type',
 					type: 'grid-popout',
 					ariaLabel: 'Subtool',
-					class: 'goo-grid-trigger--subtool',
+					class: 'goo-grid-trigger--compact',
 					dataParam: 'type',
 					id: 'UISubTool',
 					items: [
@@ -472,7 +472,7 @@ describe('GooSchema', () => {
 						{ id: 'ring', title: 'Ring', iconClass: 'icon-ring' }
 					],
 					layout: 'self-contained',
-					popoutClass: 'goo-grid-popout--icon-grid goo-grid-popout--subtool',
+					popoutClass: 'goo-grid-popout--icon-grid goo-grid-popout--compact',
 					showLabel: false
 				}
 			],
@@ -487,7 +487,7 @@ describe('GooSchema', () => {
 
 		const trigger = await waitForSchemaElement<HTMLElement>(schema, '#UISubTool')
 		expect(trigger?.getAttribute('data-param')).toBe('type')
-		expect(trigger?.classList.contains('goo-grid-trigger--subtool')).toBe(true)
+		expect(trigger?.classList.contains('goo-grid-trigger--compact')).toBe(true)
 		expect(trigger?.textContent).toContain('Star')
 
 		schema.setData({ type: 'ring' })

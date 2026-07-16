@@ -5,6 +5,8 @@
 
 /// <reference path="../svelte.d.ts" />
 
+export type { SelectFieldOptions } from './_createSelectField.ts'
+export { createSelectField } from './_createSelectField.ts'
 export { default as GooSelect } from './GooSelect.svelte'
 export type {
 	GooSelectActionContext,

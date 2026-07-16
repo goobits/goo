@@ -1,13 +1,15 @@
 import { tick } from 'svelte'
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { createAngleInputField } from '../angle-input/_createAngleInputField.ts'
-import { createButtonGroupField } from '../button-group/_createButtonGroupField.ts'
-import { createCheckboxField } from '../checkbox/_createCheckboxField.ts'
+import { createAngleInputField } from '../angle-input/index.ts'
+import { createButtonField } from '../button/index.ts'
+import { createButtonGroupField } from '../button-group/index.ts'
+import { createCheckboxField } from '../checkbox/index.ts'
 import { createColorField } from '../color/_createColorField.ts'
-import { createInputField, createNumberField } from '../input/_createInputField.ts'
+import { createInputField, createNumberField } from '../input/index.ts'
+import { createFieldGroup, createLabeledField } from '../label/index.ts'
 import { createRadioGroupField } from '../radio/_createRadioGroupField.ts'
-import { createSelectField } from '../select/_createSelectField.ts'
+import { createSelectField } from '../select/index.ts'
 import { createTextareaField } from '../textarea/_createTextareaField.ts'
 
 type FieldFactoryCase<TValue> = {
@@ -110,5 +112,43 @@ describe('Goo field factories', () => {
 			expect(field.firstElementChild).toBeNull()
 			expect(field.isConnected).toBe(false)
 		}
+	})
+
+	it('creates framework-free field compositions around imperative controls', () => {
+		const checkbox = createCheckboxField({ value: true })
+		const field = createLabeledField({
+			control: checkbox,
+			label: 'Paint into layer',
+			type: 'checkbox'
+		})
+		const group = createFieldGroup()
+		group.appendChild(field)
+		document.body.appendChild(group)
+
+		expect(field.querySelector('.goo-field__label')?.textContent).toBe('Paint into layer')
+		expect(field.control).toBe(checkbox)
+		expect(field.dataset.gooFieldType).toBe('checkbox')
+
+		group.destroy()
+		expect(group.isConnected).toBe(false)
+	})
+
+	it('creates an imperative Goo button with DOM icons', () => {
+		let clicks = 0
+		const icon = document.createElement('svg')
+		const field = createButtonField({
+			icon,
+			value: 'Upload',
+			onclick: () => clicks++
+		})
+		document.body.appendChild(field)
+
+		expect(field.button?.textContent).toContain('Upload')
+		expect(field.button?.querySelector('svg')).toBe(icon)
+		field.click()
+		expect(clicks).toBe(1)
+
+		field.destroy()
+		expect(field.isConnected).toBe(false)
 	})
 })
