@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { BellRing, Bot, ChevronDown, CircleAlert, Plus, X } from '@lucide/svelte'
+	import BellRing from '@lucide/svelte/icons/bell-ring'
+	import Bot from '@lucide/svelte/icons/bot'
+	import ChevronDown from '@lucide/svelte/icons/chevron-down'
+	import CircleAlert from '@lucide/svelte/icons/circle-alert'
+	import Plus from '@lucide/svelte/icons/plus'
+	import X from '@lucide/svelte/icons/x'
 	import { tooltip } from '../tooltip/index.ts'
 	import './GooChevronTabs.css'
 	import {
