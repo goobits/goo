@@ -61,7 +61,7 @@ describe('GooChevronTabs', () => {
 
 	it('omits unavailable mutation controls for read-only tabs', () => {
 		const onselect = vi.fn()
-		const { queryByRole, getByTestId } = render(GooChevronTabs, {
+		const { container, queryByRole, getByTestId } = render(GooChevronTabs, {
 			props: {
 				activeId: 'kernel',
 				tabs: [
@@ -75,6 +75,7 @@ describe('GooChevronTabs', () => {
 
 		expect(queryByRole('button', { name: 'Add tab' })).toBeNull()
 		expect(queryByRole('button', { name: 'Close Kernel tab' })).toBeNull()
+		expect(container.querySelector('.goo-chevron-tabs__rail--without-add')).not.toBeNull()
 		expect(dispatchKey(getByTestId('tab-kernel'), 'F2').defaultPrevented).toBe(false)
 		expect(dispatchKey(getByTestId('tab-kernel'), 'Delete').defaultPrevented).toBe(false)
 	})

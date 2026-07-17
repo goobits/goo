@@ -165,6 +165,17 @@
 	white-space: nowrap;
 }
 
+.goo-chevron-tabs__rail--without-add > .goo-chevron-tabs__tab:first-of-type {
+	margin-left: 0;
+	clip-path: polygon(
+		0 0,
+		calc(100% - var(--goo-chevron-tabs-chevron-size)) 0,
+		100% 50%,
+		calc(100% - var(--goo-chevron-tabs-chevron-size)) 100%,
+		0 100%
+	);
+}
+
 .goo-chevron-tabs__tab--has-activity {
 	padding-left: var(--goo-theme-space-sm);
 }

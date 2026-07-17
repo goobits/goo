@@ -367,6 +367,7 @@
 	<div
 		class="goo-chevron-tabs__rail"
 		class:goo-chevron-tabs__rail--dragging={dragging?.moved}
+		class:goo-chevron-tabs__rail--without-add={!onadd}
 		role="tablist"
 		tabindex="-1"
 		aria-label={resolvedAriaLabel}
