@@ -134,6 +134,18 @@ describe('GooChevronTabs', () => {
 		expect(document.querySelector('.goo-popout.goo-tooltip')).not.toBeNull()
 	})
 
+	it('can delegate connection status to an owning product chrome', () => {
+		const { container } = render(GooChevronTabs, {
+			props: {
+				activeId: 'kernel',
+				showConnectionStatus: false,
+				tabs: [ { id: 'kernel', name: 'Kernel', status: 'connected' } ]
+			}
+		})
+
+		expect(container.querySelector('.goo-chevron-tabs__connection')).toBeNull()
+	})
+
 	it('selects focused tabs from Spacebar and contains handled keys', () => {
 		const onselect = vi.fn()
 		const { container } = render(GooChevronTabs, {

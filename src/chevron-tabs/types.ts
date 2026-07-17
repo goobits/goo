@@ -26,6 +26,7 @@ export type GooChevronTabsProps = {
 	'aria-label'?: string
 	addLabel?: string
 	renameLabel?: string
+	showConnectionStatus?: boolean
 	allowClosingLastTab?: boolean
 	closeLabel?: (_tab: GooChevronTab) => string
 	tabAttributes?: (_tab: GooChevronTab, _index: number) => GooChevronTabAttributes

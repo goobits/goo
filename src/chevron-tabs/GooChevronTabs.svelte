@@ -55,6 +55,7 @@
 		'aria-label': ariaLabelAttribute,
 		addLabel = 'Add tab',
 		renameLabel = 'Rename tab',
+		showConnectionStatus = true,
 		allowClosingLastTab = false,
 		closeLabel = (tab) => `Close ${tab.name} tab`,
 		tabAttributes = () => ({}),
@@ -470,7 +471,7 @@
 	</div>
 
 	<div class="goo-chevron-tabs__right">
-		{#if tabs.length > 0}
+		{#if showConnectionStatus && tabs.length > 0}
 			<div class="goo-chevron-tabs__connection">
 				<span
 					class="goo-chevron-tabs__connection-dot"
