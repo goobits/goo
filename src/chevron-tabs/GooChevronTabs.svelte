@@ -92,7 +92,7 @@
 	let originalName = ''
 	let canceledRename = false
 
-	const canClose = $derived(allowClosingLastTab || tabs.length > 1)
+	const canClose = $derived(Boolean(onclose) && (allowClosingLastTab || tabs.length > 1))
 	const resolvedAriaLabel = $derived(ariaLabel ?? ariaLabelAttribute ?? 'Tabs')
 	const activeTab = $derived(tabs.find((tab) => tab.id === activeId) ?? null)
 	const activeStatus = $derived(activeTab?.status ?? 'connected')
@@ -218,11 +218,13 @@
 			return
 		}
 		if (event.key === 'F2') {
+			if (!onrename) return
 			containKeyboardEvent(event)
 			startRename(tab)
 			return
 		}
 		if (event.key === 'Delete' || event.key === 'Backspace') {
+			if (!canClose) return
 			containKeyboardEvent(event)
 			closeTab(tab)
 		}
@@ -256,6 +258,7 @@
 		const drag = dragging
 		if (!drag) return
 		if (event.pointerId !== drag.pointerId) return
+		if (!onmove) return
 		const movement = event.clientX - drag.startX
 		if (!drag.moved) {
 			if (!hasChevronTabDragIntent(movement, event.clientY - drag.startY)) return
@@ -372,15 +375,17 @@
 		onpointerup={(event) => finishDrag(event)}
 		onpointercancel={(event) => finishDrag(event)}
 	>
-		<button
-			class="goo-chevron-tabs__add"
-			type="button"
-			aria-label={addLabel}
-			title={addLabel}
-			onclick={onadd}
-		>
-			<Plus size={15} strokeWidth={2} aria-hidden="true" />
-		</button>
+		{#if onadd}
+			<button
+				class="goo-chevron-tabs__add"
+				type="button"
+				aria-label={addLabel}
+				title={addLabel}
+				onclick={onadd}
+			>
+				<Plus size={15} strokeWidth={2} aria-hidden="true" />
+			</button>
+		{/if}
 
 		{#each tabs as tab, index (tab.id)}
 			{@const activity = tabActivity(tab)}

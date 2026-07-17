@@ -59,6 +59,26 @@ describe('GooChevronTabs', () => {
 		expect(onmove).not.toHaveBeenCalled()
 	})
 
+	it('omits unavailable mutation controls for read-only tabs', () => {
+		const onselect = vi.fn()
+		const { queryByRole, getByTestId } = render(GooChevronTabs, {
+			props: {
+				activeId: 'kernel',
+				tabs: [
+					{ id: 'kernel', name: 'Kernel' },
+					{ id: 'tests', name: 'Tests' }
+				],
+				tabAttributes: tab => ({ 'data-testid': `tab-${ tab.id }` }),
+				onselect
+			}
+		})
+
+		expect(queryByRole('button', { name: 'Add tab' })).toBeNull()
+		expect(queryByRole('button', { name: 'Close Kernel tab' })).toBeNull()
+		expect(dispatchKey(getByTestId('tab-kernel'), 'F2').defaultPrevented).toBe(false)
+		expect(dispatchKey(getByTestId('tab-kernel'), 'Delete').defaultPrevented).toBe(false)
+	})
+
 	it('supports keyboard rename and close commands', async() => {
 		const onclose = vi.fn()
 		const onrename = vi.fn()
