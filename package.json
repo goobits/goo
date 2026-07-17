@@ -200,6 +200,10 @@
 			"types": "./src/schema/types.ts",
 			"import": "./src/schema/types.ts"
 		},
+		"./schema/assert": {
+			"types": "./src/schema/assertGooSchemaDescriptor.ts",
+			"import": "./src/schema/assertGooSchemaDescriptor.ts"
+		},
 		"./schema/path": {
 			"types": "./src/schema/pathUtils.ts",
 			"import": "./src/schema/pathUtils.ts"

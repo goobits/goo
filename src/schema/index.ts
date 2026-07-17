@@ -6,10 +6,14 @@
 export { default as GooSchema } from './GooSchema.svelte'
 export type {
 	GooSchemaChangeHandler,
+	GooSchemaChoiceOption,
+	GooSchemaControlOptions,
 	GooSchemaControlType,
 	GooSchemaData,
 	GooSchemaDataUpdateOptions,
 	GooSchemaDataUpdateReason,
+	GooSchemaDescriptorPrimitive,
+	GooSchemaDescriptorValue,
 	GooSchema as GooSchemaElement,
 	GooSchemaEvent,
 	GooSchemaEventDetail,
@@ -29,6 +33,7 @@ export type {
 	GooSchemaWidget
 } from './GooSchema.ts'
 export {
+	assertGooSchemaDescriptor,
 	createGooSchema,
 	schemaHasConditions
 } from './GooSchema.ts'

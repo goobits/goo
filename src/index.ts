@@ -181,6 +181,7 @@ export type {
 	GooSchemaWidget
 } from './schema/index.ts'
 export {
+	assertGooSchemaDescriptor,
 	createGooSchema,
 	getByPath,
 	GooSchema,

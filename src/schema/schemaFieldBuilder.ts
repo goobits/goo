@@ -4,12 +4,14 @@
  * @module goobits/schema/schemaFieldBuilder
  */
 
-import type { GooControlOptionBag, GooControlOptionValue, GooControlTypeRegistry } from '../controller/controlRegistry.ts'
+import type { GooControlOptionBag, GooControlTypeRegistry } from '../controller/controlRegistry.ts'
 import type { GooControllerOptions } from '../controller/GooController.ts'
+import { localizeSchemaText } from './_schemaText.ts'
+import { shouldRenderSchemaItem } from './fieldConditions.ts'
 import { getControllerFieldLayout } from './fieldLayout.ts'
 import { applyFieldValueFormatOptions } from './fieldValueFormat.ts'
 import { pathToLabel } from './pathUtils.ts'
-import type { GooSchemaField } from './types.ts'
+import type { GooSchemaData, GooSchemaField } from './types.ts'
 
 // =============================================================================
 // Types
@@ -20,14 +22,11 @@ export interface NormalizedSelectOption {
 	id: string
 	label: string
 	icon?: string
-}
-
-type RawOption = string | {
-	id?: string | number
-	key?: string | number
-	label?: string | number
-	value?: string | number
-	icon?: string
+	tooltip?: string
+	ariaLabel?: string
+	hideLabel?: boolean
+	className?: string
+	disabled?: boolean
 }
 
 /** Controller options built from a schema field */
@@ -52,52 +51,6 @@ export interface ControllerOptions extends GooControllerOptions {
 	layout?: 'inline' | 'stacked'
 	controlOptions?: GooControlOptionBag
 }
-
-const SCHEMA_FIELD_KEYS = new Set([
-	'path',
-	'type',
-	'label',
-	'min',
-	'max',
-	'step',
-	'dual',
-	'xy',
-	'coverage',
-	'preset',
-	'presetColor',
-	'presetHue',
-	'shape',
-	'scale',
-	'mode',
-	'gradient',
-	'marks',
-	'snap',
-	'valueBubble',
-	'unit',
-	'displayUnit',
-	'options',
-	'if',
-	'unless',
-	'layout',
-	'disabled',
-	'controlOptions',
-	'selfContained',
-	'format',
-	'valueFormat',
-	'showLabel',
-	'ticks',
-	'fullBleed',
-
-	// Framework-reserved keys: never forwarded as control options because they
-	// are the binding target / wired handlers set by GooSchema. Excluding them
-	// keeps a malformed schema node from silently overriding the binding.
-	'object',
-	'property',
-	'value',
-	'controlTypes',
-	'onchange',
-	'oninput'
-])
 
 // =============================================================================
 // Type Detection
@@ -185,19 +138,30 @@ function isColorString(value: string): boolean {
  * @returns Normalized options with id and label
  */
 export function normalizeSelectOptions(
-	options: RawOption[]
+	options: NonNullable<GooSchemaField['options']>,
+	data: GooSchemaData = {}
 ): NormalizedSelectOption[] {
-	return options.map(opt => {
-		if (typeof opt === 'string') {
-			return { id: opt, label: opt }
+	return options.filter(opt => (
+		typeof opt === 'string'
+		|| typeof opt === 'number'
+		|| shouldRenderSchemaItem(opt, data)
+	)).map(opt => {
+		if (typeof opt === 'string' || typeof opt === 'number') {
+			const value = String(opt)
+			return { id: value, label: localizeSchemaText(value) ?? value }
 		}
 
 		const id = opt.id ?? opt.key ?? opt.value ?? opt.label ?? ''
 		const label = opt.label ?? opt.value ?? opt.id ?? opt.key ?? ''
 		return {
 			id: String(id),
-			label: String(label),
-			icon: opt.icon
+			label: localizeSchemaText(String(label)) ?? String(label),
+			icon: opt.icon,
+			tooltip: localizeSchemaText(opt.tooltip),
+			ariaLabel: localizeSchemaText(opt.ariaLabel),
+			hideLabel: opt.hideLabel,
+			className: opt.className,
+			disabled: opt.disabled
 		}
 	})
 }
@@ -224,14 +188,17 @@ export function buildControllerOptions(
 	node: GooSchemaField,
 	object: Record<string, unknown>,
 	property: string,
-	value: unknown
+	value: unknown,
+	data: GooSchemaData = object
 ): ControllerOptions {
 	const detectedType = node.type || detectFieldType(value, node)
 
 	const options: ControllerOptions = {
 		object,
 		property,
-		label: node.showLabel === false ? '' : node.label || pathToLabel(node.path)
+		label: node.showLabel === false
+			? ''
+			: localizeSchemaText(node.label) || pathToLabel(node.path)
 	}
 
 	// Type (use detected type)
@@ -258,7 +225,7 @@ export function buildControllerOptions(
 
 	// Select options - normalize strings to { label, id } format
 	if (node.options) {
-		options.options = normalizeSelectOptions(node.options)
+		options.options = normalizeSelectOptions(node.options, data)
 	}
 
 	// Layout
@@ -268,28 +235,35 @@ export function buildControllerOptions(
 
 	let controlOptions: GooControlOptionBag | undefined = node.controlOptions ? { ...node.controlOptions } : undefined
 	for (const [ key, value ] of [
+		[ 'input', node.input ],
+		[ 'canCross', node.canCross ],
+		[ 'canPush', node.canPush ],
+		[ 'xy', node.xy ],
 		[ 'scale', node.scale ],
 		[ 'mode', node.mode ],
 		[ 'gradient', node.gradient ],
 		[ 'marks', node.marks ],
 		[ 'snap', node.snap ],
-		[ 'valueBubble', node.valueBubble ]
+		[ 'valueBubble', node.valueBubble ],
+		[ 'fullWidth', node.fullWidth ],
+		[ 'modes', node.modes ],
+		[ 'ariaLabel', localizeSchemaText(node.ariaLabel) ],
+		[ 'class', node.class ],
+		[ 'dataParam', node.dataParam ],
+		[ 'id', node.id ],
+		[ 'items', node.items ],
+		[ 'popoutClass', node.popoutClass ],
+		[ 'tabIndex', node.tabIndex ]
 	] as const) {
-		if (value !== undefined && isGooControlOptionValue(value)) {
+		if (value !== undefined) {
 			controlOptions ??= {}
 			controlOptions[key] = value
 		}
 	}
 	for (const [ key, value ] of Object.entries(valueFormatOptions)) {
-		if (key !== 'unit' && isGooControlOptionValue(value)) {
+		if (key !== 'unit' && value !== undefined) {
 			controlOptions ??= {}
-			controlOptions[key] = value
-		}
-	}
-	for (const [ key, value ] of Object.entries(node)) {
-		if (!SCHEMA_FIELD_KEYS.has(key) && isGooControlOptionValue(value)) {
-			controlOptions ??= {}
-			controlOptions[key] = value
+			controlOptions[key] = value as GooControlOptionBag[string]
 		}
 	}
 	if (controlOptions && Object.keys(controlOptions).length) {
@@ -297,16 +271,4 @@ export function buildControllerOptions(
 	}
 
 	return options
-}
-
-function isGooControlOptionValue(value: unknown): value is GooControlOptionValue {
-	return (
-		value === null ||
-		value === undefined ||
-		typeof value === 'string' ||
-		typeof value === 'number' ||
-		typeof value === 'boolean' ||
-		typeof value === 'function' ||
-		typeof value === 'object'
-	)
 }

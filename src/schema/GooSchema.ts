@@ -18,6 +18,7 @@ import {
 	schemaHasConditions as hasSchemaConditions
 } from './_schemaData.ts'
 import { attachSchemaKeyboardNavigation } from './_schemaKeyboard.ts'
+import { assertGooSchemaDescriptor } from './assertGooSchemaDescriptor.ts'
 import type {
 	GooSchemaData,
 	GooSchemaDataUpdateOptions,
@@ -28,10 +29,14 @@ import type {
 
 export type {
 	GooSchemaChangeHandler,
+	GooSchemaChoiceOption,
+	GooSchemaControlOptions,
 	GooSchemaControlType,
 	GooSchemaData,
 	GooSchemaDataUpdateOptions,
 	GooSchemaDataUpdateReason,
+	GooSchemaDescriptorPrimitive,
+	GooSchemaDescriptorValue,
 	GooSchemaField,
 	GooSchemaFolder,
 	GooSchemaNode,
@@ -197,6 +202,7 @@ function attachSchemaApi(element: GooSchemaInternal): void {
 		},
 		setSchema: (schema: GooSchemaType) => {
 			if (element._destroyed) return
+			assertGooSchemaDescriptor(schema)
 			element.state.schema = schema
 			void element._rebuild()
 		},
@@ -232,6 +238,7 @@ export function schemaHasConditions(schema: GooSchemaType): boolean {
 }
 
 function createGooSchemaElement(options: GooSchemaOptions = {}): GooSchema {
+	if (options.schema !== undefined) assertGooSchemaDescriptor(options.schema)
 	const element = document.createElement('div') as unknown as GooSchemaInternal
 	element.className = 'goo-schema'
 	initializeSchema(element, options)
@@ -250,3 +257,5 @@ function createGooSchemaElement(options: GooSchemaOptions = {}): GooSchema {
 export function createGooSchema(options: GooSchemaOptions = {}): GooSchema {
 	return createGooSchemaElement(options)
 }
+
+export { assertGooSchemaDescriptor } from './assertGooSchemaDescriptor.ts'
