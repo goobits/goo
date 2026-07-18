@@ -38,3 +38,4 @@ export {
 	schemaHasConditions
 } from './GooSchema.ts'
 export { getByPath, pathToLabel, resolvePath, setByPath } from './pathUtils.ts'
+export { defineGooSchemaWidget } from './schemaWidget.ts'
