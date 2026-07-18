@@ -9,12 +9,17 @@
 	--goo-chevron-tabs-add-width: calc(var(--goo-theme-control-height-lg) - var(--goo-theme-space-2xs));
 	--goo-chevron-tabs-chevron-size: calc(var(--goo-theme-space-sm) + var(--goo-theme-space-2xs));
 	--goo-chevron-tabs-tab-gap: calc(var(--goo-theme-space-sm) + var(--goo-theme-space-2xs) * 0.5);
-	--goo-chevron-tabs-tab-min-width: calc(var(--goo-theme-control-height-lg) * 2 + var(--goo-theme-space-md));
+	--goo-chevron-tabs-tab-min-width: 0px;
 	--goo-chevron-tabs-tab-max-width: calc(var(--goo-theme-control-height-lg) * 6);
 	--goo-chevron-tabs-tab-overlap: calc(
 		(var(--goo-theme-space-sm) - var(--goo-theme-space-2xs) * 0.5) * -1
 	);
-	--goo-chevron-tabs-tab-inline-end-padding: calc(var(--goo-theme-control-height-md) + var(--goo-theme-space-xs));
+	--goo-chevron-tabs-tab-inline-start-padding: calc(
+		var(--goo-theme-control-height-sm) + var(--goo-theme-space-2xs)
+	);
+	--goo-chevron-tabs-tab-inline-end-padding: calc(
+		var(--goo-theme-control-height-md) + var(--goo-theme-space-2xs)
+	);
 	--goo-chevron-tabs-label-max-width: calc(var(--goo-theme-control-height-lg) * 3.75);
 	--goo-chevron-tabs-font-size: var(--goo-theme-font-size-sm);
 	--goo-chevron-tabs-focus-ring-width: var(--goo-theme-focus-ring-width);
@@ -144,7 +149,8 @@
 	min-width: var(--goo-chevron-tabs-tab-min-width);
 	max-width: var(--goo-chevron-tabs-tab-max-width);
 	margin-left: var(--goo-chevron-tabs-tab-overlap);
-	padding: 0 var(--goo-chevron-tabs-tab-inline-end-padding) 0 var(--goo-theme-space-sm);
+	padding: 0 var(--goo-chevron-tabs-tab-inline-end-padding) 0
+		var(--goo-chevron-tabs-tab-inline-start-padding);
 	border: 0;
 	background: var(--goo-chevron-tabs-tab-bg);
 	clip-path: polygon(0 0, calc(100% - var(--goo-chevron-tabs-chevron-size)) 0, 100% 50%, calc(100% - var(--goo-chevron-tabs-chevron-size)) 100%, 0 100%, var(--goo-chevron-tabs-chevron-size) 50%);
@@ -265,12 +271,6 @@
 }
 
 .goo-chevron-tabs__label--editor {
-	position: absolute;
-	left: 50%;
-	top: 50%;
-	max-width: calc(100% - var(--goo-theme-control-height-lg) - var(--goo-theme-space-lg));
-	overflow: hidden;
-	color: inherit;
 	cursor: text;
 	caret-color: currentColor;
 	user-select: text;

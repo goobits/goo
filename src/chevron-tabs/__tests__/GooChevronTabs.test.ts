@@ -24,8 +24,10 @@ describe('GooChevronTabs', () => {
 			}
 		})
 
+		const label = getByTestId('tab-kernel').querySelector('.goo-chevron-tabs__label')
 		await fireEvent.dblClick(getByTestId('tab-kernel'))
 		const editor = getByRole('textbox', { name: 'Rename tab' })
+		expect(editor).toBe(label)
 		expect(editor.textContent).toBe('Kernel')
 
 		editor.textContent = 'Core'
