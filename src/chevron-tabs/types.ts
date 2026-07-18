@@ -25,6 +25,7 @@ export type GooChevronTabsProps = {
 	ariaLabel?: string
 	'aria-label'?: string
 	addLabel?: string
+	addAttributes?: GooChevronTabAttributes
 	renameLabel?: string
 	showConnectionStatus?: boolean
 	allowClosingLastTab?: boolean
@@ -32,7 +33,7 @@ export type GooChevronTabsProps = {
 	tabAttributes?: (_tab: GooChevronTab, _index: number) => GooChevronTabAttributes
 	actions?: Snippet
 	onselect?: (_tabId: string) => void
-	onadd?: () => void
+	onadd?: (_event: MouseEvent) => void
 	onclose?: (_tabId: string) => void
 	onrename?: (_tabId: string, _name: string) => void
 	onmove?: (_tabId: string, _targetIndex: number) => void

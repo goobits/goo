@@ -61,6 +61,29 @@ describe('GooChevronTabs', () => {
 		expect(onmove).not.toHaveBeenCalled()
 	})
 
+	it('forwards add button attributes and the activation event', async() => {
+		const onadd = vi.fn()
+		const { getByRole } = render(GooChevronTabs, {
+			props: {
+				activeId: 'kernel',
+				tabs: [ { id: 'kernel', name: 'Kernel' } ],
+				addAttributes: {
+					'aria-haspopup': 'menu',
+					'aria-expanded': 'false'
+				},
+				onadd
+			}
+		})
+
+		const addButton = getByRole('button', { name: 'Add tab' })
+		expect(addButton.getAttribute('aria-haspopup')).toBe('menu')
+		expect(addButton.getAttribute('aria-expanded')).toBe('false')
+		await fireEvent.click(addButton)
+
+		expect(onadd).toHaveBeenCalledOnce()
+		expect(onadd.mock.calls[0]?.[0]).toBeInstanceOf(MouseEvent)
+	})
+
 	it('omits unavailable mutation controls for read-only tabs', () => {
 		const onselect = vi.fn()
 		const { container, queryByRole, getByTestId } = render(GooChevronTabs, {

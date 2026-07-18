@@ -54,6 +54,7 @@
 		ariaLabel,
 		'aria-label': ariaLabelAttribute,
 		addLabel = 'Add tab',
+		addAttributes = {},
 		renameLabel = 'Rename tab',
 		showConnectionStatus = true,
 		allowClosingLastTab = false,
@@ -379,6 +380,7 @@
 	>
 		{#if onadd}
 			<button
+				{...addAttributes}
 				class="goo-chevron-tabs__add"
 				type="button"
 				aria-label={addLabel}
