@@ -57,6 +57,14 @@
 	pointer-events: auto;
 }
 
+/* Rich content can provide its own complete visual frame. */
+.goo-popout.goo-tooltip.goo-popout--chromeless {
+	box-shadow: none;
+	filter: none;
+	max-width: none;
+	padding: 0;
+}
+
 /* =============================================================================
    Content - Remove popout's default padding/scroll behavior
    ============================================================================= */
