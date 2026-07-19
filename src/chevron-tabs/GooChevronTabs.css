@@ -110,6 +110,10 @@
 	user-select: none;
 }
 
+.goo-chevron-tabs__rail:not(.goo-chevron-tabs__rail--without-add) {
+	margin-left: var(--goo-chevron-tabs-tab-overlap);
+}
+
 .goo-chevron-tabs__rail::-webkit-scrollbar {
 	display: none;
 }
@@ -169,6 +173,11 @@
 		padding 0.22s ease,
 		transform 0.26s cubic-bezier(0.2, 0.9, 0.2, 1);
 	white-space: nowrap;
+}
+
+.goo-chevron-tabs__rail:not(.goo-chevron-tabs__rail--without-add)
+	> .goo-chevron-tabs__tab:first-of-type {
+	margin-left: 0;
 }
 
 .goo-chevron-tabs__rail--without-add > .goo-chevron-tabs__tab:first-of-type {

@@ -366,6 +366,18 @@
 </script>
 
 <div {...rest} class="goo-chevron-tabs" aria-label={resolvedAriaLabel}>
+	{#if onadd}
+		<button
+			{...addAttributes}
+			class="goo-chevron-tabs__add"
+			type="button"
+			aria-label={addLabel}
+			title={addLabel}
+			onclick={onadd}
+		>
+			<Plus size={15} strokeWidth={2} aria-hidden="true" />
+		</button>
+	{/if}
 	<div
 		class="goo-chevron-tabs__rail"
 		class:goo-chevron-tabs__rail--dragging={dragging?.moved}
@@ -378,19 +390,6 @@
 		onpointerup={(event) => finishDrag(event)}
 		onpointercancel={(event) => finishDrag(event)}
 	>
-		{#if onadd}
-			<button
-				{...addAttributes}
-				class="goo-chevron-tabs__add"
-				type="button"
-				aria-label={addLabel}
-				title={addLabel}
-				onclick={onadd}
-			>
-				<Plus size={15} strokeWidth={2} aria-hidden="true" />
-			</button>
-		{/if}
-
 		{#each tabs as tab, index (tab.id)}
 			{@const activity = tabActivity(tab)}
 			<div

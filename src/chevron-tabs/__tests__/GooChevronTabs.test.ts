@@ -61,9 +61,9 @@ describe('GooChevronTabs', () => {
 		expect(onmove).not.toHaveBeenCalled()
 	})
 
-	it('forwards add button attributes and the activation event', async() => {
+	it('keeps the add button outside the scrolling rail and forwards activation', async() => {
 		const onadd = vi.fn()
-		const { getByRole } = render(GooChevronTabs, {
+		const { container, getByRole } = render(GooChevronTabs, {
 			props: {
 				activeId: 'kernel',
 				tabs: [ { id: 'kernel', name: 'Kernel' } ],
@@ -76,6 +76,10 @@ describe('GooChevronTabs', () => {
 		})
 
 		const addButton = getByRole('button', { name: 'Add tab' })
+		expect(container.querySelector(':scope > .goo-chevron-tabs > .goo-chevron-tabs__add')).toBe(
+			addButton
+		)
+		expect(container.querySelector('.goo-chevron-tabs__rail > .goo-chevron-tabs__add')).toBeNull()
 		expect(addButton.getAttribute('aria-haspopup')).toBe('menu')
 		expect(addButton.getAttribute('aria-expanded')).toBe('false')
 		await fireEvent.click(addButton)
