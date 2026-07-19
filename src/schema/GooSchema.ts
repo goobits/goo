@@ -150,7 +150,7 @@ function attachSchemaApi(element: GooSchemaInternal): void {
 		getSchema: () => element.state.schema,
 		refreshConditions: () => {
 			if (element._destroyed) return
-			void element._rebuild()
+			updateSchemaAfterDataMutation(element)
 		},
 		setData: (data: GooSchemaData, options: GooSchemaDataUpdateOptions = {}) => {
 			if (element._destroyed) return

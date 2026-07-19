@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { defineSvelteControlType } from '../../controller/index.ts'
 import GridPopoutPicker from '../../grid-popout/GridPopoutPicker.svelte'
+import { setLocale } from '../../support/i18n/index.ts'
 import { isFullBleedField, isSelfContainedField } from '../fieldLayout.ts'
 import GooSchema from '../GooSchema.svelte'
 import { createGooSchema, schemaHasConditions } from '../index.ts'
@@ -67,9 +68,50 @@ const selfContainedInputControlType = defineSvelteControlType({
 	})
 })
 
+const decoratedSvelteControlType = defineSvelteControlType({
+	load: () => Promise.resolve({
+		default: SelfContainedInputControl,
+		controlSchema: {
+			selfContained: true,
+			propMapping: { message: 'message' }
+		}
+	}),
+	buildOptions: (_value, options) => ({
+		...options,
+		message: 'Built by registry policy'
+	})
+})
+
 describe('GooSchema', () => {
 	afterEach(() => {
 		document.querySelectorAll('.goo-schema').forEach(element => element.remove())
+		setLocale({ locale: 'en-US', translate: key => key })
+	})
+
+	it('localizes compact schema text while preserving authored phrases', async() => {
+		setLocale({
+			locale: 'schema-text-test',
+			translate: key => `translated:${ key }`
+		})
+		const schema = createGooSchema({
+			schema: [
+				{
+					type: 'folder',
+					title: 'appearance',
+					open: true,
+					children: [ { path: 'size', label: 'brushSize' } ]
+				},
+				{ type: 'note', text: 'Helpful authored phrase.' }
+			],
+			data: { size: 12 },
+			bare: true
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+		await waitForSchemaElement(schema, '.goo-controller')
+
+		expect(schema.querySelector('.goo-folder__title')?.textContent).toContain('translated:appearance')
+		expect(schema.querySelector('.goo-schema__note')?.textContent).toBe('Helpful authored phrase.')
 	})
 
 	it('creates native schema elements without custom tags', async() => {
@@ -285,6 +327,22 @@ describe('GooSchema', () => {
 		expect(data.size).toBe(13)
 	})
 
+	it('applies registry option policy to Svelte controls', async() => {
+		const schema = createGooSchema({
+			schema: [ { path: 'size', type: 'decorated-svelte' } ],
+			data: { size: 12 },
+			bare: true,
+			controlTypes: {
+				'decorated-svelte': decoratedSvelteControlType
+			}
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+
+		const control = await waitForSchemaElement<HTMLElement>(schema, '.self-contained-input-control')
+		expect(control.dataset.message).toBe('Built by registry policy')
+	})
+
 	it('remounts the Svelte wrapper when creation options change', async() => {
 		const { container, rerender } = render(GooSchema, {
 			props: {
@@ -334,6 +392,49 @@ describe('GooSchema', () => {
 
 		expect(container.querySelector('.goo-controller')).toBe(firstController)
 		expect(slider?.getAttribute('aria-valuenow')).toBe('24')
+	})
+
+	it('preserves folder state and focus across structurally equal schema props', async() => {
+		const createSchema = () => [ {
+			type: 'folder' as const,
+			title: 'Taper',
+			open: false,
+			children: [ { path: 'taper', min: 0, max: 100 } ]
+		} ]
+		const { container, rerender } = render(GooSchema, {
+			props: {
+				schema: createSchema(),
+				data: { taper: 48 },
+				defaults: { taper: 10 },
+				bare: true
+			}
+		})
+		await settleGooSchema()
+
+		const folder = container.querySelector<HTMLElement>('.goo-folder')
+		const folderHeader = folder?.querySelector<HTMLElement>('.goo-folder__header')
+		const slider = container.querySelector<HTMLElement>('.goo-slider')
+		expect(folder).not.toBeNull()
+		expect(folderHeader).not.toBeNull()
+		expect(slider).not.toBeNull()
+		folderHeader!.click()
+		slider!.focus()
+		expect(folder?.classList.contains('goo-folder--open')).toBe(true)
+		expect(document.activeElement).toBe(slider)
+
+		await rerender({
+			schema: createSchema(),
+			data: { taper: 48 },
+			defaults: { taper: 10 },
+			bare: true
+		})
+		await settleGooSchema()
+
+		expect(container.querySelector('.goo-folder')).toBe(folder)
+		expect(container.querySelector('.goo-slider')).toBe(slider)
+		expect(folder?.classList.contains('goo-folder--open')).toBe(true)
+		expect(document.activeElement).toBe(slider)
+		expect(slider?.getAttribute('aria-valuenow')).toBe('48')
 	})
 
 	it('refreshes wrapper controls when same-object data changes by value', async() => {
@@ -405,6 +506,10 @@ describe('GooSchema', () => {
 		const opacityController = schema.getController('opacity')
 		expect(sizeController).not.toBeUndefined()
 		expect(opacityController).not.toBeUndefined()
+		schema.refreshConditions()
+		await settleGooSchema()
+		expect(schema.getController('size')).toBe(sizeController)
+		expect(schema.getController('opacity')).toBe(opacityController)
 
 		schema.setData({
 			mode: 'advanced',
@@ -455,6 +560,30 @@ describe('GooSchema', () => {
 		expect(schema.getController('mode')).not.toBe(modeController)
 		expect(schema.getController('basicSize')).toBeUndefined()
 		expect(schema.getController('advancedSize')).not.toBeUndefined()
+	})
+
+	it('rebuilds fields when conditional choices change', async() => {
+		const schema = createGooSchema({
+			schema: [ {
+				path: 'mode',
+				options: [
+					'basic',
+					{ id: 'advanced', label: 'Advanced', if: '__ui.showAdvanced' }
+				]
+			} ],
+			data: { mode: 'basic', __ui: { showAdvanced: false } },
+			bare: true
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+
+		const firstController = schema.getController('mode')
+		expect(firstController).not.toBeUndefined()
+
+		schema.setData({ mode: 'basic', __ui: { showAdvanced: true } })
+		await settleGooSchema()
+
+		expect(schema.getController('mode')).not.toBe(firstController)
 	})
 
 	it('forwards self-contained Svelte control metadata and refreshes display on data updates', async() => {
@@ -1021,5 +1150,15 @@ describe('GooSchema', () => {
 		expect(schemaHasConditions([
 			{ path: 'size', type: 'range' }
 		])).toBe(false)
+	})
+
+	it('detects conditions declared on field choices', () => {
+		expect(schemaHasConditions([ {
+			path: 'mode',
+			options: [
+				'basic',
+				{ id: 'advanced', if: '__ui.showAdvanced' }
+			]
+		} ])).toBe(true)
 	})
 })

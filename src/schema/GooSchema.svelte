@@ -36,8 +36,10 @@
 	let mounted = false
 	let lastCreateKey = ''
 	let lastSchema: GooSchemaType | undefined
+	let lastSchemaKey: string | null = null
 	let lastDataKey = ''
 	let lastDefaults: GooSchemaData | undefined
+	let lastDefaultsKey: string | null = null
 	let lastPresets: GooSchemaOptions['presets'] | undefined
 	let lastActivePresetId: string | null | undefined
 	let lastShowReset: boolean | undefined
@@ -111,6 +113,36 @@
 		} catch {
 			return ''
 		}
+	}
+
+	function getStructuralKey(value: unknown): string | null {
+		let serializable = true
+		try {
+			const key = JSON.stringify(value, (_key, item: unknown) => {
+				if (
+					typeof item === 'bigint'
+					|| typeof item === 'function'
+					|| typeof item === 'symbol'
+				) {
+					serializable = false
+				}
+				return item
+			})
+			return serializable && key !== undefined ? key : null
+		} catch {
+			return null
+		}
+	}
+
+	function hasStructuralChange(
+		next: unknown,
+		previous: unknown,
+		nextKey: string | null,
+		previousKey: string | null
+	): boolean {
+		return nextKey !== null && previousKey !== null
+			? nextKey !== previousKey
+			: next !== previous
 	}
 
 	function handleChange(event: Event): void {
@@ -196,8 +228,10 @@
 		target.replaceChildren(schemaElement)
 		instance = schemaElement
 		lastSchema = snapshot.schema
+		lastSchemaKey = getStructuralKey(snapshot.schema)
 		lastDataKey = getDataKey(snapshot.data)
 		lastDefaults = snapshot.defaults
+		lastDefaultsKey = getStructuralKey(snapshot.defaults)
 		lastPresets = snapshot.presets
 		lastActivePresetId = snapshot.activePresetId
 		lastShowReset = snapshot.showReset
@@ -211,18 +245,22 @@
 		if (!schemaElement) return
 		const options: GooSchemaUpdateOptions = {}
 		const nextDataKey = getDataKey(snapshot.data)
-		if (snapshot.schema !== lastSchema) {
+		const nextSchemaKey = getStructuralKey(snapshot.schema)
+		if (hasStructuralChange(snapshot.schema, lastSchema, nextSchemaKey, lastSchemaKey)) {
 			schemaElement.setSchema(snapshot.schema)
-			lastSchema = snapshot.schema
 		}
+		lastSchema = snapshot.schema
+		lastSchemaKey = nextSchemaKey
 		if (nextDataKey !== lastDataKey) {
 			schemaElement.setData(snapshot.data)
 			lastDataKey = nextDataKey
 		}
-		if (snapshot.defaults !== lastDefaults) {
-			lastDefaults = snapshot.defaults
+		const nextDefaultsKey = getStructuralKey(snapshot.defaults)
+		if (hasStructuralChange(snapshot.defaults, lastDefaults, nextDefaultsKey, lastDefaultsKey)) {
 			options.defaults = snapshot.defaults
 		}
+		lastDefaults = snapshot.defaults
+		lastDefaultsKey = nextDefaultsKey
 		if (snapshot.presets !== lastPresets) {
 			lastPresets = snapshot.presets
 			options.presets = snapshot.presets
