@@ -1,11 +1,13 @@
 import { createGooTooltip, type GooTooltipInstance } from './tooltip.ts'
 
+/** Plain text or prebuilt DOM content. String values are never parsed as HTML. */
 type TooltipContent = string | HTMLElement | (() => string | HTMLElement | null | undefined)
 
 /** Options accepted by the imperative Goo tooltip runtime. */
 export interface GooTooltipRuntimeOptions {
 	autoHide?: number
 	className?: string
+	chromeless?: boolean
 	direction?: 'top' | 'right' | 'bottom' | 'left'
 	element?: HTMLElement
 	event?: Event
@@ -91,6 +93,7 @@ function attachTooltip(
 		contentElement: value instanceof HTMLElement ? value : undefined,
 		align: alignFromDirection(options.direction),
 		className: options.className,
+		chromeless: options.chromeless,
 		offset: normalizeOffset(options.offset),
 		showDelay: options.showDelay ?? 0,
 		trigger: resolveTrigger(options),
@@ -190,6 +193,7 @@ function createShowState(content: TooltipContent, options: GooTooltipRuntimeOpti
 		content: '',
 		align: alignFromDirection(options.direction),
 		className: options.className,
+		chromeless: options.chromeless,
 		offset: normalizeOffset(options.offset),
 		trigger: 'manual',
 		interactive: options.interactive
@@ -238,8 +242,8 @@ function resolveAnchor(options: GooTooltipRuntimeOptions): HTMLElement {
 	if (!anchor) {
 		anchor = document.createElement('span')
 		anchor.style.position = 'fixed'
-		anchor.style.width = '1px'
-		anchor.style.height = '1px'
+		anchor.style.width = '0'
+		anchor.style.height = '0'
 		anchor.style.pointerEvents = 'none'
 		document.body.append(anchor)
 	}
@@ -304,6 +308,7 @@ function canReuseManualState(
 	if (state.mode !== 'manual' || state.element !== target) return false
 	return alignFromDirection(state.options.direction) === alignFromDirection(options.direction)
 		&& state.options.className === options.className
+		&& state.options.chromeless === options.chromeless
 		&& sameOffset(state.options.offset, options.offset)
 		&& state.options.interactive === options.interactive
 }

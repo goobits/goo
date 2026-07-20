@@ -36,6 +36,46 @@ describe('GooTooltip', () => {
 		button.remove()
 	})
 
+	it('renders markup-looking string content as plain text', () => {
+		const button = document.createElement('button')
+		document.body.appendChild(button)
+		const instance = gooTooltip.createGooTooltip({
+			for: button,
+			content: '<strong>Save</strong>',
+			trigger: 'manual'
+		})
+
+		instance.show()
+		const tooltip = document.querySelector('.goo-popout.goo-tooltip')
+
+		expect(tooltip?.textContent).toContain('<strong>Save</strong>')
+		expect(tooltip?.querySelector('strong')).toBeNull()
+
+		instance.destroy()
+		button.remove()
+	})
+
+	it('preserves DOM structure for element content', () => {
+		const button = document.createElement('button')
+		const contentElement = document.createElement('span')
+		const emphasizedText = document.createElement('strong')
+		emphasizedText.textContent = 'Save'
+		contentElement.append(emphasizedText)
+		document.body.appendChild(button)
+		const instance = gooTooltip.createGooTooltip({
+			for: button,
+			contentElement,
+			trigger: 'manual'
+		})
+
+		instance.show()
+
+		expect(document.querySelector('.goo-popout.goo-tooltip strong')).toBe(emphasizedText)
+
+		instance.destroy()
+		button.remove()
+	})
+
 	it('binds the Svelte component instance for imperative control', async() => {
 		const button = document.createElement('button')
 		button.id = 'tooltip-target'
@@ -112,6 +152,26 @@ describe('GooTooltip', () => {
 		)
 		expect(arrow).not.toBeNull()
 		expect(arrow?.classList.contains('left')).toBe(true)
+	})
+
+	it('uses an exact point anchor and supports content-owned chrome', () => {
+		const content = document.createElement('span')
+		content.textContent = 'Sample'
+		gooTooltip.gooTooltipRuntime.show(content, {
+			chromeless: true,
+			position: { x: 100, y: 80 }
+		})
+
+		const tooltip = document.querySelector('.goo-popout.goo-tooltip')
+		const pointAnchor = Array.from(document.body.children).find(element =>
+			element instanceof HTMLElement && element.style.position === 'fixed' && element.style.pointerEvents === 'none'
+		) as HTMLElement | undefined
+		expect(pointAnchor?.style.left).toBe('100px')
+		expect(pointAnchor?.style.top).toBe('80px')
+		expect(pointAnchor?.style.width).toBe('0px')
+		expect(pointAnchor?.style.height).toBe('0px')
+		expect(tooltip?.classList.contains('goo-popout--chromeless')).toBe(true)
+		expect(tooltip?.querySelector('.goo-popout__arrow')).toBeNull()
 	})
 
 	it('removes interactive popout listeners when destroyed', () => {

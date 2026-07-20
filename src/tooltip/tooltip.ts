@@ -48,10 +48,10 @@ export interface GooTooltipOptions {
 	/** Target element to attach tooltip to (required) */
 	for: HTMLElement
 
-	/** Text content for tooltip */
+	/** Plain-text tooltip content. Markup-looking strings are rendered literally. */
 	content?: string
 
-	/** Custom element content (alternative to content string) */
+	/** Rich DOM content (alternative to the plain-text content string). */
 	contentElement?: HTMLElement
 
 	/** Alignment relative to target. Default: 'center bottom to center top' (above) */
@@ -83,6 +83,9 @@ export interface GooTooltipOptions {
 
 	/** Additional class name applied to the tooltip popout. */
 	className?: string
+
+	/** Remove the popout frame and arrow when the tooltip content supplies its own chrome. */
+	chromeless?: boolean
 }
 
 /**
@@ -105,7 +108,8 @@ export interface GooTooltipInstance {
 	/** Destroy the tooltip and clean up event listeners */
 	destroy(): void
 
-	/** Update tooltip content 	 * @param content - content.
+	/** Update tooltip content. Strings are rendered as plain text; elements preserve their DOM structure.
+	 * @param content - Plain text or a prebuilt rich-content element.
 	 */
 	setContent(content: string | HTMLElement): void
 
@@ -139,6 +143,7 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 		arrow = true,
 		interactive = false,
 		className = '',
+		chromeless = false,
 		onshow,
 		onhide
 	} = options
@@ -194,6 +199,7 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 				align,
 				offset,
 				showArrow: arrow,
+				chromeless,
 				className: `goo-tooltip ${ className }`.trim(),
 				clickToClose: false, // Tooltip closes on mouse leave, not click
 				escapeToClose: true,
