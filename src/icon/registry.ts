@@ -148,8 +148,7 @@ function sanitizeSvg(svg: string): string | null {
  */
 export const iconRegistry = {
 	/**
-	 * Register a single icon. The SVG must come from a trusted source — it is
-	 * rendered unsanitized via `{@html}`. See the module-level SECURITY note.
+	 * Register a single icon. SVG is sanitized when read from the registry.
 	 * @param {string} name - Icon name.
 	 * @param {string|Function} svg - SVG string or function returning SVG string
 	 */
