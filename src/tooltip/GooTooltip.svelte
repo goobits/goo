@@ -36,6 +36,7 @@ let {
 	trigger = 'hover',
 	arrow = true,
 	interactive = false,
+	chromeless = false,
 	children,
 	instance = $bindable<GooTooltipInstance | null>(null),
 	onshow,
@@ -61,6 +62,7 @@ function getKey(): string {
 		trigger,
 		arrow,
 		interactive,
+		chromeless,
 		hasChildren: Boolean(children)
 	})
 }
@@ -86,6 +88,7 @@ function mountTooltip(): void {
 		trigger,
 		arrow,
 		interactive,
+		chromeless,
 		onshow,
 		onhide
 	})
@@ -110,7 +113,7 @@ $effect(() => {
 </script>
 
 {#if children}
-	<div bind:this={contentElement} hidden>
+	<div bind:this={contentElement} data-goo-popout-staged="true" hidden>
 		{@render children()}
 	</div>
 {/if}
