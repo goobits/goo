@@ -1,11 +1,13 @@
 <script lang="ts">
 	interface Props {
+		message?: string
 		value?: number
 		onchange?: (value: number) => void
 		oninput?: (value: number) => void
 	}
 
 	let {
+		message,
 		value = 0,
 		onchange,
 		oninput
@@ -15,6 +17,7 @@
 <button
 	type="button"
 	class="self-contained-input-control"
+	data-message={message}
 	onclick={() => oninput?.(value + 1)}
 >
 	Input

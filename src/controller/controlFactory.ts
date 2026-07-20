@@ -9,6 +9,7 @@ import {
 	type GooControlElement,
 	type GooControlExport,
 	type GooControlOptions,
+	type GooControlTypeConfig,
 	type GooControlTypeRegistry,
 	type GooSvelteControlModule,
 	resolveGooControlTypeConfig
@@ -93,7 +94,7 @@ export async function createControlFromRegistry(
 				log.warn(`Control type "${ controlType }" is marked as Svelte but did not load a default component.`)
 				return { status: 'error' }
 			}
-			return createSvelteControl(module, options, controlType)
+			return createSvelteControl(module, options, controlType, config)
 		}
 
 		if (!config.extract) {
@@ -151,9 +152,18 @@ export async function createControlFromRegistry(
 function createSvelteControl(
 	module: GooSvelteControlModule,
 	options: ControlCreationOptions,
-	controlType: string
+	controlType: string,
+	config: GooControlTypeConfig
 ): ControlCreationResult {
-	const controlOptions = buildSvelteGooControlOptions(controlType, options.controllerOptions)
+	const controllerOptions = config.buildOptions
+		? config.buildOptions(
+			options.value,
+			options.controllerOptions,
+			options.onchange,
+			options.oninput
+		)
+		: options.controllerOptions
+	const controlOptions = buildSvelteGooControlOptions(controlType, controllerOptions)
 	const host = createSvelteControlHost({
 		component: module.default as Parameters<typeof createSvelteControlHost>[0]['component'],
 		schema: module.controlSchema,

@@ -1,14 +1,22 @@
 import { getByPath } from './pathUtils.ts'
-import type { GooSchemaCondition, GooSchemaNode } from './types.ts'
+import type { GooSchemaChoiceOption, GooSchemaCondition, GooSchemaNode } from './types.ts'
 
 type ConditionData = Record<string, unknown>
 
 export function shouldRenderSchemaNode(node: GooSchemaNode, data: ConditionData): boolean {
-	if ('if' in node && !matchesCondition(node.if, data, true)) {
+	return shouldRenderSchemaItem(node, data)
+}
+
+/** Test the shared `if` and `unless` contract used by nodes and choices. */
+export function shouldRenderSchemaItem(
+	item: GooSchemaNode | GooSchemaChoiceOption,
+	data: ConditionData
+): boolean {
+	if ('if' in item && !matchesCondition(item.if, data, true)) {
 		return false
 	}
 
-	if ('unless' in node && !matchesCondition(node.unless, data, false)) {
+	if ('unless' in item && !matchesCondition(item.unless, data, false)) {
 		return false
 	}
 

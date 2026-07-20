@@ -1,5 +1,10 @@
 import { createControlFromRegistry } from '../controller/controlFactory.ts'
-import type { GooControlElement, GooControlOptions, GooSvelteControlModule } from '../controller/controlRegistry.ts'
+import type {
+	GooControlElement,
+	GooControlOptions,
+	GooControlTypeConfig,
+	GooSvelteControlModule
+} from '../controller/controlRegistry.ts'
 import { resolveGooControlTypeConfig } from '../controller/controlRegistry.ts'
 import { createGooController } from '../controller/GooController.ts'
 import { createSvelteControlHost, type SvelteControlHost } from '../controller/SvelteControl.svelte.ts'
@@ -13,6 +18,7 @@ import {
 	isSchemaValueEqual,
 	schemaHasConditions as hasSchemaConditions
 } from './_schemaData.ts'
+import { localizeSchemaText } from './_schemaText.ts'
 import { shouldRenderSchemaNode } from './fieldConditions.ts'
 import { isFullBleedField, isSelfContainedField } from './fieldLayout.ts'
 import { getByPath, resolvePath, setByPath } from './pathUtils.ts'
@@ -82,7 +88,7 @@ export async function rebuildSchema(element: GooSchemaBuildElement): Promise<voi
 	} else if (Array.isArray(schema)) {
 		element._root = createPanel({
 			docked: true,
-			title: 'Settings',
+			title: localizeSchemaText('Settings'),
 			collapsible: false,
 			showHeader: element.state.showPanelHeader ?? true
 		}) as HTMLElement
@@ -90,7 +96,7 @@ export async function rebuildSchema(element: GooSchemaBuildElement): Promise<voi
 		await buildNodes(element, schema, element._root, token)
 	} else if (schema.type === 'panel') {
 		element._root = createPanel({
-			title: schema.title || 'Settings',
+			title: localizeSchemaText(schema.title || 'Settings'),
 			docked: schema.docked ?? true,
 			width: schema.width,
 			collapsible: true,
@@ -231,7 +237,7 @@ function buildNote(node: GooSchemaNote, parent: HTMLElement): void {
 	const note = document.createElement('div')
 	note.className = mergeClassNames('goo-schema__note', node.className) ?? 'goo-schema__note'
 	note.setAttribute('role', 'note')
-	note.textContent = node.text
+	note.textContent = localizeSchemaText(node.text) ?? node.text
 	appendSchemaChild(parent, note)
 }
 
@@ -264,7 +270,7 @@ async function buildWidget(
 	}
 
 	const controller = createGooController({
-		label: node.showLabel === false ? '' : node.label ?? '',
+		label: node.showLabel === false ? '' : localizeSchemaText(node.label) ?? '',
 		type: node.widget,
 		unbound: true,
 		className: mergeClassNames(
@@ -275,7 +281,7 @@ async function buildWidget(
 		controlOptions: node.options,
 		controlTypes: element.state.controlTypes
 	})
-	controller.name(node.showLabel === false ? '' : node.label ?? '')
+	controller.name(node.showLabel === false ? '' : localizeSchemaText(node.label) ?? '')
 	element._controllers.set(key, controller)
 	controller.addTo(parent)
 }
@@ -297,7 +303,7 @@ async function buildFolder(
 ): Promise<void> {
 	if (token !== element._rebuildToken) return
 	const folder: GooFolderElement = createFolder({
-		title: node.title,
+		title: localizeSchemaText(node.title) ?? node.title,
 		open: node.open ?? false,
 		className: mergeClassNames(element.state.folderClassName, node.className)
 	})
@@ -328,7 +334,7 @@ async function buildField(
 
 	const { object, property } = resolved
 	const controlTypes = element.state.controlTypes
-	const controllerOptions = buildControllerOptions(node, object, property, object[property])
+	const controllerOptions = buildControllerOptions(node, object, property, object[property], element._data)
 	if (controlTypes) {
 		controllerOptions.controlTypes = controlTypes
 	}
@@ -358,7 +364,17 @@ async function buildField(
 				return
 			}
 			if (module.controlSchema?.selfContained || isSelfContainedField(node)) {
-				await buildSelfContainedField(element, node, object, property, controllerOptions, module, parent, token)
+				await buildSelfContainedField(
+					element,
+					node,
+					object,
+					property,
+					controllerOptions,
+					module,
+					controlConfig,
+					parent,
+					token
+				)
 				return
 			}
 		}
@@ -492,6 +508,7 @@ async function buildSelfContainedField(
 	property: string,
 	controllerOptions: ControllerOptions,
 	module: GooSvelteControlModule,
+	controlConfig: GooControlTypeConfig,
 	parent: HTMLElement,
 	token: number
 ): Promise<void> {
@@ -512,10 +529,16 @@ async function buildSelfContainedField(
 	}
 
 	const { controlOptions, ...controllerBaseOptions } = controllerOptions
-	const options = {
+	const baseOptions = {
 		...controllerBaseOptions,
 		...controlOptions
 	}
+	const options = controlConfig.buildOptions?.(
+		object[property],
+		baseOptions,
+		handleChange,
+		handleInput
+	) ?? baseOptions
 	if (!node.label || node.showLabel === false) {
 		delete (options as Partial<typeof options>).label
 	}

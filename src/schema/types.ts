@@ -3,7 +3,7 @@
  * @module goobits/schema/types
  */
 
-import type { GooControlOptionBag, GooControlType, GooControlTypeRegistry } from '../controller/controlTypes.ts'
+import type { GooControlType, GooControlTypeRegistry } from '../controller/controlTypes.ts'
 import type {
 	GooSliderMark,
 	GooSliderMode,
@@ -21,6 +21,39 @@ export type GooSchemaControlType = GooControlType
 
 export type GooSchemaData = Record<string, unknown>
 
+/** Primitive value allowed inside a portable GooSchema description. */
+export type GooSchemaDescriptorPrimitive = string | number | boolean | null
+
+/**
+ * Recursively portable value allowed inside a GooSchema description.
+ * Runtime callbacks and constructed objects belong in a control registry.
+ */
+export type GooSchemaDescriptorValue =
+	| GooSchemaDescriptorPrimitive
+	| GooSchemaDescriptorValue[]
+	| { [key: string]: GooSchemaDescriptorValue | undefined }
+
+/** Pure-data options passed from a schema node to a named control. */
+export type GooSchemaControlOptions = Record<string, GooSchemaDescriptorValue | undefined>
+
+/** Pure-data option accepted by select and button-group schema fields. */
+export interface GooSchemaChoiceOption {
+	id?: string | number
+	key?: string | number
+	value?: string | number
+	label?: string | number
+	icon?: string
+	tooltip?: string
+	ariaLabel?: string
+	hideLabel?: boolean
+	className?: string
+	disabled?: boolean
+	/** Show this choice when the condition matches the schema data. */
+	if?: GooSchemaCondition
+	/** Hide this choice when the condition matches the schema data. */
+	unless?: GooSchemaCondition
+}
+
 export type GooSchemaChangeHandler = (path: string, value: unknown) => void
 
 /** Programmatic data update source for schema refresh behavior. */
@@ -37,8 +70,8 @@ export interface GooSchemaDataUpdateOptions {
 
 export type GooSchemaCondition = string | {
 	path: string
-	equals?: unknown
-	notEquals?: unknown
+	equals?: GooSchemaDescriptorValue
+	notEquals?: GooSchemaDescriptorValue
 }
 
 export type GooSchemaFieldLayout = 'inline' | 'stacked' | 'self-contained' | 'full-bleed'
@@ -161,7 +194,7 @@ export interface GooSchemaField {
 	ticks?: boolean
 
 	/** Options for select/button-group controls. */
-	options?: Array<string | { label?: string; id?: string; key?: string; value?: string; icon?: string }>
+	options?: Array<string | number | GooSchemaChoiceOption>
 
 	/** Mode ids for blend-mode controls. */
 	modes?: readonly string[]
@@ -178,8 +211,8 @@ export interface GooSchemaField {
 	/** DOM id forwarded to self-contained controls. */
 	id?: string
 
-	/** Rich item metadata for grid-style choice controls. */
-	items?: unknown[]
+	/** Portable item metadata for grid-style choice controls. */
+	items?: readonly GooSchemaDescriptorValue[]
 
 	/** Popout class forwarded to popout-backed controls. */
 	popoutClass?: string
@@ -188,7 +221,7 @@ export interface GooSchemaField {
 	tabIndex?: number
 
 	/** Component-specific options forwarded to the selected control. */
-	controlOptions?: GooControlOptionBag
+	controlOptions?: GooSchemaControlOptions
 
 	/** Show field when condition matches. */
 	if?: GooSchemaCondition
@@ -206,9 +239,7 @@ export interface GooSchemaField {
 	selfContained?: boolean
 }
 
-/**
-	 * Folder container - groups related fields.
-	 */
+/** Folder container that groups related fields. */
 export interface GooSchemaFolder {
 	type: 'folder'
 
@@ -247,14 +278,12 @@ export interface GooSchemaWidget {
 	showLabel?: boolean
 	layout?: GooSchemaFieldLayout
 	className?: string
-	options?: GooControlOptionBag
+	options?: GooSchemaControlOptions
 	if?: GooSchemaCondition
 	unless?: GooSchemaCondition
 }
 
-/**
-	 * Panel root container.
-	 */
+/** Panel root container. */
 export interface GooSchemaPanel {
 	type: 'panel'
 

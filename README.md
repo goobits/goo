@@ -361,6 +361,13 @@ Custom GooSchema controls register Svelte modules through `@goobits/goo/controll
 
 Imperative schema callers can use `createGooSchema()` to receive a native element with `setSchema()`, `setData()`, `setOptions()`, `getSchema()`, `getData()`, `getController()`, `refreshConditions()`, `refresh()`, and `destroy()`.
 
+Schema descriptions are portable data. Use `assertGooSchemaDescriptor()` from
+`@goobits/goo/schema/assert` at host boundaries; callbacks and constructed
+objects belong in a control registry. Fields, folders, and individual choices
+can use `if` and `unless` paths. Compact labels such as `brushSize` are passed
+through Goo's configured translator, while authored phrases containing spaces
+are displayed as written.
+
 ## Overlay And Feedback
 
 ### Dialog
@@ -439,6 +446,28 @@ Use `GooContextMenu.register()`, `GooContextMenu.open()`, and `GooContextMenu.cl
 </script>
 
 <button use:tooltip={{ content: 'Create a new item' }}>New</button>
+```
+
+Tooltip strings are plain text: markup-looking strings are displayed literally and are never parsed as HTML. Pass a prebuilt `HTMLElement` through `contentElement` for imperative rich content, or use `GooTooltip` children in Svelte.
+
+```svelte
+<script lang="ts">
+	import { GooTooltip } from '@goobits/goo/tooltip'
+</script>
+
+<button id="save-button">Save</button>
+<GooTooltip for="save-button">
+	Press <kbd>⌘S</kbd> to save
+</GooTooltip>
+```
+
+```ts
+import { createGooTooltip } from '@goobits/goo/tooltip'
+
+const contentElement = document.createElement('strong')
+contentElement.textContent = 'Rich tooltip content'
+
+createGooTooltip({ for: button, contentElement })
 ```
 
 ### Toast

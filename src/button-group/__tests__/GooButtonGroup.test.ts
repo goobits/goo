@@ -1,9 +1,25 @@
 import { fireEvent, render } from '@testing-library/svelte'
 import { describe, expect, it, vi } from 'vitest'
 
+import { iconRegistry } from '../../icon/registry.ts'
 import GooButtonGroup from '../GooButtonGroup.svelte'
 
 describe('GooButtonGroup', () => {
+	it('renders registered icon names and keeps CSS icon classes as a fallback', () => {
+		iconRegistry.register('button-group-test-icon', '<svg viewBox="0 0 16 16"><path d="M2 8h12"/></svg>')
+		const { container } = render(GooButtonGroup, {
+			props: {
+				options: [
+					{ key: 'registered', value: 'Registered', icon: 'button-group-test-icon' },
+					{ key: 'class', value: 'Class', icon: 'legacy-icon-class' }
+				]
+			}
+		})
+
+		expect(container.querySelector('[data-key="registered"] .goo-icon svg')).not.toBeNull()
+		expect(container.querySelector('[data-key="class"] .legacy-icon-class')).not.toBeNull()
+	})
+
 	it('renders option buttons without a custom element host', () => {
 		const { container } = render(GooButtonGroup, {
 			props: {

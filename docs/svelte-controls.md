@@ -61,6 +61,19 @@ export const hostControlTypes: GooControlTypeRegistry = {
 }
 ```
 
+`buildOptions` can add host policy to either a Svelte or factory control. Keep
+that policy in the registry so the schema remains pure data:
+
+```ts
+export const hostControlTypes: GooControlTypeRegistry = {
+	'my-picker': {
+		load: () => import('./editors/my-picker/index.ts'),
+		svelte: true,
+		buildOptions: (_value, options) => ({ ...options, modes: allowedModes })
+	}
+}
+```
+
 Non-Svelte controls must provide an explicit factory/class extractor instead of
 relying on default exports or first-function module scans:
 

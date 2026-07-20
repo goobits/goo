@@ -8,9 +8,12 @@ export const controlSchema: SvelteControlSchema = {
 	propMapping: {
 		allowMultiple: 'allowMultiple',
 		allowToggle: 'allowToggle',
+		ariaLabel: 'label',
+		class: 'class',
 		layout: 'layout',
 		options: 'options',
-		size: 'size'
+		size: 'size',
+		tabIndex: 'tabIndex'
 	}
 }
 </script>
@@ -19,6 +22,8 @@ export const controlSchema: SvelteControlSchema = {
 import '../button/GooButton.css'
 import './GooButtonGroup.css'
 
+import GooIcon from '../icon/GooIcon.svelte'
+import { iconRegistry } from '../icon/registry.ts'
 import { handleLinearNavigationKeyboardEvent } from '../support/keyboard/_composite.ts'
 import {
 	normalizeButtonGroupOptions,
@@ -316,7 +321,11 @@ function mountIcon(node: HTMLSpanElement, iconFactory: () => Element) {
 				title={option.tooltip || undefined}
 			>
 				{#if typeof option.icon === 'string'}
-					<span class={`goo-button__icon ${ option.icon }`} aria-hidden="true"></span>
+					{#if iconRegistry.has(option.icon)}
+						<GooIcon value={option.icon} class="goo-button__icon" />
+					{:else}
+						<span class={`goo-button__icon ${ option.icon }`} aria-hidden="true"></span>
+					{/if}
 				{:else if typeof option.icon === 'function'}
 					<span class="goo-button__icon" aria-hidden="true" use:mountIcon={option.icon}></span>
 				{/if}
