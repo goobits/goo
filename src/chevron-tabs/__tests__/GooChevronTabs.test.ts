@@ -24,8 +24,10 @@ describe('GooChevronTabs', () => {
 			}
 		})
 
+		const label = getByTestId('tab-kernel').querySelector('.goo-chevron-tabs__label')
 		await fireEvent.dblClick(getByTestId('tab-kernel'))
 		const editor = getByRole('textbox', { name: 'Rename tab' })
+		expect(editor).toBe(label)
 		expect(editor.textContent).toBe('Kernel')
 
 		editor.textContent = 'Core'
@@ -57,6 +59,54 @@ describe('GooChevronTabs', () => {
 		expect(onselect).toHaveBeenNthCalledWith(1, 'tests')
 		expect(onselect).toHaveBeenNthCalledWith(2, 'kernel')
 		expect(onmove).not.toHaveBeenCalled()
+	})
+
+	it('keeps the add button outside the scrolling rail and forwards activation', async() => {
+		const onadd = vi.fn()
+		const { container, getByRole } = render(GooChevronTabs, {
+			props: {
+				activeId: 'kernel',
+				tabs: [ { id: 'kernel', name: 'Kernel' } ],
+				addAttributes: {
+					'aria-haspopup': 'menu',
+					'aria-expanded': 'false'
+				},
+				onadd
+			}
+		})
+
+		const addButton = getByRole('button', { name: 'Add tab' })
+		expect(container.querySelector(':scope > .goo-chevron-tabs > .goo-chevron-tabs__add')).toBe(
+			addButton
+		)
+		expect(container.querySelector('.goo-chevron-tabs__rail > .goo-chevron-tabs__add')).toBeNull()
+		expect(addButton.getAttribute('aria-haspopup')).toBe('menu')
+		expect(addButton.getAttribute('aria-expanded')).toBe('false')
+		await fireEvent.click(addButton)
+
+		expect(onadd).toHaveBeenCalledOnce()
+		expect(onadd.mock.calls[0]?.[0]).toBeInstanceOf(MouseEvent)
+	})
+
+	it('omits unavailable mutation controls for read-only tabs', () => {
+		const onselect = vi.fn()
+		const { container, queryByRole, getByTestId } = render(GooChevronTabs, {
+			props: {
+				activeId: 'kernel',
+				tabs: [
+					{ id: 'kernel', name: 'Kernel' },
+					{ id: 'tests', name: 'Tests' }
+				],
+				tabAttributes: tab => ({ 'data-testid': `tab-${ tab.id }` }),
+				onselect
+			}
+		})
+
+		expect(queryByRole('button', { name: 'Add tab' })).toBeNull()
+		expect(queryByRole('button', { name: 'Close Kernel tab' })).toBeNull()
+		expect(container.querySelector('.goo-chevron-tabs__rail--without-add')).not.toBeNull()
+		expect(dispatchKey(getByTestId('tab-kernel'), 'F2').defaultPrevented).toBe(false)
+		expect(dispatchKey(getByTestId('tab-kernel'), 'Delete').defaultPrevented).toBe(false)
 	})
 
 	it('supports keyboard rename and close commands', async() => {
@@ -111,6 +161,18 @@ describe('GooChevronTabs', () => {
 		await new Promise(resolve => setTimeout(resolve))
 
 		expect(document.querySelector('.goo-popout.goo-tooltip')).not.toBeNull()
+	})
+
+	it('can delegate connection status to an owning product chrome', () => {
+		const { container } = render(GooChevronTabs, {
+			props: {
+				activeId: 'kernel',
+				showConnectionStatus: false,
+				tabs: [ { id: 'kernel', name: 'Kernel', status: 'connected' } ]
+			}
+		})
+
+		expect(container.querySelector('.goo-chevron-tabs__connection')).toBeNull()
 	})
 
 	it('selects focused tabs from Spacebar and contains handled keys', () => {

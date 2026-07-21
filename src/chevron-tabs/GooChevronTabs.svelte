@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { BellRing, Bot, ChevronDown, CircleAlert, Plus, X } from '@lucide/svelte'
+	import BellRing from '@lucide/svelte/icons/bell-ring'
+	import Bot from '@lucide/svelte/icons/bot'
+	import ChevronDown from '@lucide/svelte/icons/chevron-down'
+	import CircleAlert from '@lucide/svelte/icons/circle-alert'
+	import Plus from '@lucide/svelte/icons/plus'
+	import X from '@lucide/svelte/icons/x'
 	import { tooltip } from '../tooltip/index.ts'
 	import './GooChevronTabs.css'
 	import {
@@ -49,7 +54,9 @@
 		ariaLabel,
 		'aria-label': ariaLabelAttribute,
 		addLabel = 'Add tab',
+		addAttributes = {},
 		renameLabel = 'Rename tab',
+		showConnectionStatus = true,
 		allowClosingLastTab = false,
 		closeLabel = (tab) => `Close ${tab.name} tab`,
 		tabAttributes = () => ({}),
@@ -87,7 +94,7 @@
 	let originalName = ''
 	let canceledRename = false
 
-	const canClose = $derived(allowClosingLastTab || tabs.length > 1)
+	const canClose = $derived(Boolean(onclose) && (allowClosingLastTab || tabs.length > 1))
 	const resolvedAriaLabel = $derived(ariaLabel ?? ariaLabelAttribute ?? 'Tabs')
 	const activeTab = $derived(tabs.find((tab) => tab.id === activeId) ?? null)
 	const activeStatus = $derived(activeTab?.status ?? 'connected')
@@ -213,11 +220,13 @@
 			return
 		}
 		if (event.key === 'F2') {
+			if (!onrename) return
 			containKeyboardEvent(event)
 			startRename(tab)
 			return
 		}
 		if (event.key === 'Delete' || event.key === 'Backspace') {
+			if (!canClose) return
 			containKeyboardEvent(event)
 			closeTab(tab)
 		}
@@ -251,6 +260,7 @@
 		const drag = dragging
 		if (!drag) return
 		if (event.pointerId !== drag.pointerId) return
+		if (!onmove) return
 		const movement = event.clientX - drag.startX
 		if (!drag.moved) {
 			if (!hasChevronTabDragIntent(movement, event.clientY - drag.startY)) return
@@ -356,18 +366,9 @@
 </script>
 
 <div {...rest} class="goo-chevron-tabs" aria-label={resolvedAriaLabel}>
-	<div
-		class="goo-chevron-tabs__rail"
-		class:goo-chevron-tabs__rail--dragging={dragging?.moved}
-		role="tablist"
-		tabindex="-1"
-		aria-label={resolvedAriaLabel}
-		bind:this={railElement}
-		onpointermove={moveDrag}
-		onpointerup={(event) => finishDrag(event)}
-		onpointercancel={(event) => finishDrag(event)}
-	>
+	{#if onadd}
 		<button
+			{...addAttributes}
 			class="goo-chevron-tabs__add"
 			type="button"
 			aria-label={addLabel}
@@ -376,7 +377,19 @@
 		>
 			<Plus size={15} strokeWidth={2} aria-hidden="true" />
 		</button>
-
+	{/if}
+	<div
+		class="goo-chevron-tabs__rail"
+		class:goo-chevron-tabs__rail--dragging={dragging?.moved}
+		class:goo-chevron-tabs__rail--without-add={!onadd}
+		role="tablist"
+		tabindex="-1"
+		aria-label={resolvedAriaLabel}
+		bind:this={railElement}
+		onpointermove={moveDrag}
+		onpointerup={(event) => finishDrag(event)}
+		onpointercancel={(event) => finishDrag(event)}
+	>
 		{#each tabs as tab, index (tab.id)}
 			{@const activity = tabActivity(tab)}
 			<div
@@ -459,7 +472,7 @@
 	</div>
 
 	<div class="goo-chevron-tabs__right">
-		{#if tabs.length > 0}
+		{#if showConnectionStatus && tabs.length > 0}
 			<div class="goo-chevron-tabs__connection">
 				<span
 					class="goo-chevron-tabs__connection-dot"

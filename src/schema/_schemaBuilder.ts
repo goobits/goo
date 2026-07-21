@@ -1,13 +1,15 @@
 import { createControlFromRegistry } from '../controller/controlFactory.ts'
-import type {
-	GooControlElement,
-	GooControlOptions,
-	GooControlTypeConfig,
-	GooSvelteControlModule
-} from '../controller/controlRegistry.ts'
-import { resolveGooControlTypeConfig } from '../controller/controlRegistry.ts'
+import {
+	type GooControlElement,
+	type GooControlOptions,
+	type GooControlTypeConfig,
+	type GooSvelteControlModule,
+	resolveGooControlTypeConfig } from '../controller/controlRegistry.ts'
 import { createGooController } from '../controller/GooController.ts'
-import { createSvelteControlHost, type SvelteControlHost } from '../controller/SvelteControl.svelte.ts'
+import {
+	createSvelteControlHost,
+	type SvelteControlHost
+} from '../controller/SvelteControl.svelte.ts'
 import { createFolder, type GooFolderElement } from '../folder/_createFolder.ts'
 import { createPanel } from '../panel/_createPanel.ts'
 import { schemaLog as log } from '../support/utils/logger.ts'
@@ -127,7 +129,12 @@ export function getChangedSchemaControllerPaths(
 	nextData: GooSchemaData
 ): Set<string> {
 	const changedPaths = new Set<string>()
-	appendChangedSchemaControllerPaths(element, getSchemaNodes(element.state.schema), nextData, changedPaths)
+	appendChangedSchemaControllerPaths(
+		element,
+		getSchemaNodes(element.state.schema),
+		nextData,
+		changedPaths
+	)
 	return changedPaths
 }
 
@@ -207,7 +214,9 @@ function applySchemaDataMotion(
 	}
 }
 
-function getSchemaControllerMotionElement(controller: GooSchemaController | undefined): HTMLElement | null {
+function getSchemaControllerMotionElement(
+	controller: GooSchemaController | undefined
+): HTMLElement | null {
 	if (!controller) return null
 	if (controller instanceof HTMLElement) return controller
 	return controller.element
@@ -282,7 +291,11 @@ async function buildWidget(
 	}
 
 	const controller = createGooController({
+<<<<<<< HEAD
 		label: node.showLabel === false ? '' : localizeSchemaText(node.label) ?? '',
+=======
+		label: node.showLabel === false ? '' : (node.label ?? ''),
+>>>>>>> origin/main
 		type: node.widget,
 		unbound: true,
 		className: mergeClassNames(
@@ -293,7 +306,11 @@ async function buildWidget(
 		controlOptions: node.options,
 		controlTypes: element.state.controlTypes
 	})
+<<<<<<< HEAD
 	controller.name(node.showLabel === false ? '' : localizeSchemaText(node.label) ?? '')
+=======
+	controller.name(node.showLabel === false ? '' : (node.label ?? ''))
+>>>>>>> origin/main
 	element._controllers.set(key, controller)
 	controller.addTo(parent)
 }
@@ -351,18 +368,13 @@ async function buildField(
 		controllerOptions.controlTypes = controlTypes
 	}
 	if (isFullBleedField(node)) {
-		controllerOptions.className = mergeClassNames(controllerOptions.className, 'goo-controller--full-bleed')
+		controllerOptions.className = mergeClassNames(
+			controllerOptions.className,
+			'goo-controller--full-bleed'
+		)
 	}
 	if (isSelfContainedField(node) && controllerOptions.type) {
-		await buildDirectSchemaField(
-			element,
-			node,
-			object,
-			property,
-			controllerOptions,
-			parent,
-			token
-		)
+		await buildDirectSchemaField(element, node, object, property, controllerOptions, parent, token)
 		return
 	}
 
@@ -372,7 +384,9 @@ async function buildField(
 			const module = await controlConfig.load()
 			if (token !== element._rebuildToken) return
 			if (!isGooSvelteControlModule(module)) {
-				log.warn(`Control type "${ node.type }" is marked as Svelte but did not load a default component.`)
+				log.warn(
+					`Control type "${ node.type }" is marked as Svelte but did not load a default component.`
+				)
 				return
 			}
 			if (module.controlSchema?.selfContained || isSelfContainedField(node)) {
@@ -383,7 +397,10 @@ async function buildField(
 					property,
 					controllerOptions,
 					module,
+<<<<<<< HEAD
 					controlConfig,
+=======
+>>>>>>> origin/main
 					parent,
 					token
 				)
@@ -467,7 +484,9 @@ type DirectSchemaControlOptions = {
 	value: unknown
 }
 
-async function createDirectSchemaControl(options: DirectSchemaControlOptions): Promise<GooControlElement | null> {
+async function createDirectSchemaControl(
+	options: DirectSchemaControlOptions
+): Promise<GooControlElement | null> {
 	const result = await createControlFromRegistry(options.controlType, {
 		value: options.value,
 		controllerOptions: options.options,
@@ -589,10 +608,12 @@ async function buildSelfContainedField(
 }
 
 function isGooSvelteControlModule(module: unknown): module is GooSvelteControlModule {
-	return typeof module === 'object'
-		&& module !== null
-		&& 'default' in module
-		&& typeof (module as { default?: unknown }).default === 'function'
+	return (
+		typeof module === 'object' &&
+		module !== null &&
+		'default' in module &&
+		typeof (module as { default?: unknown }).default === 'function'
+	)
 }
 
 function mergeClassNames(...values: Array<string | undefined>): string | undefined {
