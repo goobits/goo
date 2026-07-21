@@ -102,12 +102,20 @@ onDestroy(() => {
 	if (changePulseTimeout) clearTimeout(changePulseTimeout)
 })
 
+// Auto lives as state so hosts can flip it without a remount (a remount
+// would destroy a focused value input mid-interaction).
+let autoActive = $state(Boolean(auto))
+
+$effect(() => {
+	autoActive = Boolean(auto)
+})
+
 const classes = $derived.by(() => {
 	const values = [ 'goo-number' ]
 	if (disabled) values.push('goo-number--disabled')
 	if (changePulseClass) values.push('goo-number--changed', changePulseClass)
 	if (autoLabel) values.push('goo-number--with-auto')
-	if (autoLabel && auto) values.push('goo-number--auto')
+	if (autoLabel && autoActive) values.push('goo-number--auto')
 	if (className) values.push(className)
 	return values.filter(Boolean).join(' ')
 })
@@ -181,6 +189,10 @@ export function getValue(): number {
 	return currentValue
 }
 
+export function setAuto(nextAuto: boolean): void {
+	autoActive = Boolean(nextAuto)
+}
+
 export function focus(): void {
 	contentElement?.focus()
 }
@@ -225,6 +237,9 @@ function handleFocus(event: Event): void {
 	event.stopPropagation()
 	if (disabled) return
 
+	// Editing the value is manual intent: an active Auto switches off. The
+	// arrows and wheel funnel through content focus, so they clear it too.
+	if (autoLabel && autoActive) onautotoggle?.(false)
 	lastCommittedValue = currentValue
 	onfocus?.()
 	numberElement?.dispatchEvent(new CustomEvent('focus', { detail: { value: currentValue, target: numberElement } }))
@@ -406,10 +421,10 @@ function pulseValueChange(): void {
 		<button
 			class="goo-number__auto"
 			type="button"
-			aria-pressed={auto}
+			aria-pressed={autoActive}
 			{disabled}
 			onpointerdown={(event) => event.stopPropagation()}
-			onclick={() => onautotoggle?.(!auto)}
+			onclick={() => onautotoggle?.(!autoActive)}
 		>{autoLabel}</button>
 	{/if}
 	<input

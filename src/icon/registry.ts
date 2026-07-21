@@ -27,6 +27,9 @@
 type IconOptions = { size?: number }
 type IconDefinition = string | ((options: IconOptions) => string)
 
+/** Lucide icon node shape (`lucide` package): child tags with attributes. */
+export type LucideIconNode = [tag: string, attrs: Record<string, string | number>][]
+
 const icons = new Map<string, IconDefinition>()
 const allowedSvgElements = new Set([
 	'svg',
@@ -200,4 +203,29 @@ export const iconRegistry = {
 	list() {
 		return Array.from(icons.keys())
 	}
+}
+
+/**
+ * Register Lucide icon nodes (from the `lucide` package) as stroke icons,
+ * serialized with the library's standard svg attributes.
+ * @param {Object<string, LucideIconNode>} iconMap - Map of name -> icon node
+ */
+export function registerLucideIcons(iconMap: Record<string, LucideIconNode>): void {
+	iconRegistry.registerAll(Object.fromEntries(
+		Object.entries(iconMap).map(([ name, node ]) => [ name, lucideIconSvg(node) ])
+	))
+}
+
+/** Serialize a Lucide icon node to a registry-compatible svg string. */
+export function lucideIconSvg(node: LucideIconNode): string {
+	const children = node
+		.map(([ tag, attrs ]) => {
+			const serialized = Object.entries(attrs)
+				.map(([ key, value ]) => `${ key }="${ value }"`)
+				.join(' ')
+			return `<${ tag } ${ serialized }/>`
+		})
+		.join('')
+	return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em"'
+		+ ` fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ children }</svg>`
 }

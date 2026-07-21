@@ -76,6 +76,11 @@ export type GooSchemaCondition = string | {
 
 export type GooSchemaFieldLayout = 'inline' | 'stacked' | 'self-contained' | 'full-bleed'
 
+/** Host shell zone a self-contained control docks into (pinned above the
+    scroll area, or a footer below it). Stamped as `data-goo-dock` on the
+    rendered control so shells can relocate it without knowing its type. */
+export type GooSchemaDockZone = 'pinned' | 'footer'
+
 export type GooSchemaValueFormat = 'percent' | 'number' | 'integer' | 'float' | string
 
 /**
@@ -232,6 +237,9 @@ export interface GooSchemaField {
 	/** Layout mode for goo-controller. */
 	layout?: GooSchemaFieldLayout
 
+	/** Shell zone this control docks into. */
+	dock?: GooSchemaDockZone
+
 	/** Disable the generated field/control. */
 	disabled?: boolean
 
@@ -288,6 +296,9 @@ export interface GooSchemaWidget {
 	label?: string
 	showLabel?: boolean
 	layout?: GooSchemaFieldLayout
+
+	/** Shell zone this control docks into. */
+	dock?: GooSchemaDockZone
 	className?: string
 	options?: GooSchemaControlOptions
 	if?: GooSchemaCondition

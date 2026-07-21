@@ -9,7 +9,6 @@ import { resolveGooControlTypeConfig } from '../controller/controlRegistry.ts'
 import { createGooController } from '../controller/GooController.ts'
 import { createSvelteControlHost, type SvelteControlHost } from '../controller/SvelteControl.svelte.ts'
 import { createFolder, type GooFolderElement } from '../folder/_createFolder.ts'
-import { iconRegistry } from '../icon/registry.ts'
 import { createPanel } from '../panel/_createPanel.ts'
 import { schemaLog as log } from '../support/utils/logger.ts'
 import { appendSchemaActions, updateSchemaActionState } from './_schemaActions.ts'
@@ -20,6 +19,7 @@ import {
 	schemaHasConditions as hasSchemaConditions
 } from './_schemaData.ts'
 import { localizeSchemaText } from './_schemaText.ts'
+import { createSchemaHeading } from './schemaHeading.ts'
 import { shouldRenderSchemaNode } from './fieldConditions.ts'
 import { isFullBleedField, isSelfContainedField } from './fieldLayout.ts'
 import { getByPath, resolvePath, setByPath } from './pathUtils.ts'
@@ -246,25 +246,11 @@ function buildNote(node: GooSchemaNote, parent: HTMLElement): void {
 }
 
 function buildHeading(node: GooSchemaHeading, parent: HTMLElement): void {
-	const heading = document.createElement('div')
-	heading.className = mergeClassNames('goo-schema__heading', node.className) ?? 'goo-schema__heading'
-	heading.setAttribute('role', 'heading')
-	heading.setAttribute('aria-level', '3')
-
-	const chipSvg = node.icon ? iconRegistry.get(node.icon) : null
-	if (chipSvg) {
-		const chip = document.createElement('span')
-		chip.className = 'goo-schema__heading-chip'
-		chip.setAttribute('aria-hidden', 'true')
-		chip.innerHTML = chipSvg
-		heading.append(chip)
-	}
-
-	const label = document.createElement('span')
-	label.className = 'goo-schema__heading-text'
-	label.textContent = localizeSchemaText(node.text) ?? node.text
-	heading.append(label)
-	appendSchemaChild(parent, heading)
+	appendSchemaChild(parent, createSchemaHeading({
+		className: node.className,
+		icon: node.icon,
+		text: localizeSchemaText(node.text) ?? node.text
+	}))
 }
 
 async function buildWidget(
@@ -288,7 +274,7 @@ async function buildWidget(
 			control?.destroy?.()
 			return
 		}
-		markSelfContainedControl(control, node.widget)
+		markSelfContainedControl(control, node.widget, node.dock)
 		if (node.className) control.classList.add(...node.className.split(/\s+/).filter(Boolean))
 		element._controllers.set(key, control)
 		appendSchemaChild(parent, control)
@@ -459,7 +445,7 @@ async function buildDirectSchemaField(
 		control?.destroy?.()
 		return
 	}
-	markSelfContainedControl(control, controllerOptions.type!)
+	markSelfContainedControl(control, controllerOptions.type!, node.dock)
 
 	const refresh = control.refresh?.bind(control)
 	if (!refresh && control.setValue) {
@@ -508,9 +494,15 @@ function flattenControllerOptions(options: ControllerOptions): GooControlOptions
 	}
 }
 
-function markSelfContainedControl(control: GooControlElement, controlType: string): void {
+function markSelfContainedControl(
+	control: GooControlElement,
+	controlType: string,
+	dock?: string
+): void {
 	control.classList.add('goo-schema__self-contained')
 	control.dataset.gooControlType = controlType
+	// Shells relocate docked controls by this attribute (see GooSchemaDockZone).
+	if (dock) control.dataset.gooDock = dock
 }
 
 function resolveFieldPath(

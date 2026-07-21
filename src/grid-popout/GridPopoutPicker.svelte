@@ -29,6 +29,7 @@ interface Props {
 	selected?: string
 	tabIndex?: number
 	onchoose?: (id: string) => void
+	onopenchange?: (opened: boolean) => void
 	onrootchange?: (element: HTMLElement | null) => void
 }
 
@@ -43,6 +44,7 @@ let {
 	selected = '',
 	tabIndex = 0,
 	onchoose,
+	onopenchange,
 	onrootchange
 }: Props = $props()
 
@@ -161,7 +163,7 @@ function openPopout(): void {
 	if (disabled || !rootElement || popout?.element || !items.length) return
 
 	gooPopoutRuntime.closeOutside(rootElement)
-	opened = true
+	setOpened(true)
 	lastPopoutOpenAt = performance.now()
 
 	popout = createGooPopout({
@@ -171,10 +173,10 @@ function openPopout(): void {
 		clickToClose: shouldCloseFromPointer,
 		initialFocus: 'none',
 		onClose() {
-			opened = false
+			setOpened(false)
 		},
 		onDestroy() {
-			opened = false
+			setOpened(false)
 			popout = null
 			unbindDocumentKeydown()
 		},
@@ -183,6 +185,12 @@ function openPopout(): void {
 		}
 	})
 	bindDocumentKeydown()
+}
+
+function setOpened(nextOpened: boolean): void {
+	if (opened === nextOpened) return
+	opened = nextOpened
+	onopenchange?.(nextOpened)
 }
 
 function closePopout(): void {

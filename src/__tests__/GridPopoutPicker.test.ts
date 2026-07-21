@@ -146,6 +146,27 @@ describe('GridPopoutPicker', () => {
 		expect(document.body.querySelector('.goo-popout')).toBeNull()
 	})
 
+	it('reports real popout open-state transitions once', async() => {
+		const onopenchange = vi.fn()
+		const { getByRole } = render(GridPopoutPicker, {
+			props: {
+				ariaLabel: 'Subtool',
+				items,
+				onopenchange,
+				selected: 'line'
+			}
+		})
+
+		await fireEvent.click(getByRole('button', { name: 'Subtool' }))
+		expect(onopenchange).toHaveBeenCalledExactlyOnceWith(true)
+
+		await fireEvent.click(getByRole('option', { name: 'Warp arc' }))
+		await waitFor(() => {
+			expect(onopenchange).toHaveBeenNthCalledWith(2, false)
+		})
+		expect(onopenchange).toHaveBeenCalledTimes(2)
+	})
+
 	it('renders Goo preview surfaces in the trigger and options when provided', async() => {
 		const { getByRole } = render(GridPopoutPicker, {
 			props: {

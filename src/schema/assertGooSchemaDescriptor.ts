@@ -10,13 +10,13 @@ const FIELD_KEYS = new Set([
 	'mode', 'gradient', 'marks', 'snap', 'valueBubble', 'unit', 'displayUnit', 'format',
 	'valueFormat', 'showLabel', 'fullWidth', 'fullBleed', 'ticks', 'options', 'modes',
 	'ariaLabel', 'class', 'dataParam', 'id', 'items', 'popoutClass', 'tabIndex',
-	'controlOptions', 'if', 'unless', 'layout', 'disabled', 'selfContained'
+	'controlOptions', 'if', 'unless', 'layout', 'dock', 'disabled', 'selfContained'
 ])
 const FOLDER_KEYS = new Set([ 'type', 'title', 'className', 'open', 'children', 'if', 'unless' ])
 const NOTE_KEYS = new Set([ 'type', 'text', 'className', 'if', 'unless' ])
 const HEADING_KEYS = new Set([ 'type', 'text', 'icon', 'className', 'if', 'unless' ])
 const WIDGET_KEYS = new Set([
-	'type', 'widget', 'id', 'label', 'showLabel', 'layout', 'className', 'options', 'if', 'unless'
+	'type', 'widget', 'id', 'label', 'showLabel', 'layout', 'dock', 'className', 'options', 'if', 'unless'
 ])
 const PANEL_KEYS = new Set([ 'type', 'title', 'docked', 'width', 'showHeader', 'children' ])
 const CONDITION_KEYS = new Set([ 'path', 'equals', 'notEquals' ])
@@ -157,6 +157,7 @@ function assertWidget(widget: Record<string, unknown>, path: string): void {
 	assertOptionalString(widget, 'id', path)
 	assertOptionalString(widget, 'label', path)
 	assertOptionalString(widget, 'layout', path)
+	assertOptionalString(widget, 'dock', path)
 	assertOptionalString(widget, 'className', path)
 	assertOptionalBoolean(widget, 'showLabel', path)
 	if (widget.options !== undefined) expectRecord(widget.options, `${ path }.options`)

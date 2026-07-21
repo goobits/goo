@@ -249,6 +249,40 @@ describe('GooNumber', () => {
 		expect(onchange).toHaveBeenCalledExactlyOnceWith(8, 4)
 	})
 
+	it('switches an active Auto off when the value gains focus', async() => {
+		const onautotoggle = vi.fn()
+		const { container } = render(GooNumber, {
+			props: {
+				value: 36,
+				auto: true,
+				autoLabel: 'Auto',
+				onautotoggle
+			}
+		})
+		const input = container.querySelector<HTMLInputElement>('.goo-number__content')!
+
+		await fireEvent.focus(input)
+
+		expect(onautotoggle).toHaveBeenCalledExactlyOnceWith(false)
+	})
+
+	it('leaves the auto toggle alone when focusing without an active Auto', async() => {
+		const onautotoggle = vi.fn()
+		const { container } = render(GooNumber, {
+			props: {
+				value: 36,
+				auto: false,
+				autoLabel: 'Auto',
+				onautotoggle
+			}
+		})
+		const input = container.querySelector<HTMLInputElement>('.goo-number__content')!
+
+		await fireEvent.focus(input)
+
+		expect(onautotoggle).not.toHaveBeenCalled()
+	})
+
 	it('marks stepped number inputs as changed', async() => {
 		const { container } = render(GooNumber, {
 			props: {

@@ -11,8 +11,9 @@ import type { GooForwardedAttributes } from '../support/types/forwardedAttribute
 /** Host-owned action context passed through menu/select actions. */
 export type GooSelectActionContext = unknown
 
-/** Renderable label/icon content accepted by GooSelect options. */
-export type GooSelectRenderable = string | HTMLElement | (() => string | HTMLElement)
+/** Renderable label/icon content accepted by GooSelect options. SVG nodes
+    (icon sets built with createElementNS) are Elements, not HTMLElements. */
+export type GooSelectRenderable = string | Element | (() => string | Element)
 
 /** Shortcut text accepted by GooSelect options. */
 export type GooSelectShortcut = string | string[] | (() => string | string[])

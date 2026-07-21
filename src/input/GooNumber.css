@@ -209,7 +209,7 @@
 	padding: 0 var(--goo-theme-space-sm);
 	border: 0;
 	border-radius: calc(var(--goo-number-radius) - var(--goo-theme-space-2xs));
-	background: var(--goo-theme-surface-raised);
+	background: color-mix(in srgb, var(--goo-theme-fg) 8%, transparent);
 	box-shadow: inset 0 0 0 1px var(--goo-theme-border);
 	color: var(--goo-theme-muted);
 	cursor: pointer;
@@ -218,14 +218,22 @@
 	font-weight: var(--goo-theme-font-weight-semibold);
 	letter-spacing: 0.01em;
 	line-height: 1;
+	/* The inactive side steps back so the active one reads at a glance. */
+	opacity: 0.6;
 	transition:
 		background-color var(--goo-number-motion-fast),
 		box-shadow var(--goo-number-motion-fast),
-		color var(--goo-number-motion-fast);
+		color var(--goo-number-motion-fast),
+		opacity var(--goo-number-motion-fast);
 }
 
 .goo-number__auto:hover {
 	color: var(--goo-theme-fg);
+	opacity: 1;
+}
+
+.goo-number__auto[aria-pressed='true'] {
+	opacity: 1;
 }
 
 .goo-number__auto[aria-pressed='true'] {

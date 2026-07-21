@@ -83,14 +83,14 @@ export function createShortcut(shortcut: string | string[] | null | undefined): 
  * @returns HTMLElement or null if no icon provided
  */
 export function createIcon(
-	icon: string | HTMLElement | (() => string | HTMLElement) | null | undefined
+	icon: string | Element | (() => string | Element) | null | undefined
 ): HTMLElement | null {
 	if (!icon) return null
 
 	const evaluatedIcon = evaluate(icon)
 
-	// DOM node - wrap in icon container and clone
-	if (evaluatedIcon instanceof HTMLElement) {
+	// DOM node (HTML or SVG) - wrap in icon container and clone
+	if (evaluatedIcon instanceof Element) {
 		const $icon = document.createElement('span')
 		$icon.className = 'goo-select__icon'
 		$icon.appendChild(evaluatedIcon.cloneNode(true))

@@ -626,6 +626,7 @@ describe('GooSchema', () => {
 						{ id: 'ring', title: 'Ring', iconClass: 'icon-ring' }
 					],
 					layout: 'self-contained',
+					dock: 'pinned',
 					popoutClass: 'goo-grid-popout--icon-grid goo-grid-popout--compact',
 					showLabel: false
 				}
@@ -641,6 +642,8 @@ describe('GooSchema', () => {
 
 		const trigger = await waitForSchemaElement<HTMLElement>(schema, '#UISubTool')
 		expect(trigger?.getAttribute('data-param')).toBe('type')
+		// Shells relocate docked controls by the zone stamped on the root.
+		expect(schema.querySelector('[data-goo-control-type="grid-popout"]')?.getAttribute('data-goo-dock')).toBe('pinned')
 		expect(trigger?.classList.contains('goo-grid-trigger--compact')).toBe(true)
 		expect(trigger?.textContent).toContain('Star')
 

@@ -560,7 +560,7 @@ export class DropdownPanel {
 		const $label = document.createElement('span')
 		$label.className = 'goo-select__label'
 		const labelVal = evaluate(opt.label)
-		if (labelVal instanceof HTMLElement) {
+		if (labelVal instanceof Element) {
 			$label.appendChild(labelVal.cloneNode(true))
 		} else {
 			$label.textContent = labelVal as string

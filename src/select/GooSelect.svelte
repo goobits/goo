@@ -132,8 +132,13 @@ const hostAttributes = $derived<Record<string, string | undefined>>({
 	'show-selection-indicator': showSelectionIndicator ? undefined : 'false'
 })
 
+/* Imperative setOptions must survive the prop-sync effect: without this
+   guard, the mount-time effect flush clobbers options set right after
+   creation (the imperative owner takes over from the prop). */
+let imperativeOptions: GooSelectOption[] | null = $state(null)
+
 $effect(() => {
-	normalizedOptions = normalizeOptions(options)
+	normalizedOptions = imperativeOptions ?? normalizeOptions(options)
 })
 
 $effect(() => {
@@ -193,8 +198,11 @@ export function getValue(): string {
 }
 
 export function setOptions(nextOptions: GooSelectOptionsInput): void {
-	normalizedOptions = normalizeOptions(nextOptions)
-	if (opened) panel?.render(normalizedOptions)
+	imperativeOptions = normalizeOptions(nextOptions)
+	// Effects flush async; assign directly so a setOptions-then-open flow in
+	// the same task opens with the new options, not the pre-flush list.
+	normalizedOptions = imperativeOptions
+	if (opened) panel?.render(imperativeOptions)
 }
 
 export function setTriggerIcon(icon: string | HTMLElement | (() => HTMLElement) | null): void {
@@ -585,7 +593,7 @@ function getContext(): unknown {
 function getOptionLabel(option: GooSelectOption | null): string {
 	if (!option) return ''
 	const label = evaluate(option.label, getContext())
-	if (label instanceof HTMLElement) return label.textContent ?? ''
+	if (label instanceof Element) return label.textContent ?? ''
 	return String(label ?? option.id ?? '')
 }
 

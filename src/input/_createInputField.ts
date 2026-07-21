@@ -48,6 +48,7 @@ type MountedTextInput<T> = ReturnType<typeof mount> & {
 
 type MountedNumberInput = ReturnType<typeof mount> & {
 	getValue?: () => number
+	setAuto?: (auto: boolean) => void
 	setValue?: (value: number, options?: { silent?: boolean }) => void
 }
 
@@ -213,7 +214,13 @@ export function createNumberField(options: NumberInputFieldOptions = {}): Number
 	field.setAuto = auto => {
 		if (destroyed || currentAuto === Boolean(auto)) return
 		currentAuto = Boolean(auto)
-		render()
+		// In-place update: a remount would destroy a focused value input
+		// mid-interaction (click-to-edit clears Auto, then types).
+		if (instance?.setAuto) {
+			instance.setAuto(currentAuto)
+		} else {
+			render()
+		}
 	}
 	field.setValue = value => {
 		if (destroyed) return
