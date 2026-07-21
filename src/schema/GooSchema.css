@@ -56,6 +56,44 @@
 	line-height: 1.45;
 }
 
+/* Section heading: tinted icon chip + compact semibold label. Hosts retint
+   per section via --goo-schema-heading-tint. */
+.goo-schema__heading {
+	display: flex;
+	align-items: center;
+	gap: var(--goo-theme-space-sm);
+	box-sizing: border-box;
+	margin: 0;
+	padding: var(--goo-schema-row-padding);
+	padding-block-end: var(--goo-theme-space-xs);
+}
+
+.goo-schema__heading-chip {
+	--goo-schema-heading-chip-tint: var(--goo-schema-heading-tint, var(--goo-theme-accent));
+
+	display: grid;
+	place-items: center;
+	flex: none;
+	inline-size: calc(var(--goo-theme-control-height-sm) - var(--goo-theme-space-2xs));
+	block-size: calc(var(--goo-theme-control-height-sm) - var(--goo-theme-space-2xs));
+	border-radius: var(--goo-theme-radius-sm);
+	background: color-mix(in srgb, var(--goo-schema-heading-chip-tint) 14%, transparent);
+	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--goo-schema-heading-chip-tint) 34%, transparent);
+	color: var(--goo-schema-heading-chip-tint);
+}
+
+.goo-schema__heading-chip svg {
+	inline-size: var(--goo-theme-icon-sm);
+	block-size: var(--goo-theme-icon-sm);
+}
+
+.goo-schema__heading-text {
+	color: var(--goo-theme-fg);
+	font-size: var(--goo-theme-font-size-sm);
+	font-weight: var(--goo-theme-font-weight-semibold);
+	letter-spacing: -0.01em;
+}
+
 .goo-schema__preset-select,
 .goo-schema__reset {
 	box-sizing: border-box;

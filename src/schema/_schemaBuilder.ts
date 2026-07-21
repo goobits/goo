@@ -9,6 +9,7 @@ import { resolveGooControlTypeConfig } from '../controller/controlRegistry.ts'
 import { createGooController } from '../controller/GooController.ts'
 import { createSvelteControlHost, type SvelteControlHost } from '../controller/SvelteControl.svelte.ts'
 import { createFolder, type GooFolderElement } from '../folder/_createFolder.ts'
+import { iconRegistry } from '../icon/registry.ts'
 import { createPanel } from '../panel/_createPanel.ts'
 import { schemaLog as log } from '../support/utils/logger.ts'
 import { appendSchemaActions, updateSchemaActionState } from './_schemaActions.ts'
@@ -29,6 +30,7 @@ import type {
 	GooSchemaDataUpdateOptions,
 	GooSchemaField,
 	GooSchemaFolder,
+	GooSchemaHeading,
 	GooSchemaNode,
 	GooSchemaNote,
 	GooSchemaPreset,
@@ -223,6 +225,8 @@ async function buildNodes(
 
 		if ('type' in node && node.type === 'folder') {
 			await buildFolder(element, node as GooSchemaFolder, parent, token)
+		} else if ('type' in node && node.type === 'heading') {
+			buildHeading(node as GooSchemaHeading, parent)
 		} else if ('type' in node && node.type === 'note') {
 			buildNote(node as GooSchemaNote, parent)
 		} else if ('type' in node && node.type === 'widget') {
@@ -239,6 +243,28 @@ function buildNote(node: GooSchemaNote, parent: HTMLElement): void {
 	note.setAttribute('role', 'note')
 	note.textContent = localizeSchemaText(node.text) ?? node.text
 	appendSchemaChild(parent, note)
+}
+
+function buildHeading(node: GooSchemaHeading, parent: HTMLElement): void {
+	const heading = document.createElement('div')
+	heading.className = mergeClassNames('goo-schema__heading', node.className) ?? 'goo-schema__heading'
+	heading.setAttribute('role', 'heading')
+	heading.setAttribute('aria-level', '3')
+
+	const chipSvg = node.icon ? iconRegistry.get(node.icon) : null
+	if (chipSvg) {
+		const chip = document.createElement('span')
+		chip.className = 'goo-schema__heading-chip'
+		chip.setAttribute('aria-hidden', 'true')
+		chip.innerHTML = chipSvg
+		heading.append(chip)
+	}
+
+	const label = document.createElement('span')
+	label.className = 'goo-schema__heading-text'
+	label.textContent = localizeSchemaText(node.text) ?? node.text
+	heading.append(label)
+	appendSchemaChild(parent, heading)
 }
 
 async function buildWidget(

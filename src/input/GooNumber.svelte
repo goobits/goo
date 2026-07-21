@@ -48,6 +48,9 @@ let {
 	max = Infinity,
 	step = 1,
 	unit = '',
+	autoLabel,
+	auto = false,
+	onautotoggle,
 	inputId,
 	ariaLabel,
 	'aria-label': ariaLabelAttribute,
@@ -103,6 +106,8 @@ const classes = $derived.by(() => {
 	const values = [ 'goo-number' ]
 	if (disabled) values.push('goo-number--disabled')
 	if (changePulseClass) values.push('goo-number--changed', changePulseClass)
+	if (autoLabel) values.push('goo-number--with-auto')
+	if (autoLabel && auto) values.push('goo-number--auto')
 	if (className) values.push(className)
 	return values.filter(Boolean).join(' ')
 })
@@ -397,6 +402,16 @@ function pulseValueChange(): void {
 	{...hostAttributes}
 	onpointerdown={(event) => event.stopPropagation()}
 >
+	{#if autoLabel}
+		<button
+			class="goo-number__auto"
+			type="button"
+			aria-pressed={auto}
+			{disabled}
+			onpointerdown={(event) => event.stopPropagation()}
+			onclick={() => onautotoggle?.(!auto)}
+		>{autoLabel}</button>
+	{/if}
 	<input
 		bind:this={contentElement}
 		class="goo-number__content"

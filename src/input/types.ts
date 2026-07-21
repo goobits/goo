@@ -104,6 +104,15 @@ export type GooNumberProps = GooForwardedAttributes & {
 	/** Display unit suffix. */
 	unit?: string
 
+	/** Render an auto toggle with this label; the value dims while auto. */
+	autoLabel?: string
+
+	/** Auto state shown by the toggle. */
+	auto?: boolean
+
+	/** Called when the auto toggle is pressed. */
+	onautotoggle?: (auto: boolean) => void
+
 	/** Native form field name. */
 	name?: string
 

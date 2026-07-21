@@ -55,6 +55,10 @@
 			"import": "./src/select/index.ts"
 		},
 		"./select/styles.css": "./src/select/GooSelect.css",
+		"./scroll-affordances": {
+			"types": "./src/scroll-affordances/index.ts",
+			"import": "./src/scroll-affordances/index.ts"
+		},
 		"./slider-field": {
 			"types": "./src/slider-field/index.ts",
 			"import": "./src/slider-field/index.ts"

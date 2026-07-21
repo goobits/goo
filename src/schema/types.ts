@@ -269,6 +269,17 @@ export interface GooSchemaNote {
 	unless?: GooSchemaCondition
 }
 
+/** Section heading with an optional tinted icon chip. */
+export interface GooSchemaHeading {
+	type: 'heading'
+	text: string
+	/** Registered icon name rendered inside the heading chip. */
+	icon?: string
+	className?: string
+	if?: GooSchemaCondition
+	unless?: GooSchemaCondition
+}
+
 /** Registered control that is not bound to schema data. */
 export interface GooSchemaWidget {
 	type: 'widget'
@@ -306,7 +317,12 @@ export interface GooSchemaPanel {
 /**
 	 * Any schema node.
 	 */
-export type GooSchemaNode = GooSchemaField | GooSchemaFolder | GooSchemaNote | GooSchemaWidget
+export type GooSchemaNode =
+	| GooSchemaField
+	| GooSchemaFolder
+	| GooSchemaHeading
+	| GooSchemaNote
+	| GooSchemaWidget
 
 /**
  * Root schema definition.

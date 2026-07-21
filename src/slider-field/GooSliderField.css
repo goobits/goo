@@ -3,13 +3,15 @@
 	--goo-slider-field-gap-no-inputs: var(--goo-theme-space-xs);
 	--goo-slider-field-header-gap: var(--goo-theme-space-sm);
 	--goo-slider-field-input-gap: var(--goo-theme-space-xs);
-	--goo-slider-field-input-width: calc(var(--goo-theme-control-height-lg) * 1.8);
+	--goo-slider-field-input-width: calc(var(--goo-theme-control-height-sm) * 2.5);
+	--goo-slider-field-label-fg: var(--goo-theme-fg);
+	--goo-slider-field-label-weight: var(--goo-theme-font-weight-semibold);
 	--goo-slider-field-tick-height: var(--goo-theme-space-xs);
 	--goo-slider-field-tick-offset: calc((var(--goo-theme-space-xs) + var(--goo-theme-space-2xs) * 0.5) * -1);
 	--goo-slider-field-tick-size: calc(var(--goo-theme-space-2xs) * 0.5);
 	--goo-slider-field-tick-step: var(--goo-theme-space-sm);
-	--goo-slider-field-track-height: calc(var(--goo-theme-space-xs) + var(--goo-theme-space-2xs));
-	--goo-slider-field-track-radius: calc(var(--goo-slider-field-track-height) * 0.5);
+	--goo-slider-field-track-height: var(--goo-theme-space-xs);
+	--goo-slider-field-track-radius: var(--goo-theme-radius-full);
 
 	box-sizing: border-box;
 	display: flex;
@@ -42,9 +44,9 @@
 .goo-slider-field--goo .goo-slider-field__label {
 	min-inline-size: 0;
 	overflow: hidden;
-	color: var(--goo-theme-fg);
+	color: var(--goo-slider-field-label-fg);
 	font-size: var(--goo-theme-font-size-sm);
-	font-weight: var(--goo-theme-font-weight-semibold);
+	font-weight: var(--goo-slider-field-label-weight);
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }

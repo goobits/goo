@@ -29,8 +29,11 @@ export type NumberInputFieldOptions = Omit<
 	TextInputFieldOptions<number>,
 	'multiline' | 'onchange' | 'oninput' | 'type'
 > & {
+	auto?: boolean
+	autoLabel?: string
 	max?: number
 	min?: number
+	onautotoggle?: (auto: boolean) => void
 	onchange?: (value: number, oldValue?: number) => void
 	oninput?: (value: number, oldValue?: number) => void
 	step?: number | 'any'
@@ -58,6 +61,7 @@ export type TextInputFieldElement<T = string> = HTMLDivElement & {
 export type NumberInputFieldElement = HTMLDivElement & {
 	destroy(): void
 	getValue(): number
+	setAuto(auto: boolean): void
 	setValue(value: number): void
 	value: number
 }
@@ -148,6 +152,7 @@ export function createNumberField(options: NumberInputFieldOptions = {}): Number
 	const field = document.createElement('div') as NumberInputFieldElement
 	field.className = 'goo-number-field'
 	let currentValue = Number(options.value ?? 0)
+	let currentAuto = Boolean(options.auto)
 	let instance: MountedNumberInput | null = null
 	let destroyed = false
 
@@ -173,6 +178,9 @@ export function createNumberField(options: NumberInputFieldOptions = {}): Number
 				max: options.max,
 				step: options.step,
 				unit: options.unit,
+				auto: currentAuto,
+				autoLabel: options.autoLabel,
+				onautotoggle: options.onautotoggle,
 				name: options.name,
 				disabled: options.disabled,
 				size: options.size,
@@ -202,6 +210,11 @@ export function createNumberField(options: NumberInputFieldOptions = {}): Number
 		}
 	})
 	field.getValue = () => currentValue
+	field.setAuto = auto => {
+		if (destroyed || currentAuto === Boolean(auto)) return
+		currentAuto = Boolean(auto)
+		render()
+	}
 	field.setValue = value => {
 		if (destroyed) return
 		currentValue = Number(value)

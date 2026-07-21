@@ -18,6 +18,16 @@
 	--goo-button-group-height: var(--goo-theme-control-height-md);
 	--goo-button-group-indicator-motion: var(--goo-theme-transition-normal);
 	--goo-button-group-indicator-radius-inset: calc(var(--goo-theme-space-2xs) * 0.5);
+	--goo-button-group-indicator-radius: max(
+		calc(var(--goo-theme-space-2xs) - var(--goo-theme-space-2xs)),
+		calc(var(--goo-button-group-radius) - var(--goo-button-group-indicator-radius-inset))
+	);
+	/* Hooks for flush "bar" styling: hosts can inset the indicator into a
+	   pill and give it a ring without forking the group's structure. */
+	--goo-button-group-indicator-inset-block: 0px;
+	--goo-button-group-indicator-ring: transparent;
+	--goo-button-group-inset-shadow: inset 0 1px 0
+		color-mix(in srgb, var(--goo-theme-fg) 5%, transparent);
 	--goo-button-group-divider-inset: 18%;
 	--goo-button-group-motion-fast: var(--goo-theme-transition-fast);
 	--goo-button-group-stacked-gap: var(--goo-theme-space-xs);
@@ -33,7 +43,7 @@
 	background: var(--goo-button-group-bg);
 	border: 1px solid var(--goo-button-group-border);
 	border-radius: var(--goo-button-group-radius);
-	box-shadow: inset 0 1px 0 color-mix(in srgb, var(--goo-theme-fg) 5%, transparent);
+	box-shadow: var(--goo-button-group-inset-shadow);
 	height: var(--goo-button-group-height);
 	overflow: hidden;
 	outline: none;
@@ -46,14 +56,13 @@
 .goo-button-group::before {
 	content: '';
 	position: absolute;
-	inset: 0 auto 0 0;
+	inset: var(--goo-button-group-indicator-inset-block) auto
+		var(--goo-button-group-indicator-inset-block) 0;
 	z-index: 0;
 	width: calc(100% / var(--goo-button-group-option-count));
-	border-radius: max(
-		calc(var(--goo-theme-space-2xs) - var(--goo-theme-space-2xs)),
-		calc(var(--goo-button-group-radius) - var(--goo-button-group-indicator-radius-inset))
-	);
+	border-radius: var(--goo-button-group-indicator-radius);
 	background: var(--goo-button-group-selected-bg);
+	box-shadow: inset 0 0 0 1px var(--goo-button-group-indicator-ring);
 	opacity: 0;
 	pointer-events: none;
 	transform: translateX(calc(var(--goo-button-group-selected-index) * 100%));
@@ -103,9 +112,12 @@
 	text-align: center;
 }
 
+/* Fill the grid column: the sliding indicator assumes equal columns, so a
+   fixed-width button would sit off-center under it in stretched groups. The
+   min keeps compact standalone groups at least square. */
 .goo-button-group > .goo-button.goo-button--icon-only {
-	aspect-ratio: 1;
-	width: var(--goo-button-group-height);
+	min-width: var(--goo-button-group-height);
+	width: 100%;
 	padding: 0;
 }
 

@@ -14,6 +14,7 @@ const FIELD_KEYS = new Set([
 ])
 const FOLDER_KEYS = new Set([ 'type', 'title', 'className', 'open', 'children', 'if', 'unless' ])
 const NOTE_KEYS = new Set([ 'type', 'text', 'className', 'if', 'unless' ])
+const HEADING_KEYS = new Set([ 'type', 'text', 'icon', 'className', 'if', 'unless' ])
 const WIDGET_KEYS = new Set([
 	'type', 'widget', 'id', 'label', 'showLabel', 'layout', 'className', 'options', 'if', 'unless'
 ])
@@ -110,6 +111,9 @@ function assertNode(node: Record<string, unknown>, path: string): void {
 		case 'folder':
 			assertFolder(node, path)
 			return
+		case 'heading':
+			assertHeading(node, path)
+			return
 		case 'note':
 			assertNote(node, path)
 			return
@@ -137,6 +141,14 @@ function assertNote(note: Record<string, unknown>, path: string): void {
 	expectString(note.text, `${ path }.text`)
 	assertOptionalString(note, 'className', path)
 	assertConditions(note, path)
+}
+
+function assertHeading(heading: Record<string, unknown>, path: string): void {
+	assertKnownKeys(heading, HEADING_KEYS, path, 'heading')
+	expectString(heading.text, `${ path }.text`)
+	assertOptionalString(heading, 'icon', path)
+	assertOptionalString(heading, 'className', path)
+	assertConditions(heading, path)
 }
 
 function assertWidget(widget: Record<string, unknown>, path: string): void {

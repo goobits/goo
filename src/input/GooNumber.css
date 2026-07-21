@@ -23,11 +23,11 @@
 	--goo-number-arrow-divider-inset: var(--goo-theme-space-2xs);
 	--goo-number-arrow-divider-size: calc(var(--goo-theme-space-2xs) * 0.5);
 	--goo-number-arrow-height: calc(var(--goo-theme-space-xs) + var(--goo-theme-space-2xs) * 0.5);
+	--goo-number-arrow-width: var(--goo-theme-space-xs);
 	--goo-number-radius: var(--goo-theme-radius-md);
 	--goo-number-height: var(--goo-theme-control-height-sm);
 	--goo-number-inline-size: calc(var(--goo-theme-control-height-md) * 6.25);
 	--goo-number-arrows-width: calc(var(--goo-number-height) * 0.68);
-	--goo-number-arrow-width: var(--goo-theme-space-xs);
 	--goo-number-compact-arrow-height: var(--goo-theme-space-xs);
 	--goo-number-compact-arrow-width: calc(var(--goo-theme-space-xs) - var(--goo-theme-space-2xs) * 0.5);
 	--goo-number-compact-edge-padding: calc(var(--goo-theme-space-xs) + var(--goo-theme-space-2xs) * 0.5);
@@ -57,6 +57,10 @@
 	color: var(--goo-number-fg);
 	cursor: text;
 	direction: ltr;
+	/* Numeric data reads as data: mono with tabular figures so values align
+	   and do not shift width while scrubbing. */
+	font-family: var(--goo-theme-font-mono);
+	font-variant-numeric: tabular-nums;
 	font-weight: var(--goo-theme-font-weight-medium);
 	font-size: var(--goo-theme-font-size-sm);
 	height: var(--goo-number-height);
@@ -68,12 +72,15 @@
 		color var(--goo-number-motion-fast);
 }
 
+/* Outline instead of an offset border box: outlines never contribute to
+   scrollable overflow, so a flush field cannot summon a phantom scrollbar. */
 .goo-number::after {
 	content: '';
 	position: absolute;
-	inset: calc(var(--goo-number-focus-outline-offset) * -1);
-	border: var(--goo-number-focus-outline-size) solid var(--goo-number-change-pulse);
-	border-radius: calc(var(--goo-number-radius) + var(--goo-number-focus-outline-offset));
+	inset: 0;
+	outline: var(--goo-number-focus-outline-size) solid var(--goo-number-change-pulse);
+	outline-offset: var(--goo-number-focus-outline-offset);
+	border-radius: inherit;
 	opacity: 0;
 	pointer-events: none;
 }
@@ -183,6 +190,56 @@
 
 .goo-number[unit]:not([unit='']):not([unit='float']):not([unit='int']):not([unit='integer']):not([unit='number']) {
 	--goo-number-unit-padding: var(--goo-number-unit-width);
+}
+
+/* Optional auto toggle: a pill docked at the leading edge; the numeric value
+   stays visible but dimmed while auto, and sharpens on intent. */
+.goo-number--with-auto {
+	--goo-number-auto-reserve: calc(var(--goo-theme-control-height-lg) + var(--goo-theme-space-xs));
+	--goo-number-leading-padding: var(--goo-number-auto-reserve);
+}
+
+.goo-number__auto {
+	position: absolute;
+	inset-inline-start: calc(var(--goo-theme-space-2xs) + 1px);
+	top: 50%;
+	transform: translateY(-50%);
+	z-index: 2;
+	height: calc(var(--goo-number-height) - var(--goo-theme-space-xs) - var(--goo-theme-space-2xs));
+	padding: 0 var(--goo-theme-space-sm);
+	border: 0;
+	border-radius: calc(var(--goo-number-radius) - var(--goo-theme-space-2xs));
+	background: var(--goo-theme-surface-raised);
+	box-shadow: inset 0 0 0 1px var(--goo-theme-border);
+	color: var(--goo-theme-muted);
+	cursor: pointer;
+	font-family: var(--goo-theme-font-sans);
+	font-size: var(--goo-theme-font-size-xs);
+	font-weight: var(--goo-theme-font-weight-semibold);
+	letter-spacing: 0.01em;
+	line-height: 1;
+	transition:
+		background-color var(--goo-number-motion-fast),
+		box-shadow var(--goo-number-motion-fast),
+		color var(--goo-number-motion-fast);
+}
+
+.goo-number__auto:hover {
+	color: var(--goo-theme-fg);
+}
+
+.goo-number__auto[aria-pressed='true'] {
+	background: color-mix(in srgb, var(--goo-theme-accent) 13%, transparent);
+	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--goo-theme-accent) 32%, transparent);
+	color: var(--goo-theme-accent);
+}
+
+.goo-number--auto .goo-number__content {
+	opacity: 0.55;
+}
+
+.goo-number--auto:is(:hover, :focus-within) .goo-number__content {
+	opacity: 1;
 }
 
 /* Arrow buttons container */

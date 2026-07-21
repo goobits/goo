@@ -114,6 +114,31 @@ describe('GooSchema', () => {
 		expect(schema.querySelector('.goo-schema__note')?.textContent).toBe('Helpful authored phrase.')
 	})
 
+	it('renders heading nodes with an icon chip when the icon is registered', async() => {
+		const { iconRegistry } = await import('../../icon/registry.ts')
+		iconRegistry.register('spacing-test', '<svg viewBox="0 0 16 16"><path d="M0 8h16" /></svg>')
+		const schema = createGooSchema({
+			schema: [
+				{ type: 'heading', text: 'Spacing group', icon: 'spacing-test' },
+				{ type: 'heading', text: 'Chipless group', icon: 'missing-icon' },
+				{ path: 'size', min: 0, max: 100 }
+			],
+			data: { size: 12 },
+			bare: true
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+		await waitForSchemaElement(schema, '.goo-controller')
+
+		const headings = schema.querySelectorAll('.goo-schema__heading')
+		expect(headings).toHaveLength(2)
+		expect(headings[0]?.getAttribute('role')).toBe('heading')
+		expect(headings[0]?.querySelector('.goo-schema__heading-chip svg')).toBeTruthy()
+		expect(headings[0]?.querySelector('.goo-schema__heading-text')?.textContent).toBe('Spacing group')
+		expect(headings[1]?.querySelector('.goo-schema__heading-chip')).toBeNull()
+		expect(headings[1]?.querySelector('.goo-schema__heading-text')?.textContent).toBe('Chipless group')
+	})
+
 	it('creates native schema elements without custom tags', async() => {
 		const schema = createGooSchema({
 			schema: [ { path: 'size', min: 0, max: 100 } ],

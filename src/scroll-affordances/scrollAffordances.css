@@ -1,0 +1,87 @@
+.goo-scroll-affordances {
+	position: relative;
+}
+
+.goo-scroll-affordances__fade {
+	position: absolute;
+	left: 1px;
+	right: 1px;
+	height: 48px;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.2s;
+	z-index: 5;
+}
+
+.goo-scroll-affordances__fade--top {
+	top: 0;
+	background: linear-gradient(
+		to top,
+		transparent,
+		var(--goo-scroll-affordances-bg, var(--goo-theme-bg)) 88%
+	);
+}
+
+.goo-scroll-affordances__fade--bottom {
+	bottom: 0;
+	background: linear-gradient(
+		to bottom,
+		transparent,
+		var(--goo-scroll-affordances-bg, var(--goo-theme-bg)) 88%
+	);
+}
+
+.goo-scroll-affordances__button {
+	position: absolute;
+	left: 50%;
+	width: 27px;
+	height: 27px;
+	display: grid;
+	place-items: center;
+	padding: 0;
+	border: 0;
+	border-radius: var(--goo-theme-radius-full);
+	background: var(--goo-theme-surface-raised);
+	box-shadow:
+		0 3px 9px -3px rgb(0 0 0 / 45%),
+		inset 0 0 0 1px var(--goo-theme-border-strong);
+	color: var(--goo-theme-fg);
+	cursor: pointer;
+	opacity: 0;
+	pointer-events: none;
+	transition:
+		opacity 0.18s,
+		transform 0.18s,
+		background-color 0.12s;
+	z-index: 6;
+}
+
+.goo-scroll-affordances__button--up {
+	top: 8px;
+	transform: translateX(-50%) translateY(-6px);
+}
+
+.goo-scroll-affordances__button--down {
+	bottom: 8px;
+	transform: translateX(-50%) translateY(6px);
+}
+
+.goo-scroll-affordances__button:hover {
+	background: color-mix(in srgb, var(--goo-theme-fg) 10%, var(--goo-theme-surface-raised));
+}
+
+.goo-scroll-affordances--show {
+	opacity: 1;
+}
+
+.goo-scroll-affordances__button.goo-scroll-affordances--show {
+	pointer-events: auto;
+	transform: translateX(-50%) translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.goo-scroll-affordances__fade,
+	.goo-scroll-affordances__button {
+		transition-duration: 0.01ms;
+	}
+}

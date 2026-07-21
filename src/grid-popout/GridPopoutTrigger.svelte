@@ -419,7 +419,9 @@ goo-grid-popout-trigger .goo-grid-trigger__arrow {
 	position: absolute;
 	inset-inline-end: 0;
 	top: 50%;
-	transform: translateY(-50%);
+	/* Triggers open popouts, so the resting arrow points down like any
+	   dropdown; opening flips it up. */
+	transform: translateY(-50%) rotate(90deg);
 	transform-origin: center;
 	transition:
 		background-color var(--goo-theme-transition-fast),
@@ -451,11 +453,11 @@ goo-grid-popout-trigger .goo-grid-trigger__arrow :global(svg) {
 }
 
 goo-grid-popout-trigger.goo-grid-trigger--opened .goo-grid-trigger__arrow {
-	transform: translateY(-50%) rotate(90deg);
+	transform: translateY(-50%) rotate(270deg);
 }
 
 :global([dir="rtl"]) goo-grid-popout-trigger.goo-grid-trigger--opened .goo-grid-trigger__arrow {
-	transform: translateY(-50%) rotate(90deg);
+	transform: translateY(-50%) rotate(270deg);
 }
 
 :global([dir="rtl"]) goo-grid-popout-trigger :global(.icon),
