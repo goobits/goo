@@ -291,11 +291,7 @@ async function buildWidget(
 	}
 
 	const controller = createGooController({
-<<<<<<< HEAD
 		label: node.showLabel === false ? '' : localizeSchemaText(node.label) ?? '',
-=======
-		label: node.showLabel === false ? '' : (node.label ?? ''),
->>>>>>> origin/main
 		type: node.widget,
 		unbound: true,
 		className: mergeClassNames(
@@ -306,11 +302,7 @@ async function buildWidget(
 		controlOptions: node.options,
 		controlTypes: element.state.controlTypes
 	})
-<<<<<<< HEAD
 	controller.name(node.showLabel === false ? '' : localizeSchemaText(node.label) ?? '')
-=======
-	controller.name(node.showLabel === false ? '' : (node.label ?? ''))
->>>>>>> origin/main
 	element._controllers.set(key, controller)
 	controller.addTo(parent)
 }
@@ -397,10 +389,7 @@ async function buildField(
 					property,
 					controllerOptions,
 					module,
-<<<<<<< HEAD
 					controlConfig,
-=======
->>>>>>> origin/main
 					parent,
 					token
 				)
