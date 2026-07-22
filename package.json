@@ -266,7 +266,7 @@
 		"@sveltejs/vite-plugin-svelte": "^7.2.0",
 		"@testing-library/svelte": "^5.4.2",
 		"eslint": "^10.7.0",
-		"eslint-plugin-simple-import-sort": "^13.0.0",
+		"eslint-plugin-simple-import-sort": "^14.0.0",
 		"jsdom": "^29.1.1",
 		"svelte": "^5.56.7",
 		"svelte-check": "4.7.3",
