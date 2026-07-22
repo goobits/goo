@@ -4,7 +4,8 @@ import {
 	type GooControlOptions,
 	type GooControlTypeConfig,
 	type GooSvelteControlModule,
-	resolveGooControlTypeConfig } from '../controller/controlRegistry.ts'
+	resolveGooControlTypeConfig
+} from '../controller/controlRegistry.ts'
 import { createGooController } from '../controller/GooController.ts'
 import {
 	createSvelteControlHost,
@@ -21,11 +22,11 @@ import {
 	schemaHasConditions as hasSchemaConditions
 } from './_schemaData.ts'
 import { localizeSchemaText } from './_schemaText.ts'
-import { createSchemaHeading } from './schemaHeading.ts'
 import { shouldRenderSchemaNode } from './fieldConditions.ts'
 import { isFullBleedField, isSelfContainedField } from './fieldLayout.ts'
 import { getByPath, resolvePath, setByPath } from './pathUtils.ts'
 import { buildControllerOptions, type ControllerOptions } from './schemaFieldBuilder.ts'
+import { createSchemaHeading } from './schemaHeading.ts'
 import type {
 	GooSchemaChangeHandler,
 	GooSchemaData,
