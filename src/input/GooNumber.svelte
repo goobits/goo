@@ -104,7 +104,7 @@ onDestroy(() => {
 
 // Auto lives as state so hosts can flip it without a remount (a remount
 // would destroy a focused value input mid-interaction).
-let autoActive = $state(Boolean(auto))
+let autoActive = $state(Boolean(untrack(() => auto)))
 
 $effect(() => {
 	autoActive = Boolean(auto)
