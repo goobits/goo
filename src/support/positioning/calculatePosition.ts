@@ -369,7 +369,7 @@ function calculateOffset(
 	if (direction === HORIZONTAL) {
 		// Horizontal: offset.x pushes away from edge, offset.y adjusts along edge
 		const xMult = edge === 'right' ? -1 : 1
-		let yOffset = 0
+		let yOffset = oy
 		if (position === 'top' && toPosition === 'bottom') yOffset = -oy
 		else if (position === 'bottom' && toPosition === 'top') yOffset = oy
 
@@ -377,7 +377,7 @@ function calculateOffset(
 	} else {
 		// Vertical: offset.y pushes away from edge, offset.x adjusts along edge
 		const yMult = edge === 'bottom' ? -1 : 1
-		let xOffset = 0
+		let xOffset = ox
 		if (position === 'left' && toPosition === 'right') xOffset = -ox
 		else if (position === 'right' && toPosition === 'left') xOffset = ox
 
