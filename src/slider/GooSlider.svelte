@@ -192,7 +192,7 @@
 		if (
 			!coverage &&
 			currentValues.length === 1 &&
-			!preset &&
+			(!preset || preset === 'bipolar') &&
 			usesDefaultShape &&
 			!hasCustomGradient
 		)
@@ -213,6 +213,13 @@
 
 	const rootStyle = $derived.by(() => {
 		const declarations = [style].filter(Boolean) as string[]
+		if (preset === 'bipolar' && numericMax > numericMin) {
+			const zero = Math.min(
+				100,
+				Math.max(0, ((0 - numericMin) / (numericMax - numericMin)) * 100)
+			)
+			declarations.push(`--goo-slider-fill-origin: ${zero}%`)
+		}
 		if (preset === 'opacity' && currentPresetColor)
 			declarations.push(`--goo-slider-opacity-color: ${currentPresetColor}`)
 		if ((preset === 'saturation' || preset === 'lightness') && currentPresetHue !== undefined)
