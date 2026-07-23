@@ -187,24 +187,35 @@
 /* Inspector variant - compact section styling for dense property panels. */
 .goo-folder--inspector {
 	--goo-folder-inspector-active-bg: transparent;
-	--goo-folder-inspector-accent: var(--goo-theme-accent);
+	/* The bracket is structure, not emphasis: it speaks the divider voice. */
+	--goo-folder-inspector-rail: var(--goo-theme-border-strong);
 
+	position: relative;
 	margin-block-end: 0;
+	padding-inline-start: var(--goo-theme-space-sm);
 	border: 1px solid transparent;
 	border-radius: 0;
 }
 
+/* Open folders wear a section bracket: an accent rail up the whole left
+   edge that hooks over the top of the header, so header and content read
+   as one region rather than a floating line beside the rows. */
 .goo-folder--inspector::before {
 	content: '';
 	position: absolute;
-	inset-block: var(--goo-theme-space-sm);
-	inset-inline-start: 0;
-	inline-size: 2px;
-	border-radius: var(--goo-theme-radius-sm);
-	background: var(--goo-folder-inspector-accent);
+	/* The arm stops short of the end so rounded host cards keep their
+	   corner; the bracket reads as a mark, not a border. */
+	inset: 1px var(--goo-theme-space-sm) var(--goo-theme-space-2xs) 0;
+	border-inline-start: 1px solid var(--goo-folder-inspector-rail);
+	border-block-start: 1px solid var(--goo-folder-inspector-rail);
+	border-start-start-radius: var(--goo-theme-radius-sm);
 	opacity: 0;
 	pointer-events: none;
-	display: none;
+	transition: opacity var(--goo-folder-transition);
+}
+
+.goo-folder--inspector.goo-folder--open::before {
+	opacity: 1;
 }
 
 .goo-folder--inspector.goo-folder--open {
@@ -212,15 +223,22 @@
 	border-color: transparent;
 }
 
-.goo-folder--inspector.goo-folder--open::before {
-	opacity: 0;
-}
-
 .goo-folder--inspector > .goo-folder__header-row > .goo-folder__header {
 	gap: var(--goo-theme-space-sm);
 	min-height: var(--goo-folder-inspector-header-height);
 	padding: 0 var(--goo-theme-space-2xs);
 	background: transparent;
+	border-radius: var(--goo-theme-radius-sm);
+}
+
+/* A soft cap gradient marks headers as section starts without adding
+   chrome; hover swaps to the flat brightening. */
+.goo-folder--inspector > .goo-folder__header-row {
+	background: linear-gradient(
+		to bottom,
+		color-mix(in srgb, var(--goo-theme-fg) 5%, transparent),
+		transparent
+	);
 	border-radius: var(--goo-theme-radius-sm);
 }
 
@@ -247,6 +265,7 @@
 }
 
 .goo-folder--inspector > .goo-folder__content {
+	position: relative;
 	gap: 0;
 	padding: 0 0 var(--goo-theme-space-xs);
 	background: transparent;
