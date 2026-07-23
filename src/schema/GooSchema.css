@@ -17,6 +17,7 @@
 }
 
 .goo-schema {
+	--goo-schema-folder-row-padding: var(--goo-theme-space-sm);
 	--goo-schema-row-padding: var(--goo-theme-space-sm) var(--goo-theme-space-md);
 }
 
@@ -191,20 +192,13 @@
 }
 
 :is(.goo-schema, .goo-schema__bare) .goo-folder .goo-folder__content > .goo-controller {
-	--goo-controller-padding: var(--goo-schema-row-padding);
+	--goo-controller-padding: var(--goo-schema-folder-row-padding);
 	border-bottom: 1px solid color-mix(in srgb, var(--goo-theme-border) 72%, transparent);
-}
-
-:is(.goo-schema, .goo-schema__bare)
-	.goo-folder
-	.goo-folder__content
-	> .goo-controller.goo-controller--slider-field {
-	--goo-controller-padding: var(--goo-theme-space-sm) 0;
 }
 
 :is(.goo-schema, .goo-schema__bare) .goo-folder .goo-folder__content > .goo-svelte-control,
 :is(.goo-schema, .goo-schema__bare) .goo-folder .goo-folder__content > .goo-native-control {
-	padding: var(--goo-schema-row-padding);
+	padding: var(--goo-schema-folder-row-padding);
 	border-bottom: 1px solid color-mix(in srgb, var(--goo-theme-border) 72%, transparent);
 }
 
