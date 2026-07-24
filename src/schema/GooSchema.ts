@@ -13,6 +13,7 @@ import {
 	destroySchemaControllers,
 	type GooSchemaBuildElement,
 	rebuildSchema,
+	type SchemaRebuildOptions,
 	updateSchemaAfterDataMutation
 } from './_schemaBuilder.ts'
 import {
@@ -144,11 +145,12 @@ type GooSchemaInternal = GooSchema & GooSchemaBuildElement & {
 	_history: SchemaHistory
 	_modifierBlurHandler: () => void
 	_modifierKeyHandler: (event: KeyboardEvent) => void
+	_preserveFolderOpenStateOnRebuild: boolean
 	_rebuildPending: boolean
 	_redoMode: boolean
 	_scopeBuild: Map<string, SchemaHistoryScope>
-	_rebuild(): Promise<void>
-	_scheduleRebuild(): void
+	_rebuild(options?: SchemaRebuildOptions): Promise<void>
+	_scheduleRebuild(options?: SchemaRebuildOptions): void
 }
 
 function initializeSchema(element: GooSchemaInternal, options: GooSchemaOptions): void {
@@ -181,6 +183,7 @@ function initializeSchema(element: GooSchemaInternal, options: GooSchemaOptions)
 	element._scopeBuild = new Map()
 	element._rebuildToken = 0
 	element._rebuildPending = false
+	element._preserveFolderOpenStateOnRebuild = false
 	element._redoMode = false
 	element._root = null
 	element._toolbar = null
@@ -431,17 +434,28 @@ function attachSchemaApi(element: GooSchemaInternal): void {
 			element.dispatchEvent(new CustomEvent('reset', { detail, bubbles: true }))
 			element._onreset?.(element._data)
 		},
-		_scheduleRebuild: () => {
+		_scheduleRebuild: (options: SchemaRebuildOptions = {}) => {
 			if (element._destroyed) return
-			if (element._rebuildPending) return
+			const preserveFolderOpenState = options.preserveFolderOpenState === true
+			if (element._rebuildPending) {
+				if (!preserveFolderOpenState) {
+					element._preserveFolderOpenStateOnRebuild = false
+				}
+				return
+			}
 			element._rebuildPending = true
+			element._preserveFolderOpenStateOnRebuild = preserveFolderOpenState
 			queueMicrotask(() => {
 				if (element._destroyed) return
+				const nextOptions: SchemaRebuildOptions = {
+					preserveFolderOpenState: element._preserveFolderOpenStateOnRebuild
+				}
 				element._rebuildPending = false
-				void element._rebuild()
+				element._preserveFolderOpenStateOnRebuild = false
+				void element._rebuild(nextOptions)
 			})
 		},
-		_rebuild: () => rebuildSchema(element)
+		_rebuild: (options?: SchemaRebuildOptions) => rebuildSchema(element, options)
 	})
 }
 

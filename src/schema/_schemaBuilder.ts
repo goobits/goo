@@ -54,6 +54,10 @@ const SCHEMA_DATA_MOTION_ATTRIBUTE = 'data-goo-schema-data-motion'
 const SCHEMA_DATA_MOTION_DURATION_MS = 360
 const schemaDataMotionTimers = new WeakMap<HTMLElement, ReturnType<typeof setTimeout>>()
 
+export type SchemaRebuildOptions = {
+	preserveFolderOpenState?: boolean
+}
+
 export type GooSchemaController = (HTMLElement | SvelteControlHost) & {
 	destroy?: () => void
 }
@@ -83,7 +87,7 @@ export type GooSchemaBuildElement = HTMLElement & {
 	state: GooSchemaState
 	refresh(): void
 	setData(data: GooSchemaData, options?: GooSchemaDataUpdateOptions): void
-	_scheduleRebuild(): void
+	_scheduleRebuild(options?: SchemaRebuildOptions): void
 }
 
 type SchemaDataMutationOptions = {
@@ -91,9 +95,15 @@ type SchemaDataMutationOptions = {
 	update?: GooSchemaDataUpdateOptions
 }
 
-export async function rebuildSchema(element: GooSchemaBuildElement): Promise<void> {
+export async function rebuildSchema(
+	element: GooSchemaBuildElement,
+	options: SchemaRebuildOptions = {}
+): Promise<void> {
 	if (element._destroyed) return
 	const token = ++element._rebuildToken
+	const folderOpenState = options.preserveFolderOpenState
+		? captureSchemaFolderOpenState(element)
+		: undefined
 
 	element._beginScopeBuild()
 	element._actionViews.clear()
@@ -137,6 +147,9 @@ export async function rebuildSchema(element: GooSchemaBuildElement): Promise<voi
 
 	if (token !== element._rebuildToken) return
 	if (element._root) {
+		if (folderOpenState) {
+			restoreSchemaFolderOpenState(element._root, folderOpenState)
+		}
 		element.appendChild(element._root)
 	}
 	if (element._actionsTarget) {
@@ -146,6 +159,30 @@ export async function rebuildSchema(element: GooSchemaBuildElement): Promise<voi
 	element._finishScopeBuild()
 	element._visibilitySignature = getSchemaVisibilitySignature(element)
 	updateSchemaActionState(element)
+}
+
+function captureSchemaFolderOpenState(element: HTMLElement): Map<string, boolean> {
+	const openState = new Map<string, boolean>()
+	for (const folder of element.querySelectorAll<GooFolderElement>(
+		'.goo-folder[data-goo-schema-scope]'
+	)) {
+		const scopeId = folder.dataset.gooSchemaScope
+		if (scopeId) openState.set(scopeId, folder.open)
+	}
+	return openState
+}
+
+function restoreSchemaFolderOpenState(
+	root: HTMLElement,
+	openState: ReadonlyMap<string, boolean>
+): void {
+	for (const folder of root.querySelectorAll<GooFolderElement>(
+		'.goo-folder[data-goo-schema-scope]'
+	)) {
+		const scopeId = folder.dataset.gooSchemaScope
+		const open = scopeId ? openState.get(scopeId) : undefined
+		if (open !== undefined) folder.setOpen(open, { silent: true })
+	}
 }
 
 export function destroySchemaControllers(element: GooSchemaBuildElement): void {
@@ -176,7 +213,7 @@ export function updateSchemaAfterDataMutation(
 	if (hasSchemaConditions(element.state.schema)) {
 		const nextVisibilitySignature = getSchemaVisibilitySignature(element)
 		if (nextVisibilitySignature !== element._visibilitySignature) {
-			element._scheduleRebuild()
+			element._scheduleRebuild({ preserveFolderOpenState: true })
 			return
 		}
 		element.refresh()

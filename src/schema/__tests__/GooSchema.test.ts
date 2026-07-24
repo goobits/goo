@@ -623,6 +623,73 @@ describe('GooSchema', () => {
 		expect(schema.getController('advancedSize')).not.toBeUndefined()
 	})
 
+	it('preserves user folder disclosure state when conditional visibility changes', async() => {
+		const schema = createGooSchema({
+			schema: [
+				{ path: 'enabled', type: 'checkbox' },
+				{
+					type: 'folder',
+					title: 'Initially closed',
+					open: false,
+					children: [
+						{ path: 'closedDetail', min: 0, max: 10, if: 'enabled' }
+					]
+				},
+				{
+					type: 'folder',
+					title: 'Initially open',
+					open: true,
+					children: [
+						{ path: 'openDetail', min: 0, max: 10, if: 'enabled' }
+					]
+				}
+			],
+			data: {
+				closedDetail: 1,
+				enabled: false,
+				openDetail: 2
+			},
+			bare: true
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+
+		const initiallyClosed = await waitForSchemaElement<HTMLElement>(
+			schema,
+			'.goo-folder[title="Initially closed"]'
+		)
+		const initiallyOpen = await waitForSchemaElement<HTMLElement>(
+			schema,
+			'.goo-folder[title="Initially open"]'
+		)
+		initiallyClosed.querySelector<HTMLButtonElement>('.goo-folder__header')?.click()
+		initiallyOpen.querySelector<HTMLButtonElement>('.goo-folder__header')?.click()
+		expect(initiallyClosed.classList.contains('goo-folder--open')).toBe(true)
+		expect(initiallyOpen.classList.contains('goo-folder--open')).toBe(false)
+
+		schema.setData({
+			closedDetail: 1,
+			enabled: true,
+			openDetail: 2
+		})
+		await settleGooSchema()
+
+		const rebuiltInitiallyClosed = await waitForSchemaElement<HTMLElement>(
+			schema,
+			'.goo-folder[title="Initially closed"]'
+		)
+		const rebuiltInitiallyOpen = await waitForSchemaElement<HTMLElement>(
+			schema,
+			'.goo-folder[title="Initially open"]'
+		)
+		expect(rebuiltInitiallyClosed).not.toBe(initiallyClosed)
+		expect(rebuiltInitiallyOpen).not.toBe(initiallyOpen)
+		expect(rebuiltInitiallyClosed.classList.contains('goo-folder--open')).toBe(true)
+		expect(rebuiltInitiallyOpen.classList.contains('goo-folder--open')).toBe(false)
+		expect(schema.getController('closedDetail')).not.toBeUndefined()
+		expect(schema.getController('openDetail')).not.toBeUndefined()
+	})
+
 	it('rebuilds fields when conditional choices change', async() => {
 		const schema = createGooSchema({
 			schema: [ {
