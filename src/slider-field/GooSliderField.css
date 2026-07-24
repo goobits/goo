@@ -6,8 +6,12 @@
 	--goo-slider-field-input-width: calc(var(--goo-theme-control-height-sm) * 2.5);
 	--goo-slider-field-label-fg: var(--goo-theme-fg);
 	--goo-slider-field-label-weight: var(--goo-theme-font-weight-semibold);
+	--goo-slider-field-tick-gap: calc(var(--goo-theme-space-2xs) * 0.5);
 	--goo-slider-field-tick-height: var(--goo-theme-space-xs);
-	--goo-slider-field-tick-offset: calc((var(--goo-theme-space-xs) + var(--goo-theme-space-2xs) * 0.5) * -1);
+	--goo-slider-field-tick-major-height: calc(var(--goo-theme-space-xs) + var(--goo-theme-space-2xs) * 1.5);
+	--goo-slider-field-tick-major-step: calc(var(--goo-slider-field-tick-step) * 5);
+	--goo-slider-field-tick-minor-color: color-mix(in srgb, var(--goo-theme-fg) 14%, transparent);
+	--goo-slider-field-tick-major-color: color-mix(in srgb, var(--goo-theme-fg) 24%, transparent);
 	--goo-slider-field-tick-size: calc(var(--goo-theme-space-2xs) * 0.5);
 	--goo-slider-field-tick-step: var(--goo-theme-space-sm);
 	--goo-slider-field-track-height: var(--goo-theme-space-xs);
@@ -81,6 +85,12 @@
 	min-width: 0;
 }
 
+/* Scrub updates land every pointer move; the number's change pulse would
+   restart each tick and read as flicker. Discrete changes keep the pulse. */
+.goo-slider-field--goo:has(.goo-slider--active) .goo-number::after {
+	animation: none;
+}
+
 .goo-slider-field--goo .goo-slider-field__inputs--grouped {
 	flex-wrap: nowrap;
 }
@@ -97,18 +107,31 @@
 	margin-inline: 0;
 }
 
-.goo-slider-field--goo .goo-slider__track::after {
+/* Tick ruler under the rail: short minor ticks with a taller, brighter major
+   tick every fifth step, both anchored to the band's top so they read as one
+   measuring edge. The thumb passes over them. Lives on the slider root, not
+   the track: shaped tracks (wedge) claim the track's own pseudos. */
+.goo-slider-field--goo .goo-slider::after {
 	content: '';
 	position: absolute;
 	inset-inline: 0;
-	top: var(--goo-slider-field-tick-offset);
-	height: var(--goo-slider-field-tick-height);
-	background-image: repeating-linear-gradient(
-		to right,
-		color-mix(in srgb, var(--goo-theme-fg) 28%, transparent) 0 var(--goo-slider-field-tick-size),
-		transparent var(--goo-slider-field-tick-size) var(--goo-slider-field-tick-step)
-	);
-	opacity: 0.72;
+	top: calc(50% + var(--goo-slider-field-track-height) / 2 + var(--goo-slider-field-tick-gap));
+	height: var(--goo-slider-field-tick-major-height);
+	background-image:
+		repeating-linear-gradient(
+			to right,
+			var(--goo-slider-field-tick-major-color) 0 var(--goo-slider-field-tick-size),
+			transparent var(--goo-slider-field-tick-size) var(--goo-slider-field-tick-major-step)
+		),
+		repeating-linear-gradient(
+			to right,
+			var(--goo-slider-field-tick-minor-color) 0 var(--goo-slider-field-tick-size),
+			transparent var(--goo-slider-field-tick-size) var(--goo-slider-field-tick-step)
+		);
+	background-repeat: no-repeat;
+	background-size:
+		100% var(--goo-slider-field-tick-major-height),
+		100% var(--goo-slider-field-tick-height);
 	pointer-events: none;
-	z-index: -1;
+	z-index: 0;
 }

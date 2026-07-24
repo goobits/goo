@@ -28,6 +28,8 @@ interface Props {
 	popoutClass?: string
 	selected?: string
 	tabIndex?: number
+	/** Hover tooltip forwarded to the trigger's leading tile. */
+	tooltip?: string | (() => string | undefined)
 	onchoose?: (id: string) => void
 	onopenchange?: (opened: boolean) => void
 	onrootchange?: (element: HTMLElement | null) => void
@@ -43,6 +45,7 @@ let {
 	popoutClass = '',
 	selected = '',
 	tabIndex = 0,
+	tooltip,
 	onchoose,
 	onopenchange,
 	onrootchange
@@ -455,6 +458,7 @@ function escapeSelectorValue(value: string): string {
 	previewUrl={currentItem?.previewUrl ?? ''}
 	tabIndex={tabIndex}
 	title={currentItem?.title ?? ''}
+	{tooltip}
 	onpointerdown={handlePointerDown}
 	onclick={handleClick}
 	onkeydown={handleKeydown}

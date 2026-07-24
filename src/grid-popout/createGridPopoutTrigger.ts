@@ -1,6 +1,5 @@
 import { flushSync, mount, unmount } from 'svelte'
 
-import { gooTooltipRuntime as UITooltip } from '../tooltip/index.ts'
 import GridPopoutPicker from './GridPopoutPicker.svelte'
 import type { GridPopoutItem } from './types.ts'
 
@@ -57,6 +56,8 @@ export function createGridPopoutTrigger({
 			items,
 			popoutClass: popoutClassName,
 			selected,
+			// The trigger owns tooltip placement (leading tile, open-suppressed).
+			tooltip,
 			onchoose(value: string) {
 				if (handleRef.current) {
 					void onChoose?.call(handleRef.current, value)
@@ -73,20 +74,6 @@ export function createGridPopoutTrigger({
 		throw new Error('GridPopoutPicker failed to mount.')
 	}
 
-	const tooltipHandle = tooltip
-		? UITooltip.attach(trigger, () => {
-			if (trigger.classList.contains('goo-grid-trigger--opened')) {
-				return
-			}
-
-			return typeof tooltip === 'function' ? tooltip() : tooltip
-		}, {
-			direction: 'right',
-			showOnClick: true,
-			showOnHover: true
-		})
-		: undefined
-
 	const handle: GridPopoutTriggerHandle = {
 		get element() {
 			return trigger
@@ -94,7 +81,6 @@ export function createGridPopoutTrigger({
 		destroy() {
 			if (destroyed) return
 			destroyed = true
-			tooltipHandle?.destroy()
 			void unmount(component)
 		},
 		setItems(nextItems) {

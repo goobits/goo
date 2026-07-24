@@ -618,6 +618,40 @@ function getTriggerIconClasses(icon: unknown): string {
 	return trimmed
 }
 
+/* Element and factory trigger icons (the setTriggerIcon contract already
+   admits them); factories re-run per selection so the icon can track the
+   current value. Cloned into the host span, like option icons. */
+let triggerIconHost = $state<HTMLElement | null>(null)
+const triggerIconElement = $derived.by(() => {
+	const icon = currentTriggerIcon
+	void selectedValue
+	if (typeof icon === 'function') {
+		const element = icon()
+		return element instanceof Element ? element : null
+	}
+	return icon instanceof Element ? icon : null
+})
+
+$effect(() => {
+	if (triggerIconHost && triggerIconElement) {
+		triggerIconHost.replaceChildren(triggerIconElement.cloneNode(true))
+	}
+})
+
+/* With a trigger icon, the hover tooltip moves onto the tile (icons carry
+   names; the value text speaks for itself) and the button drops its native
+   title. Suppressed while the dropdown is open. */
+$effect(() => {
+	const text = typeof tooltip === 'string' && tooltip ? tooltip : title
+	if (!triggerIconHost || !text) return
+	const handle = gooTooltipRuntime.attach(triggerIconHost, () => (opened ? undefined : text), {
+		direction: 'right',
+		showOnClick: true,
+		showOnHover: true
+	})
+	return () => handle?.destroy()
+})
+
 </script>
 
 <div
@@ -642,10 +676,12 @@ function getTriggerIconClasses(icon: unknown): string {
 			aria-activedescendant={opened && activeDescendant ? activeDescendant : undefined}
 			aria-label={triggerAccessibleName}
 			disabled={effectiveDisabled}
-			title={typeof tooltip === 'string' ? tooltip : title}
+			title={triggerIconElement ? undefined : (typeof tooltip === 'string' ? tooltip : title)}
 			onpointerdown={handleTriggerPointerDown}
 		>
-			{#if getTriggerIconClasses(currentTriggerIcon)}
+			{#if triggerIconElement}
+				<span class="goo-select__trigger-icon" aria-hidden="true" bind:this={triggerIconHost}></span>
+			{:else if getTriggerIconClasses(currentTriggerIcon)}
 				<span class={`goo-select__trigger-icon ${ getTriggerIconClasses(currentTriggerIcon) }`}></span>
 			{/if}
 			<span

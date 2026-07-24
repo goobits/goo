@@ -5,6 +5,8 @@
 
 import ChevronRight from '@lucide/svelte/icons/chevron-right'
 
+import { gooTooltipRuntime } from '../tooltip/index.ts'
+
 import { GooPreview } from '../preview/index.ts'
 import type { GridPopoutPreview, GridPopoutSvgIcon } from './types.ts'
 
@@ -41,6 +43,9 @@ interface Props {
 	nextPreviewUrl?: string
 	tabIndex?: number
 	title?: string
+	/** Hover tooltip, attached to the leading tile (icons carry names;
+	    the visible title text speaks for itself). Hidden while open. */
+	tooltip?: string | (() => string | undefined)
 	onclick?: (event: MouseEvent) => void
 	onkeydown?: (event: KeyboardEvent) => void
 	onpointerdown?: (event: PointerEvent) => void
@@ -67,6 +72,7 @@ let {
 	nextPreviewUrl = '',
 	tabIndex = 0,
 	title = '',
+	tooltip = '',
 	onclick,
 	onkeydown,
 	onpointerdown,
@@ -141,6 +147,30 @@ export function setValue(value: TriggerValue): void {
 
 $effect(() => {
 	onrootchange?.(rootElement)
+})
+
+/* Tooltip lives on the leading tile: icons need names, the visible title
+   speaks for itself. Re-attaches when the tile variant swaps (preview url
+   arriving async, icon class changes); falls back to the root when no
+   tile renders. Suppressed while the popout is open. */
+$effect(() => {
+	if (!tooltip || !rootElement) return
+	void currentPreview
+	void currentPreviewUrl
+	void currentIconSvg
+	void currentIconClass
+	const tile = rootElement.querySelector<HTMLElement>(
+		'.goo-grid-trigger__icon:not(.goo-grid-popout-trigger__preview--next)'
+	) ?? rootElement
+	const handle = gooTooltipRuntime.attach(tile, () => {
+		if (currentOpened) return
+		return typeof tooltip === 'function' ? tooltip() : tooltip
+	}, {
+		direction: 'right',
+		showOnClick: true,
+		showOnHover: true
+	})
+	return () => handle?.destroy()
 })
 
 $effect(() => {

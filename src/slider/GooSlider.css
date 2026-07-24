@@ -15,13 +15,29 @@
 	--goo-slider-hairline-width: calc(var(--goo-theme-focus-ring-width) * 0.5);
 	--goo-slider-thumb-shadow: 0 0 0 var(--goo-slider-thumb-ring-width) var(--goo-slider-thumb-border),
 		var(--goo-theme-shadow-sm);
+	/* Pointer feedback is local to the thumb: a soft accent halo that grows
+	   while dragging. The track itself never reacts. */
+	--goo-slider-thumb-halo: color-mix(in srgb, var(--goo-theme-accent) 13%, transparent);
+	--goo-slider-thumb-halo-width: var(--goo-theme-space-xs);
 	--goo-slider-thumb-shadow-hover:
 		0 0 0 var(--goo-slider-thumb-ring-width) var(--goo-slider-thumb-border),
-		0 4px 12px rgb(0 0 0 / 28%);
+		0 0 0 calc(var(--goo-slider-thumb-ring-width) + var(--goo-slider-thumb-halo-width))
+			var(--goo-slider-thumb-halo),
+		var(--goo-theme-shadow-sm);
 	--goo-slider-thumb-shadow-active:
-		0 0 0 calc(var(--goo-slider-thumb-ring-width) + var(--goo-theme-space-2xs) * 0.5)
-			var(--goo-slider-thumb-border),
-		0 6px 16px rgb(0 0 0 / 32%);
+		0 0 0 var(--goo-slider-thumb-ring-width) var(--goo-slider-thumb-border),
+		0 0 0
+			calc(
+				var(--goo-slider-thumb-ring-width) + var(--goo-slider-thumb-halo-width) +
+					var(--goo-theme-space-2xs) * 0.5
+			)
+			var(--goo-slider-thumb-halo),
+		var(--goo-theme-shadow-sm);
+	--goo-slider-thumb-shadow-focus:
+		0 0 0 var(--goo-slider-thumb-ring-width) var(--goo-slider-thumb-border),
+		0 0 0 calc(var(--goo-slider-thumb-ring-width) + var(--goo-theme-focus-ring-width))
+			var(--goo-theme-accent),
+		var(--goo-theme-shadow-sm);
 	--goo-slider-variance-thumb-radius: var(--goo-theme-space-2xs);
 	--goo-slider-value-bubble-radius: calc(var(--goo-theme-radius-sm) - var(--goo-theme-space-2xs));
 	--goo-slider-coverage-bg: var(--goo-theme-accent);
@@ -29,12 +45,8 @@
 	--goo-slider-variance-coverage-base-bg: color-mix(in srgb, var(--goo-slider-coverage-bg) 88%, var(--goo-theme-fg) 12%);
 	--goo-slider-value-pct: 0%;
 	--goo-slider-track-shadow: inset 0 1px 2px rgb(0 0 0 / 20%);
-	--goo-slider-track-shadow-hover:
-		inset 0 1px 2px rgb(0 0 0 / 22%),
-		0 0 0 1px color-mix(in srgb, var(--goo-theme-accent) 28%, transparent);
-	--goo-slider-track-shadow-focus:
-		inset 0 1px 2px rgb(0 0 0 / 22%),
-		0 0 0 var(--goo-slider-focus-ring-width) color-mix(in srgb, var(--goo-theme-accent) 45%, transparent);
+	--goo-slider-track-shadow-hover: var(--goo-slider-track-shadow);
+	--goo-slider-track-shadow-focus: var(--goo-slider-track-shadow);
 	--goo-slider-transition-timing: cubic-bezier(0.5, 1.3, 0.5, 1);
 	--goo-slider-motion-fast: var(--goo-theme-transition-fast);
 	--goo-slider-motion-normal: var(--goo-theme-transition-normal);
@@ -42,8 +54,8 @@
 	--goo-slider-animate-bg-motion: 250ms;
 	--goo-slider-snap-motion: 140ms cubic-bezier(0.2, 0.85, 0.22, 1);
 	--goo-slider-value-fill-opacity: 0.78;
-	--goo-slider-thumb-hover-scale: 1.05;
-	--goo-slider-thumb-active-scale: 1.12;
+	--goo-slider-thumb-hover-scale: 1;
+	--goo-slider-thumb-active-scale: 1;
 	--goo-slider-thumb-vertical-hover-scale: 1.08;
 	--goo-slider-thumb-vertical-active-scale: 1.2;
 	--goo-slider-variance-thumb-hover-scale: 1.08;
@@ -130,6 +142,11 @@
 
 .goo-slider:focus-visible .goo-slider__track {
 	box-shadow: var(--goo-slider-track-shadow-focus);
+}
+
+.goo-slider:focus-visible .goo-slider__thumb,
+.goo-slider__thumb:focus-visible {
+	box-shadow: var(--goo-slider-thumb-shadow-focus);
 }
 
 .goo-slider.goo-slider--value-fill .goo-slider__track::before {
@@ -638,6 +655,19 @@
    RTL Support
    Mirror gradients and positions for right-to-left layouts
    ========================================================================== */
+
+/* Bipolar fill tells the truth for zero-centered ranges: it grows outward
+   from the track's midpoint toward the value, in either direction. */
+.goo-slider.goo-slider--bipolar.goo-slider--value-fill .goo-slider__track::before {
+	inset-inline-start: min(var(--goo-slider-fill-origin, 50%), var(--goo-slider-value-pct));
+	width: max(
+		calc(var(--goo-slider-fill-origin, 50%) - var(--goo-slider-value-pct)),
+		calc(var(--goo-slider-value-pct) - var(--goo-slider-fill-origin, 50%))
+	);
+	transition:
+		width var(--goo-slider-motion-normal),
+		inset-inline-start var(--goo-slider-motion-normal);
+}
 
 [dir='rtl'] .goo-slider.goo-slider--opacity .goo-slider__track::after {
 	background: linear-gradient(to left, transparent 0%, var(--goo-slider-opacity-color) 100%);

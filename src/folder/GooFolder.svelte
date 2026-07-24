@@ -167,8 +167,9 @@ $effect(assignApi)
 			onclick={handleHeaderClick}
 		>
 			<span bind:this={chevronElement} class="goo-folder__chevron">
-				<svg class="goo-folder__chevron-icon" width="12" height="12" viewBox="0 0 12 12">
-					<path d="M4 2L8 6L4 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+				<!-- Lucide chevron-right, matching popout trigger arrows. -->
+				<svg class="goo-folder__chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+					<path d="m9 18 6-6-6-6"/>
 				</svg>
 			</span>
 			<span bind:this={titleElement} class="goo-folder__title">{title}</span>

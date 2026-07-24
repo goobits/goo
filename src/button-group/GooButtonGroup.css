@@ -172,36 +172,97 @@
 	border-radius: var(--goo-button-group-radius);
 }
 
-/* Selected state - use !important to override base button gradient */
+/* Selected state - !important overrides the base button gradient. The
+   segment's own surface stays clear: horizontal multi-select paints a
+   per-segment indicator pill (below); single-select uses the sliding
+   group indicator. */
 .goo-button-group > .goo-button.goo-button--selected,
 .goo-button-group > .goo-button[selected] {
-	background: var(--goo-button-group-selected-bg) !important;
+	background: transparent !important;
 	color: var(--goo-button-group-selected-fg);
 }
 
-.goo-button-group.goo-button-group--single-select > .goo-button.goo-button--selected,
-.goo-button-group.goo-button-group--single-select > .goo-button[selected] {
-	background: transparent !important;
-}
-
-/* Selected + hover - must use higher specificity to override base button hover */
 .goo-button-group > .goo-button.goo-button--selected:hover:not([disabled]),
 .goo-button-group > .goo-button[selected]:hover:not([disabled]) {
-	background: var(--goo-button-group-selected-bg-hover) !important;
+	background: transparent !important;
 	color: var(--goo-button-group-selected-fg);
 }
 
-.goo-button-group.goo-button-group--single-select
-	> .goo-button.goo-button--selected:hover:not([disabled]),
-.goo-button-group.goo-button-group--single-select > .goo-button[selected]:hover:not([disabled]) {
-	background: transparent !important;
-	color: var(--goo-button-group-selected-fg);
+/* Multi-select selection: each selected segment paints the same indicator
+   pill the single-select group slides - same inset, radius, and ring vars.
+   Adjacent selections fuse into one continuous pill: touching sides drop
+   their radii and the ring keeps only its outer edges. */
+.goo-button-group:not(.goo-button-group--single-select):not([data-layout='vertical'])
+	> .goo-button:is(.goo-button--selected, [selected])::before {
+	content: '';
+	position: absolute;
+	inset: var(--goo-button-group-indicator-inset-block) 0;
+	z-index: -1;
+	border-radius: var(--goo-button-group-indicator-radius);
+	background: var(--goo-button-group-selected-bg);
+	box-shadow: inset 0 0 0 1px var(--goo-button-group-indicator-ring);
+	pointer-events: none;
+	transition: background-color var(--goo-button-group-motion-fast);
+}
+
+.goo-button-group:not(.goo-button-group--single-select):not([data-layout='vertical'])
+	> .goo-button:is(.goo-button--selected, [selected]):hover:not([disabled])::before {
+	background: var(--goo-button-group-selected-bg-hover);
+}
+
+.goo-button-group:not(.goo-button-group--single-select):not([data-layout='vertical'])
+	> .goo-button:is(.goo-button--selected, [selected])
+	+ .goo-button:is(.goo-button--selected, [selected])::before {
+	border-start-start-radius: 0;
+	border-end-start-radius: 0;
+	box-shadow:
+		inset 0 1px 0 0 var(--goo-button-group-indicator-ring),
+		inset 0 -1px 0 0 var(--goo-button-group-indicator-ring),
+		inset -1px 0 0 0 var(--goo-button-group-indicator-ring);
+}
+
+.goo-button-group:not(.goo-button-group--single-select):not([data-layout='vertical'])
+	> .goo-button:is(.goo-button--selected, [selected]):has(
+		+ .goo-button:is(.goo-button--selected, [selected])
+	)::before {
+	border-start-end-radius: 0;
+	border-end-end-radius: 0;
+	box-shadow:
+		inset 0 1px 0 0 var(--goo-button-group-indicator-ring),
+		inset 0 -1px 0 0 var(--goo-button-group-indicator-ring),
+		inset 1px 0 0 0 var(--goo-button-group-indicator-ring);
+}
+
+.goo-button-group:not(.goo-button-group--single-select):not([data-layout='vertical'])
+	> .goo-button:is(.goo-button--selected, [selected])
+	+ .goo-button:is(.goo-button--selected, [selected]):has(
+		+ .goo-button:is(.goo-button--selected, [selected])
+	)::before {
+	box-shadow:
+		inset 0 1px 0 0 var(--goo-button-group-indicator-ring),
+		inset 0 -1px 0 0 var(--goo-button-group-indicator-ring);
+}
+
+/* Vertical multi-select keeps the flat fill; the pill's fusion logic is
+   horizontal. */
+.goo-button-group[data-layout='vertical']:not(.goo-button-group--single-select)
+	> .goo-button.goo-button--selected,
+.goo-button-group[data-layout='vertical']:not(.goo-button-group--single-select)
+	> .goo-button[selected] {
+	background: var(--goo-button-group-selected-bg) !important;
+}
+
+.goo-button-group[data-layout='vertical']:not(.goo-button-group--single-select)
+	> .goo-button:is(.goo-button--selected, [selected]):hover:not([disabled]) {
+	background: var(--goo-button-group-selected-bg-hover) !important;
 }
 
 /* Focused state (keyboard nav). The --focused class tracks the roving
    tabindex at all times, so gate the ring on the group actually holding
-   focus; otherwise every group paints a ring on its selected segment at rest. */
-.goo-button-group:focus-within > .goo-button.goo-button--focused {
+   focus; otherwise every group paints a ring on its selected segment at rest.
+   The :focus-visible gate keeps pointer clicks ring-free; roving-tabindex
+   script focus inherits keyboard visibility, so arrow nav still shows it. */
+.goo-button-group:focus-within > .goo-button.goo-button--focused:focus-visible {
 	box-shadow: inset 0 0 0 2px var(--goo-theme-focus-ring);
 }
 

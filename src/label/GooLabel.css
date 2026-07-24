@@ -130,6 +130,12 @@
 	z-index: 1;
 }
 
+/* Label-less fields set [hidden]; inline-block above would otherwise win
+   over the UA hidden rule and leave an empty label line. */
+.goo-field__label[hidden] {
+	display: none;
+}
+
 .goo-field__label a {
 	pointer-events: all;
 }

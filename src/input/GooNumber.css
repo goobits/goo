@@ -15,6 +15,7 @@
 	--goo-number-change-pulse: color-mix(in srgb, var(--goo-number-border-focus) 18%, transparent);
 	--goo-number-fg: var(--goo-theme-fg);
 	--goo-number-unit-fg: color-mix(in srgb, var(--goo-number-fg) 58%, transparent);
+	--goo-number-unit-font-size: 1em;
 	/* Typed zeros: these feed calc() sums with lengths, and a unitless 0 makes
 	   the whole declaration invalid (text stops reserving stepper/unit space). */
 	--goo-number-unit-width: 0em;
@@ -180,6 +181,7 @@
 	box-sizing: border-box;
 	color: var(--goo-number-unit-fg);
 	font: inherit;
+	font-size: var(--goo-number-unit-font-size);
 	line-height: inherit;
 	pointer-events: none;
 	transition:
