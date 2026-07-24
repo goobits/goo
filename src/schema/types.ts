@@ -56,8 +56,37 @@ export interface GooSchemaChoiceOption {
 
 export type GooSchemaChangeHandler = (path: string, value: unknown) => void
 
+/** Built-in actions a schema or folder may expose. */
+export interface GooSchemaActionOptions {
+	/** Track committed values and expose Undo, with Redo while Alt is held. */
+	history?: boolean
+
+	/** Reset values from the schema's existing defaults object. */
+	reset?: boolean
+}
+
+/** Source of a final schema data transaction. */
+export type GooSchemaCommitReason = 'change' | 'preset' | 'redo' | 'reset' | 'undo'
+
+/** One atomic schema mutation emitted to a host. */
+export interface GooSchemaCommitDetail {
+	data: GooSchemaData
+	paths: string[]
+	reason: GooSchemaCommitReason
+	scope: string
+}
+
+/** Programmatic final-transaction handler. */
+export type GooSchemaCommitHandler = (detail: GooSchemaCommitDetail) => void
+
+/** Normalize a field-driven transaction before GooSchema records it. */
+export type GooSchemaCommitNormalizer = (
+	data: GooSchemaData,
+	paths: readonly string[]
+) => GooSchemaData | void
+
 /** Programmatic data update source for schema refresh behavior. */
-export type GooSchemaDataUpdateReason = 'preset' | 'reset' | 'sync'
+export type GooSchemaDataUpdateReason = GooSchemaCommitReason | 'sync'
 
 /** Options for applying schema data without rebuilding the schema. */
 export interface GooSchemaDataUpdateOptions {
@@ -66,6 +95,18 @@ export interface GooSchemaDataUpdateOptions {
 
 	/** Semantic source of the data update. */
 	reason?: GooSchemaDataUpdateReason
+}
+
+/** Options for committing externally controlled schema data into history. */
+export interface GooSchemaCommitOptions {
+	/** Briefly mark controls whose displayed values changed. */
+	animate?: boolean
+
+	/** Semantic source of the transaction. */
+	reason?: GooSchemaCommitReason
+
+	/** Optional action scope; defaults to the whole schema. */
+	scope?: string
 }
 
 export type GooSchemaCondition = string | {
@@ -251,8 +292,14 @@ export interface GooSchemaField {
 export interface GooSchemaFolder {
 	type: 'folder'
 
+	/** Optional stable identifier for scoped actions and automation. */
+	id?: string
+
 	/** Folder title. */
 	title: string
+
+	/** Override the host's default folder actions, or disable them. */
+	actions?: false | GooSchemaActionOptions
 
 	/** Additional classes for the folder element. */
 	className?: string
@@ -353,6 +400,12 @@ export interface GooSchemaOptions {
 	/** Default data used by the reset action. */
 	defaults?: GooSchemaData
 
+	/** Actions exposed for the whole schema. */
+	actions?: GooSchemaActionOptions
+
+	/** Default actions inherited by schema folders. */
+	folderActions?: GooSchemaActionOptions
+
 	/** Named data presets the schema can apply. */
 	presets?: GooSchemaPreset[]
 
@@ -364,6 +417,12 @@ export interface GooSchemaOptions {
 
 	/** Programmatic change handler. */
 	onchange?: GooSchemaChangeHandler
+
+	/** Programmatic final-transaction handler. */
+	oncommit?: GooSchemaCommitHandler
+
+	/** Normalize field-driven data before it enters history. */
+	normalizeCommit?: GooSchemaCommitNormalizer
 
 	/** Programmatic reset handler. */
 	onreset?: (data: GooSchemaData) => void
@@ -393,6 +452,12 @@ export interface GooSchemaState {
 
 	/** Default data used by the reset action. */
 	defaults?: GooSchemaData
+
+	/** Actions exposed for the whole schema. */
+	actions?: GooSchemaActionOptions
+
+	/** Default actions inherited by schema folders. */
+	folderActions?: GooSchemaActionOptions
 
 	/** Named data presets the schema can apply. */
 	presets?: GooSchemaPreset[]

@@ -419,6 +419,42 @@ describe('GooSchema', () => {
 		expect(slider?.getAttribute('aria-valuenow')).toBe('24')
 	})
 
+	it('preserves history when a controlled host echoes a committed value', async() => {
+		const schema = [ { path: 'size', min: 0, max: 100 } ]
+		const actions = { history: true }
+		let instance: ReturnType<typeof createGooSchema> | null = null
+		const { rerender } = render(GooSchema, {
+			props: {
+				schema,
+				data: { size: 12 },
+				actions,
+				bare: true,
+				get instance() {
+					return instance
+				},
+				set instance(value) {
+					instance = value
+				}
+			}
+		})
+		await settleGooSchema()
+
+		instance?.commitData({ size: 24 })
+		expect(instance?.canUndo()).toBe(true)
+
+		await rerender({
+			schema,
+			data: { size: 24 },
+			actions,
+			bare: true
+		})
+		await settleGooSchema()
+
+		expect(instance?.canUndo()).toBe(true)
+		instance?.undo()
+		expect(instance?.getData().size).toBe(12)
+	})
+
 	it('preserves folder state and focus across structurally equal schema props', async() => {
 		const createSchema = () => [ {
 			type: 'folder' as const,
@@ -682,6 +718,238 @@ describe('GooSchema', () => {
 		expect(schema.getData()).toEqual({ size: 12 })
 		expect(onreset).toHaveBeenCalledWith({ size: 12 })
 		expect(reset?.disabled).toBe(true)
+	})
+
+	it('preserves data outside the defaults shape during reset', async() => {
+		const schema = createGooSchema({
+			actions: { reset: true },
+			schema: [ { path: 'style.opacity', min: 0, max: 1 } ],
+			data: {
+				__ui: { mode: 'vector' },
+				style: { opacity: 0.5, runtimeOnly: true }
+			},
+			defaults: { style: { opacity: 1 } },
+			bare: true
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+
+		schema.reset()
+
+		expect(schema.getData()).toEqual({
+			__ui: { mode: 'vector' },
+			style: { opacity: 1, runtimeOnly: true }
+		})
+		expect(schema.querySelector<HTMLButtonElement>('[data-action="reset"]')?.disabled).toBe(true)
+	})
+
+	it('keeps schema Reset, Undo, and Alt-Redo in one history', async() => {
+		const commits: string[] = []
+		const schema = createGooSchema({
+			actions: { history: true, reset: true },
+			schema: [ {
+				path: 'size',
+				type: 'self-contained-input'
+			} ],
+			data: { size: 12 },
+			defaults: { size: 6 },
+			bare: true,
+			controlTypes: {
+				'self-contained-input': selfContainedInputControlType
+			},
+			oncommit: detail => commits.push(detail.reason)
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+
+		const increment = await waitForSchemaElement<HTMLButtonElement>(
+			schema,
+			'.self-contained-change-control'
+		)
+		increment.click()
+		await settleGooSchema()
+		expect(schema.getData().size).toBe(14)
+
+		const undo = schema.querySelector<HTMLButtonElement>(
+			'.goo-schema__scope-actions[data-scope="schema"] [data-action="undo"]'
+		)
+		expect(undo?.disabled).toBe(false)
+		undo?.click()
+		expect(schema.getData().size).toBe(12)
+
+		window.dispatchEvent(new KeyboardEvent('keydown', {
+			altKey: true,
+			key: 'Alt'
+		}))
+		expect(undo?.dataset.action).toBe('redo')
+		undo?.click()
+		expect(schema.getData().size).toBe(14)
+		window.dispatchEvent(new KeyboardEvent('keyup', { key: 'Alt' }))
+
+		schema.querySelector<HTMLButtonElement>(
+			'.goo-schema__scope-actions[data-scope="schema"] [data-action="reset"]'
+		)?.click()
+		expect(schema.getData().size).toBe(6)
+		undo?.click()
+		expect(schema.getData().size).toBe(14)
+		expect(commits).toEqual([ 'change', 'undo', 'redo', 'reset', 'undo' ])
+	})
+
+	it('normalizes field commits before recording their history snapshot', async() => {
+		const schema = createGooSchema({
+			actions: { history: true },
+			schema: [ {
+				path: 'size',
+				type: 'self-contained-input'
+			} ],
+			data: { size: 12 },
+			bare: true,
+			controlTypes: {
+				'self-contained-input': selfContainedInputControlType
+			},
+			normalizeCommit: data => ({
+				...data,
+				size: Number(data.size) * 2
+			})
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+
+		;(await waitForSchemaElement<HTMLButtonElement>(
+			schema,
+			'.self-contained-change-control'
+		)).click()
+
+		expect(schema.getData().size).toBe(28)
+		schema.undo()
+		expect(schema.getData().size).toBe(12)
+	})
+
+	it('keeps generic schema actions docked through rebuilds', async() => {
+		const actionsTarget = document.createElement('div')
+		const schema = createGooSchema({
+			actions: { history: true, reset: true },
+			schema: [ { path: 'size', min: 0, max: 100 } ],
+			data: { size: 12 },
+			defaults: { size: 6 },
+			bare: true
+		})
+		document.body.append(actionsTarget, schema)
+		await settleGooSchema()
+
+		schema.setActionsTarget(actionsTarget)
+		expect(schema.getActionsElement()?.parentElement).toBe(actionsTarget)
+
+		schema.setOptions({ showPanelHeader: false })
+		await settleGooSchema()
+		expect(schema.getActionsElement()?.parentElement).toBe(actionsTarget)
+
+		schema.destroy()
+		expect(actionsTarget.childElementCount).toBe(0)
+	})
+
+	it('scopes folder Reset, Undo, and Alt-Redo to descendant paths', async() => {
+		const schema = createGooSchema({
+			actions: { history: true },
+			folderActions: { history: true, reset: true },
+			schema: [
+				{
+					type: 'folder',
+					title: 'Style',
+					open: true,
+					children: [ { path: 'style.opacity', min: 0, max: 1 } ]
+				},
+				{
+					type: 'folder',
+					title: 'Shape',
+					open: true,
+					children: [ { path: 'shape.size', min: 0, max: 100 } ]
+				}
+			],
+			data: {
+				shape: { size: 10 },
+				style: { opacity: 0.5 }
+			},
+			defaults: {
+				shape: { size: 5 },
+				style: { opacity: 1 }
+			},
+			bare: true
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+
+		const styleFolder = await waitForSchemaElement<HTMLElement>(
+			schema,
+			'.goo-folder[data-goo-schema-scope^="folder:Style:"]'
+		)
+		schema.commitData({
+			shape: { size: 10 },
+			style: { opacity: 0.75 }
+		})
+		schema.commitData({
+			shape: { size: 20 },
+			style: { opacity: 0.75 }
+		})
+
+		const history = styleFolder.querySelector<HTMLButtonElement>(
+			'[data-action="undo"]'
+		)
+		expect(history).not.toBeNull()
+		expect(schema.canUndo(styleFolder.dataset.gooSchemaScope)).toBe(true)
+		history!.click()
+		expect(schema.getData()).toEqual({
+			shape: { size: 20 },
+			style: { opacity: 0.5 }
+		})
+
+		window.dispatchEvent(new KeyboardEvent('keydown', {
+			altKey: true,
+			key: 'Alt'
+		}))
+		history!.click()
+		expect(schema.getData()).toEqual({
+			shape: { size: 20 },
+			style: { opacity: 0.75 }
+		})
+		window.dispatchEvent(new KeyboardEvent('keyup', { key: 'Alt' }))
+
+		styleFolder.querySelector<HTMLButtonElement>('[data-action="reset"]')?.click()
+		expect(schema.getData()).toEqual({
+			shape: { size: 20 },
+			style: { opacity: 1 }
+		})
+		history!.click()
+		expect(schema.getData()).toEqual({
+			shape: { size: 20 },
+			style: { opacity: 0.75 }
+		})
+	})
+
+	it('preserves folder history while the schema rebuilds', async() => {
+		const scopeId = 'style'
+		const schema = createGooSchema({
+			actions: { history: true },
+			folderActions: { history: true },
+			schema: [ {
+				type: 'folder',
+				id: scopeId,
+				title: 'Style',
+				children: [ { path: 'style.opacity', min: 0, max: 1 } ]
+			} ],
+			data: { style: { opacity: 0.5 } },
+			bare: true
+		})
+		document.body.appendChild(schema)
+		await waitForSchemaElement(schema, '[data-goo-schema-scope="style"]')
+
+		schema.commitData({ style: { opacity: 0.75 } })
+		schema.setOptions({ showPanelHeader: false })
+		await settleGooSchema()
+
+		expect(schema.canUndo(scopeId)).toBe(true)
+		schema.undo(scopeId)
+		expect(schema.getData()).toEqual({ style: { opacity: 0.5 } })
 	})
 
 	it('applies named schema presets and emits preset events', async() => {

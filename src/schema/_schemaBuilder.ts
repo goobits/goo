@@ -14,13 +14,20 @@ import {
 import { createFolder, type GooFolderElement } from '../folder/_createFolder.ts'
 import { createPanel } from '../panel/_createPanel.ts'
 import { schemaLog as log } from '../support/utils/logger.ts'
-import { appendSchemaActions, updateSchemaActionState } from './_schemaActions.ts'
+import {
+	appendSchemaActions,
+	createSchemaScopeActions,
+	resolveSchemaFolderActions,
+	type SchemaActionView,
+	updateSchemaActionState
+} from './_schemaActions.ts'
 import {
 	cloneSchemaValue,
 	getSchemaVisibilitySignature,
 	isSchemaValueEqual,
 	schemaHasConditions as hasSchemaConditions
 } from './_schemaData.ts'
+import type { SchemaHistory, SchemaHistoryScope } from './_schemaHistory.ts'
 import { localizeSchemaText } from './_schemaText.ts'
 import { shouldRenderSchemaNode } from './fieldConditions.ts'
 import { isFullBleedField, isSelfContainedField } from './fieldLayout.ts'
@@ -29,6 +36,7 @@ import { buildControllerOptions, type ControllerOptions } from './schemaFieldBui
 import { createSchemaHeading } from './schemaHeading.ts'
 import type {
 	GooSchemaChangeHandler,
+	GooSchemaCommitReason,
 	GooSchemaData,
 	GooSchemaDataUpdateOptions,
 	GooSchemaField,
@@ -51,13 +59,24 @@ export type GooSchemaController = (HTMLElement | SvelteControlHost) & {
 }
 
 export type GooSchemaBuildElement = HTMLElement & {
+	_actionViews: Map<string, SchemaActionView>
+	_actionsTarget: HTMLElement | null
+	_applyHistory(scopeId: string, direction: 'redo' | 'undo'): void
+	_applyPreset(preset: GooSchemaPreset): void
+	_beginScopeBuild(): void
 	_changeHandler: GooSchemaChangeHandler | null
+	_commitMutation(paths: readonly string[], reason: GooSchemaCommitReason, scopeId?: string): void
 	_controllers: Map<string, GooSchemaController>
 	_data: GooSchemaData
 	_destroyed: boolean
+	_finishScopeBuild(): void
+	_history: SchemaHistory
 	_onpreset: ((preset: GooSchemaPreset) => void) | null
 	_onreset: ((data: GooSchemaData) => void) | null
+	_registerScope(scope: SchemaHistoryScope): void
+	_redoMode: boolean
 	_rebuildToken: number
+	_resetScope(scopeId: string): void
 	_root: HTMLElement | null
 	_toolbar: HTMLElement | null
 	_visibilitySignature: string
@@ -76,7 +95,12 @@ export async function rebuildSchema(element: GooSchemaBuildElement): Promise<voi
 	if (element._destroyed) return
 	const token = ++element._rebuildToken
 
+	element._beginScopeBuild()
+	element._actionViews.clear()
 	destroySchemaControllers(element)
+	if (element._toolbar && !element.contains(element._toolbar)) {
+		element._toolbar.remove()
+	}
 	element.replaceChildren()
 	element._root = null
 	element._toolbar = null
@@ -115,7 +139,13 @@ export async function rebuildSchema(element: GooSchemaBuildElement): Promise<voi
 	if (element._root) {
 		element.appendChild(element._root)
 	}
+	if (element._actionsTarget) {
+		element._actionsTarget.replaceChildren()
+		if (element._toolbar) element._actionsTarget.appendChild(element._toolbar)
+	}
+	element._finishScopeBuild()
 	element._visibilitySignature = getSchemaVisibilitySignature(element)
+	updateSchemaActionState(element)
 }
 
 export function destroySchemaControllers(element: GooSchemaBuildElement): void {
@@ -324,11 +354,22 @@ async function buildFolder(
 	token: number
 ): Promise<void> {
 	if (token !== element._rebuildToken) return
+	const paths = collectSchemaFieldPaths(node.children)
+	const scopeId = node.id ?? createFolderScopeId(node, paths)
+	const actions = resolveSchemaFolderActions(element.state, node)
+	element._registerScope({
+		history: Boolean(actions.history),
+		id: scopeId,
+		paths
+	})
+	const headerActions = createSchemaScopeActions(element, scopeId, actions)
 	const folder: GooFolderElement = createFolder({
 		title: localizeSchemaText(node.title) ?? node.title,
 		open: node.open ?? false,
-		className: mergeClassNames(element.state.folderClassName, node.className)
+		className: mergeClassNames(element.state.folderClassName, node.className),
+		headerActions: headerActions ?? undefined
 	})
+	folder.dataset.gooSchemaScope = scopeId
 
 	await buildNodes(element, node.children, folder, token)
 
@@ -400,10 +441,10 @@ async function buildField(
 	}
 
 	controllerOptions.onchange = (value: unknown) => {
+		element._commitMutation([ node.path ], 'change')
 		const detail = { path: node.path, value, data: element._data }
 		element.dispatchEvent(new CustomEvent('change', { detail, bubbles: true }))
 		element._changeHandler?.(node.path, value)
-		updateSchemaAfterDataMutation(element)
 	}
 
 	controllerOptions.oninput = (value: unknown) => {
@@ -429,10 +470,10 @@ async function buildDirectSchemaField(
 ): Promise<void> {
 	const handleChange = (value: unknown) => {
 		object[property] = value
+		element._commitMutation([ node.path ], 'change')
 		const detail = { path: node.path, value, data: element._data }
 		element.dispatchEvent(new CustomEvent('change', { detail, bubbles: true }))
 		element._changeHandler?.(node.path, value)
-		updateSchemaAfterDataMutation(element)
 	}
 	const handleInput = (value: unknown) => {
 		object[property] = value
@@ -542,10 +583,10 @@ async function buildSelfContainedField(
 	if (token !== element._rebuildToken) return
 	const handleChange = (value: unknown) => {
 		object[property] = value
+		element._commitMutation([ node.path ], 'change')
 		const detail = { path: node.path, value, data: element._data }
 		element.dispatchEvent(new CustomEvent('change', { detail, bubbles: true }))
 		element._changeHandler?.(node.path, value)
-		updateSchemaAfterDataMutation(element)
 	}
 
 	const handleInput = (value: unknown) => {
@@ -612,4 +653,23 @@ function mergeClassNames(...values: Array<string | undefined>): string | undefin
 		.filter(Boolean)
 		.join(' ')
 	return className || undefined
+}
+
+function collectSchemaFieldPaths(nodes: readonly GooSchemaNode[]): string[] {
+	const paths: string[] = []
+	for (const node of nodes) {
+		if ('children' in node && node.type === 'folder') {
+			paths.push(...collectSchemaFieldPaths(node.children))
+		} else if ('path' in node) {
+			paths.push(node.path)
+		}
+	}
+	return [ ...new Set(paths) ]
+}
+
+function createFolderScopeId(
+	node: GooSchemaFolder,
+	paths: readonly string[]
+): string {
+	return `folder:${ node.title }:${ paths.join('|') }`
 }

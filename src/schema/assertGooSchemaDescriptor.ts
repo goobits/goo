@@ -12,7 +12,10 @@ const FIELD_KEYS = new Set([
 	'ariaLabel', 'class', 'dataParam', 'id', 'items', 'popoutClass', 'tabIndex',
 	'controlOptions', 'if', 'unless', 'layout', 'dock', 'disabled', 'selfContained'
 ])
-const FOLDER_KEYS = new Set([ 'type', 'title', 'className', 'open', 'children', 'if', 'unless' ])
+const FOLDER_KEYS = new Set([
+	'type', 'id', 'title', 'actions', 'className', 'open', 'children', 'if', 'unless'
+])
+const ACTION_KEYS = new Set([ 'history', 'reset' ])
 const NOTE_KEYS = new Set([ 'type', 'text', 'className', 'if', 'unless' ])
 const HEADING_KEYS = new Set([ 'type', 'text', 'icon', 'className', 'if', 'unless' ])
 const WIDGET_KEYS = new Set([
@@ -129,7 +132,14 @@ function assertNode(node: Record<string, unknown>, path: string): void {
 
 function assertFolder(folder: Record<string, unknown>, path: string): void {
 	assertKnownKeys(folder, FOLDER_KEYS, path, 'folder')
+	assertOptionalString(folder, 'id', path)
 	expectNonEmptyString(folder.title, `${ path }.title`)
+	if (folder.actions !== undefined && folder.actions !== false) {
+		const actions = expectRecord(folder.actions, `${ path }.actions`)
+		assertKnownKeys(actions, ACTION_KEYS, `${ path }.actions`, 'folder actions')
+		assertOptionalBoolean(actions, 'history', `${ path }.actions`)
+		assertOptionalBoolean(actions, 'reset', `${ path }.actions`)
+	}
 	assertOptionalString(folder, 'className', path)
 	assertOptionalBoolean(folder, 'open', path)
 	assertConditions(folder, path)

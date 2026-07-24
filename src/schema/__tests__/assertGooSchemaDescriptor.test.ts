@@ -10,7 +10,9 @@ describe('assertGooSchemaDescriptor', () => {
 			children: [
 				{
 					type: 'folder',
+					id: 'stroke',
 					title: 'Stroke',
+					actions: { history: true, reset: true },
 					children: [ {
 						path: 'size',
 						type: 'slider-field',
@@ -77,5 +79,12 @@ describe('assertGooSchemaDescriptor', () => {
 			path: 'mode',
 			options: [ { id: 'draw', label: 'Draw', component: 'legacy' } ]
 		})).toThrow("schema.options[0].component': is not a declared GooSchema choice option key")
+
+		expect(() => assertGooSchemaDescriptor({
+			type: 'folder',
+			title: 'Style',
+			actions: { legacyUndo: true },
+			children: []
+		})).toThrow("schema.actions.legacyUndo': is not a declared GooSchema folder actions key")
 	})
 })

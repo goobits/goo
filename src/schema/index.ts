@@ -5,8 +5,16 @@
 
 export { default as GooSchema } from './GooSchema.svelte'
 export type {
+	GooSchemaActionOptions,
 	GooSchemaChangeHandler,
 	GooSchemaChoiceOption,
+	GooSchemaCommitDetail,
+	GooSchemaCommitEvent,
+	GooSchemaCommitEventDetail,
+	GooSchemaCommitHandler,
+	GooSchemaCommitNormalizer,
+	GooSchemaCommitOptions,
+	GooSchemaCommitReason,
 	GooSchemaControlOptions,
 	GooSchemaControlType,
 	GooSchemaData,

@@ -48,7 +48,7 @@ export function cloneSchemaData(data: GooSchemaData): GooSchemaData {
 
 export function cloneSchemaValue(value: unknown): unknown {
 	if (Array.isArray(value)) return value.map(cloneSchemaValue)
-	if (isPlainRecord(value)) {
+	if (isSchemaRecord(value)) {
 		return Object.fromEntries(Object.entries(value).map(([ key, child ]) => [ key, cloneSchemaValue(child) ]))
 	}
 	return value
@@ -63,6 +63,13 @@ function isPlainRecord(value: unknown): value is GooSchemaData {
 		&& typeof value === 'object'
 		&& !Array.isArray(value)
 		&& Object.getPrototypeOf(value) === Object.prototype
+}
+
+function isSchemaRecord(value: unknown): value is GooSchemaData {
+	return Boolean(value)
+		&& typeof value === 'object'
+		&& !Array.isArray(value)
+		&& !(typeof Element !== 'undefined' && value instanceof Element)
 }
 
 function nodeHasConditions(node: GooSchemaNode): boolean {
@@ -116,8 +123,8 @@ export function isSchemaValueEqual(left: unknown, right: unknown): boolean {
 		if (!Array.isArray(left) || !Array.isArray(right) || left.length !== right.length) return false
 		return left.every((value, index) => isSchemaValueEqual(value, right[index]))
 	}
-	if (isPlainRecord(left) || isPlainRecord(right)) {
-		if (!isPlainRecord(left) || !isPlainRecord(right)) return false
+	if (isSchemaRecord(left) || isSchemaRecord(right)) {
+		if (!isSchemaRecord(left) || !isSchemaRecord(right)) return false
 		const leftKeys = Object.keys(left)
 		const rightKeys = Object.keys(right)
 		if (leftKeys.length !== rightKeys.length) return false

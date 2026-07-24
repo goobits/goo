@@ -4,6 +4,9 @@
 		createGooSchema,
 		type GooSchema,
 		type GooSchemaChangeHandler,
+		type GooSchemaCommitEvent,
+		type GooSchemaCommitHandler,
+		type GooSchemaCommitOptions,
 		type GooSchemaData,
 		type GooSchemaDataUpdateOptions,
 		type GooSchemaEvent,
@@ -15,20 +18,26 @@
 	} from './GooSchema.ts'
 
 	type GooSchemaDomEventHandler = (event: GooSchemaEvent) => void
+	type GooSchemaCommitDomEventHandler = (event: GooSchemaCommitEvent) => void
 	type GooSchemaPresetDomEventHandler = (event: GooSchemaPresetEvent) => void
 	type GooSchemaResetDomEventHandler = (event: GooSchemaResetEvent) => void
 
-	type GooSchemaProps = GooSchemaOptions & {
+	type GooSchemaProps = Omit<
+		GooSchemaOptions,
+		'onchange' | 'oncommit' | 'onpreset' | 'onreset'
+	> & {
 		schema: GooSchemaType
 		data: GooSchemaData
 		class?: string
 		style?: string
 		instance?: GooSchema | null
 		onchange?: GooSchemaDomEventHandler
+		oncommit?: GooSchemaCommitDomEventHandler
 		oninput?: GooSchemaDomEventHandler
 		onpreset?: GooSchemaPresetDomEventHandler
 		onreset?: GooSchemaResetDomEventHandler
 		valuechange?: GooSchemaChangeHandler
+		valuecommit?: GooSchemaCommitHandler
 	}
 
 	let host: HTMLDivElement | null = $state(null)
@@ -41,7 +50,10 @@
 	let lastDefaults: GooSchemaData | undefined
 	let lastDefaultsKey: string | null = null
 	let lastPresets: GooSchemaOptions['presets'] | undefined
+	let lastActions: GooSchemaOptions['actions'] | undefined
 	let lastActivePresetId: string | null | undefined
+	let lastFolderActions: GooSchemaOptions['folderActions'] | undefined
+	let lastNormalizeCommit: GooSchemaOptions['normalizeCommit'] | undefined
 	let lastShowReset: boolean | undefined
 	let lastBare: boolean | undefined
 	let lastShowPanelHeader: boolean | undefined
@@ -49,12 +61,15 @@
 	let lastControlTypes: GooSchemaOptions['controlTypes'] | undefined
 
 	type GooSchemaPropsSnapshot = {
+		actions: GooSchemaOptions['actions'] | undefined
 		bare: boolean
 		className: string
 		controlTypes: GooSchemaOptions['controlTypes'] | undefined
 		data: GooSchemaData
 		defaults: GooSchemaData | undefined
 		folderClassName: string | undefined
+		folderActions: GooSchemaOptions['folderActions'] | undefined
+		normalizeCommit: GooSchemaOptions['normalizeCommit'] | undefined
 		presets: GooSchemaOptions['presets'] | undefined
 		activePresetId: string | null | undefined
 		schema: GooSchemaType
@@ -62,6 +77,7 @@
 		showReset: boolean | undefined
 		style: string | undefined
 		valuechange: GooSchemaChangeHandler | undefined
+		valuecommit: GooSchemaCommitHandler | undefined
 	}
 
 	let {
@@ -70,36 +86,45 @@
 		defaults,
 		presets,
 		activePresetId,
+		actions,
 		showReset,
 		bare = false,
 		showPanelHeader = true,
 		folderClassName,
+		folderActions,
+		normalizeCommit,
 		controlTypes,
 		class: className = '',
 		style,
 		instance = $bindable<GooSchema | null>(null),
 		onchange,
+		oncommit,
 		oninput,
 		onpreset,
 		onreset,
-		valuechange
+		valuechange,
+		valuecommit
 	}: GooSchemaProps = $props()
 
 	function snapshotProps(): GooSchemaPropsSnapshot {
 		return {
+			actions,
 			bare,
 			className,
 			controlTypes,
 			data,
 			defaults,
 			folderClassName,
+			folderActions,
+			normalizeCommit,
 			presets,
 			activePresetId,
 			schema,
 			showPanelHeader,
 			showReset,
 			style,
-			valuechange
+			valuechange,
+			valuecommit
 		}
 	}
 
@@ -155,6 +180,11 @@
 		oninput?.(event as GooSchemaEvent)
 	}
 
+	function handleCommit(event: Event): void {
+		if (!isSchemaCommitEvent(event)) return
+		oncommit?.(event)
+	}
+
 	function handlePreset(event: Event): void {
 		if (!isSchemaPresetEvent(event)) return
 		onpreset?.(event)
@@ -170,6 +200,15 @@
 			event.target === schemaElement &&
 			event instanceof CustomEvent &&
 			typeof event.detail?.path === 'string'
+		)
+	}
+
+	function isSchemaCommitEvent(event: Event): event is GooSchemaCommitEvent {
+		return (
+			event.target === schemaElement &&
+			event instanceof CustomEvent &&
+			Array.isArray(event.detail?.paths) &&
+			typeof event.detail?.reason === 'string'
 		)
 	}
 
@@ -192,6 +231,7 @@
 
 	function destroySchema(): void {
 		schemaElement?.removeEventListener('change', handleChange)
+		schemaElement?.removeEventListener('commit', handleCommit)
 		schemaElement?.removeEventListener('input', handleInput)
 		schemaElement?.removeEventListener('preset', handlePreset)
 		schemaElement?.removeEventListener('reset', handleReset)
@@ -205,6 +245,7 @@
 		if (!target) return
 		destroySchema()
 		const nextSchemaElement = createGooSchema({
+			actions: snapshot.actions,
 			schema: snapshot.schema,
 			data: snapshot.data,
 			defaults: snapshot.defaults,
@@ -214,14 +255,18 @@
 			bare: snapshot.bare,
 			showPanelHeader: snapshot.showPanelHeader,
 			folderClassName: snapshot.folderClassName,
+			folderActions: snapshot.folderActions,
+			normalizeCommit: snapshot.normalizeCommit,
 			controlTypes: snapshot.controlTypes,
-			onchange: snapshot.valuechange
+			onchange: snapshot.valuechange,
+			oncommit: snapshot.valuecommit
 		})
 		schemaElement = nextSchemaElement
 		if (snapshot.className)
 			schemaElement.classList.add(...snapshot.className.split(' ').filter(Boolean))
 		if (snapshot.style) schemaElement.setAttribute('style', snapshot.style)
 		schemaElement.addEventListener('change', handleChange)
+		schemaElement.addEventListener('commit', handleCommit)
 		schemaElement.addEventListener('input', handleInput)
 		schemaElement.addEventListener('preset', handlePreset)
 		schemaElement.addEventListener('reset', handleReset)
@@ -233,7 +278,10 @@
 		lastDefaults = snapshot.defaults
 		lastDefaultsKey = getStructuralKey(snapshot.defaults)
 		lastPresets = snapshot.presets
+		lastActions = snapshot.actions
 		lastActivePresetId = snapshot.activePresetId
+		lastFolderActions = snapshot.folderActions
+		lastNormalizeCommit = snapshot.normalizeCommit
 		lastShowReset = snapshot.showReset
 		lastBare = snapshot.bare
 		lastShowPanelHeader = snapshot.showPanelHeader
@@ -252,7 +300,14 @@
 		lastSchema = snapshot.schema
 		lastSchemaKey = nextSchemaKey
 		if (nextDataKey !== lastDataKey) {
-			schemaElement.setData(snapshot.data)
+			if (nextDataKey === getDataKey(schemaElement.getData())) {
+				// Controlled hosts commonly echo a schema-owned commit back as
+				// a new data object. Refresh that shared value without rebasing
+				// the history transaction that produced it.
+				schemaElement.refreshConditions()
+			} else {
+				schemaElement.setData(snapshot.data)
+			}
 			lastDataKey = nextDataKey
 		}
 		const nextDefaultsKey = getStructuralKey(snapshot.defaults)
@@ -265,9 +320,21 @@
 			lastPresets = snapshot.presets
 			options.presets = snapshot.presets
 		}
+		if (snapshot.actions !== lastActions) {
+			lastActions = snapshot.actions
+			options.actions = snapshot.actions
+		}
 		if (snapshot.activePresetId !== lastActivePresetId) {
 			lastActivePresetId = snapshot.activePresetId
 			options.activePresetId = snapshot.activePresetId
+		}
+		if (snapshot.folderActions !== lastFolderActions) {
+			lastFolderActions = snapshot.folderActions
+			options.folderActions = snapshot.folderActions
+		}
+		if (snapshot.normalizeCommit !== lastNormalizeCommit) {
+			lastNormalizeCommit = snapshot.normalizeCommit
+			options.normalizeCommit = snapshot.normalizeCommit
 		}
 		if (snapshot.showReset !== lastShowReset) {
 			lastShowReset = snapshot.showReset
@@ -296,6 +363,26 @@
 
 	export function setData(nextData: GooSchemaData, options?: GooSchemaDataUpdateOptions): void {
 		schemaElement?.setData(nextData, options)
+	}
+
+	export function commitData(nextData: GooSchemaData, options?: GooSchemaCommitOptions): void {
+		schemaElement?.commitData(nextData, options)
+	}
+
+	export function undo(scopeId?: string): void {
+		schemaElement?.undo(scopeId)
+	}
+
+	export function redo(scopeId?: string): void {
+		schemaElement?.redo(scopeId)
+	}
+
+	export function reset(scopeId?: string): void {
+		schemaElement?.reset(scopeId)
+	}
+
+	export function setActionsTarget(target: HTMLElement | null): void {
+		schemaElement?.setActionsTarget(target)
 	}
 
 	export function getData(): GooSchemaData | undefined {

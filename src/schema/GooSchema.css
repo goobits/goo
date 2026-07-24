@@ -48,6 +48,13 @@
 	padding: 0 0 calc(var(--goo-theme-space-xs) + var(--goo-theme-space-2xs));
 }
 
+.goo-schema__scope-actions {
+	display: flex;
+	align-items: center;
+	flex: none;
+	gap: var(--goo-theme-space-2xs);
+}
+
 .goo-schema__note {
 	box-sizing: border-box;
 	margin: 0;
@@ -96,6 +103,7 @@
 }
 
 .goo-schema__preset-select,
+.goo-schema__action,
 .goo-schema__reset {
 	box-sizing: border-box;
 	height: var(--goo-schema-action-height, var(--goo-theme-control-height-sm));
@@ -120,16 +128,43 @@
 	cursor: pointer;
 }
 
+.goo-schema__action {
+	flex: 0 0 auto;
+	padding: 0 var(--goo-theme-space-sm);
+	cursor: pointer;
+}
+
+.goo-schema__action--icon {
+	display: grid;
+	place-items: center;
+	inline-size: var(--goo-schema-action-height, var(--goo-theme-control-height-sm));
+	padding: 0;
+}
+
+.goo-schema__action--icon svg {
+	inline-size: var(--goo-theme-icon-sm);
+	block-size: var(--goo-theme-icon-sm);
+}
+
+.goo-folder__header-actions .goo-schema__action {
+	height: var(--goo-theme-control-height-sm);
+	border-color: transparent;
+	background: transparent;
+}
+
+.goo-schema__action:hover:not(:disabled),
 .goo-schema__reset:hover:not(:disabled) {
 	background: color-mix(in srgb, var(--goo-theme-fg) 10%, transparent);
 }
 
+.goo-schema__action:disabled,
 .goo-schema__reset:disabled {
 	cursor: default;
 	opacity: 0.48;
 }
 
 .goo-schema__preset-select:focus-visible,
+.goo-schema__action:focus-visible,
 .goo-schema__reset:focus-visible {
 	outline: none;
 	box-shadow:
