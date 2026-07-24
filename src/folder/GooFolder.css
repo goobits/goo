@@ -91,7 +91,7 @@
 	align-items: center;
 	flex: none;
 	gap: var(--goo-theme-space-2xs);
-	margin-inline-end: calc(var(--goo-folder-chevron-size) + var(--goo-folder-header-padding-inline));
+	margin-inline-end: var(--goo-folder-header-padding-inline);
 }
 
 .goo-folder__header-actions:empty {
@@ -103,17 +103,13 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	position: absolute;
-	inset-block-start: 50%;
-	inset-inline-end: var(--goo-folder-header-padding-inline);
 	width: var(--goo-folder-chevron-size);
 	height: var(--goo-folder-chevron-size);
 	flex-shrink: 0;
 	border-radius: var(--goo-theme-radius-sm);
 	color: var(--goo-theme-muted);
-	transform: translateY(-50%);
+	transform: rotate(0deg);
 	transition:
-		background-color var(--goo-folder-transition),
 		color var(--goo-folder-transition),
 		transform var(--goo-folder-transition);
 }
@@ -126,7 +122,7 @@
 
 /* Rotate chevron when open - use direct child selectors for proper nesting */
 .goo-folder.goo-folder--open > .goo-folder__header-row > .goo-folder__header > .goo-folder__chevron {
-	transform: translateY(-50%) rotate(90deg);
+	transform: rotate(90deg);
 }
 
 /* Title */
@@ -134,7 +130,7 @@
 	order: 1;
 	flex: 1;
 	min-width: 0;
-	padding-inline-end: calc(var(--goo-folder-chevron-size) + var(--goo-theme-space-2xs));
+	padding-inline-end: var(--goo-theme-space-2xs);
 	font-size: var(--goo-theme-font-size-xs);
 	font-weight: var(--goo-theme-font-weight-medium);
 	text-transform: none;
@@ -145,13 +141,8 @@
 	text-overflow: ellipsis;
 }
 
-.goo-folder__header-row:has(.goo-folder__header-actions:not(:empty)) .goo-folder__title {
-	padding-inline-end: var(--goo-theme-space-2xs);
-}
-
 .goo-folder__header-row:hover > .goo-folder__header > .goo-folder__chevron,
 .goo-folder__header:focus-visible > .goo-folder__chevron {
-	background: color-mix(in srgb, var(--goo-theme-fg) 8%, transparent);
 	color: var(--goo-theme-fg);
 }
 
@@ -197,7 +188,9 @@
 	--goo-folder-inspector-active-bg: transparent;
 	/* The bracket is structure, not emphasis: it speaks the divider voice. */
 	--goo-folder-inspector-rail: var(--goo-theme-border-strong);
-	--goo-folder-chevron-icon-size: var(--goo-theme-icon-sm);
+	/* Match select and popout disclosure arrows. Compact editor affordances
+	   may use smaller icons, but primary control arrows share icon-md. */
+	--goo-folder-chevron-icon-size: var(--goo-theme-icon-md);
 
 	position: relative;
 	margin-block-end: 0;
@@ -213,8 +206,10 @@
 	position: absolute;
 	inset: 1px 1px var(--goo-theme-space-2xs) 0;
 	border-inline-start: 1px solid var(--goo-folder-inspector-rail);
+	border-inline-end: 1px solid var(--goo-folder-inspector-rail);
 	border-block-start: 1px solid var(--goo-folder-inspector-rail);
 	border-start-start-radius: var(--goo-theme-radius-sm);
+	border-start-end-radius: var(--goo-theme-radius-sm);
 	opacity: 0;
 	pointer-events: none;
 	transition: opacity var(--goo-folder-transition);
@@ -230,9 +225,10 @@
 }
 
 .goo-folder--inspector > .goo-folder__header-row > .goo-folder__header {
-	gap: var(--goo-theme-space-sm);
+	gap: var(--goo-theme-space-xs);
 	min-height: var(--goo-folder-inspector-header-height);
 	padding: 0 var(--goo-theme-space-2xs);
+	padding-inline-start: var(--goo-theme-space-xs);
 	background: transparent;
 	border-radius: var(--goo-theme-radius-sm);
 }
@@ -265,7 +261,6 @@
 	width: var(--goo-folder-chevron-size);
 	height: var(--goo-folder-chevron-size);
 	color: var(--goo-theme-muted);
-	transition: color var(--goo-folder-transition);
 }
 
 .goo-folder--inspector > .goo-folder__header-row:hover .goo-folder__chevron,

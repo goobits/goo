@@ -223,7 +223,7 @@
 /* Folder content: keep row separation consistent inside groups */
 :is(.goo-schema, .goo-schema__bare) .goo-folder .goo-folder__content {
 	gap: 0;
-	padding: 0;
+	padding: 0 calc(var(--goo-theme-space-2xs) + 1px);
 }
 
 :is(.goo-schema, .goo-schema__bare) .goo-folder .goo-folder__content > .goo-controller {
