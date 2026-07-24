@@ -212,6 +212,7 @@ describe('GooPopout', () => {
 			expect(Number.parseFloat(popout.style.top)).toBe(32)
 			expect(Number.parseFloat(popout.style.left)).toBe(1105)
 			expect(instance.position?.maxHeight).toBe(690)
+			expect(popout.style.getPropertyValue('--goo-popout-available-height')).toBe('690px')
 
 			await instance.destroy()
 		} finally {

@@ -79,7 +79,13 @@
 	flex-direction: var(--goo-popout-content-flex-direction, column);
 	width: var(--goo-popout-content-width, 100%);
 	height: var(--goo-popout-content-height, 100%);
-	max-height: var(--goo-popout-content-max-height, calc(100vh - var(--goo-popout-viewport-inset)));
+	max-height: var(
+		--goo-popout-content-max-height,
+		min(
+			var(--goo-popout-available-height, 100vh),
+			calc(100vh - var(--goo-popout-viewport-inset))
+		)
+	);
 	overflow: var(--goo-popout-content-overflow, visible);
 	overflow-y: var(--goo-popout-content-overflow-y, auto);
 	overflow-x: var(--goo-popout-content-overflow-x, hidden);

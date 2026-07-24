@@ -404,6 +404,14 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 
 		currentPosition = calculatePosition($element, positionOptions)
 		applyPosition($element, currentPosition)
+		if (currentPosition.maxHeight != null) {
+			$element.style.setProperty(
+				'--goo-popout-available-height',
+				`${ currentPosition.maxHeight }px`
+			)
+		} else {
+			$element.style.removeProperty('--goo-popout-available-height')
+		}
 		applyArrowPosition($arrow, currentPosition)
 		onPosition?.({ element: $element, instance, position: currentPosition })
 	}
