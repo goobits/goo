@@ -7,6 +7,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { pointerEvent } from '../../__tests__/_pointerEvents.ts'
 import { createSliderPrimitiveField } from '../_createSliderPrimitiveField.ts'
 import GooSlider from '../GooSlider.svelte'
+import { fromScaledPercent, toScaledPercent } from '../sliderUtils.ts'
 import type { GooSliderElement } from '../types.ts'
 
 const sliderCss = readFileSync('src/slider/GooSlider.css', 'utf8')
@@ -305,6 +306,25 @@ describe('GooSlider', () => {
 		const thumb = container.querySelector<HTMLElement>('.goo-slider__thumb')!
 
 		expect(thumb.style.left).toBe('50%')
+	})
+
+	it('maps power-scaled values in both directions', () => {
+		const value = fromScaledPercent(0.5, 0.4, 1, 'power', 6)
+		const { container } = render(GooSlider, {
+			props: {
+				value,
+				min: 0.4,
+				max: 1,
+				step: 0.001,
+				scale: 'power',
+				scalePower: 6
+			}
+		})
+		const thumb = container.querySelector<HTMLElement>('.goo-slider__thumb')!
+
+		expect(value).toBeCloseTo(0.935, 3)
+		expect(toScaledPercent(value, 0.4, 1, 'power', 6)).toBeCloseTo(0.5, 12)
+		expect(Number.parseFloat(thumb.style.left)).toBeCloseTo(50, 0)
 	})
 
 	it('enforces minimum distance between range thumbs', async() => {

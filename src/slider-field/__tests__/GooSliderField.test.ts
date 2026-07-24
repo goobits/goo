@@ -65,6 +65,25 @@ describe('GooSliderField', () => {
 		}))
 	})
 
+	it('forwards power scale options to the field slider', async() => {
+		const field = createSliderField({
+			max: 1,
+			min: 0.4,
+			scale: 'power',
+			scalePower: 6,
+			step: 0.001,
+			value: 0.935
+		})
+		document.body.appendChild(field)
+		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
+
+		const slider = field.querySelector<HTMLElement>('.goo-slider')!
+		const thumb = field.querySelector<HTMLElement>('.goo-slider__thumb')!
+		expect(slider.getAttribute('scale')).toBe('power')
+		expect(slider.getAttribute('scale-power')).toBe('6')
+		expect(Number.parseFloat(thumb.style.left)).toBeCloseTo(50, 0)
+	})
+
 	it('preserves min/max object values for dual ranges', async() => {
 		const field = createSliderField({
 			max: 64,

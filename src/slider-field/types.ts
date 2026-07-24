@@ -55,6 +55,7 @@ export type GooSliderFieldOptions = {
 	presetHue?: number
 	presetSaturation?: number
 	scale?: GooSliderScale
+	scalePower?: number
 	shape?: GooSliderShape
 	showInputs?: boolean
 	snap?: GooSliderSnap

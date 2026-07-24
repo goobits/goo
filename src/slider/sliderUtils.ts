@@ -21,6 +21,7 @@ export interface GooSliderState {
 	unit: string
 	direction: 'horizontal' | 'vertical'
 	scale?: GooSliderScale
+	scalePower?: number
 }
 
 /** Normalized slider mark used for rendering and snapping. */
@@ -115,7 +116,13 @@ export function buildGradientCSS(colors: string[] | undefined): string {
  */
 export function toFormattedValue(value: number, isPercent: boolean, state: GooSliderState): number {
 	if (isPercent) {
-		value = fromScaledPercent(value, state.min, state.max, state.scale)
+		value = fromScaledPercent(
+			value,
+			state.min,
+			state.max,
+			state.scale,
+			state.scalePower
+		)
 	}
 
 	if (state.unit === 'float') {
@@ -131,7 +138,13 @@ export function toFormattedValue(value: number, isPercent: boolean, state: GooSl
 }
 
 /** Convert a value into a 0-1 track percentage for the selected scale. */
-export function toScaledPercent(value: number, min: number, max: number, scale: GooSliderScale = 'linear'): number {
+export function toScaledPercent(
+	value: number,
+	min: number,
+	max: number,
+	scale: GooSliderScale = 'linear',
+	scalePower = 2
+): number {
 	if (max === min) return 0
 	if (scale === 'log' && min > 0 && max > 0) {
 		return clamp((Math.log(value) - Math.log(min)) / (Math.log(max) - Math.log(min)), 0, 1)
@@ -139,11 +152,21 @@ export function toScaledPercent(value: number, min: number, max: number, scale: 
 	if (scale === 'exponential') {
 		return clamp(Math.sqrt((value - min) / (max - min)), 0, 1)
 	}
+	if (scale === 'power') {
+		const normalized = clamp((value - min) / (max - min), 0, 1)
+		return Math.pow(normalized, normalizeScalePower(scalePower))
+	}
 	return clamp((value - min) / (max - min), 0, 1)
 }
 
 /** Convert a 0-1 track percentage into a value for the selected scale. */
-export function fromScaledPercent(percent: number, min: number, max: number, scale: GooSliderScale = 'linear'): number {
+export function fromScaledPercent(
+	percent: number,
+	min: number,
+	max: number,
+	scale: GooSliderScale = 'linear',
+	scalePower = 2
+): number {
 	const pct = clamp(percent, 0, 1)
 	if (scale === 'log' && min > 0 && max > 0) {
 		return Math.exp(Math.log(min) + pct * (Math.log(max) - Math.log(min)))
@@ -151,7 +174,14 @@ export function fromScaledPercent(percent: number, min: number, max: number, sca
 	if (scale === 'exponential') {
 		return min + (pct ** 2) * (max - min)
 	}
+	if (scale === 'power') {
+		return min + Math.pow(pct, 1 / normalizeScalePower(scalePower)) * (max - min)
+	}
 	return min + pct * (max - min)
+}
+
+function normalizeScalePower(value: number): number {
+	return Number.isFinite(value) && value > 0 ? value : 2
 }
 
 /** Build track marks from slider ticks and explicit mark options. */
@@ -255,14 +285,15 @@ export function getNearestSliderThumbIndex(
 	pointerPct: number,
 	min: number,
 	max: number,
-	scale: GooSliderScale = 'linear'
+	scale: GooSliderScale = 'linear',
+	scalePower = 2
 ): number | null {
 	if (!values.length) return null
 
 	let nearestIndex = 0
 	let nearestDistance = Number.MAX_SAFE_INTEGER
 	for (let index = 0; index < values.length; index++) {
-		const valuePct = toScaledPercent(values[index], min, max, scale)
+		const valuePct = toScaledPercent(values[index], min, max, scale, scalePower)
 		const distance = Math.abs(pointerPct - valuePct)
 		if (distance < nearestDistance) {
 			nearestDistance = distance

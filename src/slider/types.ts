@@ -26,7 +26,7 @@ export type GooSliderThumb = {
 export type GooSliderMode = 'range' | 'value' | 'variance'
 
 /** Slider scale mapping used to convert values to track percentages. */
-export type GooSliderScale = 'exponential' | 'linear' | 'log'
+export type GooSliderScale = 'exponential' | 'linear' | 'log' | 'power'
 
 /** Tick/mark configuration for the slider track. */
 export type GooSliderTickConfig = boolean | number
@@ -142,6 +142,9 @@ export type GooSliderProps = GooForwardedAttributes & {
 
 	/** First-class value-to-track scale. Custom easing props still override rendered mapping. */
 	scale?: GooSliderScale
+
+	/** Positive exponent used by the normalized `power` scale (default: 2). */
+	scalePower?: number
 
 	/** Minimum allowed distance between neighboring range thumbs. */
 	minDistance?: number | string

@@ -23,6 +23,7 @@
 			presetHue: 'presetHue',
 			presetSaturation: 'presetSaturation',
 			scale: 'scale',
+			scalePower: 'scalePower',
 			shape: 'shape',
 			snap: 'snap',
 			step: 'step',
@@ -75,6 +76,7 @@
 		max: number
 		min: number
 		scale: GooSliderScale
+		scalePower: number
 		step: number
 		unit: string
 	}
@@ -125,6 +127,7 @@
 		marks,
 		snap,
 		scale = 'linear',
+		scalePower = 2,
 		minDistance,
 		maxDistance,
 		valueBubble = false,
@@ -150,6 +153,7 @@
 		max: numericMax,
 		min: numericMin,
 		scale,
+		scalePower,
 		step: numericStep,
 		unit
 	})
@@ -260,6 +264,7 @@
 		coverage: coverage ? '' : undefined,
 		variance: isVarianceMode ? '' : undefined,
 		scale: scale !== 'linear' ? scale : undefined,
+		'scale-power': scale === 'power' ? scalePower : undefined,
 		ticks: ticks ? '' : undefined,
 		disabled: effectiveDisabled ? '' : undefined
 	})
@@ -370,7 +375,13 @@
 		slider.setGradient = (colors) => {
 			currentGradient = colors
 		}
-		slider.toPercent = (nextValue) => toScaledPercent(nextValue, numericMin, numericMax, scale)
+		slider.toPercent = (nextValue) => toScaledPercent(
+			nextValue,
+			numericMin,
+			numericMax,
+			scale,
+			scalePower
+		)
 		slider.enable = () => {
 			effectiveDisabled = false
 		}
@@ -519,7 +530,8 @@
 			getPointerPercent(event),
 			numericMin,
 			numericMax,
-			scale
+			scale,
+			scalePower
 		)
 	}
 
@@ -595,7 +607,7 @@
 	}
 
 	function getDisplayPercent(nextValue: number): number {
-		const pct = toScaledPercent(nextValue, numericMin, numericMax, scale)
+		const pct = toScaledPercent(nextValue, numericMin, numericMax, scale, scalePower)
 		return clamp(easingFn ? easingFn(pct) : pct, 0, 1)
 	}
 
