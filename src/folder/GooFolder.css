@@ -41,6 +41,7 @@
 .goo-folder__header-row {
 	display: flex;
 	align-items: center;
+	position: relative;
 	width: 100%;
 	min-width: 0;
 	background: var(--goo-folder-header-bg);
@@ -90,7 +91,7 @@
 	align-items: center;
 	flex: none;
 	gap: var(--goo-theme-space-2xs);
-	padding-inline-end: var(--goo-folder-header-padding-inline);
+	margin-inline-end: calc(var(--goo-folder-chevron-size) + var(--goo-folder-header-padding-inline));
 }
 
 .goo-folder__header-actions:empty {
@@ -102,13 +103,15 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	order: 2;
+	position: absolute;
+	inset-block-start: 50%;
+	inset-inline-end: var(--goo-folder-header-padding-inline);
 	width: var(--goo-folder-chevron-size);
 	height: var(--goo-folder-chevron-size);
-	margin-inline-start: auto;
 	flex-shrink: 0;
 	border-radius: var(--goo-theme-radius-sm);
 	color: var(--goo-theme-muted);
+	transform: translateY(-50%);
 	transition:
 		background-color var(--goo-folder-transition),
 		color var(--goo-folder-transition),
@@ -123,7 +126,7 @@
 
 /* Rotate chevron when open - use direct child selectors for proper nesting */
 .goo-folder.goo-folder--open > .goo-folder__header-row > .goo-folder__header > .goo-folder__chevron {
-	transform: rotate(90deg);
+	transform: translateY(-50%) rotate(90deg);
 }
 
 /* Title */
@@ -131,6 +134,7 @@
 	order: 1;
 	flex: 1;
 	min-width: 0;
+	padding-inline-end: calc(var(--goo-folder-chevron-size) + var(--goo-theme-space-2xs));
 	font-size: var(--goo-theme-font-size-xs);
 	font-weight: var(--goo-theme-font-weight-medium);
 	text-transform: none;
@@ -139,6 +143,10 @@
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+}
+
+.goo-folder__header-row:has(.goo-folder__header-actions:not(:empty)) .goo-folder__title {
+	padding-inline-end: var(--goo-theme-space-2xs);
 }
 
 .goo-folder__header-row:hover > .goo-folder__header > .goo-folder__chevron,
@@ -189,23 +197,21 @@
 	--goo-folder-inspector-active-bg: transparent;
 	/* The bracket is structure, not emphasis: it speaks the divider voice. */
 	--goo-folder-inspector-rail: var(--goo-theme-border-strong);
+	--goo-folder-chevron-icon-size: var(--goo-theme-icon-sm);
 
 	position: relative;
 	margin-block-end: 0;
-	padding-inline-start: var(--goo-theme-space-sm);
 	border: 1px solid transparent;
 	border-radius: 0;
 }
 
-/* Open folders wear a section bracket: an accent rail up the whole left
-   edge that hooks over the top of the header, so header and content read
+/* Open folders wear a section bracket: a rail up the whole left edge
+   hooking over the full width of the header, so header and content read
    as one region rather than a floating line beside the rows. */
 .goo-folder--inspector::before {
 	content: '';
 	position: absolute;
-	/* The arm stops short of the end so rounded host cards keep their
-	   corner; the bracket reads as a mark, not a border. */
-	inset: 1px var(--goo-theme-space-sm) var(--goo-theme-space-2xs) 0;
+	inset: 1px 1px var(--goo-theme-space-2xs) 0;
 	border-inline-start: 1px solid var(--goo-folder-inspector-rail);
 	border-block-start: 1px solid var(--goo-folder-inspector-rail);
 	border-start-start-radius: var(--goo-theme-radius-sm);
@@ -246,14 +252,25 @@
 	background: color-mix(in srgb, var(--goo-theme-fg) 7%, transparent);
 }
 
+/* Open headers close their section cap with an underline in the rail
+   voice; the radius flattens at the bottom so the line runs edge to edge. */
 .goo-folder--inspector.goo-folder--open > .goo-folder__header-row {
-	border-radius: var(--goo-theme-radius-sm);
+	border-block-end: 1px solid var(--goo-folder-inspector-rail);
+	border-radius: var(--goo-theme-radius-sm) var(--goo-theme-radius-sm) 0 0;
 }
 
+/* Chevron speaks the popout-trigger arrow voice: muted at rest, fg on
+   header hover/focus. */
 .goo-folder--inspector > .goo-folder__header-row > .goo-folder__header > .goo-folder__chevron {
 	width: var(--goo-folder-chevron-size);
 	height: var(--goo-folder-chevron-size);
-	color: color-mix(in srgb, var(--goo-theme-muted) 78%, var(--goo-folder-fg));
+	color: var(--goo-theme-muted);
+	transition: color var(--goo-folder-transition);
+}
+
+.goo-folder--inspector > .goo-folder__header-row:hover .goo-folder__chevron,
+.goo-folder--inspector > .goo-folder__header-row:focus-within .goo-folder__chevron {
+	color: var(--goo-theme-fg);
 }
 
 .goo-folder--inspector > .goo-folder__header-row > .goo-folder__header > .goo-folder__title {
@@ -267,7 +284,9 @@
 .goo-folder--inspector > .goo-folder__content {
 	position: relative;
 	gap: 0;
-	padding: 0 0 var(--goo-theme-space-xs);
+	/* Content indents off the rail; the header stays full width so the
+	   bracket's arm and underline span the whole section. */
+	padding: 0 0 var(--goo-theme-space-xs) var(--goo-theme-space-sm);
 	background: transparent;
 	border-radius: 0;
 	overflow: hidden;
