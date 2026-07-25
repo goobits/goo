@@ -24,9 +24,10 @@ const WIDGET_KEYS = new Set([
 const PANEL_KEYS = new Set([ 'type', 'title', 'docked', 'width', 'showHeader', 'children' ])
 const CONDITION_KEYS = new Set([ 'path', 'equals', 'notEquals' ])
 const CHOICE_KEYS = new Set([
-	'id', 'key', 'value', 'label', 'icon', 'tooltip', 'ariaLabel', 'hideLabel', 'className', 'disabled',
-	'if', 'unless'
+	'type', 'id', 'key', 'value', 'label', 'icon', 'tooltip', 'ariaLabel', 'hideLabel', 'className',
+	'disabled', 'options', 'if', 'unless'
 ])
+const CHOICE_TYPES = new Set([ 'option', 'divider', 'optgroup', 'submenu' ])
 
 /**
  * Assert that a GooSchema description contains only declared, portable data.
@@ -217,6 +218,11 @@ function assertChoiceOptions(value: unknown, path: string): void {
 		if (typeof option === 'string' || typeof option === 'number') continue
 		const choice = expectRecord(option, optionPath)
 		assertKnownKeys(choice, CHOICE_KEYS, optionPath, 'choice option')
+		if (choice.type !== undefined && (
+			typeof choice.type !== 'string' || !CHOICE_TYPES.has(choice.type)
+		)) {
+			fail(`${ optionPath }.type`, 'must be option, divider, optgroup, or submenu')
+		}
 		for (const key of [ 'id', 'key', 'value', 'label' ]) {
 			const item = choice[key]
 			if (item !== undefined && typeof item !== 'string' && typeof item !== 'number') {
@@ -227,6 +233,7 @@ function assertChoiceOptions(value: unknown, path: string): void {
 			assertOptionalString(choice, key, optionPath)
 		}
 		for (const key of [ 'hideLabel', 'disabled' ]) assertOptionalBoolean(choice, key, optionPath)
+		assertChoiceOptions(choice.options, `${ optionPath }.options`)
 		assertConditions(choice, optionPath)
 	}
 }

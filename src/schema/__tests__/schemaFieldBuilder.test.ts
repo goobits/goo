@@ -88,4 +88,38 @@ describe('schemaFieldBuilder', () => {
 			setLocale({ locale: 'en-US', translate: key => key })
 		}
 	})
+
+	it('preserves nested select groups, dividers, icons, and conditional choices', () => {
+		const options = buildControllerOptions({
+			path: 'shape',
+			type: 'select',
+			options: [
+				{
+					type: 'optgroup',
+					label: 'Basic Shapes',
+					options: [
+						{ id: 'square', label: 'Square', icon: 'square' },
+						{ type: 'divider' },
+						{ id: 'circle', label: 'Circle', unless: 'hideCircle' }
+					]
+				}
+			]
+		}, { shape: 'square' }, 'shape', 'square', { hideCircle: true })
+
+		expect(options.options).toEqual([
+			expect.objectContaining({
+				type: 'optgroup',
+				id: 'Basic Shapes',
+				label: 'Basic Shapes',
+				options: [
+					expect.objectContaining({
+						id: 'square',
+						label: 'Square',
+						icon: 'square'
+					}),
+					{ type: 'divider' }
+				]
+			})
+		])
+	})
 })

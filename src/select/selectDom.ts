@@ -3,6 +3,8 @@
  * @module goobits/select/selectDom
  */
 
+import { iconRegistry } from '../icon/registry.ts'
+
 // Platform detection for shortcut display
 const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform)
 
@@ -104,6 +106,16 @@ export function createIcon(
 
 		const $icon = document.createElement('span')
 		$icon.className = 'goo-select__icon'
+
+		// Pure-data schemas refer to app-installed icons by registry name.
+		// Registry output is sanitized before it reaches this DOM parser.
+		const registeredSvg = iconRegistry.get(iconValue)
+		if (registeredSvg) {
+			const template = document.createElement('template')
+			template.innerHTML = registeredSvg
+			$icon.append(template.content.cloneNode(true))
+			return $icon
+		}
 
 		// URL or data URI
 		if (

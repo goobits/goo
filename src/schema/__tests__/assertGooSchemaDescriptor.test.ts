@@ -38,6 +38,23 @@ describe('assertGooSchemaDescriptor', () => {
 		})).not.toThrow()
 	})
 
+	it('accepts portable nested select groups and dividers', () => {
+		expect(() => assertGooSchemaDescriptor({
+			path: 'shape',
+			type: 'select',
+			options: [
+				{
+					type: 'optgroup',
+					label: 'Basic Shapes',
+					options: [
+						{ id: 'square', label: 'Square', icon: 'square' },
+						{ type: 'divider' }
+					]
+				}
+			]
+		})).not.toThrow()
+	})
+
 	it('rejects callbacks, constructed objects, accessors, and cycles', () => {
 		expect(() => assertGooSchemaDescriptor({
 			path: 'size',
@@ -79,6 +96,15 @@ describe('assertGooSchemaDescriptor', () => {
 			path: 'mode',
 			options: [ { id: 'draw', label: 'Draw', component: 'legacy' } ]
 		})).toThrow("schema.options[0].component': is not a declared GooSchema choice option key")
+
+		expect(() => assertGooSchemaDescriptor({
+			path: 'mode',
+			options: [ {
+				type: 'optgroup',
+				label: 'Draw',
+				options: [ { id: 'draw', legacyLabel: 'Draw' } ]
+			} ]
+		})).toThrow("schema.options[0].options[0].legacyLabel': is not a declared GooSchema choice option key")
 
 		expect(() => assertGooSchemaDescriptor({
 			type: 'folder',

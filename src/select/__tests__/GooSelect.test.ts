@@ -3,6 +3,7 @@ import { tick } from 'svelte'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { pointerEvent } from '../../__tests__/_pointerEvents.ts'
+import { iconRegistry } from '../../icon/registry.ts'
 import { gooTooltipRuntime } from '../../tooltip/index.ts'
 import { DropdownPanel } from '../_dropdownPanel.ts'
 import GooSelect from '../GooSelect.svelte'
@@ -220,6 +221,19 @@ describe('GooSelect', () => {
 		const icon = createIcon(' <img src=x onerror=alert(1)>')
 
 		expect(icon).toBeNull()
+	})
+
+	it('renders app-installed registry icons from pure-data option names', () => {
+		iconRegistry.register(
+			'select-shape-test',
+			'<svg viewBox="0 0 16 16"><path d="M1 1h14v14H1z" /></svg>'
+		)
+
+		const icon = createIcon('select-shape-test')
+
+		expect(icon?.classList.contains('goo-select__icon')).toBe(true)
+		expect(icon?.querySelector('svg path')?.getAttribute('d')).toBe('M1 1h14v14H1z')
+		expect(icon?.classList.contains('select-shape-test')).toBe(false)
 	})
 
 	it('shows a selected option indicator by default', async() => {

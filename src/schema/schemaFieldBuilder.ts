@@ -17,16 +17,19 @@ import type { GooSchemaData, GooSchemaField } from './types.ts'
 // Types
 // =============================================================================
 
-/** Normalized select option with required id and label */
+/** Select option normalized for GooSelect or GooButtonGroup. */
 export interface NormalizedSelectOption {
-	id: string
-	label: string
+	type?: 'option' | 'divider' | 'optgroup' | 'submenu'
+	id?: string
+	label?: string
 	icon?: string
 	tooltip?: string
 	ariaLabel?: string
 	hideLabel?: boolean
 	className?: string
 	disabled?: boolean
+	isDisabled?: boolean
+	options?: NormalizedSelectOption[]
 }
 
 /** Controller options built from a schema field */
@@ -141,19 +144,18 @@ export function normalizeSelectOptions(
 	options: NonNullable<GooSchemaField['options']>,
 	data: GooSchemaData = {}
 ): NormalizedSelectOption[] {
-	return options.filter(opt => (
-		typeof opt === 'string'
-		|| typeof opt === 'number'
-		|| shouldRenderSchemaItem(opt, data)
-	)).map(opt => {
+	return options.flatMap<NormalizedSelectOption>(opt => {
 		if (typeof opt === 'string' || typeof opt === 'number') {
 			const value = String(opt)
-			return { id: value, label: localizeSchemaText(value) ?? value }
+			return [ { id: value, label: localizeSchemaText(value) ?? value } ]
 		}
+		if (!shouldRenderSchemaItem(opt, data)) return []
+		if (opt.type === 'divider') return [ { type: 'divider' as const } ]
 
 		const id = opt.id ?? opt.key ?? opt.value ?? opt.label ?? ''
 		const label = opt.label ?? opt.value ?? opt.id ?? opt.key ?? ''
-		return {
+		return [ {
+			type: opt.type,
 			id: String(id),
 			label: localizeSchemaText(String(label)) ?? String(label),
 			icon: opt.icon,
@@ -161,8 +163,10 @@ export function normalizeSelectOptions(
 			ariaLabel: localizeSchemaText(opt.ariaLabel),
 			hideLabel: opt.hideLabel,
 			className: opt.className,
-			disabled: opt.disabled
-		}
+			disabled: opt.disabled,
+			isDisabled: opt.disabled,
+			options: opt.options ? normalizeSelectOptions(opt.options, data) : undefined
+		} ]
 	})
 }
 

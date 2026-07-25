@@ -38,6 +38,7 @@ export type GooSchemaControlOptions = Record<string, GooSchemaDescriptorValue | 
 
 /** Pure-data option accepted by select and button-group schema fields. */
 export interface GooSchemaChoiceOption {
+	type?: 'option' | 'divider' | 'optgroup' | 'submenu'
 	id?: string | number
 	key?: string | number
 	value?: string | number
@@ -48,6 +49,8 @@ export interface GooSchemaChoiceOption {
 	hideLabel?: boolean
 	className?: string
 	disabled?: boolean
+	/** Nested choices for optgroups and submenus. */
+	options?: Array<string | number | GooSchemaChoiceOption>
 	/** Show this choice when the condition matches the schema data. */
 	if?: GooSchemaCondition
 	/** Hide this choice when the condition matches the schema data. */
