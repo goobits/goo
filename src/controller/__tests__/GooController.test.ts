@@ -214,6 +214,35 @@ describe('GooController', () => {
 		expect(popout.querySelector('.goo-select__options--width-content')).not.toBeNull()
 	})
 
+	it('preserves select menu options from component-specific control options', async() => {
+		const model = { units: 'px' }
+		const controller = createGooController({
+			object: model,
+			property: 'units',
+			type: 'select',
+			options: [
+				{ label: 'Pixels', value: 'px' },
+				{ label: 'Inches', value: 'in' }
+			],
+			controlOptions: {
+				menu: {
+					variant: 'attached',
+					width: 'content'
+				}
+			}
+		})
+		document.body.appendChild(controller)
+		await waitForControllerControl(controller)
+
+		const select = controller.querySelector<HTMLElement>('.goo-select') as HTMLElement & { open: (options?: { autoFocus?: boolean }) => boolean }
+		expect(select.open({ autoFocus: false })).toBe(true)
+		await tick()
+
+		const popout = document.querySelector<HTMLElement>('.goo-popout.goo-select-popout')!
+		expect(popout.classList.contains('goo-select-popout--menu-attached')).toBe(true)
+		expect(popout.querySelector('.goo-select__options--width-content')).not.toBeNull()
+	})
+
 	it('mounts Svelte controls when the bound value is missing', async() => {
 		const model: Record<string, unknown> = {}
 		const angle = createGooController({

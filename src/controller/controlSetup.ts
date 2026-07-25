@@ -275,19 +275,19 @@ export function buildControlOptions(
 export function getAllOptions(stored: StoredOptions): GooControlOptions {
 	return {
 		...stored.controlOptions,
-		min: stored.min,
-		max: stored.max,
-		step: stored.step,
-		options: stored.selectOptions,
-		menu: stored.menu,
-		preset: stored.preset,
-		presetColor: stored.presetColor,
-		presetHue: stored.presetHue,
-		coverage: stored.showCoverage,
-		unit: stored.unit,
-		label: stored.buttonLabel,
-		shape: stored.shape,
-		layout: stored.layout
+		min: stored.min ?? stored.controlOptions?.min,
+		max: stored.max ?? stored.controlOptions?.max,
+		step: stored.step ?? stored.controlOptions?.step,
+		options: stored.selectOptions ?? stored.controlOptions?.options,
+		menu: stored.menu ?? stored.controlOptions?.menu,
+		preset: stored.preset ?? stored.controlOptions?.preset,
+		presetColor: stored.presetColor ?? stored.controlOptions?.presetColor,
+		presetHue: stored.presetHue ?? stored.controlOptions?.presetHue,
+		coverage: stored.showCoverage ?? stored.controlOptions?.coverage,
+		unit: stored.unit ?? stored.controlOptions?.unit,
+		label: stored.buttonLabel ?? stored.controlOptions?.label,
+		shape: stored.shape ?? stored.controlOptions?.shape,
+		layout: stored.layout ?? stored.controlOptions?.layout
 	}
 }
 
