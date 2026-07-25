@@ -13,6 +13,7 @@ import SelfContainedInputControl from './SelfContainedInputControl.svelte'
 async function settleGooSchema(): Promise<void> {
 	await tick()
 	await Promise.resolve()
+	await new Promise(resolve => setTimeout(resolve, 0))
 }
 
 const gridPopoutControlType = defineSvelteControlType({
@@ -417,6 +418,79 @@ describe('GooSchema', () => {
 
 		expect(container.querySelector('.goo-controller')).toBe(firstController)
 		expect(slider?.getAttribute('aria-valuenow')).toBe('24')
+	})
+
+	it('can defer refreshing active controls during a coordinated schema transition', async() => {
+		const schema = createGooSchema({
+			schema: [ { path: 'size', min: 0, max: 100 } ],
+			data: { size: 12 },
+			bare: true
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+
+		const slider = await waitForSchemaElement<HTMLElement>(schema, '.goo-slider')
+		schema.setData({ size: 24 }, { refresh: false })
+
+		expect(schema.getData().size).toBe(24)
+		expect(slider.getAttribute('aria-valuenow')).toBe('12')
+
+		schema.setData({ size: 24 })
+		await settleGooSchema()
+		expect(slider.getAttribute('aria-valuenow')).toBe('24')
+	})
+
+	it('does not refresh outgoing controls when replacing wrapper schema and data together', async() => {
+		const refreshOutgoing = vi.fn()
+		const destroyOutgoing = vi.fn()
+		const controlTypes = {
+			'outgoing-control': {
+				load: () => Promise.resolve({}),
+				extract: () => () => Object.assign(document.createElement('div'), {
+					className: 'outgoing-control',
+					destroy: destroyOutgoing,
+					refresh: refreshOutgoing
+				})
+			},
+			'incoming-control': {
+				load: () => Promise.resolve({}),
+				extract: () => () => Object.assign(document.createElement('div'), {
+					className: 'incoming-control'
+				})
+			}
+		}
+		const { container, rerender } = render(GooSchema, {
+			props: {
+				schema: [ {
+					path: 'size',
+					type: 'outgoing-control',
+					layout: 'self-contained'
+				} ],
+				data: { size: 12 },
+				bare: true,
+				controlTypes
+			}
+		})
+		await settleGooSchema()
+
+		expect(container.querySelector('.outgoing-control')).not.toBeNull()
+
+		await rerender({
+			schema: [ {
+				path: 'opacity',
+				type: 'incoming-control',
+				layout: 'self-contained'
+			} ],
+			data: { opacity: 0.5 },
+			bare: true,
+			controlTypes
+		})
+		await settleGooSchema()
+
+		expect(refreshOutgoing).not.toHaveBeenCalled()
+		expect(destroyOutgoing).toHaveBeenCalledOnce()
+		expect(container.querySelector('.outgoing-control')).toBeNull()
+		expect(container.querySelector('.incoming-control')).not.toBeNull()
 	})
 
 	it('preserves history when a controlled host echoes a committed value', async() => {
@@ -1305,6 +1379,121 @@ describe('GooSchema', () => {
 		expect(destroyControl).toHaveBeenCalledOnce()
 		expect(schema.getController('size')).toBeUndefined()
 		expect(schema.getController('opacity')).not.toBeUndefined()
+	})
+
+	it('keeps the active tree and docked actions mounted until an async rebuild commits', async() => {
+		let resolveDelayed!: (value: object) => void
+		const delayedModule = new Promise<object>(resolve => {
+			resolveDelayed = resolve
+		})
+		const destroyActiveControl = vi.fn()
+		const actionsTarget = document.createElement('div')
+		const schema = createGooSchema({
+			actions: { history: true, reset: true },
+			schema: [ {
+				type: 'widget',
+				widget: 'active-control',
+				id: 'active',
+				layout: 'self-contained'
+			} ],
+			data: { size: 12 },
+			defaults: { size: 6 },
+			bare: true,
+			controlTypes: {
+				'active-control': {
+					load: () => Promise.resolve({}),
+					extract: () => () => Object.assign(document.createElement('div'), {
+						className: 'active-control',
+						destroy: destroyActiveControl
+					})
+				},
+				'delayed-control': {
+					load: () => delayedModule,
+					extract: () => () => Object.assign(document.createElement('div'), {
+						className: 'delayed-control'
+					})
+				}
+			}
+		})
+		document.body.append(actionsTarget, schema)
+		await settleGooSchema()
+		schema.setActionsTarget(actionsTarget)
+
+		const activeControl = schema.querySelector('.active-control')
+		const activeActions = schema.getActionsElement()
+		const actionChildCounts: number[] = []
+		const actionsObserver = new MutationObserver(() => {
+			actionChildCounts.push(actionsTarget.childElementCount)
+		})
+		actionsObserver.observe(actionsTarget, { childList: true })
+
+		schema.setSchema([ {
+			type: 'widget',
+			widget: 'delayed-control',
+			id: 'delayed',
+			layout: 'self-contained'
+		} ])
+		await Promise.resolve()
+		await Promise.resolve()
+
+		expect(schema.querySelector('.active-control')).toBe(activeControl)
+		expect(schema.getActionsElement()).toBe(activeActions)
+		expect(actionsTarget.childElementCount).toBe(1)
+		expect(destroyActiveControl).not.toHaveBeenCalled()
+
+		resolveDelayed({})
+		await settleGooSchema()
+		actionsObserver.disconnect()
+
+		expect(schema.querySelector('.active-control')).toBeNull()
+		expect(schema.querySelector('.delayed-control')).not.toBeNull()
+		expect(destroyActiveControl).toHaveBeenCalledOnce()
+		expect(actionsTarget.childElementCount).toBe(1)
+		expect(actionChildCounts).not.toContain(0)
+	})
+
+	it('discards stale async builds and destroys their late controls exactly once', async() => {
+		let resolveStale!: (value: object) => void
+		const staleModule = new Promise<object>(resolve => {
+			resolveStale = resolve
+		})
+		const loadStale = vi.fn(() => staleModule)
+		const destroyStaleControl = vi.fn()
+		const schema = createGooSchema({
+			schema: [ { path: 'size', min: 0, max: 100 } ],
+			data: { opacity: 0.5, size: 12 },
+			bare: true,
+			controlTypes: {
+				'stale-control': {
+					load: loadStale,
+					extract: () => () => Object.assign(document.createElement('div'), {
+						className: 'stale-control',
+						destroy: destroyStaleControl
+					})
+				}
+			}
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+
+		schema.setSchema([ {
+			type: 'widget',
+			widget: 'stale-control',
+			id: 'stale',
+			layout: 'self-contained'
+		} ])
+		await Promise.resolve()
+		await Promise.resolve()
+		expect(loadStale).toHaveBeenCalledOnce()
+
+		schema.setSchema([ { path: 'opacity', min: 0, max: 1 } ])
+		await settleGooSchema()
+		resolveStale({})
+		await settleGooSchema()
+
+		expect(schema.getController('opacity')).not.toBeUndefined()
+		expect(schema.querySelector('.stale-control')).toBeNull()
+		expect(destroyStaleControl).toHaveBeenCalledOnce()
 	})
 
 	it('does not rebuild after destroy when a rebuild was already queued', async() => {

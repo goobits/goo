@@ -18,6 +18,7 @@ import {
 	appendSchemaActions,
 	createSchemaScopeActions,
 	resolveSchemaFolderActions,
+	type SchemaActionsElement,
 	type SchemaActionView,
 	updateSchemaActionState
 } from './_schemaActions.ts'
@@ -27,7 +28,11 @@ import {
 	isSchemaValueEqual,
 	schemaHasConditions as hasSchemaConditions
 } from './_schemaData.ts'
-import type { SchemaHistory, SchemaHistoryScope } from './_schemaHistory.ts'
+import {
+	ROOT_SCHEMA_HISTORY_SCOPE,
+	type SchemaHistory,
+	type SchemaHistoryScope
+} from './_schemaHistory.ts'
 import { localizeSchemaText } from './_schemaText.ts'
 import { shouldRenderSchemaNode } from './fieldConditions.ts'
 import { isFullBleedField, isSelfContainedField } from './fieldLayout.ts'
@@ -67,27 +72,41 @@ export type GooSchemaBuildElement = HTMLElement & {
 	_actionsTarget: HTMLElement | null
 	_applyHistory(scopeId: string, direction: 'redo' | 'undo'): void
 	_applyPreset(preset: GooSchemaPreset): void
-	_beginScopeBuild(): void
 	_changeHandler: GooSchemaChangeHandler | null
 	_commitMutation(paths: readonly string[], reason: GooSchemaCommitReason, scopeId?: string): void
 	_controllers: Map<string, GooSchemaController>
 	_data: GooSchemaData
 	_destroyed: boolean
-	_finishScopeBuild(): void
 	_history: SchemaHistory
 	_onpreset: ((preset: GooSchemaPreset) => void) | null
 	_onreset: ((data: GooSchemaData) => void) | null
-	_registerScope(scope: SchemaHistoryScope): void
 	_redoMode: boolean
 	_rebuildToken: number
 	_resetScope(scopeId: string): void
 	_root: HTMLElement | null
+	_stagedBuild: SchemaBuildTransactionHandle | null
 	_toolbar: HTMLElement | null
 	_visibilitySignature: string
 	state: GooSchemaState
 	refresh(): void
 	setData(data: GooSchemaData, options?: GooSchemaDataUpdateOptions): void
 	_scheduleRebuild(options?: SchemaRebuildOptions): void
+}
+
+export type SchemaBuildTransactionHandle = {
+	cancel(): void
+}
+
+type SchemaBuildTransaction = SchemaBuildTransactionHandle & {
+	actionHost: SchemaActionsElement
+	actionViews: Map<string, SchemaActionView>
+	cancelled: boolean
+	committed: boolean
+	controllers: Map<string, GooSchemaController>
+	root: HTMLElement | null
+	scopes: Map<string, SchemaHistoryScope>
+	state: GooSchemaState
+	token: number
 }
 
 type SchemaDataMutationOptions = {
@@ -100,65 +119,160 @@ export async function rebuildSchema(
 	options: SchemaRebuildOptions = {}
 ): Promise<void> {
 	if (element._destroyed) return
-	const token = ++element._rebuildToken
+	invalidateSchemaRebuild(element)
+	const build = createSchemaBuildTransaction(element)
+	element._stagedBuild = build
 	const folderOpenState = options.preserveFolderOpenState
 		? captureSchemaFolderOpenState(element)
 		: undefined
 
-	element._beginScopeBuild()
-	element._actionViews.clear()
-	destroySchemaControllers(element)
-	if (element._toolbar && !element.contains(element._toolbar)) {
-		element._toolbar.remove()
-	}
-	element.replaceChildren()
-	element._root = null
-	element._toolbar = null
-
-	const schema = element.state.schema
+	const schema = build.state.schema
 	if (!schema || !element._data) return
 
-	if (element.state.bare) {
-		element._root = document.createElement('div')
-		element._root.className = 'goo-schema__bare'
-		appendSchemaActions(element, element._root)
+	try {
+		await populateSchemaBuild(element, build, schema)
+	} catch(error) {
+		if (element._stagedBuild === build) element._stagedBuild = null
+		build.cancel()
+		throw error
+	}
+
+	if (!isSchemaBuildCurrent(element, build)) {
+		build.cancel()
+		return
+	}
+	if (build.root && folderOpenState) {
+		restoreSchemaFolderOpenState(build.root, folderOpenState)
+	}
+	commitSchemaBuild(element, build)
+	element._visibilitySignature = getSchemaVisibilitySignature(element)
+	updateSchemaActionState(element)
+}
+
+async function populateSchemaBuild(
+	element: GooSchemaBuildElement,
+	build: SchemaBuildTransaction,
+	schema: GooSchemaState['schema']
+): Promise<void> {
+	if (build.state.bare) {
+		build.root = document.createElement('div')
+		build.root.className = 'goo-schema__bare'
+		appendSchemaActions(build.actionHost, build.root)
 		const nodes = Array.isArray(schema) ? schema : schema.children
-		await buildNodes(element, nodes, element._root, token)
+		await buildNodes(element, build, nodes, build.root)
 	} else if (Array.isArray(schema)) {
-		element._root = createPanel({
+		build.root = createPanel({
 			docked: true,
 			title: localizeSchemaText('Settings'),
 			collapsible: false,
-			showHeader: element.state.showPanelHeader ?? true
+			showHeader: build.state.showPanelHeader ?? true
 		}) as HTMLElement
-		appendSchemaActions(element, element._root)
-		await buildNodes(element, schema, element._root, token)
+		appendSchemaActions(build.actionHost, build.root)
+		await buildNodes(element, build, schema, build.root)
 	} else if (schema.type === 'panel') {
-		element._root = createPanel({
+		build.root = createPanel({
 			title: localizeSchemaText(schema.title || 'Settings'),
 			docked: schema.docked ?? true,
 			width: schema.width,
 			collapsible: true,
-			showHeader: schema.showHeader ?? element.state.showPanelHeader ?? true
+			showHeader: schema.showHeader ?? build.state.showPanelHeader ?? true
 		}) as HTMLElement
-		appendSchemaActions(element, element._root)
-		await buildNodes(element, schema.children, element._root, token)
+		appendSchemaActions(build.actionHost, build.root)
+		await buildNodes(element, build, schema.children, build.root)
 	}
+}
 
-	if (token !== element._rebuildToken) return
-	if (element._root) {
-		if (folderOpenState) {
-			restoreSchemaFolderOpenState(element._root, folderOpenState)
-		}
-		element.appendChild(element._root)
+export function invalidateSchemaRebuild(element: GooSchemaBuildElement): void {
+	element._rebuildToken += 1
+	element._stagedBuild?.cancel()
+	element._stagedBuild = null
+}
+
+function createSchemaBuildTransaction(
+	element: GooSchemaBuildElement
+): SchemaBuildTransaction {
+	const actionViews = new Map<string, SchemaActionView>()
+	const state = { ...element.state }
+	const actionHost = {
+		_actionViews: actionViews,
+		_applyHistory: element._applyHistory,
+		_applyPreset: element._applyPreset,
+		_data: element._data,
+		_history: element._history,
+		get _redoMode() {
+			return element._redoMode
+		},
+		_resetScope: element._resetScope,
+		_toolbar: null,
+		state
+	} as unknown as SchemaActionsElement
+	const build: SchemaBuildTransaction = {
+		actionHost,
+		actionViews,
+		cancelled: false,
+		committed: false,
+		controllers: new Map<string, GooSchemaController>(),
+		root: null,
+		scopes: new Map<string, SchemaHistoryScope>([
+			[
+				ROOT_SCHEMA_HISTORY_SCOPE,
+				{
+					history: Boolean(state.actions?.history),
+					id: ROOT_SCHEMA_HISTORY_SCOPE
+				}
+			]
+		]),
+		state,
+		token: element._rebuildToken,
+		cancel: cancelBuild
 	}
+	return build
+
+	function cancelBuild(): void {
+		if (build.cancelled || build.committed) return
+		build.cancelled = true
+		destroySchemaControllers(build.controllers)
+		build.actionViews.clear()
+		build.actionHost._toolbar?.remove()
+		build.root?.replaceChildren()
+		build.root = null
+	}
+}
+
+function isSchemaBuildCurrent(
+	element: GooSchemaBuildElement,
+	build: SchemaBuildTransaction
+): boolean {
+	return (
+		!element._destroyed
+		&& !build.cancelled
+		&& element._stagedBuild === build
+		&& element._rebuildToken === build.token
+	)
+}
+
+function commitSchemaBuild(
+	element: GooSchemaBuildElement,
+	build: SchemaBuildTransaction
+): void {
+	const previousControllers = element._controllers
+	const previousToolbar = element._toolbar
+	const nextToolbar = build.actionHost._toolbar
+
+	element._controllers = build.controllers
+	element._actionViews = build.actionViews
+	element._root = build.root
+	element._toolbar = nextToolbar
+	element._stagedBuild = null
+	element._history.configure([ ...build.scopes.values() ], element._data)
+	build.committed = true
+
 	if (element._actionsTarget) {
-		element._actionsTarget.replaceChildren()
-		if (element._toolbar) element._actionsTarget.appendChild(element._toolbar)
+		element._actionsTarget.replaceChildren(...(nextToolbar ? [ nextToolbar ] : []))
 	}
-	element._finishScopeBuild()
-	element._visibilitySignature = getSchemaVisibilitySignature(element)
-	updateSchemaActionState(element)
+	element.replaceChildren(...(build.root ? [ build.root ] : []))
+	previousToolbar?.remove()
+	destroySchemaControllers(previousControllers)
 }
 
 function captureSchemaFolderOpenState(element: HTMLElement): Map<string, boolean> {
@@ -185,11 +299,13 @@ function restoreSchemaFolderOpenState(
 	}
 }
 
-export function destroySchemaControllers(element: GooSchemaBuildElement): void {
-	for (const controller of element._controllers.values()) {
+export function destroySchemaControllers(
+	controllers: Map<string, GooSchemaController>
+): void {
+	for (const controller of controllers.values()) {
 		controller.destroy?.()
 	}
-	element._controllers.clear()
+	controllers.clear()
 }
 
 export function getChangedSchemaControllerPaths(
@@ -292,24 +408,24 @@ function getSchemaControllerMotionElement(
 
 async function buildNodes(
 	element: GooSchemaBuildElement,
+	build: SchemaBuildTransaction,
 	nodes: GooSchemaNode[],
-	parent: HTMLElement,
-	token: number
+	parent: HTMLElement
 ): Promise<void> {
 	for (const node of nodes) {
-		if (token !== element._rebuildToken) return
+		if (!isSchemaBuildCurrent(element, build)) return
 		if (!shouldRenderSchemaNode(node, element._data)) continue
 
 		if ('type' in node && node.type === 'folder') {
-			await buildFolder(element, node as GooSchemaFolder, parent, token)
+			await buildFolder(element, build, node as GooSchemaFolder, parent)
 		} else if ('type' in node && node.type === 'heading') {
 			buildHeading(node as GooSchemaHeading, parent)
 		} else if ('type' in node && node.type === 'note') {
 			buildNote(node as GooSchemaNote, parent)
 		} else if ('type' in node && node.type === 'widget') {
-			await buildWidget(element, node as GooSchemaWidget, parent, token)
+			await buildWidget(element, build, node as GooSchemaWidget, parent)
 		} else if ('path' in node) {
-			await buildField(element, node as GooSchemaField, parent, token)
+			await buildField(element, build, node as GooSchemaField, parent)
 		}
 	}
 }
@@ -332,28 +448,28 @@ function buildHeading(node: GooSchemaHeading, parent: HTMLElement): void {
 
 async function buildWidget(
 	element: GooSchemaBuildElement,
+	build: SchemaBuildTransaction,
 	node: GooSchemaWidget,
-	parent: HTMLElement,
-	token: number
+	parent: HTMLElement
 ): Promise<void> {
-	if (token !== element._rebuildToken) return
-	const key = node.id ?? `widget:${ node.widget }:${ element._controllers.size }`
+	if (!isSchemaBuildCurrent(element, build)) return
+	const key = node.id ?? `widget:${ node.widget }:${ build.controllers.size }`
 	if (node.layout === 'self-contained') {
 		const control = await createDirectSchemaControl({
 			controlType: node.widget,
-			controlTypes: element.state.controlTypes,
+			controlTypes: build.state.controlTypes,
 			onchange: () => {},
 			oninput: () => {},
 			options: node.options ?? {},
 			value: undefined
 		})
-		if (!control || token !== element._rebuildToken) {
+		if (!control || !isSchemaBuildCurrent(element, build)) {
 			control?.destroy?.()
 			return
 		}
 		markSelfContainedControl(control, node.widget, node.dock)
 		if (node.className) control.classList.add(...node.className.split(/\s+/).filter(Boolean))
-		element._controllers.set(key, control)
+		build.controllers.set(key, control)
 		appendSchemaChild(parent, control)
 		return
 	}
@@ -368,10 +484,10 @@ async function buildWidget(
 		),
 		layout: node.layout === 'inline' || node.layout === 'stacked' ? node.layout : undefined,
 		controlOptions: node.options,
-		controlTypes: element.state.controlTypes
+		controlTypes: build.state.controlTypes
 	})
 	controller.name(node.showLabel === false ? '' : localizeSchemaText(node.label) ?? '')
-	element._controllers.set(key, controller)
+	build.controllers.set(key, controller)
 	controller.addTo(parent)
 }
 
@@ -386,29 +502,30 @@ function appendSchemaChild(parent: HTMLElement, child: HTMLElement): void {
 
 async function buildFolder(
 	element: GooSchemaBuildElement,
+	build: SchemaBuildTransaction,
 	node: GooSchemaFolder,
-	parent: HTMLElement,
-	token: number
+	parent: HTMLElement
 ): Promise<void> {
-	if (token !== element._rebuildToken) return
+	if (!isSchemaBuildCurrent(element, build)) return
 	const paths = collectSchemaFieldPaths(node.children)
 	const scopeId = node.id ?? createFolderScopeId(node, paths)
-	const actions = resolveSchemaFolderActions(element.state, node)
-	element._registerScope({
+	const actions = resolveSchemaFolderActions(build.state, node)
+	build.scopes.set(scopeId, {
 		history: Boolean(actions.history),
 		id: scopeId,
 		paths
 	})
-	const headerActions = createSchemaScopeActions(element, scopeId, actions)
+	const headerActions = createSchemaScopeActions(build.actionHost, scopeId, actions)
 	const folder: GooFolderElement = createFolder({
 		title: localizeSchemaText(node.title) ?? node.title,
 		open: node.open ?? false,
-		className: mergeClassNames(element.state.folderClassName, node.className),
+		className: mergeClassNames(build.state.folderClassName, node.className),
 		headerActions: headerActions ?? undefined
 	})
 	folder.dataset.gooSchemaScope = scopeId
 
-	await buildNodes(element, node.children, folder, token)
+	await buildNodes(element, build, node.children, folder)
+	if (!isSchemaBuildCurrent(element, build)) return
 
 	const parentContainer = parent as HTMLElement & { add?: (el: HTMLElement) => void }
 	if (typeof parentContainer.add === 'function') {
@@ -420,12 +537,12 @@ async function buildFolder(
 
 async function buildField(
 	element: GooSchemaBuildElement,
+	build: SchemaBuildTransaction,
 	node: GooSchemaField,
-	parent: HTMLElement,
-	token: number
+	parent: HTMLElement
 ): Promise<void> {
-	if (token !== element._rebuildToken) return
-	const resolved = resolveFieldPath(element, node.path)
+	if (!isSchemaBuildCurrent(element, build)) return
+	const resolved = resolveFieldPath(element._data, build.state.defaults, node.path)
 
 	if (resolved === null) {
 		log.warn(`Path "${ node.path }" could not be resolved`)
@@ -433,7 +550,7 @@ async function buildField(
 	}
 
 	const { object, property } = resolved
-	const controlTypes = element.state.controlTypes
+	const controlTypes = build.state.controlTypes
 	const controllerOptions = buildControllerOptions(node, object, property, object[property], element._data)
 	if (controlTypes) {
 		controllerOptions.controlTypes = controlTypes
@@ -445,7 +562,15 @@ async function buildField(
 		)
 	}
 	if (isSelfContainedField(node) && controllerOptions.type) {
-		await buildDirectSchemaField(element, node, object, property, controllerOptions, parent, token)
+		await buildDirectSchemaField(
+			element,
+			build,
+			node,
+			object,
+			property,
+			controllerOptions,
+			parent
+		)
 		return
 	}
 
@@ -453,7 +578,7 @@ async function buildField(
 		const controlConfig = resolveGooControlTypeConfig(node.type, controlTypes)
 		if (controlConfig?.svelte) {
 			const module = await controlConfig.load()
-			if (token !== element._rebuildToken) return
+			if (!isSchemaBuildCurrent(element, build)) return
 			if (!isGooSvelteControlModule(module)) {
 				log.warn(
 					`Control type "${ node.type }" is marked as Svelte but did not load a default component.`
@@ -463,14 +588,14 @@ async function buildField(
 			if (module.controlSchema?.selfContained || isSelfContainedField(node)) {
 				await buildSelfContainedField(
 					element,
+					build,
 					node,
 					object,
 					property,
 					controllerOptions,
 					module,
 					controlConfig,
-					parent,
-					token
+					parent
 				)
 				return
 			}
@@ -492,18 +617,18 @@ async function buildField(
 
 	const controller = createGooController(controllerOptions)
 	controller.name(controllerOptions.label)
-	element._controllers.set(node.path, controller)
+	build.controllers.set(node.path, controller)
 	controller.addTo(parent)
 }
 
 async function buildDirectSchemaField(
 	element: GooSchemaBuildElement,
+	build: SchemaBuildTransaction,
 	node: GooSchemaField,
 	object: GooSchemaData,
 	property: string,
 	controllerOptions: ControllerOptions,
-	parent: HTMLElement,
-	token: number
+	parent: HTMLElement
 ): Promise<void> {
 	const handleChange = (value: unknown) => {
 		object[property] = value
@@ -520,13 +645,13 @@ async function buildDirectSchemaField(
 	}
 	const control = await createDirectSchemaControl({
 		controlType: controllerOptions.type!,
-		controlTypes: element.state.controlTypes,
+		controlTypes: build.state.controlTypes,
 		onchange: handleChange,
 		oninput: handleInput,
 		options: flattenControllerOptions(controllerOptions),
 		value: object[property]
 	})
-	if (!control || token !== element._rebuildToken) {
+	if (!control || !isSchemaBuildCurrent(element, build)) {
 		control?.destroy?.()
 		return
 	}
@@ -539,7 +664,7 @@ async function buildDirectSchemaField(
 		}
 	}
 
-	element._controllers.set(node.path, control)
+	build.controllers.set(node.path, control)
 	appendSchemaChild(parent, control)
 }
 
@@ -593,31 +718,32 @@ function markSelfContainedControl(
 }
 
 function resolveFieldPath(
-	element: GooSchemaBuildElement,
+	data: GooSchemaData,
+	defaults: GooSchemaData | undefined,
 	path: string
 ): { object: GooSchemaData; property: string } | null {
-	const resolved = resolvePath(element._data, path)
+	const resolved = resolvePath(data, path)
 	if (resolved) return resolved
 
-	const defaultValue = element.state.defaults ? getByPath(element.state.defaults, path) : undefined
+	const defaultValue = defaults ? getByPath(defaults, path) : undefined
 	if (defaultValue === undefined) return null
 
-	setByPath(element._data, path, cloneSchemaValue(defaultValue))
-	return resolvePath(element._data, path)
+	setByPath(data, path, cloneSchemaValue(defaultValue))
+	return resolvePath(data, path)
 }
 
 async function buildSelfContainedField(
 	element: GooSchemaBuildElement,
+	build: SchemaBuildTransaction,
 	node: GooSchemaField,
 	object: GooSchemaData,
 	property: string,
 	controllerOptions: ControllerOptions,
 	module: GooSvelteControlModule,
 	controlConfig: GooControlTypeConfig,
-	parent: HTMLElement,
-	token: number
+	parent: HTMLElement
 ): Promise<void> {
-	if (token !== element._rebuildToken) return
+	if (!isSchemaBuildCurrent(element, build)) return
 	const handleChange = (value: unknown) => {
 		object[property] = value
 		element._commitMutation([ node.path ], 'change')
@@ -660,12 +786,12 @@ async function buildSelfContainedField(
 	})
 
 	const hostElement = host.create()
-	if (token !== element._rebuildToken) {
+	if (!isSchemaBuildCurrent(element, build)) {
 		host.destroy()
 		return
 	}
 
-	element._controllers.set(node.path, host)
+	build.controllers.set(node.path, host)
 
 	const parentContainer = parent as HTMLElement & { add?: (el: HTMLElement) => void }
 	if (typeof parentContainer.add === 'function') {

@@ -96,6 +96,12 @@ export interface GooSchemaDataUpdateOptions {
 	/** Briefly mark controls whose displayed values changed. */
 	animate?: boolean
 
+	/**
+	 * Refresh the currently mounted controls after merging data. Set false
+	 * only when a coordinated schema rebuild will publish replacement controls.
+	 */
+	refresh?: boolean
+
 	/** Semantic source of the data update. */
 	reason?: GooSchemaDataUpdateReason
 }

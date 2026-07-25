@@ -12,6 +12,7 @@ import {
 import {
 	destroySchemaControllers,
 	type GooSchemaBuildElement,
+	invalidateSchemaRebuild,
 	rebuildSchema,
 	type SchemaRebuildOptions,
 	updateSchemaAfterDataMutation
@@ -26,8 +27,7 @@ import {
 	collectChangedSchemaDataPaths,
 	createSchemaHistory,
 	ROOT_SCHEMA_HISTORY_SCOPE,
-	type SchemaHistory,
-	type SchemaHistoryScope
+	type SchemaHistory
 } from './_schemaHistory.ts'
 import { attachSchemaKeyboardNavigation } from './_schemaKeyboard.ts'
 import { assertGooSchemaDescriptor } from './assertGooSchemaDescriptor.ts'
@@ -148,7 +148,6 @@ type GooSchemaInternal = GooSchema & GooSchemaBuildElement & {
 	_preserveFolderOpenStateOnRebuild: boolean
 	_rebuildPending: boolean
 	_redoMode: boolean
-	_scopeBuild: Map<string, SchemaHistoryScope>
 	_rebuild(options?: SchemaRebuildOptions): Promise<void>
 	_scheduleRebuild(options?: SchemaRebuildOptions): void
 }
@@ -180,12 +179,12 @@ function initializeSchema(element: GooSchemaInternal, options: GooSchemaOptions)
 	element._actionsTarget = null
 	element._controllers = new Map()
 	element._history = createSchemaHistory()
-	element._scopeBuild = new Map()
 	element._rebuildToken = 0
 	element._rebuildPending = false
 	element._preserveFolderOpenStateOnRebuild = false
 	element._redoMode = false
 	element._root = null
+	element._stagedBuild = null
 	element._toolbar = null
 	element._visibilitySignature = ''
 	element._modifierKeyHandler = event => setSchemaRedoMode(element, event.altKey)
@@ -217,9 +216,9 @@ function attachSchemaApi(element: GooSchemaInternal): void {
 			if (element._destroyed) return
 			element._destroyed = true
 			element._rebuildPending = false
-			element._rebuildToken += 1
+			invalidateSchemaRebuild(element)
 			detachSchemaActionModifiers(element)
-			destroySchemaControllers(element)
+			destroySchemaControllers(element._controllers)
 			element._actionViews.clear()
 			element._toolbar?.remove()
 			element._actionsTarget = null
@@ -257,15 +256,19 @@ function attachSchemaApi(element: GooSchemaInternal): void {
 			const changedPaths = collectChangedSchemaDataPaths(element._data, data)
 			if (!changedPaths.length) {
 				element._history.rebase(element._data)
-				updateSchemaAfterDataMutation(element, { update: options })
+				if (options.refresh !== false) {
+					updateSchemaAfterDataMutation(element, { update: options })
+				}
 				return
 			}
 			mergeSchemaData(element._data, data)
 			element._history.rebase(element._data)
-			updateSchemaAfterDataMutation(element, {
-				changedPaths: new Set(changedPaths),
-				update: options
-			})
+			if (options.refresh !== false) {
+				updateSchemaAfterDataMutation(element, {
+					changedPaths: new Set(changedPaths),
+					update: options
+				})
+			}
 		},
 		setOptions: (options: GooSchemaUpdateOptions) => {
 			if (element._destroyed) return
@@ -320,7 +323,7 @@ function attachSchemaApi(element: GooSchemaInternal): void {
 			assertGooSchemaDescriptor(schema)
 			element.state.schema = schema
 			element._history.rebase(element._data)
-			void element._rebuild()
+			element._scheduleRebuild()
 		},
 		refresh: () => {
 			if (element._destroyed) return
@@ -375,18 +378,6 @@ function attachSchemaApi(element: GooSchemaInternal): void {
 			element.dispatchEvent(new CustomEvent('preset', { detail, bubbles: true }))
 			element._onpreset?.(preset)
 		},
-		_beginScopeBuild: () => {
-			element._scopeBuild.clear()
-			element._scopeBuild.set(ROOT_SCHEMA_HISTORY_SCOPE, {
-				history: Boolean(element.state.actions?.history),
-				id: ROOT_SCHEMA_HISTORY_SCOPE
-			})
-			element._history.configure(
-				[ ...element._scopeBuild.values() ],
-				element._data,
-				false
-			)
-		},
 		_commitMutation: (
 			paths: readonly string[],
 			reason: GooSchemaCommitReason,
@@ -400,20 +391,6 @@ function attachSchemaApi(element: GooSchemaInternal): void {
 			if (normalized) mergeSchemaData(element._data, normalized)
 			element._history.record(element._data, paths)
 			finalizeSchemaCommit(element, paths, reason, scopeId, false)
-		},
-		_finishScopeBuild: () => {
-			element._history.configure(
-				[ ...element._scopeBuild.values() ],
-				element._data
-			)
-		},
-		_registerScope: (scope: SchemaHistoryScope) => {
-			element._scopeBuild.set(scope.id, scope)
-			element._history.configure(
-				[ ...element._scopeBuild.values() ],
-				element._data,
-				false
-			)
 		},
 		_resetScope: (scopeId: string) => {
 			if (element._destroyed || !element.state.defaults) return
@@ -437,6 +414,7 @@ function attachSchemaApi(element: GooSchemaInternal): void {
 		_scheduleRebuild: (options: SchemaRebuildOptions = {}) => {
 			if (element._destroyed) return
 			const preserveFolderOpenState = options.preserveFolderOpenState === true
+			invalidateSchemaRebuild(element)
 			if (element._rebuildPending) {
 				if (!preserveFolderOpenState) {
 					element._preserveFolderOpenStateOnRebuild = false
