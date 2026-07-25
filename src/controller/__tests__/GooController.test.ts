@@ -101,6 +101,54 @@ describe('GooController', () => {
 		expect(controller.querySelector('.goo-checkbox__label')).toBeNull()
 	})
 
+	it('gives visually labelled value controls accessible names at the controller boundary', async() => {
+		const model = {
+			angle: 45,
+			choice: 'first',
+			count: 3,
+			notes: 'Hello'
+		}
+		const controllers = [
+			createGooController({
+				object: model,
+				property: 'count',
+				type: 'number',
+				label: 'Item Count'
+			}),
+			createGooController({
+				object: model,
+				property: 'angle',
+				type: 'angle',
+				label: 'Nib Angle',
+				unit: 'degree'
+			}),
+			createGooController({
+				object: model,
+				property: 'choice',
+				type: 'select',
+				label: 'Paint Mode',
+				options: [ 'first', 'second' ]
+			}),
+			createGooController({
+				object: model,
+				property: 'notes',
+				type: 'textarea',
+				label: 'Content'
+			})
+		]
+		document.body.append(...controllers)
+		await Promise.all(controllers.map(waitForControllerControl))
+
+		expect(controllers[0].querySelector('input')?.getAttribute('aria-label')).toBe('Item Count')
+		expect(controllers[1].querySelector('.goo-angle-input__track')?.getAttribute('aria-label')).toBe('Nib Angle')
+		expect(controllers[1].querySelector('input')?.getAttribute('aria-label')).toBe('Nib Angle')
+		expect(controllers[2].querySelector('[role="combobox"]')?.getAttribute('aria-label')).toBe('Paint Mode')
+		expect(controllers[3].querySelector('textarea')?.getAttribute('aria-label')).toBe('Content')
+
+		controllers[3].name('Brush Text')
+		expect(controllers[3].querySelector('textarea')?.getAttribute('aria-label')).toBe('Brush Text')
+	})
+
 	it('uses registry layout preferences for large Svelte controls', async() => {
 		const model = { color: true }
 		const controller = createGooController({

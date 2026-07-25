@@ -223,6 +223,7 @@ interface GooControllerInternal extends GooController {
 	_unbound: boolean
 	_getExistingControl(): HTMLElement | null
 	_attachControl(control: HTMLElement): void
+	_syncAccessibleName(): void
 	_createElement(): void
 	_createControl(): Promise<void>
 	_createControlInner(): Promise<void>
@@ -274,6 +275,7 @@ class GooControllerRuntime {
 			this.$widget.replaceChildren(control)
 		}
 		this._control = control
+		this._syncAccessibleName()
 		return control
 	}
 
@@ -287,6 +289,59 @@ class GooControllerRuntime {
 		this._control = control as GooControlElement
 		if (this.$widget.children.length !== 1 || this.$widget.children[0] !== control) {
 			this.$widget.replaceChildren(control)
+		}
+		this._syncAccessibleName()
+	}
+
+	/**
+	 * Give value-editing descendants the controller's semantic label.
+	 *
+	 * GooController owns the field label even when it is rendered through
+	 * `data-label`/CSS, so controls must not have to rediscover it individually.
+	 * Existing component-owned names (for example dual-thumb distinctions) are
+	 * preserved; names generated here remain updateable through `name()`.
+	 */
+	_syncAccessibleName() {
+		if (!this._control) return
+		const explicitLabel = this._controlOptions?.ariaLabel
+		const visibleLabel = humanizePropertyName(this._buttonLabel ?? this._property ?? '')
+		const accessibleLabel = typeof explicitLabel === 'string'
+			? explicitLabel
+			: visibleLabel
+		if (!accessibleLabel) return
+
+		const selector = [
+			'input:not([type="button"]):not([type="submit"]):not([type="reset"])',
+			'textarea',
+			'select',
+			'[role="combobox"]',
+			'[role="slider"]',
+			'[role="spinbutton"]'
+		].join(',')
+		const targets = [
+			...(this._control.matches(selector) ? [ this._control ] : []),
+			...this._control.querySelectorAll<HTMLElement>(selector)
+		]
+		const controllerOwnsAccessibleName = [
+			'angle',
+			'email',
+			'number',
+			'password',
+			'select',
+			'text',
+			'textarea',
+			'url'
+		].includes(this._controlType)
+		for (const target of targets) {
+			if (target.hasAttribute('aria-labelledby')) continue
+			if (
+				!controllerOwnsAccessibleName
+				&&
+				target.hasAttribute('aria-label')
+				&& target.dataset.gooControllerAccessibleName !== 'true'
+			) continue
+			target.setAttribute('aria-label', accessibleLabel)
+			target.dataset.gooControllerAccessibleName = 'true'
 		}
 	}
 
@@ -410,6 +465,13 @@ class GooControllerRuntime {
 	 * @private
 	 */
 	_getStoredOptions(): StoredOptions {
+		const visibleLabel = humanizePropertyName(this._buttonLabel ?? this._property ?? '')
+		const controlOptions = {
+			...this._controlOptions
+		}
+		if (visibleLabel && controlOptions.ariaLabel === undefined) {
+			controlOptions.ariaLabel = visibleLabel
+		}
 		return {
 			min: this._min,
 			max: this._max,
@@ -426,7 +488,7 @@ class GooControllerRuntime {
 			buttonLabel: this._buttonLabel,
 			shape: this._shape,
 			layout: this._layout,
-			controlOptions: this._controlOptions
+			controlOptions: Object.keys(controlOptions).length ? controlOptions : undefined
 		}
 	}
 
@@ -678,14 +740,21 @@ class GooControllerRuntime {
 	 */
 	name(label: string) {
 		this._buttonLabel = label
+		const visibleLabel = humanizePropertyName(label)
 
 		// Update the data-label attribute (displayed via CSS ::before)
-		this.setAttribute('data-label', label)
+		this.setAttribute('data-label', visibleLabel)
+		const stackedLabel = this.querySelector<HTMLElement>('.goo-controller__header .goo-label')
+		if (stackedLabel) stackedLabel.textContent = visibleLabel
 
 		// For button controls, also update the button text
 		if (this._controlType === 'button' && this._control) {
 			this._control.setValue?.(label)
 		}
+		this._control?.setOptions?.({
+			ariaLabel: this._controlOptions?.ariaLabel ?? visibleLabel
+		})
+		this._syncAccessibleName()
 		return this
 	}
 
