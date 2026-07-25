@@ -22,6 +22,7 @@
 			presetColor: 'presetColor',
 			presetHue: 'presetHue',
 			presetSaturation: 'presetSaturation',
+			resetValue: 'resetValue',
 			scale: 'scale',
 			scalePower: 'scalePower',
 			shape: 'shape',
@@ -81,6 +82,9 @@
 		unit: string
 	}
 
+	const RESET_SNAP_CAPTURE_PX = 6
+	const RESET_SNAP_RELEASE_PX = 10
+
 	let sliderRoot: HTMLDivElement | undefined = $state()
 	// The root <div> is augmented with the GooSlider API at runtime (assignSliderApi),
 	// so expose it under the augmented type while binding to the real element type.
@@ -95,6 +99,8 @@
 	let animateTimer: ReturnType<typeof setTimeout> | undefined
 	let snapAnimate = $state(false)
 	let snapAnimateTimer: ReturnType<typeof setTimeout> | undefined
+	let resetSnapSuppressed = false
+	let capturedResetIndex: number | null = null
 	let pointerDragHandle: GooPointerDragHandle | null = null
 	let currentPresetColor = $state('')
 	let currentPresetHue = $state(0)
@@ -126,6 +132,7 @@
 		ticks,
 		marks,
 		snap,
+		resetValue,
 		scale = 'linear',
 		scalePower = 2,
 		minDistance,
@@ -162,6 +169,8 @@
 	)
 	const isVarianceMode = $derived(effectiveMode === 'variance')
 	const sliderMarks = $derived(normalizeSliderMarks(ticks, marks, numericMin, numericMax))
+	const resetTargets = $derived(normalizeResetTargets(resetValue))
+	const resetMarkers = $derived(getUniqueResetMarkers(resetTargets, currentValues.length))
 	const hiddenValue = $derived(formatSliderValue(currentValues))
 	const ariaValueNow = $derived(currentValues[0] ?? numericMin)
 	const ariaValueText = $derived(thumbValueText(ariaValueNow))
@@ -399,6 +408,13 @@
 			const startedOnThumb = targetIndex !== null
 			const index = targetIndex ?? findNearestThumbIndex(event.originalEvent)
 			if (index === null) return false
+			const resetTarget = resetTargets[index]
+			resetSnapSuppressed = Boolean(
+				startedOnThumb &&
+				resetTarget !== undefined &&
+				Object.is(currentValues[index], resetTarget)
+			)
+			capturedResetIndex = null
 			if (!startedOnThumb) {
 				playPointerJumpAnimation()
 			}
@@ -459,28 +475,51 @@
 		const pct = getPointerPercent(event)
 		const easedPct = easingFnInvert ? easingFnInvert(pct) : pct
 		const nextValue = toFormattedValue(easedPct, true, runtimeState)
-		updateThumbValue(index, nextValue, state, event)
+		const resetSnap = resolvePointerResetSnap(index, pct)
+		updateThumbValue(
+			index,
+			resetSnap?.value ?? nextValue,
+			state,
+			event,
+			{
+				animateSnap: resetSnap?.entered,
+				bypassSnap: Boolean(resetSnap)
+			}
+		)
 	}
 
 	function updateThumbValue(
 		index: number,
 		nextValue: number,
 		state: 'change' | 'input',
-		event?: Event
+		event?: Event,
+		{
+			animateSnap: shouldAnimateSnap = false,
+			bypassSnap = false
+		}: {
+			animateSnap?: boolean
+			bypassSnap?: boolean
+		} = {}
 	): void {
 		const unsnapped = formatValue(nextValue, { snapValue: false })
-		let formatted = formatValue(nextValue)
+		const formatted = bypassSnap ? unsnapped : formatValue(nextValue)
+		const constraintFormatValue = bypassSnap
+			? (value: number) => {
+					const nextUnsnapped = formatValue(value, { snapValue: false })
+					return Object.is(nextUnsnapped, formatted) ? formatted : formatValue(value)
+				}
+			: formatValue
 
 		const values = isVarianceMode
 			? getSharedVarianceValues(currentValues, index, formatted, {
 					min: numericMin,
 					max: numericMax,
-					formatValue
+					formatValue: constraintFormatValue
 				})
 			: getConstrainedSliderValues(currentValues, index, formatted, {
 					canCross,
 					canPush,
-					formatValue,
+					formatValue: constraintFormatValue,
 					maxDistance: toFiniteNumber(maxDistance, Number.POSITIVE_INFINITY),
 					min: numericMin,
 					minDistance: toFiniteNumber(minDistance, 0)
@@ -493,7 +532,11 @@
 			return
 		}
 
-		if (state === 'input' && activePointerId !== null && !Object.is(unsnapped, formatted)) {
+		if (
+			state === 'input' &&
+			activePointerId !== null &&
+			(shouldAnimateSnap || !Object.is(unsnapped, formatted))
+		) {
 			playSnapAnimation()
 		}
 
@@ -548,6 +591,32 @@
 		return Number.isInteger(index) && index >= 0 && index < currentValues.length ? index : null
 	}
 
+	function resolvePointerResetSnap(
+		index: number,
+		pointerPct: number
+	): { entered: boolean; value: number } | undefined {
+		if (resetSnapSuppressed) return undefined
+		const target = resetTargets[index]
+		if (target === undefined) {
+			capturedResetIndex = null
+			return undefined
+		}
+
+		const wasCaptured = capturedResetIndex === index
+		const threshold = wasCaptured ? RESET_SNAP_RELEASE_PX : RESET_SNAP_CAPTURE_PX
+		const distance = Math.abs(pointerPct - getDisplayPercent(target)) * getTrackLength()
+		if (distance > threshold) {
+			if (wasCaptured) capturedResetIndex = null
+			return undefined
+		}
+
+		capturedResetIndex = index
+		return {
+			entered: !wasCaptured,
+			value: target
+		}
+	}
+
 	function playPointerJumpAnimation(): void {
 		clearTimeout(animateTimer)
 		animate = true
@@ -581,6 +650,8 @@
 	function clearActivePointer(): void {
 		activeIndex = null
 		activePointerId = null
+		resetSnapSuppressed = false
+		capturedResetIndex = null
 	}
 
 	function cleanupSliderRuntime(): void {
@@ -670,11 +741,47 @@
 		if (typeof nextValue === 'object' && !Array.isArray(nextValue)) {
 			const range = nextValue as { min?: unknown; max?: unknown }
 			return [toFiniteNumber(range.min, numericMin), toFiniteNumber(range.max, numericMax)].map(
-				(value) => formatValue(value)
+				(value, index) => formatIncomingValue(value, index)
 			)
 		}
 		const values = parseFloatArray(nextValue)
-		return values.length ? values.map((value) => formatValue(value)) : [fallback]
+		return values.length
+			? values.map((value, index) => formatIncomingValue(value, index))
+			: [fallback]
+	}
+
+	function formatIncomingValue(nextValue: number, index: number): number {
+		const formatted = formatValue(nextValue, { snapValue: false })
+		return Object.is(formatted, resetTargets[index]) ? formatted : formatValue(nextValue)
+	}
+
+	function normalizeResetTargets(nextValue: GooSliderValue | undefined): Array<number | undefined> {
+		if (nextValue === undefined || nextValue === null) return []
+		const rawValues = typeof nextValue === 'object' && !Array.isArray(nextValue)
+			? [ nextValue.min, nextValue.max ]
+			: parseFloatArray(nextValue)
+		return rawValues.map(rawValue => {
+			const numericValue = Number(rawValue)
+			if (
+				!Number.isFinite(numericValue) ||
+				numericValue < numericMin ||
+				numericValue > numericMax
+			) {
+				return undefined
+			}
+			return formatValue(numericValue, { snapValue: false })
+		})
+	}
+
+	function getUniqueResetMarkers(
+		targets: Array<number | undefined>,
+		thumbCount: number
+	): number[] {
+		const markers: number[] = []
+		for (const target of targets.slice(0, thumbCount)) {
+			if (target !== undefined && !markers.includes(target)) markers.push(target)
+		}
+		return markers
 	}
 
 	function valuesToSliderValue(values: number[], fallback: number): number | number[] {
@@ -734,6 +841,13 @@
 	aria-disabled={effectiveDisabled ? 'true' : undefined}
 >
 	<div bind:this={trackElement} class="goo-slider__track" style={trackStyle}>
+		{#each resetMarkers as resetMarker}
+			<div
+				aria-hidden="true"
+				class="goo-slider__mark goo-slider__mark--reset"
+				style={getMarkStyle(resetMarker)}
+			></div>
+		{/each}
 		{#each sliderMarks as mark}
 			<div
 				class="goo-slider__mark"

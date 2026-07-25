@@ -331,13 +331,14 @@ export function buildDualRangeOptions(
 	const arrayValue = isMinMaxFormat ? [ minMaxValue.min, minMaxValue.max ] : value
 
 	const sliderOptions: GooControlOptions = {
+		...stored.controlOptions,
 		value: arrayValue as RegistryControlOptionValue,
-		min: stored.min ?? 0,
-		max: stored.max ?? 100,
-		step: stored.step,
-		preset: stored.preset,
-		presetColor: stored.presetColor,
-		presetHue: stored.presetHue,
+		min: stored.min ?? stored.controlOptions?.min ?? 0,
+		max: stored.max ?? stored.controlOptions?.max ?? 100,
+		step: stored.step ?? stored.controlOptions?.step,
+		preset: stored.preset ?? stored.controlOptions?.preset,
+		presetColor: stored.presetColor ?? stored.controlOptions?.presetColor,
+		presetHue: stored.presetHue ?? stored.controlOptions?.presetHue,
 		onchange: handlers.onchange,
 		oninput: handlers.oninput
 	}

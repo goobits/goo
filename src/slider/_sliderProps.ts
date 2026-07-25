@@ -36,6 +36,7 @@ export type SliderPropsOptions = {
 	presetColor?: string
 	presetHue?: number
 	presetSaturation?: number
+	resetValue?: GooSliderValue
 	scale?: GooSliderScale
 	scalePower?: number
 	shape?: GooSliderShape
@@ -82,6 +83,7 @@ export function getSliderProps(options: SliderPropsOptions, defaults: SliderProp
 		ticks: options.ticks,
 		marks: options.marks,
 		snap: options.snap,
+		resetValue: options.resetValue,
 		scale: options.scale,
 		scalePower: options.scalePower,
 		minDistance: options.minDistance,

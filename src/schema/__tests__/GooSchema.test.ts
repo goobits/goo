@@ -1194,6 +1194,91 @@ describe('GooSchema', () => {
 		})
 	})
 
+	it('uses canonical defaults as reset targets for every built-in slider type', async() => {
+		const schema = createGooSchema({
+			schema: [
+				{ path: 'autoRange', min: 0, max: 100 },
+				{ path: 'slider', type: 'slider', min: 0, max: 100 },
+				{ path: 'sliderField', type: 'slider-field', min: 0, max: 100 },
+				{ path: 'dualRange', type: 'range-dual', min: 0, max: 100 }
+			],
+			data: {
+				autoRange: 10,
+				dualRange: [ 10, 90 ],
+				slider: 20,
+				sliderField: 30
+			},
+			defaults: {
+				autoRange: 40,
+				dualRange: [ 25, 75 ],
+				slider: 50,
+				sliderField: 60
+			},
+			bare: true
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+
+		const markerPositions = (path: string) => [
+			...(schema.getController(path) as HTMLElement)
+				.querySelectorAll<HTMLElement>('.goo-slider__mark--reset')
+		].map(marker => marker.style.left)
+
+		expect(markerPositions('autoRange')).toEqual([ '40%' ])
+		expect(markerPositions('slider')).toEqual([ '50%' ])
+		expect(markerPositions('sliderField')).toEqual([ '60%' ])
+		expect(markerPositions('dualRange')).toEqual([ '25%', '75%' ])
+	})
+
+	it('clones canonical slider reset targets without changing unrelated control options', async() => {
+		const receivedOptions = new Map<string, Record<string, unknown>>()
+		const defaults = {
+			custom: 0,
+			range: [ 25, 75 ]
+		}
+		const createCapturedControl = (key: string) => ({
+			load: () => Promise.resolve({}),
+			extract: () => (options: Record<string, unknown>) => {
+				receivedOptions.set(key, options)
+				return Object.assign(document.createElement('div'), {
+					getValue: () => options.value,
+					setValue: vi.fn()
+				})
+			}
+		})
+		const schema = createGooSchema({
+			schema: [
+				{
+					path: 'range',
+					type: 'slider-field',
+					controlOptions: { resetValue: [ 1, 2 ] }
+				},
+				{
+					path: 'custom',
+					type: 'custom-control',
+					controlOptions: { resetValue: 99 }
+				}
+			],
+			data: {
+				custom: 1,
+				range: [ 10, 90 ]
+			},
+			defaults,
+			bare: true,
+			controlTypes: {
+				'custom-control': createCapturedControl('custom'),
+				'slider-field': createCapturedControl('range')
+			}
+		})
+		document.body.appendChild(schema)
+		await settleGooSchema()
+
+		const rangeResetValue = receivedOptions.get('range')?.resetValue
+		expect(rangeResetValue).toEqual([ 25, 75 ])
+		expect(rangeResetValue).not.toBe(defaults.range)
+		expect(receivedOptions.get('custom')?.resetValue).toBe(99)
+	})
+
 	it('destroys child controllers when the schema is destroyed', async() => {
 		const destroyControl = vi.fn()
 		const schema = createGooSchema({

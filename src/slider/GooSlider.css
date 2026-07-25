@@ -63,6 +63,7 @@
 	--goo-slider-variance-thumb-border-width: var(--goo-theme-focus-ring-width);
 	--goo-slider-mark-extra-height: var(--goo-theme-space-sm);
 	--goo-slider-mark-label-offset: var(--goo-theme-space-xs);
+	--goo-slider-reset-mark-color: color-mix(in srgb, var(--goo-theme-accent) 78%, var(--goo-theme-fg));
 	--goo-slider-header-gap: var(--goo-theme-space-sm);
 	--goo-slider-header-block-gap: var(--goo-theme-space-sm);
 	--goo-slider-labeled-gap: var(--goo-theme-space-xs);
@@ -256,6 +257,23 @@
 	pointer-events: none;
 	transform: translateX(-50%) translateY(-50%);
 	z-index: 0;
+}
+
+.goo-slider__mark--reset {
+	background: var(--goo-slider-reset-mark-color);
+	opacity: 0;
+	transition: opacity var(--goo-slider-motion-fast);
+	z-index: 2;
+}
+
+.goo-slider:not(.goo-slider--disabled):hover .goo-slider__mark--reset,
+.goo-slider:not(.goo-slider--disabled):focus-visible .goo-slider__mark--reset,
+.goo-slider:not(.goo-slider--disabled):focus-within .goo-slider__mark--reset {
+	opacity: 0.56;
+}
+
+.goo-slider.goo-slider--active .goo-slider__mark--reset {
+	opacity: 0.82;
 }
 
 .goo-slider__mark-label {

@@ -10,6 +10,12 @@ test.describe('GooSlider', () => {
 		await waitForGoo(page)
 		await page.evaluate(() => {
 			document.getElementById('test-container')!.innerHTML = ''
+			const root = document.documentElement
+			root.style.setProperty('--goo-theme-control-height-lg', '28px')
+			root.style.setProperty('--goo-theme-control-height-touch', '40px')
+			root.style.setProperty('--goo-theme-space-sm', '4px')
+			root.style.setProperty('--goo-theme-space-2xs', '2px')
+			root.style.setProperty('--goo-theme-focus-ring-width', '2px')
 		})
 	})
 
@@ -116,6 +122,60 @@ test.describe('GooSlider', () => {
 		await page.mouse.up()
 
 		expect(await varianceField.evaluate(element => (element as unknown as { getValue(): number[] }).getValue())).toEqual([ 0, 0, 20 ])
+	})
+
+	test('rearms the reset magnet after a drag that starts at reset', async({ page }) => {
+		await page.evaluate(() => {
+			const goo = (window as unknown as GooHarnessWindow).goo
+			const container = document.getElementById('test-container')!
+			const field = goo.createSlider({
+				value: 50,
+				resetValue: 50,
+				min: 0,
+				max: 100,
+				style: 'width: 220px;'
+			})
+			field.dataset.testid = 'reset-slider'
+			container.appendChild(field)
+		})
+
+		const field = page.locator('[data-testid="reset-slider"]')
+		const slider = field.locator('.goo-slider')
+		const track = slider.locator('.goo-slider__track')
+		const thumb = slider.locator('.goo-slider__thumb')
+		const marker = slider.locator('.goo-slider__mark--reset')
+		const trackBox = await track.boundingBox()
+		const thumbBox = await thumb.boundingBox()
+		expect(trackBox).not.toBeNull()
+		expect(thumbBox).not.toBeNull()
+		await expect(marker).toHaveCount(1)
+		expect(await marker.evaluate(element => (element as HTMLElement).style.left)).toBe('50%')
+
+		await page.mouse.move(
+			thumbBox!.x + thumbBox!.width / 2,
+			thumbBox!.y + thumbBox!.height / 2
+		)
+		await page.mouse.down()
+		await page.mouse.move(
+			trackBox!.x + trackBox!.width * 0.8,
+			trackBox!.y + trackBox!.height / 2
+		)
+		await page.mouse.move(
+			trackBox!.x + trackBox!.width * 0.52,
+			trackBox!.y + trackBox!.height / 2
+		)
+		expect(await field.evaluate(element => (element as unknown as { getValue(): number }).getValue())).toBe(52)
+		await page.mouse.up()
+
+		const movedThumbBox = await thumb.boundingBox()
+		expect(movedThumbBox).not.toBeNull()
+		await page.mouse.move(
+			movedThumbBox!.x + movedThumbBox!.width / 2,
+			movedThumbBox!.y + movedThumbBox!.height / 2
+		)
+		await page.mouse.down()
+		expect(await field.evaluate(element => (element as unknown as { getValue(): number }).getValue())).toBe(50)
+		await page.mouse.up()
 	})
 })
 

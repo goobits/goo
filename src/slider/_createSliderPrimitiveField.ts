@@ -42,6 +42,7 @@ export type SliderPrimitiveFieldOptions = {
 	presetColor?: string
 	presetHue?: number
 	presetSaturation?: number
+	resetValue?: GooSliderValue
 	scale?: GooSliderScale
 	shape?: GooSliderShape
 	snap?: GooSliderSnap

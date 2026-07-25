@@ -709,6 +709,203 @@ describe('GooSlider', () => {
 		vi.useRealTimers()
 	})
 
+	it('marks and magnetizes the reset value with capture and release hysteresis', async() => {
+		const { container } = render(GooSlider, {
+			props: {
+				value: 20,
+				resetValue: 50,
+				min: 0,
+				max: 100
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const track = container.querySelector<HTMLElement>('.goo-slider__track')!
+		const thumb = container.querySelector<HTMLElement>('.goo-slider__thumb')!
+		const marker = container.querySelector<HTMLElement>('.goo-slider__mark--reset')!
+		track.getBoundingClientRect = () => ({
+			x: 0,
+			y: 0,
+			width: 100,
+			height: 20,
+			top: 0,
+			right: 100,
+			bottom: 20,
+			left: 0,
+			toJSON: () => ({})
+		})
+		slider.setPointerCapture = vi.fn()
+		slider.releasePointerCapture = vi.fn()
+
+		expect(marker.style.left).toBe('50%')
+
+		thumb.dispatchEvent(pointerEvent('pointerdown', { pointerId: 10, clientX: 20 }))
+		slider.dispatchEvent(pointerEvent('pointermove', { pointerId: 10, clientX: 45 }))
+		await tick()
+		expect(slider.getValue()).toBe(50)
+
+		slider.dispatchEvent(pointerEvent('pointermove', { pointerId: 10, clientX: 58 }))
+		await tick()
+		expect(slider.getValue()).toBe(50)
+
+		slider.dispatchEvent(pointerEvent('pointermove', { pointerId: 10, clientX: 61 }))
+		await tick()
+		expect(slider.getValue()).toBe(61)
+
+		slider.dispatchEvent(pointerEvent('pointerup', { pointerId: 10, clientX: 61 }))
+	})
+
+	it('suppresses the reset magnet for a whole thumb-origin drag that starts at reset', async() => {
+		const { container } = render(GooSlider, {
+			props: {
+				value: 50,
+				resetValue: 50,
+				min: 0,
+				max: 100
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const track = container.querySelector<HTMLElement>('.goo-slider__track')!
+		const thumb = container.querySelector<HTMLElement>('.goo-slider__thumb')!
+		track.getBoundingClientRect = () => ({
+			x: 0,
+			y: 0,
+			width: 100,
+			height: 20,
+			top: 0,
+			right: 100,
+			bottom: 20,
+			left: 0,
+			toJSON: () => ({})
+		})
+		slider.setPointerCapture = vi.fn()
+		slider.releasePointerCapture = vi.fn()
+
+		thumb.dispatchEvent(pointerEvent('pointerdown', { pointerId: 11, clientX: 50 }))
+		slider.dispatchEvent(pointerEvent('pointermove', { pointerId: 11, clientX: 54 }))
+		await tick()
+		expect(slider.getValue()).toBe(54)
+
+		slider.dispatchEvent(pointerEvent('pointermove', { pointerId: 11, clientX: 90 }))
+		slider.dispatchEvent(pointerEvent('pointermove', { pointerId: 11, clientX: 52 }))
+		await tick()
+		expect(slider.getValue()).toBe(52)
+		slider.dispatchEvent(pointerEvent('pointerup', { pointerId: 11, clientX: 52 }))
+
+		thumb.dispatchEvent(pointerEvent('pointerdown', { pointerId: 12, clientX: 52 }))
+		await tick()
+		expect(slider.getValue()).toBe(50)
+		thumb.dispatchEvent(pointerEvent('pointerup', { pointerId: 12, clientX: 52 }))
+	})
+
+	it('lets the reset target win while captured and resumes explicit snap after release', async() => {
+		const { container } = render(GooSlider, {
+			props: {
+				value: 0,
+				resetValue: 50,
+				min: 0,
+				max: 100,
+				snap: [ 0, 100 ]
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const track = container.querySelector<HTMLElement>('.goo-slider__track')!
+		const thumb = container.querySelector<HTMLElement>('.goo-slider__thumb')!
+		track.getBoundingClientRect = () => ({
+			x: 0,
+			y: 0,
+			width: 100,
+			height: 20,
+			top: 0,
+			right: 100,
+			bottom: 20,
+			left: 0,
+			toJSON: () => ({})
+		})
+		slider.setPointerCapture = vi.fn()
+		slider.releasePointerCapture = vi.fn()
+
+		thumb.dispatchEvent(pointerEvent('pointerdown', { pointerId: 13, clientX: 0 }))
+		slider.dispatchEvent(pointerEvent('pointermove', { pointerId: 13, clientX: 48 }))
+		await tick()
+		expect(slider.getValue()).toBe(50)
+
+		slider.dispatchEvent(pointerEvent('pointermove', { pointerId: 13, clientX: 70 }))
+		await tick()
+		expect(slider.getValue()).toBe(100)
+		slider.dispatchEvent(pointerEvent('pointerup', { pointerId: 13, clientX: 70 }))
+	})
+
+	it('maps reset targets to their corresponding range thumbs', async() => {
+		const { container } = render(GooSlider, {
+			props: {
+				value: [ 20, 80 ],
+				resetValue: { min: 25, max: 70 },
+				min: 0,
+				max: 100
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const track = container.querySelector<HTMLElement>('.goo-slider__track')!
+		const thumbs = container.querySelectorAll<HTMLElement>('.goo-slider__thumb')
+		track.getBoundingClientRect = () => ({
+			x: 0,
+			y: 0,
+			width: 100,
+			height: 20,
+			top: 0,
+			right: 100,
+			bottom: 20,
+			left: 0,
+			toJSON: () => ({})
+		})
+		slider.setPointerCapture = vi.fn()
+		slider.releasePointerCapture = vi.fn()
+
+		expect(container.querySelectorAll('.goo-slider__mark--reset')).toHaveLength(2)
+
+		thumbs[1]?.dispatchEvent(pointerEvent('pointerdown', { pointerId: 14, clientX: 80 }))
+		slider.dispatchEvent(pointerEvent('pointermove', { pointerId: 14, clientX: 73 }))
+		await tick()
+		expect(slider.getValue()).toEqual([ 20, 70 ])
+		slider.dispatchEvent(pointerEvent('pointerup', { pointerId: 14, clientX: 73 }))
+	})
+
+	it('restores the mirrored variance shape when an edge reaches its reset target', async() => {
+		const { container } = render(GooSlider, {
+			props: {
+				value: [ 20, 50, 80 ],
+				resetValue: [ 30, 50, 70 ],
+				mode: 'variance',
+				min: 0,
+				max: 100
+			}
+		})
+		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
+		const track = container.querySelector<HTMLElement>('.goo-slider__track')!
+		const lowThumb = container.querySelector<HTMLElement>('.goo-slider__thumb--variance-low')!
+		track.getBoundingClientRect = () => ({
+			x: 0,
+			y: 0,
+			width: 100,
+			height: 20,
+			top: 0,
+			right: 100,
+			bottom: 20,
+			left: 0,
+			toJSON: () => ({})
+		})
+		slider.setPointerCapture = vi.fn()
+		slider.releasePointerCapture = vi.fn()
+
+		expect(container.querySelectorAll('.goo-slider__mark--reset')).toHaveLength(3)
+
+		lowThumb.dispatchEvent(pointerEvent('pointerdown', { pointerId: 15, clientX: 20 }))
+		slider.dispatchEvent(pointerEvent('pointermove', { pointerId: 15, clientX: 28 }))
+		await tick()
+		expect(slider.getValue()).toEqual([ 30, 50, 70 ])
+		slider.dispatchEvent(pointerEvent('pointerup', { pointerId: 15, clientX: 28 }))
+	})
+
 	it('cleans active pointer capture and timers when unmounted mid-drag', async() => {
 		vi.useFakeTimers()
 		const { container, unmount } = render(GooSlider, {

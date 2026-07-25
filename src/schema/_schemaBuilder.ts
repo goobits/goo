@@ -2,6 +2,7 @@ import { createControlFromRegistry } from '../controller/controlFactory.ts'
 import {
 	type GooControlElement,
 	type GooControlOptions,
+	type GooControlOptionValue,
 	type GooControlTypeConfig,
 	type GooSvelteControlModule,
 	resolveGooControlTypeConfig
@@ -57,6 +58,7 @@ import type {
 const SCHEMA_DATA_MOTION_CLASS = 'goo-schema__data-motion'
 const SCHEMA_DATA_MOTION_ATTRIBUTE = 'data-goo-schema-data-motion'
 const SCHEMA_DATA_MOTION_DURATION_MS = 360
+const SCHEMA_SLIDER_CONTROL_TYPES = new Set([ 'range', 'range-dual', 'slider', 'slider-field' ])
 const schemaDataMotionTimers = new WeakMap<HTMLElement, ReturnType<typeof setTimeout>>()
 
 export type SchemaRebuildOptions = {
@@ -552,6 +554,7 @@ async function buildField(
 	const { object, property } = resolved
 	const controlTypes = build.state.controlTypes
 	const controllerOptions = buildControllerOptions(node, object, property, object[property], element._data)
+	applySchemaSliderResetValue(controllerOptions, build.state.defaults, node.path)
 	if (controlTypes) {
 		controllerOptions.controlTypes = controlTypes
 	}
@@ -619,6 +622,22 @@ async function buildField(
 	controller.name(controllerOptions.label)
 	build.controllers.set(node.path, controller)
 	controller.addTo(parent)
+}
+
+function applySchemaSliderResetValue(
+	controllerOptions: ControllerOptions,
+	defaults: GooSchemaData | undefined,
+	path: string
+): void {
+	if (!controllerOptions.type || !SCHEMA_SLIDER_CONTROL_TYPES.has(controllerOptions.type) || !defaults) {
+		return
+	}
+	const resetValue = getByPath(defaults, path)
+	if (resetValue === undefined) return
+	controllerOptions.controlOptions = {
+		...controllerOptions.controlOptions,
+		resetValue: cloneSchemaValue(resetValue) as GooControlOptionValue
+	}
 }
 
 async function buildDirectSchemaField(

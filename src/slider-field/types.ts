@@ -9,6 +9,7 @@ import type {
 	GooSliderSnap,
 	GooSliderTickConfig,
 	GooSliderUnit,
+	GooSliderValue,
 	GooSliderValueBubble
 } from '../slider/types.ts'
 
@@ -54,6 +55,7 @@ export type GooSliderFieldOptions = {
 	presetColor?: string
 	presetHue?: number
 	presetSaturation?: number
+	resetValue?: GooSliderValue
 	scale?: GooSliderScale
 	scalePower?: number
 	shape?: GooSliderShape

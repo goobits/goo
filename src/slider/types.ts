@@ -140,6 +140,9 @@ export type GooSliderProps = GooForwardedAttributes & {
 	/** Optional snapping to marks/ticks or explicit snap values. */
 	snap?: GooSliderSnap
 
+	/** Canonical reset value shown as a marker and softly magnetized during pointer drags. */
+	resetValue?: GooSliderValue
+
 	/** First-class value-to-track scale. Custom easing props still override rendered mapping. */
 	scale?: GooSliderScale
 
