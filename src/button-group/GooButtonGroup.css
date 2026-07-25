@@ -122,6 +122,9 @@
 }
 
 .goo-button-group > .goo-button .goo-button__title {
+	display: block;
+	flex: 1 1 auto;
+	max-width: 100%;
 	min-width: 0;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -150,7 +153,36 @@
 	opacity: 0;
 }
 
-.goo-button-group > .goo-button:hover:not(.goo-button--selected) {
+/* Hover previews the same rounded surface that selection will occupy. The
+   button remains the full rectangular hit target; only its visual state is
+   inset/rounded. Horizontal groups and vertical single-select groups use the
+   indicator treatment, while vertical multi-select keeps its matching flat
+   segment fill below. */
+.goo-button-group:is(:not([data-layout='vertical']), .goo-button-group--single-select)
+	> .goo-button:not(.goo-button--selected):not([selected])::before {
+	content: '';
+	position: absolute;
+	inset: var(--goo-button-group-indicator-inset-block) 0;
+	z-index: -1;
+	border-radius: var(--goo-button-group-indicator-radius);
+	background: var(--goo-button-bg-hover);
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity var(--goo-button-group-motion-fast);
+}
+
+.goo-button-group:is(:not([data-layout='vertical']), .goo-button-group--single-select)
+	> .goo-button:not(.goo-button--selected):not([selected]):hover::before {
+	opacity: 1;
+}
+
+.goo-button-group:is(:not([data-layout='vertical']), .goo-button-group--single-select)
+	> .goo-button:not(.goo-button--selected):not([selected]):hover {
+	background: transparent;
+}
+
+.goo-button-group[data-layout='vertical']:not(.goo-button-group--single-select)
+	> .goo-button:hover:not(.goo-button--selected):not([selected]) {
 	background: var(--goo-button-bg-hover);
 }
 
@@ -186,6 +218,12 @@
 .goo-button-group > .goo-button[selected]:hover:not([disabled]) {
 	background: transparent !important;
 	color: var(--goo-button-group-selected-fg);
+}
+
+.goo-button-group.goo-button-group--single-select:has(
+	> .goo-button:is(.goo-button--selected, [selected]):hover:not([disabled])
+)::before {
+	background: var(--goo-button-group-selected-bg-hover);
 }
 
 /* Multi-select selection: each selected segment paints the same indicator

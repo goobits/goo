@@ -79,6 +79,151 @@ test.describe('GooSchema', () => {
 		await page.keyboard.press('Home')
 		await expect(textInput).toBeFocused()
 	})
+
+	test('ellipsizes button-group labels when their segment is too narrow', async({ page }) => {
+		await page.evaluate(() => {
+			const host = document.createElement('div')
+			host.style.width = '180px'
+			const schema = (window as unknown as GooHarnessWindow).goo.createGooSchema({
+				schema: [ {
+					ariaLabel: 'Spiral type',
+					path: 'variant',
+					showLabel: false,
+					type: 'button-group',
+					options: [
+						{ icon: 'test-icon', label: 'Archimedean', value: 'archimedean' },
+						{ icon: 'test-icon', label: 'Logarithmic', value: 'logarithmic' },
+						{ icon: 'test-icon', label: 'Rosette', value: 'rosette' }
+					]
+				} ],
+				data: { variant: 'archimedean' },
+				bare: true
+			})
+			host.appendChild(schema)
+			document.getElementById('test-container')!.appendChild(host)
+		})
+
+		const title = page.locator('.goo-button[data-key="archimedean"] .goo-button__title')
+		await expect(title).toBeVisible()
+		const state = await title.evaluate(element => {
+			const style = getComputedStyle(element)
+			return {
+				clipped: element.scrollWidth > element.clientWidth,
+				display: style.display,
+				overflow: style.overflow,
+				textOverflow: style.textOverflow,
+				whiteSpace: style.whiteSpace
+			}
+		})
+
+		expect(state).toEqual({
+			clipped: true,
+			display: 'block',
+			overflow: 'hidden',
+			textOverflow: 'ellipsis',
+			whiteSpace: 'nowrap'
+		})
+
+		const button = page.locator('.goo-button[data-key="archimedean"]')
+		await expect(button).not.toHaveAttribute('title')
+		const icon = button.locator('.goo-button__icon')
+		await icon.evaluate(element => {
+			element.setAttribute('style', 'width: 12px; height: 12px')
+		})
+		await icon.hover()
+		await expect(page.getByRole('tooltip')).toHaveText('Archimedean')
+		await expect(button).toHaveAttribute('aria-describedby', /^goo-tooltip-/)
+	})
+
+	test('uses matching rounded surfaces for button-group hover and selection', async({ page }) => {
+		await page.evaluate(() => {
+			const schema = (window as unknown as GooHarnessWindow).goo.createGooSchema({
+				schema: [ {
+					ariaLabel: 'Alignment',
+					path: 'alignment',
+					showLabel: false,
+					type: 'button-group',
+					options: [ 'Left', 'Center', 'Right' ]
+				} ],
+				data: { alignment: 'Left' },
+				bare: true
+			})
+			document.getElementById('test-container')!.appendChild(schema)
+		})
+
+		const group = page.locator('.goo-button-group')
+		const selectedButton = group.locator('.goo-button[data-key="Left"]')
+		const hoverButton = group.locator('.goo-button[data-key="Center"]')
+		await group.evaluate(element => {
+			const style = (element as HTMLElement).style
+			style.setProperty('--goo-button-group-indicator-inset-block', '2px')
+			style.setProperty('--goo-button-group-indicator-radius', '5px')
+			style.setProperty('--goo-button-group-motion-fast', '0s')
+			style.setProperty('--goo-button-group-selected-bg', 'rgb(20, 80, 200)')
+			style.setProperty('--goo-button-group-selected-bg-hover', 'rgb(30, 90, 210)')
+			style.setProperty('--goo-theme-border', 'rgb(50, 60, 70)')
+		})
+		await expect(selectedButton).toHaveClass(/goo-button--selected/)
+
+		const selectedSurface = await group.evaluate(element => {
+			const style = getComputedStyle(element, '::before')
+			return {
+				background: style.backgroundColor,
+				borderRadius: style.borderRadius,
+				bottom: style.bottom,
+				opacity: style.opacity,
+				top: style.top
+			}
+		})
+		const idleHoverSurface = await hoverButton.evaluate(element => {
+			const buttonStyle = getComputedStyle(element)
+			const surfaceStyle = getComputedStyle(element, '::before')
+			return {
+				background: surfaceStyle.backgroundColor,
+				borderRadius: surfaceStyle.borderRadius,
+				bottom: surfaceStyle.bottom,
+				buttonBackground: buttonStyle.backgroundColor,
+				opacity: surfaceStyle.opacity,
+				top: surfaceStyle.top
+			}
+		})
+
+		expect(idleHoverSurface).toEqual({
+			background: expect.not.stringMatching(/rgba?\(0, 0, 0, 0\)/),
+			borderRadius: selectedSurface.borderRadius,
+			bottom: selectedSurface.bottom,
+			buttonBackground: 'rgba(0, 0, 0, 0)',
+			opacity: '0',
+			top: selectedSurface.top
+		})
+
+		await hoverButton.hover()
+		await expect.poll(async() => hoverButton.evaluate(element => {
+			return getComputedStyle(element, '::before').opacity
+		})).toBe('1')
+
+		const hoveredSurface = await hoverButton.evaluate(element => {
+			const buttonStyle = getComputedStyle(element)
+			const surfaceStyle = getComputedStyle(element, '::before')
+			return {
+				borderRadius: surfaceStyle.borderRadius,
+				bottom: surfaceStyle.bottom,
+				buttonBackground: buttonStyle.backgroundColor,
+				top: surfaceStyle.top
+			}
+		})
+		expect(hoveredSurface).toEqual({
+			borderRadius: selectedSurface.borderRadius,
+			bottom: selectedSurface.bottom,
+			buttonBackground: 'rgba(0, 0, 0, 0)',
+			top: selectedSurface.top
+		})
+
+		await selectedButton.hover()
+		await expect.poll(async() => group.evaluate(element => {
+			return getComputedStyle(element, '::before').backgroundColor
+		})).not.toBe(selectedSurface.background)
+	})
 })
 
 interface GooHarnessWindow extends Window {
@@ -92,11 +237,18 @@ interface GooHarnessWindow extends Window {
 }
 
 interface GooSchemaField {
+	ariaLabel?: string
 	children?: GooSchemaField[]
 	path?: string
 	open?: boolean
 	min?: number
 	max?: number
+	options?: Array<{
+		icon?: string
+		label: string
+		value: string
+	}>
+	showLabel?: boolean
 	title?: string
 	type?: string
 }

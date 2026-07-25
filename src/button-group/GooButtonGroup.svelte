@@ -25,6 +25,7 @@ import './GooButtonGroup.css'
 import GooIcon from '../icon/GooIcon.svelte'
 import { iconRegistry } from '../icon/registry.ts'
 import { handleLinearNavigationKeyboardEvent } from '../support/keyboard/_composite.ts'
+import { tooltip } from '../tooltip/tooltip.ts'
 import {
 	normalizeButtonGroupOptions,
 	normalizeButtonGroupValue,
@@ -318,7 +319,7 @@ function mountIcon(node: HTMLSpanElement, iconFactory: () => Element) {
 				aria-disabled={disabled || option.disabled ? 'true' : undefined}
 				aria-label={option.ariaLabel || option.tooltip || option.value || undefined}
 				aria-pressed={isSelected(option.key)}
-				title={option.tooltip || undefined}
+				use:tooltip={{ content: option.tooltip || option.value }}
 			>
 				{#if typeof option.icon === 'string'}
 					{#if iconRegistry.has(option.icon)}
