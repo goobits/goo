@@ -294,13 +294,23 @@
 		const options: GooSchemaUpdateOptions = {}
 		const nextDataKey = getDataKey(snapshot.data)
 		const nextSchemaKey = getStructuralKey(snapshot.schema)
-		if (hasStructuralChange(snapshot.schema, lastSchema, nextSchemaKey, lastSchemaKey)) {
+		const schemaChanged = hasStructuralChange(
+			snapshot.schema,
+			lastSchema,
+			nextSchemaKey,
+			lastSchemaKey
+		)
+		if (schemaChanged) {
 			schemaElement.setSchema(snapshot.schema)
 		}
 		lastSchema = snapshot.schema
 		lastSchemaKey = nextSchemaKey
 		if (nextDataKey !== lastDataKey) {
-			if (nextDataKey === getDataKey(schemaElement.getData())) {
+			if (schemaChanged) {
+				// The replacement build initializes its controls from this data.
+				// Refreshing now would point outgoing controls at the new model.
+				schemaElement.setData(snapshot.data, { refresh: false })
+			} else if (nextDataKey === getDataKey(schemaElement.getData())) {
 				// Controlled hosts commonly echo a schema-owned commit back as
 				// a new data object. Refresh that shared value without rebasing
 				// the history transaction that produced it.
