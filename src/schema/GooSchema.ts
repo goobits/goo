@@ -135,6 +135,13 @@ export interface GooSchema extends HTMLElement {
 	setOptions(options: GooSchemaUpdateOptions): void
 	setSchema(schema: GooSchemaType): void
 	undo(scopeId?: string): void
+	/** Resolve after the newest queued or in-flight schema build is committed. */
+	whenReady(): Promise<void>
+}
+
+type GooSchemaReadyWaiter = {
+	reject(error: unknown): void
+	resolve(): void
 }
 
 type GooSchemaInternal = GooSchema & GooSchemaBuildElement & {
@@ -148,6 +155,7 @@ type GooSchemaInternal = GooSchema & GooSchemaBuildElement & {
 	_preserveFolderOpenStateOnRebuild: boolean
 	_rebuildPending: boolean
 	_redoMode: boolean
+	_readyWaiters: Set<GooSchemaReadyWaiter>
 	_rebuild(options?: SchemaRebuildOptions): Promise<void>
 	_scheduleRebuild(options?: SchemaRebuildOptions): void
 }
@@ -183,6 +191,7 @@ function initializeSchema(element: GooSchemaInternal, options: GooSchemaOptions)
 	element._rebuildPending = false
 	element._preserveFolderOpenStateOnRebuild = false
 	element._redoMode = false
+	element._readyWaiters = new Set()
 	element._root = null
 	element._stagedBuild = null
 	element._toolbar = null
@@ -226,6 +235,7 @@ function attachSchemaApi(element: GooSchemaInternal): void {
 			element._toolbar = null
 			element.replaceChildren()
 			element.remove()
+			settleSchemaReadyWaiters(element)
 		},
 		getActionsElement: () => element._toolbar,
 		getController: (path: string) => element._controllers.get(path) as HTMLElement | undefined,
@@ -340,6 +350,17 @@ function attachSchemaApi(element: GooSchemaInternal): void {
 		undo: (scopeId = ROOT_SCHEMA_HISTORY_SCOPE) => {
 			element._applyHistory(scopeId, 'undo')
 		},
+		whenReady: () => {
+			if (
+				element._destroyed
+				|| (!element._rebuildPending && !element._stagedBuild)
+			) {
+				return Promise.resolve()
+			}
+			return new Promise<void>((resolve, reject) => {
+				element._readyWaiters.add({ resolve, reject })
+			})
+		},
 		_applyHistory: (
 			scopeId: string,
 			direction: 'redo' | 'undo'
@@ -433,8 +454,31 @@ function attachSchemaApi(element: GooSchemaInternal): void {
 				void element._rebuild(nextOptions)
 			})
 		},
-		_rebuild: (options?: SchemaRebuildOptions) => rebuildSchema(element, options)
+		_rebuild: async(options?: SchemaRebuildOptions) => {
+			try {
+				await rebuildSchema(element, options)
+				settleSchemaReadyWaiters(element)
+			} catch(error) {
+				settleSchemaReadyWaiters(element, error)
+				throw error
+			}
+		}
 	})
+}
+
+function settleSchemaReadyWaiters(
+	element: GooSchemaInternal,
+	error?: unknown
+): void {
+	if (!element._destroyed && (element._rebuildPending || element._stagedBuild)) return
+	for (const waiter of element._readyWaiters) {
+		if (error === undefined) {
+			waiter.resolve()
+		} else {
+			waiter.reject(error)
+		}
+	}
+	element._readyWaiters.clear()
 }
 
 function finalizeSchemaCommit(

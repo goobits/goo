@@ -1581,6 +1581,48 @@ describe('GooSchema', () => {
 		expect(destroyStaleControl).toHaveBeenCalledOnce()
 	})
 
+	it('waits for the latest asynchronous schema build', async() => {
+		let resolveDelayed!: (value: object) => void
+		const delayedModule = new Promise<object>(resolve => {
+			resolveDelayed = resolve
+		})
+		const schema = createGooSchema({
+			schema: [ { path: 'size', min: 0, max: 100 } ],
+			data: { opacity: 0.5, size: 12 },
+			bare: true,
+			controlTypes: {
+				'delayed-control': {
+					load: () => delayedModule,
+					extract: () => () => Object.assign(document.createElement('div'), {
+						className: 'delayed-control',
+						getValue: () => 0,
+						setValue: vi.fn()
+					})
+				}
+			}
+		})
+		document.body.appendChild(schema)
+		await schema.whenReady()
+
+		schema.setSchema([ {
+			type: 'widget',
+			widget: 'delayed-control',
+			id: 'delayed',
+			layout: 'self-contained'
+		} ])
+		const delayedReady = schema.whenReady()
+		schema.setSchema([ { path: 'opacity', min: 0, max: 1 } ])
+
+		await schema.whenReady()
+		await delayedReady
+		expect(schema.getController('opacity')).not.toBeUndefined()
+		expect(schema.getController('size')).toBeUndefined()
+
+		resolveDelayed({})
+		await settleGooSchema()
+		expect(schema.querySelector('.delayed-control')).toBeNull()
+	})
+
 	it('does not rebuild after destroy when a rebuild was already queued', async() => {
 		const destroyControl = vi.fn()
 		const schema = createGooSchema({
