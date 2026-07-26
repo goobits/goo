@@ -14,6 +14,8 @@ export const controlSchema: SvelteControlSchema = {
 <script lang="ts">
 import './GooAngleInput.css'
 
+import { untrack } from 'svelte'
+
 import GooNumber from '../input/GooNumber.svelte'
 import { containKeyboardEvent } from '../support/keyboard/_keyboardActivation.ts'
 import { createPointerDrag, type GooPointerDragEvent, type GooPointerDragHandle } from '../support/utils/pointerDrag.ts'
@@ -32,6 +34,7 @@ let trackElement: HTMLButtonElement | undefined = $state()
 let activePointerId = $state<number | null>(null)
 let currentValue = $state(0)
 let lastCommittedValue = $state(0)
+let presentationRotation = $state(180)
 let currentUnit: GooAngleInputUnit = $state('degree')
 let effectiveDisabled = $state(false)
 let skipNextValueSync = false
@@ -57,7 +60,6 @@ let {
 
 const activeUnit = $derived(currentUnit)
 const degrees = $derived(normalizeDegrees(toDegrees(currentValue, activeUnit)))
-const rotation = $derived(degrees + 180)
 
 const classes = $derived.by(() => {
 	const values = [ 'goo-angle-input' ]
@@ -90,6 +92,14 @@ $effect(() => {
 
 $effect(() => {
 	effectiveDisabled = Boolean(disabled)
+})
+
+$effect(() => {
+	const nextRotation = degrees + 180
+	presentationRotation = nearestEquivalentDegrees(
+		nextRotation,
+		untrack(() => presentationRotation)
+	)
 })
 
 $effect(() => {
@@ -284,6 +294,13 @@ function normalizeDegrees(nextValue: number): number {
 	return ((nextValue % 360) + 360) % 360
 }
 
+/* Keeps CSS transform interpolation on the shortest route across the 0°/360°
+   seam while the public angle remains normalized. */
+function nearestEquivalentDegrees(nextDegrees: number, referenceDegrees: number): number {
+	const signedDelta = normalizeDegrees(nextDegrees - referenceDegrees + 180) - 180
+	return referenceDegrees + signedDelta
+}
+
 function toDegrees(nextValue: number, nextUnit: GooAngleInputUnit): number {
 	return nextUnit === 'radian' ? nextValue * 180 / Math.PI : nextValue
 }
@@ -329,7 +346,7 @@ function syncBoundValue(nextValue: number): void {
 		<div
 			class="goo-angle-input__handle"
 			tabindex="-1"
-			style:transform={`rotate(${ rotation }deg)`}
+			style:transform={`rotate(${ presentationRotation }deg)`}
 		></div>
 	</button>
 	<div

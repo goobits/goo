@@ -43,6 +43,30 @@ describe('GooAngleInput', () => {
 		expect(element?.getValue()).toBe(70)
 	})
 
+	it('takes the shortest visual route across the 0-degree seam', async() => {
+		const { container, rerender } = render(GooAngleInput, {
+			props: {
+				value: 359
+			}
+		})
+		await tick()
+
+		const handle = container.querySelector<HTMLElement>('.goo-angle-input__handle')!
+		const beforeClockwiseWrap = readRotation(handle)
+
+		await rerender({ value: 1 })
+		await tick()
+
+		const afterClockwiseWrap = readRotation(handle)
+		expect(afterClockwiseWrap - beforeClockwiseWrap).toBeCloseTo(2)
+
+		await rerender({ value: 359 })
+		await tick()
+
+		expect(readRotation(handle) - afterClockwiseWrap).toBeCloseTo(-2)
+		expect(container.querySelector<HTMLInputElement>('.goo-number__content')?.value).toBe('359')
+	})
+
 	it('emits value callbacks from the Svelte number input', async() => {
 		const oninput = vi.fn()
 		const onchange = vi.fn()
@@ -153,6 +177,12 @@ function dispatchKey(element: HTMLElement, key: string): KeyboardEvent {
 	})
 	element.dispatchEvent(event)
 	return event
+}
+
+function readRotation(element: HTMLElement): number {
+	const match = /^rotate\((-?\d+(?:\.\d+)?)deg\)$/.exec(element.style.transform)
+	if (!match) throw new Error(`Expected a degree rotation, received "${ element.style.transform }"`)
+	return Number(match[1])
 }
 
 function rect(x: number, y: number, width: number, height: number): DOMRect {
