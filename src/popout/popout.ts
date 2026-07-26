@@ -35,7 +35,7 @@ import {
 	stabilizeOpeningLayout
 } from './_popoutLayout.ts'
 import {
-	getActivePopout,
+	getActiveEscapePopout,
 	type GooPopoutRuntime,
 	gooPopoutRuntime as sharedGooPopoutRuntime,
 	registerActivePopout,
@@ -208,11 +208,11 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 
 		// Mark open before the first await so callers can synchronously observe the state.
 		opened = true
-		registerActivePopout(instance)
+		registerActivePopout(instance, { escapeToClose })
 		bindImmediatePopoutEscapeToClose({
 			close,
 			escapeToClose,
-			isActive: () => getActivePopout() === instance,
+			isActive: () => getActiveEscapePopout() === instance,
 			isOpen: () => opened,
 			lifecycle
 		})

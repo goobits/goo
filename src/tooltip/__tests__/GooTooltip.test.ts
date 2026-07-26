@@ -36,6 +36,30 @@ describe('GooTooltip', () => {
 		button.remove()
 	})
 
+	it('dismisses a standalone tooltip on Escape without consuming the key', () => {
+		const button = document.createElement('button')
+		document.body.appendChild(button)
+		const instance = gooTooltip.createGooTooltip({
+			for: button,
+			content: 'Save',
+			trigger: 'manual'
+		})
+		instance.show()
+		const escape = new KeyboardEvent('keydown', {
+			bubbles: true,
+			cancelable: true,
+			key: 'Escape'
+		})
+
+		document.dispatchEvent(escape)
+
+		expect(instance.visible).toBe(false)
+		expect(escape.defaultPrevented).toBe(false)
+
+		instance.destroy()
+		button.remove()
+	})
+
 	it('renders markup-looking string content as plain text', () => {
 		const button = document.createElement('button')
 		document.body.appendChild(button)
