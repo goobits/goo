@@ -5,10 +5,18 @@ export type GooPopoutRuntime = GooPopoutInstance & {
 	readonly children: Set<GooPopoutRuntime>
 }
 
-const activePopouts = new Set<GooPopoutRuntime>()
+type ActivePopoutRegistration = {
+	escapeToClose: boolean
+}
 
-export function registerActivePopout(popout: GooPopoutRuntime): void {
-	activePopouts.add(popout)
+const activePopouts = new Map<GooPopoutRuntime, ActivePopoutRegistration>()
+
+export function registerActivePopout(
+	popout: GooPopoutRuntime,
+	registration: ActivePopoutRegistration
+): void {
+	activePopouts.delete(popout)
+	activePopouts.set(popout, registration)
 }
 
 export function unregisterActivePopout(popout: GooPopoutRuntime): void {
@@ -23,13 +31,13 @@ export const gooPopoutRuntime = {
 }
 
 function closeAllPopouts(): void {
-	for (const popout of Array.from(activePopouts)) {
+	for (const popout of Array.from(activePopouts.keys())) {
 		void popout.close()
 	}
 }
 
 function closePopoutsOutside(target: HTMLElement): void {
-	for (const popout of Array.from(activePopouts)) {
+	for (const popout of Array.from(activePopouts.keys())) {
 		const element = popout.element
 		if (element?.contains(target)) {
 			continue
@@ -40,6 +48,16 @@ function closePopoutsOutside(target: HTMLElement): void {
 }
 
 export function getActivePopout(): GooPopoutRuntime | null {
-	const popouts = Array.from(activePopouts)
+	const popouts = Array.from(activePopouts.keys())
 	return popouts[popouts.length - 1] ?? null
+}
+
+/** Return the topmost popout that opted into Escape dismissal. */
+export function getActiveEscapePopout(): GooPopoutRuntime | null {
+	const registrations = Array.from(activePopouts.entries())
+	for (let index = registrations.length - 1; index >= 0; index -= 1) {
+		const [ popout, registration ] = registrations[index]
+		if (registration.escapeToClose) return popout
+	}
+	return null
 }

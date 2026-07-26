@@ -476,6 +476,46 @@ describe('GooPopout', () => {
 		}
 	})
 
+	it('lets an Escape-disabled child defer Escape to its closable parent', async() => {
+		const target = document.createElement('button')
+		const parentContent = document.createElement('div')
+		const childTarget = document.createElement('button')
+		const childContent = document.createElement('div')
+		parentContent.appendChild(childTarget)
+		document.body.appendChild(target)
+		const parent = createGooPopout({
+			at: target,
+			content: parentContent,
+			openImmediately: false
+		})
+		const child = createGooPopout({
+			at: childTarget,
+			content: childContent,
+			escapeToClose: false,
+			openImmediately: false
+		})
+
+		try {
+			await parent.open()
+			const childOpenPromise = child.open()
+			const escape = new KeyboardEvent('keydown', {
+				bubbles: true,
+				cancelable: true,
+				key: 'Escape'
+			})
+			document.dispatchEvent(escape)
+			await childOpenPromise
+			await delay(180)
+
+			expect(escape.defaultPrevented).toBe(true)
+			expect(parent.isOpen()).toBe(false)
+			expect(child.isOpen()).toBe(false)
+		} finally {
+			await Promise.all([ parent.destroy(), child.destroy() ])
+			target.remove()
+		}
+	})
+
 	it('binds the Svelte component instance for imperative control', async() => {
 		const target = document.createElement('button')
 		target.id = 'popout-target'

@@ -202,7 +202,7 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 				chromeless,
 				className: `goo-tooltip ${ className }`.trim(),
 				clickToClose: false, // Tooltip closes on mouse leave, not click
-				escapeToClose: true,
+				escapeToClose: false, // Passive tooltip must not block an enclosing popout's Escape key.
 				openImmediately: false, // We control timing
 				initialFocus: 'none', // Tooltip must not steal focus from the hover target.
 				onOpen: ({ element }) => {
@@ -342,6 +342,12 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 		if (popout?.isOpen()) hide()
 	}
 	lifecycle.listen(window, 'blur', onWindowBlur)
+
+	// Keep standalone tooltips dismissible without consuming Escape from an enclosing surface.
+	const onEscape = (event: KeyboardEvent) => {
+		if (event.key === 'Escape' && popout?.isOpen()) hide()
+	}
+	lifecycle.listen(document, 'keydown', onEscape, { capture: true })
 
 	// -------------------------------------------------------------------------
 	// Cleanup
