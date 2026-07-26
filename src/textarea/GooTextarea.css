@@ -10,6 +10,12 @@
 	min-inline-size: var(--goo-textarea-min-inline-size);
 }
 
+.goo-textarea.goo-textarea--block {
+	display: block;
+	min-inline-size: 0;
+	width: 100%;
+}
+
 .goo-textarea__input {
 	background: var(--goo-theme-surface-sunken);
 	border: 1px solid var(--goo-theme-border);

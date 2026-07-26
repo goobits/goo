@@ -40,9 +40,16 @@ let {
 	autocomplete,
 	spellcheck,
 	autocapitalize,
+	inputmode,
+	minLength,
+	maxLength,
+	autofocus = false,
+	'aria-describedby': ariaDescribedby,
+	'aria-invalid': ariaInvalid,
 	disabled = false,
 	readonly = false,
 	required = false,
+	block = false,
 	size,
 	class: className = '',
 	style,
@@ -72,6 +79,7 @@ onDestroy(() => {
 const classes = $derived.by(() => {
 	const values = [ 'goo-input' ]
 	if (multiline) values.push('goo-input--multiline')
+	if (block) values.push('goo-input--block')
 	if (disabled) values.push('goo-input--disabled')
 	if (className) values.push(className)
 	return values.filter(Boolean).join(' ')
@@ -188,7 +196,7 @@ function handleBlur(event: Event): void {
 		lastCommittedValue = currentValue
 		emitChange(oldValue)
 	}
-	onblur?.()
+	onblur?.(currentValue)
 	inputElement?.dispatchEvent(new CustomEvent('blur', { detail: { value: currentValue, target: inputElement } }))
 }
 
@@ -243,6 +251,7 @@ function pulseValueChange(): void {
 	onpointerdown={(event) => event.stopPropagation()}
 >
 	{#if multiline}
+		<!-- svelte-ignore a11y_autofocus -->
 		<textarea
 			bind:this={contentElement}
 			class="goo-input__content"
@@ -253,6 +262,12 @@ function pulseValueChange(): void {
 			autocomplete={autocomplete}
 			spellcheck={spellcheck}
 			autocapitalize={autocapitalize}
+			{inputmode}
+			minlength={minLength}
+			maxlength={maxLength}
+			{autofocus}
+			aria-describedby={ariaDescribedby}
+			aria-invalid={ariaInvalid}
 			{disabled}
 			readOnly={readonly}
 			{required}
@@ -265,6 +280,7 @@ function pulseValueChange(): void {
 			onkeyupcapture={(event) => containKeyboardEvent(event, { preventDefault: false, immediate: false })}
 		></textarea>
 	{:else}
+		<!-- svelte-ignore a11y_autofocus -->
 		<input
 			bind:this={contentElement}
 			class="goo-input__content"
@@ -276,6 +292,12 @@ function pulseValueChange(): void {
 			autocomplete={autocomplete}
 			spellcheck={spellcheck}
 			autocapitalize={autocapitalize}
+			{inputmode}
+			minlength={minLength}
+			maxlength={maxLength}
+			{autofocus}
+			aria-describedby={ariaDescribedby}
+			aria-invalid={ariaInvalid}
 			{disabled}
 			readOnly={readonly}
 			{required}

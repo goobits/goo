@@ -33,6 +33,33 @@ describe('GooSelect', () => {
 		expect(container.querySelector('.goo-select__trigger-label')?.textContent).toBe('B')
 	})
 
+	it('forwards required and validation semantics to the combobox trigger', () => {
+		const { container } = render(GooSelect, {
+			props: {
+				block: true,
+				inputId: 'option-input',
+				name: 'option',
+				options: [ { id: 'a', label: 'A' } ],
+				required: true,
+				'aria-describedby': 'option-help',
+				'aria-invalid': 'true'
+			}
+		})
+
+		const root = container.querySelector<HTMLElement>('.goo-select')
+		const trigger = container.querySelector<HTMLButtonElement>('.goo-select__trigger')
+		const field = container.querySelector<HTMLSelectElement>('.goo-select__form-field')
+
+		expect(root?.classList.contains('goo-select--block')).toBe(true)
+		expect(trigger?.id).toBe('option-input')
+		expect(trigger?.getAttribute('aria-required')).toBe('true')
+		expect(trigger?.getAttribute('aria-describedby')).toBe('option-help')
+		expect(trigger?.getAttribute('aria-invalid')).toBe('true')
+		expect(field?.name).toBe('option')
+		expect(field?.required).toBe(true)
+		expect(field?.checkValidity()).toBe(false)
+	})
+
 	it('binds the native root API for imperative updates', async() => {
 		let element: GooSelectElement | null = null
 		render(GooSelect, {

@@ -136,12 +136,17 @@ export type GooSelectProps = GooForwardedAttributes & {
 
 	style?: string
 	id?: string
+	inputId?: string
 	size?: string
 	name?: string
 	placeholder?: string
 	ariaLabel?: string
 	tooltip?: string | (() => string)
 	title?: string
+	required?: boolean
+	block?: boolean
+	'aria-describedby'?: string
+	'aria-invalid'?: boolean | 'false' | 'grammar' | 'spelling' | 'true'
 	disabled?: boolean
 	actionContext?: GooSelectActionContext
 	triggerIcon?: string | HTMLElement | (() => HTMLElement)

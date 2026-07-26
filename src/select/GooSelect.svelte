@@ -80,10 +80,15 @@ let {
 	'aria-label': ariaLabelAttribute,
 	tooltip,
 	title,
+	required = false,
+	block = false,
+	'aria-describedby': ariaDescribedby,
+	'aria-invalid': ariaInvalid,
 	disabled = false,
 	actionContext,
 	triggerIcon,
 	id,
+	inputId,
 	size,
 	class: className = '',
 	style,
@@ -117,6 +122,7 @@ const classes = $derived.by(() => {
 	if (opened) values.push('goo-select--open')
 	if (selectMenu.variant === 'attached') values.push('goo-select--menu-attached')
 	if (effectiveDisabled) values.push('goo-select--disabled')
+	if (block) values.push('goo-select--block')
 	if (className) values.push(className)
 	return values.filter(Boolean).join(' ')
 })
@@ -586,6 +592,11 @@ function emitChange(oldValue: string): void {
 	selectElement.dispatchEvent(new CustomEvent('change', { detail: data, bubbles: true }))
 }
 
+function handleFormFieldInvalid(event: Event): void {
+	event.preventDefault()
+	triggerElement?.focus()
+}
+
 function getContext(): unknown {
 	return currentBoundContext || selectElement
 }
@@ -667,6 +678,7 @@ $effect(() => {
 	{#if showHeader}
 		<button
 			bind:this={triggerElement}
+			id={inputId}
 			type="button"
 			class="goo-select__trigger"
 			role="combobox"
@@ -675,6 +687,9 @@ $effect(() => {
 			aria-controls={opened && listboxId ? listboxId : undefined}
 			aria-activedescendant={opened && activeDescendant ? activeDescendant : undefined}
 			aria-label={triggerAccessibleName}
+			aria-describedby={ariaDescribedby}
+			aria-invalid={ariaInvalid}
+			aria-required={required ? 'true' : undefined}
 			disabled={effectiveDisabled}
 			title={triggerIconElement ? undefined : (typeof tooltip === 'string' ? tooltip : title)}
 			onpointerdown={handleTriggerPointerDown}
@@ -696,7 +711,22 @@ $effect(() => {
 		</button>
 	{/if}
 	{#if name}
-		<input type="hidden" data-goo-select-field {name} value={selectedValue} disabled={effectiveDisabled} />
+		<select
+			data-goo-select-field
+			class="goo-select__form-field"
+			{name}
+			value={selectedValue}
+			{required}
+			disabled={effectiveDisabled}
+			tabindex="-1"
+			aria-hidden="true"
+			oninvalid={handleFormFieldInvalid}
+		>
+			<option value=""></option>
+			{#if selectedValue}
+				<option value={selectedValue}>{selectedValue}</option>
+			{/if}
+		</select>
 	{/if}
 	{#if children}
 		{@render children()}

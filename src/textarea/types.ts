@@ -35,6 +35,18 @@ export type GooTextareaProps = GooForwardedAttributes & {
 	/** Maximum text length. */
 	maxLength?: number
 
+	/** Focus the native textarea when mounted. */
+	autofocus?: boolean
+
+	/** Accessible label for the native textarea. */
+	ariaLabel?: string
+
+	/** IDs of elements describing the native textarea. */
+	'aria-describedby'?: string
+
+	/** Native textarea validation state. */
+	'aria-invalid'?: boolean | 'false' | 'grammar' | 'spelling' | 'true'
+
 	/** Whether the textarea is disabled. */
 	disabled?: boolean
 
@@ -43,6 +55,9 @@ export type GooTextareaProps = GooForwardedAttributes & {
 
 	/** Whether a value is required. */
 	required?: boolean
+
+	/** Fill the available inline width. */
+	block?: boolean
 
 	/** Extra class names. */
 	class?: string
@@ -62,4 +77,6 @@ export type GooTextareaProps = GooForwardedAttributes & {
 	/** Change callback. */
 	onchange?: (value: string, oldValue?: string) => void
 
+	/** Native keydown callback. */
+	onkeydown?: (event: KeyboardEvent) => void
 }

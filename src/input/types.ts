@@ -39,6 +39,24 @@ export type GooInputProps<T = string> = GooForwardedAttributes & {
 	/** Native autocapitalize hint. */
 	autocapitalize?: HTMLInputAttributes['autocapitalize'] | HTMLTextareaAttributes['autocapitalize']
 
+	/** Native virtual-keyboard input mode. */
+	inputmode?: HTMLInputAttributes['inputmode'] | HTMLTextareaAttributes['inputmode']
+
+	/** Native minimum input length. */
+	minLength?: number
+
+	/** Native maximum input length. */
+	maxLength?: number
+
+	/** Focus the native input when mounted. */
+	autofocus?: boolean
+
+	/** IDs of elements describing the native input. */
+	'aria-describedby'?: string
+
+	/** Native input validation state. */
+	'aria-invalid'?: boolean | 'false' | 'grammar' | 'spelling' | 'true'
+
 	/** Element id. */
 	id?: string
 
@@ -53,6 +71,9 @@ export type GooInputProps<T = string> = GooForwardedAttributes & {
 
 	/** Whether a value is required. */
 	required?: boolean
+
+	/** Fill the available inline width. */
+	block?: boolean
 
 	/** Compact/medium size token. */
 	size?: string
@@ -79,7 +100,7 @@ export type GooInputProps<T = string> = GooForwardedAttributes & {
 	onfocus?: () => void
 
 	/** Blur callback. */
-	onblur?: () => void
+	onblur?: (value: T) => void
 
 	/** Keydown callback fired from the native input before Goo default handling. */
 	onkeydown?: (event: KeyboardEvent) => void

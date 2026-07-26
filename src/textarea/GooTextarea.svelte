@@ -38,15 +38,21 @@ let {
 	cols,
 	minLength,
 	maxLength,
+	autofocus = false,
+	ariaLabel,
+	'aria-describedby': ariaDescribedby,
+	'aria-invalid': ariaInvalid,
 	disabled = false,
 	readonly = false,
 	required = false,
+	block = false,
 	class: className = '',
 	style,
 	tabIndex,
 	children,
 	oninput,
 	onchange,
+	onkeydown,
 	...rest
 }: GooTextareaProps = $props()
 
@@ -62,6 +68,7 @@ $effect(() => {
 const classes = $derived.by(() => {
 	const values = [ 'goo-textarea' ]
 	if (disabled) values.push('goo-textarea--disabled')
+	if (block) values.push('goo-textarea--block')
 	if (className) values.push(className)
 	return values.filter(Boolean).join(' ')
 })
@@ -179,6 +186,7 @@ function syncBoundValue(nextValue: string): void {
 	{style}
 	{...hostAttributes}
 >
+	<!-- svelte-ignore a11y_autofocus -->
 	<textarea
 		bind:this={inputElement}
 		class="goo-textarea__input"
@@ -189,6 +197,10 @@ function syncBoundValue(nextValue: string): void {
 		{cols}
 		minlength={minLength}
 		maxlength={maxLength}
+		{autofocus}
+		aria-label={ariaLabel}
+		aria-describedby={ariaDescribedby}
+		aria-invalid={ariaInvalid}
 		{disabled}
 		readonly={readonly}
 		{required}
@@ -196,6 +208,7 @@ function syncBoundValue(nextValue: string): void {
 		value={currentValue}
 		oninput={handleInput}
 		onchange={handleChange}
+		{onkeydown}
 	></textarea>
 	{#if children}
 		{@render children()}

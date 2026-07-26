@@ -97,6 +97,21 @@
 	letter-spacing: 0;
 }
 
+.goo-select.goo-select--block {
+	display: block;
+	width: 100%;
+}
+
+.goo-select__form-field {
+	position: absolute;
+	inset-block-end: 0;
+	inset-inline-start: 0;
+	inline-size: 1px;
+	block-size: 1px;
+	opacity: 0;
+	pointer-events: none;
+}
+
 /* Disabled state */
 .goo-select.goo-select--disabled {
 	opacity: var(--goo-theme-disabled-opacity);
