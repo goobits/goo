@@ -608,12 +608,14 @@ function getOptionLabel(option: GooSelectOption | null): string {
 	return String(label ?? option.id ?? '')
 }
 
-function readTriggerAccessibleName(): string {
-	return textValue(ariaLabel)
+function readTriggerAccessibleName(): string | undefined {
+	const explicitName = textValue(ariaLabel)
 		|| textValue(ariaLabelAttribute)
 		|| textValue(title)
 		|| (typeof tooltip === 'string' ? textValue(tooltip) : '')
-		|| textValue(triggerLabel)
+	if (explicitName) return explicitName
+	if (inputId) return undefined
+	return textValue(triggerLabel)
 		|| textValue(placeholder)
 		|| 'Select'
 }

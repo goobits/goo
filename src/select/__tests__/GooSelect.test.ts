@@ -52,6 +52,7 @@ describe('GooSelect', () => {
 
 		expect(root?.classList.contains('goo-select--block')).toBe(true)
 		expect(trigger?.id).toBe('option-input')
+		expect(trigger?.getAttribute('aria-label')).toBeNull()
 		expect(trigger?.getAttribute('aria-required')).toBe('true')
 		expect(trigger?.getAttribute('aria-describedby')).toBe('option-help')
 		expect(trigger?.getAttribute('aria-invalid')).toBe('true')
