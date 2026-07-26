@@ -194,7 +194,8 @@ export class DropdownPanel {
 		if (nextIdx < 0) nextIdx = items.length - 1
 		if (nextIdx >= items.length) nextIdx = 0
 
-		this.setHovered(items[nextIdx].dataset.id!)
+		const nextItem = items[nextIdx]
+		if (nextItem) this.setHovered(nextItem.dataset.id!)
 	}
 
 	/**
@@ -206,7 +207,7 @@ export class DropdownPanel {
 		if (!items.length) return
 
 		const item = boundary === 'first' ? items[0] : items[items.length - 1]
-		this.setHovered(item.dataset.id!)
+		if (item) this.setHovered(item.dataset.id!)
 	}
 
 	/**
