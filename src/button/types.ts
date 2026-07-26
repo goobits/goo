@@ -23,6 +23,9 @@ export type GooButtonProps = GooForwardedAttributes & {
 	/** Native button form value. */
 	formValue?: string
 
+	/** ID of the form submitted by a button rendered outside that form. */
+	form?: string
+
 	/** Native button type. */
 	type?: GooButtonType
 

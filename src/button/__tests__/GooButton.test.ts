@@ -69,4 +69,19 @@ describe('GooButton', () => {
 		expect(button.classList.contains('goo-button--block')).toBe(true)
 		expect(button.classList.contains('goo-button--full-row')).toBe(true)
 	})
+
+	it('targets an external form', () => {
+		const { container } = render(GooButton, {
+			props: {
+				form: 'delete-form',
+				type: 'submit',
+				value: 'Delete'
+			}
+		})
+
+		const button = container.querySelector('button.goo-button') as HTMLButtonElement
+
+		expect(button.form).toBeNull()
+		expect(button.getAttribute('form')).toBe('delete-form')
+	})
 })

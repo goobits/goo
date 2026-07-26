@@ -7,6 +7,7 @@ let buttonElement: HTMLAnchorElement | HTMLButtonElement | undefined = $state()
 let {
 	value = '',
 	formValue,
+	form,
 	type = 'button',
 	disabled = false,
 	href,
@@ -125,6 +126,7 @@ const resolvedAriaLabel = $derived(ariaLabel || (!children && !value ? resolvedT
 		bind:this={buttonElement}
 		class={classes}
 		{type}
+		{form}
 		value={formValue}
 		{disabled}
 		title={resolvedTitle}
