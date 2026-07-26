@@ -121,6 +121,7 @@ export interface GooSchemaCommitOptions {
 export type GooSchemaCondition = string | {
 	path: string
 	equals?: GooSchemaDescriptorValue
+	equalsAny?: readonly GooSchemaDescriptorValue[]
 	notEquals?: GooSchemaDescriptorValue
 }
 

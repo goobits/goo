@@ -1668,12 +1668,22 @@ describe('GooSchema', () => {
 	it('supports condition objects for field visibility', async() => {
 		const schema = createGooSchema({
 			schema: [
-				{ path: 'visibleSize', min: 0, max: 100, if: { path: 'mode', equals: 'advanced' } },
-				{ path: 'hiddenSize', min: 0, max: 100, unless: { path: 'mode', equals: 'advanced' } }
+				{
+					path: 'visibleSize',
+					min: 0,
+					max: 100,
+					if: { path: 'mode', equalsAny: [ 'advanced', 'expert' ] }
+				},
+				{
+					path: 'hiddenSize',
+					min: 0,
+					max: 100,
+					unless: { path: 'mode', equalsAny: [ 'advanced', 'expert' ] }
+				}
 			],
 			data: {
 				hiddenSize: 8,
-				mode: 'advanced',
+				mode: 'expert',
 				visibleSize: 12
 			},
 			bare: true

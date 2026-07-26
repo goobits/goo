@@ -34,7 +34,8 @@ describe('assertGooSchemaDescriptor', () => {
 			path: 'opacity',
 			type: 'slider-field',
 			min: 0,
-			max: 1
+			max: 1,
+			if: { path: 'mode', equalsAny: [ 'draw', 'edit' ] }
 		})).not.toThrow()
 	})
 
@@ -91,6 +92,11 @@ describe('assertGooSchemaDescriptor', () => {
 			path: 'size',
 			if: { path: 'enabled', legacyEquals: true }
 		})).toThrow("schema.if.legacyEquals': is not a declared GooSchema condition key")
+
+		expect(() => assertGooSchemaDescriptor({
+			path: 'size',
+			if: { path: 'mode', equalsAny: 'draw' }
+		})).toThrow("schema.if.equalsAny': must be an array")
 
 		expect(() => assertGooSchemaDescriptor({
 			path: 'mode',

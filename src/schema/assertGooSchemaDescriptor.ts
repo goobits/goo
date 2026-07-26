@@ -22,7 +22,7 @@ const WIDGET_KEYS = new Set([
 	'type', 'widget', 'id', 'label', 'showLabel', 'layout', 'dock', 'className', 'options', 'if', 'unless'
 ])
 const PANEL_KEYS = new Set([ 'type', 'title', 'docked', 'width', 'showHeader', 'children' ])
-const CONDITION_KEYS = new Set([ 'path', 'equals', 'notEquals' ])
+const CONDITION_KEYS = new Set([ 'path', 'equals', 'equalsAny', 'notEquals' ])
 const CHOICE_KEYS = new Set([
 	'type', 'id', 'key', 'value', 'label', 'icon', 'tooltip', 'ariaLabel', 'hideLabel', 'className',
 	'disabled', 'options', 'if', 'unless'
@@ -248,6 +248,7 @@ function assertCondition(value: unknown, path: string): asserts value is GooSche
 	const condition = expectRecord(value, path)
 	assertKnownKeys(condition, CONDITION_KEYS, path, 'condition')
 	expectNonEmptyString(condition.path, `${ path }.path`)
+	assertOptionalArray(condition, 'equalsAny', path)
 }
 
 function assertKnownKeys(

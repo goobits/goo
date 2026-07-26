@@ -40,6 +40,9 @@ function matchesCondition(
 	if ('equals' in condition) {
 		return Object.is(actualValue, condition.equals) === expected
 	}
+	if ('equalsAny' in condition) {
+		return (condition.equalsAny?.some(value => Object.is(actualValue, value)) ?? false) === expected
+	}
 	if ('notEquals' in condition) {
 		return (!Object.is(actualValue, condition.notEquals)) === expected
 	}
