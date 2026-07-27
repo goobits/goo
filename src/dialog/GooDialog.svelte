@@ -49,6 +49,8 @@ let {
 	onclose
 }: GooDialogProps = $props()
 
+let rendered = $state(Boolean(open))
+
 function createDialog(): void {
 	if (!contentElement) return
 	if (actions && !actionsElement) return
@@ -79,6 +81,7 @@ function createDialog(): void {
 		onCancel: oncancel,
 		onClose: () => {
 			open = false
+			rendered = false
 			onclose?.()
 		}
 	})
@@ -104,19 +107,20 @@ $effect(() => {
 
 $effect(() => {
 	if (!mounted || !currentDialog) return
+	if (open) rendered = true
 	if (open && !currentDialog.isOpen) void currentDialog.open()
 	if (!open && currentDialog.isOpen) void currentDialog.close()
 })
 </script>
 
 <div bind:this={contentElement} hidden>
-	{#if children}
+	{#if rendered && children}
 		{@render children()}
 	{/if}
 </div>
 
 <div bind:this={actionsElement} class="goo-dialog__actions" hidden>
-	{#if actions}
+	{#if rendered && actions}
 		{@render actions()}
 	{/if}
 </div>

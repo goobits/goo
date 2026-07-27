@@ -51,8 +51,10 @@ describe('GooDialog', () => {
 	})
 
 	it('renders reactive custom actions and restores opener focus', async() => {
-		const { getByTestId } = render(GooDialogActionsHost)
+		const { getByTestId, queryByText } = render(GooDialogActionsHost)
 		const opener = getByTestId('opener')
+
+		expect(queryByText('Dialog body')).toBeNull()
 
 		opener.focus()
 		await fireEvent.click(opener)
@@ -76,9 +78,11 @@ describe('GooDialog', () => {
 			cancelable: true,
 			key: 'Escape'
 		}))
+		expect(dialog.textContent).toContain('Dialog body')
 		await new Promise(resolve => setTimeout(resolve, 180))
 
 		expect(getByTestId('open-state').textContent).toBe('false')
+		expect(queryByText('Dialog body')).toBeNull()
 		expect(document.activeElement).toBe(opener)
 	})
 
