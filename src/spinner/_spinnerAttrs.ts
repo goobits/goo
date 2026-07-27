@@ -57,8 +57,7 @@ function resolveSizeLength(size: GooSpinnerSize | number | string | undefined): 
 		return Number.isFinite(size) && size > 0 ? `${ size }px` : null
 	}
 
-	const parsed = Number.parseFloat(size)
-	return Number.isFinite(parsed) ? `${ parsed }px` : null
+	return formatCssLength(size)
 }
 
 function resolveStroke(thickness: number | string | undefined): string | null {

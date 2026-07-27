@@ -35,6 +35,20 @@ describe('GooSpinner', () => {
 		expect(container.querySelector('.goo-spinner')?.getAttribute('style') ?? '').not.toContain('--goo-spinner-stroke')
 	})
 
+	it('preserves custom CSS lengths for spinner size', () => {
+		const { container } = render(GooSpinner, { props: { size: '1.5rem' } })
+		expect(container.querySelector('.goo-spinner')?.getAttribute('style'))
+			.toContain('--goo-spinner-size: 1.5rem')
+
+		container.innerHTML = renderGooSpinnerHtml({ size: '24' })
+		expect(container.querySelector('.goo-spinner')?.getAttribute('style'))
+			.toContain('--goo-spinner-size: 24px')
+
+		container.innerHTML = renderGooSpinnerHtml({ size: 'bad' })
+		expect(container.querySelector('.goo-spinner')?.getAttribute('style') ?? '')
+			.not.toContain('--goo-spinner-size')
+	})
+
 	it('escapes attributes in raw HTML markup', () => {
 		const container = document.createElement('div')
 		container.innerHTML = renderGooSpinnerHtml({
