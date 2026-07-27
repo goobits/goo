@@ -151,7 +151,13 @@ Use `createGooController()` and `createGooSchema()` for imperative controller/sc
 <GooButton variant="danger">Danger</GooButton>
 <GooButton variant="ghost">Ghost</GooButton>
 <GooButton disabled>Disabled</GooButton>
+<GooButton type="submit" name="intent" formValue="save">Save</GooButton>
+<GooButton href="/export" download="export.json">Download</GooButton>
 ```
+
+`GooButton` forwards native button attributes when `href` is absent and native
+anchor attributes when `href` is present. Use `formValue` for the submitted
+button value; `value` remains Goo's text-label shorthand.
 
 ### Button Group
 

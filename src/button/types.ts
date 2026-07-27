@@ -1,4 +1,5 @@
 import type { Snippet } from 'svelte'
+import type { HTMLAnchorAttributes, HTMLButtonAttributes } from 'svelte/elements'
 
 import type { GooForwardedAttributes } from '../support/types/forwardedAttributes.ts'
 
@@ -14,8 +15,7 @@ export type GooButtonType = 'button' | 'reset' | 'submit'
 /** Native Goo button variant. */
 export type GooButtonVariant = 'default' | 'primary' | 'secondary' | 'attention' | 'danger' | 'ghost' | 'link' | 'selected' | string
 
-/** Props accepted by the Svelte `GooButton` component. */
-export type GooButtonProps = GooForwardedAttributes & {
+type GooButtonOwnProps = GooForwardedAttributes & {
 
 	/** Visual label rendered when no children are provided. */
 	value?: string
@@ -96,3 +96,19 @@ export type GooButtonProps = GooForwardedAttributes & {
 	onchange?: (value: boolean, oldValue?: boolean) => void
 
 }
+
+type GooButtonNativeProps =
+	| (Omit<HTMLButtonAttributes, keyof GooButtonOwnProps | 'href'> & {
+		href?: undefined
+	})
+	| (Omit<HTMLAnchorAttributes, keyof GooButtonOwnProps | 'href'> & {
+		href: string
+	})
+
+/**
+ * Props accepted by the Svelte `GooButton` component.
+ *
+ * Native button attributes are accepted when `href` is absent. Native anchor
+ * attributes are accepted when `href` is present.
+ */
+export type GooButtonProps = GooButtonOwnProps & GooButtonNativeProps

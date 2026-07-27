@@ -43,7 +43,10 @@ describe('GooButton', () => {
 	it('renders an anchor when href is provided', () => {
 		const { container } = render(GooButton, {
 			props: {
+				download: 'invoice.pdf',
 				href: '/billing',
+				hreflang: 'en',
+				referrerpolicy: 'no-referrer',
 				value: 'Billing',
 				variant: 'secondary'
 			}
@@ -52,8 +55,34 @@ describe('GooButton', () => {
 		const link = container.querySelector('a.goo-button')
 
 		expect(container.querySelector('button')).toBeNull()
+		expect(link?.getAttribute('download')).toBe('invoice.pdf')
 		expect(link?.getAttribute('href')).toBe('/billing')
+		expect(link?.getAttribute('hreflang')).toBe('en')
+		expect(link?.getAttribute('referrerpolicy')).toBe('no-referrer')
 		expect(link?.getAttribute('variant')).toBe('secondary')
+	})
+
+	it('forwards native form attributes to button elements', () => {
+		const { container } = render(GooButton, {
+			props: {
+				autofocus: true,
+				form: 'profile',
+				formaction: '/profile',
+				formmethod: 'post',
+				formValue: 'save',
+				name: 'intent',
+				value: 'Save'
+			}
+		})
+
+		const button = container.querySelector('button.goo-button')
+
+		expect(button?.getAttribute('form')).toBe('profile')
+		expect(button?.getAttribute('formaction')).toBe('/profile')
+		expect(button?.getAttribute('formmethod')).toBe('post')
+		expect(button?.getAttribute('name')).toBe('intent')
+		expect(button?.getAttribute('value')).toBe('save')
+		expect(button?.hasAttribute('autofocus')).toBe(true)
 	})
 
 	it('maps block to the full-row button class', () => {
