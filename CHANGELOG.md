@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Type and forward native button and anchor attributes through `GooButton`.
+- Isolate nested modal branches and forward root attributes through `GooFocusTrap`.
 
 ## 0.1.0
 

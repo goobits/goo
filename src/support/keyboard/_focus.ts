@@ -44,20 +44,28 @@ export function activateModalIsolation(options: ModalIsolationOptions): ModalIso
 	])
 	const isolated: IsolatedElementState[] = []
 
-	for (const element of Array.from(ownerDocument.body.children)) {
-		if (!(element instanceof HTMLElement)) continue
-		if (preserved.has(element)) continue
-		if ([ ...preserved ].some(item => element.contains(item) || item.contains(element))) continue
+	const isolateOutsidePreservedBranches = (container: Element): void => {
+		for (const element of Array.from(container.children)) {
+			if (!(element instanceof HTMLElement)) continue
+			if (preserved.has(element) || [ ...preserved ].some(item => item.contains(element))) {
+				continue
+			}
+			if ([ ...preserved ].some(item => element.contains(item))) {
+				isolateOutsidePreservedBranches(element)
+				continue
+			}
 
-		const inertElement = element as InertHTMLElement
-		isolated.push({
-			ariaHidden: element.getAttribute('aria-hidden'),
-			element,
-			inert: inertElement.inert === true || element.hasAttribute('inert')
-		})
-		inertElement.inert = true
-		element.setAttribute('aria-hidden', 'true')
+			const inertElement = element as InertHTMLElement
+			isolated.push({
+				ariaHidden: element.getAttribute('aria-hidden'),
+				element,
+				inert: inertElement.inert === true || element.hasAttribute('inert')
+			})
+			inertElement.inert = true
+			element.setAttribute('aria-hidden', 'true')
+		}
 	}
+	isolateOutsidePreservedBranches(ownerDocument.body)
 
 	return {
 		detach() {
