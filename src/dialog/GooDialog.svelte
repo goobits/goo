@@ -4,8 +4,12 @@ import type { Snippet } from 'svelte'
 import { createGooDialog } from './dialog.ts'
 import type { GooDialogInstance, GooDialogOptions, DialogResult } from './dialog.ts'
 
-type GooDialogProps = Omit<GooDialogOptions, 'content' | 'onOk' | 'onCancel' | 'onClose'> & {
+type GooDialogProps = Omit<
+	GooDialogOptions,
+	'actions' | 'content' | 'onOk' | 'onCancel' | 'onClose'
+> & {
 	open?: boolean
+	actions?: Snippet
 	children?: Snippet
 	instance?: GooDialogInstance | null
 	onok?: (result: DialogResult) => void
@@ -14,6 +18,7 @@ type GooDialogProps = Omit<GooDialogOptions, 'content' | 'onOk' | 'onCancel' | '
 }
 
 let contentElement: HTMLDivElement | undefined = $state()
+let actionsElement: HTMLDivElement | undefined = $state()
 let currentDialog: GooDialogInstance | null = null
 let mounted = false
 
@@ -36,6 +41,7 @@ let {
 	height = 'auto',
 	className,
 	autoDismiss = 0,
+	actions,
 	children,
 	instance = $bindable<GooDialogInstance | null>(null),
 	onok,
@@ -45,13 +51,16 @@ let {
 
 function createDialog(): void {
 	if (!contentElement) return
+	if (actions && !actionsElement) return
 	if (currentDialog) return
 	contentElement.hidden = false
+	if (actions && actionsElement) actionsElement.hidden = false
 	currentDialog = createGooDialog({
 		type,
 		ariaLabel,
 		heading,
 		content: contentElement,
+		actions: actions ? actionsElement : undefined,
 		labels,
 		fields,
 		verify,
@@ -86,7 +95,7 @@ $effect(() => {
 	untrack(createDialog)
 	mounted = true
 	return () => {
-		void currentDialog?.close()
+		void currentDialog?.destroy()
 		currentDialog = null
 		instance = null
 		if (mountedContent === element) mountedContent = undefined
@@ -103,5 +112,11 @@ $effect(() => {
 <div bind:this={contentElement} hidden>
 	{#if children}
 		{@render children()}
+	{/if}
+</div>
+
+<div bind:this={actionsElement} class="goo-dialog__actions" hidden>
+	{#if actions}
+		{@render actions()}
 	{/if}
 </div>

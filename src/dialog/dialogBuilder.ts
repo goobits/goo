@@ -136,7 +136,8 @@ export function buildStandardLayout(
 	state: DialogState,
 	content: string | Node,
 	labels: DialogLabels,
-	fields: DialogField[]
+	fields: DialogField[],
+	actions?: Node
 ): DialogElements {
 	const { type, heading, showClose } = state
 
@@ -193,10 +194,11 @@ export function buildStandardLayout(
 		elements.$content.appendChild(elements.$fields)
 	}
 
-	// Footer for confirm/prompt
-	if (type === 'confirm' || type === 'prompt') {
+	// Footer for generated confirm/prompt actions or consumer-provided actions
+	if (type === 'confirm' || type === 'prompt' || actions) {
 		elements.$footer = document.createElement('div')
 		elements.$footer.className = 'goo-dialog__footer'
+		if (actions) elements.$footer.classList.add('goo-dialog__footer--custom')
 		$dialog.appendChild(elements.$footer)
 	}
 

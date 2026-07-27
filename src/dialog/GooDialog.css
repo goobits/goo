@@ -197,6 +197,14 @@
 	border-top: 1px solid var(--goo-theme-border);
 }
 
+.goo-dialog__footer--custom {
+	justify-content: flex-end;
+}
+
+.goo-dialog__actions {
+	display: contents;
+}
+
 /* Apply to all checkbox */
 .goo-dialog__apply-all {
 	margin-right: auto;

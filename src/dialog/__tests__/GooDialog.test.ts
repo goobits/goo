@@ -1,6 +1,8 @@
+import { fireEvent, render } from '@testing-library/svelte'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { createGooDialog, GooConfirm } from '../index.ts'
+import GooDialogActionsHost from './GooDialogActionsHost.svelte'
 
 const nextFrame = () => new Promise(resolve => requestAnimationFrame(resolve))
 
@@ -46,6 +48,38 @@ describe('GooDialog', () => {
 		dialog?.querySelector<HTMLElement>('.goo-dialog__ok-btn')?.click()
 
 		await expect(resultPromise).resolves.toMatchObject({ ok: true })
+	})
+
+	it('renders reactive custom actions and restores opener focus', async() => {
+		const { getByTestId } = render(GooDialogActionsHost)
+		const opener = getByTestId('opener')
+
+		opener.focus()
+		await fireEvent.click(opener)
+		await nextFrame()
+
+		const dialog = document.querySelector<HTMLElement>('.goo-dialog[open]')!
+		const footer = dialog.querySelector<HTMLElement>('.goo-dialog__footer--custom')!
+		const save = footer.querySelector<HTMLButtonElement>('button:last-child')!
+
+		expect(dialog.getAttribute('aria-labelledby')).toBeTruthy()
+		expect(footer).not.toBeNull()
+		expect(save.textContent?.trim()).toBe('Save')
+
+		await fireEvent.click(save)
+
+		expect(save.disabled).toBe(true)
+		expect(save.textContent?.trim()).toBe('Saving…')
+
+		dialog.dispatchEvent(new KeyboardEvent('keydown', {
+			bubbles: true,
+			cancelable: true,
+			key: 'Escape'
+		}))
+		await new Promise(resolve => setTimeout(resolve, 180))
+
+		expect(getByTestId('open-state').textContent).toBe('false')
+		expect(document.activeElement).toBe(opener)
 	})
 
 	it('treats string content as text instead of HTML', async() => {

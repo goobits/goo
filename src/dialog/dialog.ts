@@ -58,6 +58,8 @@ export interface GooDialogOptions<TValues extends DialogValues = DialogValues> {
 	ariaLabel?: string
 	heading?: string
 	content?: string | Node
+	/** Custom standard-dialog actions. Replaces generated footer buttons when provided. */
+	actions?: Node
 	labels?: DialogLabels
 	fields?: DialogField[]
 	verify?: DialogVerifyHandler<TValues>
@@ -166,6 +168,7 @@ class GooDialogControllerRuntime {
 
 	// Internal state
 	declare _content: string | Node
+	declare _actions: Node | undefined
 	declare _labels: DialogLabels
 	declare _fields: DialogField[]
 	declare _verify: DialogVerifyHandler | undefined
@@ -212,6 +215,7 @@ class GooDialogControllerRuntime {
 		}
 
 		this._content = options.content || ''
+		this._actions = options.actions
 		this._labels = { ...DEFAULT_LABELS, ...options.labels }
 		this._fields = options.fields || []
 		this._verify = options.verify
@@ -297,7 +301,8 @@ class GooDialogControllerRuntime {
 				{ type, heading, showClose },
 				this._content,
 				this._labels,
-				this._fields
+				this._fields,
+				this._actions
 			)
 			this.$header = standardElements.$header
 			this.$title = standardElements.$title
@@ -314,11 +319,15 @@ class GooDialogControllerRuntime {
 
 			// Build footer buttons if we have a footer
 			if (this.$footer) {
-				const footerElements = buildFooter(this.$footer, this._labels)
-				this.$okBtn = footerElements.$okBtn
-				this.$cancelBtn = footerElements.$cancelBtn
-				this.$disregardBtn = footerElements.$disregardBtn
-				this.$applyToAll = footerElements.$applyToAll
+				if (this._actions) {
+					appendContent(this.$footer, this._actions)
+				} else {
+					const footerElements = buildFooter(this.$footer, this._labels)
+					this.$okBtn = footerElements.$okBtn
+					this.$cancelBtn = footerElements.$cancelBtn
+					this.$disregardBtn = footerElements.$disregardBtn
+					this.$applyToAll = footerElements.$applyToAll
+				}
 			}
 		}
 
