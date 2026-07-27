@@ -7,6 +7,7 @@ export interface ModalIsolationHandle {
 export interface ModalIsolationOptions {
 	modal: HTMLElement
 	preserve?: Array<Element | null | undefined>
+	root?: HTMLElement
 }
 
 export interface FocusTrapKeyboardOptions {
@@ -38,6 +39,7 @@ const focusableSelector = [
 export function activateModalIsolation(options: ModalIsolationOptions): ModalIsolationHandle {
 	const modal = options.modal
 	const ownerDocument = modal.ownerDocument
+	const root = options.root ?? ownerDocument.body
 	const preserved = new Set<Element>([
 		modal,
 		...(options.preserve?.filter((element): element is Element => element instanceof Element) ?? [])
@@ -65,7 +67,7 @@ export function activateModalIsolation(options: ModalIsolationOptions): ModalIso
 			element.setAttribute('aria-hidden', 'true')
 		}
 	}
-	isolateOutsidePreservedBranches(ownerDocument.body)
+	isolateOutsidePreservedBranches(root)
 
 	return {
 		detach() {

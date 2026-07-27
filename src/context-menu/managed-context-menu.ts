@@ -258,7 +258,8 @@ function createRegisteredContextMenu(
 			onDestroyCallback = options.onDestroy || options.onClose
 			const didOpen = contextMenu.open({
 				...options,
-				actionContext: options.actionContext || config.actionContext
+				actionContext: options.actionContext || config.actionContext,
+				parentElement: options.parentElement ?? config.parentElement
 			})
 			if (didOpen) armOpen()
 			return didOpen

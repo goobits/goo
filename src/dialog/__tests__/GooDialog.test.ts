@@ -316,6 +316,40 @@ describe('GooDialog', () => {
 		await expect(resultPromise).resolves.toEqual({ cancel: true })
 	})
 
+	it('contains inferred dialogs and modal isolation inside the active app scope', async() => {
+		const scope = document.createElement('section')
+		const content = document.createElement('main')
+		const opener = document.createElement('button')
+		const host = document.createElement('div')
+		const outside = document.createElement('button')
+		scope.dataset.gooOverlayScope = ''
+		host.dataset.gooOverlayHost = ''
+		content.append(opener)
+		scope.append(content, host)
+		document.body.append(scope, outside)
+		opener.focus()
+
+		const dialog = createGooDialog({
+			type: 'alert',
+			content: 'Contained'
+		})
+		const resultPromise = dialog.open()
+		await nextFrame()
+
+		expect(host.contains(dialog.element)).toBe(true)
+		expect(host.querySelector('.goo-dialog-backdrop')).not.toBeNull()
+		expect(content.inert).toBe(true)
+		expect(outside.inert).not.toBe(true)
+
+		await dialog.close()
+
+		expect(content.inert).not.toBe(true)
+		expect(document.activeElement).toBe(opener)
+		scope.remove()
+		outside.remove()
+		await expect(resultPromise).resolves.toEqual({ cancel: true })
+	})
+
 	it('leaves background content interactive for non-modal overlays', async() => {
 		const appRoot = document.createElement('main')
 		const opener = document.createElement('button')

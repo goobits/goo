@@ -74,7 +74,6 @@ export class SubmenuPopoutController {
 		const textDirection = getElementTextDirection($item)
 		this.#popout = createGooPopout({
 			content: this.#createSubmenuFrame($nextSubmenu),
-			parentElement: document.body,
 			className: 'goo-menu-popout goo-select-submenu-popout goo-select-submenu-popout--morph',
 			clickToClose: false,
 			escapeToClose: false,

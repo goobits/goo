@@ -7,6 +7,7 @@
 
 import './GooPopout.css'
 
+import { resolveGooOverlayPlacement } from '../overlay-host/_overlayPlacement.ts'
 import {
 	applyArrowPosition,
 	applyPosition,
@@ -73,7 +74,7 @@ export const gooPopoutRuntime: GooPopoutManager = sharedGooPopoutRuntime
 export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstance {
 	const {
 		content,
-		parentElement = document.body,
+		parentElement: requestedParentElement,
 		ariaLabel = 'Popout',
 		ariaLabelledby,
 		ariaDescribedby,
@@ -81,7 +82,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		at,
 		align: alignInput,
 		offset: offsetInput = { x: 15, y: 15 },
-		keepWithin,
+		keepWithin: requestedKeepWithin,
 		className = '',
 		dataset,
 		attributes,
@@ -125,13 +126,21 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 	const fallbackAlign = alignInput ?? (resolvedRtl ? 'right to left' : 'left to right')
 	let currentAlign = fallbackAlign
 	let currentOffset = { ...offsetInput }
-	const fullScreen = fullScreenOption || !!keepWithin?.fullScreen
+	const fullScreen = fullScreenOption || !!requestedKeepWithin?.fullScreen
 
 	// Parse target
 	let targetElement: HTMLElement | null = null
 	let targetPoint: { x: number; y: number } | null = null
 
 	applyAtConfig(at)
+	const placementAnchor =
+		targetElement ??
+		(document.activeElement instanceof HTMLElement ? document.activeElement : null)
+	const placement = resolveGooOverlayPlacement(placementAnchor)
+	const parentElement = requestedParentElement ?? placement?.host ?? document.body
+	const keepWithin =
+		requestedKeepWithin ??
+		(placement ? { element: placement.scope, margin: 15 } : undefined)
 
 	// ==========================================================================
 	// Instance Object
@@ -405,7 +414,17 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 			rtl: resolvedRtl
 		}
 
-		currentPosition = calculatePosition($element, positionOptions)
+		const viewportPosition = calculatePosition($element, positionOptions)
+		if (parentElement === document.body || parentElement === document.documentElement) {
+			currentPosition = viewportPosition
+		} else {
+			const parentBounds = parentElement.getBoundingClientRect()
+			currentPosition = {
+				...viewportPosition,
+				x: viewportPosition.x - parentBounds.left,
+				y: viewportPosition.y - parentBounds.top
+			}
+		}
 		applyPosition($element, currentPosition)
 		if (currentPosition.maxHeight != null) {
 			$element.style.setProperty(

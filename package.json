@@ -162,6 +162,11 @@
 			"types": "./src/icon/registry.ts",
 			"import": "./src/icon/registry.ts"
 		},
+		"./overlay-host": {
+			"types": "./src/overlay-host/index.ts",
+			"svelte": "./src/overlay-host/index.ts",
+			"import": "./src/overlay-host/index.ts"
+		},
 		"./label": {
 			"types": "./src/label/index.ts",
 			"svelte": "./src/label/index.ts",

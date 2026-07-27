@@ -6,6 +6,7 @@
 import './GooDialog.css'
 
 import type { CheckboxFieldElement } from '../checkbox/_createCheckboxField.ts'
+import { resolveGooOverlayPlacement } from '../overlay-host/_overlayPlacement.ts'
 import {
 	activateModalIsolation,
 	handleFocusTrapKeyboardEvent
@@ -73,6 +74,10 @@ export interface GooDialogOptions<TValues extends DialogValues = DialogValues> {
 	height?: string | number
 	className?: string
 	autoDismiss?: number
+	/** Optional app-owned portal for containing the dialog. */
+	parentElement?: HTMLElement
+	/** Optional modal isolation boundary. Defaults to the portal's owning scope. */
+	isolationRoot?: HTMLElement
 	/** Notify only: cover earlier notifications instead of stacking below them. */
 	overlap?: boolean
 	onOk?: (result: DialogResult<TValues>) => void
@@ -185,6 +190,8 @@ class GooDialogControllerRuntime {
 	declare _elementLifecycle: GooLifecycleBag
 	declare _openLifecycle: GooLifecycleBag
 	declare _closePromise: Promise<void> | null
+	declare _parentElement: HTMLElement
+	declare _isolationRoot: HTMLElement
 
 	// Callback functions
 	declare _onOk: ((result: DialogResult) => void) | undefined
@@ -197,6 +204,9 @@ class GooDialogControllerRuntime {
 	 * @param options - options.
 	 */
 	constructor(options: GooDialogOptions = {}) {
+		const activeElement =
+			document.activeElement instanceof HTMLElement ? document.activeElement : null
+		const placement = resolveGooOverlayPlacement(activeElement)
 		this.$element = document.createElement('div')
 		this.$element.className = 'goo-dialog'
 		this.state = {
@@ -237,6 +247,13 @@ class GooDialogControllerRuntime {
 		this._elementLifecycle = createLifecycleBag()
 		this._openLifecycle = createLifecycleBag()
 		this._closePromise = null
+		this._parentElement = options.parentElement ?? placement?.host ?? document.body
+		this._isolationRoot =
+			options.isolationRoot ??
+			placement?.scope ??
+			(this._parentElement === document.body
+				? document.body
+				: (this._parentElement.parentElement ?? this._parentElement))
 		this._createElement()
 	}
 
@@ -648,7 +665,7 @@ class GooDialogControllerRuntime {
 					this._listenOpen(this._$backdrop, 'click', () => this._handleCancel())
 				}
 
-				document.body.appendChild(this._$backdrop)
+				this._parentElement.appendChild(this._$backdrop)
 
 				// Animate backdrop in
 				this._requestOpenFrame(() => this._$backdrop?.classList.add('goo-dialog-backdrop--visible'))
@@ -657,18 +674,18 @@ class GooDialogControllerRuntime {
 			// Set z-index
 			this.$element.style.setProperty('--goo-dialog-z-index', String(dialogManager.getZIndex(this)))
 
-			// Append to body
-			document.body.appendChild(this.$element)
+			this._parentElement.appendChild(this.$element)
 			if (this._isModalDialog()) {
 				this._openLifecycle.add(activateModalIsolation({
 					modal: this.$element,
-					preserve: [ this._$backdrop ]
+					preserve: [ this._$backdrop ],
+					root: this._isolationRoot
 				}))
 			}
 
 			// Animate in
 			this._requestOpenFrame(() => {
-				if (!document.body.contains(this.$element)) return
+				if (!this._parentElement.contains(this.$element)) return
 				reflowNotifyStack()
 				this.$element.setAttribute('open', '')
 				this._setInitialFocus()
@@ -831,13 +848,15 @@ interface GooDialogControllerRuntime extends GooDialogController {}
  * the classic cover-the-previous behavior.
  */
 function reflowNotifyStack(): void {
-	let offset = 0
+	const offsets = new Map<HTMLElement, number>()
 	for (const managed of dialogManager.getDialogs()) {
 		if (!(managed instanceof GooDialogControllerRuntime)) continue
 		if (managed.state.type !== 'notify' || managed.state.overlap) continue
-		if (!document.body.contains(managed.$element)) continue
+		const parent = managed.$element.parentElement
+		if (!parent) continue
+		const offset = offsets.get(parent) ?? 0
 		managed.$element.style.setProperty('--goo-notify-offset', `${ offset }px`)
-		offset += managed.$element.offsetHeight
+		offsets.set(parent, offset + managed.$element.offsetHeight)
 	}
 }
 

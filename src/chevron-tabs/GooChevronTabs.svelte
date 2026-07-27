@@ -73,6 +73,7 @@
 	let menuOpen = $state(false)
 	let hasOverflow = $state(false)
 	let closePressId = $state<string | null>(null)
+	let pendingCloseFocusId = $state<string | null>(null)
 	let dragging = $state<{
 		id: string
 		startX: number
@@ -145,6 +146,9 @@
 
 	const closeTab = (tab: GooChevronTab): void => {
 		if (!canClose) return
+		if (tabElements[tab.id]?.contains(document.activeElement)) {
+			pendingCloseFocusId = tab.id
+		}
 		onclose?.(tab.id)
 	}
 
@@ -362,6 +366,17 @@
 	$effect(() => {
 		activeId
 		requestAnimationFrame(scrollActiveIntoView)
+	})
+
+	$effect(() => {
+		const closedTabId = pendingCloseFocusId
+		const nextActiveId = activeId
+		if (!closedTabId || tabs.some((tab) => tab.id === closedTabId)) return
+		pendingCloseFocusId = null
+		requestAnimationFrame(() => {
+			const nextFocus = nextActiveId ? tabElements[nextActiveId] : null
+			;(nextFocus ?? railElement)?.focus()
+		})
 	})
 </script>
 

@@ -3,7 +3,18 @@
  * @module goobits/dialog/dialogs
  */
 
-import { createGooDialog, type DialogField, type DialogLabels, type DialogResult, type DialogVerifyHandler, type GooDialogDefaultFocus, type GooDialogInstance } from './dialog.ts'
+import {
+	createGooDialog,
+	type DialogField,
+	type DialogLabels,
+	type DialogResult,
+	type DialogVerifyHandler,
+	type GooDialogDefaultFocus,
+	type GooDialogInstance,
+	type GooDialogOptions
+} from './dialog.ts'
+
+type GooDialogPlacementOptions = Pick<GooDialogOptions, 'isolationRoot' | 'parentElement'>
 
 /** Task returned by dialog convenience helpers. */
 export type GooDialogTask = {
@@ -18,7 +29,7 @@ export type GooDialogTask = {
 }
 
 /** Options accepted by `GooAlert`. */
-export interface GooAlertOptions {
+export interface GooAlertOptions extends GooDialogPlacementOptions {
 	className?: string
 	content: string | Node
 	heading?: string
@@ -27,7 +38,7 @@ export interface GooAlertOptions {
 }
 
 /** Options accepted by `GooConfirm`. */
-export interface GooConfirmOptions {
+export interface GooConfirmOptions extends GooDialogPlacementOptions {
 	className?: string
 	content: string | Node
 	defaultFocus?: Extract<GooDialogDefaultFocus, 'ok' | 'cancel'>
@@ -37,7 +48,7 @@ export interface GooConfirmOptions {
 }
 
 /** Options accepted by `GooPrompt`. */
-export interface GooPromptOptions {
+export interface GooPromptOptions extends GooDialogPlacementOptions {
 	className?: string
 	content?: string | Node
 	defaultFocus?: Extract<GooDialogDefaultFocus, 'ok' | 'cancel'>
@@ -48,7 +59,7 @@ export interface GooPromptOptions {
 }
 
 /** Options accepted by `GooNotify`. */
-export interface GooNotifyOptions {
+export interface GooNotifyOptions extends GooDialogPlacementOptions {
 	autoDismiss?: number
 	className?: string
 	content: string | Node
@@ -59,7 +70,7 @@ export interface GooNotifyOptions {
 }
 
 /** Options accepted by `GooOverlay`. */
-export interface GooOverlayOptions {
+export interface GooOverlayOptions extends GooDialogPlacementOptions {
 	ariaLabel?: string
 	className?: string
 	content: string | Node

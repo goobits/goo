@@ -1,6 +1,7 @@
 <script lang="ts">
 import { untrack } from 'svelte'
 import type { Snippet } from 'svelte'
+import { useGooOverlayHost } from '../overlay-host/overlayHost.ts'
 import { createGooDialog } from './dialog.ts'
 import type { GooDialogInstance, GooDialogOptions, DialogResult } from './dialog.ts'
 
@@ -21,6 +22,7 @@ let contentElement: HTMLDivElement | undefined = $state()
 let actionsElement: HTMLDivElement | undefined = $state()
 let currentDialog: GooDialogInstance | null = null
 let mounted = false
+const overlayHost = useGooOverlayHost()
 
 let {
 	open = $bindable(false),
@@ -42,6 +44,8 @@ let {
 	className,
 	autoDismiss = 0,
 	actions,
+	parentElement,
+	isolationRoot,
 	children,
 	instance = $bindable<GooDialogInstance | null>(null),
 	onok,
@@ -77,6 +81,8 @@ function createDialog(): void {
 		height,
 		className,
 		autoDismiss,
+		parentElement: parentElement ?? overlayHost?.element() ?? undefined,
+		isolationRoot: isolationRoot ?? overlayHost?.scope() ?? undefined,
 		onOk: onok,
 		onCancel: oncancel,
 		onClose: () => {
