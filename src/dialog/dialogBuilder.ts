@@ -126,7 +126,6 @@ export function appendContent($target: HTMLElement, content: string | HTMLElemen
 /**
  * Build standard dialog layout (alert, confirm, prompt).
  * @param state - state.
- * @param labels - labels.
  * @param fields - fields.
  * @param content - content.
  * @param $dialog - dialog.
@@ -135,7 +134,6 @@ export function buildStandardLayout(
 	$dialog: HTMLElement,
 	state: DialogState,
 	content: string | Node,
-	labels: DialogLabels,
 	fields: DialogField[]
 ): DialogElements {
 	const { type, heading, showClose } = state

@@ -41,7 +41,7 @@ export function readButtonGroupValue(selectedKeys: Set<string>, allowMultiple: b
 	if (allowMultiple) {
 		return [ ...selectedKeys ]
 	}
-	return selectedKeys.size > 0 ? [ ...selectedKeys ][0] : null
+	return selectedKeys.values().next().value ?? null
 }
 
 function normalizeButtonGroupOption(option: RawButtonGroupOption): NormalizedButtonGroupOption {

@@ -35,7 +35,7 @@ import {
 	getSelectMenuPopoutClass,
 	normalizeSelectMenu
 } from './_selectMenu.ts'
-import { evaluate, getElementTextDirection } from './selectDom.ts'
+import { evaluate, getElementTextDirection, isElementNode } from './selectDom.ts'
 import type {
 	GooSelectElement,
 	GooSelectEventData,
@@ -604,7 +604,7 @@ function getContext(): unknown {
 function getOptionLabel(option: GooSelectOption | null): string {
 	if (!option) return ''
 	const label = evaluate(option.label, getContext())
-	if (label instanceof Element) return label.textContent ?? ''
+	if (isElementNode(label)) return label.textContent ?? ''
 	return String(label ?? option.id ?? '')
 }
 
@@ -640,9 +640,9 @@ const triggerIconElement = $derived.by(() => {
 	void selectedValue
 	if (typeof icon === 'function') {
 		const element = icon()
-		return element instanceof Element ? element : null
+		return isElementNode(element) ? element : null
 	}
-	return icon instanceof Element ? icon : null
+	return isElementNode(icon) ? icon : null
 })
 
 $effect(() => {

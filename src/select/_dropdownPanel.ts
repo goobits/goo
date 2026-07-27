@@ -5,7 +5,7 @@
 
 import { findOptionById } from './_normalizeOptions.ts'
 import { SubmenuPopoutController } from './_submenuPopout.ts'
-import { createIcon, createShortcut, evaluate } from './selectDom.ts'
+import { createIcon, createShortcut, evaluate, isElementNode } from './selectDom.ts'
 import type { GooSelectDropdownSemantics, GooSelectOption } from './types.ts'
 
 // ============================================================================
@@ -561,7 +561,7 @@ export class DropdownPanel {
 		const $label = document.createElement('span')
 		$label.className = 'goo-select__label'
 		const labelVal = evaluate(opt.label)
-		if (labelVal instanceof Element) {
+		if (isElementNode(labelVal)) {
 			$label.appendChild(labelVal.cloneNode(true))
 		} else {
 			$label.textContent = labelVal as string

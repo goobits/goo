@@ -1,5 +1,6 @@
 import { render } from '@testing-library/svelte'
 import { tick } from 'svelte'
+import { render as renderSsr } from 'svelte/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { pointerEvent } from '../../__tests__/_pointerEvents.ts'
@@ -31,6 +32,21 @@ describe('GooSelect', () => {
 		expect(container.querySelector('goo-option')).toBeNull()
 		expect(container.querySelector('.goo-select')?.getAttribute('value')).toBe('b')
 		expect(container.querySelector('.goo-select__trigger-label')?.textContent).toBe('B')
+	})
+
+	it('renders string options on the server without browser globals', () => {
+		const originalElement = globalThis.Element
+		vi.stubGlobal('Element', undefined)
+		try {
+			expect(() => renderSsr(GooSelect, {
+				props: {
+					value: 'a',
+					options: [ { id: 'a', label: 'A' } ]
+				}
+			})).not.toThrow()
+		} finally {
+			vi.stubGlobal('Element', originalElement)
+		}
 	})
 
 	it('forwards required and validation semantics to the combobox trigger', () => {

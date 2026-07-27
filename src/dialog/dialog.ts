@@ -307,7 +307,6 @@ class GooDialogControllerRuntime {
 				this.$element,
 				{ type, heading, showClose },
 				this._content,
-				this._labels,
 				this._fields
 			)
 			this.$header = standardElements.$header
