@@ -544,12 +544,25 @@ timer.hide()
 ```svelte
 <script lang="ts">
 	import { GooTurnstileField } from '@goobits/goo/turnstile'
+
+	let resetSignal = $state(0)
+	let failed = $state(false)
 </script>
 
-<GooTurnstileField siteKey={PUBLIC_TURNSTILE_SITE_KEY} action="signup" />
+<GooTurnstileField
+	siteKey={PUBLIC_TURNSTILE_SITE_KEY}
+	action="signup"
+	{resetSignal}
+	onReady={() => (failed = false)}
+	onError={() => (failed = true)}
+/>
 ```
 
-Turnstile site keys are public. Server-side verification still belongs in the consuming app.
+The component owns explicit script loading, one shared Trusted Types policy named
+`goo-turnstile`, widget rendering, reset, and cleanup. Hosts that enforce
+`trusted-types` must allow that policy name. Turnstile site keys are public;
+server-side verification and product-specific failure presentation remain in
+the consuming app.
 
 ### Vortex
 

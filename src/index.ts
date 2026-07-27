@@ -304,7 +304,12 @@ export type {
 	GooTooltipRuntimeOptions
 } from './tooltip/index.ts'
 export { createGooTooltip, GooTooltip, gooTooltipRuntime, tooltip } from './tooltip/index.ts'
-export type { GooTurnstileFieldProps, GooTurnstileSize, GooTurnstileTheme } from './turnstile/index.ts'
+export type {
+	GooTurnstileError,
+	GooTurnstileFieldProps,
+	GooTurnstileSize,
+	GooTurnstileTheme
+} from './turnstile/index.ts'
 export { GooTurnstileField } from './turnstile/index.ts'
 export type { VirtualGridProps, VirtualGridSlot, VirtualGridWindow } from './virtualGrid/index.ts'
 export { VirtualGrid } from './virtualGrid/index.ts'
