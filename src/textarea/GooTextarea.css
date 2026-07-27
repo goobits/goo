@@ -44,6 +44,13 @@
 	box-shadow: 0 0 0 2px var(--goo-theme-focus-ring);
 }
 
+.goo-textarea.goo-textarea--bare .goo-textarea__input,
+.goo-textarea.goo-textarea--bare .goo-textarea__input:focus-visible {
+	background: transparent;
+	border-color: transparent;
+	box-shadow: none;
+}
+
 .goo-textarea__input::placeholder {
 	color: var(--goo-theme-muted);
 }

@@ -9,7 +9,7 @@
 
 export type { GooAngleInputElement, GooAngleInputEventData, GooAngleInputProps, GooAngleInputUnit } from './angle-input/index.ts'
 export { GooAngleInput } from './angle-input/index.ts'
-export type { GooButtonLayout, GooButtonProps, GooButtonTarget, GooButtonType, GooButtonVariant } from './button/index.ts'
+export type { GooButtonElement, GooButtonLayout, GooButtonProps, GooButtonTarget, GooButtonType, GooButtonVariant } from './button/index.ts'
 export { GooButton } from './button/index.ts'
 export type {
 	ButtonGroupOption,
@@ -131,7 +131,7 @@ export type { GooFolderElement, GooFolderOptions } from './folder/index.ts'
 export { GooFolder } from './folder/index.ts'
 export type { GooIconProps, GooIconRenderOptions } from './icon/index.ts'
 export { GooIcon, renderIconHtml, renderIconPlaceholderHtml, renderIconPlaceholders } from './icon/index.ts'
-export type { GooInputProps, GooInputType, GooNumberProps } from './input/index.ts'
+export type { GooInputProps, GooInputType, GooInputVariant, GooNumberProps } from './input/index.ts'
 export { GooInput, GooNumber } from './input/index.ts'
 export type { GooLabelProps } from './label/index.ts'
 export { GooLabel } from './label/index.ts'
@@ -268,7 +268,7 @@ export type {
 	GooPointerTargetEvent
 } from './support/utils/pointerDrag.ts'
 export { createPointerDrag, createPointerTap } from './support/utils/pointerDrag.ts'
-export type { GooTextareaProps } from './textarea/index.ts'
+export type { GooTextareaProps, GooTextareaVariant } from './textarea/index.ts'
 export { GooTextarea } from './textarea/index.ts'
 export type {
 	GooProgressToastHandle,

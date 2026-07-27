@@ -68,4 +68,14 @@ describe('GooTextarea', () => {
 		expect(textarea.getAttribute('aria-invalid')).toBe('true')
 		expect(onkeydown).toHaveBeenCalledOnce()
 	})
+
+	it('supports bare chrome for composite controls', () => {
+		const { container } = render(GooTextarea, {
+			props: {
+				variant: 'bare'
+			}
+		})
+
+		expect(container.querySelector('.goo-textarea')?.classList.contains('goo-textarea--bare')).toBe(true)
+	})
 })

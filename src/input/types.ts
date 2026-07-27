@@ -6,6 +6,9 @@ import type { GooForwardedAttributes } from '../support/types/forwardedAttribute
 /** Native text input type supported by Goo input. */
 export type GooInputType = 'email' | 'password' | 'search' | 'tel' | 'text' | 'url' | string
 
+/** Visual treatment for a Goo input. */
+export type GooInputVariant = 'default' | 'bare'
+
 /** Props accepted by the Svelte `GooInput` component. */
 export type GooInputProps<T = string> = GooForwardedAttributes & {
 
@@ -74,6 +77,9 @@ export type GooInputProps<T = string> = GooForwardedAttributes & {
 
 	/** Fill the available inline width. */
 	block?: boolean
+
+	/** Visual treatment. Bare inputs defer their chrome to a composite parent. */
+	variant?: GooInputVariant
 
 	/** Compact/medium size token. */
 	size?: string

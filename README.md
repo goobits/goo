@@ -151,6 +151,7 @@ Use `createGooController()` and `createGooSchema()` for imperative controller/sc
 <GooButton variant="danger">Danger</GooButton>
 <GooButton variant="ghost">Ghost</GooButton>
 <GooButton disabled>Disabled</GooButton>
+<GooButton tooltip="Save changes">Save</GooButton>
 ```
 
 ### Button Group
@@ -190,6 +191,7 @@ Use `createGooController()` and `createGooSchema()` for imperative controller/sc
 
 <GooInput placeholder="Title" />
 <GooInput type="password" placeholder="Password" />
+<GooInput variant="bare" placeholder="Search inside a composite control" />
 <GooNumber value={50} min={0} max={100} step={1} />
 ```
 
@@ -201,6 +203,7 @@ Use `createGooController()` and `createGooSchema()` for imperative controller/sc
 </script>
 
 <GooTextarea placeholder="Notes" rows={4} />
+<GooTextarea variant="bare" placeholder="Write inside a composite control" />
 ```
 
 ### Radio

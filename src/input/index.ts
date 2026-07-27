@@ -12,5 +12,6 @@ export { default as GooNumber } from './GooNumber.svelte'
 export type {
 	GooInputProps,
 	GooInputType,
+	GooInputVariant,
 	GooNumberProps
 } from './types.ts'

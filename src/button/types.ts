@@ -14,6 +14,9 @@ export type GooButtonType = 'button' | 'reset' | 'submit'
 /** Native Goo button variant. */
 export type GooButtonVariant = 'default' | 'primary' | 'secondary' | 'attention' | 'danger' | 'ghost' | 'link' | 'selected' | string
 
+/** Native element rendered by Goo button. */
+export type GooButtonElement = HTMLAnchorElement | HTMLButtonElement
+
 /** Props accepted by the Svelte `GooButton` component. */
 export type GooButtonProps = GooForwardedAttributes & {
 
@@ -47,10 +50,10 @@ export type GooButtonProps = GooForwardedAttributes & {
 	/** Render as a full-width row button. */
 	fullRow?: boolean
 
-	/** Optional title/tooltip text. */
+	/** Native browser title text. */
 	title?: string
 
-	/** Additional tooltip text when title is not provided. */
+	/** Goo tooltip text, rendered with an arrow on hover and keyboard focus. */
 	tooltip?: string
 
 	/** Accessible label for icon-only buttons. */
@@ -89,8 +92,17 @@ export type GooButtonProps = GooForwardedAttributes & {
 	/** Button content. */
 	children?: Snippet
 
+	/** Native anchor or button element rendered by the component. */
+	element?: GooButtonElement | null
+
 	/** Native click callback. */
 	onclick?: (event: MouseEvent) => void
+
+	/** Native mouse-enter callback. */
+	onmouseenter?: (event: MouseEvent) => void
+
+	/** Native mouse-leave callback. */
+	onmouseleave?: (event: MouseEvent) => void
 
 	/** Activation callback fired after click/toggle handling. */
 	onactivate?: (event: MouseEvent) => void

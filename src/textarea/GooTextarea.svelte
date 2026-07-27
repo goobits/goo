@@ -46,6 +46,7 @@ let {
 	readonly = false,
 	required = false,
 	block = false,
+	variant = 'default',
 	class: className = '',
 	style,
 	tabIndex,
@@ -69,6 +70,7 @@ const classes = $derived.by(() => {
 	const values = [ 'goo-textarea' ]
 	if (disabled) values.push('goo-textarea--disabled')
 	if (block) values.push('goo-textarea--block')
+	if (variant === 'bare') values.push('goo-textarea--bare')
 	if (className) values.push(className)
 	return values.filter(Boolean).join(' ')
 })

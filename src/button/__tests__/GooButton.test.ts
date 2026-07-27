@@ -1,9 +1,14 @@
 import { fireEvent, render } from '@testing-library/svelte'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import GooButton from '../GooButton.svelte'
+import type { GooButtonElement } from '../types.ts'
 
 describe('GooButton', () => {
+	afterEach(() => {
+		document.querySelectorAll('.goo-popout').forEach(element => element.remove())
+	})
+
 	it('renders a native button without a goo-button custom element', () => {
 		const { container } = render(GooButton, {
 			props: {
@@ -83,5 +88,49 @@ describe('GooButton', () => {
 
 		expect(button.form).toBeNull()
 		expect(button.getAttribute('form')).toBe('delete-form')
+	})
+
+	it('binds the rendered native element and forwards hover callbacks', async() => {
+		let element: GooButtonElement | null = null
+		const onmouseenter = vi.fn()
+		const onmouseleave = vi.fn()
+		render(GooButton, {
+			props: {
+				value: 'Preview',
+				onmouseenter,
+				onmouseleave,
+				get element() {
+					return element
+				},
+				set element(value) {
+					element = value
+				}
+			}
+		})
+
+		await fireEvent.mouseEnter(element!)
+		await fireEvent.mouseLeave(element!)
+
+		expect(element).toBeInstanceOf(HTMLButtonElement)
+		expect(onmouseenter).toHaveBeenCalledOnce()
+		expect(onmouseleave).toHaveBeenCalledOnce()
+	})
+
+	it('keeps title native and renders tooltip as Goo chrome with an arrow', async() => {
+		const { container } = render(GooButton, {
+			props: {
+				tooltip: 'Save changes',
+				value: 'Save'
+			}
+		})
+		const button = container.querySelector<HTMLButtonElement>('button.goo-button')!
+
+		expect(button.hasAttribute('title')).toBe(false)
+
+		await fireEvent.mouseEnter(button)
+		await new Promise(resolve => setTimeout(resolve, 450))
+
+		expect(document.querySelector('.goo-popout.goo-tooltip')?.textContent).toContain('Save changes')
+		expect(document.querySelector('.goo-popout.goo-tooltip .goo-popout__arrow')).not.toBeNull()
 	})
 })

@@ -2,6 +2,9 @@ import type { Snippet } from 'svelte'
 
 import type { GooForwardedAttributes } from '../support/types/forwardedAttributes.ts'
 
+/** Visual treatment for a Goo textarea. */
+export type GooTextareaVariant = 'default' | 'bare'
+
 /** Props accepted by the Svelte `GooTextarea` component. */
 export type GooTextareaProps = GooForwardedAttributes & {
 
@@ -58,6 +61,9 @@ export type GooTextareaProps = GooForwardedAttributes & {
 
 	/** Fill the available inline width. */
 	block?: boolean
+
+	/** Visual treatment. Bare textareas defer their chrome to a composite parent. */
+	variant?: GooTextareaVariant
 
 	/** Extra class names. */
 	class?: string

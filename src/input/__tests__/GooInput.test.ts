@@ -85,6 +85,16 @@ describe('GooInput', () => {
 		expect(root.classList.contains('goo-input--changed')).toBe(true)
 	})
 
+	it('supports bare chrome for composite controls', () => {
+		const { container } = render(GooInput, {
+			props: {
+				variant: 'bare'
+			}
+		})
+
+		expect(container.querySelector('.goo-input')?.classList.contains('goo-input--bare')).toBe(true)
+	})
+
 	it('contains handled editor keys without blocking native typing keys', () => {
 		const { container } = render(GooInput, {
 			props: {

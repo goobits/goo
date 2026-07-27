@@ -1,8 +1,9 @@
 <script lang="ts">
 import './GooButton.css'
-import type { GooButtonProps } from './types.ts'
+import { createGooTooltip } from '../tooltip/tooltip.ts'
+import type { GooButtonElement, GooButtonProps } from './types.ts'
 
-let buttonElement: HTMLAnchorElement | HTMLButtonElement | undefined = $state()
+let buttonElement: GooButtonElement | undefined = $state()
 
 let {
 	value = '',
@@ -29,7 +30,10 @@ let {
 	style,
 	icon,
 	children,
+	element = $bindable<GooButtonElement | null>(null),
 	onclick,
+	onmouseenter,
+	onmouseleave,
 	onactivate,
 	onchange,
 	...rest
@@ -39,6 +43,23 @@ let currentPressed = $state(false)
 
 $effect(() => {
 	currentPressed = Boolean(pressed)
+})
+
+$effect(() => {
+	element = buttonElement ?? null
+})
+
+$effect(() => {
+	const target = buttonElement
+	if (!target || !tooltip) return
+
+	const instance = createGooTooltip({
+		for: target,
+		content: tooltip,
+		arrow: true
+	})
+
+	return () => instance.destroy()
 })
 
 const classes = $derived.by(() => {
@@ -89,8 +110,7 @@ function handleClick(event: MouseEvent): void {
 	}))
 }
 
-const resolvedTitle = $derived(title || tooltip || undefined)
-const resolvedAriaLabel = $derived(ariaLabel || (!children && !value ? resolvedTitle : undefined))
+const resolvedAriaLabel = $derived(ariaLabel || (!children && !value ? title || tooltip : undefined))
 </script>
 
 {#if href}
@@ -101,13 +121,15 @@ const resolvedAriaLabel = $derived(ariaLabel || (!children && !value ? resolvedT
 		href={disabled ? undefined : href}
 		{target}
 		{rel}
-		title={resolvedTitle}
+		{title}
 		aria-label={resolvedAriaLabel}
 		{...hostAttributes}
 		aria-disabled={disabled ? 'true' : undefined}
 		tabindex={disabled ? -1 : rest.tabindex ?? rest.tabIndex}
 		{style}
 		onclick={handleClick}
+		{onmouseenter}
+		{onmouseleave}
 	>
 		{#if icon}
 			<span class="goo-button__icon" aria-hidden="true">
@@ -129,13 +151,15 @@ const resolvedAriaLabel = $derived(ariaLabel || (!children && !value ? resolvedT
 		{form}
 		value={formValue}
 		{disabled}
-		title={resolvedTitle}
+		{title}
 		aria-label={resolvedAriaLabel}
 		{...hostAttributes}
 		aria-disabled={disabled ? 'true' : undefined}
 		aria-pressed={toggle ? currentPressed : ariaPressed}
 		{style}
 		onclick={handleClick}
+		{onmouseenter}
+		{onmouseleave}
 	>
 		{#if icon}
 			<span class="goo-button__icon" aria-hidden="true">

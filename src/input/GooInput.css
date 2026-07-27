@@ -70,6 +70,17 @@
 	z-index: 2;
 }
 
+.goo-input.goo-input--bare,
+.goo-input.goo-input--bare.goo-input--focused,
+.goo-input.goo-input--bare:focus-within {
+	background: transparent;
+	box-shadow: none;
+}
+
+.goo-input.goo-input--bare::after {
+	display: none;
+}
+
 .goo-input.goo-input--changed::after {
 	animation: goo-input-value-pulse 260ms ease-out;
 }

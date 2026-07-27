@@ -50,6 +50,7 @@ let {
 	readonly = false,
 	required = false,
 	block = false,
+	variant = 'default',
 	size,
 	class: className = '',
 	style,
@@ -81,6 +82,7 @@ const classes = $derived.by(() => {
 	if (multiline) values.push('goo-input--multiline')
 	if (block) values.push('goo-input--block')
 	if (disabled) values.push('goo-input--disabled')
+	if (variant === 'bare') values.push('goo-input--bare')
 	if (className) values.push(className)
 	return values.filter(Boolean).join(' ')
 })
