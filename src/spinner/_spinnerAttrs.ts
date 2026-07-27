@@ -2,15 +2,14 @@ import type { GooSpinnerSize, GooSpinnerVariant } from './types.ts'
 
 /** Spinner presentation resolved from size / thickness / variant inputs. */
 export type ResolvedSpinnerAttrs = {
-
 	/** Preset size attribute (`sm` | `md` | `lg`), when a preset was given. */
-	sizeAttr?: GooSpinnerSize
+	sizeAttr: GooSpinnerSize | undefined
 
 	/** `rainbow` when the rainbow variant was requested. */
-	variantAttr?: 'rainbow'
+	variantAttr: 'rainbow' | undefined
 
 	/** CSS custom-property declarations (size/stroke), or undefined when none. */
-	style?: string
+	style: string | undefined
 }
 
 /**

@@ -8,6 +8,8 @@ export type {
 export { createButtonField } from './createButtonField.ts'
 export { default as GooButton } from './GooButton.svelte'
 export type {
+	GooButtonAnchorProps,
+	GooButtonButtonProps,
 	GooButtonLayout,
 	GooButtonProps,
 	GooButtonTarget,
