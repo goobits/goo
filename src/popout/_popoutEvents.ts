@@ -2,6 +2,33 @@ import type { GooLifecycleBag } from '../support/utils/lifecycleBag.ts'
 import { createPointerDrag } from '../support/utils/pointerDrag.ts'
 import type { GooPopoutPointerEvent } from './popoutTypes.ts'
 
+const INTERACTIVE_DRAG_TARGET_SELECTOR = [
+	'a[href]',
+	'button',
+	'input',
+	'label',
+	'select',
+	'summary',
+	'textarea',
+	'[contenteditable]:not([contenteditable="false"])',
+	'[role="button"]',
+	'[role="checkbox"]',
+	'[role="combobox"]',
+	'[role="link"]',
+	'[role="listbox"]',
+	'[role="menuitem"]',
+	'[role="option"]',
+	'[role="radio"]',
+	'[role="scrollbar"]',
+	'[role="searchbox"]',
+	'[role="slider"]',
+	'[role="spinbutton"]',
+	'[role="switch"]',
+	'[role="tab"]',
+	'[role="textbox"]',
+	'[data-goo-popout-no-drag]'
+].join(',')
+
 export function setupPopoutEventHandlers({
 	clickToClose,
 	close,
@@ -106,6 +133,7 @@ function setupDragToMove(
 		element,
 		event => {
 			if (event.START) {
+				if (isInteractiveDragTarget(event.originalEvent.target)) return false
 				const rect = element.getBoundingClientRect()
 				startX = event.clientX
 				startY = event.clientY
@@ -129,6 +157,11 @@ function setupDragToMove(
 	)
 
 	lifecycle.add(handler)
+}
+
+function isInteractiveDragTarget(target: EventTarget | null): boolean {
+	return target instanceof Element
+		&& Boolean(target.closest(INTERACTIVE_DRAG_TARGET_SELECTOR))
 }
 
 function toGooPointerEvent(event: PointerEvent): GooPopoutPointerEvent {

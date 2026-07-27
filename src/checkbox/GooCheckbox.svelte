@@ -3,6 +3,7 @@ import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.ts'
 
 /** GooController binding metadata for the Svelte checkbox component. */
 export const controlSchema: SvelteControlSchema = {
+	valueKey: 'checked',
 	propMapping: {
 		ariaLabel: 'ariaLabel',
 		formValue: 'formValue',

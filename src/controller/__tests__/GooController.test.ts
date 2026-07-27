@@ -101,6 +101,32 @@ describe('GooController', () => {
 		expect(controller.querySelector('.goo-checkbox__label')).toBeNull()
 	})
 
+	it('refreshes a checked checkbox to a false bound value', async() => {
+		const model = { enabled: true }
+		const controller = createGooController({
+			object: model,
+			property: 'enabled',
+			type: 'checkbox',
+			label: 'Enabled'
+		})
+		document.body.appendChild(controller)
+		await waitForControllerControl(controller)
+		const checkbox = controller.querySelector<HTMLElement>('.goo-checkbox')
+		expect(checkbox?.getAttribute('aria-checked')).toBe('true')
+
+		checkbox?.click()
+		checkbox?.click()
+		await tick()
+		expect(model.enabled).toBe(true)
+
+		model.enabled = false
+		controller.refresh()
+		await tick()
+
+		expect(controller.querySelector('.goo-checkbox')?.getAttribute('aria-checked')).toBe('false')
+		expect(controller.getControlElement()?.getValue?.()).toBe(false)
+	})
+
 	it('gives visually labelled value controls accessible names at the controller boundary', async() => {
 		const model = {
 			angle: 45,

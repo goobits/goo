@@ -28,6 +28,47 @@ describe('GooPopout', () => {
 		target.remove()
 	})
 
+	it('keeps interactive descendants clickable while drag-to-move is enabled', async() => {
+		const target = document.createElement('button')
+		const content = document.createElement('div')
+		const passiveSurface = document.createElement('span')
+		const interactiveControl = document.createElement('button')
+		content.append(passiveSurface, interactiveControl)
+		document.body.appendChild(target)
+		const instance = createGooPopout({
+			at: target,
+			content,
+			dragToMove: true,
+			openImmediately: false
+		})
+		await instance.open()
+		const popout = document.querySelector<HTMLElement>('.goo-popout')!
+		const setPointerCapture = vi.fn()
+		Object.defineProperty(popout, 'setPointerCapture', {
+			configurable: true,
+			value: setPointerCapture
+		})
+
+		interactiveControl.dispatchEvent(new PointerEvent('pointerdown', {
+			bubbles: true,
+			button: 0,
+			pointerId: 1,
+			pointerType: 'mouse'
+		}))
+		expect(setPointerCapture).not.toHaveBeenCalled()
+
+		passiveSurface.dispatchEvent(new PointerEvent('pointerdown', {
+			bubbles: true,
+			button: 0,
+			pointerId: 2,
+			pointerType: 'mouse'
+		}))
+		expect(setPointerCapture).toHaveBeenCalledWith(2)
+
+		await instance.destroy()
+		target.remove()
+	})
+
 	it('keeps every sibling child popout inside its parent click boundary', async() => {
 		const target = document.createElement('button')
 		const parentContent = document.createElement('div')
