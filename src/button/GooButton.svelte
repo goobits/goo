@@ -9,7 +9,6 @@ let {
 	formValue,
 	type = 'button',
 	disabled = false,
-	href,
 	target,
 	rel,
 	block = false,
@@ -17,6 +16,7 @@ let {
 	title,
 	tooltip,
 	ariaLabel,
+	'aria-label': nativeAriaLabel,
 	ariaPressed,
 	variant = 'default',
 	size,
@@ -89,15 +89,19 @@ function handleClick(event: MouseEvent): void {
 }
 
 const resolvedTitle = $derived(title || tooltip || undefined)
-const resolvedAriaLabel = $derived(ariaLabel || (!children && !value ? resolvedTitle : undefined))
+const resolvedAriaLabel = $derived(
+	ariaLabel
+		|| (typeof nativeAriaLabel === 'string' ? nativeAriaLabel : undefined)
+		|| (!children && !value ? resolvedTitle : undefined)
+)
 </script>
 
-{#if href}
+{#if typeof rest.href === 'string'}
 	<a
 		{...rest}
 		bind:this={buttonElement}
 		class={classes}
-		href={disabled ? undefined : href}
+		href={disabled ? undefined : rest.href}
 		{target}
 		{rel}
 		title={resolvedTitle}

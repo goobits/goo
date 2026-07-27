@@ -8,7 +8,6 @@ export function setupPopoutEventHandlers({
 	dragToMove,
 	element,
 	getArrowElement,
-	initialFocus,
 	isClickInsidePopout,
 	isDestroying,
 	isOpen,
@@ -20,7 +19,6 @@ export function setupPopoutEventHandlers({
 	dragToMove: boolean
 	element: HTMLElement
 	getArrowElement(): HTMLElement | null
-	initialFocus: 'content' | 'popout' | 'none'
 	isClickInsidePopout(target: HTMLElement): boolean
 	isDestroying(): boolean
 	isOpen(): boolean
@@ -64,23 +62,6 @@ export function setupPopoutEventHandlers({
 		setupDragToMove(element, getArrowElement, lifecycle)
 	}
 
-	if (initialFocus !== 'none') {
-		lifecycle.frame(() => {
-			if (isDestroying()) return
-
-			if (initialFocus === 'content') {
-				const focusable = element.querySelector<HTMLElement>(
-					'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-				)
-				if (focusable) {
-					focusable.focus({ preventScroll: true })
-					return
-				}
-			}
-
-			element.focus({ preventScroll: true })
-		})
-	}
 }
 
 function handleWheel(event: WheelEvent, element: HTMLElement): void {

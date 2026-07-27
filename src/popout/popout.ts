@@ -27,6 +27,7 @@ import {
 import { setupPopoutEventHandlers } from './_popoutEvents.ts'
 import {
 	capturePopoutFocusTarget,
+	focusInitialPopoutTarget,
 	restorePopoutFocus
 } from './_popoutFocus.ts'
 import { bindImmediatePopoutEscapeToClose } from './_popoutKeyboard.ts'
@@ -230,7 +231,6 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 			dragToMove,
 			element: $element,
 			getArrowElement: () => $arrow,
-			initialFocus,
 			isClickInsidePopout: isClickInsidePopoutChain,
 			isDestroying: () => destroying,
 			isOpen: () => opened,
@@ -255,6 +255,8 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 			state: animationState
 		})
 		if (!$element || destroying || !opened) return
+
+		focusInitialPopoutTarget($element, initialFocus, previousActiveElement)
 
 		// Callback
 		if (onOpen) onOpen({ element: $element, instance })

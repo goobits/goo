@@ -11,3 +11,7 @@
 	display: inline-block;
 	margin: var(--goo-turnstile-margin);
 }
+
+.goo-turnstile-field__widget {
+	min-height: 65px;
+}

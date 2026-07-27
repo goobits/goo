@@ -43,6 +43,7 @@
 	pointer-events: auto;
 	position: relative;
 	text-align: center;
+	text-decoration: none;
 	text-transform: none;
 	transition:
 		background var(--goo-theme-transition-normal),
