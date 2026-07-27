@@ -3,7 +3,16 @@
  * @module goobits/dialog/dialogs
  */
 
-import { createGooDialog, type DialogField, type DialogLabels, type DialogResult, type DialogVerifyHandler, type GooDialogDefaultFocus, type GooDialogInstance } from './dialog.ts'
+import {
+	createGooDialog,
+	type DialogField,
+	type DialogLabels,
+	type DialogResult,
+	type DialogVerifyHandler,
+	type GooDialogDefaultFocus,
+	type GooDialogInstance,
+	type GooDialogSide
+} from './dialog.ts'
 
 /** Task returned by dialog convenience helpers. */
 export type GooDialogTask = {
@@ -67,6 +76,15 @@ export interface GooOverlayOptions {
 	modal?: boolean
 	showBackdrop?: boolean
 	showClose?: boolean
+}
+
+/** Options accepted by `GooSheet`. */
+export interface GooSheetOptions extends GooOverlayOptions {
+	closeOnBackdrop?: boolean
+	closeOnEscape?: boolean
+	defaultFocus?: Extract<GooDialogDefaultFocus, 'first' | 'dialog'>
+	side?: GooDialogSide
+	width?: string | number
 }
 
 type ContentOptions = { content: string | Node }
@@ -184,6 +202,24 @@ export function GooOverlay(options: GooOverlayOptions | string | Node): GooDialo
 	const normalized = normalizeContentOptions<GooOverlayOptions>(options)
 	const dialog = createGooDialog({
 		type: 'overlay',
+		showClose: true,
+		...normalized
+	})
+
+	return createDialogTask(dialog)
+}
+
+/**
+ * Show a modal sheet from a logical viewport edge.
+ *
+ * @param options - Options, message, or node.
+ * @returns Dialog task containing the result promise and controller.
+ */
+export function GooSheet(options: GooSheetOptions | string | Node): GooDialogTask {
+	const normalized = normalizeContentOptions<GooSheetOptions>(options)
+	const dialog = createGooDialog({
+		type: 'sheet',
+		defaultFocus: 'first',
 		showClose: true,
 		...normalized
 	})

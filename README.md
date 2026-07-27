@@ -373,14 +373,23 @@ are displayed as written.
 ### Dialog
 
 ```ts
-import { GooAlert, GooConfirm, GooPrompt } from '@goobits/goo/dialog'
+import { GooAlert, GooConfirm, GooPrompt, GooSheet } from '@goobits/goo/dialog'
 
 await GooAlert('Saved').result
 const confirm = await GooConfirm('Delete this item?').result
 const prompt = await GooPrompt({
 	fields: [{ type: 'text', name: 'name', label: 'Name' }]
 }).result
+const sheet = GooSheet({
+	heading: 'Issue details',
+	content: issuePanel,
+	side: 'end'
+})
 ```
+
+`GooSheet` uses the same modal isolation, focus restoration, Escape handling, and
+stack-safe scroll lock as other modal dialogs. Popouts and selects anchored
+inside a dialog automatically stay inside that dialog's overlay root.
 
 `createGooDialog()` returns a public controller handle with `element`, `open()`, `close()`, and `setContent()`. Use `controller.element` for DOM events, attributes, and queries; header/content/footer nodes are implementation details.
 

@@ -147,6 +147,34 @@ describe('GooSelect', () => {
 		expect(document.querySelectorAll('.goo-select__option').length).toBe(2)
 	})
 
+	it('keeps dialog-owned menus inside the overlay root without stealing trigger focus', async() => {
+		const overlayRoot = document.createElement('section')
+		overlayRoot.dataset.gooOverlayRoot = ''
+		document.body.appendChild(overlayRoot)
+		const { container } = render(GooSelect, {
+			props: {
+				value: 'a',
+				options: [
+					{ id: 'a', label: 'A' },
+					{ id: 'b', label: 'B' }
+				]
+			}
+		})
+		overlayRoot.appendChild(container)
+		const element = container.querySelector<GooSelectElement>('.goo-select')!
+		const trigger = container.querySelector<HTMLButtonElement>('.goo-select__trigger')!
+		trigger.focus()
+
+		expect(element.open({ autoFocus: false })).toBe(true)
+		await tick()
+
+		expect(overlayRoot.querySelector('.goo-popout.goo-select-popout')).not.toBeNull()
+		expect(document.activeElement).toBe(trigger)
+
+		element.close()
+		overlayRoot.remove()
+	})
+
 	it('omits optgroup headers when supported contents collapse to dividers only', async() => {
 		const { container } = render(GooSelect, {
 			props: {

@@ -71,7 +71,7 @@ export const gooPopoutRuntime: GooPopoutManager = sharedGooPopoutRuntime
 export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstance {
 	const {
 		content,
-		parentElement = document.body,
+		parentElement,
 		ariaLabel = 'Popout',
 		ariaLabelledby,
 		ariaDescribedby,
@@ -201,7 +201,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		$element = popoutElement.element
 		$arrow = popoutElement.arrowElement
 		$backdrop = popoutElement.backdropElement
-		parentElement.appendChild($element)
+		resolveParentElement().appendChild($element)
 
 		// Index parent-child chain
 		indexParentChain()
@@ -518,6 +518,16 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 
 		currentAvoidRects = normalizeAvoidRects(atConfig.avoidRects)
 		currentAvoidMargin = Number.isFinite(atConfig.avoidMargin) ? atConfig.avoidMargin! : 0
+	}
+
+	/**
+	 * Keep nested overlays inside their owning modal unless the caller explicitly
+	 * selects another portal root.
+	 */
+	function resolveParentElement(): HTMLElement {
+		return parentElement ??
+			targetElement?.closest<HTMLElement>('[data-goo-overlay-root]') ??
+			document.body
 	}
 
 	function normalizeAvoidRects(avoidRects: PositionAvoidRect[] | undefined): PositionAvoidRect[] {

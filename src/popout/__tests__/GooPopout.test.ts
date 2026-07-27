@@ -28,6 +28,27 @@ describe('GooPopout', () => {
 		target.remove()
 	})
 
+	it('inherits the nearest overlay root as its portal owner', async() => {
+		const overlayRoot = document.createElement('section')
+		const target = document.createElement('button')
+		const content = document.createElement('div')
+		overlayRoot.dataset.gooOverlayRoot = ''
+		overlayRoot.appendChild(target)
+		document.body.appendChild(overlayRoot)
+		const instance = createGooPopout({
+			at: target,
+			content,
+			openImmediately: false
+		})
+
+		await instance.open()
+
+		expect(instance.element?.parentElement).toBe(overlayRoot)
+
+		await instance.destroy()
+		overlayRoot.remove()
+	})
+
 	it('keeps every sibling child popout inside its parent click boundary', async() => {
 		const target = document.createElement('button')
 		const parentContent = document.createElement('div')
@@ -542,6 +563,46 @@ describe('GooPopout', () => {
 
 		instance?.destroy()
 		target.remove()
+	})
+
+	it('forwards container, accessibility, and chrome options from Svelte', async() => {
+		const target = document.createElement('button')
+		const portal = document.createElement('section')
+		target.id = 'forwarded-popout-target'
+		document.body.append(target, portal)
+		let instance: GooPopoutInstance | null = null
+		const onDestroy = vi.fn()
+
+		render(GooPopout, {
+			props: {
+				target,
+				open: true,
+				parentElement: portal,
+				role: 'menu',
+				ariaLabelledby: 'forwarded-popout-title',
+				ariaDescribedby: 'forwarded-popout-description',
+				chromeless: true,
+				onDestroy,
+				get instance() {
+					return instance
+				},
+				set instance(value) {
+					instance = value
+				}
+			}
+		})
+		await tick()
+
+		const popout = portal.querySelector<HTMLElement>('.goo-popout')
+		expect(popout?.getAttribute('role')).toBe('menu')
+		expect(popout?.getAttribute('aria-labelledby')).toBe('forwarded-popout-title')
+		expect(popout?.getAttribute('aria-describedby')).toBe('forwarded-popout-description')
+		expect(popout?.classList.contains('goo-popout--chromeless')).toBe(true)
+
+		await instance?.destroy()
+		expect(onDestroy).toHaveBeenCalledOnce()
+		target.remove()
+		portal.remove()
 	})
 
 	it('does not remount from a queued prop-change microtask after unmount', async() => {

@@ -59,6 +59,7 @@ function handleKeydown(event: KeyboardEvent): void {
 	aria-modal="true"
 	aria-label={ariaLabel}
 	aria-labelledby={ariaLabelledby}
+	data-goo-overlay-root=""
 	tabindex="-1"
 	onclick={onClick}
 	onkeydowncapture={handleKeydown}

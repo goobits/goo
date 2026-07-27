@@ -1,13 +1,14 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { createGooDialog, GooConfirm } from '../index.ts'
+import { createGooDialog, dialogManager, GooConfirm, GooSheet } from '../index.ts'
 
 const nextFrame = () => new Promise(resolve => requestAnimationFrame(resolve))
 
 describe('GooDialog', () => {
-	afterEach(() => {
-		document.querySelectorAll('.goo-dialog, .goo-dialog-backdrop').forEach(element => element.remove())
+	afterEach(async() => {
 		vi.useRealTimers()
+		await dialogManager.closeAll()
+		document.querySelectorAll('.goo-dialog, .goo-dialog-backdrop').forEach(element => element.remove())
 	})
 
 	it('opens native dialog elements without custom tags', async() => {
@@ -35,6 +36,50 @@ describe('GooDialog', () => {
 
 		expect(dialog.element.querySelector('.goo-dialog__close')).toBeNull()
 		expect(dialog.element.querySelectorAll('.goo-dialog__close-badge')).toHaveLength(1)
+	})
+
+	it('renders logical-edge sheets with overlay ownership and content focus', async() => {
+		const content = document.createElement('section')
+		const input = document.createElement('input')
+		input.autofocus = true
+		content.appendChild(input)
+		const task = GooSheet({
+			ariaLabel: 'Issue details',
+			content,
+			showClose: false,
+			side: 'start'
+		})
+		await nextFrame()
+
+		expect(task.dialog.element.classList.contains('goo-dialog--sheet')).toBe(true)
+		expect(task.dialog.element.classList.contains('goo-dialog--sheet-start')).toBe(true)
+		expect(task.dialog.element.dataset.gooOverlayRoot).toBe('')
+		expect(document.body.style.overflow).toBe('hidden')
+		expect(document.activeElement).toBe(input)
+
+		await task.dialog.close()
+		await expect(task.result).resolves.toEqual({ cancel: true })
+		expect(document.body.style.overflow).toBe('')
+	})
+
+	it('keeps body scroll locked until the last modal closes', async() => {
+		document.body.style.overflow = 'clip'
+		const first = createGooDialog({ content: 'First' })
+		const second = createGooDialog({ content: 'Second' })
+		const firstResult = first.open()
+		const secondResult = second.open()
+
+		expect(document.body.style.overflow).toBe('hidden')
+		await second.close()
+		expect(document.body.style.overflow).toBe('hidden')
+		await first.close()
+		expect(document.body.style.overflow).toBe('clip')
+
+		await expect(Promise.all([ firstResult, secondResult ])).resolves.toEqual([
+			{ cancel: true },
+			{ cancel: true }
+		])
+		document.body.style.overflow = ''
 	})
 
 	it('resolves confirm dialogs from footer actions', async() => {
