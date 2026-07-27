@@ -43,6 +43,7 @@ describe('GooButton', () => {
 	it('renders an anchor when href is provided', () => {
 		const { container } = render(GooButton, {
 			props: {
+				'aria-label': 'Billing portal',
 				download: 'invoice.pdf',
 				href: '/billing',
 				hreflang: 'en',
@@ -55,6 +56,7 @@ describe('GooButton', () => {
 		const link = container.querySelector('a.goo-button')
 
 		expect(container.querySelector('button')).toBeNull()
+		expect(link?.getAttribute('aria-label')).toBe('Billing portal')
 		expect(link?.getAttribute('download')).toBe('invoice.pdf')
 		expect(link?.getAttribute('href')).toBe('/billing')
 		expect(link?.getAttribute('hreflang')).toBe('en')

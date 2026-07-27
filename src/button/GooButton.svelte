@@ -16,6 +16,7 @@ let {
 	title,
 	tooltip,
 	ariaLabel,
+	'aria-label': nativeAriaLabel,
 	ariaPressed,
 	variant = 'default',
 	size,
@@ -88,7 +89,11 @@ function handleClick(event: MouseEvent): void {
 }
 
 const resolvedTitle = $derived(title || tooltip || undefined)
-const resolvedAriaLabel = $derived(ariaLabel || (!children && !value ? resolvedTitle : undefined))
+const resolvedAriaLabel = $derived(
+	ariaLabel
+		|| (typeof nativeAriaLabel === 'string' ? nativeAriaLabel : undefined)
+		|| (!children && !value ? resolvedTitle : undefined)
+)
 </script>
 
 {#if typeof rest.href === 'string'}

@@ -25,6 +25,7 @@ const handleButtonKeydown: NonNullable<HTMLButtonAttributes['onkeydown']> = even
 	Save
 </GooButton>
 <GooButton
+	aria-label="Download invoice"
 	download="invoice.pdf"
 	href="/billing"
 	hreflang="en"
