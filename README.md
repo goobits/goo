@@ -518,7 +518,14 @@ container.innerHTML = renderGooSpinnerHtml({ size: 'sm', label: 'Loading' })
 	import { GooProgressRing } from '@goobits/goo/progress-ring'
 </script>
 
-<GooProgressRing progress={0.75} showText />
+<GooProgressRing
+	progress={0.75}
+	size={52}
+	thickness={7}
+	color="var(--goo-theme-accent)"
+	showText={false}
+	label="Sprint progress"
+/>
 ```
 
 Imperative timer:

@@ -149,6 +149,7 @@ export { createGooPopout, GooPopout, gooPopoutRuntime } from './popout/index.ts'
 export type { GooPreviewBackground, GooPreviewFit, GooPreviewProps, GooPreviewSize } from './preview/index.ts'
 export { GooPreview } from './preview/index.ts'
 export type {
+	GooProgressRingProps,
 	GooProgressRingSteps,
 	GooProgressRingTimer,
 	GooProgressRingTimerOptions,

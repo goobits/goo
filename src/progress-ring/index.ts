@@ -15,6 +15,7 @@ import type {
 
 export { default as GooProgressRing } from './GooProgressRing.svelte'
 export type {
+	GooProgressRingProps,
 	GooProgressRingSteps,
 	GooProgressRingTimer,
 	GooProgressRingTimerOptions,
