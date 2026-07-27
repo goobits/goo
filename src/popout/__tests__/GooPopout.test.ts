@@ -140,6 +140,71 @@ describe('GooPopout', () => {
 		}
 	})
 
+	it('focuses the first content control after opening and restores its opener', async() => {
+		const target = document.createElement('button')
+		const content = document.createElement('div')
+		const firstControl = document.createElement('button')
+		content.appendChild(firstControl)
+		document.body.appendChild(target)
+		target.focus()
+		const instance = createGooPopout({
+			at: target,
+			content,
+			initialFocus: 'content',
+			openImmediately: false
+		})
+
+		await instance.open()
+		expect(document.activeElement).toBe(firstControl)
+
+		await instance.destroy()
+		expect(document.activeElement).toBe(target)
+		target.remove()
+	})
+
+	it('preserves focus moved by the user while the popout is opening', async() => {
+		const target = document.createElement('button')
+		const content = document.createElement('div')
+		const firstControl = document.createElement('button')
+		const userFocusedControl = document.createElement('button')
+		content.append(firstControl, userFocusedControl)
+		document.body.appendChild(target)
+		target.focus()
+		const instance = createGooPopout({
+			at: target,
+			content,
+			initialFocus: 'content',
+			openImmediately: false
+		})
+
+		const opening = instance.open()
+		userFocusedControl.focus()
+		await opening
+
+		expect(document.activeElement).toBe(userFocusedControl)
+
+		await instance.destroy()
+		target.remove()
+	})
+
+	it('skips hidden content controls when choosing initial focus', async() => {
+		const content = document.createElement('div')
+		const hiddenControl = document.createElement('button')
+		const visibleControl = document.createElement('button')
+		hiddenControl.style.visibility = 'hidden'
+		content.append(hiddenControl, visibleControl)
+		const instance = createGooPopout({
+			content,
+			initialFocus: 'content',
+			openImmediately: false
+		})
+
+		await instance.open()
+		expect(document.activeElement).toBe(visibleControl)
+
+		await instance.destroy()
+	})
+
 	it('reports the resolved arrow side after containment flips horizontally', async() => {
 		const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect
 		const target = document.createElement('button')

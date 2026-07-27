@@ -211,6 +211,7 @@ function createRegisteredContextMenu(
 	})
 	let onDestroyCallback: (() => void) | undefined
 	let isOpen = false
+	let openNotified = false
 	let destroyed = false
 	const lifecycle = createLifecycleBag()
 	const handle: ManagedGooContextMenu = {
@@ -255,10 +256,12 @@ function createRegisteredContextMenu(
 		open(options = {}) {
 			if (destroyed) return false
 			onDestroyCallback = options.onDestroy || options.onClose
-			return contextMenu.open({
+			const didOpen = contextMenu.open({
 				...options,
 				actionContext: options.actionContext || config.actionContext
 			})
+			if (didOpen) armOpen()
+			return didOpen
 		},
 		setOptions: options => {
 			if (destroyed) return
@@ -287,27 +290,37 @@ function createRegisteredContextMenu(
 	return handle
 
 	function markOpen(): void {
-		if (destroyed) return
-		if (isOpen) return
+		if (destroyed || !contextMenu.isOpen()) return
 
-		isOpen = true
-		contextMenuState.currentMenu = handle
-		contextMenuState.id = id
-		contextMenuState.opened = true
+		armOpen()
+		if (openNotified) return
+		openNotified = true
 		config.onOpen?.call(handle)
 		emit('open')
 	}
 
+	function armOpen(): void {
+		if (destroyed) return
+		isOpen = true
+		contextMenuState.currentMenu = handle
+		contextMenuState.id = id
+		contextMenuState.opened = true
+	}
+
 	function markClosed(): void {
 		if (destroyed) return
-		if (!isOpen && !contextMenuState.opened) return
+		const ownsGlobalState = contextMenuState.currentMenu === handle
+		if (!isOpen && !openNotified && !ownsGlobalState) return
 
 		isOpen = false
+		openNotified = false
 		const onDestroy = onDestroyCallback
 		onDestroyCallback = undefined
-		contextMenuState.currentMenu = undefined
-		contextMenuState.id = undefined
-		contextMenuState.opened = false
+		if (ownsGlobalState) {
+			contextMenuState.currentMenu = undefined
+			contextMenuState.id = undefined
+			contextMenuState.opened = false
+		}
 		config.onClose?.call(handle)
 		onDestroy?.()
 		emit('close')

@@ -1,4 +1,4 @@
-import { mount, unmount } from 'svelte'
+import { flushSync, mount, unmount } from 'svelte'
 
 import { normalizeOptions } from './_normalizeOptions.ts'
 import GooSelect from './GooSelect.svelte'
@@ -41,6 +41,7 @@ export function createSelectField(options: SelectFieldOptions = {}): GooSelectEl
 	let currentValue = options.value ?? ''
 	let instance: MountedControl | null = null
 	let destroyed = false
+	let needsMountFlush = false
 
 	function unmountSelect(): void {
 		if (instance) {
@@ -80,10 +81,17 @@ export function createSelectField(options: SelectFieldOptions = {}): GooSelectEl
 				onclose: options.onclose
 			}
 		})
+		needsMountFlush = true
 	}
 
 	function component(): Record<string, unknown> {
 		return (instance ?? {}) as Record<string, unknown>
+	}
+
+	function ensureMounted(): void {
+		if (destroyed || !needsMountFlush) return
+		flushSync()
+		needsMountFlush = false
 	}
 
 	Object.defineProperty(field, 'value', {
@@ -144,6 +152,10 @@ export function createSelectField(options: SelectFieldOptions = {}): GooSelectEl
 	}
 	field.open = (openOptions?: GooSelectOpenOptions) => {
 		if (destroyed) return false
+		// Svelte 5 mounts DOM bindings on its next flush. Imperative Goo factories
+		// promise a ready-to-use handle, so same-task register-and-open consumers
+		// must flush that pending mount before invoking the component API.
+		ensureMounted()
 		return (
 			(component().open as ((openOptions?: GooSelectOpenOptions) => boolean) | undefined)?.(
 				openOptions
