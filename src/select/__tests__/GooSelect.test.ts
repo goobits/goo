@@ -9,6 +9,7 @@ import { DropdownPanel } from '../_dropdownPanel.ts'
 import GooSelect from '../GooSelect.svelte'
 import { createIcon } from '../selectDom.ts'
 import type { GooSelectElement } from '../types.ts'
+import GooSelectEffectHost from './GooSelectEffectHost.svelte'
 
 describe('GooSelect', () => {
 	afterEach(() => {
@@ -31,6 +32,24 @@ describe('GooSelect', () => {
 		expect(container.querySelector('goo-option')).toBeNull()
 		expect(container.querySelector('.goo-select')?.getAttribute('value')).toBe('b')
 		expect(container.querySelector('.goo-select__trigger-label')?.textContent).toBe('B')
+	})
+
+	it('does not track private state in a consumer setOptions effect', async() => {
+		const { container, rerender } = render(GooSelectEffectHost, {
+			props: {
+				options: [ { id: 'a', label: 'Alpha' } ]
+			}
+		})
+		await tick()
+
+		expect(container.querySelector('.goo-select__trigger-label')?.textContent).toBe('Alpha')
+
+		await rerender({
+			options: [ { id: 'a', label: 'Updated' } ]
+		})
+		await tick()
+
+		expect(container.querySelector('.goo-select__trigger-label')?.textContent).toBe('Updated')
 	})
 
 	it('binds the native root API for imperative updates', async() => {

@@ -216,11 +216,18 @@ export function getValue(): string {
 }
 
 export function setOptions(nextOptions: GooSelectOptionsInput): void {
-	imperativeOptions = normalizeOptions(nextOptions)
-	// Effects flush async; assign directly so a setOptions-then-open flow in
-	// the same task opens with the new options, not the pre-flush list.
-	normalizedOptions = imperativeOptions
-	if (opened) panel?.render(imperativeOptions)
+	const nextNormalizedOptions = normalizeOptions(nextOptions)
+	// Public imperative methods may be called from a consumer's effect. Keep
+	// internal state reads out of that consumer reaction so updating options
+	// cannot make the calling effect depend on — and recursively retrigger
+	// from — GooSelect's private state.
+	untrack(() => {
+		imperativeOptions = nextNormalizedOptions
+		// Effects flush async; assign directly so a setOptions-then-open flow in
+		// the same task opens with the new options, not the pre-flush list.
+		normalizedOptions = nextNormalizedOptions
+		if (opened) panel?.render(nextNormalizedOptions)
+	})
 }
 
 export function setTriggerIcon(icon: string | HTMLElement | (() => HTMLElement) | null): void {
