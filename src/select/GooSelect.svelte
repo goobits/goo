@@ -16,6 +16,8 @@ export const controlSchema: SvelteControlSchema = {
 import './GooSelect.css'
 import './GooSelect.submenu.css'
 
+import { untrack } from 'svelte'
+
 import { createGooPopout } from '../popout/index.ts'
 import type { GooPopoutInstance } from '../popout/index.ts'
 import { gooTooltipRuntime } from '../tooltip/index.ts'
@@ -94,6 +96,22 @@ let {
 	onclose,
 	...rest
 }: GooSelectProps = $props()
+
+// Effects do not run during SSR. Seed prop-backed state synchronously so the
+// server renders the selected label and disabled state instead of a placeholder
+// that changes during hydration.
+const initialPropState = untrack(() => ({
+	actionContext,
+	disabled,
+	options: normalizeOptions(options),
+	triggerIcon,
+	value: value ?? ''
+}))
+normalizedOptions = initialPropState.options
+selectedValue = initialPropState.value
+effectiveDisabled = Boolean(initialPropState.disabled)
+currentTriggerIcon = initialPropState.triggerIcon
+currentBoundContext = initialPropState.actionContext
 
 const selectedOption = $derived(findOptionById(normalizedOptions, selectedValue))
 const selectMenu = $derived(normalizeSelectMenu(menu))
@@ -593,7 +611,7 @@ function getContext(): unknown {
 function getOptionLabel(option: GooSelectOption | null): string {
 	if (!option) return ''
 	const label = evaluate(option.label, getContext())
-	if (label instanceof Element) return label.textContent ?? ''
+	if (isDomElement(label)) return label.textContent ?? ''
 	return String(label ?? option.id ?? '')
 }
 
@@ -609,6 +627,10 @@ function readTriggerAccessibleName(): string {
 
 function textValue(value: unknown): string {
 	return typeof value === 'string' ? value.trim() : ''
+}
+
+function isDomElement(value: unknown): value is Element {
+	return typeof Element !== 'undefined' && value instanceof Element
 }
 
 function getTriggerIconClasses(icon: unknown): string {
@@ -627,9 +649,9 @@ const triggerIconElement = $derived.by(() => {
 	void selectedValue
 	if (typeof icon === 'function') {
 		const element = icon()
-		return element instanceof Element ? element : null
+		return isDomElement(element) ? element : null
 	}
-	return icon instanceof Element ? icon : null
+	return isDomElement(icon) ? icon : null
 })
 
 $effect(() => {
