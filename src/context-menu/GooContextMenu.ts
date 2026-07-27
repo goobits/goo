@@ -128,15 +128,20 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 		},
 		className: `goo-context-menu ${ className }`.trim(),
 		actionContext,
+		onchange: () => {
+			// GooSelect intentionally closes quietly after a choice so it can
+			// emit one change event. Synchronize the context-menu wrapper here:
+			// its normal onclose callback is not invoked by that quiet close.
+			if (!contextMenuOpened) return
+			syncClosedState()
+		},
 		onopen: () => {
 			contextMenuOpened = true
 			bindPageUnfocus()
 			onopen?.()
 		},
 		onclose: () => {
-			contextMenuOpened = false
-			unbindPageUnfocus()
-			onclose?.()
+			syncClosedState()
 		}
 	})
 	// Context menus render their visible panel in a separate popout. Their
@@ -203,10 +208,10 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 	}
 	contextMenu.close = function closeContextMenu(opts = {}) {
 		contextMenuOpened = false
-		contextMenuAnchor = null
 		delegatesPointerCloseToPopout = false
 		unbindPageUnfocus()
 		originalClose(opts)
+		if (opts.quiet) contextMenuAnchor = null
 	}
 
 	// Add convenience method for right-click handling
@@ -292,10 +297,35 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 		attachments.destroy()
 		unbindPageUnfocus()
 		contextMenuOpened = false
+		contextMenuAnchor = null
 		originalDestroy()
 	}
 
 	return contextMenu
+
+	function syncClosedState(): void {
+		const returnFocus = contextMenuAnchor
+		contextMenuOpened = false
+		contextMenuAnchor = null
+		delegatesPointerCloseToPopout = false
+		unbindPageUnfocus()
+		restoreAnchorFocus(returnFocus)
+		onclose?.()
+	}
+
+	function restoreAnchorFocus(anchor: HTMLElement | null): void {
+		if (!anchor?.isConnected) return
+		const activeElement = document.activeElement
+		const focusStayedInMenu = activeElement instanceof Element &&
+			Boolean(activeElement.closest('.goo-context-menu-popout, .goo-select-submenu-popout'))
+		if (
+			activeElement === document.body ||
+			activeElement === document.documentElement ||
+			focusStayedInMenu
+		) {
+			anchor.focus({ preventScroll: true })
+		}
+	}
 
 	function bindPageUnfocus(): void {
 		if (releasePageUnfocus) return

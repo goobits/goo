@@ -72,6 +72,48 @@ describe('createGooContextMenu', () => {
 		await menu.destroy()
 	})
 
+	it('synchronizes close state after choosing a submenu item', async() => {
+		const onclose = vi.fn()
+		const menu = createGooContextMenu({
+			onclose,
+			options: [
+				{
+					id: 'insert',
+					label: 'Insert',
+					type: 'submenu',
+					options: [
+						{ id: 'image', label: 'Image' }
+					]
+				}
+			]
+		})
+		const anchor = document.createElement('button')
+		document.body.append(menu, anchor)
+		await tick()
+
+		expect(menu.open({ at: anchor })).toBe(true)
+		await Promise.resolve()
+
+		const submenuOwner = document.querySelector<HTMLElement>(
+			'.goo-context-menu-popout .goo-select__option[data-id="insert"]'
+		)
+		submenuOwner?.dispatchEvent(new MouseEvent('pointerup', { button: 0 }))
+		await Promise.resolve()
+
+		const leaf = document.querySelector<HTMLElement>(
+			'.goo-select-submenu-popout .goo-select__option[data-id="image"]'
+		)
+		leaf?.dispatchEvent(new MouseEvent('pointerup', { button: 0 }))
+		await Promise.resolve()
+
+		expect(menu.isOpen()).toBe(false)
+		expect(onclose).toHaveBeenCalledOnce()
+		expect(menu.open({ at: anchor })).toBe(true)
+
+		await menu.destroy()
+		anchor.remove()
+	})
+
 	it('renders managed string labels as text instead of HTML', async() => {
 		const menu = GooContextMenu.register('unsafe-menu', [
 			{
@@ -398,6 +440,34 @@ describe('createGooContextMenu', () => {
 
 		expect(escape.defaultPrevented).toBe(true)
 		expect(menu.isOpen()).toBe(false)
+
+		await menu.destroy()
+		host.remove()
+	})
+
+	it('restores an anchored menu button after Escape', async() => {
+		const menu = createGooContextMenu({
+			options: [
+				{ id: 'copy', label: 'Copy' }
+			]
+		})
+		const host = document.createElement('button')
+		document.body.append(menu, host)
+		host.focus()
+		await tick()
+
+		expect(menu.open({ at: host, autoFocus: true })).toBe(true)
+		await delay(550)
+		expect(document.activeElement).not.toBe(host)
+
+		document.dispatchEvent(new KeyboardEvent('keydown', {
+			bubbles: true,
+			cancelable: true,
+			key: 'Escape'
+		}))
+
+		expect(menu.isOpen()).toBe(false)
+		expect(document.activeElement).toBe(host)
 
 		await menu.destroy()
 		host.remove()
