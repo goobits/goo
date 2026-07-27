@@ -337,7 +337,7 @@ export function createGooProgressRingTimer(options: GooProgressRingTimerOptions 
 		const completed = steps
 			.slice(0, stepIndex)
 			.reduce((sum, step) => sum + step, 0)
-		return clampProgress(completed + progress * steps[stepIndex])
+		return clampProgress(completed + progress * (steps[stepIndex] ?? 0))
 	}
 }
 
