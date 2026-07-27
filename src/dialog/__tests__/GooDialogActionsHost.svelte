@@ -3,6 +3,7 @@ import GooDialog from '../GooDialog.svelte'
 
 let open = $state(false)
 let saving = $state(false)
+let heading = $state('Custom actions')
 
 function save(): void {
 	saving = true
@@ -12,8 +13,11 @@ function save(): void {
 <button data-testid="opener" type="button" onclick={() => { open = true }}>Open</button>
 <output data-testid="open-state">{String(open)}</output>
 
-<GooDialog bind:open heading="Custom actions" showClose={false}>
+<GooDialog bind:open {heading} showClose={false}>
 	<p>Dialog body</p>
+	<button data-testid="change-heading" type="button" onclick={() => { heading = 'Updated actions' }}>
+		Change heading
+	</button>
 
 	{#snippet actions()}
 		<button type="button" onclick={() => { open = false }}>Cancel</button>

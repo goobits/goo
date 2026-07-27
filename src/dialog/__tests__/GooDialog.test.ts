@@ -68,6 +68,11 @@ describe('GooDialog', () => {
 		expect(footer).not.toBeNull()
 		expect(save.textContent?.trim()).toBe('Save')
 
+		await fireEvent.click(getByTestId('change-heading'))
+		const title = dialog.querySelector<HTMLElement>('.goo-dialog__title')
+		expect(title?.textContent).toBe('Updated actions')
+		expect(dialog.getAttribute('aria-labelledby')).toBe(title?.id)
+
 		await fireEvent.click(save)
 
 		expect(save.disabled).toBe(true)
@@ -114,6 +119,37 @@ describe('GooDialog', () => {
 		const content = dialog.element.querySelector<HTMLElement>('.goo-dialog__content')
 		expect(content?.textContent).toBe('<button onclick=alert(1)>Run</button>')
 		expect(content?.querySelector('button')).toBeNull()
+	})
+
+	it('updates its heading and accessible name without rebuilding the dialog', () => {
+		const dialog = createGooDialog({
+			type: 'alert',
+			heading: 'First heading',
+			content: 'Hello'
+		})
+		const element = dialog.element
+		const originalTitleId =
+			element.querySelector<HTMLElement>('.goo-dialog__title')?.id
+
+		dialog.setHeading('Second heading')
+
+		const title = element.querySelector<HTMLElement>('.goo-dialog__title')
+		expect(dialog.element).toBe(element)
+		expect(title?.textContent).toBe('Second heading')
+		expect(title?.id).toBe(originalTitleId)
+		expect(element.getAttribute('aria-labelledby')).toBe(originalTitleId)
+
+		dialog.setHeading('')
+		expect(element.querySelector('.goo-dialog__title')).toBeNull()
+		expect(element.getAttribute('aria-labelledby')).toBeNull()
+		expect(element.getAttribute('aria-label')).toBe('Hello')
+
+		dialog.setHeading('Third heading')
+		const restoredTitle =
+			element.querySelector<HTMLElement>('.goo-dialog__title')
+		expect(restoredTitle?.textContent).toBe('Third heading')
+		expect(element.getAttribute('aria-labelledby')).toBe(restoredTitle?.id)
+		expect(element.getAttribute('aria-label')).toBeNull()
 	})
 
 	it('does not use rich DOM content as the dialog accessible name', () => {

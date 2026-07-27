@@ -142,6 +142,8 @@ export interface GooDialogController<TValues extends DialogValues = DialogValues
 	open(): Promise<DialogResult<TValues>>
 	/** Replace dialog content. Strings render as text; pass a DOM node for rich content. */
 	setContent(content: string | Node): void
+	/** Replace the heading on dialog layouts that render one. */
+	setHeading(heading: string): void
 }
 
 type DestroyableElement = HTMLElement & { destroy?: () => void }
@@ -366,9 +368,10 @@ class GooDialogControllerRuntime {
 	 * Reference the title, or use an explicit/string label, so `role="dialog"` exposes an accessible name.
 	 */
 	_applyAccessibleName() {
-		const instanceId = `goo-dialog-${ ++dialogInstanceCount }`
 		if (this.$title) {
-			if (!this.$title.id) this.$title.id = `${ instanceId }-title`
+			if (!this.$title.id) {
+				this.$title.id = `goo-dialog-${ ++dialogInstanceCount }-title`
+			}
 			this.$element.setAttribute('aria-labelledby', this.$title.id)
 			this.$element.removeAttribute('aria-label')
 			return
@@ -376,10 +379,12 @@ class GooDialogControllerRuntime {
 
 		const label =
 			this.state.ariaLabel || (typeof this._content === 'string' ? this._content.trim() : '')
-		if (!label) return
-
-		this.$element.setAttribute('aria-label', label)
 		this.$element.removeAttribute('aria-labelledby')
+		if (label) {
+			this.$element.setAttribute('aria-label', label)
+		} else {
+			this.$element.removeAttribute('aria-label')
+		}
 	}
 
 	// --------------------------------------------------------------------------
@@ -763,6 +768,39 @@ class GooDialogControllerRuntime {
 			this.$content.innerHTML = ''
 			appendContent(this.$content, content)
 		}
+	}
+
+	/**
+	 * Update the dialog heading without rebuilding the dialog.
+	 * @param heading - heading.
+	 */
+	setHeading(heading: string) {
+		if (this.state.heading === heading) return
+		this.state.heading = heading
+		if (this.state.type === 'notify') return
+
+		if (heading) {
+			if (!this.$header) {
+				this.$header = document.createElement('div')
+				this.$header.className = 'goo-dialog__header'
+				this.$element.insertBefore(this.$header, this.$content)
+			}
+			if (!this.$title) {
+				this.$title = document.createElement('h2')
+				this.$title.className = 'goo-dialog__title'
+				this.$header.prepend(this.$title)
+			}
+			this.$title.textContent = heading
+		} else if (this.$title) {
+			this.$title.remove()
+			this.$title = null
+			if (this.$header?.childElementCount === 0) {
+				this.$header.remove()
+				this.$header = null
+			}
+		}
+
+		this._applyAccessibleName()
 	}
 
 	/**

@@ -111,6 +111,12 @@ $effect(() => {
 	if (open && !currentDialog.isOpen) void currentDialog.open()
 	if (!open && currentDialog.isOpen) void currentDialog.close()
 })
+
+$effect(() => {
+	const nextHeading = heading
+	if (!mounted || !currentDialog) return
+	currentDialog.setHeading(nextHeading)
+})
 </script>
 
 <div bind:this={contentElement} hidden>
