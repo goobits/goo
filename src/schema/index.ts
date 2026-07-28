@@ -43,6 +43,7 @@ export type {
 export {
 	assertGooSchemaDescriptor,
 	createGooSchema,
+	GOO_SCHEMA_RESET_EVENT,
 	schemaHasConditions
 } from './GooSchema.ts'
 export { getByPath, pathToLabel, resolvePath, setByPath } from './pathUtils.ts'

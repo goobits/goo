@@ -184,6 +184,7 @@ export {
 	assertGooSchemaDescriptor,
 	createGooSchema,
 	getByPath,
+	GOO_SCHEMA_RESET_EVENT,
 	GooSchema,
 	pathToLabel,
 	resolvePath,

@@ -7,7 +7,11 @@ import GridPopoutPicker from '../../grid-popout/GridPopoutPicker.svelte'
 import { setLocale } from '../../support/i18n/index.ts'
 import { isFullBleedField, isSelfContainedField } from '../fieldLayout.ts'
 import GooSchema from '../GooSchema.svelte'
-import { createGooSchema, schemaHasConditions } from '../index.ts'
+import {
+	createGooSchema,
+	GOO_SCHEMA_RESET_EVENT,
+	schemaHasConditions
+} from '../index.ts'
 import SelfContainedInputControl from './SelfContainedInputControl.svelte'
 
 async function settleGooSchema(): Promise<void> {
@@ -323,7 +327,7 @@ describe('GooSchema', () => {
 		expect(container.querySelector('.goo-schema')).toBe(instance)
 		instance?.dispatchEvent(new CustomEvent('change', { detail: { path: 'enabled', value: false, data: instance.getData() } }))
 		instance?.dispatchEvent(new CustomEvent('preset', { detail: { id: 'off', preset: { id: 'off', label: 'Off', data: { enabled: false } }, data: { enabled: false } } }))
-		instance?.dispatchEvent(new CustomEvent('reset', { detail: { data: { enabled: true }, defaults: { enabled: true } } }))
+		instance?.dispatchEvent(new CustomEvent(GOO_SCHEMA_RESET_EVENT, { detail: { data: { enabled: true }, defaults: { enabled: true } } }))
 		expect(onchange).toHaveBeenCalledOnce()
 		expect(onpreset).toHaveBeenCalledOnce()
 		expect(onreset).toHaveBeenCalledOnce()
@@ -833,6 +837,8 @@ describe('GooSchema', () => {
 
 	it('resets schema data to defaults without rebuilding unchanged controllers', async() => {
 		const onreset = vi.fn()
+		const onSchemaReset = vi.fn()
+		const onNativeReset = vi.fn()
 		const schema = createGooSchema({
 			schema: [ { path: 'size', min: 0, max: 100 } ],
 			data: { size: 24 },
@@ -842,6 +848,8 @@ describe('GooSchema', () => {
 			onreset
 		})
 		document.body.appendChild(schema)
+		schema.addEventListener(GOO_SCHEMA_RESET_EVENT, onSchemaReset)
+		document.addEventListener('reset', onNativeReset, { capture: true })
 		await settleGooSchema()
 
 		const controller = schema.getController('size')
@@ -852,12 +860,15 @@ describe('GooSchema', () => {
 
 		reset?.click()
 		await settleGooSchema()
+		document.removeEventListener('reset', onNativeReset, { capture: true })
 
 		expect(schema.getController('size')).toBe(controller)
 		expect((controller as HTMLElement).classList.contains('goo-schema__data-motion')).toBe(true)
 		expect((controller as HTMLElement).getAttribute('data-goo-schema-data-motion')).toBe('reset')
 		expect(schema.getData()).toEqual({ size: 12 })
 		expect(onreset).toHaveBeenCalledWith({ size: 12 })
+		expect(onSchemaReset).toHaveBeenCalledOnce()
+		expect(onNativeReset).not.toHaveBeenCalled()
 		expect(reset?.disabled).toBe(true)
 	})
 

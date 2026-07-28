@@ -95,8 +95,16 @@ export interface GooSchemaPresetEventDetail {
 /** DOM detail emitted for every final schema transaction. */
 export type GooSchemaCommitEventDetail = GooSchemaCommitDetail
 
+/** Namespaced to avoid colliding with the native form reset event. */
+export const GOO_SCHEMA_RESET_EVENT = 'goo-schema-reset'
+
 /** Event names emitted by the GooSchema element. */
-export type GooSchemaEventName = 'change' | 'commit' | 'input' | 'preset' | 'reset'
+export type GooSchemaEventName =
+	| 'change'
+	| 'commit'
+	| 'input'
+	| 'preset'
+	| typeof GOO_SCHEMA_RESET_EVENT
 
 /** DOM custom event emitted by the GooSchema Svelte wrapper and element. */
 export type GooSchemaEvent = CustomEvent<GooSchemaEventDetail>
@@ -429,7 +437,7 @@ function attachSchemaApi(element: GooSchemaInternal): void {
 				data: element._data,
 				defaults: element.state.defaults
 			}
-			element.dispatchEvent(new CustomEvent('reset', { detail, bubbles: true }))
+			element.dispatchEvent(new CustomEvent(GOO_SCHEMA_RESET_EVENT, { detail, bubbles: true }))
 			element._onreset?.(element._data)
 		},
 		_scheduleRebuild: (options: SchemaRebuildOptions = {}) => {
