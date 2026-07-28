@@ -9,6 +9,7 @@ import { DropdownPanel } from '../_dropdownPanel.ts'
 import GooSelect from '../GooSelect.svelte'
 import { createIcon } from '../selectDom.ts'
 import type { GooSelectElement } from '../types.ts'
+import GooSelectControlledHost from './GooSelectControlledHost.svelte'
 import GooSelectEffectHost from './GooSelectEffectHost.svelte'
 
 describe('GooSelect', () => {
@@ -97,6 +98,23 @@ describe('GooSelect', () => {
 
 		expect(onchange).toHaveBeenCalledOnce()
 		expect(onchange.mock.calls[0]?.[0]).toBe('b')
+	})
+
+	it('preserves a controlled selection until its delayed change callback', async() => {
+		const { container } = render(GooSelectControlledHost)
+		const element = container.querySelector<GooSelectElement>('.goo-select')!
+
+		expect(element.open({ autoFocus: false })).toBe(true)
+		await tick()
+
+		const option = document.querySelector<HTMLElement>('.goo-select__option[data-id="b"]')!
+		option.dispatchEvent(pointerEvent('pointerdown', { pointerId: 14 }))
+		option.dispatchEvent(pointerEvent('pointerup', { pointerId: 14 }))
+		await delay(300)
+		await tick()
+
+		expect(element.getValue()).toBe('b')
+		expect(element.querySelector('.goo-select__trigger-label')?.textContent).toBe('B')
 	})
 
 	it('does not emit when setting the current value again', async() => {

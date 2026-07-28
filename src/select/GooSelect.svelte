@@ -65,6 +65,7 @@ let currentTriggerIcon = $state<string | HTMLElement | (() => HTMLElement) | und
 let currentBoundContext = $state<unknown>()
 let listboxId = $state('')
 let activeDescendant = $state('')
+let pendingSelection = $state<string | null>(null)
 let triggerPointerId: number | null = null
 let selectLifecycleToken = 0
 let focusFrame = 0
@@ -160,7 +161,10 @@ $effect(() => {
 })
 
 $effect(() => {
-	selectedValue = value ?? ''
+	const nextValue = value ?? ''
+	if (pendingSelection === null || nextValue === pendingSelection) {
+		selectedValue = nextValue
+	}
 })
 
 $effect(() => {
@@ -564,6 +568,7 @@ function selectOption(option: GooSelectOption, item?: HTMLElement | null): void 
 	}
 
 	const oldValue = selectedValue
+	pendingSelection = option.id ?? ''
 	selectedValue = option.id ?? ''
 	value = selectedValue
 	if (showSelectionIndicator) {
@@ -597,6 +602,7 @@ function finishSelection(option: GooSelectOption, oldValue: string): void {
 	if (oldValue !== option.id) {
 		emitChange(oldValue)
 	}
+	pendingSelection = null
 }
 
 function emitChange(oldValue: string): void {
