@@ -7,10 +7,7 @@ import './GooDialog.css'
 
 import type { CheckboxFieldElement } from '../checkbox/_createCheckboxField.ts'
 import { resolveGooOverlayPlacement } from '../overlay-host/_overlayPlacement.ts'
-import {
-	activateModalIsolation,
-	handleFocusTrapKeyboardEvent
-} from '../support/keyboard/_focus.ts'
+import { activateModalIsolation, handleFocusTrapKeyboardEvent } from '../support/keyboard/_focus.ts'
 import { createLifecycleBag, type GooLifecycleBag } from '../support/utils/lifecycleBag.ts'
 import { handleDialogKeyboardEvent } from './_dialogKeyboard.ts'
 import {
@@ -569,6 +566,14 @@ class GooDialogControllerRuntime {
 	 * Sets initial focus.
 	 */
 	_setInitialFocus() {
+		const $autofocus = this.$element.querySelector<HTMLElement>(
+			'[autofocus], [data-autofocus="true"]'
+		)
+		if ($autofocus) {
+			$autofocus.focus()
+			return
+		}
+
 		// Focus first field for prompt
 		if (this.state.type === 'prompt' && this._fieldElements.size > 0) {
 			const firstField = this._fieldElements.entries().next()
@@ -676,11 +681,13 @@ class GooDialogControllerRuntime {
 
 			this._parentElement.appendChild(this.$element)
 			if (this._isModalDialog()) {
-				this._openLifecycle.add(activateModalIsolation({
-					modal: this.$element,
-					preserve: [ this._$backdrop ],
-					root: this._isolationRoot
-				}))
+				this._openLifecycle.add(
+					activateModalIsolation({
+						modal: this.$element,
+						preserve: [ this._$backdrop ],
+						root: this._isolationRoot
+					})
+				)
 			}
 
 			// Animate in

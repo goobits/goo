@@ -28,12 +28,13 @@ export function handleDialogKeyboardEvent(
 		return true
 	}
 
-	if (event.key !== 'Enter') {
+	if (event.key !== 'Enter' || !okButton) {
 		return false
 	}
 
-	const activeElement = document.activeElement
-	if (activeElement === okButton || !isDialogTextEntryElement(activeElement)) {
+	const targetElement =
+		event.target instanceof Element ? event.target : document.activeElement
+	if (targetElement === okButton || !isDialogTextEntryElement(targetElement)) {
 		containKeyboardEvent(event)
 		onOk()
 		return true

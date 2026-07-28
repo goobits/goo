@@ -4,7 +4,8 @@ import {
 	GOO_OVERLAY_HOST_ATTRIBUTE,
 	GOO_OVERLAY_SCOPE_ATTRIBUTE,
 	type GooOverlayPlacement,
-	resolveGooOverlayPlacement } from './_overlayPlacement.ts'
+	resolveGooOverlayPlacement
+} from './_overlayPlacement.ts'
 
 export type GooOverlayHost = {
 	element: () => HTMLElement | null
@@ -41,6 +42,7 @@ export const portalToGooOverlayHost = (
 		if (target && node.parentElement !== target) target.append(node)
 	}
 
+	move()
 	queueMicrotask(move)
 	frame = requestAnimationFrame(move)
 
@@ -61,4 +63,5 @@ export {
 	GOO_OVERLAY_HOST_ATTRIBUTE,
 	GOO_OVERLAY_SCOPE_ATTRIBUTE,
 	type GooOverlayPlacement,
-	resolveGooOverlayPlacement }
+	resolveGooOverlayPlacement
+}

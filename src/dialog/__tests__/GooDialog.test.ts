@@ -8,7 +8,9 @@ const nextFrame = () => new Promise(resolve => requestAnimationFrame(resolve))
 
 describe('GooDialog', () => {
 	afterEach(() => {
-		document.querySelectorAll('.goo-dialog, .goo-dialog-backdrop').forEach(element => element.remove())
+		document
+			.querySelectorAll('.goo-dialog, .goo-dialog-backdrop')
+			.forEach(element => element.remove())
 		vi.useRealTimers()
 	})
 
@@ -201,9 +203,10 @@ describe('GooDialog', () => {
 			content: 'Name?',
 			fields: [ { type: 'text', name: 'name' } ],
 			onOk,
-			verify: () => new Promise<boolean>(resolve => {
-				resolveVerify = resolve
-			})
+			verify: () =>
+				new Promise<boolean>(resolve => {
+					resolveVerify = resolve
+				})
 		})
 		const resultPromise = dialog.open()
 		await nextFrame()
@@ -259,6 +262,24 @@ describe('GooDialog', () => {
 		}
 	})
 
+	it('leaves Enter available to custom alert content', async() => {
+		const input = document.createElement('input')
+		const dialog = createGooDialog({
+			type: 'alert',
+			content: input
+		})
+		const resultPromise = dialog.open()
+		await nextFrame()
+
+		const event = dispatchDialogKey(input, 'Enter')
+
+		expect(event.defaultPrevented).toBe(false)
+		expect(dialog.isOpen).toBe(true)
+
+		await dialog.close()
+		await expect(resultPromise).resolves.toEqual({ cancel: true })
+	})
+
 	it('wraps Tab inside the topmost dialog without sentinel elements', async() => {
 		const dialog = createGooDialog({
 			type: 'confirm',
@@ -283,6 +304,26 @@ describe('GooDialog', () => {
 		expect(shiftTabEvent.defaultPrevented).toBe(true)
 		expect(document.activeElement).toBe(ok)
 		expect(dialog.element.querySelector('.goo-dialog__focus-trap')).toBeNull()
+
+		await dialog.close()
+		await expect(resultPromise).resolves.toEqual({ cancel: true })
+	})
+
+	it('honors explicit autofocus content before built-in controls', async() => {
+		const content = document.createElement('section')
+		const input = document.createElement('input')
+		const trailingButton = document.createElement('button')
+		input.dataset['autofocus'] = 'true'
+		content.append(input, trailingButton)
+		const dialog = createGooDialog({
+			type: 'alert',
+			content
+		})
+
+		const resultPromise = dialog.open()
+		await nextFrame()
+
+		expect(document.activeElement).toBe(input)
 
 		await dialog.close()
 		await expect(resultPromise).resolves.toEqual({ cancel: true })

@@ -3,7 +3,8 @@ import { afterEach, describe, expect, it } from 'vitest'
 import {
 	type GooOverlayHost,
 	portalToGooOverlayHost,
-	resolveGooOverlayPlacement } from '../index.ts'
+	resolveGooOverlayPlacement
+} from '../index.ts'
 
 afterEach(() => {
 	document.body.innerHTML = ''
@@ -32,7 +33,7 @@ describe('Goo overlay host', () => {
 		})
 	})
 
-	it('portals content into the host and removes it on destroy', async() => {
+	it('portals content into a ready host synchronously and removes it on destroy', () => {
 		const source = document.createElement('div')
 		const node = document.createElement('aside')
 		const hostElement = document.createElement('div')
@@ -44,7 +45,6 @@ describe('Goo overlay host', () => {
 		}
 
 		const action = portalToGooOverlayHost(node, host)
-		await Promise.resolve()
 
 		expect(node.parentElement).toBe(hostElement)
 		expect(node.hasAttribute('data-goo-overlay-portal')).toBe(true)
@@ -52,5 +52,28 @@ describe('Goo overlay host', () => {
 		action.destroy()
 
 		expect(node.isConnected).toBe(false)
+	})
+
+	it('retries a host that binds after the portal action mounts', async() => {
+		const source = document.createElement('div')
+		const node = document.createElement('aside')
+		let hostElement: HTMLDivElement | null = null
+		source.append(node)
+		document.body.append(source)
+		const host: GooOverlayHost = {
+			element: () => hostElement,
+			scope: () => source
+		}
+
+		const action = portalToGooOverlayHost(node, host)
+		expect(node.parentElement).toBe(source)
+
+		hostElement = document.createElement('div')
+		document.body.append(hostElement)
+		await Promise.resolve()
+
+		expect(node.parentElement).toBe(hostElement)
+
+		action.destroy()
 	})
 })
