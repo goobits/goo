@@ -206,6 +206,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 
 		// Index parent-child chain
 		indexParentChain()
+		ensureNestedStackOrder()
 
 		// Mark open before the first await so callers can synchronously observe the state.
 		opened = true
@@ -549,6 +550,27 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 				return
 			}
 			el = el.parentElement
+		}
+	}
+
+	/**
+	 * Keep a child popout above the parent surface that owns its trigger.
+	 *
+	 * App chrome can intentionally raise a parent above Goo's theme default.
+	 * Preserve an explicitly higher child layer, but repair inherited/default
+	 * child layers that would otherwise render behind that parent.
+	 */
+	function ensureNestedStackOrder() {
+		const parentElement = parentPopout?.element
+		if (!$element || !parentElement) return
+
+		const parentZIndex = Number.parseInt(getComputedStyle(parentElement).zIndex, 10)
+		const childZIndex = Number.parseInt(getComputedStyle($element).zIndex, 10)
+		if (
+			Number.isFinite(parentZIndex) &&
+			(!Number.isFinite(childZIndex) || childZIndex <= parentZIndex)
+		) {
+			$element.style.zIndex = String(parentZIndex + 1)
 		}
 	}
 

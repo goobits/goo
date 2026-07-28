@@ -107,6 +107,44 @@ describe('GooPopout', () => {
 		}
 	})
 
+	it('keeps nested popouts above raised parents without lowering higher child layers', async() => {
+		const target = document.createElement('button')
+		const parentContent = document.createElement('div')
+		const lowTarget = document.createElement('button')
+		const highTarget = document.createElement('button')
+		parentContent.append(lowTarget, highTarget)
+		document.body.appendChild(target)
+
+		const parent = createGooPopout({
+			at: target,
+			attributes: { style: 'z-index: 100' },
+			content: parentContent,
+			openImmediately: false
+		})
+		const lowChild = createGooPopout({
+			at: lowTarget,
+			attributes: { style: 'z-index: 10' },
+			openImmediately: false
+		})
+		const highChild = createGooPopout({
+			at: highTarget,
+			attributes: { style: 'z-index: 200' },
+			openImmediately: false
+		})
+
+		try {
+			await parent.open()
+			await lowChild.open()
+			await highChild.open()
+
+			expect(lowChild.element?.style.zIndex).toBe('101')
+			expect(highChild.element?.style.zIndex).toBe('200')
+		} finally {
+			await Promise.all([ parent.destroy(), lowChild.destroy(), highChild.destroy() ])
+			target.remove()
+		}
+	})
+
 	it('uses explicit accessible label references when provided', () => {
 		const target = document.createElement('button')
 		const title = document.createElement('h2')
