@@ -109,6 +109,7 @@ const currentOpened = $derived(openedOverride ?? opened)
 const currentAriaLabel = $derived(valueOverride.ariaLabel ?? ariaLabel)
 const currentIconClass = $derived(valueOverride.iconClass ?? iconClass)
 const currentIconSvg = $derived(valueOverride.iconSvg ?? iconSvg)
+const currentIconSvgAttributes = $derived(currentIconSvg?.attributes ?? {})
 const currentKicker = $derived(valueOverride.kicker ?? kicker)
 const currentPreview = $derived(valueOverride.preview ?? preview ?? getLegacyPreview(valueOverride.previewUrl ?? previewUrl, valueOverride.previewAlt ?? previewAlt))
 const currentPreviewAlt = $derived(valueOverride.previewAlt ?? previewAlt)
@@ -272,6 +273,7 @@ function getLegacyPreview(src: string, alt: string): GridPopoutPreview | undefin
 			/>
 		{:else if currentIconSvg}
 			<svg
+				{...currentIconSvgAttributes}
 				class={svgIconClassName}
 				viewBox={currentIconSvg.viewBox}
 				aria-hidden="true"
