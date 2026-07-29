@@ -482,7 +482,7 @@
 			state,
 			event,
 			{
-				animateSnap: resetSnap?.entered,
+				...(resetSnap ? { animateSnap: resetSnap.entered } : {}),
 				bypassSnap: Boolean(resetSnap)
 			}
 		)
@@ -556,7 +556,7 @@
 			thumb,
 			index,
 			value,
-			event
+			...(event ? { event } : {})
 		}
 
 		if (state === 'input') {
@@ -587,7 +587,7 @@
 	function getThumbTargetIndex(target: EventTarget | null): number | null {
 		if (!(target instanceof Element)) return null
 		const thumb = target.closest<HTMLElement>('.goo-slider__thumb')
-		const index = Number(thumb?.dataset.index)
+		const index = Number(thumb?.dataset['index'])
 		return Number.isInteger(index) && index >= 0 && index < currentValues.length ? index : null
 	}
 

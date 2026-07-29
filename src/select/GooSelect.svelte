@@ -315,7 +315,7 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 		parentElement: parentElement || document.body,
 		role: null,
 		className: getSelectMenuPopoutClass(currentMenu, popoutClassName),
-		dataset: currentMenu.dataset,
+		...(currentMenu.dataset ? { dataset: currentMenu.dataset } : {}),
 		clickToClose,
 		escapeToClose: true,
 		...(initialFocus === undefined ? {} : { initialFocus }),
