@@ -178,6 +178,26 @@ describe('GooSelect', () => {
 		expect(onchange).not.toHaveBeenCalled()
 	})
 
+	it('runs an option action when choosing the current selected value', async() => {
+		const onChoose = vi.fn()
+		const { container } = render(GooSelect, {
+			props: {
+				value: 'a',
+				options: [
+					{ id: 'a', label: 'A', onChoose },
+					{ id: 'b', label: 'B' }
+				]
+			}
+		})
+		const element = container.querySelector<GooSelectElement>('.goo-select')!
+
+		expect(element.open({ autoFocus: false })).toBe(true)
+		await tick()
+		document.querySelector<HTMLElement>('.goo-select__option[data-id="a"]')?.click()
+
+		expect(onChoose).toHaveBeenCalledWith('a')
+	})
+
 	it('opens a popout from the Svelte root API', async() => {
 		const { container } = render(GooSelect, {
 			props: {
@@ -373,9 +393,12 @@ describe('GooSelect', () => {
 			}
 		})
 		const element = container.querySelector<GooSelectElement>('.goo-select')!
+		const trigger = container.querySelector<HTMLButtonElement>('.goo-select__trigger')!
 
 		expect(element.open({ autoFocus: false })).toBe(true)
 		await tick()
+		expect(trigger.getAttribute('role')).toBeNull()
+		expect(trigger.getAttribute('aria-haspopup')).toBe('menu')
 
 		const link = document.querySelector<HTMLAnchorElement>(
 			'.goo-select__option[data-id="download"]'

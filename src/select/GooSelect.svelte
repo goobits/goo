@@ -580,6 +580,7 @@ function selectOption(option: GooSelectOption, item?: HTMLElement | null): void 
 	}
 
 	if (selectedValue === option.id && showSelectionIndicator) {
+		option.onChoose?.call(getContext(), option.id ?? '')
 		close({ quiet: true })
 		return
 	}
@@ -768,7 +769,7 @@ $effect(() => {
 			{id}
 			type="button"
 			class="goo-select__trigger"
-			role="combobox"
+			role={dropdownSemantics?.popupRole === 'menu' ? undefined : 'combobox'}
 			aria-haspopup={dropdownSemantics?.popupRole ?? 'listbox'}
 			aria-expanded={opened ? 'true' : 'false'}
 			aria-controls={opened && listboxId ? listboxId : undefined}
