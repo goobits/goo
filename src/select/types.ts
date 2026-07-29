@@ -111,6 +111,8 @@ export type GooSelectDropdownSemantics = {
 export type GooSelectMenuOptions = {
 	arrow?: boolean
 	backdrop?: boolean
+	/** Data attributes forwarded to the rendered popout container. */
+	dataset?: Record<string, string>
 	offset?: { x?: number; y?: number }
 	outline?: boolean
 	placement?: GooSelectMenuPlacement
@@ -165,6 +167,8 @@ export type GooSelectProps = GooForwardedAttributes & {
 	disabled?: boolean
 	actionContext?: GooSelectActionContext
 	triggerIcon?: string | HTMLElement | (() => HTMLElement)
+	/** Data attributes forwarded to the native trigger button. */
+	triggerDataset?: Record<string, string>
 	/** Custom trigger content for icon, avatar, or other app-owned menu buttons. */
 	trigger?: Snippet
 

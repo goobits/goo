@@ -256,6 +256,27 @@ describe('GooSelect', () => {
 		expect(document.querySelector('.goo-popout.goo-select-popout.sketch-contextual-menu-popout')).not.toBeNull()
 	})
 
+	it('forwards datasets to the native trigger and menu popout', async() => {
+		const { container } = render(GooSelect, {
+			props: {
+				menu: {
+					dataset: { testid: 'export-menu' }
+				},
+				options: [ { id: 'm3u', label: 'M3U' } ],
+				triggerDataset: { testid: 'export-toggle' }
+			}
+		})
+		const element = container.querySelector<GooSelectElement>('.goo-select')!
+		const trigger = container.querySelector<HTMLButtonElement>('.goo-select__trigger')!
+
+		expect(trigger.dataset.testid).toBe('export-toggle')
+		expect(element.open({ autoFocus: false })).toBe(true)
+		await tick()
+		expect(document.querySelector<HTMLElement>('.goo-select-popout')?.dataset.testid).toBe(
+			'export-menu'
+		)
+	})
+
 	it('applies option row class names without treating labels as markup', async() => {
 		const { container } = render(GooSelect, {
 			props: {

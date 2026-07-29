@@ -268,7 +268,8 @@ native anchor fields (`href`, `target`, `rel`, `download`, and `dataset`);
 choosing a link closes the menu without changing the select value.
 Provide a named `trigger` snippet when an icon or avatar should replace the
 default label-and-chevron trigger; keep `ariaLabel` explicit for icon-only
-menus.
+menus. `triggerDataset` targets that native trigger button, while
+`menu.dataset` targets the rendered popout container.
 
 ### Slider
 

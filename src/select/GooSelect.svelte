@@ -87,6 +87,7 @@ let {
 	disabled = false,
 	actionContext,
 	triggerIcon,
+	triggerDataset,
 	trigger,
 	id,
 	size,
@@ -148,6 +149,7 @@ const hostAttributes = $derived<Record<string, string | undefined>>({
    guard, the mount-time effect flush clobbers options set right after
    creation (the imperative owner takes over from the prop). */
 let imperativeOptions: GooSelectOption[] | null = $state(null)
+let appliedTriggerDatasetKeys: string[] = []
 
 $effect(() => {
 	normalizedOptions = imperativeOptions ?? normalizeOptions(options)
@@ -168,6 +170,27 @@ $effect(() => {
 
 $effect(() => {
 	currentBoundContext = actionContext
+})
+
+$effect(() => {
+	const currentTrigger = triggerElement
+	for (const key of appliedTriggerDatasetKeys) {
+		delete currentTrigger?.dataset[key]
+	}
+	appliedTriggerDatasetKeys = []
+	if (!currentTrigger || !triggerDataset) return
+
+	for (const [ key, datasetValue ] of Object.entries(triggerDataset)) {
+		currentTrigger.dataset[key] = datasetValue
+		appliedTriggerDatasetKeys.push(key)
+	}
+
+	return () => {
+		for (const key of appliedTriggerDatasetKeys) {
+			delete currentTrigger.dataset[key]
+		}
+		appliedTriggerDatasetKeys = []
+	}
 })
 
 $effect(() => {
@@ -286,6 +309,7 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 		parentElement: parentElement || document.body,
 		role: null,
 		className: getSelectMenuPopoutClass(currentMenu, popoutClassName),
+		dataset: currentMenu.dataset,
 		clickToClose,
 		escapeToClose: true,
 		...(initialFocus === undefined ? {} : { initialFocus }),
