@@ -26,30 +26,26 @@ export function setupPopoutEventHandlers({
 	reposition(): void
 }): void {
 	if (clickToClose) {
-		lifecycle.timeout(() => {
+		const handlePointerDown = (event: PointerEvent) => {
 			if (!isOpen() || isDestroying()) return
 
-			const handlePointerDown = (event: PointerEvent) => {
-				if (!isOpen() || isDestroying()) return
+			const pointerEvent = toGooPointerEvent(event)
+			const clickedElement = pointerEvent.target as HTMLElement
+			const isInsidePopout = isClickInsidePopout(clickedElement)
 
-				const pointerEvent = toGooPointerEvent(event)
-				const clickedElement = pointerEvent.target as HTMLElement
-				const isInsidePopout = isClickInsidePopout(clickedElement)
-
-				if (typeof clickToClose === 'function') {
-					if (clickToClose(pointerEvent, isInsidePopout)) {
-						void close()
-					}
-				} else if (!isInsidePopout) {
+			if (typeof clickToClose === 'function') {
+				if (clickToClose(pointerEvent, isInsidePopout)) {
 					void close()
 				}
+			} else if (!isInsidePopout) {
+				void close()
 			}
+		}
 
-			lifecycle.listen(document, 'pointerdown', handlePointerDown, { capture: true })
-			// Deterministic hook: outside-click closing is live from here on
-			// (the delay exists so the opening click cannot self-close).
-			element.setAttribute('data-click-to-close-armed', '')
-		}, 100)
+		// Capture is attached after the opening event has already reached its
+		// trigger, so it cannot self-close but is ready for the very next press.
+		lifecycle.listen(document, 'pointerdown', handlePointerDown, { capture: true })
+		element.setAttribute('data-click-to-close-armed', '')
 	}
 
 	lifecycle.listen(window, 'resize', () => {

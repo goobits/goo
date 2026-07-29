@@ -94,16 +94,18 @@ export function positionElementAt(
 
 	// Calculate position
 	const position = calculatePosition($element, {
-		element,
-		x,
-		y,
+		...(element ? { element } : {}),
+		...(x === undefined ? {} : { x }),
+		...(y === undefined ? {} : { y }),
 		align,
 		offset,
-		keepWithin: keepWithin ? {
-			$element: keepWithin.$element,
-			margin: keepWithin.margin
-		} : undefined,
-		rtl
+		...(keepWithin ? {
+			keepWithin: {
+				...(keepWithin.$element ? { $element: keepWithin.$element } : {}),
+				...(keepWithin.margin === undefined ? {} : { margin: keepWithin.margin })
+			}
+		} : {}),
+		...(rtl === undefined ? {} : { rtl })
 	})
 
 	// Apply position

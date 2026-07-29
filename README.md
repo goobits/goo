@@ -235,6 +235,7 @@ button value; `value` remains Goo's text-label shorthand.
 
 	const options = [
 		{ id: 'copy', label: 'Copy', shortcut: 'Ctrl+C' },
+		{ id: 'docs', label: 'Documentation', href: '/docs' },
 		{
 			id: 'export',
 			label: 'Export',
@@ -249,8 +250,26 @@ button value; `value` remains Goo's text-label shorthand.
 	]
 </script>
 
-<GooSelect {options} onchange={(id) => console.log(id)} />
+<label for="format">Format</label>
+<GooSelect
+	id="format"
+	name="format"
+	required
+	{options}
+	onchange={(id) => console.log(id)}
+	onhoverchange={(id, { option }) => console.log(id, option)}
+/>
 ```
+
+Named selects submit through native `FormData`, honor `disabled`, `required`,
+`form`, `autocomplete`, and placeholder validation, and associate an external
+`<label for>` with the trigger through `id`. Menu options may instead provide
+native anchor fields (`href`, `target`, `rel`, `download`, and `dataset`);
+choosing a link closes the menu without changing the select value.
+Provide a named `trigger` snippet when an icon or avatar should replace the
+default label-and-chevron trigger; keep `ariaLabel` explicit for icon-only
+menus. `triggerDataset` targets that native trigger button, while
+`menu.dataset` targets the rendered popout container.
 
 ### Slider
 

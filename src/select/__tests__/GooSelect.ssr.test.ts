@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest'
 import GooSelect from '../GooSelect.svelte'
 
 describe('GooSelect SSR', () => {
-	it('renders string options without browser DOM globals', () => {
+	it('renders selected string options without browser DOM globals', () => {
 		const { body } = render(GooSelect, {
 			props: {
 				ariaLabel: 'Theme',
@@ -14,13 +14,13 @@ describe('GooSelect SSR', () => {
 					{ id: 'light', label: 'Light' },
 					{ id: 'dark', label: 'Dark' }
 				],
-				value: 'light'
+				value: 'dark'
 			}
 		})
 
 		expect(body).toContain('role="combobox"')
 		expect(body).toContain('aria-label="Theme"')
-		expect(body).toContain('Light')
+		expect(body).toContain('Dark')
 		expect(body).not.toContain('Select...</span>')
 	})
 })

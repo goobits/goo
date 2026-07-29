@@ -11,7 +11,8 @@ import {
 	applyArrowPosition,
 	applyPosition,
 	calculatePosition,
-	type PositionAvoidRect
+	type PositionAvoidRect,
+	type PositionOptions
 } from '../support/positioning/index.ts'
 import { createLifecycleBag } from '../support/utils/lifecycleBag.ts'
 import {
@@ -217,14 +218,6 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 			isOpen: () => opened,
 			lifecycle
 		})
-
-		await stabilizeOpeningLayout({
-			element: $element,
-			isActive: () => $element !== null && !destroying,
-			reposition
-		})
-		if (!$element || destroying) return
-
 		setupPopoutEventHandlers({
 			clickToClose,
 			close,
@@ -237,6 +230,14 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 			lifecycle,
 			reposition
 		})
+
+		await stabilizeOpeningLayout({
+			element: $element,
+			isActive: () => $element !== null && !destroying,
+			reposition
+		})
+		if (!$element || destroying) return
+
 		if ($element) {
 			observeOpenLayoutChanges({
 				element: $element,
@@ -392,10 +393,10 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		const keepWithinElement = keepWithin?.element ?? document.documentElement
 		const keepWithinMargin = keepWithin?.margin ?? 15
 
-		const positionOptions = {
-			element: targetElement ?? undefined,
-			x: targetPoint?.x,
-			y: targetPoint?.y,
+		const positionOptions: PositionOptions = {
+			...(targetElement ? { element: targetElement } : {}),
+			...(targetPoint?.x === undefined ? {} : { x: targetPoint.x }),
+			...(targetPoint?.y === undefined ? {} : { y: targetPoint.y }),
 			align: currentAlign,
 			offset: currentOffset,
 			keepWithin: { $element: keepWithinElement, margin: keepWithinMargin },

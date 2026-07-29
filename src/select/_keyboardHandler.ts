@@ -165,7 +165,12 @@ export function handleKeyboard(host: GooSelectKeyboardHost, event: GooSelectKeyC
 			if (host._panel.hoveredId) {
 				const opt = host._panel.findOptionById(host._panel.hoveredId)
 				if (opt && opt.type !== 'submenu') {
-					host._selectOption(opt)
+					const $hovered = host._panel.getHoveredElement()
+					if (opt.href && $hovered instanceof HTMLAnchorElement) {
+						$hovered.click()
+					} else {
+						host._selectOption(opt)
+					}
 				} else if (opt?.type === 'submenu') {
 					const $hovered = host._panel.getHoveredElement()
 					if ($hovered) host._panel.openSubmenu($hovered, opt)

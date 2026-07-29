@@ -80,7 +80,7 @@ function mountTooltip(): void {
 	currentTooltip = createGooTooltip({
 		for: targetElement,
 		content,
-		contentElement: children && contentElement ? contentElement : undefined,
+		...(children && contentElement ? { contentElement } : {}),
 		align,
 		offset,
 		showDelay,
@@ -89,8 +89,8 @@ function mountTooltip(): void {
 		arrow,
 		interactive,
 		chromeless,
-		onshow,
-		onhide
+		...(onshow === undefined ? {} : { onshow }),
+		...(onhide === undefined ? {} : { onhide })
 	})
 	instance = currentTooltip
 }

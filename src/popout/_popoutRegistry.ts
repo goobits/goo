@@ -56,7 +56,9 @@ export function getActivePopout(): GooPopoutRuntime | null {
 export function getActiveEscapePopout(): GooPopoutRuntime | null {
 	const registrations = Array.from(activePopouts.entries())
 	for (let index = registrations.length - 1; index >= 0; index -= 1) {
-		const [ popout, registration ] = registrations[index]
+		const entry = registrations[index]
+		if (!entry) continue
+		const [ popout, registration ] = entry
 		if (registration.escapeToClose) return popout
 	}
 	return null

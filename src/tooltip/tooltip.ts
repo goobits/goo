@@ -267,13 +267,13 @@ export function createGooTooltip(options: GooTooltipOptions): GooTooltipInstance
 		if (!interactive || !popout?.element) return
 
 		const element = popout.element
-		element.dataset.interactive = 'true'
+		element.dataset['interactive'] = 'true'
 		element.addEventListener('mouseenter', cancelHide)
 		element.addEventListener('mouseleave', scheduleHide)
 		interactiveCleanup = lifecycle.add(() => {
 			element.removeEventListener('mouseenter', cancelHide)
 			element.removeEventListener('mouseleave', scheduleHide)
-			delete element.dataset.interactive
+			delete element.dataset['interactive']
 		})
 	}
 
