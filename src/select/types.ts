@@ -165,6 +165,8 @@ export type GooSelectProps = GooForwardedAttributes & {
 	disabled?: boolean
 	actionContext?: GooSelectActionContext
 	triggerIcon?: string | HTMLElement | (() => HTMLElement)
+	/** Custom trigger content for icon, avatar, or other app-owned menu buttons. */
+	trigger?: Snippet
 
 	/** Optional child content. */
 	children?: Snippet

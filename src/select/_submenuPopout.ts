@@ -301,7 +301,7 @@ export class SubmenuPopoutController {
 		if (!this.#activeOwner || !side) return
 
 		this.#clearOwnerPlacement(this.#activeOwner)
-		this.#activeOwner.dataset.submenuSide = side
+		this.#activeOwner.dataset['submenuSide'] = side
 		this.#activeOwner.classList.add(`goo-select__option--submenu-open-${ side }`)
 	}
 

@@ -193,13 +193,14 @@ export class DropdownPanel {
 		const items = this.getNavigableOptions()
 		if (!items.length) return
 
-		const currentIdx = items.findIndex(el => el.dataset.id === this.hoveredId)
+		const currentIdx = items.findIndex(el => el.dataset['id'] === this.hoveredId)
 		let nextIdx = currentIdx + dir
 
 		if (nextIdx < 0) nextIdx = items.length - 1
 		if (nextIdx >= items.length) nextIdx = 0
 
-		this.setHovered(items[nextIdx].dataset.id!)
+		const nextId = items[nextIdx]?.dataset['id']
+		if (nextId) this.setHovered(nextId)
 	}
 
 	/**
@@ -211,7 +212,8 @@ export class DropdownPanel {
 		if (!items.length) return
 
 		const item = boundary === 'first' ? items[0] : items[items.length - 1]
-		this.setHovered(item.dataset.id!)
+		const itemId = item?.dataset['id']
+		if (itemId) this.setHovered(itemId)
 	}
 
 	/**
@@ -256,8 +258,8 @@ export class DropdownPanel {
 			let settled = false
 
 			// Mark as animating
-			$item.dataset.isChosen = 'true'
-			this.$container.dataset.isChoosingOption = 'true'
+			$item.dataset['isChosen'] = 'true'
+			this.$container.dataset['isChoosingOption'] = 'true'
 
 			let step = 0
 			const totalSteps = 3
@@ -265,8 +267,8 @@ export class DropdownPanel {
 				for (const timer of timers) clearTimeout(timer)
 				timers.length = 0
 				$item.classList.remove('goo-select__option--flash')
-				$item.dataset.isChosen = ''
-				this.$container.dataset.isChoosingOption = ''
+				$item.dataset['isChosen'] = ''
+				this.$container.dataset['isChoosingOption'] = ''
 				if (this.#selectionAnimationCleanup === cleanup) {
 					this.#selectionAnimationCleanup = null
 				}
@@ -341,7 +343,7 @@ export class DropdownPanel {
 	 */
 	getOptionElementById(id: string): OptionElement | null {
 		for (const item of this.getNavigableOptions()) {
-			if (item.dataset.id === id) return item
+			if (item.dataset['id'] === id) return item
 		}
 		return null
 	}
@@ -417,7 +419,8 @@ export class DropdownPanel {
 		})
 
 		if (match) {
-			this.setHovered(match.dataset.id!)
+			const matchId = match.dataset['id']
+			if (matchId) this.setHovered(matchId)
 		}
 	}
 
@@ -747,7 +750,7 @@ export class DropdownPanel {
 	}
 
 	#readOptionFromElement(item: HTMLElement): GooSelectOption | null {
-		const optionId = item.dataset.id
+		const optionId = item.dataset['id']
 		return optionId ? this.findOptionById(optionId) : null
 	}
 

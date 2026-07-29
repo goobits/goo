@@ -87,6 +87,7 @@ let {
 	disabled = false,
 	actionContext,
 	triggerIcon,
+	trigger,
 	id,
 	size,
 	form,
@@ -245,7 +246,7 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 
 	if (!panel) {
 		panel = new DropdownPanel({
-			semantics: dropdownSemantics,
+			...(dropdownSemantics ? { semantics: dropdownSemantics } : {}),
 			showSelectionIndicator,
 			value: selectedValue,
 			getContext: () => getContext(),
@@ -261,7 +262,7 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 		})
 	} else {
 		panel.updateContext({
-			semantics: dropdownSemantics,
+			...(dropdownSemantics ? { semantics: dropdownSemantics } : {}),
 			showSelectionIndicator,
 			value: selectedValue
 		})
@@ -287,7 +288,7 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 		className: getSelectMenuPopoutClass(currentMenu, popoutClassName),
 		clickToClose,
 		escapeToClose: true,
-		initialFocus,
+		...(initialFocus === undefined ? {} : { initialFocus }),
 		keepWithin: keepWithin || { element: document.body, margin: 15 },
 		showArrow: showArrow ?? currentMenu.arrow,
 		showBackdrop: currentMenu.backdrop,
@@ -326,7 +327,7 @@ function syncPanelTypography(): void {
 function focusInitialPanelOption(): void {
 	if (!panel) return
 
-	const toFocus = selectedValue || panel.getNavigableOptions()[0]?.dataset.id
+	const toFocus = selectedValue || panel.getNavigableOptions()[0]?.dataset['id']
 	if (toFocus) panel.setHovered(toFocus)
 }
 
@@ -376,16 +377,16 @@ function withPositionOverrides(
 
 	if (positionAt instanceof HTMLElement) {
 		return {
-			align: options.align,
 			element: positionAt,
-			offset: options.offset
+			...(options.align === undefined ? {} : { align: options.align }),
+			...(options.offset === undefined ? {} : { offset: options.offset })
 		}
 	}
 
 	return {
 		...positionAt,
-		align: options.align ?? positionAt.align,
-		offset: options.offset ?? positionAt.offset
+		...(options.align === undefined ? {} : { align: options.align }),
+		...(options.offset === undefined ? {} : { offset: options.offset })
 	}
 }
 
@@ -752,18 +753,24 @@ $effect(() => {
 			title={triggerIconElement ? undefined : (typeof tooltip === 'string' ? tooltip : title)}
 			onpointerdown={handleTriggerPointerDown}
 		>
-			{#if triggerIconElement}
-				<span class="goo-select__trigger-icon" aria-hidden="true" bind:this={triggerIconHost}></span>
-			{:else if getTriggerIconClasses(currentTriggerIcon)}
-				<span class={`goo-select__trigger-icon ${ getTriggerIconClasses(currentTriggerIcon) }`}></span>
+			{#if trigger}
+				<span class="goo-select__trigger-custom">
+					{@render trigger()}
+				</span>
+			{:else}
+				{#if triggerIconElement}
+					<span class="goo-select__trigger-icon" aria-hidden="true" bind:this={triggerIconHost}></span>
+				{:else if getTriggerIconClasses(currentTriggerIcon)}
+					<span class={`goo-select__trigger-icon ${ getTriggerIconClasses(currentTriggerIcon) }`}></span>
+				{/if}
+				<span
+					class="goo-select__trigger-label"
+					class:goo-select__trigger-label--placeholder={showPlaceholder}
+				>{triggerLabel}</span>
+				<span class="goo-select__trigger-arrow">
+					<ChevronDown aria-hidden="true" />
+				</span>
 			{/if}
-			<span
-				class="goo-select__trigger-label"
-				class:goo-select__trigger-label--placeholder={showPlaceholder}
-			>{triggerLabel}</span>
-			<span class="goo-select__trigger-arrow">
-				<ChevronDown aria-hidden="true" />
-			</span>
 		</button>
 	{/if}
 	<select

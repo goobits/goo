@@ -8,7 +8,8 @@ import type {
 	GooSelectMenuOptions,
 	GooSelectOpenOptions,
 	GooSelectOption,
-	GooSelectOptionsInput
+	GooSelectOptionsInput,
+	GooSelectProps
 } from './types.ts'
 
 export type SelectFieldOptions = {
@@ -55,31 +56,36 @@ export function createSelectField(options: SelectFieldOptions = {}): GooSelectEl
 
 		unmountSelect()
 
+		const props: GooSelectProps = {
+			value: currentValue,
+			onchange: (value: string, data: GooSelectEventData) => {
+				currentValue = value
+				options.onchange?.(value, data)
+			}
+		}
+		if (options.options !== undefined) props.options = options.options
+		if (options.enableKeyboard !== undefined) props.enableKeyboard = options.enableKeyboard
+		if (options.showSelectionIndicator !== undefined) {
+			props.showSelectionIndicator = options.showSelectionIndicator
+		}
+		if (options.showHeader !== undefined) props.showHeader = options.showHeader
+		if (options.menu !== undefined) props.menu = options.menu
+		if (options.placeholder !== undefined) props.placeholder = options.placeholder
+		if (options.tooltip !== undefined) props.tooltip = options.tooltip
+		if (options.title !== undefined) props.title = options.title
+		if (options.disabled !== undefined) props.disabled = options.disabled
+		if (options.actionContext !== undefined) props.actionContext = options.actionContext
+		if (options.triggerIcon !== undefined) props.triggerIcon = options.triggerIcon
+		if (options.id !== undefined) props.id = options.id
+		const className = options.class ?? options.className
+		if (className !== undefined) props.class = className
+		if (options.style !== undefined) props.style = options.style
+		if (options.onopen !== undefined) props.onopen = options.onopen
+		if (options.onclose !== undefined) props.onclose = options.onclose
+
 		instance = mount(GooSelect, {
 			target: field,
-			props: {
-				value: currentValue,
-				options: options.options,
-				enableKeyboard: options.enableKeyboard,
-				showSelectionIndicator: options.showSelectionIndicator,
-				showHeader: options.showHeader,
-				menu: options.menu,
-				placeholder: options.placeholder,
-				tooltip: options.tooltip,
-				title: options.title,
-				disabled: options.disabled,
-				actionContext: options.actionContext,
-				triggerIcon: options.triggerIcon,
-				id: options.id,
-				class: options.class ?? options.className,
-				style: options.style,
-				onchange: (value: string, data: GooSelectEventData) => {
-					currentValue = value
-					options.onchange?.(value, data)
-				},
-				onopen: options.onopen,
-				onclose: options.onclose
-			}
+			props
 		})
 		needsMountFlush = true
 	}
@@ -105,7 +111,7 @@ export function createSelectField(options: SelectFieldOptions = {}): GooSelectEl
 	field.setValue = (value, { silent = false } = {}) => {
 		if (destroyed) return
 		currentValue = value
-		const setValue = component().setValue as
+		const setValue = component()['setValue'] as
 			| ((value: string, opts?: { silent?: boolean }) => void)
 			| undefined
 		if (setValue) {
@@ -116,20 +122,20 @@ export function createSelectField(options: SelectFieldOptions = {}): GooSelectEl
 	}
 	field.getValue = () => currentValue
 	field.isOpen = () =>
-		!destroyed && ((component().isOpen as (() => boolean) | undefined)?.() ?? false)
+		!destroyed && ((component()['isOpen'] as (() => boolean) | undefined)?.() ?? false)
 	field.getHoveredOptionId = () =>
 		destroyed
 			? null
-			: ((component().getHoveredOptionId as (() => string | null) | undefined)?.() ?? null)
+			: ((component()['getHoveredOptionId'] as (() => string | null) | undefined)?.() ?? null)
 	field.getOptions = () =>
 		destroyed
 			? normalizeOptions(options.options)
-			: ((component().getOptions as (() => GooSelectOption[]) | undefined)?.() ??
+			: ((component()['getOptions'] as (() => GooSelectOption[]) | undefined)?.() ??
 				normalizeOptions(options.options))
 	field.setOptions = nextOptions => {
 		if (destroyed) return
 		options.options = nextOptions
-		const setOptions = component().setOptions as
+		const setOptions = component()['setOptions'] as
 			| ((nextOptions: typeof options.options) => void)
 			| undefined
 		if (setOptions) {
@@ -140,8 +146,12 @@ export function createSelectField(options: SelectFieldOptions = {}): GooSelectEl
 	}
 	field.setTriggerIcon = icon => {
 		if (destroyed) return
-		options.triggerIcon = icon ?? undefined
-		const setTriggerIcon = component().setTriggerIcon as
+		if (icon === null) {
+			delete options.triggerIcon
+		} else {
+			options.triggerIcon = icon
+		}
+		const setTriggerIcon = component()['setTriggerIcon'] as
 			| ((icon: typeof options.triggerIcon | null) => void)
 			| undefined
 		if (setTriggerIcon) {
@@ -157,7 +167,7 @@ export function createSelectField(options: SelectFieldOptions = {}): GooSelectEl
 		// must flush that pending mount before invoking the component API.
 		ensureMounted()
 		return (
-			(component().open as ((openOptions?: GooSelectOpenOptions) => boolean) | undefined)?.(
+			(component()['open'] as ((openOptions?: GooSelectOpenOptions) => boolean) | undefined)?.(
 				openOptions
 			) ?? false
 		)
@@ -166,35 +176,35 @@ export function createSelectField(options: SelectFieldOptions = {}): GooSelectEl
 		if (destroyed) return false
 		return (
 			(
-				component().updatePosition as ((openOptions?: GooSelectOpenOptions) => boolean) | undefined
+				component()['updatePosition'] as ((openOptions?: GooSelectOpenOptions) => boolean) | undefined
 			)?.(openOptions) ?? false
 		)
 	}
 	field.close = (closeOptions = {}) => {
 		if (destroyed) return
-		;(component().close as ((closeOptions?: { quiet?: boolean }) => void) | undefined)?.(
+		;(component()['close'] as ((closeOptions?: { quiet?: boolean }) => void) | undefined)?.(
 			closeOptions
 		)
 	}
 	field.toggle = () => {
 		if (destroyed) return
-		;(component().toggle as (() => void) | undefined)?.()
+		;(component()['toggle'] as (() => void) | undefined)?.()
 	}
 	field.enable = () => {
 		if (destroyed) return
-		;(component().enable as (() => void) | undefined)?.()
+		;(component()['enable'] as (() => void) | undefined)?.()
 	}
 	field.disable = () => {
 		if (destroyed) return
-		;(component().disable as (() => void) | undefined)?.()
+		;(component()['disable'] as (() => void) | undefined)?.()
 	}
 	field.focus = () => {
 		if (destroyed) return
-		;(component().focus as (() => void) | undefined)?.()
+		;(component()['focus'] as (() => void) | undefined)?.()
 	}
 	field.blur = () => {
 		if (destroyed) return
-		;(component().blur as (() => void) | undefined)?.()
+		;(component()['blur'] as (() => void) | undefined)?.()
 	}
 	field.destroy = () => {
 		if (destroyed) return

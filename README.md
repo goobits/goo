@@ -266,6 +266,9 @@ Named selects submit through native `FormData`, honor `disabled`, `required`,
 `<label for>` with the trigger through `id`. Menu options may instead provide
 native anchor fields (`href`, `target`, `rel`, `download`, and `dataset`);
 choosing a link closes the menu without changing the select value.
+Provide a named `trigger` snippet when an icon or avatar should replace the
+default label-and-chevron trigger; keep `ariaLabel` explicit for icon-only
+menus.
 
 ### Slider
 

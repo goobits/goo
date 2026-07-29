@@ -9,6 +9,7 @@ import { DropdownPanel } from '../_dropdownPanel.ts'
 import GooSelect from '../GooSelect.svelte'
 import { createIcon } from '../selectDom.ts'
 import type { GooSelectElement } from '../types.ts'
+import SelectCustomTriggerHost from './SelectCustomTriggerHost.svelte'
 
 describe('GooSelect', () => {
 	afterEach(() => {
@@ -32,6 +33,14 @@ describe('GooSelect', () => {
 		expect(container.querySelector('.goo-select')?.getAttribute('value')).toBe('b')
 		expect(container.querySelector('.goo-select__trigger-label')?.textContent).toBe('B')
 		expect(container.querySelector('.goo-select__trigger-arrow .lucide-chevron-down')).not.toBeNull()
+	})
+
+	it('renders app-owned custom trigger content without default chrome', () => {
+		const { container } = render(SelectCustomTriggerHost)
+
+		expect(container.querySelector('[data-testid="custom-trigger"]')).not.toBeNull()
+		expect(container.querySelector('.goo-select__trigger-label')).toBeNull()
+		expect(container.querySelector('.goo-select__trigger-arrow')).toBeNull()
 	})
 
 	it('preserves native form submission, required validation, and external label semantics', async() => {
