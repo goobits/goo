@@ -11,6 +11,7 @@ export interface GooProgressToastOptions {
 	cancelButton?: ProgressToastContent
 	closeDelay?: number
 	dataset?: Record<string, string>
+	onCancel?: () => void | Promise<void>
 	messages?: {
 		canceled?: ProgressToastContent
 		completed?: ProgressToastContent
@@ -36,7 +37,7 @@ const PHASES = {
 	error: 'error',
 	inProgress: 'inProgress'
 } as const
-type ProgressToastPhase = typeof PHASES[keyof typeof PHASES]
+type ProgressToastPhase = (typeof PHASES)[keyof typeof PHASES]
 type ProgressToastMessages = Record<ProgressToastPhase, ProgressToastContent>
 
 /** Creates an imperative Goo progress toast. */
@@ -44,6 +45,7 @@ export function createGooProgressToast({
 	cancelButton,
 	closeDelay = 2500,
 	dataset = {},
+	onCancel,
 	messages = {}
 }: GooProgressToastOptions = {}): GooProgressToastHandle {
 	const resolvedMessages: ProgressToastMessages = {
@@ -52,13 +54,17 @@ export function createGooProgressToast({
 		error: messages.error ?? 'Operation failed.',
 		inProgress: messages.inProgress ?? 'Operation in progress.'
 	}
-	const state: { phase: ProgressToastPhase; progress: number } = { phase: PHASES.inProgress, progress: 0 }
+	const state: { phase: ProgressToastPhase; progress: number } = {
+		phase: PHASES.inProgress,
+		progress: 0
+	}
 	const toast = document.createElement('div')
 	const status = document.createElement('p')
 	const ringHost = document.createElement('div')
 	const cancel = document.createElement('button')
 	const ring = mount(GooProgressRing, { target: ringHost }) as { setProgress(value: number): void }
 	let closeTimer: number | undefined
+	let cancelRequested = false
 	let destroyed = false
 
 	toast.className = 'goo-progress-toast'
@@ -120,7 +126,7 @@ export function createGooProgressToast({
 		}
 	}
 
-	cancel.addEventListener('click', handle.cancel)
+	cancel.addEventListener('click', requestCancel)
 	render()
 
 	return handle
@@ -136,6 +142,27 @@ export function createGooProgressToast({
 		return true
 	}
 
+	function requestCancel(): void {
+		if (destroyed || state.phase !== PHASES.inProgress || cancelRequested) return
+		if (!onCancel) {
+			handle.cancel()
+			return
+		}
+		cancelRequested = true
+		render()
+		try {
+			void Promise.resolve(onCancel()).catch(resetCancelRequest)
+		} catch {
+			resetCancelRequest()
+		}
+	}
+
+	function resetCancelRequest(): void {
+		if (destroyed || state.phase !== PHASES.inProgress) return
+		cancelRequested = false
+		render()
+	}
+
 	function scheduleClose(): void {
 		if (destroyed) return
 		if (closeTimer !== undefined) return
@@ -149,7 +176,7 @@ export function createGooProgressToast({
 			window.clearTimeout(closeTimer)
 			closeTimer = undefined
 		}
-		cancel.removeEventListener('click', handle.cancel)
+		cancel.removeEventListener('click', requestCancel)
 		void unmount(ring)
 		toast.remove()
 	}
@@ -159,6 +186,7 @@ export function createGooProgressToast({
 		setContent(status, resolvedMessages[state.phase])
 		setContent(cancel, cancelButton ?? '')
 		cancel.hidden = !cancelButton || state.phase !== PHASES.inProgress
+		cancel.disabled = cancelRequested
 		ringHost.hidden = state.phase !== PHASES.inProgress
 		ring.setProgress(state.progress)
 	}
