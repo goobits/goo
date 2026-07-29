@@ -66,6 +66,9 @@ let {
 	placeholder = 'Select...',
 	ariaLabel,
 	'aria-label': ariaLabelAttribute,
+	'aria-describedby': ariaDescribedby,
+	'aria-labelledby': ariaLabelledby,
+	'aria-invalid': ariaInvalidAttribute,
 	tooltip,
 	title,
 	disabled = false,
@@ -116,6 +119,9 @@ const selectMenu = $derived(normalizeSelectMenu(menu))
 const dropdownSemantics = $derived(selectMenu.semantics)
 const triggerLabel = $derived(getOptionLabel(selectedOption) || placeholder)
 const triggerAccessibleName = $derived(readTriggerAccessibleName())
+const triggerAriaDescribedby = $derived(toAriaText(ariaDescribedby))
+const triggerAriaLabelledby = $derived(toAriaText(ariaLabelledby))
+const triggerAriaInvalid = $derived(invalid ? 'true' : toAriaInvalid(ariaInvalidAttribute))
 const showPlaceholder = $derived(!selectedOption)
 const formOptions = $derived.by(() => getFormOptions(normalizedOptions))
 // Named `selectState` (not `state`) so the `$state` rune token is not parsed as
@@ -679,6 +685,18 @@ function textValue(value: unknown): string {
 	return typeof value === 'string' ? value.trim() : ''
 }
 
+function toAriaText(value: unknown): string | undefined {
+	if (value === null || value === undefined || value === false) return undefined
+	return String(value)
+}
+
+function toAriaInvalid(value: unknown): 'false' | 'grammar' | 'spelling' | 'true' | undefined {
+	if (value === true || value === 'true') return 'true'
+	if (value === false || value === 'false') return 'false'
+	if (value === 'grammar' || value === 'spelling') return value
+	return undefined
+}
+
 function getTriggerIconClasses(icon: unknown): string {
 	if (typeof icon !== 'string') return ''
 	const trimmed = icon.trim()
@@ -785,7 +803,9 @@ $effect(() => {
 			aria-controls={opened && listboxId ? listboxId : undefined}
 			aria-activedescendant={opened && activeDescendant ? activeDescendant : undefined}
 			aria-label={triggerAccessibleName || undefined}
-			aria-invalid={invalid ? 'true' : undefined}
+			aria-describedby={triggerAriaDescribedby}
+			aria-labelledby={triggerAriaLabelledby}
+			aria-invalid={triggerAriaInvalid}
 			aria-required={required ? 'true' : undefined}
 			disabled={effectiveDisabled}
 			title={triggerIconElement ? undefined : (typeof tooltip === 'string' ? tooltip : title)}

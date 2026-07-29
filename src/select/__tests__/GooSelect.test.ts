@@ -96,6 +96,23 @@ describe('GooSelect', () => {
 		expect(trigger.hasAttribute('aria-invalid')).toBe(false)
 	})
 
+	it('forwards descriptive and validation ARIA to the interactive trigger', () => {
+		const { container } = render(GooSelect, {
+			props: {
+				'aria-describedby': 'genre-help',
+				'aria-invalid': 'grammar',
+				'aria-labelledby': 'genre-label',
+				options: [ { id: 'rock', label: 'Rock' } ],
+				value: 'rock'
+			}
+		})
+		const trigger = container.querySelector<HTMLButtonElement>('.goo-select__trigger')!
+
+		expect(trigger.getAttribute('aria-describedby')).toBe('genre-help')
+		expect(trigger.getAttribute('aria-invalid')).toBe('grammar')
+		expect(trigger.getAttribute('aria-labelledby')).toBe('genre-label')
+	})
+
 	it('omits disabled select values from native FormData', () => {
 		const { container } = render(GooSelect, {
 			props: {
