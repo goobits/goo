@@ -51,7 +51,13 @@ export function normalizeOption(opt: unknown): GooSelectOption | null {
 		shortcut: optObj.shortcut as GooSelectOption['shortcut'],
 		isDisabled: optObj.isDisabled as GooSelectOption['isDisabled'],
 		isSupported: optObj.isSupported as GooSelectOption['isSupported'],
-		onChoose: optObj.onChoose as GooSelectOption['onChoose']
+		onChoose: optObj.onChoose as GooSelectOption['onChoose'],
+		title: optObj.title as GooSelectOption['title'],
+		href: optObj.href as GooSelectOption['href'],
+		target: optObj.target as GooSelectOption['target'],
+		rel: optObj.rel as GooSelectOption['rel'],
+		download: optObj.download as GooSelectOption['download'],
+		dataset: optObj.dataset as GooSelectOption['dataset']
 	}
 
 	// Recursively normalize child options

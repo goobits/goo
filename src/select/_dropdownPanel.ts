@@ -3,7 +3,10 @@
  * @module goobits/select/DropdownPanel
  */
 
+import { mount, unmount } from 'svelte'
+
 import { findOptionById } from './_normalizeOptions.ts'
+import SelectIcon from './_SelectIcon.svelte'
 import { SubmenuPopoutController } from './_submenuPopout.ts'
 import { createIcon, createShortcut, evaluate } from './selectDom.ts'
 import type { GooSelectDropdownSemantics, GooSelectOption } from './types.ts'
@@ -82,6 +85,7 @@ export class DropdownPanel {
 	#typeaheadTimer: ReturnType<typeof setTimeout> | null = null
 	#selectionAnimationCleanup: (() => void) | null = null
 	#selectionAnimationToken = 0
+	#mountedIcons = new Map<HTMLElement, ReturnType<typeof mount>>()
 	#handleContainerMouseEnter = () => this.#cancelSubmenuTimer()
 	#handleContainerMouseLeave = (event: MouseEvent) =>
 		this.#scheduleSubmenuClose(event.relatedTarget)
@@ -128,6 +132,7 @@ export class DropdownPanel {
 		this.#options = options
 		this.#optionSeq = 0
 		this.$container.removeAttribute('aria-activedescendant')
+		this.#clearIcons()
 		this.$container.innerHTML = ''
 		this.#renderOptionsList(options, this.$container)
 	}
@@ -222,7 +227,7 @@ export class DropdownPanel {
 				$prev.setAttribute('aria-selected', 'false')
 			}
 			const $check = $prev.querySelector('.goo-select__check')
-			if ($check) $check.innerHTML = ''
+			if ($check instanceof HTMLElement) this.#clearIcon($check)
 		}
 
 		// Add selection visual to new option
@@ -233,10 +238,7 @@ export class DropdownPanel {
 				$item.setAttribute('aria-selected', 'true')
 			}
 			const $check = $item.querySelector('.goo-select__check')
-			if ($check) {
-				$check.innerHTML =
-					'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>'
-			}
+			if ($check instanceof HTMLElement) this.#renderIcon($check, 'check')
 		}
 	}
 
@@ -385,6 +387,10 @@ export class DropdownPanel {
 			this.#openSubmenuOption(item, option)
 			return true
 		}
+		if (option.href && item instanceof HTMLAnchorElement) {
+			item.click()
+			return true
+		}
 
 		this.#ctx.onSelect(option, item)
 		return true
@@ -428,6 +434,7 @@ export class DropdownPanel {
 	 */
 	destroy() {
 		this.#cancelSelectionAnimation()
+		this.#clearIcons()
 		this.closeSubmenu()
 		this.$container.removeEventListener('mouseenter', this.#handleContainerMouseEnter)
 		this.$container.removeEventListener('mouseleave', this.#handleContainerMouseLeave)
@@ -521,7 +528,7 @@ export class DropdownPanel {
 		const isSubmenu = opt.type === 'submenu'
 		if (isSubmenu && !this.#hasSupportedOptionRow(opt.options || [])) return null
 
-		const $item = document.createElement('div')
+		const $item = document.createElement(opt.href ? 'a' : 'div')
 		$item.className = [
 			'goo-select__option',
 			isDisabled ? 'goo-select__option--disabled' : '',
@@ -539,14 +546,24 @@ export class DropdownPanel {
 			$item.setAttribute('aria-selected', String(isSelected))
 		}
 		if (isDisabled) $item.setAttribute('aria-disabled', 'true')
+		if (opt.title) $item.title = opt.title
+		for (const [ key, value ] of Object.entries(opt.dataset ?? {})) {
+			$item.dataset[key] = value
+		}
+		if ($item instanceof HTMLAnchorElement && opt.href && !isDisabled) {
+			$item.href = opt.href
+			if (opt.target) $item.target = opt.target
+			const rel = opt.rel ?? (opt.target === '_blank' ? 'noopener noreferrer' : '')
+			if (rel) $item.rel = rel
+			if (opt.download === true) $item.download = ''
+			if (typeof opt.download === 'string') $item.download = opt.download
+		}
 
 		// Selection checkmark
 		if (showSelectionIndicator) {
 			const $check = document.createElement('span')
 			$check.className = 'goo-select__check'
-			$check.innerHTML = isSelected
-				? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>'
-				: ''
+			if (isSelected) this.#renderIcon($check, 'check')
 			$item.appendChild($check)
 		}
 
@@ -578,8 +595,7 @@ export class DropdownPanel {
 		if (isSubmenu) {
 			const $arrow = document.createElement('span')
 			$arrow.className = 'goo-select__submenu-arrow'
-			$arrow.innerHTML =
-				'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>'
+			this.#renderIcon($arrow, 'chevron-right')
 			$item.appendChild($arrow)
 		}
 
@@ -591,6 +607,7 @@ export class DropdownPanel {
 
 	#bindOptionEvents($item: HTMLElement, opt: GooSelectOption, isDisabled: boolean) {
 		let handledPointerSelection = false
+		const isLink = $item instanceof HTMLAnchorElement && Boolean(opt.href)
 
 		// Hover (also handles drag-to-select hover)
 		$item.addEventListener('mouseenter', () => {
@@ -602,10 +619,11 @@ export class DropdownPanel {
 		if (!isDisabled) {
 			$item.addEventListener('pointerdown', event => {
 				if (event.button !== 0) return
-				event.preventDefault() // Prevent focus loss
+				if (!isLink) event.preventDefault() // Prevent focus loss
 			})
 			$item.addEventListener('pointerup', event => {
 				if (event.button !== 0) return
+				if (isLink) return
 				event.preventDefault()
 				handledPointerSelection = true
 				this.#chooseOption($item, opt)
@@ -615,10 +633,32 @@ export class DropdownPanel {
 					handledPointerSelection = false
 					return
 				}
-				event.preventDefault()
+				if (!isLink) event.preventDefault()
 				this.#chooseOption($item, opt)
 			})
 		}
+	}
+
+	#renderIcon(target: HTMLElement, name: 'check' | 'chevron-right'): void {
+		this.#clearIcon(target)
+		this.#mountedIcons.set(target, mount(SelectIcon, {
+			target,
+			props: { name }
+		}))
+	}
+
+	#clearIcon(target: HTMLElement): void {
+		const component = this.#mountedIcons.get(target)
+		if (!component) return
+		this.#mountedIcons.delete(target)
+		void unmount(component)
+	}
+
+	#clearIcons(): void {
+		for (const component of this.#mountedIcons.values()) {
+			void unmount(component)
+		}
+		this.#mountedIcons.clear()
 	}
 
 	#chooseOption($item: HTMLElement, opt: GooSelectOption): void {

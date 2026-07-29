@@ -4,6 +4,7 @@
  */
 
 import type { Snippet } from 'svelte'
+import type { HTMLSelectAttributes } from 'svelte/elements'
 
 import type { GooPopoutAt, GooPopoutOptions } from '../popout/popoutTypes.ts'
 import type { GooForwardedAttributes } from '../support/types/forwardedAttributes.ts'
@@ -36,6 +37,16 @@ export interface GooSelectOption {
 	onChoose?: (id: string) => void
 	options?: GooSelectOption[]
 	title?: string
+	/** Native anchor destination. Link options navigate without changing the select value. */
+	href?: string
+	/** Native anchor browsing-context target. */
+	target?: string
+	/** Native anchor relationship tokens. */
+	rel?: string
+	/** Native anchor download behavior. */
+	download?: boolean | string
+	/** Data attributes forwarded to the rendered option row. */
+	dataset?: Record<string, string>
 }
 
 /** Shorthand option accepted by GooSelect option inputs. */
@@ -110,7 +121,7 @@ export type GooSelectMenuOptions = {
 }
 
 /** Event names emitted by a GooSelect element. */
-export type GooSelectEventName = 'change' | 'open' | 'close'
+export type GooSelectEventName = 'change' | 'hoverchange' | 'open' | 'close'
 
 /** Change callback fired after selection. */
 export type GooSelectChangeHandler = (value: string, data: GooSelectEventData) => void
@@ -120,6 +131,12 @@ export type GooSelectOpenHandler = () => void
 
 /** Close callback fired after the dropdown closes. */
 export type GooSelectCloseHandler = () => void
+
+/** Hover callback fired when keyboard or pointer navigation changes the active option. */
+export type GooSelectHoverChangeHandler = (
+	id: string | null,
+	data: GooSelectHoverChangeEventData
+) => void
 
 /** Props accepted by the Svelte `GooSelect` component. */
 export type GooSelectProps = GooForwardedAttributes & {
@@ -138,7 +155,10 @@ export type GooSelectProps = GooForwardedAttributes & {
 	id?: string
 	size?: string
 	name?: string
+	form?: string
 	placeholder?: string
+	required?: boolean
+	autocomplete?: HTMLSelectAttributes['autocomplete']
 	ariaLabel?: string
 	tooltip?: string | (() => string)
 	title?: string
@@ -161,6 +181,8 @@ export type GooSelectProps = GooForwardedAttributes & {
 	/** Close callback. */
 	onclose?: GooSelectCloseHandler
 
+	/** Hover callback. */
+	onhoverchange?: GooSelectHoverChangeHandler
 }
 
 /** Data emitted by select change events. */
@@ -174,6 +196,14 @@ export interface GooSelectEventData {
 
 	/** Previous option id. */
 	oldValue: string
+}
+
+/** Data emitted by select hover-change events. */
+export interface GooSelectHoverChangeEventData {
+	/** Select element that emitted the event. */
+	select: GooSelectElement
+	/** Current hovered option, or null when the menu has no active option. */
+	option: GooSelectOption | null
 }
 
 /** Native root element bound by `GooSelect` for imperative updates. */

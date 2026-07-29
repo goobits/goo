@@ -16,6 +16,8 @@ export type {
 	GooSelectElement,
 	GooSelectEventData,
 	GooSelectEventName,
+	GooSelectHoverChangeEventData,
+	GooSelectHoverChangeHandler,
 	GooSelectMenuOptions,
 	GooSelectMenuPlacement,
 	GooSelectOpenHandler,
