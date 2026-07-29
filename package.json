@@ -277,7 +277,7 @@
 	},
 	"dependencies": {
 		"@goobits/logger": "^1.0.0",
-		"@lucide/svelte": "^1.25.0"
+		"@lucide/svelte": "^1.27.0"
 	},
 	"peerDependencies": {
 		"svelte": "^5.55.5"
