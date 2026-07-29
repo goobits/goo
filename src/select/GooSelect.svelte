@@ -51,25 +51,9 @@ import type {
 
 type SelectPopout = GooPopoutInstance
 
-let selectRoot: HTMLDivElement | undefined = $state()
-// The root <div> is augmented with the GooSelect API at runtime (assignSelectApi),
-// so expose it under the augmented type while binding to the real element type.
-const selectElement = $derived(selectRoot as GooSelectElement | undefined)
-let triggerElement: HTMLButtonElement | undefined = $state()
-let panel = $state<DropdownPanel | null>(null)
-let popout = $state<SelectPopout | null>(null)
-let opened = $state(false)
-let normalizedOptions: GooSelectOption[] = $state([])
-let selectedValue = $state('')
-let effectiveDisabled = $state(false)
-let currentTriggerIcon = $state<string | HTMLElement | (() => HTMLElement) | undefined>()
-let currentBoundContext = $state<unknown>()
-let listboxId = $state('')
-let activeDescendant = $state('')
-let invalid = $state(false)
-let triggerPointerId: number | null = null
-let selectLifecycleToken = 0
-let focusFrame = 0
+function readInitial<T>(read: () => T): T {
+	return read()
+}
 
 let {
 	options = [],
@@ -104,6 +88,28 @@ let {
 	onhoverchange,
 	...rest
 }: GooSelectProps = $props()
+
+let selectRoot: HTMLDivElement | undefined = $state()
+// The root <div> is augmented with the GooSelect API at runtime (assignSelectApi),
+// so expose it under the augmented type while binding to the real element type.
+const selectElement = $derived(selectRoot as GooSelectElement | undefined)
+let triggerElement: HTMLButtonElement | undefined = $state()
+let panel = $state<DropdownPanel | null>(null)
+let popout = $state<SelectPopout | null>(null)
+let opened = $state(false)
+let normalizedOptions: GooSelectOption[] = $state(readInitial(() => normalizeOptions(options)))
+let selectedValue = $state(value ?? '')
+let effectiveDisabled = $state(readInitial(() => Boolean(disabled)))
+let currentTriggerIcon = $state<string | HTMLElement | (() => HTMLElement) | undefined>(
+	readInitial(() => triggerIcon)
+)
+let currentBoundContext = $state<unknown>(readInitial(() => actionContext))
+let listboxId = $state('')
+let activeDescendant = $state('')
+let invalid = $state(false)
+let triggerPointerId: number | null = null
+let selectLifecycleToken = 0
+let focusFrame = 0
 
 const selectedOption = $derived(findOptionById(normalizedOptions, selectedValue))
 const selectMenu = $derived(normalizeSelectMenu(menu))
@@ -654,8 +660,12 @@ function getContext(): unknown {
 function getOptionLabel(option: GooSelectOption | null): string {
 	if (!option) return ''
 	const label = evaluate(option.label, getContext())
-	if (label instanceof Element) return label.textContent ?? ''
+	if (isDomElement(label)) return label.textContent ?? ''
 	return String(label ?? option.id ?? '')
+}
+
+function isDomElement(value: unknown): value is Element {
+	return typeof Element !== 'undefined' && value instanceof Element
 }
 
 function readTriggerAccessibleName(): string {
@@ -726,9 +736,9 @@ const triggerIconElement = $derived.by(() => {
 	void selectedValue
 	if (typeof icon === 'function') {
 		const element = icon()
-		return element instanceof Element ? element : null
+		return isDomElement(element) ? element : null
 	}
-	return icon instanceof Element ? icon : null
+	return isDomElement(icon) ? icon : null
 })
 
 $effect(() => {
