@@ -43,6 +43,15 @@ describe('GooSelect', () => {
 		expect(container.querySelector('.goo-select__trigger-arrow')).toBeNull()
 	})
 
+	it('keeps pointer-opened trigger focus as the popout return target', () => {
+		const { container } = render(SelectCustomTriggerHost)
+		const trigger = container.querySelector<HTMLButtonElement>('.goo-select__trigger')!
+
+		trigger.dispatchEvent(pointerEvent('pointerdown', { pointerId: 1 }))
+
+		expect(document.activeElement).toBe(trigger)
+	})
+
 	it('preserves native form submission, required validation, and external label semantics', async() => {
 		const { container } = render(GooSelect, {
 			props: {

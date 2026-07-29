@@ -480,6 +480,9 @@ function assignSelectApi(select: GooSelectRuntimeElement): void {
 function handleTriggerPointerDown(event: PointerEvent): void {
 	if (effectiveDisabled || event.button !== 0) return
 	event.preventDefault()
+	// Preventing the native pointerdown keeps drag-to-select stable, so focus
+	// the trigger explicitly and give the popout a reliable return target.
+	triggerElement?.focus({ preventScroll: true })
 
 	if (opened) {
 		close()
