@@ -28,6 +28,31 @@ describe('GooPopout', () => {
 		target.remove()
 	})
 
+	it('dismisses on the first outside pointer press after opening', async() => {
+		const target = document.createElement('button')
+		const outside = document.createElement('button')
+		const content = document.createElement('div')
+		document.body.append(target, outside)
+		const instance = createGooPopout({ at: target, content, openImmediately: false })
+
+		try {
+			const openPromise = instance.open()
+			expect(instance.isOpen()).toBe(true)
+
+			outside.dispatchEvent(new PointerEvent('pointerdown', {
+				bubbles: true,
+				cancelable: true
+			}))
+
+			expect(instance.isOpen()).toBe(false)
+			await openPromise
+		} finally {
+			await instance.destroy()
+			target.remove()
+			outside.remove()
+		}
+	})
+
 	it('keeps every sibling child popout inside its parent click boundary', async() => {
 		const target = document.createElement('button')
 		const parentContent = document.createElement('div')

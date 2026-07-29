@@ -218,14 +218,6 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 			isOpen: () => opened,
 			lifecycle
 		})
-
-		await stabilizeOpeningLayout({
-			element: $element,
-			isActive: () => $element !== null && !destroying,
-			reposition
-		})
-		if (!$element || destroying) return
-
 		setupPopoutEventHandlers({
 			clickToClose,
 			close,
@@ -238,6 +230,14 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 			lifecycle,
 			reposition
 		})
+
+		await stabilizeOpeningLayout({
+			element: $element,
+			isActive: () => $element !== null && !destroying,
+			reposition
+		})
+		if (!$element || destroying) return
+
 		if ($element) {
 			observeOpenLayoutChanges({
 				element: $element,
