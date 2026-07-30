@@ -94,7 +94,7 @@ function createFooterButton(value: string, variant: 'primary' | 'secondary'): HT
 
 	const title = document.createElement('span')
 	title.className = 'goo-button__title'
-	title.dataset.translate = ''
+	title.dataset['translate'] = ''
 	title.textContent = value
 	button.appendChild(title)
 

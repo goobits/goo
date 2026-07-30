@@ -252,9 +252,9 @@ function emitXyPadEvent(state: GooXyPadEventData['state'], event?: Event): void 
 	const nextValue = cloneValue(latestValue)
 	const data: GooXyPadEventData = {
 		element: xyPadElement,
-		event,
 		state,
-		value: nextValue
+		value: nextValue,
+		...(event === undefined ? {} : { event })
 	}
 	if (state === 'input') {
 		oninput?.(nextValue, data)

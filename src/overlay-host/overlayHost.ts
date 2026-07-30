@@ -33,7 +33,7 @@ export const portalToGooOverlayHost = (
 ): GooOverlayPortalAction => {
 	const anchor = document.createComment('goo-overlay-portal')
 	node.before(anchor)
-	node.dataset.gooOverlayPortal = ''
+	node.dataset['gooOverlayPortal'] = ''
 	let host = initialHost
 	let frame = 0
 

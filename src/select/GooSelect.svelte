@@ -330,7 +330,7 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 
 	popout = createGooPopout({
 		content: panel.$container,
-		parentElement,
+		...(parentElement === undefined ? {} : { parentElement }),
 		role: null,
 		className: getSelectMenuPopoutClass(currentMenu, popoutClassName),
 		...(currentMenu.dataset ? { dataset: currentMenu.dataset } : {}),

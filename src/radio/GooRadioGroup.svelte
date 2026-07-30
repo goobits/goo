@@ -155,8 +155,10 @@ function handleKeydown(event: KeyboardEvent): void {
 	const checkedIndex = radios.findIndex(radio => radio.checked)
 	const currentIndex = Math.max(0, focusedIndex >= 0 ? focusedIndex : checkedIndex)
 	const nextIndex = (currentIndex + direction + radios.length) % radios.length
-	radios[nextIndex].focus()
-	radios[nextIndex].check()
+	const nextRadio = radios[nextIndex]
+	if (!nextRadio) return
+	nextRadio.focus()
+	nextRadio.check()
 }
 
 function getRadioTabIndex(nextValue: string): number {

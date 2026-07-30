@@ -206,22 +206,22 @@ class GooDialogControllerRuntime {
 		const placement = resolveGooOverlayPlacement(activeElement)
 		this.$element = document.createElement('div')
 		this.$element.className = 'goo-dialog'
-		this.state = {
-			ariaLabel: undefined,
-			type: 'alert',
-			heading: '',
-			modal: true,
-			showBackdrop: true,
-			showClose: true,
-			closeOnBackdrop: true,
-			closeOnEscape: true,
-			defaultFocus: 'ok',
-			width: 'auto',
-			height: 'auto',
-			autoDismiss: 0,
-			overlap: false,
-			...options
+		const state: GooDialogState = {
+			type: options.type ?? 'alert',
+			heading: options.heading ?? '',
+			modal: options.modal ?? true,
+			showBackdrop: options.showBackdrop ?? true,
+			showClose: options.showClose ?? true,
+			closeOnBackdrop: options.closeOnBackdrop ?? true,
+			closeOnEscape: options.closeOnEscape ?? true,
+			defaultFocus: options.defaultFocus ?? 'ok',
+			width: options.width ?? 'auto',
+			height: options.height ?? 'auto',
+			autoDismiss: options.autoDismiss ?? 0,
+			overlap: options.overlap ?? false
 		}
+		if (options.ariaLabel !== undefined) state.ariaLabel = options.ariaLabel
+		this.state = state
 
 		this._content = options.content || ''
 		this._actions = options.actions

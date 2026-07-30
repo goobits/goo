@@ -100,14 +100,14 @@ export const defaultControlRegistry: GooControlTypeRegistry = {
 	select: defineSvelteControlType({ load: () => loadSvelteModule(selectModule), createField: createSelectField }),
 	'blend-mode': defineFactoryControlType({
 		load: () => loadModule(blendModeModule),
-		extract: module => module.createBlendModeField as GooControlFactory,
+		extract: module => module['createBlendModeField'] as GooControlFactory,
 		createField: createBlendModeField
 	}),
 	radio: defineSvelteControlType({ load: () => loadSvelteModule(radioModule), createField: createRadioGroupField }),
 	radiogroup: defineSvelteControlType({ load: () => loadSvelteModule(radioModule), createField: createRadioGroupField }),
 	'slider-field': defineFactoryControlType({
 		load: () => loadModule(sliderFieldModule),
-		extract: module => module.createSliderField as GooControlFactory,
+		extract: module => module['createSliderField'] as GooControlFactory,
 		createField: createSliderField
 	}),
 	text: defineSvelteControlType({ load: () => loadSvelteModule(inputModule), createField: createInputField }),

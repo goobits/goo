@@ -1,7 +1,7 @@
 import { mount, unmount } from 'svelte'
 
 import GooColor from './GooColor.svelte'
-import type { GooColorElement, GooColorEventData } from './types.ts'
+import type { GooColorElement, GooColorEventData, GooColorProps } from './types.ts'
 
 export type ColorFieldOptions = {
 	alpha?: boolean
@@ -50,34 +50,34 @@ export function createColorField(options: ColorFieldOptions = {}): ColorFieldEle
 
 		unmountColor()
 
-		instance = mount(GooColor, {
-			target: field,
-			props: {
-				value: currentValue,
-				get element() {
-					return colorElement
-				},
-				set element(value) {
-					colorElement = value
-				},
-				alpha: options.alpha,
-				name: options.name,
-				id: options.id,
-				title: options.title,
-				disabled: options.disabled,
-				class: options.class ?? options.className,
-				style: options.style,
-				tabIndex: options.tabIndex,
-				oninput: (value: string, data: GooColorEventData) => {
-					currentValue = value
-					options.oninput?.(data)
-				},
-				onchange: (value: string, data: GooColorEventData) => {
-					currentValue = value
-					options.onchange?.(data)
-				}
+		const props: GooColorProps = {
+			value: currentValue,
+			get element() {
+				return colorElement
+			},
+			set element(value) {
+				colorElement = value
+			},
+			oninput: (value: string, data: GooColorEventData) => {
+				currentValue = value
+				options.oninput?.(data)
+			},
+			onchange: (value: string, data: GooColorEventData) => {
+				currentValue = value
+				options.onchange?.(data)
 			}
-		})
+		}
+		if (options.alpha !== undefined) props.alpha = options.alpha
+		if (options.name !== undefined) props.name = options.name
+		if (options.id !== undefined) props.id = options.id
+		if (options.title !== undefined) props.title = options.title
+		if (options.disabled !== undefined) props.disabled = options.disabled
+		const className = options.class ?? options.className
+		if (className !== undefined) props.class = className
+		if (options.style !== undefined) props.style = options.style
+		if (options.tabIndex !== undefined) props.tabIndex = options.tabIndex
+
+		instance = mount(GooColor, { target: field, props })
 	}
 
 	Object.defineProperty(field, 'value', {

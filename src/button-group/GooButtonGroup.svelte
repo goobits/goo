@@ -226,7 +226,7 @@ function syncChildButtons(): void {
 
 	for (const button of getChildButtons()) {
 		const key = readButtonKey(button)
-		button.dataset.key = key
+		button.dataset['key'] = key
 		button.tabIndex = getButtonTabIndex(key)
 		button.disabled = disabled
 		button.setAttribute('aria-pressed', String(isSelected(key)))
@@ -270,7 +270,7 @@ function getFocusedButton(): HTMLButtonElement | null {
 }
 
 function readButtonKey(button: HTMLButtonElement): string {
-	return button.dataset.key || button.dataset.value || button.textContent?.trim() || ''
+	return button.dataset['key'] || button.dataset['value'] || button.textContent?.trim() || ''
 }
 
 function mountIcon(node: HTMLSpanElement, iconFactory: () => Element) {

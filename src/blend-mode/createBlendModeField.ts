@@ -49,11 +49,12 @@ function normalizeBlendModeOptions(options: unknown): GooSelectOptionsInput {
 		}
 		const id = option.id ?? option.key ?? option.value ?? option.label ?? ''
 		const label = option.label ?? option.value ?? option.id ?? option.key ?? ''
-		return {
+		const normalizedOption: GooSelectOption = {
 			id: String(id),
-			label: String(label),
-			icon: option.icon
+			label: String(label)
 		}
+		if (option.icon !== undefined) normalizedOption.icon = option.icon
+		return normalizedOption
 	})
 }
 

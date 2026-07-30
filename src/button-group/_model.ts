@@ -41,20 +41,22 @@ export function readButtonGroupValue(selectedKeys: Set<string>, allowMultiple: b
 	if (allowMultiple) {
 		return [ ...selectedKeys ]
 	}
-	return selectedKeys.size > 0 ? [ ...selectedKeys ][0] : null
+	const [ selectedKey ] = selectedKeys
+	return selectedKey ?? null
 }
 
 function normalizeButtonGroupOption(option: RawButtonGroupOption): NormalizedButtonGroupOption {
 	const label = option.value ?? option.label ?? option.id ?? option.key ?? ''
 	const key = option.key ?? option.id ?? option.value ?? label
-	return {
+	const normalizedOption: NormalizedButtonGroupOption = {
 		key: String(key),
-		value: String(label),
-		icon: option.icon,
-		tooltip: option.tooltip,
-		ariaLabel: option.ariaLabel,
-		hideLabel: option.hideLabel,
-		className: option.className,
-		disabled: option.disabled
+		value: String(label)
 	}
+	if (option.icon !== undefined) normalizedOption.icon = option.icon
+	if (option.tooltip !== undefined) normalizedOption.tooltip = option.tooltip
+	if (option.ariaLabel !== undefined) normalizedOption.ariaLabel = option.ariaLabel
+	if (option.hideLabel !== undefined) normalizedOption.hideLabel = option.hideLabel
+	if (option.className !== undefined) normalizedOption.className = option.className
+	if (option.disabled !== undefined) normalizedOption.disabled = option.disabled
+	return normalizedOption
 }

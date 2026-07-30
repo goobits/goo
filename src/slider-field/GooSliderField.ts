@@ -2,7 +2,11 @@ import './GooSliderField.css'
 
 import { mount, unmount } from 'svelte'
 
-import { createNumberField, type NumberInputFieldElement } from '../input/_createInputField.ts'
+import {
+	createNumberField,
+	type NumberInputFieldElement,
+	type NumberInputFieldOptions
+} from '../input/_createInputField.ts'
 import { getSliderProps } from '../slider/_sliderProps.ts'
 import GooSlider from '../slider/GooSlider.svelte'
 import { getVarianceValues } from '../slider/sliderUtils.ts'
@@ -109,16 +113,17 @@ export function createSliderField(options: GooSliderFieldOptions = {}): GooSlide
 
 		const nextValues = getSliderValues()
 		nextValues.forEach((value, index) => {
-			const input = createNumberField({
+			const inputOptions: NumberInputFieldOptions = {
 				className: `goo-slider-field__number goo-slider-field__number--index${ index }`,
-				max: currentOptions.max,
-				min: currentOptions.min,
-				step: currentOptions.step,
-				unit: currentOptions.unit,
 				value,
 				oninput: nextValue => handleNumberInput(index, nextValue, 'input'),
 				onchange: nextValue => handleNumberInput(index, nextValue, 'change')
-			})
+			}
+			if (currentOptions.max !== undefined) inputOptions.max = currentOptions.max
+			if (currentOptions.min !== undefined) inputOptions.min = currentOptions.min
+			if (currentOptions.step !== undefined) inputOptions.step = currentOptions.step
+			if (currentOptions.unit !== undefined) inputOptions.unit = currentOptions.unit
+			const input = createNumberField(inputOptions)
 			inputElements.push(input)
 			inputHost.appendChild(input)
 		})
@@ -154,11 +159,11 @@ export function createSliderField(options: GooSliderFieldOptions = {}): GooSlide
 		const data: GooSliderFieldEventData = {
 			element,
 			index,
-			originalEvent,
 			slider: sliderElement,
 			state: nextState,
 			value,
-			values: currentValues.slice()
+			values: currentValues.slice(),
+			...(originalEvent === undefined ? {} : { originalEvent })
 		}
 		const nextValue = formatValue(currentValues, valueMode)
 		if (nextState === 'input') {

@@ -273,7 +273,7 @@ function emitAngleInputEvent(state: GooAngleInputEventData['state'], event?: Eve
 		angleInput: angleInputElement,
 		value: currentValue,
 		state,
-		event
+		...(event === undefined ? {} : { event })
 	}
 
 	if (state === 'input') {

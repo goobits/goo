@@ -61,15 +61,10 @@ function createDialog(): void {
 	if (currentDialog) return
 	contentElement.hidden = false
 	if (actions && actionsElement) actionsElement.hidden = false
-	currentDialog = createGooDialog({
+	const dialogOptions: GooDialogOptions = {
 		type,
-		ariaLabel,
 		heading,
 		content: contentElement,
-		actions: actions ? actionsElement : undefined,
-		labels,
-		fields,
-		verify,
 		modal,
 		overlap,
 		showBackdrop,
@@ -79,18 +74,26 @@ function createDialog(): void {
 		defaultFocus,
 		width,
 		height,
-		className,
 		autoDismiss,
-		parentElement: parentElement ?? overlayHost?.element() ?? undefined,
-		isolationRoot: isolationRoot ?? overlayHost?.scope() ?? undefined,
-		onOk: onok,
-		onCancel: oncancel,
 		onClose: () => {
 			open = false
 			rendered = false
 			onclose?.()
 		}
-	})
+	}
+	if (ariaLabel !== undefined) dialogOptions.ariaLabel = ariaLabel
+	if (actions && actionsElement) dialogOptions.actions = actionsElement
+	if (labels !== undefined) dialogOptions.labels = labels
+	if (fields !== undefined) dialogOptions.fields = fields
+	if (verify !== undefined) dialogOptions.verify = verify
+	if (className !== undefined) dialogOptions.className = className
+	const resolvedParentElement = parentElement ?? overlayHost?.element() ?? undefined
+	if (resolvedParentElement !== undefined) dialogOptions.parentElement = resolvedParentElement
+	const resolvedIsolationRoot = isolationRoot ?? overlayHost?.scope() ?? undefined
+	if (resolvedIsolationRoot !== undefined) dialogOptions.isolationRoot = resolvedIsolationRoot
+	if (onok !== undefined) dialogOptions.onOk = onok
+	if (oncancel !== undefined) dialogOptions.onCancel = oncancel
+	currentDialog = createGooDialog(dialogOptions)
 	instance = currentDialog
 	if (open) void currentDialog.open()
 }
