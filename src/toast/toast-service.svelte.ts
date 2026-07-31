@@ -32,12 +32,12 @@ class ToastStore {
 			id,
 			variant,
 			title,
-			message: options.message,
 			duration,
 			dismissible: options.dismissible ?? true,
-			action: options.action,
 			icon: options.icon ?? DEFAULT_ICONS[variant],
-			createdAt: Date.now()
+			createdAt: Date.now(),
+			...(options.message === undefined ? {} : { message: options.message }),
+			...(options.action === undefined ? {} : { action: options.action })
 		}
 
 		const existingIndex = this.#toasts.findIndex(t => t.id === id)

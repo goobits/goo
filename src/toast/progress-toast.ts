@@ -68,7 +68,7 @@ export function createGooProgressToast({
 	let destroyed = false
 
 	toast.className = 'goo-progress-toast'
-	toast.dataset.phase = state.phase
+	toast.dataset['phase'] = state.phase
 	for (const [ key, value ] of Object.entries(dataset)) {
 		toast.dataset[key] = value
 	}
@@ -137,7 +137,7 @@ export function createGooProgressToast({
 		if (!canTransition) return false
 
 		state.phase = phase
-		toast.dataset.phase = phase
+		toast.dataset['phase'] = phase
 		render()
 		return true
 	}
