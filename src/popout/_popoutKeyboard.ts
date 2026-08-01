@@ -1,4 +1,4 @@
-import { containKeyboardEvent } from '../support/keyboard/_keyboardActivation.ts'
+import { containKeyboardEvent } from '@goobits/keyboard'
 
 type EscapeLifecycle = {
 	listen(

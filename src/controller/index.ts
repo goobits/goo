@@ -22,7 +22,6 @@ export type {
 	GooController,
 	GooControllerBinding,
 	GooControllerChangeDetail,
-	GooControllerControlType,
 	GooControllerEventDetail,
 	GooControllerEventName,
 	GooControllerInputDetail,

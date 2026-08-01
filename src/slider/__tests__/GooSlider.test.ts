@@ -282,7 +282,7 @@ describe('GooSlider', () => {
 		expect(slider.getValue()).toBe(10)
 	})
 
-	it('uses explicit mode="variance" without the legacy variance boolean', () => {
+	it('selects variance behavior through the mode', () => {
 		const { container } = render(GooSlider, {
 			props: {
 				value: [ 30, 50, 70 ],
@@ -290,7 +290,7 @@ describe('GooSlider', () => {
 			}
 		})
 
-		expect(container.querySelector('.goo-slider')?.hasAttribute('variance')).toBe(true)
+		expect(container.querySelector('.goo-slider')?.getAttribute('mode')).toBe('variance')
 		expect(container.querySelectorAll('.goo-slider__thumb--variance-control')).toHaveLength(2)
 	})
 
@@ -362,14 +362,14 @@ describe('GooSlider', () => {
 				value: [ 30, 50, 70 ],
 				min: 0,
 				max: 100,
-				variance: true
+				mode: 'variance'
 			}
 		})
 		const slider = container.querySelector<HTMLElement>('.goo-slider')!
 		const thumbs = container.querySelectorAll<HTMLElement>('.goo-slider__thumb')
 
 		expect(slider.classList.contains('goo-slider--variance')).toBe(true)
-		expect(slider.hasAttribute('variance')).toBe(true)
+		expect(slider.getAttribute('mode')).toBe('variance')
 		expect(thumbs[0]?.classList.contains('goo-slider__thumb--variance-control')).toBe(true)
 		expect(thumbs[1]?.classList.contains('goo-slider__thumb--variance-base')).toBe(true)
 		expect(thumbs[2]?.classList.contains('goo-slider__thumb--variance-control')).toBe(true)
@@ -404,7 +404,7 @@ describe('GooSlider', () => {
 				min: 0,
 				max: 100,
 				step: 5,
-				variance: true,
+				mode: 'variance',
 				onchange
 			}
 		})
@@ -424,7 +424,7 @@ describe('GooSlider', () => {
 				min: 0,
 				max: 100,
 				step: 5,
-				variance: true
+				mode: 'variance'
 			}
 		})
 		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
@@ -442,7 +442,7 @@ describe('GooSlider', () => {
 				min: 0,
 				max: 100,
 				step: 10,
-				variance: true
+				mode: 'variance'
 			}
 		})
 		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
@@ -460,7 +460,7 @@ describe('GooSlider', () => {
 				min: 0,
 				max: 100,
 				step: 10,
-				variance: true
+				mode: 'variance'
 			}
 		})
 		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
@@ -478,7 +478,7 @@ describe('GooSlider', () => {
 				min: 0,
 				max: 100,
 				step: 10,
-				variance: true
+				mode: 'variance'
 			}
 		})
 		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
@@ -497,7 +497,7 @@ describe('GooSlider', () => {
 				min: 0,
 				max: 100,
 				step: 10,
-				variance: true,
+				mode: 'variance',
 				onchange
 			}
 		})
@@ -518,7 +518,7 @@ describe('GooSlider', () => {
 				min: 0,
 				max: 100,
 				step: 10,
-				variance: true,
+				mode: 'variance',
 				onchange
 			}
 		})
@@ -538,7 +538,7 @@ describe('GooSlider', () => {
 				min: 0,
 				max: 100,
 				step: 10,
-				variance: true
+				mode: 'variance'
 			}
 		})
 		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
@@ -556,7 +556,7 @@ describe('GooSlider', () => {
 				min: 0,
 				max: 100,
 				step: 10,
-				variance: true
+				mode: 'variance'
 			}
 		})
 		const slider = container.querySelector<GooSliderElement>('.goo-slider')!
@@ -576,7 +576,7 @@ describe('GooSlider', () => {
 				min: 0,
 				max: 100,
 				step: 1,
-				variance: true
+				mode: 'variance'
 			}
 		})
 		const slider = container.querySelector<GooSliderElement>('.goo-slider')!

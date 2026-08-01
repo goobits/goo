@@ -9,7 +9,6 @@ export type GooForwardedAttributes = {
 	style?: string | null | undefined
 	title?: string | null | undefined
 	tabIndex?: number | null | undefined
-	tabindex?: number | null | undefined
 	draggable?: boolean | 'false' | 'true' | null | undefined
 	[attribute: `aria-${ string }`]: GooForwardedAttributeValue
 	[attribute: `data-${ string }`]: GooForwardedAttributeValue

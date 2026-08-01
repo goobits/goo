@@ -8,15 +8,11 @@ type ToolbarToolButtonApi = ReturnType<typeof mount> & {
 	getRootElement(): HTMLElement | undefined
 }
 
-export type ToolbarToolButtonElement = GooDisposableElement
-
-export type CreateToolbarToolButtonOptions = ToolbarToolButtonConfig
-
 export function createToolbarToolButton({
 	icon,
 	id,
 	title
-}: CreateToolbarToolButtonOptions): ToolbarToolButtonElement {
+}: ToolbarToolButtonConfig): GooDisposableElement {
 	const target = document.createElement('div')
 	const component = mount(ToolbarToolButton, {
 		target,
@@ -29,7 +25,7 @@ export function createToolbarToolButton({
 	let destroyed = false
 
 	flushSync()
-	const button = component.getRootElement() as ToolbarToolButtonElement | undefined
+	const button = component.getRootElement() as GooDisposableElement | undefined
 	if (!button) {
 		unmount(component)
 		throw new Error('ToolbarToolButton failed to mount.')

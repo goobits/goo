@@ -14,7 +14,6 @@ import type {
 
 export type SelectFieldOptions = {
 	actionContext?: unknown
-	class?: string
 	className?: string
 	disabled?: boolean
 	enableKeyboard?: boolean
@@ -29,7 +28,6 @@ export type SelectFieldOptions = {
 	showHeader?: boolean
 	style?: string
 	title?: string
-	tooltip?: string | (() => string)
 	triggerIcon?: string | HTMLElement | (() => HTMLElement)
 	value?: string
 }
@@ -71,14 +69,12 @@ export function createSelectField(options: SelectFieldOptions = {}): GooSelectEl
 		if (options.showHeader !== undefined) props.showHeader = options.showHeader
 		if (options.menu !== undefined) props.menu = options.menu
 		if (options.placeholder !== undefined) props.placeholder = options.placeholder
-		if (options.tooltip !== undefined) props.tooltip = options.tooltip
 		if (options.title !== undefined) props.title = options.title
 		if (options.disabled !== undefined) props.disabled = options.disabled
 		if (options.actionContext !== undefined) props.actionContext = options.actionContext
 		if (options.triggerIcon !== undefined) props.triggerIcon = options.triggerIcon
 		if (options.id !== undefined) props.id = options.id
-		const className = options.class ?? options.className
-		if (className !== undefined) props.class = className
+		if (options.className !== undefined) props.class = options.className
 		if (options.style !== undefined) props.style = options.style
 		if (options.onopen !== undefined) props.onopen = options.onopen
 		if (options.onclose !== undefined) props.onclose = options.onclose

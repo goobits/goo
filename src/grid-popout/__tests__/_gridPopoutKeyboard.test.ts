@@ -13,7 +13,7 @@ describe('grid popout keyboard helpers', () => {
 		document.body.removeAttribute('dir')
 	})
 
-	it.each([ 'Enter', ' ', 'Spacebar', 'ArrowDown' ])('opens from trigger key %s', key => {
+	it.each([ 'Enter', ' ', 'ArrowDown' ])('opens from trigger key %s', key => {
 		const open = vi.fn()
 		const event = dispatchTriggerKey(key, {
 			close: vi.fn(),
@@ -42,7 +42,7 @@ describe('grid popout keyboard helpers', () => {
 		const event = new KeyboardEvent('keydown', {
 			bubbles: true,
 			cancelable: true,
-			key: 'Spacebar'
+			key: ' '
 		})
 		trigger.dispatchEvent(event)
 
@@ -62,7 +62,7 @@ describe('grid popout keyboard helpers', () => {
 		expect(close).toHaveBeenCalledOnce()
 	})
 
-	it.each([ 'Enter', ' ', 'Spacebar' ])('chooses the focused option from list activation key %s', key => {
+	it.each([ 'Enter', ' ' ])('chooses the focused option from list activation key %s', key => {
 		const option = document.createElement('div')
 		option.className = 'goo-grid-picker__item'
 		const choose = vi.fn()

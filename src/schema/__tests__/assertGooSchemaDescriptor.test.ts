@@ -18,6 +18,9 @@ describe('assertGooSchemaDescriptor', () => {
 						type: 'slider-field',
 						min: 1,
 						max: 100,
+						showInputs: true,
+						format: 'integer',
+						className: 'brush-size',
 						controlOptions: { tone: { light: true } },
 						items: [ { id: 'small', size: 1 } ],
 						if: { path: 'enabled', equals: true }
@@ -54,6 +57,13 @@ describe('assertGooSchemaDescriptor', () => {
 				}
 			]
 		})).not.toThrow()
+	})
+
+	it('rejects field-owned settings inside controlOptions', () => {
+		expect(() => assertGooSchemaDescriptor({
+			path: 'size',
+			controlOptions: { min: 1 }
+		})).toThrow("schema.controlOptions.min': must be declared as schema.min")
 	})
 
 	it('rejects callbacks, constructed objects, accessors, and cycles', () => {

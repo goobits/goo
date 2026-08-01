@@ -4,23 +4,12 @@
  * @module goobits/select/keyboardHandler
  */
 
-import {
-	containKeyboardEvent,
-	isKeyboardActivationKey
-} from '../support/keyboard/_keyboardActivation.ts'
+import { containKeyboardEvent, isKeyboardActivationKey } from '@goobits/keyboard'
+
 import type { GooSelectOption, GooSelectState } from './types.ts'
 
 export type GooSelectNavigationCommand =
-	| 'down'
-	| 'enter'
-	| 'escape'
-	| 'first'
-	| 'last'
-	| 'left'
-	| 'right'
-	| 'space'
-	| 'tab'
-	| 'up'
+	'down' | 'enter' | 'escape' | 'first' | 'last' | 'left' | 'right' | 'space' | 'tab' | 'up'
 
 /** Keyboard command event used by GooSelect navigation. */
 export interface GooSelectKeyCommand {
@@ -196,7 +185,10 @@ export function handleKeyboard(host: GooSelectKeyboardHost, event: GooSelectKeyC
  * @param host - The select component
  * @param event - Typeahead command event
  */
-export function handleTypeahead(host: GooSelectKeyboardHost, event: GooSelectTypeaheadCommand): void {
+export function handleTypeahead(
+	host: GooSelectKeyboardHost,
+	event: GooSelectTypeaheadCommand
+): void {
 	if (!host._opened || host.state.disabled || !host._panel) return
 
 	event.cancel()

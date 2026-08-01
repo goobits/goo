@@ -1,411 +1,425 @@
 <script module lang="ts">
-import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.ts'
+	import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.ts'
 
-/** GooController binding metadata for the Svelte number input component. */
-export const controlSchema: SvelteControlSchema = {
-	propMapping: {
-		max: 'max',
-		inputId: 'inputId',
-		min: 'min',
-		name: 'name',
-		size: 'size',
-		step: 'step',
-		unit: 'unit'
+	/** GooController binding metadata for the Svelte number input component. */
+	export const controlSchema: SvelteControlSchema = {
+		propMapping: {
+			max: 'max',
+			inputId: 'inputId',
+			min: 'min',
+			name: 'name',
+			size: 'size',
+			step: 'step',
+			unit: 'unit'
+		}
 	}
-}
 </script>
 
 <script lang="ts">
-import { onDestroy, untrack } from 'svelte'
-import './GooNumber.css'
+	import { onDestroy, untrack } from 'svelte'
+	import './GooNumber.css'
 
-import { containKeyboardEvent } from '../support/keyboard/_keyboardActivation.ts'
-import { formatNumber } from '../support/utils/formatNumber.ts'
-import { clamp, roundToStep } from '../support/utils/numberUtils.ts'
-import {
-	type GooNumberStepDirection,
-	readNumberKeyboardAction
-} from './_numberKeyboard.ts'
-import type { GooNumberProps } from './types.ts'
+	import { containKeyboardEvent } from '@goobits/keyboard'
 
-const HOLD_DELAY = 250
-const REPEAT_INTERVAL = 50
+	import { formatNumber } from '../support/utils/formatNumber.ts'
+	import { clamp, roundToStep } from '../support/utils/numberUtils.ts'
+	import { type GooNumberStepDirection, readNumberKeyboardAction } from './_numberKeyboard.ts'
+	import type { GooNumberProps } from './types.ts'
 
-let numberElement: HTMLDivElement | undefined = $state()
-let contentElement: HTMLInputElement | undefined = $state()
-let currentValue = $state(0)
-let lastCommittedValue = $state(0)
-let textValue = $state('')
-let changePulseClass = $state('')
-let holdTimeout: ReturnType<typeof setTimeout> | null = null
-let repeatInterval: ReturnType<typeof setInterval> | null = null
-let changePulseTimeout: ReturnType<typeof setTimeout> | null = null
-let skipNextValueSync = false
+	const HOLD_DELAY = 250
+	const REPEAT_INTERVAL = 50
 
-let {
-	value = $bindable(0),
-	min = -Infinity,
-	max = Infinity,
-	step = 1,
-	unit = '',
-	autoLabel,
-	auto = false,
-	onautotoggle,
-	inputId,
-	ariaLabel,
-	'aria-label': ariaLabelAttribute,
-	name = '',
-	title,
-	disabled = false,
-	size,
-	class: className = '',
-	style,
-	tabIndex = 0,
-	oninput,
-	onchange,
-	onenter,
-	onfocus,
-	onblur,
-	...rest
-}: GooNumberProps = $props()
+	let numberElement: HTMLDivElement | undefined = $state()
+	let contentElement: HTMLInputElement | undefined = $state()
+	let currentValue = $state(0)
+	let lastCommittedValue = $state(0)
+	let textValue = $state('')
+	let changePulseClass = $state('')
+	let holdTimeout: ReturnType<typeof setTimeout> | null = null
+	let repeatInterval: ReturnType<typeof setInterval> | null = null
+	let changePulseTimeout: ReturnType<typeof setTimeout> | null = null
+	let skipNextValueSync = false
 
-// Custom host attributes (CSS/web-component hooks) spread so svelte-check does
-// not reject them as unknown attributes on a <div>.
-const hostAttributes = $derived<Record<string, string | number | undefined>>({
-	size,
-	unit,
-	value: currentValue,
-	min,
-	max,
-	step,
-	disabled: disabled ? '' : undefined
-})
+	let {
+		value = $bindable(0),
+		min = -Infinity,
+		max = Infinity,
+		step = 1,
+		unit = '',
+		autoLabel,
+		auto = false,
+		onautotoggle,
+		inputId,
+		ariaLabel,
+		'aria-label': ariaLabelAttribute,
+		name = '',
+		title,
+		disabled = false,
+		size,
+		class: className = '',
+		style,
+		tabIndex = 0,
+		oninput,
+		onchange,
+		onenter,
+		onfocus,
+		onblur,
+		...rest
+	}: GooNumberProps = $props()
 
-$effect(() => {
-	const nextValue = clamp(Number(value), min, max)
-	if (skipNextValueSync && Object.is(nextValue, currentValue)) {
-		skipNextValueSync = false
-		return
-	}
-	currentValue = nextValue
-	textValue = formatDisplayValue(nextValue)
-	lastCommittedValue = nextValue
-})
-
-$effect(() => {
-	if (disabled) stopHold()
-})
-
-onDestroy(() => {
-	if (holdTimeout) clearTimeout(holdTimeout)
-	if (repeatInterval) clearInterval(repeatInterval)
-	if (changePulseTimeout) clearTimeout(changePulseTimeout)
-})
-
-// Auto lives as state so hosts can flip it without a remount (a remount
-// would destroy a focused value input mid-interaction).
-let autoActive = $state(Boolean(untrack(() => auto)))
-
-$effect(() => {
-	autoActive = Boolean(auto)
-})
-
-const classes = $derived.by(() => {
-	const values = [ 'goo-number' ]
-	if (disabled) values.push('goo-number--disabled')
-	if (changePulseClass) values.push('goo-number--changed', changePulseClass)
-	if (autoLabel) values.push('goo-number--with-auto')
-	if (autoLabel && autoActive) values.push('goo-number--auto')
-	if (className) values.push(className)
-	return values.filter(Boolean).join(' ')
-})
-const unitSuffix = $derived(getUnitSuffix(unit))
-const inputAccessibleName = $derived(
-	trimmedTextValue(ariaLabel)
-	|| trimmedTextValue(ariaLabelAttribute)
-	|| trimmedTextValue(title)
-	|| trimmedTextValue(name)
-	|| undefined
-)
-const ariaValueMin = $derived(Number.isFinite(min) ? min : undefined)
-const ariaValueMax = $derived(Number.isFinite(max) ? max : undefined)
-const rootStyle = $derived.by(() => {
-	const values = []
-	if (style) values.push(style)
-	if (unitSuffix) {
-		const unitWidth = Math.max(unitSuffix.length * 0.62, 0.55)
-		values.push(`--goo-number-unit-width: ${ unitWidth.toFixed(2) }em`)
-	}
-	return values.join('; ')
-})
-
-let apiElement: HTMLDivElement | undefined
-
-// Mirror the element API GooCheckbox/GooRadioGroup attach to their roots so
-// element-driven consumers get one calling convention across controls:
-// `.value =` is silent, `setValue()` emits.
-$effect(() => {
-	const element = numberElement
-	if (!element || apiElement === element) return
-	apiElement = element
-	untrack(() => Object.defineProperties(element, {
-		value: {
-			configurable: true,
-			get: () => currentValue,
-			set: value => setValue(Number(value), { silent: true })
-		},
-		setValue: {
-			configurable: true,
-			value: (value: number, options: { silent?: boolean } = {}) => setValue(value, { silent: options.silent ?? false })
-		},
-		getValue: {
-			configurable: true,
-			value: () => getValue()
-		},
-		focus: {
-			configurable: true,
-			value: () => focus()
-		},
-		blur: {
-			configurable: true,
-			value: () => blur()
-		},
-		select: {
-			configurable: true,
-			value: () => select()
-		}
-	}))
-})
-
-export function setValue(nextValue: number, { silent = true }: { silent?: boolean } = {}): void {
-	const oldValue = currentValue
-	syncValue(Number(nextValue), { format: true })
-	if (!silent && oldValue !== currentValue) {
-		emitInput(oldValue)
-	}
-}
-
-export function getValue(): number {
-	return currentValue
-}
-
-export function setAuto(nextAuto: boolean): void {
-	autoActive = Boolean(nextAuto)
-}
-
-export function focus(): void {
-	contentElement?.focus()
-}
-
-export function blur(): void {
-	contentElement?.blur()
-}
-
-export function select(): void {
-	contentElement?.select()
-}
-
-function syncValue(nextValue: number, { format }: { format: boolean }): void {
-	const oldValue = currentValue
-	currentValue = clamp(nextValue, min, max)
-	if (oldValue !== currentValue) {
-		syncBoundValue(currentValue)
-	}
-	if (format) {
-		textValue = formatDisplayValue(currentValue)
-	}
-	if (oldValue !== currentValue) {
-		pulseValueChange()
-	}
-}
-
-function handleInput(event: Event): void {
-	event.stopPropagation()
-	if (disabled) return
-
-	const oldValue = currentValue
-	textValue = contentElement?.value ?? ''
-	currentValue = parseInputValue(textValue)
-	if (oldValue !== currentValue) {
-		syncBoundValue(currentValue)
-		pulseValueChange()
-		emitInput(oldValue)
-	}
-}
-
-function handleFocus(event: Event): void {
-	event.stopPropagation()
-	if (disabled) return
-
-	// Editing the value is manual intent: an active Auto switches off. The
-	// arrows and wheel funnel through content focus, so they clear it too.
-	if (autoLabel && autoActive) onautotoggle?.(false)
-	lastCommittedValue = currentValue
-	onfocus?.()
-	numberElement?.dispatchEvent(new CustomEvent('focus', { detail: { value: currentValue, target: numberElement } }))
-}
-
-function handleBlur(event: Event): void {
-	event.stopPropagation()
-	if (disabled) return
-
-	const oldValue = lastCommittedValue
-	syncValue(getCommittedInputValue(), { format: true })
-	if (currentValue !== oldValue) {
-		lastCommittedValue = currentValue
-		emitChange(oldValue)
-	}
-	onblur?.()
-	numberElement?.dispatchEvent(new CustomEvent('blur', { detail: { value: currentValue, target: numberElement } }))
-}
-
-function handleKeydown(event: KeyboardEvent): void {
-	containKeyboardEvent(event, { preventDefault: false, immediate: false })
-	if (disabled) return
-
-	const action = readNumberKeyboardAction(event, {
-		hasMaximum: Number.isFinite(max),
-		hasMinimum: Number.isFinite(min)
+	// Custom host attributes (CSS/web-component hooks) spread so svelte-check does
+	// not reject them as unknown attributes on a <div>.
+	const hostAttributes = $derived<Record<string, string | number | undefined>>({
+		size,
+		unit,
+		value: currentValue,
+		min,
+		max,
+		step,
+		disabled: disabled ? '' : undefined
 	})
-	if (!action) return
 
-	containKeyboardEvent(event, { immediate: false })
-	switch (action.type) {
-		case 'commit':
-			onenter?.()
-			numberElement?.dispatchEvent(new CustomEvent('enter', {
-				bubbles: true,
-				detail: { value: currentValue, target: numberElement }
-			}))
-			contentElement?.blur()
-			break
-		case 'blur':
-			contentElement?.blur()
-			break
-		case 'set-bound':
-			setKeyboardValue(action.bound === 'min' ? min : max)
-			break
-		case 'step':
-			increment(action.direction, action.multiplier)
-			break
-	}
-}
-
-function handleWheel(event: WheelEvent): void {
-	if (disabled || document.activeElement !== contentElement) return
-
-	event.preventDefault()
-	increment(event.deltaY < 0 ? 'up' : 'down', event.shiftKey ? 10 : 1)
-}
-
-function startHold(direction: GooNumberStepDirection, multiplier: number): void {
-	stopHold()
-	increment(direction, multiplier)
-	holdTimeout = setTimeout(() => {
-		repeatInterval = setInterval(() => increment(direction, multiplier), REPEAT_INTERVAL)
-	}, HOLD_DELAY)
-}
-
-function stopHold(): void {
-	if (holdTimeout) clearTimeout(holdTimeout)
-	if (repeatInterval) clearInterval(repeatInterval)
-	holdTimeout = null
-	repeatInterval = null
-}
-
-function increment(direction: GooNumberStepDirection, multiplier = 1): void {
-	const stepValue = getStepValue() * multiplier
-	const nextValue = direction === 'up' ? currentValue + stepValue : currentValue - stepValue
-	setKeyboardValue(roundToStep(clamp(nextValue, min, max), stepValue, min))
-}
-
-function setKeyboardValue(nextValue: number): void {
-	const oldValue = currentValue
-	syncValue(nextValue, { format: true })
-	if (oldValue !== currentValue) {
-		emitInput(oldValue)
-	}
-}
-
-function emitInput(oldValue: number): void {
-	const detail = { value: currentValue, oldValue, target: numberElement }
-	oninput?.(currentValue, oldValue)
-	numberElement?.dispatchEvent(new CustomEvent('input', { bubbles: true, detail }))
-}
-
-function emitChange(oldValue: number): void {
-	const detail = { value: currentValue, oldValue, target: numberElement }
-	onchange?.(currentValue, oldValue)
-	numberElement?.dispatchEvent(new CustomEvent('change', { bubbles: true, detail }))
-}
-
-function syncBoundValue(nextValue: number): void {
-	skipNextValueSync = true
-	value = nextValue
-}
-
-function parseValue(rawValue: string): number {
-	const cleaned = String(rawValue).replace(/[^-.0-9]/g, '')
-	return Number.parseFloat(cleaned) || 0
-}
-
-function getStepValue(): number {
-	if (step === 'any') {
-		if (unit === '%' && !(min % 1 === 0 && max === 100)) {
-			return 0.01
+	$effect(() => {
+		const nextValue = clamp(Number(value), min, max)
+		if (skipNextValueSync && Object.is(nextValue, currentValue)) {
+			skipNextValueSync = false
+			return
 		}
-		return 1
+		currentValue = nextValue
+		textValue = formatDisplayValue(nextValue)
+		lastCommittedValue = nextValue
+	})
+
+	$effect(() => {
+		if (disabled) stopHold()
+	})
+
+	onDestroy(() => {
+		if (holdTimeout) clearTimeout(holdTimeout)
+		if (repeatInterval) clearInterval(repeatInterval)
+		if (changePulseTimeout) clearTimeout(changePulseTimeout)
+	})
+
+	// Auto lives as state so hosts can flip it without a remount (a remount
+	// would destroy a focused value input mid-interaction).
+	let autoActive = $state(Boolean(untrack(() => auto)))
+
+	$effect(() => {
+		autoActive = Boolean(auto)
+	})
+
+	const classes = $derived.by(() => {
+		const values = ['goo-number']
+		if (disabled) values.push('goo-number--disabled')
+		if (changePulseClass) values.push('goo-number--changed', changePulseClass)
+		if (autoLabel) values.push('goo-number--with-auto')
+		if (autoLabel && autoActive) values.push('goo-number--auto')
+		if (className) values.push(className)
+		return values.filter(Boolean).join(' ')
+	})
+	const unitSuffix = $derived(getUnitSuffix(unit))
+	const inputAccessibleName = $derived(
+		trimmedTextValue(ariaLabel) ||
+			trimmedTextValue(ariaLabelAttribute) ||
+			trimmedTextValue(title) ||
+			trimmedTextValue(name) ||
+			undefined
+	)
+	const ariaValueMin = $derived(Number.isFinite(min) ? min : undefined)
+	const ariaValueMax = $derived(Number.isFinite(max) ? max : undefined)
+	const rootStyle = $derived.by(() => {
+		const values = []
+		if (style) values.push(style)
+		if (unitSuffix) {
+			const unitWidth = Math.max(unitSuffix.length * 0.62, 0.55)
+			values.push(`--goo-number-unit-width: ${unitWidth.toFixed(2)}em`)
+		}
+		return values.join('; ')
+	})
+
+	let apiElement: HTMLDivElement | undefined
+
+	// Mirror the element API GooCheckbox/GooRadioGroup attach to their roots so
+	// element-driven consumers get one calling convention across controls:
+	// `.value =` is silent, `setValue()` emits.
+	$effect(() => {
+		const element = numberElement
+		if (!element || apiElement === element) return
+		apiElement = element
+		untrack(() =>
+			Object.defineProperties(element, {
+				value: {
+					configurable: true,
+					get: () => currentValue,
+					set: (value) => setValue(Number(value), { silent: true })
+				},
+				setValue: {
+					configurable: true,
+					value: (value: number, options: { silent?: boolean } = {}) =>
+						setValue(value, { silent: options.silent ?? false })
+				},
+				getValue: {
+					configurable: true,
+					value: () => getValue()
+				},
+				focus: {
+					configurable: true,
+					value: () => focus()
+				},
+				blur: {
+					configurable: true,
+					value: () => blur()
+				},
+				select: {
+					configurable: true,
+					value: () => select()
+				}
+			})
+		)
+	})
+
+	export function setValue(nextValue: number, { silent = true }: { silent?: boolean } = {}): void {
+		const oldValue = currentValue
+		syncValue(Number(nextValue), { format: true })
+		if (!silent && oldValue !== currentValue) {
+			emitInput(oldValue)
+		}
 	}
-	return step
-}
 
-function parseInputValue(rawValue: string): number {
-	const parsedValue = parseValue(rawValue)
-	if (unit === '%' && !(min % 1 === 0 && max === 100)) {
-		return parsedValue / 100
+	export function getValue(): number {
+		return currentValue
 	}
-	return parsedValue
-}
 
-function getCommittedInputValue(): number {
-	return textValue === formatDisplayValue(currentValue)
-		? currentValue
-		: parseInputValue(textValue)
-}
-
-function formatDisplayValue(nextValue: number): string {
-	if (!Number.isFinite(nextValue)) return ''
-	const formatted = String(formatNumber(nextValue, unit, { min, max, step }))
-	if (!unitSuffix || !formatted.endsWith(unitSuffix)) {
-		return formatted
+	export function setAuto(nextAuto: boolean): void {
+		autoActive = Boolean(nextAuto)
 	}
-	return formatted.slice(0, -unitSuffix.length)
-}
 
-function getUnitSuffix(nextUnit: string): string {
-	if (!nextUnit || nextUnit === 'float' || nextUnit === 'int' || nextUnit === 'integer' || nextUnit === 'number') {
-		return ''
+	export function focus(): void {
+		contentElement?.focus()
 	}
-	const suffix = formatNumber(0, nextUnit, { appendFormatSuffix: true, max: 1, min: 0, step: 1 })
-		.toString()
-		.replace(/^[-.\d]+/, '')
-	return suffix
-}
 
-function trimmedTextValue(value: unknown): string {
-	return typeof value === 'string' ? value.trim() : ''
-}
+	export function blur(): void {
+		contentElement?.blur()
+	}
 
-function pulseValueChange(): void {
-	changePulseClass = changePulseClass === 'goo-number--changed-a'
-		? 'goo-number--changed-b'
-		: 'goo-number--changed-a'
-	if (changePulseTimeout) clearTimeout(changePulseTimeout)
-	changePulseTimeout = setTimeout(() => {
-		changePulseClass = ''
-		changePulseTimeout = null
-	}, 340)
-}
+	export function select(): void {
+		contentElement?.select()
+	}
+
+	function syncValue(nextValue: number, { format }: { format: boolean }): void {
+		const oldValue = currentValue
+		currentValue = clamp(nextValue, min, max)
+		if (oldValue !== currentValue) {
+			syncBoundValue(currentValue)
+		}
+		if (format) {
+			textValue = formatDisplayValue(currentValue)
+		}
+		if (oldValue !== currentValue) {
+			pulseValueChange()
+		}
+	}
+
+	function handleInput(event: Event): void {
+		event.stopPropagation()
+		if (disabled) return
+
+		const oldValue = currentValue
+		textValue = contentElement?.value ?? ''
+		currentValue = parseInputValue(textValue)
+		if (oldValue !== currentValue) {
+			syncBoundValue(currentValue)
+			pulseValueChange()
+			emitInput(oldValue)
+		}
+	}
+
+	function handleFocus(event: Event): void {
+		event.stopPropagation()
+		if (disabled) return
+
+		// Editing the value is manual intent: an active Auto switches off. The
+		// arrows and wheel funnel through content focus, so they clear it too.
+		if (autoLabel && autoActive) onautotoggle?.(false)
+		lastCommittedValue = currentValue
+		onfocus?.()
+		numberElement?.dispatchEvent(
+			new CustomEvent('focus', { detail: { value: currentValue, target: numberElement } })
+		)
+	}
+
+	function handleBlur(event: Event): void {
+		event.stopPropagation()
+		if (disabled) return
+
+		const oldValue = lastCommittedValue
+		syncValue(getCommittedInputValue(), { format: true })
+		if (currentValue !== oldValue) {
+			lastCommittedValue = currentValue
+			emitChange(oldValue)
+		}
+		onblur?.()
+		numberElement?.dispatchEvent(
+			new CustomEvent('blur', { detail: { value: currentValue, target: numberElement } })
+		)
+	}
+
+	function handleKeydown(event: KeyboardEvent): void {
+		containKeyboardEvent(event, { preventDefault: false, stopImmediatePropagation: false })
+		if (disabled) return
+
+		const action = readNumberKeyboardAction(event, {
+			hasMaximum: Number.isFinite(max),
+			hasMinimum: Number.isFinite(min)
+		})
+		if (!action) return
+
+		containKeyboardEvent(event, { stopImmediatePropagation: false })
+		switch (action.type) {
+			case 'commit':
+				onenter?.()
+				numberElement?.dispatchEvent(
+					new CustomEvent('enter', {
+						bubbles: true,
+						detail: { value: currentValue, target: numberElement }
+					})
+				)
+				contentElement?.blur()
+				break
+			case 'blur':
+				contentElement?.blur()
+				break
+			case 'set-bound':
+				setKeyboardValue(action.bound === 'min' ? min : max)
+				break
+			case 'step':
+				increment(action.direction, action.multiplier)
+				break
+		}
+	}
+
+	function handleWheel(event: WheelEvent): void {
+		if (disabled || document.activeElement !== contentElement) return
+
+		event.preventDefault()
+		increment(event.deltaY < 0 ? 'up' : 'down', event.shiftKey ? 10 : 1)
+	}
+
+	function startHold(direction: GooNumberStepDirection, multiplier: number): void {
+		stopHold()
+		increment(direction, multiplier)
+		holdTimeout = setTimeout(() => {
+			repeatInterval = setInterval(() => increment(direction, multiplier), REPEAT_INTERVAL)
+		}, HOLD_DELAY)
+	}
+
+	function stopHold(): void {
+		if (holdTimeout) clearTimeout(holdTimeout)
+		if (repeatInterval) clearInterval(repeatInterval)
+		holdTimeout = null
+		repeatInterval = null
+	}
+
+	function increment(direction: GooNumberStepDirection, multiplier = 1): void {
+		const stepValue = getStepValue() * multiplier
+		const nextValue = direction === 'up' ? currentValue + stepValue : currentValue - stepValue
+		setKeyboardValue(roundToStep(clamp(nextValue, min, max), stepValue, min))
+	}
+
+	function setKeyboardValue(nextValue: number): void {
+		const oldValue = currentValue
+		syncValue(nextValue, { format: true })
+		if (oldValue !== currentValue) {
+			emitInput(oldValue)
+		}
+	}
+
+	function emitInput(oldValue: number): void {
+		const detail = { value: currentValue, oldValue, target: numberElement }
+		oninput?.(currentValue, oldValue)
+		numberElement?.dispatchEvent(new CustomEvent('input', { bubbles: true, detail }))
+	}
+
+	function emitChange(oldValue: number): void {
+		const detail = { value: currentValue, oldValue, target: numberElement }
+		onchange?.(currentValue, oldValue)
+		numberElement?.dispatchEvent(new CustomEvent('change', { bubbles: true, detail }))
+	}
+
+	function syncBoundValue(nextValue: number): void {
+		skipNextValueSync = true
+		value = nextValue
+	}
+
+	function parseValue(rawValue: string): number {
+		const cleaned = String(rawValue).replace(/[^-.0-9]/g, '')
+		return Number.parseFloat(cleaned) || 0
+	}
+
+	function getStepValue(): number {
+		if (step === 'any') {
+			if (unit === '%' && !(min % 1 === 0 && max === 100)) {
+				return 0.01
+			}
+			return 1
+		}
+		return step
+	}
+
+	function parseInputValue(rawValue: string): number {
+		const parsedValue = parseValue(rawValue)
+		if (unit === '%' && !(min % 1 === 0 && max === 100)) {
+			return parsedValue / 100
+		}
+		return parsedValue
+	}
+
+	function getCommittedInputValue(): number {
+		return textValue === formatDisplayValue(currentValue)
+			? currentValue
+			: parseInputValue(textValue)
+	}
+
+	function formatDisplayValue(nextValue: number): string {
+		if (!Number.isFinite(nextValue)) return ''
+		const formatted = String(formatNumber(nextValue, unit, { min, max, step }))
+		if (!unitSuffix || !formatted.endsWith(unitSuffix)) {
+			return formatted
+		}
+		return formatted.slice(0, -unitSuffix.length)
+	}
+
+	function getUnitSuffix(nextUnit: string): string {
+		if (
+			!nextUnit ||
+			nextUnit === 'float' ||
+			nextUnit === 'int' ||
+			nextUnit === 'integer' ||
+			nextUnit === 'number'
+		) {
+			return ''
+		}
+		const suffix = formatNumber(0, nextUnit, { appendFormatSuffix: true, max: 1, min: 0, step: 1 })
+			.toString()
+			.replace(/^[-.\d]+/, '')
+		return suffix
+	}
+
+	function trimmedTextValue(value: unknown): string {
+		return typeof value === 'string' ? value.trim() : ''
+	}
+
+	function pulseValueChange(): void {
+		changePulseClass =
+			changePulseClass === 'goo-number--changed-a'
+				? 'goo-number--changed-b'
+				: 'goo-number--changed-a'
+		if (changePulseTimeout) clearTimeout(changePulseTimeout)
+		changePulseTimeout = setTimeout(() => {
+			changePulseClass = ''
+			changePulseTimeout = null
+		}, 340)
+	}
 </script>
 
 <div
@@ -424,8 +438,8 @@ function pulseValueChange(): void {
 			aria-pressed={autoActive}
 			{disabled}
 			onpointerdown={(event) => event.stopPropagation()}
-			onclick={() => onautotoggle?.(!autoActive)}
-		>{autoLabel}</button>
+			onclick={() => onautotoggle?.(!autoActive)}>{autoLabel}</button
+		>
 	{/if}
 	<input
 		bind:this={contentElement}
@@ -446,7 +460,8 @@ function pulseValueChange(): void {
 		onfocus={handleFocus}
 		onblur={handleBlur}
 		onkeydowncapture={handleKeydown}
-		onkeyupcapture={(event) => containKeyboardEvent(event, { preventDefault: false, immediate: false })}
+		onkeyupcapture={(event) =>
+			containKeyboardEvent(event, { preventDefault: false, stopImmediatePropagation: false })}
 		onwheel={handleWheel}
 	/>
 	{#if unitSuffix}

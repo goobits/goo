@@ -8,7 +8,10 @@ export { default as GooIcon } from './GooIcon.svelte'
 export type { GooIconProps } from './types.ts'
 
 /** Options for rendering registry-backed icon markup. */
-export type GooIconRenderOptions = GooIconProps & {
+export type GooIconRenderOptions = Omit<GooIconProps, 'class'> & {
+
+	/** Additional class names for the rendered icon element. */
+	className?: string
 
 	/** Icon name registered with the Goo icon registry. */
 	value: string
@@ -45,7 +48,7 @@ export function renderIconPlaceholders(root: ParentNode): void {
 	const icons = root.querySelectorAll<HTMLElement>('[data-goo-icon]')
 
 	for (const icon of icons) {
-		const value = icon.dataset.gooIcon ?? icon.dataset.value ?? ''
+		const value = icon.dataset.gooIcon ?? ''
 		if (!value) continue
 
 		const sizeValue = normalizeIconSize(icon.dataset.size ?? icon.style.width)
@@ -68,7 +71,7 @@ function renderIconMarkup(options: GooIconRenderOptions, svg = '', isPlaceholder
 	const {
 		value,
 		disabled = false,
-		class: className = '',
+		className = '',
 		style = '',
 		label
 	} = options

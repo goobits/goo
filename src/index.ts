@@ -7,9 +7,20 @@
  * documented subpath owners so public shapes are not duplicated here.
  */
 
-export type { GooAngleInputElement, GooAngleInputEventData, GooAngleInputProps, GooAngleInputUnit } from './angle-input/index.ts'
+export type {
+	GooAngleInputElement,
+	GooAngleInputEventData,
+	GooAngleInputProps,
+	GooAngleInputUnit
+} from './angle-input/index.ts'
 export { GooAngleInput } from './angle-input/index.ts'
-export type { GooButtonLayout, GooButtonProps, GooButtonTarget, GooButtonType, GooButtonVariant } from './button/index.ts'
+export type {
+	GooButtonLayout,
+	GooButtonProps,
+	GooButtonTarget,
+	GooButtonType,
+	GooButtonVariant
+} from './button/index.ts'
 export { GooButton } from './button/index.ts'
 export type {
 	ButtonGroupOption,
@@ -27,7 +38,6 @@ export type {
 	GooContextMenuElement,
 	GooContextMenuManager,
 	GooContextMenuOpenOptions,
-	GooContextMenuOption,
 	GooContextMenuOptions,
 	ManagedGooContextMenu,
 	ManagedGooContextMenuEventHandler,
@@ -51,7 +61,6 @@ export type {
 	GooController,
 	GooControllerBinding,
 	GooControllerChangeDetail,
-	GooControllerControlType,
 	GooControllerEventDetail,
 	GooControllerEventName,
 	GooControllerInputDetail,
@@ -67,7 +76,11 @@ export type {
 	GooSvelteControlTypeConfig,
 	SvelteControlSchema
 } from './controller/index.ts'
-export { createGooController, defineFactoryControlType, defineSvelteControlType } from './controller/index.ts'
+export {
+	createGooController,
+	defineFactoryControlType,
+	defineSvelteControlType
+} from './controller/index.ts'
 export type {
 	GooDataGridCellSlot,
 	GooDataGridCellValue,
@@ -87,12 +100,11 @@ export type {
 	DialogFieldElements,
 	DialogLabels,
 	DialogResult,
-	DialogValues,
 	DialogVerifyHandler,
 	GooAlertOptions,
 	GooConfirmOptions,
+	GooDialogController,
 	GooDialogDefaultFocus,
-	GooDialogInstance,
 	GooDialogOptions,
 	GooDialogTask,
 	GooDialogType,
@@ -130,7 +142,12 @@ export { GooFocusTrap } from './focus-trap/index.ts'
 export type { GooFolderElement, GooFolderOptions } from './folder/index.ts'
 export { GooFolder } from './folder/index.ts'
 export type { GooIconProps, GooIconRenderOptions } from './icon/index.ts'
-export { GooIcon, renderIconHtml, renderIconPlaceholderHtml, renderIconPlaceholders } from './icon/index.ts'
+export {
+	GooIcon,
+	renderIconHtml,
+	renderIconPlaceholderHtml,
+	renderIconPlaceholders
+} from './icon/index.ts'
 export type { GooInputProps, GooInputType, GooNumberProps } from './input/index.ts'
 export { GooInput, GooNumber } from './input/index.ts'
 export type { GooLabelProps } from './label/index.ts'
@@ -146,7 +163,12 @@ export type {
 	PopoutKeepWithin
 } from './popout/index.ts'
 export { createGooPopout, GooPopout, gooPopoutRuntime } from './popout/index.ts'
-export type { GooPreviewBackground, GooPreviewFit, GooPreviewProps, GooPreviewSize } from './preview/index.ts'
+export type {
+	GooPreviewBackground,
+	GooPreviewFit,
+	GooPreviewProps,
+	GooPreviewSize
+} from './preview/index.ts'
 export { GooPreview } from './preview/index.ts'
 export type {
 	GooProgressRingSteps,
@@ -156,11 +178,16 @@ export type {
 	GooProgressRingVariant
 } from './progress-ring/index.ts'
 export { createGooProgressRingTimer, GooProgressRing } from './progress-ring/index.ts'
-export type { GooRadioGroupLayout, GooRadioGroupProps, GooRadioOption, GooRadioOptions, GooRadioProps } from './radio/index.ts'
+export type {
+	GooChoiceOption,
+	GooRadioGroupLayout,
+	GooRadioGroupProps,
+	GooRadioOptions,
+	GooRadioProps
+} from './radio/index.ts'
 export { GooRadio, GooRadioGroup } from './radio/index.ts'
 export type {
 	GooSchemaChangeHandler,
-	GooSchemaControlType,
 	GooSchemaData,
 	GooSchemaElement,
 	GooSchemaEvent,
@@ -237,7 +264,12 @@ export type {
 	GooSliderFieldValue
 } from './slider-field/index.ts'
 export { createSliderField } from './slider-field/index.ts'
-export type { GooSpinnerProps, GooSpinnerRenderOptions, GooSpinnerSize, GooSpinnerVariant } from './spinner/index.ts'
+export type {
+	GooSpinnerProps,
+	GooSpinnerRenderOptions,
+	GooSpinnerSize,
+	GooSpinnerVariant
+} from './spinner/index.ts'
 export { GooSpinner, renderGooSpinnerHtml } from './spinner/index.ts'
 export type { LocaleConfig } from './support/i18n/index.ts'
 export { getLocale, isRTL, onLocaleChange, setLocale, translate } from './support/i18n/index.ts'
@@ -263,7 +295,6 @@ export type {
 	GooPointerDragEvent,
 	GooPointerDragHandle,
 	GooPointerDragOptions,
-	GooPointerTapEvent,
 	GooPointerTapOptions,
 	GooPointerTargetEvent
 } from './support/utils/pointerDrag.ts'
@@ -313,5 +344,11 @@ export type {
 export { GooTurnstileField } from './turnstile/index.ts'
 export type { VirtualGridProps, VirtualGridSlot, VirtualGridWindow } from './virtualGrid/index.ts'
 export { VirtualGrid } from './virtualGrid/index.ts'
-export type { GooXyPadElement, GooXyPadEventData, GooXyPadProps, GooXyPadState, GooXyPadValue } from './xy-pad/index.ts'
+export type {
+	GooXyPadElement,
+	GooXyPadEventData,
+	GooXyPadProps,
+	GooXyPadState,
+	GooXyPadValue
+} from './xy-pad/index.ts'
 export { GooXyPad } from './xy-pad/index.ts'

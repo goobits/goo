@@ -14,11 +14,6 @@ import type {
 	GooSliderValueBubble
 } from '../slider/types.ts'
 
-/**
- * Control field definition type identifiers.
- */
-export type GooSchemaControlType = GooControlType
-
 export type GooSchemaData = Record<string, unknown>
 
 /** Primitive value allowed inside a portable GooSchema description. */
@@ -40,11 +35,9 @@ export type GooSchemaControlOptions = Record<string, GooSchemaDescriptorValue | 
 export interface GooSchemaChoiceOption {
 	type?: 'option' | 'divider' | 'optgroup' | 'submenu'
 	id?: string | number
-	key?: string | number
-	value?: string | number
 	label?: string | number
 	icon?: string
-	tooltip?: string
+	title?: string
 	ariaLabel?: string
 	hideLabel?: boolean
 	className?: string
@@ -163,7 +156,7 @@ export interface GooSchemaField {
 	 * - string -> 'text'
 	 * - array of options -> 'select'
 	 */
-	type?: GooSchemaControlType
+	type?: GooControlType
 
 	/** Display label (auto-generated from path if omitted) */
 	label?: string
@@ -177,8 +170,8 @@ export interface GooSchemaField {
 	/** Step increment. */
 	step?: number
 
-	/** Render a slider with adjacent numeric input(s). */
-	input?: boolean
+	/** Render a slider with adjacent numeric inputs. */
+	showInputs?: boolean
 
 	/** Allow range thumbs to cross. */
 	canCross?: boolean
@@ -234,9 +227,6 @@ export interface GooSchemaField {
 	/** Display/parse format hint for controls that support specialized formatting. */
 	format?: GooSchemaValueFormat
 
-	/** Alias for `format` when schema authors want an explicit value-display term. */
-	valueFormat?: GooSchemaValueFormat
-
 	/** Hide the generated controller label while preserving the bound path. */
 	showLabel?: boolean
 
@@ -259,7 +249,7 @@ export interface GooSchemaField {
 	ariaLabel?: string
 
 	/** Control host class forwarded to self-contained controls. */
-	class?: string
+	className?: string
 
 	/** Data parameter forwarded to self-contained controls. */
 	dataParam?: string
@@ -348,7 +338,7 @@ export interface GooSchemaHeading {
 /** Registered control that is not bound to schema data. */
 export interface GooSchemaWidget {
 	type: 'widget'
-	widget: GooSchemaControlType
+	widget: GooControlType
 	id?: string
 	label?: string
 	showLabel?: boolean

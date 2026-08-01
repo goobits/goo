@@ -8,7 +8,7 @@ describe('GooSpinner', () => {
 	it('renders accessible spinner markup for raw HTML callers', () => {
 		const container = document.createElement('div')
 		container.innerHTML = renderGooSpinnerHtml({
-			class: 'asset-loader',
+			className: 'asset-loader',
 			label: 'Loading assets',
 			size: 'lg',
 			thickness: 3,

@@ -1,15 +1,10 @@
-import type { GooRadioOption, GooRadioOptions } from './types.ts'
+import type { GooChoiceOption } from '../support/types/choiceOption.ts'
+import type { GooRadioOptions } from './types.ts'
 
-type RawRadioOption = string | {
-	id?: string | number
-	label?: string | number
-	value?: string | number
-}
-
-export function normalizeRadioOptions(options: GooRadioOptions = []): GooRadioOption[] {
+export function normalizeRadioOptions(options: GooRadioOptions = []): GooChoiceOption[] {
 	if (!Array.isArray(options)) {
-		return Object.entries(options).map(([ value, label ]) => ({
-			value: String(value),
+		return Object.entries(options).map(([id, label]) => ({
+			id: String(id),
 			label: String(label)
 		}))
 	}
@@ -17,15 +12,13 @@ export function normalizeRadioOptions(options: GooRadioOptions = []): GooRadioOp
 	return options.map(normalizeRadioOption)
 }
 
-function normalizeRadioOption(option: RawRadioOption): GooRadioOption {
+function normalizeRadioOption(option: string | GooChoiceOption): GooChoiceOption {
 	if (typeof option === 'string') {
-		return { value: option, label: option }
+		return { id: option, label: option }
 	}
 
-	const label = option.label ?? option.id ?? option.value ?? ''
-	const value = option.value ?? option.id ?? label
 	return {
-		value: String(value),
-		label: String(label)
+		id: String(option.id),
+		label: String(option.label)
 	}
 }

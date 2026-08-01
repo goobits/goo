@@ -2,6 +2,7 @@ import { tick } from 'svelte'
 import { afterEach, describe, expect, it } from 'vitest'
 
 import { createAngleInputField } from '../angle-input/index.ts'
+import { createBlendModeField } from '../blend-mode/createBlendModeField.ts'
 import { createButtonField } from '../button/index.ts'
 import { createButtonGroupField } from '../button-group/index.ts'
 import { createCheckboxField } from '../checkbox/index.ts'
@@ -45,15 +46,15 @@ describe('Goo field factories', () => {
 				preReadyValue: 'done'
 			},
 			{
-				create: () => createCheckboxField({ value: false }),
+				create: () => createCheckboxField({ checked: false }),
 				mountedValue: false,
 				preReadyValue: true
 			},
 			{
 				create: () => createRadioGroupField({
 					options: [
-						{ label: 'One', value: 'one' },
-						{ label: 'Two', value: 'two' }
+						{ id: 'one', label: 'One' },
+						{ id: 'two', label: 'Two' }
 					],
 					value: 'one'
 				}),
@@ -63,8 +64,8 @@ describe('Goo field factories', () => {
 			{
 				create: () => createButtonGroupField({
 					options: [
-						{ key: 'left', value: 'Left' },
-						{ key: 'right', value: 'Right' }
+						{ id: 'left', label: 'Left' },
+						{ id: 'right', label: 'Right' }
 					],
 					value: 'left'
 				}),
@@ -115,7 +116,7 @@ describe('Goo field factories', () => {
 	})
 
 	it('creates framework-free field compositions around imperative controls', () => {
-		const checkbox = createCheckboxField({ value: true })
+		const checkbox = createCheckboxField({ checked: true })
 		const field = createLabeledField({
 			control: checkbox,
 			label: 'Paint into layer',
@@ -133,12 +134,37 @@ describe('Goo field factories', () => {
 		expect(group.isConnected).toBe(false)
 	})
 
+	it('forwards className through imperative field factories', async() => {
+		const className = 'canonical-field-class'
+		const fields = [
+			createAngleInputField({ className }),
+			createBlendModeField({ className }),
+			createButtonField({ className }),
+			createButtonGroupField({ className }),
+			createCheckboxField({ className }),
+			createColorField({ className }),
+			createInputField({ className }),
+			createNumberField({ className }),
+			createRadioGroupField({ className }),
+			createSelectField({ className }),
+			createTextareaField({ className })
+		]
+
+		document.body.append(...fields)
+		await tick()
+
+		for (const field of fields) {
+			expect(field.querySelector(`.${ className }`)).not.toBeNull()
+			field.destroy()
+		}
+	})
+
 	it('creates an imperative Goo button with DOM icons', () => {
 		let clicks = 0
 		const icon = document.createElement('svg')
 		const field = createButtonField({
 			icon,
-			value: 'Upload',
+			label: 'Upload',
 			onclick: () => clicks++
 		})
 		document.body.appendChild(field)

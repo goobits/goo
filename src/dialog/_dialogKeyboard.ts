@@ -1,4 +1,4 @@
-import { containKeyboardEvent } from '../support/keyboard/_keyboardActivation.ts'
+import { containKeyboardEvent } from '@goobits/keyboard'
 
 export type DialogKeyboardOptions = {
 	closeOnEscape: boolean
@@ -10,13 +10,7 @@ export type DialogKeyboardOptions = {
 
 export function handleDialogKeyboardEvent(
 	event: KeyboardEvent,
-	{
-		closeOnEscape,
-		isTopDialog,
-		okButton,
-		onCancel,
-		onOk
-	}: DialogKeyboardOptions
+	{ closeOnEscape, isTopDialog, okButton, onCancel, onOk }: DialogKeyboardOptions
 ): boolean {
 	if (!isTopDialog()) {
 		return false
@@ -32,8 +26,7 @@ export function handleDialogKeyboardEvent(
 		return false
 	}
 
-	const targetElement =
-		event.target instanceof Element ? event.target : document.activeElement
+	const targetElement = event.target instanceof Element ? event.target : document.activeElement
 	if (targetElement === okButton || !isDialogTextEntryElement(targetElement)) {
 		containKeyboardEvent(event)
 		onOk()
@@ -53,7 +46,5 @@ function isDialogTextEntryElement(element: Element | null): boolean {
 	}
 
 	const tagName = element.tagName
-	return tagName === 'INPUT'
-		|| tagName === 'TEXTAREA'
-		|| tagName === 'SELECT'
+	return tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT'
 }

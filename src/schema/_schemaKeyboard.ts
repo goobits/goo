@@ -1,4 +1,4 @@
-import { containKeyboardEvent } from '../support/keyboard/_keyboardActivation.ts'
+import { containKeyboardEvent } from '@goobits/keyboard'
 
 const SCHEMA_FOCUSABLE_SELECTOR = [
 	'button:not([disabled])',
@@ -40,12 +40,14 @@ export function attachSchemaKeyboardNavigation(element: HTMLElement): void {
 }
 
 function isSchemaNavigationKey(key: string): boolean {
-	return key === 'ArrowDown'
-		|| key === 'ArrowRight'
-		|| key === 'ArrowUp'
-		|| key === 'ArrowLeft'
-		|| key === 'Home'
-		|| key === 'End'
+	return (
+		key === 'ArrowDown' ||
+		key === 'ArrowRight' ||
+		key === 'ArrowUp' ||
+		key === 'ArrowLeft' ||
+		key === 'Home' ||
+		key === 'End'
+	)
 }
 
 function shouldHandleSchemaNavigation(event: KeyboardEvent, element: HTMLElement): boolean {
@@ -62,8 +64,10 @@ function shouldHandleSchemaNavigation(event: KeyboardEvent, element: HTMLElement
 		return false
 	}
 
-	return target.classList.contains('goo-folder__header')
-		|| target.classList.contains('goo-schema__reset')
+	return (
+		target.classList.contains('goo-folder__header') ||
+		target.classList.contains('goo-schema__reset')
+	)
 }
 
 function isNativeKeyboardOwner(element: HTMLElement): boolean {
@@ -77,16 +81,19 @@ function isNativeKeyboardOwner(element: HTMLElement): boolean {
 	}
 
 	const role = element.getAttribute('role')
-	return role === 'combobox'
-		|| role === 'listbox'
-		|| role === 'slider'
-		|| role === 'spinbutton'
-		|| role === 'textbox'
+	return (
+		role === 'combobox' ||
+		role === 'listbox' ||
+		role === 'slider' ||
+		role === 'spinbutton' ||
+		role === 'textbox'
+	)
 }
 
 function getSchemaFocusableElements(element: HTMLElement): HTMLElement[] {
-	return [ ...element.querySelectorAll<HTMLElement>(SCHEMA_FOCUSABLE_SELECTOR) ]
-		.filter(candidate => candidate !== element && isSchemaFocusableElement(candidate))
+	return [ ...element.querySelectorAll<HTMLElement>(SCHEMA_FOCUSABLE_SELECTOR) ].filter(
+		candidate => candidate !== element && isSchemaFocusableElement(candidate)
+	)
 }
 
 function isSchemaFocusableElement(element: HTMLElement): boolean {
@@ -95,8 +102,7 @@ function isSchemaFocusableElement(element: HTMLElement): boolean {
 	}
 
 	const style = window.getComputedStyle(element)
-	return style.display !== 'none'
-		&& style.visibility !== 'hidden'
+	return style.display !== 'none' && style.visibility !== 'hidden'
 }
 
 function getSchemaNavigationTarget(

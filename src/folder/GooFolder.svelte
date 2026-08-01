@@ -11,7 +11,8 @@ import { addChild, clearChildren, hydrateChildren, removeChild } from '../suppor
 import type { GooFolderElement, GooFolderInternalElement, GooFolderOptions } from './_createFolder.ts'
 import './GooFolder.css'
 
-type GooFolderProps = GooFolderOptions & {
+type GooFolderProps = Omit<GooFolderOptions, 'className'> & {
+	class?: string
 	children?: Snippet
 	element?: GooFolderElement | null
 	onelement?: (element: GooFolderElement | null) => void
@@ -21,7 +22,6 @@ type GooFolderProps = GooFolderOptions & {
 let {
 	title = '',
 	class: className = '',
-	className: optionClassName = '',
 	style = '',
 	open = $bindable(true),
 	tabIndex = 0,
@@ -147,7 +147,7 @@ $effect(assignApi)
 
 <div
 	bind:this={rootEl}
-	class={`goo-folder ${className} ${optionClassName}`.trim()}
+	class={`goo-folder ${className}`.trim()}
 	style={style || undefined}
 	class:goo-folder--open={open}
 	class:goo-folder--disabled={disabled}

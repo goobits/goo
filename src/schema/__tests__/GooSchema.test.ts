@@ -25,7 +25,7 @@ const gridPopoutControlType = defineSvelteControlType({
 			selfContained: true,
 			propMapping: {
 				ariaLabel: 'ariaLabel',
-				class: 'class',
+				className: 'class',
 				dataParam: 'dataParam',
 				id: 'id',
 				items: 'items',
@@ -795,7 +795,7 @@ describe('GooSchema', () => {
 					path: 'type',
 					type: 'grid-popout',
 					ariaLabel: 'Subtool',
-					class: 'goo-grid-trigger--compact',
+					className: 'goo-grid-trigger--compact',
 					dataParam: 'type',
 					id: 'UISubTool',
 					items: [
@@ -1741,7 +1741,7 @@ describe('GooSchema', () => {
 				{
 					path: 'opacity',
 					type: 'slider-field',
-					valueFormat: 'percent',
+					format: 'percent',
 					displayUnit: '%',
 					showLabel: false,
 					fullWidth: true,

@@ -1,8 +1,8 @@
+import { activateModalIsolation } from '@goobits/keyboard'
 import { render } from '@testing-library/svelte'
 import { createRawSnippet, tick } from 'svelte'
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { activateModalIsolation } from '../../support/keyboard/_focus.ts'
 import GooFocusTrap from '../GooFocusTrap.svelte'
 
 const trapChildren = createRawSnippet(() => ({
@@ -20,6 +20,7 @@ describe('GooFocusTrap', () => {
 	})
 
 	it('isolates the modal, traps Tab, and restores previous focus on unmount', async() => {
+		let clicks = 0
 		const appRoot = document.createElement('main')
 		const opener = document.createElement('button')
 		appRoot.append(opener)
@@ -30,6 +31,7 @@ describe('GooFocusTrap', () => {
 			props: {
 				ariaLabel: 'Modal tools',
 				children: trapChildren,
+				onclick: () => clicks++,
 				'data-testid': 'modal-tools'
 			}
 		})
@@ -44,6 +46,8 @@ describe('GooFocusTrap', () => {
 		expect(root.getAttribute('data-testid')).toBe('modal-tools')
 		expect(appRoot.inert).toBe(true)
 		expect(appRoot.getAttribute('aria-hidden')).toBe('true')
+		root.click()
+		expect(clicks).toBe(1)
 
 		last.focus()
 		const tabEvent = dispatchTrapKey(last, 'Tab')

@@ -1,15 +1,10 @@
 import type { Snippet } from 'svelte'
 
 import type { GooForwardedAttributes } from '../support/types/forwardedAttributes.ts'
-
-/** Radio option definition. */
-export interface GooRadioOption {
-	value: string
-	label: string
-}
+import type { GooChoiceOption } from '../support/types/choiceOption.ts'
 
 /** Radio option input accepted by Goo radio groups. */
-export type GooRadioOptions = Array<string | GooRadioOption | { id?: string | number; label?: string | number; value?: string | number }> | Record<string, string>
+export type GooRadioOptions = Array<string | GooChoiceOption> | Record<string, string>
 
 /** Radio group layout direction. */
 export type GooRadioGroupLayout = 'vertical' | 'horizontal'

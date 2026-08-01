@@ -5,6 +5,7 @@ export { default as GooRadioGroup } from './GooRadioGroup.svelte'
 export type {
 	GooRadioGroupLayout,
 	GooRadioGroupProps,
-	GooRadioOption,
 	GooRadioOptions,
-	GooRadioProps } from './types.ts'
+	GooRadioProps
+} from './types.ts'
+export type { GooChoiceOption } from '../support/types/choiceOption.ts'

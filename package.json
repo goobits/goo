@@ -281,7 +281,8 @@
 		"vitest": "^4.1.10"
 	},
 	"dependencies": {
-		"@goobits/logger": "^1.0.0",
+		"@goobits/keyboard": "workspace:*",
+		"@goobits/logger": "workspace:*",
 		"@lucide/svelte": "^1.27.0"
 	},
 	"peerDependencies": {

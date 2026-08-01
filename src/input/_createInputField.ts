@@ -5,7 +5,6 @@ import GooNumber from './GooNumber.svelte'
 import type { GooInputProps, GooInputType, GooNumberProps } from './types.ts'
 
 export type TextInputFieldOptions<T = string> = {
-	class?: string
 	className?: string
 	disabled?: boolean
 	multiline?: boolean
@@ -109,8 +108,7 @@ export function createInputField<T = string>(
 		if (options.readonly !== undefined) props.readonly = options.readonly
 		if (options.required !== undefined) props.required = options.required
 		if (options.size !== undefined) props.size = options.size
-		const className = options.class ?? options.className
-		if (className !== undefined) props.class = className
+		if (options.className !== undefined) props.class = options.className
 		if (options.style !== undefined) props.style = options.style
 		if (options.tabIndex !== undefined) props.tabIndex = options.tabIndex
 		if (options.title !== undefined) props.title = options.title
@@ -193,8 +191,7 @@ export function createNumberField(options: NumberInputFieldOptions = {}): Number
 		if (options.name !== undefined) props.name = options.name
 		if (options.disabled !== undefined) props.disabled = options.disabled
 		if (options.size !== undefined) props.size = options.size
-		const className = options.class ?? options.className
-		if (className !== undefined) props.class = className
+		if (options.className !== undefined) props.class = options.className
 		if (options.style !== undefined) props.style = options.style
 		if (options.tabIndex !== undefined) props.tabIndex = options.tabIndex
 		if (options.title !== undefined) props.title = options.title

@@ -1,23 +1,10 @@
-import type { ButtonGroupOptions, NormalizedButtonGroupOption } from './types.ts'
-
-type RawButtonGroupOption = {
-	className?: string
-	disabled?: boolean
-	icon?: string | (() => Element)
-	id?: string | number
-	key?: string | number
-	label?: string | number
-	tooltip?: string
-	ariaLabel?: string
-	hideLabel?: boolean
-	value?: string | number
-}
+import type { ButtonGroupOption, ButtonGroupOptions, NormalizedButtonGroupOption } from './types.ts'
 
 export function normalizeButtonGroupOptions(options: ButtonGroupOptions = []): NormalizedButtonGroupOption[] {
 	if (Array.isArray(options)) {
 		return options.map(option => {
 			if (typeof option === 'string') {
-				return { key: option, value: option }
+				return { id: option, label: option }
 			}
 			return normalizeButtonGroupOption(option)
 		})
@@ -25,9 +12,9 @@ export function normalizeButtonGroupOptions(options: ButtonGroupOptions = []): N
 
 	return Object.entries(options).map(([ key, option ]) => {
 		if (typeof option === 'string') {
-			return { key, value: option }
+			return { id: key, label: option }
 		}
-		return normalizeButtonGroupOption({ key, ...option })
+		return normalizeButtonGroupOption({ id: key, ...option })
 	})
 }
 
@@ -37,23 +24,21 @@ export function normalizeButtonGroupValue(value?: string | string[] | null): Set
 	return new Set([ String(value) ])
 }
 
-export function readButtonGroupValue(selectedKeys: Set<string>, allowMultiple: boolean): string | string[] | null {
+export function readButtonGroupValue(selectedIds: Set<string>, allowMultiple: boolean): string | string[] | null {
 	if (allowMultiple) {
-		return [ ...selectedKeys ]
+		return [ ...selectedIds ]
 	}
-	const [ selectedKey ] = selectedKeys
-	return selectedKey ?? null
+	const [ selectedId ] = selectedIds
+	return selectedId ?? null
 }
 
-function normalizeButtonGroupOption(option: RawButtonGroupOption): NormalizedButtonGroupOption {
-	const label = option.value ?? option.label ?? option.id ?? option.key ?? ''
-	const key = option.key ?? option.id ?? option.value ?? label
+function normalizeButtonGroupOption(option: ButtonGroupOption): NormalizedButtonGroupOption {
 	const normalizedOption: NormalizedButtonGroupOption = {
-		key: String(key),
-		value: String(label)
+		id: String(option.id),
+		label: String(option.label)
 	}
 	if (option.icon !== undefined) normalizedOption.icon = option.icon
-	if (option.tooltip !== undefined) normalizedOption.tooltip = option.tooltip
+	if (option.title !== undefined) normalizedOption.title = option.title
 	if (option.ariaLabel !== undefined) normalizedOption.ariaLabel = option.ariaLabel
 	if (option.hideLabel !== undefined) normalizedOption.hideLabel = option.hideLabel
 	if (option.className !== undefined) normalizedOption.className = option.className

@@ -18,7 +18,7 @@ export type GooFocusTrapProps = GooForwardedAttributes & {
 	class?: string
 
 	/** Native click callback for the dialog root. */
-	onClick?: (event: MouseEvent) => void
+	onclick?: (event: MouseEvent) => void
 
 	/** Called after the trap contains an Escape key press. */
 	onEscape?: () => void

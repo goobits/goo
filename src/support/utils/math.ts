@@ -14,24 +14,6 @@ export const clamp = (value: number, min: number, max: number): number =>
 	Math.max(min, Math.min(max, value))
 
 /**
- * Linear interpolation between two values.
- * @param a - Start value
- * @param b - End value
- * @param t - Interpolation factor (0-1)
- */
-export const lerp = (a: number, b: number, t: number): number =>
-	a + (b - a) * t
-
-/**
- * Inverse linear interpolation - find t given a value in range.
- * @param a - Start value
- * @param b - End value
- * @param value - Value to find t for
- */
-export const inverseLerp = (a: number, b: number, value: number): number =>
-	a === b ? 0 : (value - a) / (b - a)
-
-/**
  * Round a number to a specified number of decimal places.
  * @param n - Number to round
  * @param decimals - Number of decimal places (default 0)

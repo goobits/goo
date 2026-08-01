@@ -5,9 +5,10 @@
 
 import './GooDialog.css'
 
+import { activateModalIsolation, handleFocusTrapKeyboardEvent } from '@goobits/keyboard'
+
 import type { CheckboxFieldElement } from '../checkbox/_createCheckboxField.ts'
 import { resolveGooOverlayPlacement } from '../overlay-host/_overlayPlacement.ts'
-import { activateModalIsolation, handleFocusTrapKeyboardEvent } from '../support/keyboard/_focus.ts'
 import { createLifecycleBag, type GooLifecycleBag } from '../support/utils/lifecycleBag.ts'
 import { handleDialogKeyboardEvent } from './_dialogKeyboard.ts'
 import {
@@ -35,23 +36,19 @@ export type GooDialogType = 'alert' | 'confirm' | 'prompt' | 'notify' | 'overlay
 /** Focus targets accepted by standard Goo dialogs. */
 export type GooDialogDefaultFocus = 'ok' | 'cancel' | 'disregard'
 
-/** Values collected from dialog fields. */
-export type DialogValues<TValues extends Record<string, unknown> = Record<string, unknown>> =
-	TValues
-
 /** Field element map passed to dialog verification callbacks. */
 export type DialogFieldElements = Map<string, HTMLElement>
 
 /** Verification callback for prompt dialogs. */
-export type DialogVerifyHandler<TValues extends DialogValues = DialogValues> = (
-	values: TValues,
-	fieldElements: DialogFieldElements
-) => boolean | Promise<boolean>
+export type DialogVerifyHandler<TValues extends Record<string, unknown> = Record<string, unknown>> =
+	(values: TValues, fieldElements: DialogFieldElements) => boolean | Promise<boolean>
 
 /**
  * Dialog options for construction
  */
-export interface GooDialogOptions<TValues extends DialogValues = DialogValues> {
+export interface GooDialogOptions<
+	TValues extends Record<string, unknown> = Record<string, unknown>
+> {
 	type?: GooDialogType
 	ariaLabel?: string
 	heading?: string
@@ -85,7 +82,7 @@ export interface GooDialogOptions<TValues extends DialogValues = DialogValues> {
 /**
  * Dialog result
  */
-export interface DialogResult<TValues extends DialogValues = DialogValues> {
+export interface DialogResult<TValues extends Record<string, unknown> = Record<string, unknown>> {
 	ok?: boolean
 	cancel?: boolean
 	disregard?: boolean
@@ -131,7 +128,9 @@ const DEFAULT_LABELS: DialogLabels = {
 // ============================================================================
 
 /** Public handle returned by `createGooDialog`. */
-export interface GooDialogController<TValues extends DialogValues = DialogValues> {
+export interface GooDialogController<
+	TValues extends Record<string, unknown> = Record<string, unknown>
+> {
 	/** Root dialog element. */
 	readonly element: HTMLElement
 	/** Whether the dialog is currently open. */
@@ -545,8 +544,8 @@ class GooDialogControllerRuntime {
 	/**
 	 * Gets field values.
 	 */
-	_getFieldValues(): DialogValues {
-		const values: DialogValues = {}
+	_getFieldValues(): Record<string, unknown> {
+		const values: Record<string, unknown> = {}
 		for (const [ name, $el ] of this._fieldElements) {
 			const elWithValue = $el as unknown as {
 				value?: unknown
@@ -872,17 +871,11 @@ function reflowNotifyStack(): void {
 // ============================================================================
 
 /**
- * Goo dialog instance.
- */
-export type GooDialogInstance<TValues extends DialogValues = DialogValues> =
-	GooDialogController<TValues>
-
-/**
  * Creates goo dialog.
  *
  * @param options - options.
  */
-export function createGooDialog<TValues extends DialogValues = DialogValues>(
+export function createGooDialog<TValues extends Record<string, unknown> = Record<string, unknown>>(
 	options: GooDialogOptions<TValues> = {}
 ): GooDialogController<TValues> {
 	return new GooDialogControllerRuntime(options as GooDialogOptions) as GooDialogController<TValues>

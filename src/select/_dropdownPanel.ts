@@ -526,7 +526,7 @@ export class DropdownPanel {
 		}
 
 		// Regular option or submenu
-		const isDisabled = evaluate(opt.isDisabled, this.#ctx.getContext())
+		const isDisabled = evaluate(opt.disabled, this.#ctx.getContext())
 		const isSelected = showSelectionIndicator && value === opt.id
 		const isSubmenu = opt.type === 'submenu'
 		if (isSubmenu && !this.#hasSupportedOptionRow(opt.options || [])) return null

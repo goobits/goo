@@ -6,10 +6,9 @@ export {
 	type DialogFieldElements,
 	type DialogLabels,
 	type DialogResult,
-	type DialogValues,
 	type DialogVerifyHandler,
+	type GooDialogController,
 	type GooDialogDefaultFocus,
-	type GooDialogInstance,
 	type GooDialogOptions,
 	type GooDialogType } from './dialog.ts'
 export { createGooDialogTextContent, createTrustedGooDialogContent } from './dialogContent.ts'

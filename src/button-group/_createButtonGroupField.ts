@@ -6,7 +6,6 @@ import type { ButtonGroupOptions, GooButtonGroupLayout, GooButtonGroupProps } fr
 export type ButtonGroupFieldOptions = {
 	allowMultiple?: boolean
 	allowToggle?: boolean
-	class?: string
 	className?: string
 	disabled?: boolean
 	layout?: GooButtonGroupLayout
@@ -69,8 +68,7 @@ export function createButtonGroupField(
 		if (options.size !== undefined) props.size = options.size
 		if (options.style !== undefined) props.style = options.style
 		if (options.tabIndex !== undefined) props.tabIndex = options.tabIndex
-		const className = options.class ?? options.className
-		if (className !== undefined) props.class = className
+		if (options.className !== undefined) props.class = options.className
 
 		instance = mount(GooButtonGroup, { target: field, props })
 	}

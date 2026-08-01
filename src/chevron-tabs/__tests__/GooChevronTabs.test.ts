@@ -175,7 +175,7 @@ describe('GooChevronTabs', () => {
 		expect(container.querySelector('.goo-chevron-tabs__connection')).toBeNull()
 	})
 
-	it('selects focused tabs from Spacebar and contains handled keys', () => {
+	it('selects focused tabs from Space and contains handled keys', () => {
 		const onselect = vi.fn()
 		const { container } = render(GooChevronTabs, {
 			props: {
@@ -192,7 +192,7 @@ describe('GooChevronTabs', () => {
 		const parentKeydown = vi.fn()
 		container.addEventListener('keydown', parentKeydown)
 
-		const event = dispatchKey(tab, 'Spacebar')
+		const event = dispatchKey(tab, ' ')
 
 		expect(event.defaultPrevented).toBe(true)
 		expect(parentKeydown).not.toHaveBeenCalled()

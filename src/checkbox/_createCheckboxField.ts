@@ -5,7 +5,6 @@ import type { GooCheckboxProps } from './types.ts'
 
 export type CheckboxFieldOptions = {
 	checked?: boolean
-	class?: string
 	className?: string
 	disabled?: boolean
 	formValue?: string
@@ -15,7 +14,6 @@ export type CheckboxFieldOptions = {
 	style?: string
 	tabIndex?: number
 	title?: string
-	value?: boolean
 }
 
 type MountedCheckbox = ReturnType<typeof mount>
@@ -32,14 +30,13 @@ export type CheckboxFieldElement = HTMLDivElement & {
 	getValue(): boolean
 	setValue(value: boolean): void
 	toggle(value?: boolean): boolean
-	value: boolean
 }
 
 export function createCheckboxField(options: CheckboxFieldOptions = {}): CheckboxFieldElement {
 	const field = document.createElement('div') as CheckboxFieldElement
 	field.className = 'goo-checkbox-field'
 
-	let currentValue = Boolean(options.checked ?? options.value ?? false)
+	let currentValue = Boolean(options.checked ?? false)
 	let instance: MountedCheckbox | null = null
 	let checkboxElement: CheckboxControlElement | null = null
 	let destroyed = false
@@ -73,8 +70,7 @@ export function createCheckboxField(options: CheckboxFieldOptions = {}): Checkbo
 		if (options.style !== undefined) props.style = options.style
 		if (options.tabIndex !== undefined) props.tabIndex = options.tabIndex
 		if (options.title !== undefined) props.title = options.title
-		const className = options.class ?? options.className
-		if (className !== undefined) props.class = className
+		if (options.className !== undefined) props.class = options.className
 
 		instance = mount(GooCheckbox, { target: field, props })
 		checkboxElement = field.querySelector('.goo-checkbox') as CheckboxControlElement | null
@@ -82,13 +78,6 @@ export function createCheckboxField(options: CheckboxFieldOptions = {}): Checkbo
 
 	Object.defineProperties(field, {
 		checked: {
-			configurable: true,
-			get: () => currentValue,
-			set: (value: boolean) => {
-				field.setValue(value)
-			}
-		},
-		value: {
 			configurable: true,
 			get: () => currentValue,
 			set: (value: boolean) => {

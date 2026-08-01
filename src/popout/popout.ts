@@ -22,10 +22,7 @@ import {
 	cancelPopoutAnimation,
 	type PopoutAnimationState
 } from './_popoutAnimation.ts'
-import {
-	createPopoutElement,
-	type PopoutElement
-} from './_popoutElement.ts'
+import { createPopoutElement, type PopoutElement } from './_popoutElement.ts'
 import { setupPopoutEventHandlers } from './_popoutEvents.ts'
 import {
 	capturePopoutFocusTarget,
@@ -33,23 +30,16 @@ import {
 	restorePopoutFocus
 } from './_popoutFocus.ts'
 import { bindImmediatePopoutEscapeToClose } from './_popoutKeyboard.ts'
-import {
-	observeOpenLayoutChanges,
-	stabilizeOpeningLayout
-} from './_popoutLayout.ts'
+import { observeOpenLayoutChanges, stabilizeOpeningLayout } from './_popoutLayout.ts'
 import {
 	getActiveEscapePopout,
 	type GooPopoutRuntime,
-	gooPopoutRuntime as sharedGooPopoutRuntime,
 	registerActivePopout,
-	unregisterActivePopout } from './_popoutRegistry.ts'
-import type {
-	GooPopoutAt,
-	GooPopoutInstance,
-	GooPopoutManager,
-	GooPopoutOptions
-} from './popoutTypes.ts'
+	unregisterActivePopout
+} from './_popoutRegistry.ts'
+import type { GooPopoutAt, GooPopoutInstance, GooPopoutOptions } from './popoutTypes.ts'
 
+export { gooPopoutRuntime } from './_popoutRegistry.ts'
 export type {
 	GooPopoutAt,
 	GooPopoutInstance,
@@ -58,9 +48,6 @@ export type {
 	GooPopoutPointerEvent,
 	PopoutKeepWithin
 } from './popoutTypes.ts'
-
-/** Shared Goo popout registry controls. */
-export const gooPopoutRuntime: GooPopoutManager = sharedGooPopoutRuntime
 
 // =============================================================================
 // Goo Popout Factory
@@ -134,13 +121,11 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 
 	applyAtConfig(at)
 	const placementAnchor =
-		targetElement ??
-		(document.activeElement instanceof HTMLElement ? document.activeElement : null)
+		targetElement ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null)
 	const placement = resolveGooOverlayPlacement(placementAnchor)
 	const parentElement = requestedParentElement ?? placement?.host ?? document.body
 	const keepWithin =
-		requestedKeepWithin ??
-		(placement ? { element: placement.scope, margin: 15 } : undefined)
+		requestedKeepWithin ?? (placement ? { element: placement.scope, margin: 15 } : undefined)
 
 	// ==========================================================================
 	// Instance Object
@@ -426,11 +411,8 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 			}
 		}
 		applyPosition($element, currentPosition)
-		if (currentPosition.maxHeight != null) {
-			$element.style.setProperty(
-				'--goo-popout-available-height',
-				`${ currentPosition.maxHeight }px`
-			)
+		if (currentPosition.maxHeight !== undefined) {
+			$element.style.setProperty('--goo-popout-available-height', `${ currentPosition.maxHeight }px`)
 		} else {
 			$element.style.removeProperty('--goo-popout-available-height')
 		}

@@ -70,7 +70,6 @@ let {
 	'aria-describedby': ariaDescribedby,
 	'aria-labelledby': ariaLabelledby,
 	'aria-invalid': ariaInvalidAttribute,
-	tooltip,
 	title,
 	disabled = false,
 	actionContext,
@@ -692,7 +691,6 @@ function readTriggerAccessibleName(): string {
 	return textValue(ariaLabel)
 		|| textValue(ariaLabelAttribute)
 		|| textValue(title)
-		|| (typeof tooltip === 'string' ? textValue(tooltip) : '')
 }
 
 function textValue(value: unknown): string {
@@ -738,7 +736,7 @@ function getFormOptions(
 			result.push({
 				id: option.id,
 				label: getOptionLabel(option),
-				disabled: Boolean(evaluate(option.isDisabled, getContext()))
+				disabled: Boolean(evaluate(option.disabled, getContext()))
 			})
 		}
 	}
@@ -783,7 +781,7 @@ $effect(() => {
    names; the value text speaks for itself) and the button drops its native
    title. Suppressed while the dropdown is open. */
 $effect(() => {
-	const text = typeof tooltip === 'string' && tooltip ? tooltip : title
+	const text = title
 	if (!triggerIconHost || !text) return
 	const handle = gooTooltipRuntime.attach(triggerIconHost, () => (opened ? undefined : text), {
 		direction: 'right',
@@ -822,7 +820,7 @@ $effect(() => {
 			aria-invalid={triggerAriaInvalid}
 			aria-required={required ? 'true' : undefined}
 			disabled={effectiveDisabled}
-			title={triggerIconElement ? undefined : (typeof tooltip === 'string' ? tooltip : title)}
+			title={triggerIconElement ? undefined : title}
 			onpointerdown={handleTriggerPointerDown}
 		>
 			{#if trigger}

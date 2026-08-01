@@ -3,7 +3,7 @@
  * @module goo/context-menu
  */
 
-export type { GooContextMenuElement, GooContextMenuOpenOptions, GooContextMenuOption, GooContextMenuOptions } from './GooContextMenu.ts'
+export type { GooContextMenuElement, GooContextMenuOpenOptions, GooContextMenuOptions } from './GooContextMenu.ts'
 export { createGooContextMenu } from './GooContextMenu.ts'
 export {
 	GooContextMenu,

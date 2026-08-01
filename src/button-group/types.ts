@@ -8,25 +8,19 @@ export type GooButtonGroupLayout = 'horizontal' | 'vertical'
 /** Option accepted by Goo button group renderers and components. */
 export interface ButtonGroupOption {
 
+	/** Stable selection id. */
+	id: string | number
+
 	/** Visible button label. */
-	value?: string | number
-
-	/** Stable selection key. Defaults to `value`. */
-	key?: string | number
-
-	/** Stable selection id used when `key` is omitted. */
-	id?: string | number
-
-	/** Visible fallback label used when `value` is omitted. */
-	label?: string | number
+	label: string | number
 
 	/** Optional icon class or factory node rendered before the title. */
 	icon?: string | (() => Element)
 
-	/** Tooltip/title text. */
-	tooltip?: string
+	/** Native title tooltip text. */
+	title?: string
 
-	/** Accessible label for icon-only buttons. Defaults to `tooltip` or visible text. */
+	/** Accessible label for icon-only buttons. Defaults to `title` or visible text. */
 	ariaLabel?: string
 
 	/** Hide the visible title while keeping the option keyboard/selectable. */
@@ -39,22 +33,22 @@ export interface ButtonGroupOption {
 	disabled?: boolean
 }
 
-/** Normalized button group option with an explicit key. */
+/** Normalized button group option. */
 export interface NormalizedButtonGroupOption {
 
-	/** Stable selection key. */
-	key: string
+	/** Stable selection id. */
+	id: string
 
 	/** Visible button label. */
-	value: string
+	label: string
 
 	/** Optional icon class or factory node rendered before the title. */
 	icon?: string | (() => Element)
 
-	/** Tooltip/title text. */
-	tooltip?: string
+	/** Native title tooltip text. */
+	title?: string
 
-	/** Accessible label for icon-only buttons. Defaults to `tooltip` or visible text. */
+	/** Accessible label for icon-only buttons. Defaults to `title` or visible text. */
 	ariaLabel?: string
 
 	/** Hide the visible title while keeping the option keyboard/selectable. */
@@ -67,8 +61,11 @@ export interface NormalizedButtonGroupOption {
 	disabled?: boolean
 }
 
+/** Value accepted under an id-keyed button group option map. */
+type ButtonGroupOptionMapValue = string | Omit<ButtonGroupOption, 'id'>
+
 /** Button group options collection. */
-export type ButtonGroupOptions = Array<string | ButtonGroupOption> | Record<string, string | ButtonGroupOption>
+export type ButtonGroupOptions = Array<string | ButtonGroupOption> | Record<string, ButtonGroupOptionMapValue>
 
 /** Props accepted by the Svelte `GooButtonGroup` component. */
 export type GooButtonGroupProps = GooForwardedAttributes & {
@@ -76,7 +73,7 @@ export type GooButtonGroupProps = GooForwardedAttributes & {
 	/** Button definitions to render. Existing child buttons are used when omitted. */
 	options?: ButtonGroupOptions
 
-	/** Selected key or keys. */
+	/** Selected id or ids. */
 	value?: string | string[] | null
 
 	/** Allow multiple buttons to be selected. */
@@ -90,9 +87,6 @@ export type GooButtonGroupProps = GooForwardedAttributes & {
 
 	/** Whether the group is disabled. */
 	disabled?: boolean
-
-	/** Additional class names. */
-	className?: string
 
 	/** Compact/medium size token. */
 	size?: string

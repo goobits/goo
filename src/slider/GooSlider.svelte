@@ -7,7 +7,6 @@
 			canCross: 'canCross',
 			canPush: 'canPush',
 			coverage: 'coverage',
-			variance: 'variance',
 			direction: 'direction',
 			ariaLabel: 'ariaLabel',
 			label: 'label',
@@ -38,10 +37,10 @@
 <script lang="ts">
 	import './GooSlider.css'
 
+	import { containKeyboardEvent } from '@goobits/keyboard'
 	import { onDestroy } from 'svelte'
 
 	import { formatNumber } from '../support/utils/formatNumber.ts'
-	import { containKeyboardEvent } from '../support/keyboard/_keyboardActivation.ts'
 	import { clamp } from '../support/utils/numberUtils.ts'
 	import {
 		createPointerDrag,
@@ -128,7 +127,6 @@
 		canCross = false,
 		canPush = false,
 		coverage = false,
-		variance = false,
 		ticks,
 		marks,
 		snap,
@@ -164,9 +162,7 @@
 		step: numericStep,
 		unit
 	})
-	const effectiveMode = $derived(
-		mode ?? (variance ? 'variance' : currentValues.length > 1 ? 'range' : 'value')
-	)
+	const effectiveMode = $derived(mode ?? (currentValues.length > 1 ? 'range' : 'value'))
 	const isVarianceMode = $derived(effectiveMode === 'variance')
 	const sliderMarks = $derived(normalizeSliderMarks(ticks, marks, numericMin, numericMax))
 	const resetTargets = $derived(normalizeResetTargets(resetValue))
@@ -227,10 +223,7 @@
 	const rootStyle = $derived.by(() => {
 		const declarations = [style].filter(Boolean) as string[]
 		if (preset === 'bipolar' && numericMax > numericMin) {
-			const zero = Math.min(
-				100,
-				Math.max(0, ((0 - numericMin) / (numericMax - numericMin)) * 100)
-			)
+			const zero = Math.min(100, Math.max(0, ((0 - numericMin) / (numericMax - numericMin)) * 100))
 			declarations.push(`--goo-slider-fill-origin: ${zero}%`)
 		}
 		if (preset === 'opacity' && currentPresetColor)
@@ -271,7 +264,6 @@
 		'can-cross': canCross ? '' : undefined,
 		'can-push': canPush ? '' : undefined,
 		coverage: coverage ? '' : undefined,
-		variance: isVarianceMode ? '' : undefined,
 		scale: scale !== 'linear' ? scale : undefined,
 		'scale-power': scale === 'power' ? scalePower : undefined,
 		ticks: ticks ? '' : undefined,
@@ -384,13 +376,8 @@
 		slider.setGradient = (colors) => {
 			currentGradient = colors
 		}
-		slider.toPercent = (nextValue) => toScaledPercent(
-			nextValue,
-			numericMin,
-			numericMax,
-			scale,
-			scalePower
-		)
+		slider.toPercent = (nextValue) =>
+			toScaledPercent(nextValue, numericMin, numericMax, scale, scalePower)
 		slider.enable = () => {
 			effectiveDisabled = false
 		}
@@ -410,9 +397,7 @@
 			if (index === null) return false
 			const resetTarget = resetTargets[index]
 			resetSnapSuppressed = Boolean(
-				startedOnThumb &&
-				resetTarget !== undefined &&
-				Object.is(currentValues[index], resetTarget)
+				startedOnThumb && resetTarget !== undefined && Object.is(currentValues[index], resetTarget)
 			)
 			capturedResetIndex = null
 			if (!startedOnThumb) {
@@ -476,16 +461,10 @@
 		const easedPct = easingFnInvert ? easingFnInvert(pct) : pct
 		const nextValue = toFormattedValue(easedPct, true, runtimeState)
 		const resetSnap = resolvePointerResetSnap(index, pct)
-		updateThumbValue(
-			index,
-			resetSnap?.value ?? nextValue,
-			state,
-			event,
-			{
-				...(resetSnap ? { animateSnap: resetSnap.entered } : {}),
-				bypassSnap: Boolean(resetSnap)
-			}
-		)
+		updateThumbValue(index, resetSnap?.value ?? nextValue, state, event, {
+			...(resetSnap ? { animateSnap: resetSnap.entered } : {}),
+			bypassSnap: Boolean(resetSnap)
+		})
 	}
 
 	function updateThumbValue(
@@ -757,10 +736,11 @@
 
 	function normalizeResetTargets(nextValue: GooSliderValue | undefined): Array<number | undefined> {
 		if (nextValue === undefined || nextValue === null) return []
-		const rawValues = typeof nextValue === 'object' && !Array.isArray(nextValue)
-			? [ nextValue.min, nextValue.max ]
-			: parseFloatArray(nextValue)
-		return rawValues.map(rawValue => {
+		const rawValues =
+			typeof nextValue === 'object' && !Array.isArray(nextValue)
+				? [nextValue.min, nextValue.max]
+				: parseFloatArray(nextValue)
+		return rawValues.map((rawValue) => {
 			const numericValue = Number(rawValue)
 			if (
 				!Number.isFinite(numericValue) ||
@@ -773,10 +753,7 @@
 		})
 	}
 
-	function getUniqueResetMarkers(
-		targets: Array<number | undefined>,
-		thumbCount: number
-	): number[] {
+	function getUniqueResetMarkers(targets: Array<number | undefined>, thumbCount: number): number[] {
 		const markers: number[] = []
 		for (const target of targets.slice(0, thumbCount)) {
 			if (target !== undefined && !markers.includes(target)) markers.push(target)

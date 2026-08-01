@@ -26,7 +26,7 @@ export type GooButtonVariant =
 
 type GooButtonOwnProps = GooForwardedAttributes & {
 	/** Visual label rendered when no children are provided. */
-	value?: string | undefined
+	label?: string | undefined
 
 	/** Native button form value. */
 	formValue?: string | undefined
@@ -47,16 +47,10 @@ type GooButtonOwnProps = GooForwardedAttributes & {
 	rel?: string | undefined
 
 	/** Render as a full-width row button. */
-	block?: boolean | undefined
-
-	/** Render as a full-width row button. */
 	fullRow?: boolean | undefined
 
-	/** Optional title/tooltip text. */
+	/** Optional native title text. */
 	title?: string | undefined
-
-	/** Additional tooltip text when title is not provided. */
-	tooltip?: string | undefined
 
 	/** Accessible label for icon-only buttons. */
 	ariaLabel?: string | undefined
@@ -97,20 +91,17 @@ type GooButtonOwnProps = GooForwardedAttributes & {
 	/** Native click callback. */
 	onclick?: ((event: MouseEvent) => void) | undefined
 
-	/** Activation callback fired after click/toggle handling. */
-	onactivate?: ((event: MouseEvent) => void) | undefined
-
 	/** Toggle change callback. */
 	onchange?: ((value: boolean, oldValue?: boolean) => void) | undefined
 }
 
 /** Props for a native button-backed `GooButton`. */
 export type GooButtonButtonProps = GooButtonOwnProps &
-	Omit<HTMLButtonAttributes, keyof GooButtonOwnProps | 'href'> & { href?: undefined }
+	Omit<HTMLButtonAttributes, keyof GooButtonOwnProps | 'href' | 'tabindex'> & { href?: undefined }
 
 /** Props for a native anchor-backed `GooButton`. */
 export type GooButtonAnchorProps = GooButtonOwnProps &
-	Omit<HTMLAnchorAttributes, keyof GooButtonOwnProps | 'href'> & { href: string }
+	Omit<HTMLAnchorAttributes, keyof GooButtonOwnProps | 'href' | 'tabindex'> & { href: string }
 
 /**
  * Props accepted by the Svelte `GooButton` component.

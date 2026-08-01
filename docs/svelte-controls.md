@@ -130,7 +130,7 @@ instead of duplicating it.
 | --- | --- | --- |
 | Single value | `GooSlider` | `mode="value"` is explicit; omitted mode still infers from value shape. |
 | Range values | `GooSlider` | `mode="range"` or a two-value array. |
-| Variance values | `GooSlider` | `mode="variance"` or legacy `variance: true`. Edge compression is shared with `GooSliderField`. |
+| Variance values | `GooSlider` | `mode="variance"`. Edge compression is shared with `GooSliderField`. |
 | Ticks / marks / labels | `GooSlider` | Use `ticks` and `marks`; `GooSliderField` passes them through. |
 | Snap points | `GooSlider` | Use `snap: true` for marks/ticks or `snap: number[]` for explicit points. |
 | Scale mapping | `GooSlider` | `scale="linear"`, `"log"`, or `"exponential"`. Custom easing remains available for bespoke mappings. |

@@ -21,10 +21,8 @@ import type {
 export type SliderPrimitiveFieldOptions = {
 	canCross?: boolean
 	canPush?: boolean
-	class?: string
 	className?: string
 	coverage?: boolean
-	variance?: boolean
 	direction?: GooSliderDirection
 	disabled?: boolean
 	gradient?: string[]

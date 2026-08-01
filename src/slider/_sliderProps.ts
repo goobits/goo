@@ -16,7 +16,6 @@ import type {
 export type SliderPropsOptions = {
 	canCross?: boolean
 	canPush?: boolean
-	class?: string
 	className?: string
 	coverage?: boolean
 	direction?: GooSliderDirection
@@ -49,7 +48,6 @@ export type SliderPropsOptions = {
 	unit?: GooSliderUnit
 	value?: GooSliderValue
 	valueBubble?: GooSliderValueBubble
-	variance?: boolean
 }
 
 export type SliderPropsDefaults = {
@@ -65,7 +63,7 @@ export function getSliderProps(options: SliderPropsOptions, defaults: SliderProp
 	const min = options.min ?? defaults.min
 	const max = options.max ?? defaults.max
 	const step = options.step ?? defaults.step
-	const className = options.class ?? options.className
+	const className = options.className
 	if (value !== undefined) props.value = value
 	if (min !== undefined) props.min = min
 	if (max !== undefined) props.max = max
@@ -84,7 +82,6 @@ export function getSliderProps(options: SliderPropsOptions, defaults: SliderProp
 	if (options.canCross !== undefined) props.canCross = options.canCross
 	if (options.canPush !== undefined) props.canPush = options.canPush
 	if (options.coverage !== undefined) props.coverage = options.coverage
-	if (options.variance !== undefined) props.variance = options.variance
 	if (options.ticks !== undefined) props.ticks = options.ticks
 	if (options.marks !== undefined) props.marks = options.marks
 	if (options.snap !== undefined) props.snap = options.snap
