@@ -6,7 +6,7 @@
 	"imports": {
 		"#src/*": "./src/*"
 	},
-	"packageManager": "pnpm@11.10.0",
+	"packageManager": "pnpm@11.18.0",
 	"publishConfig": {
 		"access": "public"
 	},
@@ -266,7 +266,7 @@
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
-		"@playwright/test": "^1.61.1",
+		"@playwright/test": "^1.62.0",
 		"@stylistic/eslint-plugin": "^5.10.0",
 		"@sveltejs/vite-plugin-svelte": "^7.2.0",
 		"@testing-library/svelte": "^5.4.2",
@@ -282,7 +282,7 @@
 	},
 	"dependencies": {
 		"@goobits/logger": "^1.0.0",
-		"@lucide/svelte": "^1.27.0"
+		"@lucide/svelte": "^1.26.0"
 	},
 	"peerDependencies": {
 		"svelte": "^5.55.5"

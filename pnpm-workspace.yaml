@@ -1,0 +1,11 @@
+packages:
+  - '.'
+
+blockExoticSubdeps: true
+engineStrict: true
+minimumReleaseAge: 10080
+minimumReleaseAgeIgnoreMissingTime: false
+minimumReleaseAgeStrict: true
+
+allowBuilds:
+  esbuild: true
