@@ -256,8 +256,8 @@
 		"check:types": "tsc --noEmit",
 		"lint": "eslint src/ --fix",
 		"lint:check": "eslint src/",
-		"test:e2e": "env -u NO_COLOR xvfb-run -a pnpm exec playwright test",
-		"test:all": "pnpm run test && pnpm run test:e2e"
+		"test:e2e": "env -u NO_COLOR xvfb-run -a playwright test",
+		"test:all": "vitest run --maxWorkers=2 && env -u NO_COLOR xvfb-run -a playwright test"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",

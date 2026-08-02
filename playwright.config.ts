@@ -23,7 +23,7 @@ export default defineConfig({
 		viewport: { width: 1280, height: 720 }
 	},
 	webServer: {
-		command: `pnpm exec vite --host 127.0.0.1 --port ${ port }`,
+		command: `vite --host 127.0.0.1 --port ${ port }`,
 		url: `${ baseURL }/src/__tests__/fixtures/test-harness.html`,
 		reuseExistingServer: !process.env.CI,
 		timeout: 120000
