@@ -136,6 +136,36 @@ describe('GooPopout', () => {
 		}
 	})
 
+	it('keeps the default gap on the placement axis without shifting centered anchors', async() => {
+		const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect
+		const target = document.createElement('button')
+		const content = document.createElement('div')
+		document.body.appendChild(target)
+		HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
+			if (this === document.documentElement) return rect(0, 0, 800, 600)
+			if (this === target) return rect(100, 100, 20, 20)
+			if (this.classList.contains('goo-popout')) return rect(0, 0, 80, 40)
+			return originalGetBoundingClientRect.call(this)
+		}
+
+		const instance = createGooPopout({
+			at: target,
+			content,
+			align: 'center bottom to center top',
+			openImmediately: false
+		})
+
+		try {
+			await instance.open()
+
+			expect(instance.position).toMatchObject({ x: 70, y: 45 })
+		} finally {
+			await instance.destroy()
+			target.remove()
+			HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect
+		}
+	})
+
 	it('keeps every sibling child popout inside its parent click boundary', async() => {
 		const target = document.createElement('button')
 		const parentContent = document.createElement('div')

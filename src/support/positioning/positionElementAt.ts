@@ -49,7 +49,7 @@ export function positionElementAt(
 	const {
 		at,
 		align = 'left to right',
-		offset = { x: 15, y: 15 },
+		offset,
 		keepWithin,
 		$arrow,
 		rtl
@@ -98,7 +98,7 @@ export function positionElementAt(
 		...(x === undefined ? {} : { x }),
 		...(y === undefined ? {} : { y }),
 		align,
-		offset,
+		...(offset === undefined ? {} : { offset }),
 		...(keepWithin ? {
 			keepWithin: {
 				...(keepWithin.$element ? { $element: keepWithin.$element } : {}),

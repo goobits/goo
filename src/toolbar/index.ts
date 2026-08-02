@@ -4,10 +4,8 @@ import './Toolbar.css'
 
 export type { CreateFloatingToolbarViewOptions } from './createFloatingToolbarView.ts'
 export { createFloatingToolbarView } from './createFloatingToolbarView.ts'
-export { createToolbarToolButton } from './createToolbarToolButton.ts'
 export type {
 	FloatingToolbarGroups,
 	FloatingToolbarToolConfig,
-	ToolbarChromeIcon,
-	ToolbarToolButtonConfig
+	ToolbarChromeIcon
 } from './toolbarChromeModel.ts'

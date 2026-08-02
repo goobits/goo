@@ -1,8 +1,7 @@
 /**
  * Goo-docs metadata for the `GooButton` Svelte component.
  *
- * This file is build-time docs data only. It is never imported by runtime
- * package code and is not in `package.json#exports`.
+ * This build-time data is exported through the package-owned docs metadata index.
  */
 
 import { GooButton } from '../../src/button/index.ts'

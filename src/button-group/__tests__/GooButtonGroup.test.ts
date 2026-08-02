@@ -3,10 +3,21 @@ import { tick } from 'svelte'
 import { describe, expect, it, vi } from 'vitest'
 
 import { iconRegistry } from '../../icon/registry.ts'
+import { normalizeButtonGroupOptions } from '../_model.ts'
 import GooButtonGroup from '../GooButtonGroup.svelte'
 import GooButtonGroupChildrenHost from './GooButtonGroupChildrenHost.svelte'
 
 describe('GooButtonGroup', () => {
+	it('rejects malformed and duplicate option ids at the component boundary', () => {
+		expect(() => normalizeButtonGroupOptions([
+			{ key: 'left', value: 'Left' }
+		] as never)).toThrow('option at index 0 must define a non-empty string or number id')
+		expect(() => normalizeButtonGroupOptions([
+			{ id: 'left', label: 'Left' },
+			{ id: 'left', label: 'Other left' }
+		])).toThrow('duplicate id "left" at indexes 0 and 1')
+	})
+
 	it('renders registered icon names and keeps CSS icon classes as a fallback', () => {
 		iconRegistry.register('button-group-test-icon', '<svg viewBox="0 0 16 16"><path d="M2 8h12"/></svg>')
 		const { container } = render(GooButtonGroup, {

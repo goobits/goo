@@ -68,7 +68,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		role = 'dialog',
 		at,
 		align: alignInput,
-		offset: offsetInput = { x: 15, y: 15 },
+		offset: offsetInput,
 		keepWithin: requestedKeepWithin,
 		className = '',
 		dataset,
@@ -112,7 +112,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		rtl ?? (document.documentElement?.dir === 'rtl' || document.body?.dir === 'rtl')
 	const fallbackAlign = alignInput ?? (resolvedRtl ? 'right to left' : 'left to right')
 	let currentAlign = fallbackAlign
-	let currentOffset = { ...offsetInput }
+	let currentOffset = offsetInput ? { ...offsetInput } : undefined
 	const fullScreen = fullScreenOption || !!requestedKeepWithin?.fullScreen
 
 	// Parse target
@@ -393,7 +393,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 			...(targetPoint?.x === undefined ? {} : { x: targetPoint.x }),
 			...(targetPoint?.y === undefined ? {} : { y: targetPoint.y }),
 			align: currentAlign,
-			offset: currentOffset,
+			...(currentOffset === undefined ? {} : { offset: currentOffset }),
 			keepWithin: { $element: keepWithinElement, margin: keepWithinMargin },
 			avoidMargin: currentAvoidMargin,
 			avoidRects: currentAvoidRects,

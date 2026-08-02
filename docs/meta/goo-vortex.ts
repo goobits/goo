@@ -1,8 +1,7 @@
 /**
  * Goo-docs metadata for the `goo-vortex` managed indicator.
  *
- * This file is build-time docs data only. It is never imported by runtime
- * package code and is not in `package.json#exports`.
+ * This build-time data is exported through the package-owned docs metadata index.
  */
 
 export default {

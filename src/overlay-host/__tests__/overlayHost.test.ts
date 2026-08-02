@@ -1,3 +1,4 @@
+import { render } from '@testing-library/svelte'
 import { afterEach, describe, expect, it } from 'vitest'
 
 import {
@@ -5,12 +6,24 @@ import {
 	portalToGooOverlayHost,
 	resolveGooOverlayPlacement
 } from '../index.ts'
+import OverlayHostContextHost from './OverlayHostContextHost.svelte'
 
 afterEach(() => {
 	document.body.innerHTML = ''
 })
 
 describe('Goo overlay host', () => {
+	it('provides the app-owned host through Svelte context', () => {
+		const host: GooOverlayHost = {
+			element: () => document.body,
+			scope: () => document.body
+		}
+		const view = render(OverlayHostContextHost, { props: { host } })
+
+		expect(view.component.readProvidedHost()).toBe(host)
+		expect(view.component.readConsumedHost()).toBe(host)
+	})
+
 	it('resolves the nearest app-owned overlay placement', () => {
 		const scope = document.createElement('section')
 		const content = document.createElement('main')

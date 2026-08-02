@@ -249,10 +249,15 @@
 			"types": "./src/toolbar/index.ts",
 			"svelte": "./src/toolbar/index.ts",
 			"import": "./src/toolbar/index.ts"
+		},
+		"./docs-meta": {
+			"types": "./docs/meta/index.ts",
+			"import": "./docs/meta/index.ts"
 		}
 	},
 	"files": [
 		"src",
+		"docs/meta",
 		"!src/**/__tests__/**",
 		"!src/**/*.test.ts"
 	],

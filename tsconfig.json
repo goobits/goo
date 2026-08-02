@@ -9,10 +9,10 @@
 		"skipLibCheck": true,
 		"strict": true,
 		"verbatimModuleSyntax": true,
-		"types": ["vitest/globals"],
+		"types": ["vite/client", "vitest/globals"],
 		"baseUrl": ".",
 		"ignoreDeprecations": "6.0"
 	},
-	"include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.js", "src/**/*.svelte"],
+	"include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.js", "src/**/*.svelte", "docs/meta/**/*.ts"],
 	"exclude": ["node_modules", "dist", "src/**/*.test.ts", "src/**/__tests__/**"]
 }
