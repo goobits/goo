@@ -128,7 +128,7 @@ export class ProgressRingRenderer {
 			: this.#spinnerDuration
 		this.#transitionSpeed = options.transitionSpeed ?? this.#transitionSpeed
 		this.#variant = options.variant ?? this.#variant
-		this.#host.dataset.variant = this.#variant
+		this.#host.dataset['variant'] = this.#variant
 		this.#syncAttributes()
 		this.#paint()
 		this.#startAnimation()
@@ -297,12 +297,15 @@ export class ProgressRingRenderer {
 		const progress = this.#currentProgress
 		const stops = [ ...this.#colorStops ].sort((a, b) => a.offset - b.offset)
 		const nextIndex = stops.findIndex(stop => progress <= stop.offset)
-		if (nextIndex <= 0) {
+		if (nextIndex === -1) {
+			return stops.at(-1)?.color ?? '#378cff'
+		}
+		if (nextIndex === 0) {
 			return stops[0]?.color ?? '#378cff'
 		}
 
-		const previous = stops[nextIndex - 1]
-		const next = stops[nextIndex]
+		const previous = stops[nextIndex - 1]!
+		const next = stops[nextIndex]!
 		const range = next.offset - previous.offset || 1
 		return mixColor(previous.color, next.color, (progress - previous.offset) / range)
 	}
@@ -367,10 +370,13 @@ export class ProgressRingRenderer {
 	}
 
 	#spinnerColor(currentStep: number, duration: number): string {
-		const start = parseHexColor(SPINNER_COLORS[this.#spinnerColorIndex])
-		const end = parseHexColor(SPINNER_COLORS[(this.#spinnerColorIndex + 1) % SPINNER_COLORS.length])
+		const startColor = SPINNER_COLORS[this.#spinnerColorIndex] ?? '#35ad0e'
+		const endColor =
+			SPINNER_COLORS[(this.#spinnerColorIndex + 1) % SPINNER_COLORS.length] ?? '#35ad0e'
+		const start = parseHexColor(startColor)
+		const end = parseHexColor(endColor)
 		if (!start || !end) {
-			return SPINNER_COLORS[this.#spinnerColorIndex]
+			return startColor
 		}
 
 		const r = clampChannel(easeLinear(currentStep, start.r, end.r - start.r, duration), start.r, end.r)
@@ -380,7 +386,7 @@ export class ProgressRingRenderer {
 	}
 
 	#syncAttributes(): void {
-		this.#host.dataset.indeterminate = String(this.#indeterminate)
+		this.#host.dataset['indeterminate'] = String(this.#indeterminate)
 		this.#host.setAttribute('aria-busy', String(this.#indeterminate))
 		if (this.#indeterminate) {
 			this.#host.removeAttribute('aria-valuenow')
