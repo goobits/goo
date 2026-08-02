@@ -136,7 +136,7 @@ describe('GooTooltip', () => {
 		const lifecycle = gooTooltip.tooltip(button, { content: 'Save', showDelay: 0 })
 
 		button.dispatchEvent(new MouseEvent('mouseenter'))
-		await new Promise(resolve => setTimeout(resolve)) // test-shape: timing-probe - documented test timing behavior.
+		await new Promise(resolve => setTimeout(resolve)) // documented test timing behavior.
 
 		expect(document.querySelector('.goo-popout.goo-tooltip')).not.toBeNull()
 

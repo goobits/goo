@@ -880,5 +880,5 @@ function nextAnimationFrame(): Promise<void> {
 }
 
 function delay(ms: number): Promise<void> {
-	return new Promise(resolve => setTimeout(resolve, ms)) // test-shape: timing-probe - waits for popout close animation.
+	return new Promise(resolve => setTimeout(resolve, ms)) // waits for popout close animation.
 }

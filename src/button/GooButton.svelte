@@ -26,6 +26,7 @@ let {
 	form,
 	type = 'button',
 	disabled = false,
+	href,
 	target,
 	rel,
 	fullRow = false,
@@ -125,66 +126,40 @@ const resolvedAriaLabel = $derived(
 		|| (typeof nativeAriaLabel === 'string' ? nativeAriaLabel : undefined)
 		|| (!children && !label ? resolvedTitle || tooltip : undefined)
 )
+const rendersAnchor = $derived(typeof href === 'string')
 </script>
 
-{#if typeof rest.href === 'string'}
-	<a
-		{...rest}
-		bind:this={buttonElement}
-		class={classes}
-		href={disabled ? undefined : rest.href}
-		{target}
-		{rel}
-		{title}
-		aria-label={resolvedAriaLabel}
-		{...hostAttributes}
-		aria-disabled={disabled ? 'true' : undefined}
-		tabindex={disabled ? -1 : tabIndex}
-		{style}
-		onclick={handleClick}
-		{onmouseenter}
-		{onmouseleave}
-	>
-		{#if icon}
-			<span class="goo-button__icon" aria-hidden="true">
-				{@render icon()}
-			</span>
-		{/if}
-		{#if children}
-			{@render children()}
-		{:else if label}
-			<span class="goo-button__title" data-translate>{label}</span>
-		{/if}
-	</a>
-{:else}
-	<button
-		{...rest}
-		bind:this={buttonElement}
-		class={classes}
-		{type}
-		{form}
-		value={formValue}
-		{disabled}
-		{title}
-		aria-label={resolvedAriaLabel}
-		{...hostAttributes}
-		aria-disabled={disabled ? 'true' : undefined}
-		aria-pressed={toggle ? currentPressed : ariaPressed}
-		tabindex={disabled ? -1 : tabIndex}
-		{style}
-		onclick={handleClick}
-		{onmouseenter}
-		{onmouseleave}
-	>
-		{#if icon}
-			<span class="goo-button__icon" aria-hidden="true">
-				{@render icon()}
-			</span>
-		{/if}
-		{#if children}
-			{@render children()}
-		{:else if label}
-			<span class="goo-button__title" data-translate>{label}</span>
-		{/if}
-	</button>
-{/if}
+<svelte:element
+	this={rendersAnchor ? 'a' : 'button'}
+	{...rest}
+	bind:this={buttonElement}
+	class={classes}
+	href={rendersAnchor && !disabled ? href : undefined}
+	target={rendersAnchor ? target : undefined}
+	rel={rendersAnchor ? rel : undefined}
+	type={rendersAnchor ? undefined : type}
+	form={rendersAnchor ? undefined : form}
+	value={rendersAnchor ? undefined : formValue}
+	disabled={rendersAnchor ? undefined : disabled}
+	{title}
+	aria-label={resolvedAriaLabel}
+	{...hostAttributes}
+	aria-disabled={disabled ? 'true' : undefined}
+	aria-pressed={!rendersAnchor && toggle ? currentPressed : !rendersAnchor ? ariaPressed : undefined}
+	tabindex={disabled ? -1 : tabIndex}
+	{style}
+	onclick={handleClick}
+	{onmouseenter}
+	{onmouseleave}
+>
+	{#if icon}
+		<span class="goo-button__icon" aria-hidden="true">
+			{@render icon()}
+		</span>
+	{/if}
+	{#if children}
+		{@render children()}
+	{:else if label}
+		<span class="goo-button__title" data-translate>{label}</span>
+	{/if}
+</svelte:element>
