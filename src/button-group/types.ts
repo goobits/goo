@@ -103,7 +103,7 @@ export type GooButtonGroupProps = GooForwardedAttributes & {
 	/** Accessible label for the button group. */
 	label?: string
 
-	/** Button children. Used when `options` is omitted. */
+	/** Direct button children identified by `data-id`. Used when `options` is omitted. */
 	children?: Snippet
 
 	/** Callback fired with the full selected value after a selection change. */

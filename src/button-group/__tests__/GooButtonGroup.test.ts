@@ -1,8 +1,10 @@
 import { fireEvent, render } from '@testing-library/svelte'
+import { tick } from 'svelte'
 import { describe, expect, it, vi } from 'vitest'
 
 import { iconRegistry } from '../../icon/registry.ts'
 import GooButtonGroup from '../GooButtonGroup.svelte'
+import GooButtonGroupChildrenHost from './GooButtonGroupChildrenHost.svelte'
 
 describe('GooButtonGroup', () => {
 	it('renders registered icon names and keeps CSS icon classes as a fallback', () => {
@@ -60,6 +62,22 @@ describe('GooButtonGroup', () => {
 		expect(onchange).toHaveBeenCalledExactlyOnceWith('right')
 		expect(container.querySelector('.goo-button[data-id="left"]')?.classList.contains('goo-button--selected')).toBe(false)
 		expect(container.querySelector('.goo-button[data-id="right"]')?.classList.contains('goo-button--selected')).toBe(true)
+	})
+
+	it('uses direct child data ids as stable selection values', async() => {
+		const { container, getByTestId } = render(GooButtonGroupChildrenHost)
+		const tree = container.querySelector<HTMLButtonElement>('.goo-button[data-id="tree"]')!
+		const table = container.querySelector<HTMLButtonElement>('.goo-button[data-id="table"]')!
+		await tick()
+
+		expect(tree.getAttribute('aria-pressed')).toBe('true')
+		expect(table.getAttribute('aria-pressed')).toBe('false')
+
+		await fireEvent.click(table)
+
+		expect(getByTestId('button-group-child-value').textContent).toBe('table')
+		expect(tree.getAttribute('aria-pressed')).toBe('false')
+		expect(table.getAttribute('aria-pressed')).toBe('true')
 	})
 
 	it('keeps disabled options visible but unavailable', async() => {
