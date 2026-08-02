@@ -9,7 +9,8 @@ import { createPointerDrag } from '../support/utils/pointerDrag.ts'
 import type { GooPanelElement, GooPanelInternalElement, GooPanelOptions } from './_createPanel.ts'
 import './GooPanel.css'
 
-type GooPanelProps = GooPanelOptions & {
+type GooPanelProps = Omit<GooPanelOptions, 'className'> & {
+	class?: string
 	children?: Snippet
 	element?: GooPanelElement | null
 	onelement?: (element: GooPanelElement | null) => void
@@ -19,10 +20,8 @@ type GooPanelProps = GooPanelOptions & {
 let {
 	title = 'Controls',
 	class: className = '',
-	className: optionClassName = '',
 	style = '',
 	open = $bindable(true),
-	closed,
 	draggable,
 	collapsible = true,
 	showHeader = true,
@@ -97,7 +96,6 @@ function assignApi(): void {
 			toggleElement: { configurable: true, get: () => toggleElement ?? null },
 			contentElement: { configurable: true, get: () => contentElement ?? null },
 			open: { configurable: true, get: () => open, set: (value: boolean) => setOpen(value) },
-			closed: { configurable: true, get: () => !open, set: (value: boolean) => setOpen(!value) },
 			title: { configurable: true, get: () => title, set: (value: string) => title = value },
 			width: { configurable: true, get: () => width, set: (value: number) => width = value },
 			docked: { configurable: true, get: () => docked, set: (value: boolean) => docked = value }
@@ -201,18 +199,11 @@ $effect(() => {
 
 $effect(assignApi)
 
-$effect(() => {
-	// Apply the `closed` prop only when it actually changes; reading `open`
-	// reactively here would let user/external toggles re-trigger and revert it.
-	const nextClosed = closed
-	if (nextClosed === undefined) return
-	untrack(() => setOpen(!nextClosed, { silent: true }))
-})
 </script>
 
 <div
 	bind:this={rootEl}
-	class={`goo-panel ${className} ${optionClassName}`.trim()}
+	class={`goo-panel ${className}`.trim()}
 	style={style || undefined}
 	class:goo-panel--open={open}
 	class:goo-panel--headerless={!showHeader}

@@ -5,16 +5,13 @@
 	import CircleAlert from '@lucide/svelte/icons/circle-alert'
 	import Plus from '@lucide/svelte/icons/plus'
 	import X from '@lucide/svelte/icons/x'
-	import { tooltip } from '../tooltip/index.ts'
-	import './GooChevronTabs.css'
-	import {
-		focusFirstMenuItem,
-		handleMenuKeyboardEvent
-	} from '../support/keyboard/_composite.ts'
+	import { focusFirstMenuItem, handleMenuKeyboardEvent } from '../support/keyboard/_composite.ts'
 	import {
 		containKeyboardEvent,
 		isKeyboardActivationKey
 	} from '../support/keyboard/_keyboardActivation.ts'
+	import { tooltip } from '../tooltip/index.ts'
+	import './GooChevronTabs.css'
 	import type { GooChevronTab, GooChevronTabStatus, GooChevronTabsProps } from './types.ts'
 	import {
 		hasChevronTabDragIntent,
@@ -73,6 +70,7 @@
 	let menuOpen = $state(false)
 	let hasOverflow = $state(false)
 	let closePressId = $state<string | null>(null)
+	let pendingCloseFocusId = $state<string | null>(null)
 	let dragging = $state<{
 		id: string
 		startX: number
@@ -145,6 +143,9 @@
 
 	const closeTab = (tab: GooChevronTab): void => {
 		if (!canClose) return
+		if (tabElements[tab.id]?.contains(document.activeElement)) {
+			pendingCloseFocusId = tab.id
+		}
 		onclose?.(tab.id)
 	}
 
@@ -362,6 +363,17 @@
 	$effect(() => {
 		activeId
 		requestAnimationFrame(scrollActiveIntoView)
+	})
+
+	$effect(() => {
+		const closedTabId = pendingCloseFocusId
+		const nextActiveId = activeId
+		if (!closedTabId || tabs.some((tab) => tab.id === closedTabId)) return
+		pendingCloseFocusId = null
+		requestAnimationFrame(() => {
+			const nextFocus = nextActiveId ? tabElements[nextActiveId] : null
+			;(nextFocus ?? railElement)?.focus()
+		})
 	})
 </script>
 

@@ -251,10 +251,12 @@ export function getConstrainedSliderValues(
 	formatted = values[index] ?? formatted
 	if (canPushNeighbors) {
 		for (let previous = index - 1; previous >= 0; previous--) {
-			if (values[previous] > formatted) values[previous] = formatted
+			const previousValue = values[previous]
+			if (previousValue !== undefined && previousValue > formatted) values[previous] = formatted
 		}
 		for (let next = index + 1; next < values.length; next++) {
-			if (values[next] < formatted) values[next] = formatted
+			const nextValue = values[next]
+			if (nextValue !== undefined && nextValue < formatted) values[next] = formatted
 		}
 	}
 
@@ -293,7 +295,9 @@ export function getNearestSliderThumbIndex(
 	let nearestIndex = 0
 	let nearestDistance = Number.MAX_SAFE_INTEGER
 	for (let index = 0; index < values.length; index++) {
-		const valuePct = toScaledPercent(values[index], min, max, scale, scalePower)
+		const value = values[index]
+		if (value === undefined) continue
+		const valuePct = toScaledPercent(value, min, max, scale, scalePower)
 		const distance = Math.abs(pointerPct - valuePct)
 		if (distance < nearestDistance) {
 			nearestDistance = distance
@@ -342,7 +346,11 @@ export function getSliderCoverageStyles({
 		)
 	}
 	if (values.length === 2) {
-		return getRangeCoverageStyle(getDisplayPercent(values[0]), getDisplayPercent(values[1]), direction)
+		return getRangeCoverageStyle(
+			getDisplayPercent(values[0] ?? min),
+			getDisplayPercent(values[1] ?? min),
+			direction
+		)
 	}
 	if (coverage) {
 		const pct = getDisplayPercent(values[0] ?? min) * 100

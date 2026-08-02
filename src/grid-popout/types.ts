@@ -12,11 +12,7 @@ export interface GridPopoutSvgElement {
 export interface GridPopoutSvgIcon {
 	attributes?: Record<string, string>
 	class?: string
-	elements?: GridPopoutSvgElement[]
-	paths: Array<{
-		d: string
-		transform?: string
-	}>
+	elements: GridPopoutSvgElement[]
 	viewBox: string
 }
 
@@ -55,7 +51,5 @@ export interface GridPopoutItem {
 	id: string
 	kicker?: string
 	preview?: GridPopoutPreview
-	previewAlt?: string
-	previewUrl?: string
 	title: string
 }

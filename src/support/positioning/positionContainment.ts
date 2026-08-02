@@ -295,8 +295,14 @@ function chooseAvoidancePosition(
 	avoidRect: PositionAvoidRect
 ): { x: number; y: number } {
 	const base = { x: result.x, y: result.y }
-	const candidates = [
+	const firstCandidate = scoreAvoidCandidate(
 		{ x: avoidRect.left - popoutRect.width, y: result.y },
+		base,
+		popoutRect,
+		bounds,
+		avoidRect
+	)
+	const candidates = [
 		{ x: avoidRect.right, y: result.y },
 		{ x: result.x, y: avoidRect.top - popoutRect.height },
 		{ x: result.x, y: avoidRect.bottom }
@@ -305,7 +311,7 @@ function chooseAvoidancePosition(
 	return candidates.reduce((best, next) => {
 		if (next.overlap !== best.overlap) return next.overlap < best.overlap ? next : best
 		return next.distance < best.distance ? next : best
-	}, candidates[0])
+	}, firstCandidate)
 }
 
 function scoreAvoidCandidate(

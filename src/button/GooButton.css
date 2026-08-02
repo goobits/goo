@@ -43,6 +43,7 @@
 	pointer-events: auto;
 	position: relative;
 	text-align: center;
+	text-decoration: none;
 	text-transform: none;
 	transition:
 		background var(--goo-theme-transition-normal),
@@ -186,8 +187,7 @@
 	padding: 0;
 }
 
-.goo-button--full-row,
-.goo-button--block {
+.goo-button--full-row {
 	--goo-button-full-row-height: var(--goo-theme-control-height-lg);
 	--goo-button-icon-size: var(--goo-theme-icon-md);
 
@@ -205,9 +205,7 @@
 }
 
 .goo-button--full-row.goo-button--attention,
-.goo-button--full-row[variant='attention'],
-.goo-button--block.goo-button--attention,
-.goo-button--block[variant='attention'] {
+.goo-button--full-row[variant='attention'] {
 	--goo-button-bg: color-mix(in srgb, var(--goo-theme-warning) 12%, transparent);
 	--goo-button-bg-hover: color-mix(in srgb, var(--goo-theme-warning) 18%, transparent);
 	--goo-button-border: color-mix(in srgb, var(--goo-theme-warning) 32%, transparent);

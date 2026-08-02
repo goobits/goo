@@ -3,6 +3,7 @@ import { flushSync, mount, unmount } from 'svelte'
 import GooButton from './GooButton.svelte'
 import type {
 	GooButtonLayout,
+	GooButtonProps,
 	GooButtonTarget,
 	GooButtonType,
 	GooButtonVariant
@@ -15,14 +16,13 @@ export type GooButtonFieldIcon = string | Element | (() => Element)
 export type GooButtonFieldOptions = {
 	ariaLabel?: string
 	ariaPressed?: boolean | 'false' | 'mixed' | 'true'
-	block?: boolean
-	class?: string
 	className?: string
 	disabled?: boolean
 	formValue?: string
 	fullRow?: boolean
 	href?: string
 	icon?: GooButtonFieldIcon
+	label?: string
 	layout?: GooButtonLayout
 	onclick?: (event: MouseEvent) => void
 	rel?: string
@@ -31,9 +31,7 @@ export type GooButtonFieldOptions = {
 	style?: string
 	target?: GooButtonTarget
 	title?: string
-	tooltip?: string
 	type?: GooButtonType
-	value?: string
 	variant?: GooButtonVariant
 }
 
@@ -48,30 +46,30 @@ export type GooButtonFieldElement = HTMLDivElement & {
 export function createButtonField(options: GooButtonFieldOptions = {}): GooButtonFieldElement {
 	const field = document.createElement('div') as GooButtonFieldElement
 	field.className = 'goo-button-field'
+	const sharedProps = {
+		ariaLabel: options.ariaLabel,
+		ariaPressed: options.ariaPressed,
+		class: options.className,
+		disabled: options.disabled,
+		formValue: options.formValue,
+		fullRow: options.fullRow,
+		label: options.label,
+		layout: options.layout,
+		onclick: options.onclick,
+		rel: options.rel,
+		size: options.size,
+		square: options.square,
+		style: options.style,
+		target: options.target,
+		title: options.title,
+		type: options.type,
+		variant: options.variant
+	}
+	const props: GooButtonProps =
+		options.href === undefined ? sharedProps : { ...sharedProps, href: options.href }
 	const instance = mount(GooButton, {
 		target: field,
-		props: {
-			ariaLabel: options.ariaLabel,
-			ariaPressed: options.ariaPressed,
-			block: options.block,
-			class: options.class ?? options.className,
-			disabled: options.disabled,
-			formValue: options.formValue,
-			fullRow: options.fullRow,
-			href: options.href,
-			layout: options.layout,
-			onclick: options.onclick,
-			rel: options.rel,
-			size: options.size,
-			square: options.square,
-			style: options.style,
-			target: options.target,
-			title: options.title,
-			tooltip: options.tooltip,
-			type: options.type,
-			value: options.value,
-			variant: options.variant
-		}
+		props
 	})
 	flushSync()
 

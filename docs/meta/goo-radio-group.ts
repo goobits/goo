@@ -17,9 +17,9 @@ export default {
 				name: 'alignment',
 				value: 'center',
 				options: [
-					{ value: 'left', label: 'Left' },
-					{ value: 'center', label: 'Center' },
-					{ value: 'right', label: 'Right' }
+					{ id: 'left', label: 'Left' },
+					{ id: 'center', label: 'Center' },
+					{ id: 'right', label: 'Right' }
 				]
 			}
 		},
@@ -29,9 +29,9 @@ export default {
 				name: 'quality',
 				value: 'medium',
 				options: [
-					{ value: 'low', label: 'Low (Fast)' },
-					{ value: 'medium', label: 'Medium' },
-					{ value: 'high', label: 'High (Slow)' }
+					{ id: 'low', label: 'Low (Fast)' },
+					{ id: 'medium', label: 'Medium' },
+					{ id: 'high', label: 'High (Slow)' }
 				]
 			}
 		},
@@ -42,15 +42,15 @@ export default {
 				value: 'two',
 				disabled: true,
 				options: [
-					{ value: 'one', label: 'One' },
-					{ value: 'two', label: 'Two' },
-					{ value: 'three', label: 'Three' }
+					{ id: 'one', label: 'One' },
+					{ id: 'two', label: 'Two' },
+					{ id: 'three', label: 'Three' }
 				]
 			}
 		},
 		{
 			title: 'Programmatic control',
-			description: 'setValue() selects by value and emits change; getValue() reads the current selection.',
+			description: 'setValue() selects by option id and emits change; getValue() reads the current selection.',
 			span: 'wide',
 			actionsLayout: 'vertical',
 			props: {
@@ -59,9 +59,9 @@ export default {
 				value: 'apple',
 				'data-demo-target': 'prog-radio',
 				options: [
-					{ value: 'apple', label: 'Apple' },
-					{ value: 'banana', label: 'Banana' },
-					{ value: 'cherry', label: 'Cherry' }
+					{ id: 'apple', label: 'Apple' },
+					{ id: 'banana', label: 'Banana' },
+					{ id: 'cherry', label: 'Cherry' }
 				]
 			},
 			actions: [

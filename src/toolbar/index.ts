@@ -2,9 +2,8 @@
 
 import './Toolbar.css'
 
-export type { CreateFloatingToolbarViewOptions, FloatingToolbarElement } from './createFloatingToolbarView.ts'
+export type { CreateFloatingToolbarViewOptions } from './createFloatingToolbarView.ts'
 export { createFloatingToolbarView } from './createFloatingToolbarView.ts'
-export type { CreateToolbarToolButtonOptions, ToolbarToolButtonElement } from './createToolbarToolButton.ts'
 export { createToolbarToolButton } from './createToolbarToolButton.ts'
 export type {
 	FloatingToolbarGroups,

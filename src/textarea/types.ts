@@ -2,6 +2,9 @@ import type { Snippet } from 'svelte'
 
 import type { GooForwardedAttributes } from '../support/types/forwardedAttributes.ts'
 
+/** Visual treatment for a Goo textarea. */
+export type GooTextareaVariant = 'default' | 'bare'
+
 /** Props accepted by the Svelte `GooTextarea` component. */
 export type GooTextareaProps = GooForwardedAttributes & {
 
@@ -35,6 +38,18 @@ export type GooTextareaProps = GooForwardedAttributes & {
 	/** Maximum text length. */
 	maxLength?: number
 
+	/** Focus the native textarea when mounted. */
+	autofocus?: boolean
+
+	/** Accessible label for the native textarea. */
+	ariaLabel?: string
+
+	/** IDs of elements describing the native textarea. */
+	'aria-describedby'?: string
+
+	/** Native textarea validation state. */
+	'aria-invalid'?: boolean | 'false' | 'grammar' | 'spelling' | 'true'
+
 	/** Whether the textarea is disabled. */
 	disabled?: boolean
 
@@ -43,6 +58,12 @@ export type GooTextareaProps = GooForwardedAttributes & {
 
 	/** Whether a value is required. */
 	required?: boolean
+
+	/** Fill the available inline width. */
+	block?: boolean
+
+	/** Visual treatment. Bare textareas defer their chrome to a composite parent. */
+	variant?: GooTextareaVariant
 
 	/** Extra class names. */
 	class?: string
@@ -62,4 +83,6 @@ export type GooTextareaProps = GooForwardedAttributes & {
 	/** Change callback. */
 	onchange?: (value: string, oldValue?: string) => void
 
+	/** Native keydown callback. */
+	onkeydown?: (event: KeyboardEvent) => void
 }

@@ -2,15 +2,14 @@ import type { GooSpinnerSize, GooSpinnerVariant } from './types.ts'
 
 /** Spinner presentation resolved from size / thickness / variant inputs. */
 export type ResolvedSpinnerAttrs = {
-
 	/** Preset size attribute (`sm` | `md` | `lg`), when a preset was given. */
-	sizeAttr?: GooSpinnerSize
+	sizeAttr: GooSpinnerSize | undefined
 
 	/** `rainbow` when the rainbow variant was requested. */
-	variantAttr?: 'rainbow'
+	variantAttr: 'rainbow' | undefined
 
 	/** CSS custom-property declarations (size/stroke), or undefined when none. */
-	style?: string
+	style: string | undefined
 }
 
 /**
@@ -58,8 +57,7 @@ function resolveSizeLength(size: GooSpinnerSize | number | string | undefined): 
 		return Number.isFinite(size) && size > 0 ? `${ size }px` : null
 	}
 
-	const parsed = Number.parseFloat(size)
-	return Number.isFinite(parsed) ? `${ parsed }px` : null
+	return formatCssLength(size)
 }
 
 function resolveStroke(thickness: number | string | undefined): string | null {

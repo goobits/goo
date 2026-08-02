@@ -10,10 +10,6 @@ Use these on standard backgrounds (`--goo-theme-bg`, `--goo-theme-surface-*`):
 | `--goo-theme-muted`         | Secondary text |
 | `--goo-theme-text-disabled` | Disabled text  |
 
-Do not use legacy text aliases such as `--goo-theme-fg-muted`,
-`--goo-theme-fg-secondary`, `--goo-theme-text-primary`, or
-`--goo-theme-text-secondary`.
-
 ## Text on colored backgrounds
 
 Each background has a paired `-fg` for contrast:

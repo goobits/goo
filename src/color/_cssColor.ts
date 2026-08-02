@@ -210,18 +210,22 @@ function parseColor(color: string, fallback: RgbColor): ParsedColor {
 
 function parseHexColor(hex: string, fallback: RgbColor): ParsedColor {
 	if (hex.length === 3) {
+		const [ red, green, blue ] = hex
+		if (!red || !green || !blue) return fallback
 		return {
-			r: parseInt(hex[0] + hex[0], 16),
-			g: parseInt(hex[1] + hex[1], 16),
-			b: parseInt(hex[2] + hex[2], 16)
+			r: parseInt(red + red, 16),
+			g: parseInt(green + green, 16),
+			b: parseInt(blue + blue, 16)
 		}
 	}
 	if (hex.length === 4) {
+		const [ red, green, blue, alpha ] = hex
+		if (!red || !green || !blue || !alpha) return fallback
 		return {
-			r: parseInt(hex[0] + hex[0], 16),
-			g: parseInt(hex[1] + hex[1], 16),
-			b: parseInt(hex[2] + hex[2], 16),
-			a: parseInt(hex[3] + hex[3], 16) / 255
+			r: parseInt(red + red, 16),
+			g: parseInt(green + green, 16),
+			b: parseInt(blue + blue, 16),
+			a: parseInt(alpha + alpha, 16) / 255
 		}
 	}
 	if (hex.length === 6 || hex.length === 8) {
@@ -245,18 +249,18 @@ function parseRgbColor(color: string, fallback: RgbColor): ParsedColor {
 		return fallback
 	}
 
-	const parts = match[1].split(/[\s,/]+/).filter(Boolean)
-	if (parts.length < 3) {
-		return fallback
-	}
+	const channels = match[1]
+	if (!channels) return fallback
+	const [ red, green, blue, alpha ] = channels.split(/[\s,/]+/).filter(Boolean)
+	if (!red || !green || !blue) return fallback
 
 	const result: ParsedColor = {
-		r: parseCssRgbChannel(parts[0]),
-		g: parseCssRgbChannel(parts[1]),
-		b: parseCssRgbChannel(parts[2])
+		r: parseCssRgbChannel(red),
+		g: parseCssRgbChannel(green),
+		b: parseCssRgbChannel(blue)
 	}
-	if (parts[3] !== undefined) {
-		result.a = parseCssAlpha(parts[3])
+	if (alpha !== undefined) {
+		result.a = parseCssAlpha(alpha)
 	}
 	return result
 }
@@ -267,18 +271,18 @@ function parseHslColor(color: string, fallback: RgbColor): ParsedColor {
 		return fallback
 	}
 
-	const parts = match[1].split(/[\s,/]+/).filter(Boolean)
-	if (parts.length < 3) {
-		return fallback
-	}
+	const channels = match[1]
+	if (!channels) return fallback
+	const [ hue, saturation, lightness, alpha ] = channels.split(/[\s,/]+/).filter(Boolean)
+	if (!hue || !saturation || !lightness) return fallback
 
 	const result: ParsedColor = hslToRgbBytes(
-		parseHue(parts[0]),
-		clamp01(parseFloat(parts[1]) / 100),
-		clamp01(parseFloat(parts[2]) / 100)
+		parseHue(hue),
+		clamp01(parseFloat(saturation) / 100),
+		clamp01(parseFloat(lightness) / 100)
 	)
-	if (parts[3] !== undefined) {
-		result.a = parseCssAlpha(parts[3])
+	if (alpha !== undefined) {
+		result.a = parseCssAlpha(alpha)
 	}
 	return result
 }

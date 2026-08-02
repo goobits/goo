@@ -3,12 +3,24 @@
  * @module goobits/dialog/dialogs
  */
 
-import { createGooDialog, type DialogField, type DialogLabels, type DialogResult, type DialogVerifyHandler, type GooDialogDefaultFocus, type GooDialogInstance } from './dialog.ts'
+import {
+	createGooDialog,
+	type DialogField,
+	type DialogLabels,
+	type DialogResult,
+	type DialogVerifyHandler,
+	type GooDialogController,
+	type GooDialogDefaultFocus,
+	type GooDialogOptions,
+	type GooDialogSide
+} from './dialog.ts'
+
+type GooDialogPlacementOptions = Pick<GooDialogOptions, 'isolationRoot' | 'parentElement'>
 
 /** Task returned by dialog convenience helpers. */
 export type GooDialogTask = {
 	/** Public dialog controller. */
-	readonly dialog: GooDialogInstance
+	readonly dialog: GooDialogController
 	/** Resolves with the user's dialog action. */
 	readonly result: Promise<DialogResult>
 	/** Close the dialog. */
@@ -18,7 +30,7 @@ export type GooDialogTask = {
 }
 
 /** Options accepted by `GooAlert`. */
-export interface GooAlertOptions {
+export interface GooAlertOptions extends GooDialogPlacementOptions {
 	className?: string
 	content: string | Node
 	heading?: string
@@ -27,7 +39,7 @@ export interface GooAlertOptions {
 }
 
 /** Options accepted by `GooConfirm`. */
-export interface GooConfirmOptions {
+export interface GooConfirmOptions extends GooDialogPlacementOptions {
 	className?: string
 	content: string | Node
 	defaultFocus?: Extract<GooDialogDefaultFocus, 'ok' | 'cancel'>
@@ -37,7 +49,7 @@ export interface GooConfirmOptions {
 }
 
 /** Options accepted by `GooPrompt`. */
-export interface GooPromptOptions {
+export interface GooPromptOptions extends GooDialogPlacementOptions {
 	className?: string
 	content?: string | Node
 	defaultFocus?: Extract<GooDialogDefaultFocus, 'ok' | 'cancel'>
@@ -48,7 +60,7 @@ export interface GooPromptOptions {
 }
 
 /** Options accepted by `GooNotify`. */
-export interface GooNotifyOptions {
+export interface GooNotifyOptions extends GooDialogPlacementOptions {
 	autoDismiss?: number
 	className?: string
 	content: string | Node
@@ -59,7 +71,7 @@ export interface GooNotifyOptions {
 }
 
 /** Options accepted by `GooOverlay`. */
-export interface GooOverlayOptions {
+export interface GooOverlayOptions extends GooDialogPlacementOptions {
 	ariaLabel?: string
 	className?: string
 	content: string | Node
@@ -69,9 +81,18 @@ export interface GooOverlayOptions {
 	showClose?: boolean
 }
 
+/** Options accepted by `GooSheet`. */
+export interface GooSheetOptions extends GooOverlayOptions {
+	closeOnBackdrop?: boolean
+	closeOnEscape?: boolean
+	defaultFocus?: Extract<GooDialogDefaultFocus, 'first' | 'dialog'>
+	side?: GooDialogSide
+	width?: string | number
+}
+
 type ContentOptions = { content: string | Node }
 
-function createDialogTask(dialog: GooDialogInstance): GooDialogTask {
+function createDialogTask(dialog: GooDialogController): GooDialogTask {
 	const result = dialog.open()
 	return {
 		dialog,
@@ -184,6 +205,24 @@ export function GooOverlay(options: GooOverlayOptions | string | Node): GooDialo
 	const normalized = normalizeContentOptions<GooOverlayOptions>(options)
 	const dialog = createGooDialog({
 		type: 'overlay',
+		showClose: true,
+		...normalized
+	})
+
+	return createDialogTask(dialog)
+}
+
+/**
+ * Show a modal sheet from a logical viewport edge.
+ *
+ * @param options - Options, message, or node.
+ * @returns Dialog task containing the result promise and controller.
+ */
+export function GooSheet(options: GooSheetOptions | string | Node): GooDialogTask {
+	const normalized = normalizeContentOptions<GooSheetOptions>(options)
+	const dialog = createGooDialog({
+		type: 'sheet',
+		defaultFocus: 'first',
 		showClose: true,
 		...normalized
 	})

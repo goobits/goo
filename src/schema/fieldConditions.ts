@@ -3,6 +3,14 @@ import type { GooSchemaChoiceOption, GooSchemaCondition, GooSchemaNode } from '.
 
 type ConditionData = Record<string, unknown>
 
+/** Test one portable GooSchema condition against a data snapshot. */
+export function matchesGooSchemaCondition(
+	condition: GooSchemaCondition,
+	data: ConditionData
+): boolean {
+	return matchesCondition(condition, data, true)
+}
+
 export function shouldRenderSchemaNode(node: GooSchemaNode, data: ConditionData): boolean {
 	return shouldRenderSchemaItem(node, data)
 }

@@ -229,9 +229,9 @@ describe('GooController', () => {
 			type: 'button-group',
 			label: 'Anti-aliasing',
 			options: [
-				{ label: 'None', value: 'none' },
-				{ label: 'FXAA Low', value: 'fxaa-low' },
-				{ label: 'FXAA High', value: 'fxaa-high' }
+				{ id: 'none', label: 'None' },
+				{ id: 'fxaa-low', label: 'FXAA Low' },
+				{ id: 'fxaa-high', label: 'FXAA High' }
 			]
 		})
 		document.body.appendChild(controller)
@@ -240,6 +240,18 @@ describe('GooController', () => {
 		expect(controller.classList.contains('goo-controller--stacked')).toBe(true)
 		expect(controller.querySelector('.goo-controller__header .goo-label')?.textContent).toBe('Anti aliasing')
 		expect(controller.querySelector('.goo-button-group')).not.toBeNull()
+	})
+
+	it('activates function controls through the canonical onclick callback', async() => {
+		const run = vi.fn()
+		const model = { run }
+		const controller = createGooController({ object: model, property: 'run', label: 'Run' })
+		document.body.appendChild(controller)
+		await waitForControllerControl(controller)
+
+		controller.querySelector<HTMLButtonElement>('.goo-button')?.click()
+
+		expect(run).toHaveBeenCalledOnce()
 	})
 
 	it('skips redundant display updates when the control already matches the model', async() => {
@@ -268,8 +280,8 @@ describe('GooController', () => {
 			property: 'units',
 			type: 'select',
 			options: [
-				{ label: 'Pixels', value: 'px' },
-				{ label: 'Inches', value: 'in' }
+				{ id: 'px', label: 'Pixels' },
+				{ id: 'in', label: 'Inches' }
 			],
 			menu: {
 				variant: 'attached',
@@ -295,8 +307,8 @@ describe('GooController', () => {
 			property: 'units',
 			type: 'select',
 			options: [
-				{ label: 'Pixels', value: 'px' },
-				{ label: 'Inches', value: 'in' }
+				{ id: 'px', label: 'Pixels' },
+				{ id: 'in', label: 'Inches' }
 			],
 			controlOptions: {
 				menu: {
@@ -330,8 +342,8 @@ describe('GooController', () => {
 			property: 'choice',
 			type: 'select',
 			options: [
-				{ label: 'First', value: 'first' },
-				{ label: 'Second', value: 'second' }
+				{ id: 'first', label: 'First' },
+				{ id: 'second', label: 'Second' }
 			]
 		})
 		document.body.append(angle, select)

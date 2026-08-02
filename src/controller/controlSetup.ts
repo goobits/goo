@@ -5,7 +5,11 @@
  */
 
 import type { GooSelectMenuOptions } from '../select/types.ts'
-import type { GooControlOptions, GooControlOptionValue as RegistryControlOptionValue } from './controlRegistry.ts'
+import type { GooChoiceOption } from '../support/types/choiceOption.ts'
+import type {
+	GooControlOptions,
+	GooControlOptionValue as RegistryControlOptionValue
+} from './controlRegistry.ts'
 
 // ============================================================================
 // Types
@@ -15,29 +19,26 @@ import type { GooControlOptions, GooControlOptionValue as RegistryControlOptionV
  * Options for controller setup.
  */
 /** Individual option in a select/button-group control */
-export interface ControlOption {
-	id?: string
-	value?: string | number
+export interface ControllerOption {
+	id?: string | number
 	label?: string
 	icon?: string
-	key?: string
 }
 
 /** Valid option types for select/button-group controls */
-export type GooControlOptionValue = string | ControlOption
+export type ControllerOptionValue = string | ControllerOption
 
 export interface ControllerSetupOptions {
 	type?: string
-	min?: number | GooControlOptionValue[]
+	min?: number
 	max?: number
 	step?: number
-	options?: GooControlOptionValue[]
+	options?: ControllerOptionValue[]
 	unit?: string
 	preset?: string
 	presetColor?: string
 	presetHue?: number
 	coverage?: boolean
-	showCoverage?: boolean
 	label?: string
 }
 
@@ -48,14 +49,14 @@ export interface StoredOptions {
 	min?: number
 	max?: number
 	step?: number
-	selectOptions?: GooControlOptionValue[]
+	selectOptions?: ControllerOptionValue[]
 	inputId?: string
 	name?: string
 	unit?: string
 	preset?: string
 	presetColor?: string
 	presetHue?: number
-	showCoverage?: boolean
+	coverage?: boolean
 	buttonLabel?: string
 	controlOptions?: GooControlOptions
 	menu?: GooSelectMenuOptions
@@ -84,23 +85,25 @@ export interface DualRangeEventData {
 export function humanizePropertyName(name: string): string {
 	if (!name) return ''
 
-	return name
+	return (
+		name
 
-		// Insert space before uppercase letters
-		.replace(/([A-Z])/g, ' $1')
+			// Insert space before uppercase letters
+			.replace(/([A-Z])/g, ' $1')
 
-		// Insert space before numbers
-		.replace(/(\d+)/g, ' $1')
+			// Insert space before numbers
+			.replace(/(\d+)/g, ' $1')
 
-		// Replace underscores/hyphens with spaces
-		.replace(/[_-]/g, ' ')
+			// Replace underscores/hyphens with spaces
+			.replace(/[_-]/g, ' ')
 
-		// Capitalize first letter
-		.replace(/^./, s => s.toUpperCase())
+			// Capitalize first letter
+			.replace(/^./, s => s.toUpperCase())
 
-		// Clean up multiple spaces
-		.replace(/\s+/g, ' ')
-		.trim()
+			// Clean up multiple spaces
+			.replace(/\s+/g, ' ')
+			.trim()
+	)
 }
 
 // ============================================================================
@@ -122,32 +125,44 @@ export function detectControlType(value: unknown, options: ControllerSetupOption
 	// Options with icons = button-group
 	if (Array.isArray(options.options) && options.options.length > 0) {
 		const firstOpt = options.options[0]
-		if (typeof firstOpt === 'object' && (firstOpt.icon || firstOpt.key)) {
+		if (typeof firstOpt === 'object' && firstOpt.icon) {
 			return 'button-group'
 		}
 	}
 
 	// Array of options = select
-	if (options.options || Array.isArray(options.min)) return 'select'
+	if (options.options) return 'select'
 
 	// Boolean = checkbox
 	if (typeof value === 'boolean') return 'checkbox'
 
 	// Dual-thumb range: array [min, max] or object {min, max}
-	if (Array.isArray(value) && value.length === 2
-		&& typeof value[0] === 'number' && typeof value[1] === 'number') {
+	if (
+		Array.isArray(value) &&
+		value.length === 2 &&
+		typeof value[0] === 'number' &&
+		typeof value[1] === 'number'
+	) {
 		return 'range-dual'
 	}
-	if (value && typeof value === 'object' && !Array.isArray(value)
-		&& typeof (value as { min?: number; max?: number }).min === 'number'
-		&& typeof (value as { min?: number; max?: number }).max === 'number'
-		&& Object.keys(value).length === 2) {
+	if (
+		value &&
+		typeof value === 'object' &&
+		!Array.isArray(value) &&
+		typeof (value as { min?: number; max?: number }).min === 'number' &&
+		typeof (value as { min?: number; max?: number }).max === 'number' &&
+		Object.keys(value).length === 2
+	) {
 		return 'range-dual'
 	}
-	if (value && typeof value === 'object' && !Array.isArray(value)
-		&& typeof (value as { x?: number; y?: number }).x === 'number'
-		&& typeof (value as { x?: number; y?: number }).y === 'number'
-		&& Object.keys(value).length === 2) {
+	if (
+		value &&
+		typeof value === 'object' &&
+		!Array.isArray(value) &&
+		typeof (value as { x?: number; y?: number }).x === 'number' &&
+		typeof (value as { x?: number; y?: number }).y === 'number' &&
+		Object.keys(value).length === 2
+	) {
 		return 'xy-pad'
 	}
 
@@ -178,25 +193,26 @@ export function detectControlType(value: unknown, options: ControllerSetupOption
 // Options Building
 // ============================================================================
 
-/** Formatted option for select control */
-export interface FormattedSelectOption {
-	id: string
-	label: string
-}
-
 /**
  * Format options for select control.
  * @param options - options.
  * @param _currentValue - current value.
  */
-export function formatSelectOptions(options: GooControlOptionValue[] | undefined, _currentValue: unknown): FormattedSelectOption[] {
+export function formatSelectOptions(
+	options: ControllerOptionValue[] | undefined,
+	_currentValue: unknown
+): GooChoiceOption[] {
 	if (!options) return []
 
 	return options.map(opt => {
 		if (typeof opt === 'string') {
 			return { id: opt, label: opt }
 		}
-		return { id: opt.id ?? opt.value?.toString() ?? '', label: opt.label ?? opt.id ?? opt.value?.toString() ?? '' }
+		return {
+			...opt,
+			id: String(opt.id ?? opt.label ?? ''),
+			label: opt.label ?? String(opt.id ?? '')
+		}
 	})
 }
 
@@ -220,15 +236,13 @@ export function buildControlOptions(
 	const opts: GooControlOptions = {
 		value: value as RegistryControlOptionValue,
 		onchange: (v: unknown) => {
-			const extractedValue = typeof v === 'object' && v !== null && 'value' in v
-				? (v as { value: unknown }).value
-				: v
+			const extractedValue =
+				typeof v === 'object' && v !== null && 'value' in v ? (v as { value: unknown }).value : v
 			handlers.onchange(extractedValue)
 		},
 		oninput: (v: unknown) => {
-			const extractedValue = typeof v === 'object' && v !== null && 'value' in v
-				? (v as { value: unknown }).value
-				: v
+			const extractedValue =
+				typeof v === 'object' && v !== null && 'value' in v ? (v as { value: unknown }).value : v
 			handlers.oninput(extractedValue)
 		}
 	}
@@ -246,7 +260,7 @@ export function buildControlOptions(
 	if (stored.preset) opts.preset = stored.preset
 	if (stored.presetColor) opts.presetColor = stored.presetColor
 	if (stored.presetHue !== undefined) opts.presetHue = stored.presetHue
-	if (stored.showCoverage) opts.coverage = stored.showCoverage
+	if (stored.coverage) opts.coverage = stored.coverage
 	if (stored.shape) opts.shape = stored.shape
 
 	// Add unit for angle
@@ -257,10 +271,11 @@ export function buildControlOptions(
 		opts.options = formatSelectOptions(stored.selectOptions, value)
 	}
 
-	// For button type, use label as value and pass onClick
+	// Buttons are actions, so pass a visual label and click callback instead of a bound value.
 	if (controlType === 'button') {
-		opts.value = stored.buttonLabel
-		opts.onClick = handlers.onButtonClick
+		delete opts.value
+		opts.label = stored.buttonLabel
+		opts.onclick = handlers.onButtonClick
 		delete opts.onchange
 		delete opts.oninput
 	}
@@ -283,7 +298,7 @@ export function getAllOptions(stored: StoredOptions): GooControlOptions {
 		preset: stored.preset ?? stored.controlOptions?.preset,
 		presetColor: stored.presetColor ?? stored.controlOptions?.presetColor,
 		presetHue: stored.presetHue ?? stored.controlOptions?.presetHue,
-		coverage: stored.showCoverage ?? stored.controlOptions?.coverage,
+		coverage: stored.coverage ?? stored.controlOptions?.coverage,
 		unit: stored.unit ?? stored.controlOptions?.unit,
 		label: stored.buttonLabel ?? stored.controlOptions?.label,
 		shape: stored.shape ?? stored.controlOptions?.shape,

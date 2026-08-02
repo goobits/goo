@@ -11,7 +11,6 @@ export interface GooFolderOptions {
 	open?: boolean
 	tabIndex?: number
 	disabled?: boolean
-	class?: string
 	className?: string
 	style?: string
 	content?: string | HTMLElement | Node
@@ -55,10 +54,12 @@ type MountedFolder = ReturnType<typeof mount>
 export function createFolder(options: GooFolderOptions = {}): GooFolderElement {
 	const target = document.createElement('div')
 	let element: GooFolderElement | null = null
+	const { className, ...componentOptions } = options
 	const instance: MountedFolder = mount(GooFolderComponent, {
 		target,
 		props: {
-			...options,
+			...componentOptions,
+			class: className,
 			onelement: (nextElement: GooFolderElement | null) => {
 				element = nextElement
 			},

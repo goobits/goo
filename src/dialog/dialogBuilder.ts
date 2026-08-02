@@ -94,7 +94,7 @@ function createFooterButton(value: string, variant: 'primary' | 'secondary'): HT
 
 	const title = document.createElement('span')
 	title.className = 'goo-button__title'
-	title.dataset.translate = ''
+	title.dataset['translate'] = ''
 	title.textContent = value
 	button.appendChild(title)
 
@@ -126,7 +126,6 @@ export function appendContent($target: HTMLElement, content: string | HTMLElemen
 /**
  * Build standard dialog layout (alert, confirm, prompt).
  * @param state - state.
- * @param labels - labels.
  * @param fields - fields.
  * @param content - content.
  * @param $dialog - dialog.
@@ -135,8 +134,8 @@ export function buildStandardLayout(
 	$dialog: HTMLElement,
 	state: DialogState,
 	content: string | Node,
-	labels: DialogLabels,
-	fields: DialogField[]
+	fields: DialogField[],
+	actions?: Node
 ): DialogElements {
 	const { type, heading, showClose } = state
 
@@ -193,10 +192,11 @@ export function buildStandardLayout(
 		elements.$content.appendChild(elements.$fields)
 	}
 
-	// Footer for confirm/prompt
-	if (type === 'confirm' || type === 'prompt') {
+	// Footer for generated confirm/prompt actions or consumer-provided actions
+	if (type === 'confirm' || type === 'prompt' || actions) {
 		elements.$footer = document.createElement('div')
 		elements.$footer.className = 'goo-dialog__footer'
+		if (actions) elements.$footer.classList.add('goo-dialog__footer--custom')
 		$dialog.appendChild(elements.$footer)
 	}
 

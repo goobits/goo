@@ -69,6 +69,73 @@ describe('GooPopout', () => {
 		target.remove()
 	})
 
+	it('dismisses on the first outside pointer press after opening', async() => {
+		const target = document.createElement('button')
+		const outside = document.createElement('button')
+		const content = document.createElement('div')
+		document.body.append(target, outside)
+		const instance = createGooPopout({ at: target, content, openImmediately: false })
+
+		try {
+			const openPromise = instance.open()
+			expect(instance.isOpen()).toBe(true)
+
+			outside.dispatchEvent(new PointerEvent('pointerdown', {
+				bubbles: true,
+				cancelable: true
+			}))
+
+			expect(instance.isOpen()).toBe(false)
+			await openPromise
+		} finally {
+			await instance.destroy()
+			target.remove()
+			outside.remove()
+		}
+	})
+
+	it('infers an app overlay host and applies coordinates within that host', async() => {
+		const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect
+		const scope = document.createElement('section')
+		const contentRoot = document.createElement('main')
+		const host = document.createElement('div')
+		const target = document.createElement('button')
+		const content = document.createElement('div')
+		scope.dataset.gooOverlayScope = ''
+		host.dataset.gooOverlayHost = ''
+		contentRoot.append(target)
+		scope.append(contentRoot, host)
+		document.body.append(scope)
+		HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
+			if (this === document.documentElement) return rect(0, 0, 800, 600)
+			if (this === scope || this === host) return rect(100, 50, 400, 300)
+			if (this === target) return rect(140, 90, 20, 20)
+			if (this.classList.contains('goo-popout')) return rect(0, 0, 80, 40)
+			return originalGetBoundingClientRect.call(this)
+		}
+
+		const instance = createGooPopout({
+			at: target,
+			content,
+			align: 'top left to bottom left',
+			offset: { x: 0, y: 0 },
+			openImmediately: false
+		})
+
+		try {
+			await instance.open()
+
+			expect(instance.element?.parentElement).toBe(host)
+			expect(instance.position).toMatchObject({ x: 40, y: 60 })
+			expect(instance.element?.style.left).toBe('40px')
+			expect(instance.element?.style.top).toBe('60px')
+		} finally {
+			await instance.destroy()
+			scope.remove()
+			HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect
+		}
+	})
+
 	it('keeps every sibling child popout inside its parent click boundary', async() => {
 		const target = document.createElement('button')
 		const parentContent = document.createElement('div')
@@ -686,6 +753,46 @@ describe('GooPopout', () => {
 
 		instance?.destroy()
 		target.remove()
+	})
+
+	it('forwards container, accessibility, and chrome options from Svelte', async() => {
+		const target = document.createElement('button')
+		const portal = document.createElement('section')
+		target.id = 'forwarded-popout-target'
+		document.body.append(target, portal)
+		let instance: GooPopoutInstance | null = null
+		const onDestroy = vi.fn()
+
+		render(GooPopout, {
+			props: {
+				target,
+				open: true,
+				parentElement: portal,
+				role: 'menu',
+				ariaLabelledby: 'forwarded-popout-title',
+				ariaDescribedby: 'forwarded-popout-description',
+				chromeless: true,
+				onDestroy,
+				get instance() {
+					return instance
+				},
+				set instance(value) {
+					instance = value
+				}
+			}
+		})
+		await tick()
+
+		const popout = portal.querySelector<HTMLElement>('.goo-popout')
+		expect(popout?.getAttribute('role')).toBe('menu')
+		expect(popout?.getAttribute('aria-labelledby')).toBe('forwarded-popout-title')
+		expect(popout?.getAttribute('aria-describedby')).toBe('forwarded-popout-description')
+		expect(popout?.classList.contains('goo-popout--chromeless')).toBe(true)
+
+		await instance?.destroy()
+		expect(onDestroy).toHaveBeenCalledOnce()
+		target.remove()
+		portal.remove()
 	})
 
 	it('does not remount from a queued prop-change microtask after unmount', async() => {

@@ -15,6 +15,7 @@ import type {
 
 export { default as GooProgressRing } from './GooProgressRing.svelte'
 export type {
+	GooProgressRingProps,
 	GooProgressRingSteps,
 	GooProgressRingTimer,
 	GooProgressRingTimerOptions,
@@ -336,7 +337,7 @@ export function createGooProgressRingTimer(options: GooProgressRingTimerOptions 
 		const completed = steps
 			.slice(0, stepIndex)
 			.reduce((sum, step) => sum + step, 0)
-		return clampProgress(completed + progress * steps[stepIndex])
+		return clampProgress(completed + progress * (steps[stepIndex] ?? 0))
 	}
 }
 

@@ -54,7 +54,6 @@ export type {
 	GooSchemaCommitOptions,
 	GooSchemaCommitReason,
 	GooSchemaControlOptions,
-	GooSchemaControlType,
 	GooSchemaData,
 	GooSchemaDataUpdateOptions,
 	GooSchemaDataUpdateReason,
@@ -125,7 +124,7 @@ export type GooSchemaUpdateOptions = Pick<
 >
 
 /** Public imperative handle returned by `createGooSchema`. */
-export interface GooSchema extends HTMLElement {
+export interface GooSchemaElement extends HTMLElement {
 	canRedo(scopeId?: string): boolean
 	canUndo(scopeId?: string): boolean
 	commitData(data: GooSchemaData, options?: GooSchemaCommitOptions): void
@@ -152,7 +151,7 @@ type GooSchemaReadyWaiter = {
 	resolve(): void
 }
 
-type GooSchemaInternal = GooSchema & GooSchemaBuildElement & {
+type GooSchemaInternal = GooSchemaElement & GooSchemaBuildElement & {
 	_actionViews: Map<string, SchemaActionView>
 	_actionsTarget: HTMLElement | null
 	_commitHandler: GooSchemaCommitHandler | null
@@ -536,7 +535,7 @@ export function schemaHasConditions(schema: GooSchemaType): boolean {
 	return hasSchemaConditions(schema)
 }
 
-function createGooSchemaElement(options: GooSchemaOptions = {}): GooSchema {
+function createGooSchemaElement(options: GooSchemaOptions = {}): GooSchemaElement {
 	if (options.schema !== undefined) assertGooSchemaDescriptor(options.schema)
 	const element = document.createElement('div') as unknown as GooSchemaInternal
 	element.className = 'goo-schema'
@@ -554,7 +553,7 @@ function createGooSchemaElement(options: GooSchemaOptions = {}): GooSchema {
  * @param options - Schema options.
  * @returns Schema element handle.
  */
-export function createGooSchema(options: GooSchemaOptions = {}): GooSchema {
+export function createGooSchema(options: GooSchemaOptions = {}): GooSchemaElement {
 	return createGooSchemaElement(options)
 }
 

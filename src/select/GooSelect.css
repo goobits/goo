@@ -97,6 +97,24 @@
 	letter-spacing: 0;
 }
 
+.goo-select.goo-select--block {
+	display: block;
+	width: 100%;
+}
+
+.goo-select__field {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	border: 0;
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	overflow: hidden;
+	white-space: nowrap;
+}
+
 /* Disabled state */
 .goo-select.goo-select--disabled {
 	opacity: var(--goo-theme-disabled-opacity);
@@ -186,6 +204,14 @@
 
 .goo-select__trigger-label--placeholder {
 	color: var(--goo-select-fg-muted);
+}
+
+.goo-select__trigger-custom {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
 }
 
 /* Icon from selected option shown in trigger */
@@ -480,6 +506,10 @@
 		background var(--goo-select-motion-fast),
 		color var(--goo-select-motion-fast);
 	user-select: none;
+}
+
+.goo-select__option[href] {
+	text-decoration: none;
 }
 
 /* Active row: accent-tinted fill with a thin rounded accent rail down the

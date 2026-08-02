@@ -1,3 +1,5 @@
+import type { GooForwardedAttributes } from '../support/types/forwardedAttributes.ts'
+
 /** Visual progress ring variant. */
 export type GooProgressRingVariant = 'basic' | 'rainbow'
 
@@ -6,6 +8,36 @@ export type GooProgressRingTimerType = 'progress' | 'time'
 
 /** Progress ring weighted-step configuration. */
 export type GooProgressRingSteps = number | number[]
+
+/** Declarative props accepted by the Svelte progress ring component. */
+export type GooProgressRingProps = GooForwardedAttributes & {
+	/** Normalized progress from 0 to 1. */
+	progress?: number
+
+	/** Ring diameter in CSS pixels. */
+	size?: number
+
+	/** Ring stroke thickness in CSS pixels. */
+	thickness?: number
+
+	/** Ring color. The default uses Goo's progress gradient. */
+	color?: string
+
+	/** Whether to paint the percentage in the center. */
+	showText?: boolean
+
+	/** Accessible name for the progress bar. */
+	label?: string
+
+	/** Whether to render an indeterminate spinner. */
+	indeterminate?: boolean
+
+	/** Visual ring variant. */
+	variant?: GooProgressRingVariant
+
+	/** Extra class names. */
+	class?: string
+}
 
 /** Imperative handle exposed internally by a mounted `GooProgressRing` component. */
 export type GooProgressRingComponentHandle = {
@@ -16,6 +48,7 @@ export type GooProgressRingComponentHandle = {
 		rotationSpeed?: number
 		showText?: boolean
 		spinnerDuration?: number
+		thickness?: number
 		transitionSpeed?: number
 		variant?: GooProgressRingVariant
 	}): void

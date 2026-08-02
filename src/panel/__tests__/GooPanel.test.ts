@@ -8,12 +8,18 @@ describe('GooPanel', () => {
 	})
 
 	it('creates native panel elements without custom tags', () => {
-		const panel = createPanel({ title: 'Controls', open: true, autoPlace: false })
+		const panel = createPanel({
+			title: 'Controls',
+			open: true,
+			autoPlace: false,
+			className: 'inspector-panel'
+		})
 		document.body.appendChild(panel)
 
 		expect(document.querySelector('goo-panel')).toBeNull()
 		expect(document.querySelector('.goo-panel[title="Controls"]')).toBe(panel)
 		expect(panel.open).toBe(true)
+		expect(panel.classList.contains('inspector-panel')).toBe(true)
 
 		panel.close()
 		expect(panel.open).toBe(false)

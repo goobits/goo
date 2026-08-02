@@ -4,23 +4,11 @@
  * @module goobits/select/keyboardHandler
  */
 
-import {
-	containKeyboardEvent,
-	isKeyboardActivationKey
-} from '../support/keyboard/_keyboardActivation.ts'
+import { containKeyboardEvent, isKeyboardActivationKey } from '../support/keyboard/_keyboardActivation.ts'
 import type { GooSelectOption, GooSelectState } from './types.ts'
 
 export type GooSelectNavigationCommand =
-	| 'down'
-	| 'enter'
-	| 'escape'
-	| 'first'
-	| 'last'
-	| 'left'
-	| 'right'
-	| 'space'
-	| 'tab'
-	| 'up'
+	'down' | 'enter' | 'escape' | 'first' | 'last' | 'left' | 'right' | 'space' | 'tab' | 'up'
 
 /** Keyboard command event used by GooSelect navigation. */
 export interface GooSelectKeyCommand {
@@ -165,7 +153,12 @@ export function handleKeyboard(host: GooSelectKeyboardHost, event: GooSelectKeyC
 			if (host._panel.hoveredId) {
 				const opt = host._panel.findOptionById(host._panel.hoveredId)
 				if (opt && opt.type !== 'submenu') {
-					host._selectOption(opt)
+					const $hovered = host._panel.getHoveredElement()
+					if (opt.href && $hovered instanceof HTMLAnchorElement) {
+						$hovered.click()
+					} else {
+						host._selectOption(opt)
+					}
 				} else if (opt?.type === 'submenu') {
 					const $hovered = host._panel.getHoveredElement()
 					if ($hovered) host._panel.openSubmenu($hovered, opt)
@@ -191,7 +184,10 @@ export function handleKeyboard(host: GooSelectKeyboardHost, event: GooSelectKeyC
  * @param host - The select component
  * @param event - Typeahead command event
  */
-export function handleTypeahead(host: GooSelectKeyboardHost, event: GooSelectTypeaheadCommand): void {
+export function handleTypeahead(
+	host: GooSelectKeyboardHost,
+	event: GooSelectTypeaheadCommand
+): void {
 	if (!host._opened || host.state.disabled || !host._panel) return
 
 	event.cancel()

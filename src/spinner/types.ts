@@ -30,7 +30,7 @@ export type GooSpinnerProps = {
 export type GooSpinnerRenderOptions = {
 
 	/** Additional class names for the spinner element. */
-	class?: string
+	className?: string
 
 	/** Accessible loading label. Defaults to `Loading`. */
 	label?: string

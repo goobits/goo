@@ -39,4 +39,43 @@ describe('GooTextarea', () => {
 		expect(oninput).toHaveBeenCalledExactlyOnceWith('draft', 'old')
 		expect(onchange).toHaveBeenCalledExactlyOnceWith('done', 'old')
 	})
+
+	it('forwards validation and accessibility attributes to the native textarea', () => {
+		const onkeydown = vi.fn()
+		const { container } = render(GooTextarea, {
+			props: {
+				autofocus: true,
+				ariaLabel: 'Notes',
+				block: true,
+				maxLength: 200,
+				minLength: 2,
+				'aria-describedby': 'notes-help',
+				'aria-invalid': 'true',
+				onkeydown
+			}
+		})
+
+		const textarea = container.querySelector<HTMLTextAreaElement>('.goo-textarea__input')!
+		const root = container.querySelector<HTMLElement>('.goo-textarea')
+		textarea.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Enter' }))
+
+		expect(root?.classList.contains('goo-textarea--block')).toBe(true)
+		expect(textarea.autofocus).toBe(true)
+		expect(textarea.maxLength).toBe(200)
+		expect(textarea.minLength).toBe(2)
+		expect(textarea.getAttribute('aria-label')).toBe('Notes')
+		expect(textarea.getAttribute('aria-describedby')).toBe('notes-help')
+		expect(textarea.getAttribute('aria-invalid')).toBe('true')
+		expect(onkeydown).toHaveBeenCalledOnce()
+	})
+
+	it('supports bare chrome for composite controls', () => {
+		const { container } = render(GooTextarea, {
+			props: {
+				variant: 'bare'
+			}
+		})
+
+		expect(container.querySelector('.goo-textarea')?.classList.contains('goo-textarea--bare')).toBe(true)
+	})
 })

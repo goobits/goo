@@ -75,9 +75,6 @@ export interface GooPointerDragEvent<Environment extends object = Record<string,
 	hasMoved(threshold?: number): boolean
 }
 
-/** Pointer tap event emitted by {@link createPointerTap}. */
-export interface GooPointerTapEvent extends GooPointerTargetEvent {}
-
 /** Options for lightweight Goo pointer drag handling. */
 export interface GooPointerDragOptions {
 	ignoreTouch?: boolean
@@ -272,7 +269,7 @@ export function createPointerDrag<Environment extends object = Record<string, un
  */
 export function createPointerTap(
 	target: HTMLElement,
-	onTap: (event: GooPointerTapEvent) => void,
+	onTap: (event: GooPointerTargetEvent) => void,
 	options: GooPointerTapOptions = {}
 ): GooPointerDragHandle {
 	let activePointerId: number | null = null

@@ -117,7 +117,7 @@ function getChoiceVisibilitySignature(
 	return choices?.map((choice, index) => {
 		if (typeof choice === 'string' || typeof choice === 'number') return String(choice)
 		if (!shouldRenderSchemaItem(choice, data)) return ''
-		const id = String(choice.id ?? choice.key ?? choice.value ?? choice.label ?? index)
+		const id = String(choice.id ?? choice.label ?? index)
 		const nested = getChoiceVisibilitySignature(choice.options, data)
 		return nested ? `${ id }:[${ nested }]` : id
 	}).filter(Boolean).join(',') ?? ''

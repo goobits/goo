@@ -231,7 +231,7 @@ function emitColorEvent(state: GooColorEventData['state'], event?: Event): void 
 		color: colorElement,
 		value: currentValue,
 		state,
-		event
+		...(event === undefined ? {} : { event })
 	}
 	if (state === 'input') {
 		oninput?.(currentValue, data)

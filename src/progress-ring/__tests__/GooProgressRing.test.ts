@@ -1,5 +1,8 @@
+import { render } from '@testing-library/svelte'
+import { tick } from 'svelte'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import GooProgressRing from '../GooProgressRing.svelte'
 import { createGooProgressRingTimer, type GooProgressRingTimer } from '../index.ts'
 
 /** The rendered ring element inside a timer's shell.  * @param timer - timer.
@@ -29,6 +32,62 @@ describe('GooProgressRing', () => {
 		expect(ringEl(timer).getAttribute('aria-valuenow')).toBe('25')
 
 		timer.destroy()
+	})
+
+	it('renders declarative progress, sizing, color, and accessible state', async() => {
+		const { container } = render(GooProgressRing, {
+			props: {
+				progress: 0.42,
+				size: 52,
+				thickness: 7,
+				color: '#123456',
+				showText: false,
+				label: 'Sprint progress'
+			}
+		})
+		await tick()
+		const ring = container.querySelector<HTMLElement>('.goo-progress-ring')!
+
+		expect(ring.style.getPropertyValue('--goo-progress-ring-size')).toBe('52px')
+		expect(ring.style.getPropertyValue('--goo-progress-ring-thickness')).toBe('7px')
+		expect(ring.style.getPropertyValue('--goo-progress-ring-color')).toBe('#123456')
+		expect(ring.getAttribute('role')).toBe('progressbar')
+		expect(ring.getAttribute('aria-label')).toBe('Sprint progress')
+		expect(ring.getAttribute('aria-valuenow')).toBe('42')
+		expect(ring.getAttribute('aria-valuetext')).toBe('42%')
+		expect(ring.querySelector('canvas')?.getAttribute('aria-hidden')).toBe('true')
+	})
+
+	it('clamps declarative progress and omits determinate values while busy', async() => {
+		const { container, rerender } = render(GooProgressRing, {
+			props: {
+				progress: 2
+			}
+		})
+		const ring = container.querySelector<HTMLElement>('.goo-progress-ring')!
+
+		expect(ring.getAttribute('aria-valuenow')).toBe('100')
+
+		await rerender({ progress: -1, indeterminate: true })
+
+		expect(ring.getAttribute('aria-busy')).toBe('true')
+		expect(ring.hasAttribute('aria-valuenow')).toBe(false)
+		expect(ring.hasAttribute('aria-valuetext')).toBe(false)
+	})
+
+	it('normalizes non-finite declarative values', () => {
+		const { container } = render(GooProgressRing, {
+			props: {
+				progress: Number.NaN,
+				size: Number.POSITIVE_INFINITY,
+				thickness: Number.NaN
+			}
+		})
+		const ring = container.querySelector<HTMLElement>('.goo-progress-ring')!
+
+		expect(ring.getAttribute('aria-valuenow')).toBe('0')
+		expect(ring.style.getPropertyValue('--goo-progress-ring-size')).toBe('')
+		expect(ring.style.getPropertyValue('--goo-progress-ring-thickness')).toBe('')
 	})
 
 	it('clamps progress values', () => {

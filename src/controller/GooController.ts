@@ -23,6 +23,7 @@ import {
 import {
 	buildControlOptions,
 	buildDualRangeOptions,
+	type ControllerOptionValue,
 	detectControlType,
 	type DualRangeEventData,
 	type DualRangeMinMax,
@@ -31,6 +32,8 @@ import {
 	humanizePropertyName,
 	type StoredOptions
 } from './controlSetup.ts'
+
+export type { ControllerOption, ControllerOptionValue } from './controlSetup.ts'
 
 // ============================================================================
 // Types
@@ -45,24 +48,6 @@ export interface GooControllerState {
 	// GooController doesn't add any additional state properties beyond disabled
 	// All other properties are stored as private instance variables
 }
-
-/** Individual option in a select/button-group control */
-export interface ControllerOption {
-	id?: string
-	value?: string | number
-	label?: string
-	icon?: string
-	key?: string
-}
-
-/** Valid option types for select/button-group controls */
-export type ControllerOptionValue = string | ControllerOption
-
-/** Component-specific options forwarded to the mounted control. */
-export type GooControllerControlOptions = GooControlOptionBag
-
-/** Built-in or host-registered Goo controller control id. */
-export type GooControllerControlType = GooControlType
 
 /** Object/property pair bound by a Goo controller. */
 export interface GooControllerBinding {
@@ -100,7 +85,7 @@ export interface GooControllerOptions {
 	max?: number
 	step?: number
 	options?: ControllerOptionValue[]
-	type?: GooControllerControlType
+	type?: GooControlType
 	onchange?: (value: unknown) => void
 	oninput?: (value: unknown) => void
 	parentElement?: HTMLElement
@@ -114,10 +99,9 @@ export interface GooControllerOptions {
 	menu?: GooSelectMenuOptions
 	shape?: GooSliderShape
 	coverage?: boolean
-	showCoverage?: boolean
 	disabled?: boolean
 	className?: string
-	controlOptions?: GooControllerControlOptions
+	controlOptions?: GooControlOptionBag
 	/** Treat the control as a self-owned widget instead of a bound value field. */
 	unbound?: boolean
 
@@ -214,10 +198,10 @@ interface GooControllerInternal extends GooController {
 	_presetColor: string | undefined
 	_presetHue: number | undefined
 	_menu: GooSelectMenuOptions | undefined
-	_showCoverage: boolean | undefined
+	_coverage: boolean | undefined
 	_shape: string | undefined
 	_layout: 'inline' | 'stacked' | undefined
-	_controlOptions: GooControllerControlOptions | undefined
+	_controlOptions: GooControlOptionBag | undefined
 	_dualRangeIsMinMax: boolean | undefined
 	_controlTypes: GooControlTypeRegistry | undefined
 	_unbound: boolean
@@ -484,7 +468,7 @@ class GooControllerRuntime {
 			presetColor: this._presetColor,
 			presetHue: this._presetHue,
 			menu: this._menu,
-			showCoverage: this._showCoverage,
+			coverage: this._coverage,
 			buttonLabel: this._buttonLabel,
 			shape: this._shape,
 			layout: this._layout,
@@ -941,15 +925,10 @@ class GooControllerRuntime {
 		this._presetColor = options.presetColor
 		this._presetHue = options.presetHue
 		this._menu = options.menu
-		this._showCoverage = options.coverage ?? options.showCoverage
+		this._coverage = options.coverage
 		this._shape = options.shape
 		this._controlOptions = extractControlOptions(options)
 		this._unbound = Boolean(options.unbound)
-
-		if (Array.isArray(options.min)) {
-			this._selectOptions = options.min
-			this._min = undefined
-		}
 
 		const label = options.label ?? property ?? ''
 		if (label !== this._buttonLabel) {
@@ -1128,23 +1107,19 @@ function initializeController(element: GooControllerInternal, options: GooContro
 	element._presetColor = options.presetColor
 	element._presetHue = options.presetHue
 	element._menu = options.menu
-	element._showCoverage = options.coverage ?? options.showCoverage
+	element._coverage = options.coverage
 	element._shape = options.shape
 	element._layout = layout
 	element._controlOptions = extractControlOptions(options)
 	element._controlTypes = options.controlTypes
 	element._unbound = Boolean(options.unbound)
 
-	if (Array.isArray(options.min)) {
-		element._selectOptions = options.min
-		element._min = undefined
-	}
 	if (options.className) {
 		element.classList.add(...options.className.split(' ').filter(Boolean))
 	}
 }
 
-function extractControlOptions(options: GooControllerOptions): GooControllerControlOptions | undefined {
+function extractControlOptions(options: GooControllerOptions): GooControlOptionBag | undefined {
 	return options.controlOptions ? { ...options.controlOptions } : undefined
 }
 

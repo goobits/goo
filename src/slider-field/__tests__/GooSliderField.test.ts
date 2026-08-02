@@ -129,13 +129,13 @@ describe('GooSliderField', () => {
 			min: 0,
 			step: 1,
 			value: [ 30, 50, 70 ],
-			variance: true
+			mode: 'variance'
 		})
 		document.body.appendChild(field)
 		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
 
 		expect(field.querySelectorAll('.goo-number')).toHaveLength(3)
-		expect(field.querySelector('.goo-slider')?.hasAttribute('variance')).toBe(true)
+		expect(field.querySelector('.goo-slider')?.getAttribute('mode')).toBe('variance')
 		expect(field.querySelectorAll('.goo-slider__thumb--variance-control')).toHaveLength(2)
 		expect(field.querySelector('.goo-slider__thumb--variance-base')).not.toBeNull()
 		expect(field.getValue()).toEqual([ 30, 50, 70 ])
@@ -150,7 +150,7 @@ describe('GooSliderField', () => {
 			oninput,
 			step: 1,
 			value: [ 30, 50, 70 ],
-			variance: true
+			mode: 'variance'
 		})
 		document.body.appendChild(field)
 		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
@@ -171,7 +171,7 @@ describe('GooSliderField', () => {
 			min: 0,
 			step: 5,
 			value: [ 30, 50, 70 ],
-			variance: true
+			mode: 'variance'
 		})
 		document.body.appendChild(field)
 		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
@@ -190,7 +190,7 @@ describe('GooSliderField', () => {
 			min: 0,
 			step: 10,
 			value: [ 0, 10, 20 ],
-			variance: true
+			mode: 'variance'
 		})
 		document.body.appendChild(field)
 		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.

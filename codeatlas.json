@@ -1,0 +1,22 @@
+{
+	"root": ".",
+	"projects": [
+		{
+			"id": "goo",
+			"root": ".",
+			"require_complete": true,
+			"contexts": {
+				"docs-metadata": {
+					"role": "tooling",
+					"scope": "runtime",
+					"entrypoints": ["docs/meta/*.ts"]
+				},
+				"type-contracts": {
+					"role": "test",
+					"scope": "runtime",
+					"entrypoints": ["src/button/__tests__/NativeAttributesHost.svelte"]
+				}
+			}
+		}
+	]
+}

@@ -25,11 +25,13 @@ describe('GooInput', () => {
 	it('emits text input and change callbacks', async() => {
 		const oninput = vi.fn()
 		const onchange = vi.fn()
+		const onblur = vi.fn()
 		const { container } = render(GooInput, {
 			props: {
 				value: 'old',
 				oninput,
-				onchange
+				onchange,
+				onblur
 			}
 		})
 		const input = container.querySelector<HTMLInputElement>('.goo-input__content')!
@@ -40,6 +42,32 @@ describe('GooInput', () => {
 
 		expect(oninput).toHaveBeenCalledExactlyOnceWith('draft', 'old')
 		expect(onchange).toHaveBeenCalledExactlyOnceWith('draft', 'old')
+		expect(onblur).toHaveBeenCalledExactlyOnceWith('draft')
+	})
+
+	it('forwards validation and accessibility attributes to the native input', () => {
+		const { container } = render(GooInput, {
+			props: {
+				autofocus: true,
+				block: true,
+				inputmode: 'search',
+				maxLength: 120,
+				minLength: 2,
+				'aria-describedby': 'name-help',
+				'aria-invalid': 'true'
+			}
+		})
+
+		const input = container.querySelector<HTMLInputElement>('.goo-input__content')
+		const root = container.querySelector<HTMLElement>('.goo-input')
+
+		expect(root?.classList.contains('goo-input--block')).toBe(true)
+		expect(input?.autofocus).toBe(true)
+		expect(input?.inputMode).toBe('search')
+		expect(input?.maxLength).toBe(120)
+		expect(input?.minLength).toBe(2)
+		expect(input?.getAttribute('aria-describedby')).toBe('name-help')
+		expect(input?.getAttribute('aria-invalid')).toBe('true')
 	})
 
 	it('marks edited text inputs for value-change feedback', async() => {
@@ -55,6 +83,16 @@ describe('GooInput', () => {
 		await tick()
 
 		expect(root.classList.contains('goo-input--changed')).toBe(true)
+	})
+
+	it('supports bare chrome for composite controls', () => {
+		const { container } = render(GooInput, {
+			props: {
+				variant: 'bare'
+			}
+		})
+
+		expect(container.querySelector('.goo-input')?.classList.contains('goo-input--bare')).toBe(true)
 	})
 
 	it('contains handled editor keys without blocking native typing keys', () => {

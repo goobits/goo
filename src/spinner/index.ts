@@ -17,7 +17,7 @@ export type { GooSpinnerProps, GooSpinnerRenderOptions, GooSpinnerSize, GooSpinn
 export function renderGooSpinnerHtml(options: GooSpinnerRenderOptions = {}): string {
 	const resolved = resolveSpinnerAttrs(options)
 	const attributes: Array<[string, string | undefined]> = [
-		[ 'class', [ 'goo-spinner', options.class ].filter(Boolean).join(' ') ],
+		[ 'class', [ 'goo-spinner', options.className ].filter(Boolean).join(' ') ],
 		[ 'role', 'status' ],
 		[ 'aria-label', options.label ?? 'Loading' ],
 		[ 'size', resolved.sizeAttr ],

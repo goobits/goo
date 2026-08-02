@@ -4,16 +4,16 @@ export function applyFieldValueFormatOptions(
 	node: GooSchemaField,
 	options: Record<string, unknown>
 ): void {
-	const valueFormat = node.format ?? node.valueFormat
-	if (valueFormat !== undefined) {
-		options.format = valueFormat
+	const format = node.format
+	if (format !== undefined) {
+		options.format = format
 	}
 
 	if (node.displayUnit !== undefined) {
 		options.unit = node.displayUnit
 	}
 
-	if (valueFormat === 'percent' && options.unit === undefined) {
+	if (format === 'percent' && options.unit === undefined) {
 		options.unit = '%'
 	}
 

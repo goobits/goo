@@ -1,10 +1,14 @@
 import { mount, unmount } from 'svelte'
 
 import GooAngleInput from './GooAngleInput.svelte'
-import type { GooAngleInputElement, GooAngleInputEventData, GooAngleInputUnit } from './types.ts'
+import type {
+	GooAngleInputElement,
+	GooAngleInputEventData,
+	GooAngleInputProps,
+	GooAngleInputUnit
+} from './types.ts'
 
 export type AngleInputFieldOptions = {
-	class?: string
 	className?: string
 	disabled?: boolean
 	id?: string
@@ -52,34 +56,33 @@ export function createAngleInputField(
 
 		unmountAngleInput()
 
-		instance = mount(GooAngleInput, {
-			target: field,
-			props: {
-				value: currentValue,
-				get element() {
-					return angleElement
-				},
-				set element(value) {
-					angleElement = value
-				},
-				unit: options.unit,
-				name: options.name,
-				id: options.id,
-				title: options.title,
-				disabled: options.disabled,
-				class: options.class ?? options.className,
-				style: options.style,
-				tabIndex: options.tabIndex,
-				oninput: (value: number, data: GooAngleInputEventData) => {
-					currentValue = value
-					options.oninput?.(data)
-				},
-				onchange: (value: number, data: GooAngleInputEventData) => {
-					currentValue = value
-					options.onchange?.(data)
-				}
+		const props: GooAngleInputProps = {
+			value: currentValue,
+			get element() {
+				return angleElement
+			},
+			set element(value) {
+				angleElement = value
+			},
+			oninput: (value: number, data: GooAngleInputEventData) => {
+				currentValue = value
+				options.oninput?.(data)
+			},
+			onchange: (value: number, data: GooAngleInputEventData) => {
+				currentValue = value
+				options.onchange?.(data)
 			}
-		})
+		}
+		if (options.unit !== undefined) props.unit = options.unit
+		if (options.name !== undefined) props.name = options.name
+		if (options.id !== undefined) props.id = options.id
+		if (options.title !== undefined) props.title = options.title
+		if (options.disabled !== undefined) props.disabled = options.disabled
+		if (options.className !== undefined) props.class = options.className
+		if (options.style !== undefined) props.style = options.style
+		if (options.tabIndex !== undefined) props.tabIndex = options.tabIndex
+
+		instance = mount(GooAngleInput, { target: field, props })
 	}
 
 	Object.defineProperty(field, 'value', {

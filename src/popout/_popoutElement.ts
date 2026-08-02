@@ -93,7 +93,7 @@ export function createPopoutElement({
 	if (content) {
 		const contentItems = Array.isArray(content) ? content : [ content ]
 		for (const item of contentItems) {
-			if (item instanceof HTMLElement && item.dataset.gooPopoutStaged === 'true') {
+			if (item instanceof HTMLElement && item.dataset['gooPopoutStaged'] === 'true') {
 				item.hidden = false
 			}
 			contentWrapper.appendChild(item)

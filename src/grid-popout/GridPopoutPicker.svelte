@@ -254,7 +254,7 @@ function getContentSignature(): string {
 	return [
 		currentSelected,
 		items.map(item => {
-			const preview = getItemPreview(item)
+			const preview = item.preview
 			return [
 				item.id,
 				item.ariaLabel ?? '',
@@ -301,7 +301,7 @@ function createOption(item: GridPopoutItem): HTMLElement {
 	title.appendChild(titleText)
 	option.appendChild(title)
 
-	const preview = getItemPreview(item)
+	const preview = item.preview
 	if (preview) {
 		option.appendChild(createPreviewSurface(preview))
 	} else if (item.iconSvg) {
@@ -320,18 +320,6 @@ function createOption(item: GridPopoutItem): HTMLElement {
 	option.addEventListener('pointerenter', () => option.focus({ preventScroll: true }))
 
 	return option
-}
-
-function getItemPreview(item: GridPopoutItem): GridPopoutPreview | undefined {
-	if (item.preview) return item.preview
-	if (!item.previewUrl) return undefined
-	return {
-		alt: item.previewAlt ?? '',
-		background: 'checker',
-		fit: 'contain',
-		size: 'sm',
-		src: item.previewUrl
-	}
 }
 
 function createPreviewSurface(preview: GridPopoutPreview): HTMLElement {
@@ -379,12 +367,7 @@ function createSvgIcon(icon: GridPopoutSvgIcon): HTMLElement {
 	}
 	svg.setAttribute('viewBox', icon.viewBox)
 
-	for (const elementOptions of icon.elements ?? icon.paths.map(path => ({
-		attributes: path.transform
-			? { d: path.d, transform: path.transform }
-			: { d: path.d },
-		tag: 'path' as const
-	}))) {
+	for (const elementOptions of icon.elements) {
 		const element = document.createElementNS('http://www.w3.org/2000/svg', elementOptions.tag)
 		for (const [ name, value ] of Object.entries(elementOptions.attributes)) {
 			element.setAttribute(name, value)
@@ -453,9 +436,7 @@ function escapeSelectorValue(value: string): string {
 	iconSvg={currentItem?.iconSvg}
 	kicker={currentItem?.kicker ?? ''}
 	{opened}
-	preview={currentItem ? getItemPreview(currentItem) : undefined}
-	previewAlt={currentItem?.previewAlt ?? currentItem?.title ?? ''}
-	previewUrl={currentItem?.previewUrl ?? ''}
+	preview={currentItem?.preview}
 	tabIndex={tabIndex}
 	title={currentItem?.title ?? ''}
 	{tooltip}

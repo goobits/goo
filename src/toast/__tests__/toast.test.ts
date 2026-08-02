@@ -33,9 +33,7 @@ describe('toast service', () => {
 		toast.warning('W')
 		toast.error('E')
 
-		expect(toastStore.toasts.map(t => t.variant)).toEqual([
-			'info', 'success', 'warning', 'error'
-		])
+		expect(toastStore.toasts.map(t => t.variant)).toEqual([ 'info', 'success', 'warning', 'error' ])
 	})
 
 	it('errors are sticky by default', () => {
@@ -109,7 +107,9 @@ describe('GooToast', () => {
 		})
 
 		expect(warning.container.querySelector('.goo-toast')?.getAttribute('role')).toBe('alert')
-		expect(warning.container.querySelector('.goo-toast')?.getAttribute('aria-live')).toBe('assertive')
+		expect(warning.container.querySelector('.goo-toast')?.getAttribute('aria-live')).toBe(
+			'assertive'
+		)
 		expect(error.container.querySelector('.goo-toast')?.getAttribute('role')).toBe('alert')
 		expect(error.container.querySelector('.goo-toast')?.getAttribute('aria-live')).toBe('assertive')
 	})
@@ -268,5 +268,25 @@ describe('GooProgressToast', () => {
 		expect(removeEventListener).toHaveBeenCalledWith('click', expect.any(Function))
 		expect(vi.getTimerCount()).toBe(0)
 		expect(progressToast.element.isConnected).toBe(false)
+	})
+
+	it('requests cancellation without claiming a terminal outcome', async() => {
+		const onCancel = vi.fn(async() => {})
+		const progressToast = createGooProgressToast({
+			cancelButton: 'Cancel',
+			onCancel
+		})
+		const cancelButton = progressToast.element.querySelector('button')!
+
+		cancelButton.click()
+		cancelButton.click()
+		await Promise.resolve()
+
+		expect(onCancel).toHaveBeenCalledOnce()
+		expect(progressToast.element.dataset.phase).toBe('inProgress')
+		expect(cancelButton.disabled).toBe(true)
+
+		progressToast.cancel()
+		expect(progressToast.element.dataset.phase).toBe('canceled')
 	})
 })

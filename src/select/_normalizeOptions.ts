@@ -40,23 +40,30 @@ export function normalizeOption(opt: unknown): GooSelectOption | null {
 	}
 
 	const optObj = opt as Record<string, unknown>
+	const label = (optObj['label'] ?? '') as NonNullable<GooSelectOption['label']>
 
 	const normalized: GooSelectOption = {
-		type: (optObj.type as GooSelectOption['type']) || 'option',
-		label: (optObj.label || optObj.title || '') as GooSelectOption['label'],
-		id: (optObj.id as string) || labelToId(optObj.label as string || optObj.title as string || ''),
-		tone: optObj.tone as GooSelectOption['tone'],
-		className: optObj.className as GooSelectOption['className'],
-		icon: optObj.icon as GooSelectOption['icon'],
-		shortcut: optObj.shortcut as GooSelectOption['shortcut'],
-		isDisabled: optObj.isDisabled as GooSelectOption['isDisabled'],
-		isSupported: optObj.isSupported as GooSelectOption['isSupported'],
-		onChoose: optObj.onChoose as GooSelectOption['onChoose']
+		type: (optObj['type'] as NonNullable<GooSelectOption['type']>) || 'option',
+		label,
+		id: (optObj['id'] as string) || labelToId(String(label))
 	}
+	if (optObj['tone'] !== undefined) normalized.tone = optObj['tone'] as NonNullable<GooSelectOption['tone']>
+	if (optObj['className'] !== undefined) normalized.className = optObj['className'] as string
+	if (optObj['icon'] !== undefined) normalized.icon = optObj['icon'] as NonNullable<GooSelectOption['icon']>
+	if (optObj['shortcut'] !== undefined) normalized.shortcut = optObj['shortcut'] as NonNullable<GooSelectOption['shortcut']>
+	if (optObj['disabled'] !== undefined) normalized.disabled = optObj['disabled'] as NonNullable<GooSelectOption['disabled']>
+	if (optObj['isSupported'] !== undefined) normalized.isSupported = optObj['isSupported'] as NonNullable<GooSelectOption['isSupported']>
+	if (optObj['onChoose'] !== undefined) normalized.onChoose = optObj['onChoose'] as NonNullable<GooSelectOption['onChoose']>
+	if (optObj['title'] !== undefined) normalized.title = optObj['title'] as string
+	if (optObj['href'] !== undefined) normalized.href = optObj['href'] as string
+	if (optObj['target'] !== undefined) normalized.target = optObj['target'] as string
+	if (optObj['rel'] !== undefined) normalized.rel = optObj['rel'] as string
+	if (optObj['download'] !== undefined) normalized.download = optObj['download'] as NonNullable<GooSelectOption['download']>
+	if (optObj['dataset'] !== undefined) normalized.dataset = optObj['dataset'] as Record<string, string>
 
 	// Recursively normalize child options
-	if (optObj.options) {
-		normalized.options = normalizeOptions(optObj.options as GooSelectOption[])
+	if (optObj['options']) {
+		normalized.options = normalizeOptions(optObj['options'] as GooSelectOption[])
 	}
 
 	return normalized
@@ -105,7 +112,7 @@ export function normalizeOptions(options: unknown): GooSelectOption[] {
 				})
 
 			// Nested object = submenu (if no 'label' property)
-			} else if (typeof value === 'object' && value !== null && !(value as Record<string, unknown>).label) {
+			} else if (typeof value === 'object' && value !== null && !(value as Record<string, unknown>)['label']) {
 				result.push({
 					type: 'submenu',
 					label: key,

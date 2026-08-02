@@ -7,6 +7,7 @@ export interface ModalIsolationHandle {
 export interface ModalIsolationOptions {
 	modal: HTMLElement
 	preserve?: Array<Element | null | undefined>
+	root?: HTMLElement
 }
 
 export interface FocusTrapKeyboardOptions {
@@ -38,26 +39,35 @@ const focusableSelector = [
 export function activateModalIsolation(options: ModalIsolationOptions): ModalIsolationHandle {
 	const modal = options.modal
 	const ownerDocument = modal.ownerDocument
+	const root = options.root ?? ownerDocument.body
 	const preserved = new Set<Element>([
 		modal,
 		...(options.preserve?.filter((element): element is Element => element instanceof Element) ?? [])
 	])
 	const isolated: IsolatedElementState[] = []
 
-	for (const element of Array.from(ownerDocument.body.children)) {
-		if (!(element instanceof HTMLElement)) continue
-		if (preserved.has(element)) continue
-		if ([ ...preserved ].some(item => element.contains(item) || item.contains(element))) continue
+	const isolateOutsidePreservedBranches = (container: Element): void => {
+		for (const element of Array.from(container.children)) {
+			if (!(element instanceof HTMLElement)) continue
+			if (preserved.has(element) || [ ...preserved ].some(item => item.contains(element))) {
+				continue
+			}
+			if ([ ...preserved ].some(item => element.contains(item))) {
+				isolateOutsidePreservedBranches(element)
+				continue
+			}
 
-		const inertElement = element as InertHTMLElement
-		isolated.push({
-			ariaHidden: element.getAttribute('aria-hidden'),
-			element,
-			inert: inertElement.inert === true || element.hasAttribute('inert')
-		})
-		inertElement.inert = true
-		element.setAttribute('aria-hidden', 'true')
+			const inertElement = element as InertHTMLElement
+			isolated.push({
+				ariaHidden: element.getAttribute('aria-hidden'),
+				element,
+				inert: inertElement.inert === true || element.hasAttribute('inert')
+			})
+			inertElement.inert = true
+			element.setAttribute('aria-hidden', 'true')
+		}
 	}
+	isolateOutsidePreservedBranches(root)
 
 	return {
 		detach() {

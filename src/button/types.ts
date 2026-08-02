@@ -1,4 +1,5 @@
 import type { Snippet } from 'svelte'
+import type { HTMLAnchorAttributes, HTMLButtonAttributes } from 'svelte/elements'
 
 import type { GooForwardedAttributes } from '../support/types/forwardedAttributes.ts'
 
@@ -12,87 +13,121 @@ export type GooButtonTarget = '_blank' | '_parent' | '_self' | '_top' | (string 
 export type GooButtonType = 'button' | 'reset' | 'submit'
 
 /** Native Goo button variant. */
-export type GooButtonVariant = 'default' | 'primary' | 'secondary' | 'attention' | 'danger' | 'ghost' | 'link' | 'selected' | string
+export type GooButtonVariant =
+	| 'default'
+	| 'primary'
+	| 'secondary'
+	| 'attention'
+	| 'danger'
+	| 'ghost'
+	| 'link'
+	| 'selected'
+	| string
 
-/** Props accepted by the Svelte `GooButton` component. */
-export type GooButtonProps = GooForwardedAttributes & {
+/** Native element rendered by Goo button. */
+export type GooButtonElement = HTMLAnchorElement | HTMLButtonElement
 
+type GooButtonOwnProps = GooForwardedAttributes & {
 	/** Visual label rendered when no children are provided. */
-	value?: string
+	label?: string | undefined
 
 	/** Native button form value. */
-	formValue?: string
+	formValue?: string | undefined
+
+	/** ID of the form submitted by a button rendered outside that form. */
+	form?: string | undefined
 
 	/** Native button type. */
-	type?: GooButtonType
+	type?: GooButtonType | undefined
 
 	/** Whether the button is disabled. */
-	disabled?: boolean
+	disabled?: boolean | undefined
 
 	/** Link URL. When present, GooButton renders an anchor element. */
-	href?: string
+	href?: string | undefined
 
 	/** Anchor target used when `href` is present. */
-	target?: GooButtonTarget
+	target?: GooButtonTarget | undefined
 
 	/** Anchor relationship used when `href` is present. */
-	rel?: string
+	rel?: string | undefined
 
 	/** Render as a full-width row button. */
-	block?: boolean
+	fullRow?: boolean | undefined
 
-	/** Render as a full-width row button. */
-	fullRow?: boolean
+	/** Optional native title text. */
+	title?: string | undefined
 
-	/** Optional title/tooltip text. */
-	title?: string
-
-	/** Additional tooltip text when title is not provided. */
-	tooltip?: string
+	/** Goo tooltip text, rendered with an arrow on hover and keyboard focus. */
+	tooltip?: string | undefined
 
 	/** Accessible label for icon-only buttons. */
-	ariaLabel?: string
+	ariaLabel?: string | undefined
 
 	/** Explicit pressed state for non-toggle buttons with selectable semantics. */
-	ariaPressed?: boolean | 'false' | 'mixed' | 'true'
+	ariaPressed?: boolean | 'false' | 'mixed' | 'true' | undefined
 
 	/** Visual variant. */
-	variant?: GooButtonVariant
+	variant?: GooButtonVariant | undefined
 
 	/** Compact/medium size token. */
-	size?: string
+	size?: string | undefined
 
 	/** Render as a square icon button. */
-	square?: boolean
+	square?: boolean | undefined
 
 	/** Enable toggle semantics. */
-	toggle?: boolean
+	toggle?: boolean | undefined
 
 	/** Pressed state for toggle buttons. */
-	pressed?: boolean
+	pressed?: boolean | undefined
 
 	/** Layout mode. */
-	layout?: GooButtonLayout
+	layout?: GooButtonLayout | undefined
 
 	/** Extra class names. */
-	class?: string
+	class?: string | undefined
 
 	/** Inline style. */
-	style?: string
+	style?: string | undefined
 
 	/** Optional icon snippet. */
-	icon?: Snippet
+	icon?: Snippet | undefined
 
 	/** Button content. */
-	children?: Snippet
+	children?: Snippet | undefined
+
+	/** Native anchor or button element rendered by the component. */
+	element?: GooButtonElement | null | undefined
 
 	/** Native click callback. */
-	onclick?: (event: MouseEvent) => void
+	onclick?: ((event: MouseEvent) => void) | undefined
+
+	/** Native mouse-enter callback. */
+	onmouseenter?: ((event: MouseEvent) => void) | undefined
+
+	/** Native mouse-leave callback. */
+	onmouseleave?: ((event: MouseEvent) => void) | undefined
 
 	/** Activation callback fired after click/toggle handling. */
-	onactivate?: (event: MouseEvent) => void
+	onactivate?: ((event: MouseEvent) => void) | undefined
 
 	/** Toggle change callback. */
-	onchange?: (value: boolean, oldValue?: boolean) => void
-
+	onchange?: ((value: boolean, oldValue?: boolean) => void) | undefined
 }
+
+/** Props for a native button-backed `GooButton`. */
+export type GooButtonButtonProps = GooButtonOwnProps &
+	Omit<HTMLButtonAttributes, keyof GooButtonOwnProps | 'href' | 'tabindex'> & { href?: undefined }
+
+/** Props for a native anchor-backed `GooButton`. */
+export type GooButtonAnchorProps = GooButtonOwnProps &
+	Omit<HTMLAnchorAttributes, keyof GooButtonOwnProps | 'href' | 'tabindex'> & { href: string }
+
+/**
+ * Props accepted by the Svelte `GooButton` component.
+ *
+ * Native button attributes are accepted when `href` is absent. Native anchor
+ * attributes are accepted when `href` is present.
+ */
+export type GooButtonProps = GooButtonButtonProps | GooButtonAnchorProps

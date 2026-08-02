@@ -12,9 +12,7 @@ import type { GooSelectOption } from '../types.ts'
 describe('GooSelect keyboard handler', () => {
 	it.each([
 		[ 'Enter', 'enter' ],
-		[ ' ', 'space' ],
-		[ 'Space', 'space' ],
-		[ 'Spacebar', 'space' ]
+		[ ' ', 'space' ]
 	])('maps activation key %s to %s command', (key, command) => {
 		const event = new KeyboardEvent('keydown', {
 			bubbles: true,

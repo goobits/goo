@@ -55,6 +55,11 @@
 	pointer-events: none;
 }
 
+.goo-input.goo-input--block {
+	display: block;
+	width: 100%;
+}
+
 /* Focus state */
 .goo-input.goo-input--focused,
 .goo-input:focus-within {
@@ -63,6 +68,17 @@
 		0 0 0 1px var(--goo-input-border-focus),
 		0 0 0 2px var(--goo-input-focus-ring);
 	z-index: 2;
+}
+
+.goo-input.goo-input--bare,
+.goo-input.goo-input--bare.goo-input--focused,
+.goo-input.goo-input--bare:focus-within {
+	background: transparent;
+	box-shadow: none;
+}
+
+.goo-input.goo-input--bare::after {
+	display: none;
 }
 
 .goo-input.goo-input--changed::after {
@@ -135,6 +151,12 @@
 	min-height: var(--goo-input-height);
 	min-width: var(--goo-input-inline-size);
 	line-height: var(--goo-input-multiline-line-height);
+}
+
+.goo-input.goo-input--multiline.goo-input--block,
+.goo-input.goo-input--multiline.goo-input--block textarea.goo-input__content {
+	min-width: 0;
+	width: 100%;
 }
 
 .goo-input.goo-input--multiline textarea.goo-input__content {
