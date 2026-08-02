@@ -16,6 +16,9 @@ export const controlSchema: SvelteControlSchema = {
 import './GooSelect.css'
 import './GooSelect.submenu.css'
 
+import { untrack } from 'svelte'
+import ChevronDown from '@lucide/svelte/icons/chevron-down'
+
 import { createGooPopout } from '../popout/index.ts'
 import type { GooPopoutInstance } from '../popout/index.ts'
 import { gooTooltipRuntime } from '../tooltip/index.ts'
@@ -35,10 +38,11 @@ import {
 	getSelectMenuPopoutClass,
 	normalizeSelectMenu
 } from './_selectMenu.ts'
-import { evaluate, getElementTextDirection, isElementNode } from './selectDom.ts'
+import { evaluate, getElementTextDirection } from './selectDom.ts'
 import type {
 	GooSelectElement,
 	GooSelectEventData,
+	GooSelectHoverChangeEventData,
 	GooSelectOpenOptions,
 	GooSelectOption,
 	GooSelectOptionsInput,
@@ -48,24 +52,9 @@ import type {
 
 type SelectPopout = GooPopoutInstance
 
-let selectRoot: HTMLDivElement | undefined = $state()
-// The root <div> is augmented with the GooSelect API at runtime (assignSelectApi),
-// so expose it under the augmented type while binding to the real element type.
-const selectElement = $derived(selectRoot as GooSelectElement | undefined)
-let triggerElement: HTMLButtonElement | undefined = $state()
-let panel = $state<DropdownPanel | null>(null)
-let popout = $state<SelectPopout | null>(null)
-let opened = $state(false)
-let normalizedOptions: GooSelectOption[] = $state([])
-let selectedValue = $state('')
-let effectiveDisabled = $state(false)
-let currentTriggerIcon = $state<string | HTMLElement | (() => HTMLElement) | undefined>()
-let currentBoundContext = $state<unknown>()
-let listboxId = $state('')
-let activeDescendant = $state('')
-let triggerPointerId: number | null = null
-let selectLifecycleToken = 0
-let focusFrame = 0
+function readInitial<T>(read: () => T): T {
+	return read()
+}
 
 let {
 	options = [],
@@ -78,18 +67,22 @@ let {
 	placeholder = 'Select...',
 	ariaLabel,
 	'aria-label': ariaLabelAttribute,
-	tooltip,
-	title,
-	required = false,
-	block = false,
 	'aria-describedby': ariaDescribedby,
-	'aria-invalid': ariaInvalid,
+	'aria-labelledby': ariaLabelledby,
+	'aria-invalid': ariaInvalidAttribute,
+	title,
 	disabled = false,
 	actionContext,
 	triggerIcon,
+	triggerDataset,
+	trigger,
 	id,
 	inputId,
 	size,
+	form,
+	required = false,
+	autocomplete,
+	block = false,
 	class: className = '',
 	style,
 	children,
@@ -97,15 +90,43 @@ let {
 	onchange,
 	onopen,
 	onclose,
+	onhoverchange,
 	...rest
 }: GooSelectProps = $props()
+
+let selectRoot: HTMLDivElement | undefined = $state()
+// The root <div> is augmented with the GooSelect API at runtime (assignSelectApi),
+// so expose it under the augmented type while binding to the real element type.
+const selectElement = $derived(selectRoot as GooSelectElement | undefined)
+let triggerElement: HTMLButtonElement | undefined = $state()
+let panel = $state<DropdownPanel | null>(null)
+let popout = $state<SelectPopout | null>(null)
+let opened = $state(false)
+let normalizedOptions: GooSelectOption[] = $state(readInitial(() => normalizeOptions(options)))
+let selectedValue = $state(value ?? '')
+let effectiveDisabled = $state(readInitial(() => Boolean(disabled)))
+let currentTriggerIcon = $state<string | HTMLElement | (() => HTMLElement) | undefined>(
+	readInitial(() => triggerIcon)
+)
+let currentBoundContext = $state<unknown>(readInitial(() => actionContext))
+let listboxId = $state('')
+let activeDescendant = $state('')
+let invalid = $state(false)
+let pendingSelection = $state<string | null>(null)
+let triggerPointerId: number | null = null
+let selectLifecycleToken = 0
+let focusFrame = 0
 
 const selectedOption = $derived(findOptionById(normalizedOptions, selectedValue))
 const selectMenu = $derived(normalizeSelectMenu(menu))
 const dropdownSemantics = $derived(selectMenu.semantics)
 const triggerLabel = $derived(getOptionLabel(selectedOption) || placeholder)
 const triggerAccessibleName = $derived(readTriggerAccessibleName())
+const triggerAriaDescribedby = $derived(toAriaText(ariaDescribedby))
+const triggerAriaLabelledby = $derived(toAriaText(ariaLabelledby))
+const triggerAriaInvalid = $derived(invalid ? 'true' : toAriaInvalid(ariaInvalidAttribute))
 const showPlaceholder = $derived(!selectedOption)
+const formOptions = $derived.by(() => getFormOptions(normalizedOptions))
 // Named `selectState` (not `state`) so the `$state` rune token is not parsed as
 // Svelte store-style access to a `state` variable by svelte-check.
 const selectState = $derived<GooSelectState>({
@@ -133,6 +154,8 @@ const hostAttributes = $derived<Record<string, string | undefined>>({
 	size,
 	placeholder,
 	disabled: effectiveDisabled ? '' : undefined,
+	'aria-invalid': invalid ? 'true' : undefined,
+	'aria-required': required ? 'true' : undefined,
 	'show-header': showHeader ? undefined : 'false',
 	'enable-keyboard': enableKeyboard ? undefined : 'false',
 	'show-selection-indicator': showSelectionIndicator ? undefined : 'false'
@@ -142,13 +165,18 @@ const hostAttributes = $derived<Record<string, string | undefined>>({
    guard, the mount-time effect flush clobbers options set right after
    creation (the imperative owner takes over from the prop). */
 let imperativeOptions: GooSelectOption[] | null = $state(null)
+let appliedTriggerDatasetKeys: string[] = []
 
 $effect(() => {
 	normalizedOptions = imperativeOptions ?? normalizeOptions(options)
 })
 
 $effect(() => {
-	selectedValue = value ?? ''
+	const nextValue = value ?? ''
+	if (pendingSelection === null || nextValue === pendingSelection) {
+		selectedValue = nextValue
+	}
+	if (selectedValue || !required) invalid = false
 })
 
 $effect(() => {
@@ -161,6 +189,27 @@ $effect(() => {
 
 $effect(() => {
 	currentBoundContext = actionContext
+})
+
+$effect(() => {
+	const currentTrigger = triggerElement
+	for (const key of appliedTriggerDatasetKeys) {
+		delete currentTrigger?.dataset[key]
+	}
+	appliedTriggerDatasetKeys = []
+	if (!currentTrigger || !triggerDataset) return
+
+	for (const [ key, datasetValue ] of Object.entries(triggerDataset)) {
+		currentTrigger.dataset[key] = datasetValue
+		appliedTriggerDatasetKeys.push(key)
+	}
+
+	return () => {
+		for (const key of appliedTriggerDatasetKeys) {
+			delete currentTrigger.dataset[key]
+		}
+		appliedTriggerDatasetKeys = []
+	}
 })
 
 $effect(() => {
@@ -204,11 +253,18 @@ export function getValue(): string {
 }
 
 export function setOptions(nextOptions: GooSelectOptionsInput): void {
-	imperativeOptions = normalizeOptions(nextOptions)
-	// Effects flush async; assign directly so a setOptions-then-open flow in
-	// the same task opens with the new options, not the pre-flush list.
-	normalizedOptions = imperativeOptions
-	if (opened) panel?.render(imperativeOptions)
+	const nextNormalizedOptions = normalizeOptions(nextOptions)
+	// Public imperative methods may be called from a consumer's effect. Keep
+	// internal state reads out of that consumer reaction so updating options
+	// cannot make the calling effect depend on — and recursively retrigger
+	// from — GooSelect's private state.
+	untrack(() => {
+		imperativeOptions = nextNormalizedOptions
+		// Effects flush async; assign directly so a setOptions-then-open flow in
+		// the same task opens with the new options, not the pre-flush list.
+		normalizedOptions = nextNormalizedOptions
+		if (opened) panel?.render(nextNormalizedOptions)
+	})
 }
 
 export function setTriggerIcon(icon: string | HTMLElement | (() => HTMLElement) | null): void {
@@ -239,14 +295,14 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 
 	if (!panel) {
 		panel = new DropdownPanel({
-			semantics: dropdownSemantics,
+			...(dropdownSemantics ? { semantics: dropdownSemantics } : {}),
 			showSelectionIndicator,
 			value: selectedValue,
 			getContext: () => getContext(),
 			onSelect: (option, item) => selectOption(option, item),
 			onHoverChange: (hoveredId, activeDescendantId) => {
 				activeDescendant = activeDescendantId
-				selectElement?.dispatchEvent(new CustomEvent('hoverchange', { bubbles: true, detail: { id: hoveredId } }))
+				emitHoverChange(hoveredId || null)
 			}
 		})
 		panel.$container.addEventListener('keydown', event => {
@@ -255,7 +311,7 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 		})
 	} else {
 		panel.updateContext({
-			semantics: dropdownSemantics,
+			...(dropdownSemantics ? { semantics: dropdownSemantics } : {}),
 			showSelectionIndicator,
 			value: selectedValue
 		})
@@ -276,13 +332,14 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 
 	popout = createGooPopout({
 		content: panel.$container,
-		parentElement,
+		...(parentElement === undefined ? {} : { parentElement }),
 		role: null,
 		className: getSelectMenuPopoutClass(currentMenu, popoutClassName),
+		...(currentMenu.dataset ? { dataset: currentMenu.dataset } : {}),
 		clickToClose,
 		escapeToClose: true,
-		initialFocus: initialFocus ?? 'none',
-		keepWithin: keepWithin || { element: document.body, margin: 15 },
+		...(initialFocus === undefined ? {} : { initialFocus }),
+		...(keepWithin === undefined ? {} : { keepWithin }),
 		showArrow: showArrow ?? currentMenu.arrow,
 		showBackdrop: currentMenu.backdrop,
 		at: positionAt,
@@ -320,7 +377,7 @@ function syncPanelTypography(): void {
 function focusInitialPanelOption(): void {
 	if (!panel) return
 
-	const toFocus = selectedValue || panel.getNavigableOptions()[0]?.dataset.id
+	const toFocus = selectedValue || panel.getNavigableOptions()[0]?.dataset['id']
 	if (toFocus) panel.setHovered(toFocus)
 }
 
@@ -370,16 +427,16 @@ function withPositionOverrides(
 
 	if (positionAt instanceof HTMLElement) {
 		return {
-			align: options.align,
 			element: positionAt,
-			offset: options.offset
+			...(options.align === undefined ? {} : { align: options.align }),
+			...(options.offset === undefined ? {} : { offset: options.offset })
 		}
 	}
 
 	return {
 		...positionAt,
-		align: options.align ?? positionAt.align,
-		offset: options.offset ?? positionAt.offset
+		...(options.align === undefined ? {} : { align: options.align }),
+		...(options.offset === undefined ? {} : { offset: options.offset })
 	}
 }
 
@@ -473,6 +530,9 @@ function assignSelectApi(select: GooSelectRuntimeElement): void {
 function handleTriggerPointerDown(event: PointerEvent): void {
 	if (effectiveDisabled || event.button !== 0) return
 	event.preventDefault()
+	// Preventing the native pointerdown keeps drag-to-select stable, so focus
+	// the trigger explicitly and give the popout a reliable return target.
+	triggerElement?.focus({ preventScroll: true })
 
 	if (opened) {
 		close()
@@ -539,12 +599,20 @@ function handleKeydown(event: KeyboardEvent): void {
 }
 
 function selectOption(option: GooSelectOption, item?: HTMLElement | null): void {
+	if (option.href) {
+		option.onChoose?.call(getContext(), option.id ?? '')
+		close({ quiet: true })
+		return
+	}
+
 	if (selectedValue === option.id && showSelectionIndicator) {
+		option.onChoose?.call(getContext(), option.id ?? '')
 		close({ quiet: true })
 		return
 	}
 
 	const oldValue = selectedValue
+	pendingSelection = option.id ?? ''
 	selectedValue = option.id ?? ''
 	value = selectedValue
 	if (showSelectionIndicator) {
@@ -578,6 +646,7 @@ function finishSelection(option: GooSelectOption, oldValue: string): void {
 	if (oldValue !== option.id) {
 		emitChange(oldValue)
 	}
+	pendingSelection = null
 }
 
 function emitChange(oldValue: string): void {
@@ -592,9 +661,18 @@ function emitChange(oldValue: string): void {
 	selectElement.dispatchEvent(new CustomEvent('change', { detail: data, bubbles: true }))
 }
 
-function handleFormFieldInvalid(event: Event): void {
-	event.preventDefault()
-	triggerElement?.focus()
+function emitHoverChange(id: string | null): void {
+	if (!selectElement) return
+
+	const data: GooSelectHoverChangeEventData = {
+		select: selectElement,
+		option: id ? findOptionById(normalizedOptions, id) : null
+	}
+	onhoverchange?.(id, data)
+	selectElement.dispatchEvent(new CustomEvent('hoverchange', {
+		detail: { ...data, id },
+		bubbles: true
+	}))
 }
 
 function getContext(): unknown {
@@ -604,24 +682,34 @@ function getContext(): unknown {
 function getOptionLabel(option: GooSelectOption | null): string {
 	if (!option) return ''
 	const label = evaluate(option.label, getContext())
-	if (isElementNode(label)) return label.textContent ?? ''
+	if (isDomElement(label)) return label.textContent ?? ''
 	return String(label ?? option.id ?? '')
 }
 
-function readTriggerAccessibleName(): string | undefined {
-	const explicitName = textValue(ariaLabel)
+function isDomElement(value: unknown): value is Element {
+	return typeof Element !== 'undefined' && value instanceof Element
+}
+
+function readTriggerAccessibleName(): string {
+	return textValue(ariaLabel)
 		|| textValue(ariaLabelAttribute)
 		|| textValue(title)
-		|| (typeof tooltip === 'string' ? textValue(tooltip) : '')
-	if (explicitName) return explicitName
-	if (inputId) return undefined
-	return textValue(triggerLabel)
-		|| textValue(placeholder)
-		|| 'Select'
 }
 
 function textValue(value: unknown): string {
 	return typeof value === 'string' ? value.trim() : ''
+}
+
+function toAriaText(value: unknown): string | undefined {
+	if (value === null || value === undefined || value === false) return undefined
+	return String(value)
+}
+
+function toAriaInvalid(value: unknown): 'false' | 'grammar' | 'spelling' | 'true' | undefined {
+	if (value === true || value === 'true') return 'true'
+	if (value === false || value === 'false') return 'false'
+	if (value === 'grammar' || value === 'spelling') return value
+	return undefined
 }
 
 function getTriggerIconClasses(icon: unknown): string {
@@ -629,6 +717,47 @@ function getTriggerIconClasses(icon: unknown): string {
 	const trimmed = icon.trim()
 	if (!trimmed || trimmed.startsWith('<') || trimmed.startsWith('http') || trimmed.startsWith('./') || trimmed.startsWith('/') || trimmed.startsWith('data:')) return ''
 	return trimmed
+}
+
+function getFormOptions(
+	options: GooSelectOption[]
+): Array<{ id: string; label: string; disabled: boolean }> {
+	const result: Array<{ id: string; label: string; disabled: boolean }> = []
+	for (const option of options) {
+		if (
+			option.isSupported !== undefined
+			&& !evaluate(option.isSupported, getContext())
+		) continue
+		if (option.options) result.push(...getFormOptions(option.options))
+		if (
+			option.type !== 'divider'
+			&& option.type !== 'optgroup'
+			&& option.type !== 'submenu'
+			&& !option.href
+			&& option.id
+		) {
+			result.push({
+				id: option.id,
+				label: getOptionLabel(option),
+				disabled: Boolean(evaluate(option.disabled, getContext()))
+			})
+		}
+	}
+	return result
+}
+
+function handleNativeChange(event: Event): void {
+	const field = event.currentTarget as HTMLSelectElement
+	const oldValue = selectedValue
+	selectedValue = field.value
+	value = selectedValue
+	invalid = false
+	if (oldValue !== selectedValue) emitChange(oldValue)
+}
+
+function handleInvalid(): void {
+	invalid = true
+	queueMicrotask(() => triggerElement?.focus())
 }
 
 /* Element and factory trigger icons (the setTriggerIcon contract already
@@ -640,9 +769,9 @@ const triggerIconElement = $derived.by(() => {
 	void selectedValue
 	if (typeof icon === 'function') {
 		const element = icon()
-		return isElementNode(element) ? element : null
+		return isDomElement(element) ? element : null
 	}
-	return isElementNode(icon) ? icon : null
+	return isDomElement(icon) ? icon : null
 })
 
 $effect(() => {
@@ -655,7 +784,7 @@ $effect(() => {
    names; the value text speaks for itself) and the button drops its native
    title. Suppressed while the dropdown is open. */
 $effect(() => {
-	const text = typeof tooltip === 'string' && tooltip ? tooltip : title
+	const text = title
 	if (!triggerIconHost || !text) return
 	const handle = gooTooltipRuntime.attach(triggerIconHost, () => (opened ? undefined : text), {
 		direction: 'right',
@@ -670,7 +799,7 @@ $effect(() => {
 <div
 	{...rest}
 	bind:this={selectRoot}
-	{id}
+	id={showHeader ? undefined : id}
 	class={classes}
 	{style}
 	{...hostAttributes}
@@ -680,56 +809,62 @@ $effect(() => {
 	{#if showHeader}
 		<button
 			bind:this={triggerElement}
-			id={inputId}
+			id={inputId ?? id}
 			type="button"
 			class="goo-select__trigger"
-			role="combobox"
+			role={dropdownSemantics?.popupRole === 'menu' ? undefined : 'combobox'}
 			aria-haspopup={dropdownSemantics?.popupRole ?? 'listbox'}
 			aria-expanded={opened ? 'true' : 'false'}
 			aria-controls={opened && listboxId ? listboxId : undefined}
 			aria-activedescendant={opened && activeDescendant ? activeDescendant : undefined}
-			aria-label={triggerAccessibleName}
-			aria-describedby={ariaDescribedby}
-			aria-invalid={ariaInvalid}
+			aria-label={triggerAccessibleName || undefined}
+			aria-describedby={triggerAriaDescribedby}
+			aria-labelledby={triggerAriaLabelledby}
+			aria-invalid={triggerAriaInvalid}
 			aria-required={required ? 'true' : undefined}
 			disabled={effectiveDisabled}
-			title={triggerIconElement ? undefined : (typeof tooltip === 'string' ? tooltip : title)}
+			title={triggerIconElement ? undefined : title}
 			onpointerdown={handleTriggerPointerDown}
 		>
-			{#if triggerIconElement}
-				<span class="goo-select__trigger-icon" aria-hidden="true" bind:this={triggerIconHost}></span>
-			{:else if getTriggerIconClasses(currentTriggerIcon)}
-				<span class={`goo-select__trigger-icon ${ getTriggerIconClasses(currentTriggerIcon) }`}></span>
+			{#if trigger}
+				<span class="goo-select__trigger-custom">
+					{@render trigger()}
+				</span>
+			{:else}
+				{#if triggerIconElement}
+					<span class="goo-select__trigger-icon" aria-hidden="true" bind:this={triggerIconHost}></span>
+				{:else if getTriggerIconClasses(currentTriggerIcon)}
+					<span class={`goo-select__trigger-icon ${ getTriggerIconClasses(currentTriggerIcon) }`}></span>
+				{/if}
+				<span
+					class="goo-select__trigger-label"
+					class:goo-select__trigger-label--placeholder={showPlaceholder}
+				>{triggerLabel}</span>
+				<span class="goo-select__trigger-arrow">
+					<ChevronDown aria-hidden="true" />
+				</span>
 			{/if}
-			<span
-				class="goo-select__trigger-label"
-				class:goo-select__trigger-label--placeholder={showPlaceholder}
-			>{triggerLabel}</span>
-			<span class="goo-select__trigger-arrow">
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-					<path d="m6 9 6 6 6-6"></path>
-				</svg>
-			</span>
 		</button>
 	{/if}
-	{#if name}
-		<select
-			data-goo-select-field
-			class="goo-select__form-field"
-			{name}
-			value={selectedValue}
-			{required}
-			disabled={effectiveDisabled}
-			tabindex="-1"
-			aria-hidden="true"
-			oninvalid={handleFormFieldInvalid}
-		>
-			<option value=""></option>
-			{#if selectedValue}
-				<option value={selectedValue}>{selectedValue}</option>
-			{/if}
-		</select>
-	{/if}
+	<select
+		class="goo-select__field"
+		data-goo-select-field
+		tabindex="-1"
+		aria-hidden="true"
+		name={name || undefined}
+		{form}
+		{required}
+		autocomplete={autocomplete || undefined}
+		disabled={effectiveDisabled}
+		value={selectedValue}
+		onchange={handleNativeChange}
+		oninvalid={handleInvalid}
+	>
+		<option value="">{placeholder}</option>
+		{#each formOptions as option}
+			<option value={option.id} disabled={option.disabled}>{option.label}</option>
+		{/each}
+	</select>
 	{#if children}
 		{@render children()}
 	{/if}

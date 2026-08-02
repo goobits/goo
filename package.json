@@ -6,7 +6,7 @@
 	"imports": {
 		"#src/*": "./src/*"
 	},
-	"packageManager": "pnpm@11.10.0",
+	"packageManager": "pnpm@11.18.0",
 	"publishConfig": {
 		"access": "public"
 	},
@@ -162,6 +162,11 @@
 			"types": "./src/icon/registry.ts",
 			"import": "./src/icon/registry.ts"
 		},
+		"./overlay-host": {
+			"types": "./src/overlay-host/index.ts",
+			"svelte": "./src/overlay-host/index.ts",
+			"import": "./src/overlay-host/index.ts"
+		},
 		"./label": {
 			"types": "./src/label/index.ts",
 			"svelte": "./src/label/index.ts",
@@ -250,7 +255,7 @@
 	"scripts": {
 		"dev": "vite --host 127.0.0.1",
 		"test": "vitest run --maxWorkers=2",
-    "check": "eslint src/ && tsx scripts/checkCssConventions.ts && tsx scripts/checkSvelteConventions.ts && svelte-check --tsconfig ./tsconfig.json && tsc --noEmit",
+		"check": "eslint src/ && tsx scripts/checkCssConventions.ts && tsx scripts/checkSvelteConventions.ts && svelte-check --tsconfig ./tsconfig.json && tsc --noEmit",
 		"check:css": "tsx scripts/checkCssConventions.ts",
 		"check:svelte": "tsx scripts/checkSvelteConventions.ts && svelte-check --tsconfig ./tsconfig.json",
 		"check:types": "tsc --noEmit",
@@ -261,7 +266,7 @@
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
-		"@playwright/test": "^1.61.1",
+		"@playwright/test": "^1.62.0",
 		"@stylistic/eslint-plugin": "^5.10.0",
 		"@sveltejs/vite-plugin-svelte": "^7.2.0",
 		"@testing-library/svelte": "^5.4.2",
@@ -277,7 +282,7 @@
 	},
 	"dependencies": {
 		"@goobits/logger": "^1.0.0",
-		"@lucide/svelte": "^1.25.0"
+		"@lucide/svelte": "^1.26.0"
 	},
 	"peerDependencies": {
 		"svelte": "^5.55.5"

@@ -137,7 +137,7 @@ export class ProgressRingRenderer {
 		}
 		this.#transitionSpeed = options.transitionSpeed ?? this.#transitionSpeed
 		this.#variant = options.variant ?? this.#variant
-		this.#host.dataset.variant = this.#variant
+		this.#host.dataset['variant'] = this.#variant
 		this.#syncAttributes()
 		this.#paint()
 		this.#startAnimation()
@@ -387,8 +387,9 @@ export class ProgressRingRenderer {
 	}
 
 	#spinnerColor(currentStep: number, duration: number): string {
-		const startColor = SPINNER_COLORS[this.#spinnerColorIndex] ?? SPINNER_COLORS[0]!
-		const endColor = SPINNER_COLORS[(this.#spinnerColorIndex + 1) % SPINNER_COLORS.length] ?? startColor
+		const startColor = SPINNER_COLORS[this.#spinnerColorIndex] ?? '#35ad0e'
+		const endColor =
+			SPINNER_COLORS[(this.#spinnerColorIndex + 1) % SPINNER_COLORS.length] ?? '#35ad0e'
 		const start = parseHexColor(startColor)
 		const end = parseHexColor(endColor)
 		if (!start || !end) {
@@ -402,7 +403,7 @@ export class ProgressRingRenderer {
 	}
 
 	#syncAttributes(): void {
-		this.#host.dataset.indeterminate = String(this.#indeterminate)
+		this.#host.dataset['indeterminate'] = String(this.#indeterminate)
 		this.#host.setAttribute('aria-busy', String(this.#indeterminate))
 		if (this.#indeterminate) {
 			this.#host.removeAttribute('aria-valuenow')

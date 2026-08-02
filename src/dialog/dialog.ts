@@ -6,6 +6,7 @@
 import './GooDialog.css'
 
 import type { CheckboxFieldElement } from '../checkbox/_createCheckboxField.ts'
+import { resolveGooOverlayPlacement } from '../overlay-host/_overlayPlacement.ts'
 import {
 	activateModalIsolation,
 	getFocusTrapItems,
@@ -41,27 +42,25 @@ export type GooDialogDefaultFocus = 'ok' | 'cancel' | 'disregard' | 'first' | 'd
 /** Logical edge used by sheet dialogs. */
 export type GooDialogSide = 'start' | 'end'
 
-/** Values collected from dialog fields. */
-export type DialogValues<TValues extends Record<string, unknown> = Record<string, unknown>> =
-	TValues
-
 /** Field element map passed to dialog verification callbacks. */
 export type DialogFieldElements = Map<string, HTMLElement>
 
 /** Verification callback for prompt dialogs. */
-export type DialogVerifyHandler<TValues extends DialogValues = DialogValues> = (
-	values: TValues,
-	fieldElements: DialogFieldElements
-) => boolean | Promise<boolean>
+export type DialogVerifyHandler<TValues extends Record<string, unknown> = Record<string, unknown>> =
+	(values: TValues, fieldElements: DialogFieldElements) => boolean | Promise<boolean>
 
 /**
  * Dialog options for construction
  */
-export interface GooDialogOptions<TValues extends DialogValues = DialogValues> {
+export interface GooDialogOptions<
+	TValues extends Record<string, unknown> = Record<string, unknown>
+> {
 	type?: GooDialogType
 	ariaLabel?: string
 	heading?: string
 	content?: string | Node
+	/** Custom standard-dialog actions. Replaces generated footer buttons when provided. */
+	actions?: Node
 	labels?: DialogLabels
 	fields?: DialogField[]
 	verify?: DialogVerifyHandler<TValues>
@@ -76,6 +75,10 @@ export interface GooDialogOptions<TValues extends DialogValues = DialogValues> {
 	height?: string | number
 	className?: string
 	autoDismiss?: number
+	/** Optional app-owned portal for containing the dialog. */
+	parentElement?: HTMLElement
+	/** Optional modal isolation boundary. Defaults to the portal's owning scope. */
+	isolationRoot?: HTMLElement
 	/** Notify only: cover earlier notifications instead of stacking below them. */
 	overlap?: boolean
 	onOk?: (result: DialogResult<TValues>) => void
@@ -86,7 +89,7 @@ export interface GooDialogOptions<TValues extends DialogValues = DialogValues> {
 /**
  * Dialog result
  */
-export interface DialogResult<TValues extends DialogValues = DialogValues> {
+export interface DialogResult<TValues extends Record<string, unknown> = Record<string, unknown>> {
 	ok?: boolean
 	cancel?: boolean
 	disregard?: boolean
@@ -133,7 +136,9 @@ const DEFAULT_LABELS: DialogLabels = {
 // ============================================================================
 
 /** Public handle returned by `createGooDialog`. */
-export interface GooDialogController<TValues extends DialogValues = DialogValues> {
+export interface GooDialogController<
+	TValues extends Record<string, unknown> = Record<string, unknown>
+> {
 	/** Root dialog element. */
 	readonly element: HTMLElement
 	/** Whether the dialog is currently open. */
@@ -146,6 +151,8 @@ export interface GooDialogController<TValues extends DialogValues = DialogValues
 	open(): Promise<DialogResult<TValues>>
 	/** Replace dialog content. Strings render as text; pass a DOM node for rich content. */
 	setContent(content: string | Node): void
+	/** Replace the heading on dialog layouts that render one. */
+	setHeading(heading: string): void
 }
 
 type DestroyableElement = HTMLElement & { destroy?: () => void }
@@ -172,6 +179,7 @@ class GooDialogControllerRuntime {
 
 	// Internal state
 	declare _content: string | Node
+	declare _actions: Node | undefined
 	declare _labels: DialogLabels
 	declare _fields: DialogField[]
 	declare _verify: DialogVerifyHandler | undefined
@@ -186,6 +194,8 @@ class GooDialogControllerRuntime {
 	declare _elementLifecycle: GooLifecycleBag
 	declare _openLifecycle: GooLifecycleBag
 	declare _closePromise: Promise<void> | null
+	declare _parentElement: HTMLElement
+	declare _isolationRoot: HTMLElement
 
 	// Callback functions
 	declare _onOk: ((result: DialogResult) => void) | undefined
@@ -198,29 +208,33 @@ class GooDialogControllerRuntime {
 	 * @param options - options.
 	 */
 	constructor(options: GooDialogOptions = {}) {
+		const activeElement =
+			document.activeElement instanceof HTMLElement ? document.activeElement : null
+		const placement = resolveGooOverlayPlacement(activeElement)
 		this.$element = document.createElement('div')
 		this.$element.className = 'goo-dialog'
-		this.state = {
-			ariaLabel: undefined,
-			type: 'alert',
-			heading: '',
-			modal: true,
-			showBackdrop: true,
-			showClose: true,
-			closeOnBackdrop: true,
-			closeOnEscape: true,
+		const state: GooDialogState = {
+			type: options.type ?? 'alert',
+			heading: options.heading ?? '',
+			modal: options.modal ?? true,
+			showBackdrop: options.showBackdrop ?? true,
+			showClose: options.showClose ?? true,
+			closeOnBackdrop: options.closeOnBackdrop ?? true,
+			closeOnEscape: options.closeOnEscape ?? true,
 			defaultFocus:
 				options.defaultFocus ??
 				(options.type === 'sheet' || options.type === 'overlay' ? 'first' : 'ok'),
-			side: 'end',
-			width: 'auto',
-			height: 'auto',
-			autoDismiss: 0,
-			overlap: false,
-			...options
+			side: options.side ?? 'end',
+			width: options.width ?? 'auto',
+			height: options.height ?? 'auto',
+			autoDismiss: options.autoDismiss ?? 0,
+			overlap: options.overlap ?? false
 		}
+		if (options.ariaLabel !== undefined) state.ariaLabel = options.ariaLabel
+		this.state = state
 
 		this._content = options.content || ''
+		this._actions = options.actions
 		this._labels = { ...DEFAULT_LABELS, ...options.labels }
 		this._fields = options.fields || []
 		this._verify = options.verify
@@ -240,6 +254,13 @@ class GooDialogControllerRuntime {
 		this._elementLifecycle = createLifecycleBag()
 		this._openLifecycle = createLifecycleBag()
 		this._closePromise = null
+		this._parentElement = options.parentElement ?? placement?.host ?? document.body
+		this._isolationRoot =
+			options.isolationRoot ??
+			placement?.scope ??
+			(this._parentElement === document.body
+				? document.body
+				: (this._parentElement.parentElement ?? this._parentElement))
 		this._createElement()
 	}
 
@@ -307,7 +328,9 @@ class GooDialogControllerRuntime {
 				this.$element,
 				{ type, heading, showClose },
 				this._content,
-				this._fields
+				this._labels,
+				this._fields,
+				this._actions
 			)
 			this.$header = standardElements.$header
 			this.$title = standardElements.$title
@@ -324,11 +347,15 @@ class GooDialogControllerRuntime {
 
 			// Build footer buttons if we have a footer
 			if (this.$footer) {
-				const footerElements = buildFooter(this.$footer, this._labels)
-				this.$okBtn = footerElements.$okBtn
-				this.$cancelBtn = footerElements.$cancelBtn
-				this.$disregardBtn = footerElements.$disregardBtn
-				this.$applyToAll = footerElements.$applyToAll
+				if (this._actions) {
+					appendContent(this.$footer, this._actions)
+				} else {
+					const footerElements = buildFooter(this.$footer, this._labels)
+					this.$okBtn = footerElements.$okBtn
+					this.$cancelBtn = footerElements.$cancelBtn
+					this.$disregardBtn = footerElements.$disregardBtn
+					this.$applyToAll = footerElements.$applyToAll
+				}
 			}
 		}
 
@@ -367,9 +394,10 @@ class GooDialogControllerRuntime {
 	 * Reference the title, or use an explicit/string label, so `role="dialog"` exposes an accessible name.
 	 */
 	_applyAccessibleName() {
-		const instanceId = `goo-dialog-${ ++dialogInstanceCount }`
 		if (this.$title) {
-			if (!this.$title.id) this.$title.id = `${ instanceId }-title`
+			if (!this.$title.id) {
+				this.$title.id = `goo-dialog-${ ++dialogInstanceCount }-title`
+			}
 			this.$element.setAttribute('aria-labelledby', this.$title.id)
 			this.$element.removeAttribute('aria-label')
 			return
@@ -377,10 +405,12 @@ class GooDialogControllerRuntime {
 
 		const label =
 			this.state.ariaLabel || (typeof this._content === 'string' ? this._content.trim() : '')
-		if (!label) return
-
-		this.$element.setAttribute('aria-label', label)
 		this.$element.removeAttribute('aria-labelledby')
+		if (label) {
+			this.$element.setAttribute('aria-label', label)
+		} else {
+			this.$element.removeAttribute('aria-label')
+		}
 	}
 
 	// --------------------------------------------------------------------------
@@ -527,8 +557,8 @@ class GooDialogControllerRuntime {
 	/**
 	 * Gets field values.
 	 */
-	_getFieldValues(): DialogValues {
-		const values: DialogValues = {}
+	_getFieldValues(): Record<string, unknown> {
+		const values: Record<string, unknown> = {}
 		for (const [ name, $el ] of this._fieldElements) {
 			const elWithValue = $el as unknown as {
 				value?: unknown
@@ -548,6 +578,14 @@ class GooDialogControllerRuntime {
 	 * Sets initial focus.
 	 */
 	_setInitialFocus() {
+		const $autofocus = this.$element.querySelector<HTMLElement>(
+			'[autofocus], [data-autofocus="true"]'
+		)
+		if ($autofocus) {
+			$autofocus.focus()
+			return
+		}
+
 		// Focus first field for prompt
 		if (this.state.type === 'prompt' && this._fieldElements.size > 0) {
 			const firstField = this._fieldElements.entries().next()
@@ -651,7 +689,7 @@ class GooDialogControllerRuntime {
 					this._listenOpen(this._$backdrop, 'click', () => this._handleCancel())
 				}
 
-				document.body.appendChild(this._$backdrop)
+				this._parentElement.appendChild(this._$backdrop)
 
 				// Animate backdrop in
 				this._requestOpenFrame(() => this._$backdrop?.classList.add('goo-dialog-backdrop--visible'))
@@ -660,18 +698,20 @@ class GooDialogControllerRuntime {
 			// Set z-index
 			this.$element.style.setProperty('--goo-dialog-z-index', String(dialogManager.getZIndex(this)))
 
-			// Append to body
-			document.body.appendChild(this.$element)
+			this._parentElement.appendChild(this.$element)
 			if (this._isModalDialog()) {
-				this._openLifecycle.add(activateModalIsolation({
-					modal: this.$element,
-					preserve: [ this._$backdrop ]
-				}))
+				this._openLifecycle.add(
+					activateModalIsolation({
+						modal: this.$element,
+						preserve: [ this._$backdrop ],
+						root: this._isolationRoot
+					})
+				)
 			}
 
 			// Animate in
 			this._requestOpenFrame(() => {
-				if (!document.body.contains(this.$element)) return
+				if (!this._parentElement.contains(this.$element)) return
 				reflowNotifyStack()
 				this.$element.setAttribute('open', '')
 				this._setInitialFocus()
@@ -774,6 +814,39 @@ class GooDialogControllerRuntime {
 	}
 
 	/**
+	 * Update the dialog heading without rebuilding the dialog.
+	 * @param heading - heading.
+	 */
+	setHeading(heading: string) {
+		if (this.state.heading === heading) return
+		this.state.heading = heading
+		if (this.state.type === 'notify') return
+
+		if (heading) {
+			if (!this.$header) {
+				this.$header = document.createElement('div')
+				this.$header.className = 'goo-dialog__header'
+				this.$element.insertBefore(this.$header, this.$content)
+			}
+			if (!this.$title) {
+				this.$title = document.createElement('h2')
+				this.$title.className = 'goo-dialog__title'
+				this.$header.prepend(this.$title)
+			}
+			this.$title.textContent = heading
+		} else if (this.$title) {
+			this.$title.remove()
+			this.$title = null
+			if (this.$header?.childElementCount === 0) {
+				this.$header.remove()
+				this.$header = null
+			}
+		}
+
+		this._applyAccessibleName()
+	}
+
+	/**
 	 * Check if dialog is open.
 	 * @returns {boolean}
 	 */
@@ -801,13 +874,15 @@ interface GooDialogControllerRuntime extends GooDialogController {}
  * the classic cover-the-previous behavior.
  */
 function reflowNotifyStack(): void {
-	let offset = 0
+	const offsets = new Map<HTMLElement, number>()
 	for (const managed of dialogManager.getDialogs()) {
 		if (!(managed instanceof GooDialogControllerRuntime)) continue
 		if (managed.state.type !== 'notify' || managed.state.overlap) continue
-		if (!document.body.contains(managed.$element)) continue
+		const parent = managed.$element.parentElement
+		if (!parent) continue
+		const offset = offsets.get(parent) ?? 0
 		managed.$element.style.setProperty('--goo-notify-offset', `${ offset }px`)
-		offset += managed.$element.offsetHeight
+		offsets.set(parent, offset + managed.$element.offsetHeight)
 	}
 }
 
@@ -816,17 +891,11 @@ function reflowNotifyStack(): void {
 // ============================================================================
 
 /**
- * Goo dialog instance.
- */
-export type GooDialogInstance<TValues extends DialogValues = DialogValues> =
-	GooDialogController<TValues>
-
-/**
  * Creates goo dialog.
  *
  * @param options - options.
  */
-export function createGooDialog<TValues extends DialogValues = DialogValues>(
+export function createGooDialog<TValues extends Record<string, unknown> = Record<string, unknown>>(
 	options: GooDialogOptions<TValues> = {}
 ): GooDialogController<TValues> {
 	return new GooDialogControllerRuntime(options as GooDialogOptions) as GooDialogController<TValues>

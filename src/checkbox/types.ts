@@ -6,9 +6,6 @@ import type { GooForwardedAttributes } from '../support/types/forwardedAttribute
 export type GooCheckboxProps = GooForwardedAttributes & {
 
 	/** Current checked state. */
-	value?: boolean
-
-	/** Alias for value. */
 	checked?: boolean
 
 	/** Optional visible label. */

@@ -7,6 +7,7 @@ import type {
 export type NormalizedGooSelectMenu = {
 	arrow: boolean
 	backdrop: boolean
+	dataset?: Record<string, string>
 	offset?: { x?: number; y?: number }
 	outline: boolean
 	placement: GooSelectMenuPlacement

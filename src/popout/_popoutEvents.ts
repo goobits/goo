@@ -8,7 +8,6 @@ export function setupPopoutEventHandlers({
 	dragToMove,
 	element,
 	getArrowElement,
-	initialFocus,
 	isClickInsidePopout,
 	isDestroying,
 	isOpen,
@@ -20,7 +19,6 @@ export function setupPopoutEventHandlers({
 	dragToMove: boolean
 	element: HTMLElement
 	getArrowElement(): HTMLElement | null
-	initialFocus: 'content' | 'popout' | 'none'
 	isClickInsidePopout(target: HTMLElement): boolean
 	isDestroying(): boolean
 	isOpen(): boolean
@@ -28,30 +26,26 @@ export function setupPopoutEventHandlers({
 	reposition(): void
 }): void {
 	if (clickToClose) {
-		lifecycle.timeout(() => {
+		const handlePointerDown = (event: PointerEvent) => {
 			if (!isOpen() || isDestroying()) return
 
-			const handlePointerDown = (event: PointerEvent) => {
-				if (!isOpen() || isDestroying()) return
+			const pointerEvent = toGooPointerEvent(event)
+			const clickedElement = pointerEvent.target as HTMLElement
+			const isInsidePopout = isClickInsidePopout(clickedElement)
 
-				const pointerEvent = toGooPointerEvent(event)
-				const clickedElement = pointerEvent.target as HTMLElement
-				const isInsidePopout = isClickInsidePopout(clickedElement)
-
-				if (typeof clickToClose === 'function') {
-					if (clickToClose(pointerEvent, isInsidePopout)) {
-						void close()
-					}
-				} else if (!isInsidePopout) {
+			if (typeof clickToClose === 'function') {
+				if (clickToClose(pointerEvent, isInsidePopout)) {
 					void close()
 				}
+			} else if (!isInsidePopout) {
+				void close()
 			}
+		}
 
-			lifecycle.listen(document, 'pointerdown', handlePointerDown, { capture: true })
-			// Deterministic hook: outside-click closing is live from here on
-			// (the delay exists so the opening click cannot self-close).
-			element.setAttribute('data-click-to-close-armed', '')
-		}, 100)
+		// Capture is attached after the opening event has already reached its
+		// trigger, so it cannot self-close but is ready for the very next press.
+		lifecycle.listen(document, 'pointerdown', handlePointerDown, { capture: true })
+		element.setAttribute('data-click-to-close-armed', '')
 	}
 
 	lifecycle.listen(window, 'resize', () => {
@@ -64,23 +58,6 @@ export function setupPopoutEventHandlers({
 		setupDragToMove(element, getArrowElement, lifecycle)
 	}
 
-	if (initialFocus !== 'none') {
-		lifecycle.frame(() => {
-			if (isDestroying()) return
-
-			if (initialFocus === 'content') {
-				const focusable = element.querySelector<HTMLElement>(
-					'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-				)
-				if (focusable) {
-					focusable.focus({ preventScroll: true })
-					return
-				}
-			}
-
-			element.focus({ preventScroll: true })
-		})
-	}
 }
 
 function handleWheel(event: WheelEvent, element: HTMLElement): void {

@@ -7,11 +7,13 @@
 
 import './GooPopout.css'
 
+import { resolveGooOverlayPlacement } from '../overlay-host/_overlayPlacement.ts'
 import {
 	applyArrowPosition,
 	applyPosition,
 	calculatePosition,
-	type PositionAvoidRect
+	type PositionAvoidRect,
+	type PositionOptions
 } from '../support/positioning/index.ts'
 import { createLifecycleBag } from '../support/utils/lifecycleBag.ts'
 import {
@@ -20,33 +22,24 @@ import {
 	cancelPopoutAnimation,
 	type PopoutAnimationState
 } from './_popoutAnimation.ts'
-import {
-	createPopoutElement,
-	type PopoutElement
-} from './_popoutElement.ts'
+import { createPopoutElement, type PopoutElement } from './_popoutElement.ts'
 import { setupPopoutEventHandlers } from './_popoutEvents.ts'
 import {
 	capturePopoutFocusTarget,
+	focusInitialPopoutTarget,
 	restorePopoutFocus
 } from './_popoutFocus.ts'
 import { bindImmediatePopoutEscapeToClose } from './_popoutKeyboard.ts'
-import {
-	observeOpenLayoutChanges,
-	stabilizeOpeningLayout
-} from './_popoutLayout.ts'
+import { observeOpenLayoutChanges, stabilizeOpeningLayout } from './_popoutLayout.ts'
 import {
 	getActiveEscapePopout,
 	type GooPopoutRuntime,
-	gooPopoutRuntime as sharedGooPopoutRuntime,
 	registerActivePopout,
-	unregisterActivePopout } from './_popoutRegistry.ts'
-import type {
-	GooPopoutAt,
-	GooPopoutInstance,
-	GooPopoutManager,
-	GooPopoutOptions
-} from './popoutTypes.ts'
+	unregisterActivePopout
+} from './_popoutRegistry.ts'
+import type { GooPopoutAt, GooPopoutInstance, GooPopoutOptions } from './popoutTypes.ts'
 
+export { gooPopoutRuntime } from './_popoutRegistry.ts'
 export type {
 	GooPopoutAt,
 	GooPopoutInstance,
@@ -55,9 +48,6 @@ export type {
 	GooPopoutPointerEvent,
 	PopoutKeepWithin
 } from './popoutTypes.ts'
-
-/** Shared Goo popout registry controls. */
-export const gooPopoutRuntime: GooPopoutManager = sharedGooPopoutRuntime
 
 // =============================================================================
 // Goo Popout Factory
@@ -71,7 +61,7 @@ export const gooPopoutRuntime: GooPopoutManager = sharedGooPopoutRuntime
 export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstance {
 	const {
 		content,
-		parentElement,
+		parentElement: requestedParentElement,
 		ariaLabel = 'Popout',
 		ariaLabelledby,
 		ariaDescribedby,
@@ -79,7 +69,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		at,
 		align: alignInput,
 		offset: offsetInput = { x: 15, y: 15 },
-		keepWithin,
+		keepWithin: requestedKeepWithin,
 		className = '',
 		dataset,
 		attributes,
@@ -123,13 +113,19 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 	const fallbackAlign = alignInput ?? (resolvedRtl ? 'right to left' : 'left to right')
 	let currentAlign = fallbackAlign
 	let currentOffset = { ...offsetInput }
-	const fullScreen = fullScreenOption || !!keepWithin?.fullScreen
+	const fullScreen = fullScreenOption || !!requestedKeepWithin?.fullScreen
 
 	// Parse target
 	let targetElement: HTMLElement | null = null
 	let targetPoint: { x: number; y: number } | null = null
 
 	applyAtConfig(at)
+	const placementAnchor =
+		targetElement ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null)
+	const placement = resolveGooOverlayPlacement(placementAnchor)
+	const parentElement = requestedParentElement ?? placement?.host ?? document.body
+	const keepWithin =
+		requestedKeepWithin ?? (placement ? { element: placement.scope, margin: 15 } : undefined)
 
 	// ==========================================================================
 	// Instance Object
@@ -201,7 +197,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		$element = popoutElement.element
 		$arrow = popoutElement.arrowElement
 		$backdrop = popoutElement.backdropElement
-		resolveParentElement().appendChild($element)
+		parentElement.appendChild($element)
 
 		// Index parent-child chain
 		indexParentChain()
@@ -216,6 +212,18 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 			isOpen: () => opened,
 			lifecycle
 		})
+		setupPopoutEventHandlers({
+			clickToClose,
+			close,
+			dragToMove,
+			element: $element,
+			getArrowElement: () => $arrow,
+			isClickInsidePopout: isClickInsidePopoutChain,
+			isDestroying: () => destroying,
+			isOpen: () => opened,
+			lifecycle,
+			reposition
+		})
 
 		await stabilizeOpeningLayout({
 			element: $element,
@@ -224,19 +232,6 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		})
 		if (!$element || destroying) return
 
-		setupPopoutEventHandlers({
-			clickToClose,
-			close,
-			dragToMove,
-			element: $element,
-			getArrowElement: () => $arrow,
-			initialFocus,
-			isClickInsidePopout: isClickInsidePopoutChain,
-			isDestroying: () => destroying,
-			isOpen: () => opened,
-			lifecycle,
-			reposition
-		})
 		if ($element) {
 			observeOpenLayoutChanges({
 				element: $element,
@@ -255,6 +250,8 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 			state: animationState
 		})
 		if (!$element || destroying || !opened) return
+
+		focusInitialPopoutTarget($element, initialFocus, previousActiveElement)
 
 		// Callback
 		if (onOpen) onOpen({ element: $element, instance })
@@ -390,10 +387,10 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		const keepWithinElement = keepWithin?.element ?? document.documentElement
 		const keepWithinMargin = keepWithin?.margin ?? 15
 
-		const positionOptions = {
-			element: targetElement ?? undefined,
-			x: targetPoint?.x,
-			y: targetPoint?.y,
+		const positionOptions: PositionOptions = {
+			...(targetElement ? { element: targetElement } : {}),
+			...(targetPoint?.x === undefined ? {} : { x: targetPoint.x }),
+			...(targetPoint?.y === undefined ? {} : { y: targetPoint.y }),
 			align: currentAlign,
 			offset: currentOffset,
 			keepWithin: { $element: keepWithinElement, margin: keepWithinMargin },
@@ -402,13 +399,20 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 			rtl: resolvedRtl
 		}
 
-		currentPosition = calculatePosition($element, positionOptions)
+		const viewportPosition = calculatePosition($element, positionOptions)
+		if (parentElement === document.body || parentElement === document.documentElement) {
+			currentPosition = viewportPosition
+		} else {
+			const parentBounds = parentElement.getBoundingClientRect()
+			currentPosition = {
+				...viewportPosition,
+				x: viewportPosition.x - parentBounds.left,
+				y: viewportPosition.y - parentBounds.top
+			}
+		}
 		applyPosition($element, currentPosition)
-		if (currentPosition.maxHeight != null) {
-			$element.style.setProperty(
-				'--goo-popout-available-height',
-				`${ currentPosition.maxHeight }px`
-			)
+		if (currentPosition.maxHeight !== undefined) {
+			$element.style.setProperty('--goo-popout-available-height', `${ currentPosition.maxHeight }px`)
 		} else {
 			$element.style.removeProperty('--goo-popout-available-height')
 		}
@@ -518,16 +522,6 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 
 		currentAvoidRects = normalizeAvoidRects(atConfig.avoidRects)
 		currentAvoidMargin = Number.isFinite(atConfig.avoidMargin) ? atConfig.avoidMargin! : 0
-	}
-
-	/**
-	 * Keep nested overlays inside their owning modal unless the caller explicitly
-	 * selects another portal root.
-	 */
-	function resolveParentElement(): HTMLElement {
-		return parentElement ??
-			targetElement?.closest<HTMLElement>('[data-goo-overlay-root]') ??
-			document.body
 	}
 
 	function normalizeAvoidRects(avoidRects: PositionAvoidRect[] | undefined): PositionAvoidRect[] {

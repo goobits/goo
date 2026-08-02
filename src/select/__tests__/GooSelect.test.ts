@@ -10,6 +10,9 @@ import { DropdownPanel } from '../_dropdownPanel.ts'
 import GooSelect from '../GooSelect.svelte'
 import { createIcon } from '../selectDom.ts'
 import type { GooSelectElement } from '../types.ts'
+import GooSelectControlledHost from './GooSelectControlledHost.svelte'
+import GooSelectEffectHost from './GooSelectEffectHost.svelte'
+import SelectCustomTriggerHost from './SelectCustomTriggerHost.svelte'
 
 describe('GooSelect', () => {
 	afterEach(() => {
@@ -32,6 +35,118 @@ describe('GooSelect', () => {
 		expect(container.querySelector('goo-option')).toBeNull()
 		expect(container.querySelector('.goo-select')?.getAttribute('value')).toBe('b')
 		expect(container.querySelector('.goo-select__trigger-label')?.textContent).toBe('B')
+		expect(container.querySelector('.goo-select__trigger-arrow .lucide-chevron-down')).not.toBeNull()
+	})
+
+	it('renders app-owned custom trigger content without default chrome', () => {
+		const { container } = render(SelectCustomTriggerHost)
+
+		expect(container.querySelector('[data-testid="custom-trigger"]')).not.toBeNull()
+		expect(container.querySelector('.goo-select__trigger-label')).toBeNull()
+		expect(container.querySelector('.goo-select__trigger-arrow')).toBeNull()
+	})
+
+	it('keeps pointer-opened trigger focus as the popout return target', () => {
+		const { container } = render(SelectCustomTriggerHost)
+		const trigger = container.querySelector<HTMLButtonElement>('.goo-select__trigger')!
+
+		trigger.dispatchEvent(pointerEvent('pointerdown', { pointerId: 1 }))
+
+		expect(document.activeElement).toBe(trigger)
+	})
+
+	it('preserves native form submission, required validation, and external label semantics', async() => {
+		const { container } = render(GooSelect, {
+			props: {
+				id: 'genre',
+				name: 'genre',
+				placeholder: 'Choose a genre',
+				required: true,
+				value: '',
+				options: [
+					{ id: 'rock', label: 'Rock' },
+					{ id: 'jazz', label: 'Jazz' }
+				]
+			}
+		})
+		const form = document.createElement('form')
+		const label = document.createElement('label')
+		label.htmlFor = 'genre'
+		label.textContent = 'Genre'
+		form.append(label, container.querySelector('.goo-select')!)
+		document.body.append(form)
+
+		const element = form.querySelector<GooSelectElement>('.goo-select')!
+		const trigger = form.querySelector<HTMLButtonElement>('.goo-select__trigger')!
+		const field = form.querySelector<HTMLSelectElement>('[data-goo-select-field]')!
+
+		expect(trigger.id).toBe('genre')
+		expect(label.control).toBe(trigger)
+		expect(field.name).toBe('genre')
+		expect(field.required).toBe(true)
+		expect(field.options[0]?.textContent).toBe('Choose a genre')
+		expect(form.checkValidity()).toBe(false)
+		await Promise.resolve()
+		expect(trigger.getAttribute('aria-invalid')).toBe('true')
+		expect(document.activeElement).toBe(trigger)
+
+		element.setValue('rock')
+		await tick()
+
+		expect(field.value).toBe('rock')
+		expect(form.checkValidity()).toBe(true)
+		expect(new FormData(form).get('genre')).toBe('rock')
+		expect(trigger.hasAttribute('aria-invalid')).toBe(false)
+	})
+
+	it('forwards descriptive and validation ARIA to the interactive trigger', () => {
+		const { container } = render(GooSelect, {
+			props: {
+				'aria-describedby': 'genre-help',
+				'aria-invalid': 'grammar',
+				'aria-labelledby': 'genre-label',
+				options: [ { id: 'rock', label: 'Rock' } ],
+				value: 'rock'
+			}
+		})
+		const trigger = container.querySelector<HTMLButtonElement>('.goo-select__trigger')!
+
+		expect(trigger.getAttribute('aria-describedby')).toBe('genre-help')
+		expect(trigger.getAttribute('aria-invalid')).toBe('grammar')
+		expect(trigger.getAttribute('aria-labelledby')).toBe('genre-label')
+	})
+
+	it('omits disabled select values from native FormData', () => {
+		const { container } = render(GooSelect, {
+			props: {
+				disabled: true,
+				name: 'genre',
+				value: 'rock',
+				options: [ { id: 'rock', label: 'Rock' } ]
+			}
+		})
+		const form = document.createElement('form')
+		form.append(container.querySelector('.goo-select')!)
+
+		expect(new FormData(form).has('genre')).toBe(false)
+	})
+
+	it('does not track private state in a consumer setOptions effect', async() => {
+		const { container, rerender } = render(GooSelectEffectHost, {
+			props: {
+				options: [ { id: 'a', label: 'Alpha' } ]
+			}
+		})
+		await tick()
+
+		expect(container.querySelector('.goo-select__trigger-label')?.textContent).toBe('Alpha')
+
+		await rerender({
+			options: [ { id: 'a', label: 'Updated' } ]
+		})
+		await tick()
+
+		expect(container.querySelector('.goo-select__trigger-label')?.textContent).toBe('Updated')
 	})
 
 	it('renders string options on the server without browser globals', () => {
@@ -64,7 +179,7 @@ describe('GooSelect', () => {
 
 		const root = container.querySelector<HTMLElement>('.goo-select')
 		const trigger = container.querySelector<HTMLButtonElement>('.goo-select__trigger')
-		const field = container.querySelector<HTMLSelectElement>('.goo-select__form-field')
+		const field = container.querySelector<HTMLSelectElement>('.goo-select__field')
 
 		expect(root?.classList.contains('goo-select--block')).toBe(true)
 		expect(trigger?.id).toBe('option-input')
@@ -124,6 +239,23 @@ describe('GooSelect', () => {
 		expect(onchange.mock.calls[0]?.[0]).toBe('b')
 	})
 
+	it('preserves a controlled selection until its delayed change callback', async() => {
+		const { container } = render(GooSelectControlledHost)
+		const element = container.querySelector<GooSelectElement>('.goo-select')!
+
+		expect(element.open({ autoFocus: false })).toBe(true)
+		await tick()
+
+		const option = document.querySelector<HTMLElement>('.goo-select__option[data-id="b"]')!
+		option.dispatchEvent(pointerEvent('pointerdown', { pointerId: 14 }))
+		option.dispatchEvent(pointerEvent('pointerup', { pointerId: 14 }))
+		await delay(300)
+		await tick()
+
+		expect(element.getValue()).toBe('b')
+		expect(element.querySelector('.goo-select__trigger-label')?.textContent).toBe('B')
+	})
+
 	it('does not emit when setting the current value again', async() => {
 		const onchange = vi.fn()
 		const { container } = render(GooSelect, {
@@ -142,6 +274,26 @@ describe('GooSelect', () => {
 		await tick()
 
 		expect(onchange).not.toHaveBeenCalled()
+	})
+
+	it('runs an option action when choosing the current selected value', async() => {
+		const onChoose = vi.fn()
+		const { container } = render(GooSelect, {
+			props: {
+				value: 'a',
+				options: [
+					{ id: 'a', label: 'A', onChoose },
+					{ id: 'b', label: 'B' }
+				]
+			}
+		})
+		const element = container.querySelector<GooSelectElement>('.goo-select')!
+
+		expect(element.open({ autoFocus: false })).toBe(true)
+		await tick()
+		document.querySelector<HTMLElement>('.goo-select__option[data-id="a"]')?.click()
+
+		expect(onChoose).toHaveBeenCalledWith('a')
 	})
 
 	it('opens a popout from the Svelte root API', async() => {
@@ -164,9 +316,13 @@ describe('GooSelect', () => {
 	})
 
 	it('keeps dialog-owned menus inside the overlay root without stealing trigger focus', async() => {
-		const overlayRoot = document.createElement('section')
-		overlayRoot.dataset.gooOverlayRoot = ''
-		document.body.appendChild(overlayRoot)
+		const overlayScope = document.createElement('section')
+		const contentRoot = document.createElement('main')
+		const overlayRoot = document.createElement('div')
+		overlayScope.dataset.gooOverlayScope = ''
+		overlayRoot.dataset.gooOverlayHost = ''
+		overlayScope.append(contentRoot, overlayRoot)
+		document.body.appendChild(overlayScope)
 		const { container } = render(GooSelect, {
 			props: {
 				value: 'a',
@@ -176,7 +332,7 @@ describe('GooSelect', () => {
 				]
 			}
 		})
-		overlayRoot.appendChild(container)
+		contentRoot.appendChild(container)
 		const element = container.querySelector<GooSelectElement>('.goo-select')!
 		const trigger = container.querySelector<HTMLButtonElement>('.goo-select__trigger')!
 		trigger.focus()
@@ -188,7 +344,7 @@ describe('GooSelect', () => {
 		expect(document.activeElement).toBe(trigger)
 
 		element.close()
-		overlayRoot.remove()
+		overlayScope.remove()
 	})
 
 	it('omits optgroup headers when supported contents collapse to dividers only', async() => {
@@ -250,6 +406,27 @@ describe('GooSelect', () => {
 		expect(document.querySelector('.goo-popout.goo-select-popout.sketch-contextual-menu-popout')).not.toBeNull()
 	})
 
+	it('forwards datasets to the native trigger and menu popout', async() => {
+		const { container } = render(GooSelect, {
+			props: {
+				menu: {
+					dataset: { testid: 'export-menu' }
+				},
+				options: [ { id: 'm3u', label: 'M3U' } ],
+				triggerDataset: { testid: 'export-toggle' }
+			}
+		})
+		const element = container.querySelector<GooSelectElement>('.goo-select')!
+		const trigger = container.querySelector<HTMLButtonElement>('.goo-select__trigger')!
+
+		expect(trigger.dataset.testid).toBe('export-toggle')
+		expect(element.open({ autoFocus: false })).toBe(true)
+		await tick()
+		expect(document.querySelector<HTMLElement>('.goo-select-popout')?.dataset.testid).toBe(
+			'export-menu'
+		)
+	})
+
 	it('applies option row class names without treating labels as markup', async() => {
 		const { container } = render(GooSelect, {
 			props: {
@@ -287,6 +464,88 @@ describe('GooSelect', () => {
 		await tick()
 
 		expect(hideTooltip).toHaveBeenCalledOnce()
+	})
+
+	it('emits typed hover changes with the active option', async() => {
+		const onhoverchange = vi.fn()
+		const { container } = render(GooSelect, {
+			props: {
+				value: 'a',
+				options: [
+					{ id: 'a', label: 'A' },
+					{ id: 'b', label: 'B' }
+				],
+				onhoverchange
+			}
+		})
+		const element = container.querySelector<GooSelectElement>('.goo-select')!
+
+		expect(element.open({ autoFocus: false })).toBe(true)
+		await tick()
+
+		document.querySelector<HTMLElement>('.goo-select__option[data-id="b"]')!
+			.dispatchEvent(new MouseEvent('mouseenter'))
+
+		expect(onhoverchange).toHaveBeenCalledWith('b', {
+			select: element,
+			option: expect.objectContaining({ id: 'b', label: 'B' })
+		})
+	})
+
+	it('renders native link options without changing the selected value', async() => {
+		const onchange = vi.fn()
+		const onChoose = vi.fn()
+		const { container } = render(GooSelect, {
+			props: {
+				value: 'current',
+				showSelectionIndicator: false,
+				menu: {
+					semantics: {
+						containerRole: 'menu',
+						optionRole: 'menuitem',
+						popupRole: 'menu',
+						usesSelectedState: false
+					}
+				},
+				options: [
+					{ id: 'current', label: 'Current' },
+					{
+						id: 'download',
+						label: 'Download',
+						href: '/export.json',
+						target: '_blank',
+						download: 'favorites.json',
+						dataset: { testid: 'download-favorites' },
+						onChoose
+					}
+				],
+				onchange
+			}
+		})
+		const element = container.querySelector<GooSelectElement>('.goo-select')!
+		const trigger = container.querySelector<HTMLButtonElement>('.goo-select__trigger')!
+
+		expect(element.open({ autoFocus: false })).toBe(true)
+		await tick()
+		expect(trigger.getAttribute('role')).toBeNull()
+		expect(trigger.getAttribute('aria-haspopup')).toBe('menu')
+
+		const link = document.querySelector<HTMLAnchorElement>(
+			'.goo-select__option[data-id="download"]'
+		)!
+		link.addEventListener('click', event => event.preventDefault())
+
+		expect(link.pathname).toBe('/export.json')
+		expect(link.target).toBe('_blank')
+		expect(link.rel).toBe('noopener noreferrer')
+		expect(link.download).toBe('favorites.json')
+		expect(link.dataset.testid).toBe('download-favorites')
+
+		link.click()
+
+		expect(onChoose).toHaveBeenCalledExactlyOnceWith('download')
+		expect(element.getValue()).toBe('current')
+		expect(onchange).not.toHaveBeenCalled()
 	})
 
 	it('does not render inline HTML icon strings', () => {
@@ -327,7 +586,7 @@ describe('GooSelect', () => {
 		const selected = document.querySelector<HTMLElement>('.goo-select__option[data-id="b"]')!
 		expect(selected.getAttribute('role')).toBe('option')
 		expect(selected.getAttribute('aria-selected')).toBe('true')
-		expect(selected.querySelector('.goo-select__check svg')).not.toBeNull()
+		expect(selected.querySelector('.goo-select__check .lucide-check')).not.toBeNull()
 	})
 
 	it('marks destructive options with the danger modifier', async() => {
@@ -509,7 +768,7 @@ describe('GooSelect', () => {
 		}
 	})
 
-	it('renders submenu arrows as inline SVG instead of icon-font glyphs', async() => {
+	it('renders submenu arrows with Lucide instead of icon-font glyphs', async() => {
 		const { container } = render(GooSelect, {
 			props: {
 				value: '',
@@ -531,7 +790,7 @@ describe('GooSelect', () => {
 		await tick()
 
 		const arrow = document.querySelector<HTMLElement>('.goo-select__submenu-arrow')!
-		expect(arrow.querySelector('svg')).not.toBeNull()
+		expect(arrow.querySelector('.lucide-chevron-right')).not.toBeNull()
 		expect(arrow.textContent).toBe('')
 	})
 

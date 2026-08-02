@@ -2,7 +2,7 @@
 	import { untrack } from 'svelte'
 	import {
 		createGooSchema,
-		type GooSchema,
+		type GooSchemaElement,
 		type GooSchemaChangeHandler,
 		type GooSchemaCommitEvent,
 		type GooSchemaCommitHandler,
@@ -30,7 +30,7 @@
 		data: GooSchemaData
 		class?: string
 		style?: string
-		instance?: GooSchema | null
+		instance?: GooSchemaElement | null
 		onchange?: GooSchemaDomEventHandler
 		oncommit?: GooSchemaCommitDomEventHandler
 		oninput?: GooSchemaDomEventHandler
@@ -41,7 +41,7 @@
 	}
 
 	let host: HTMLDivElement | null = $state(null)
-	let schemaElement: GooSchema | null = null
+	let schemaElement: GooSchemaElement | null = null
 	let mounted = false
 	let lastCreateKey = ''
 	let lastSchema: GooSchemaType | undefined
@@ -96,7 +96,7 @@
 		controlTypes,
 		class: className = '',
 		style,
-		instance = $bindable<GooSchema | null>(null),
+		instance = $bindable<GooSchemaElement | null>(null),
 		onchange,
 		oncommit,
 		oninput,

@@ -1,10 +1,9 @@
 import { mount, unmount } from 'svelte'
 
 import GooRadioGroup from './GooRadioGroup.svelte'
-import type { GooRadioGroupLayout, GooRadioOptions } from './types.ts'
+import type { GooRadioGroupLayout, GooRadioGroupProps, GooRadioOptions } from './types.ts'
 
 export type RadioGroupFieldOptions = {
-	class?: string
 	className?: string
 	disabled?: boolean
 	layout?: GooRadioGroupLayout
@@ -58,25 +57,24 @@ export function createRadioGroupField(
 
 		unmountRadioGroup()
 
-		instance = mount(GooRadioGroup, {
-			target: field,
-			props: {
-				value: currentValue,
-				options: options.options,
-				name: options.name,
-				disabled: options.disabled,
-				required: options.required,
-				layout: options.layout,
-				class: options.class ?? options.className,
-				style: options.style,
-				tabIndex: options.tabIndex,
-				title: options.title,
-				onchange: (value: string, oldValue?: string) => {
-					currentValue = value
-					options.onchange?.(value, oldValue)
-				}
+		const props: GooRadioGroupProps = {
+			value: currentValue,
+			onchange: (value: string, oldValue?: string) => {
+				currentValue = value
+				options.onchange?.(value, oldValue)
 			}
-		})
+		}
+		if (options.options !== undefined) props.options = options.options
+		if (options.name !== undefined) props.name = options.name
+		if (options.disabled !== undefined) props.disabled = options.disabled
+		if (options.required !== undefined) props.required = options.required
+		if (options.layout !== undefined) props.layout = options.layout
+		if (options.className !== undefined) props.class = options.className
+		if (options.style !== undefined) props.style = options.style
+		if (options.tabIndex !== undefined) props.tabIndex = options.tabIndex
+		if (options.title !== undefined) props.title = options.title
+
+		instance = mount(GooRadioGroup, { target: field, props })
 		radioElement = field.querySelector('.goo-radio-group') as RadioGroupControlElement | null
 	}
 

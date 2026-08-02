@@ -2,6 +2,7 @@
 
 export { default as GooTurnstileField } from './GooTurnstileField.svelte'
 export type {
+	GooTurnstileError,
 	GooTurnstileFieldProps,
 	GooTurnstileSize,
 	GooTurnstileTheme

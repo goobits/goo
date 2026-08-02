@@ -2,6 +2,7 @@ import { render } from '@testing-library/svelte'
 import { createRawSnippet, tick } from 'svelte'
 import { afterEach, describe, expect, it } from 'vitest'
 
+import { activateModalIsolation } from '../../support/keyboard/_focus.ts'
 import GooFocusTrap from '../GooFocusTrap.svelte'
 
 const trapChildren = createRawSnippet(() => ({
@@ -19,6 +20,7 @@ describe('GooFocusTrap', () => {
 	})
 
 	it('isolates the modal, traps Tab, and restores previous focus on unmount', async() => {
+		let clicks = 0
 		const appRoot = document.createElement('main')
 		const opener = document.createElement('button')
 		appRoot.append(opener)
@@ -28,7 +30,9 @@ describe('GooFocusTrap', () => {
 		const { container, unmount } = render(GooFocusTrap, {
 			props: {
 				ariaLabel: 'Modal tools',
-				children: trapChildren
+				children: trapChildren,
+				onclick: () => clicks++,
+				'data-testid': 'modal-tools'
 			}
 		})
 		await tick()
@@ -39,8 +43,11 @@ describe('GooFocusTrap', () => {
 
 		expect(document.activeElement).toBe(first)
 		expect(root.getAttribute('aria-modal')).toBe('true')
+		expect(root.getAttribute('data-testid')).toBe('modal-tools')
 		expect(appRoot.inert).toBe(true)
 		expect(appRoot.getAttribute('aria-hidden')).toBe('true')
+		root.click()
+		expect(clicks).toBe(1)
 
 		last.focus()
 		const tabEvent = dispatchTrapKey(last, 'Tab')
@@ -59,6 +66,28 @@ describe('GooFocusTrap', () => {
 		expect(appRoot.inert).toBe(false)
 		expect(appRoot.getAttribute('aria-hidden')).toBeNull()
 		expect(document.activeElement).toBe(opener)
+	})
+
+	it('isolates sibling branches when the modal is nested in the application shell', () => {
+		const appRoot = document.createElement('main')
+		const background = document.createElement('button')
+		const modalHost = document.createElement('section')
+		const modal = document.createElement('div')
+		modalHost.append(modal)
+		appRoot.append(background, modalHost)
+		document.body.append(appRoot)
+
+		const isolation = activateModalIsolation({ modal })
+
+		expect(appRoot.inert).not.toBe(true)
+		expect(modalHost.inert).not.toBe(true)
+		expect(background.inert).toBe(true)
+		expect(background.getAttribute('aria-hidden')).toBe('true')
+
+		isolation.detach()
+
+		expect(background.inert).toBe(false)
+		expect(background.getAttribute('aria-hidden')).toBeNull()
 	})
 })
 

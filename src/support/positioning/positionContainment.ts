@@ -295,29 +295,23 @@ function chooseAvoidancePosition(
 	avoidRect: PositionAvoidRect
 ): { x: number; y: number } {
 	const base = { x: result.x, y: result.y }
-	const candidates: [AvoidCandidate, AvoidCandidate, AvoidCandidate, AvoidCandidate] = [
-		scoreAvoidCandidate(
-			{ x: avoidRect.left - popoutRect.width, y: result.y },
-			base,
-			popoutRect,
-			bounds,
-			avoidRect
-		),
-		scoreAvoidCandidate({ x: avoidRect.right, y: result.y }, base, popoutRect, bounds, avoidRect),
-		scoreAvoidCandidate(
-			{ x: result.x, y: avoidRect.top - popoutRect.height },
-			base,
-			popoutRect,
-			bounds,
-			avoidRect
-		),
-		scoreAvoidCandidate({ x: result.x, y: avoidRect.bottom }, base, popoutRect, bounds, avoidRect)
-	]
+	const firstCandidate = scoreAvoidCandidate(
+		{ x: avoidRect.left - popoutRect.width, y: result.y },
+		base,
+		popoutRect,
+		bounds,
+		avoidRect
+	)
+	const candidates = [
+		{ x: avoidRect.right, y: result.y },
+		{ x: result.x, y: avoidRect.top - popoutRect.height },
+		{ x: result.x, y: avoidRect.bottom }
+	].map(candidate => scoreAvoidCandidate(candidate, base, popoutRect, bounds, avoidRect))
 
-	return candidates.slice(1).reduce((best, next) => {
+	return candidates.reduce((best, next) => {
 		if (next.overlap !== best.overlap) return next.overlap < best.overlap ? next : best
 		return next.distance < best.distance ? next : best
-	}, candidates[0])
+	}, firstCandidate)
 }
 
 function scoreAvoidCandidate(

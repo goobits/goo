@@ -1,10 +1,10 @@
 import { mount, unmount } from 'svelte'
 
 import GooCheckbox from './GooCheckbox.svelte'
+import type { GooCheckboxProps } from './types.ts'
 
 export type CheckboxFieldOptions = {
 	checked?: boolean
-	class?: string
 	className?: string
 	disabled?: boolean
 	formValue?: string
@@ -14,7 +14,6 @@ export type CheckboxFieldOptions = {
 	style?: string
 	tabIndex?: number
 	title?: string
-	value?: boolean
 }
 
 type MountedCheckbox = ReturnType<typeof mount>
@@ -31,14 +30,13 @@ export type CheckboxFieldElement = HTMLDivElement & {
 	getValue(): boolean
 	setValue(value: boolean): void
 	toggle(value?: boolean): boolean
-	value: boolean
 }
 
 export function createCheckboxField(options: CheckboxFieldOptions = {}): CheckboxFieldElement {
 	const field = document.createElement('div') as CheckboxFieldElement
 	field.className = 'goo-checkbox-field'
 
-	let currentValue = Boolean(options.checked ?? options.value ?? false)
+	let currentValue = Boolean(options.checked ?? false)
 	let instance: MountedCheckbox | null = null
 	let checkboxElement: CheckboxControlElement | null = null
 	let destroyed = false
@@ -58,36 +56,28 @@ export function createCheckboxField(options: CheckboxFieldOptions = {}): Checkbo
 
 		unmountCheckbox()
 
-		instance = mount(GooCheckbox, {
-			target: field,
-			props: {
-				checked: currentValue,
-				disabled: options.disabled,
-				formValue: options.formValue,
-				label: options.label,
-				name: options.name,
-				style: options.style,
-				tabIndex: options.tabIndex,
-				title: options.title,
-				class: options.class ?? options.className,
-				onchange: (value: boolean, oldValue?: boolean) => {
-					currentValue = value
-					options.onchange?.(value, oldValue)
-				}
+		const props: GooCheckboxProps = {
+			checked: currentValue,
+			onchange: (value: boolean, oldValue?: boolean) => {
+				currentValue = value
+				options.onchange?.(value, oldValue)
 			}
-		})
+		}
+		if (options.disabled !== undefined) props.disabled = options.disabled
+		if (options.formValue !== undefined) props.formValue = options.formValue
+		if (options.label !== undefined) props.label = options.label
+		if (options.name !== undefined) props.name = options.name
+		if (options.style !== undefined) props.style = options.style
+		if (options.tabIndex !== undefined) props.tabIndex = options.tabIndex
+		if (options.title !== undefined) props.title = options.title
+		if (options.className !== undefined) props.class = options.className
+
+		instance = mount(GooCheckbox, { target: field, props })
 		checkboxElement = field.querySelector('.goo-checkbox') as CheckboxControlElement | null
 	}
 
 	Object.defineProperties(field, {
 		checked: {
-			configurable: true,
-			get: () => currentValue,
-			set: (value: boolean) => {
-				field.setValue(value)
-			}
-		},
-		value: {
 			configurable: true,
 			get: () => currentValue,
 			set: (value: boolean) => {

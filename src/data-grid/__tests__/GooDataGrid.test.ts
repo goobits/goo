@@ -83,7 +83,7 @@ describe('GooDataGrid', () => {
 		expect(onrowactivate.mock.calls[0]?.[1]).toBe(0)
 	})
 
-	it('activates rows from Spacebar and contains handled row keys', () => {
+	it('activates rows from Space and contains handled row keys', () => {
 		const onrowactivate = vi.fn()
 		const { container } = render(GooDataGrid, {
 			props: {
@@ -96,7 +96,7 @@ describe('GooDataGrid', () => {
 		const parentKeydown = vi.fn()
 		container.addEventListener('keydown', parentKeydown)
 
-		const event = dispatchKey(row, 'Spacebar')
+		const event = dispatchKey(row, ' ')
 
 		expect(event.defaultPrevented).toBe(true)
 		expect(parentKeydown).not.toHaveBeenCalled()

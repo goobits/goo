@@ -9,7 +9,6 @@ let numberValue = $state(2)
 let textareaValue = $state('draft')
 let selectValue = $state('a')
 let checkboxChecked = $state(false)
-let checkboxValue = $state(false)
 
 const selectOptions = [
 	{ id: 'a', label: 'Alpha' },
@@ -22,7 +21,7 @@ const selectOptions = [
 	<GooNumber bind:value={numberValue} name="number-field" />
 	<GooTextarea bind:value={textareaValue} name="textarea-field" />
 	<GooSelect bind:value={selectValue} name="select-field" options={selectOptions} />
-	<GooCheckbox bind:checked={checkboxChecked} bind:value={checkboxValue} name="checkbox-field" formValue="yes" />
+	<GooCheckbox bind:checked={checkboxChecked} name="checkbox-field" formValue="yes" />
 </form>
 
 <output data-testid="input-value">{inputValue}</output>
@@ -30,4 +29,3 @@ const selectOptions = [
 <output data-testid="textarea-value">{textareaValue}</output>
 <output data-testid="select-value">{selectValue}</output>
 <output data-testid="checkbox-checked">{String(checkboxChecked)}</output>
-<output data-testid="checkbox-value">{String(checkboxValue)}</output>

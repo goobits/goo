@@ -126,18 +126,18 @@ function mountPopout(): void {
 	const at = resolveTarget()
 	if (!at || !contentElement) return
 	destroyPopout()
-	contentElement.dataset.gooPopoutStaged = 'true'
+	contentElement.dataset['gooPopoutStaged'] = 'true'
 	contentElement.hidden = true
 	const targetId = getTargetId()
 	currentPopout = createGooPopout({
 		content: contentElement,
 		at,
-		align,
-		offset,
-		keepWithin,
-		parentElement,
+		...(align === undefined ? {} : { align }),
+		...(offset === undefined ? {} : { offset }),
+		...(keepWithin === undefined ? {} : { keepWithin }),
+		...(parentElement === undefined ? {} : { parentElement }),
 		className,
-		dataset,
+		...(dataset === undefined ? {} : { dataset }),
 		attributes: {
 			...attributes,
 			...(targetId ? { for: targetId } : {})

@@ -1,11 +1,10 @@
-import { mount, unmount } from 'svelte'
+import { type Component, mount, unmount } from 'svelte'
 
 import GooInput from './GooInput.svelte'
 import GooNumber from './GooNumber.svelte'
-import type { GooInputType } from './types.ts'
+import type { GooInputProps, GooInputType, GooNumberProps } from './types.ts'
 
 export type TextInputFieldOptions<T = string> = {
-	class?: string
 	className?: string
 	disabled?: boolean
 	multiline?: boolean
@@ -90,34 +89,34 @@ export function createInputField<T = string>(
 
 		unmountInput()
 
-		instance = mount(GooInput, {
-			target: field,
-			props: {
-				value: currentValue,
-				placeholder: options.placeholder,
-				type: options.type,
-				multiline: options.multiline,
-				name: options.name,
-				disabled: options.disabled,
-				readonly: options.readonly,
-				required: options.required,
-				size: options.size,
-				class: options.class ?? options.className,
-				style: options.style,
-				tabIndex: options.tabIndex,
-				title: options.title,
-				oninput: (value: unknown, oldValue?: unknown) => {
-					currentValue = value as T
-					options.oninput?.(value as T, oldValue as T)
-				},
-				onchange: (value: unknown, oldValue?: unknown) => {
-					currentValue = value as T
-					options.onchange?.(value as T, oldValue as T)
-				},
-				onfocus: options.onfocus,
-				onblur: options.onblur
+		const props: GooInputProps<T> = {
+			value: currentValue,
+			oninput: (value: T, oldValue?: T) => {
+				currentValue = value
+				options.oninput?.(value, oldValue)
+			},
+			onchange: (value: T, oldValue?: T) => {
+				currentValue = value
+				options.onchange?.(value, oldValue)
 			}
-		})
+		}
+		if (options.placeholder !== undefined) props.placeholder = options.placeholder
+		if (options.type !== undefined) props.type = options.type
+		if (options.multiline !== undefined) props.multiline = options.multiline
+		if (options.name !== undefined) props.name = options.name
+		if (options.disabled !== undefined) props.disabled = options.disabled
+		if (options.readonly !== undefined) props.readonly = options.readonly
+		if (options.required !== undefined) props.required = options.required
+		if (options.size !== undefined) props.size = options.size
+		if (options.className !== undefined) props.class = options.className
+		if (options.style !== undefined) props.style = options.style
+		if (options.tabIndex !== undefined) props.tabIndex = options.tabIndex
+		if (options.title !== undefined) props.title = options.title
+		if (options.onfocus !== undefined) props.onfocus = options.onfocus
+		if (options.onblur !== undefined) props.onblur = options.onblur
+
+		const InputComponent = GooInput as Component<GooInputProps<T>, MountedTextInput<T>>
+		instance = mount(InputComponent, { target: field, props })
 	}
 
 	Object.defineProperty(field, 'value', {
@@ -171,36 +170,35 @@ export function createNumberField(options: NumberInputFieldOptions = {}): Number
 
 		unmountNumber()
 
-		instance = mount(GooNumber, {
-			target: field,
-			props: {
-				value: currentValue,
-				min: options.min,
-				max: options.max,
-				step: options.step,
-				unit: options.unit,
-				auto: currentAuto,
-				autoLabel: options.autoLabel,
-				onautotoggle: options.onautotoggle,
-				name: options.name,
-				disabled: options.disabled,
-				size: options.size,
-				class: options.class ?? options.className,
-				style: options.style,
-				tabIndex: options.tabIndex,
-				title: options.title,
-				oninput: (value: number, oldValue?: number) => {
-					currentValue = value
-					options.oninput?.(value, oldValue)
-				},
-				onchange: (value: number, oldValue?: number) => {
-					currentValue = value
-					options.onchange?.(value, oldValue)
-				},
-				onfocus: options.onfocus,
-				onblur: options.onblur
+		const props: GooNumberProps = {
+			value: currentValue,
+			auto: currentAuto,
+			oninput: (value: number, oldValue?: number) => {
+				currentValue = value
+				options.oninput?.(value, oldValue)
+			},
+			onchange: (value: number, oldValue?: number) => {
+				currentValue = value
+				options.onchange?.(value, oldValue)
 			}
-		})
+		}
+		if (options.min !== undefined) props.min = options.min
+		if (options.max !== undefined) props.max = options.max
+		if (options.step !== undefined) props.step = options.step
+		if (options.unit !== undefined) props.unit = options.unit
+		if (options.autoLabel !== undefined) props.autoLabel = options.autoLabel
+		if (options.onautotoggle !== undefined) props.onautotoggle = options.onautotoggle
+		if (options.name !== undefined) props.name = options.name
+		if (options.disabled !== undefined) props.disabled = options.disabled
+		if (options.size !== undefined) props.size = options.size
+		if (options.className !== undefined) props.class = options.className
+		if (options.style !== undefined) props.style = options.style
+		if (options.tabIndex !== undefined) props.tabIndex = options.tabIndex
+		if (options.title !== undefined) props.title = options.title
+		if (options.onfocus !== undefined) props.onfocus = options.onfocus
+		if (options.onblur !== undefined) props.onblur = options.onblur
+
+		instance = mount(GooNumber, { target: field, props })
 	}
 
 	Object.defineProperty(field, 'value', {

@@ -2,7 +2,11 @@ import './GooSliderField.css'
 
 import { mount, unmount } from 'svelte'
 
-import { createNumberField, type NumberInputFieldElement } from '../input/_createInputField.ts'
+import {
+	createNumberField,
+	type NumberInputFieldElement,
+	type NumberInputFieldOptions
+} from '../input/_createInputField.ts'
 import { getSliderProps } from '../slider/_sliderProps.ts'
 import GooSlider from '../slider/GooSlider.svelte'
 import { getVarianceValues } from '../slider/sliderUtils.ts'
@@ -18,7 +22,6 @@ import type {
 
 type MountedControl = ReturnType<typeof mount>
 type ValueMode = 'number' | 'array' | 'minmax' | 'xy'
-type GooSliderFieldSliderElement = GooSliderElement
 
 const DEFAULT_MIN = 0
 const DEFAULT_MAX = 100
@@ -32,7 +35,7 @@ export function createSliderField(options: GooSliderFieldOptions = {}): GooSlide
 	const sliderHost = document.createElement('div')
 	const inputHost = document.createElement('div')
 	let sliderInstance: MountedControl | null = null
-	let sliderElement: GooSliderFieldSliderElement | null = null
+	let sliderElement: GooSliderElement | null = null
 	let inputElements: NumberInputFieldElement[] = []
 	let valueMode: ValueMode = detectValueMode(currentOptions.value)
 	let currentValues = normalizeValues(currentOptions.value, currentOptions.min)
@@ -56,7 +59,7 @@ export function createSliderField(options: GooSliderFieldOptions = {}): GooSlide
 	}
 
 	function renderHeader(): void {
-		const label = currentOptions.label || currentOptions.title || ''
+		const label = currentOptions.label || ''
 		labelHost.textContent = label
 		labelHost.hidden = !label
 		headerHost.hidden = !label && !shouldShowInputs(currentOptions)
@@ -79,7 +82,7 @@ export function createSliderField(options: GooSliderFieldOptions = {}): GooSlide
 				},
 				set element(value) {
 					boundSliderElement = value
-					sliderElement = value as GooSliderFieldSliderElement | null
+					sliderElement = value
 				},
 				oninput: (_value: number | number[], data: GooSliderEventData) => {
 					handleSliderEvent(data, 'input')
@@ -89,7 +92,7 @@ export function createSliderField(options: GooSliderFieldOptions = {}): GooSlide
 				}
 			}
 		})
-		sliderElement = (boundSliderElement ?? sliderHost.querySelector('.goo-slider')) as GooSliderFieldSliderElement | null
+		sliderElement = (boundSliderElement ?? sliderHost.querySelector('.goo-slider')) as GooSliderElement | null
 	}
 
 	function unmountSlider(): void {
@@ -109,16 +112,17 @@ export function createSliderField(options: GooSliderFieldOptions = {}): GooSlide
 
 		const nextValues = getSliderValues()
 		nextValues.forEach((value, index) => {
-			const input = createNumberField({
+			const inputOptions: NumberInputFieldOptions = {
 				className: `goo-slider-field__number goo-slider-field__number--index${ index }`,
-				max: currentOptions.max,
-				min: currentOptions.min,
-				step: currentOptions.step,
-				unit: currentOptions.unit,
 				value,
 				oninput: nextValue => handleNumberInput(index, nextValue, 'input'),
 				onchange: nextValue => handleNumberInput(index, nextValue, 'change')
-			})
+			}
+			if (currentOptions.max !== undefined) inputOptions.max = currentOptions.max
+			if (currentOptions.min !== undefined) inputOptions.min = currentOptions.min
+			if (currentOptions.step !== undefined) inputOptions.step = currentOptions.step
+			if (currentOptions.unit !== undefined) inputOptions.unit = currentOptions.unit
+			const input = createNumberField(inputOptions)
 			inputElements.push(input)
 			inputHost.appendChild(input)
 		})
@@ -129,7 +133,7 @@ export function createSliderField(options: GooSliderFieldOptions = {}): GooSlide
 	function handleSliderEvent(data: GooSliderEventData, nextState: GooSliderFieldState): void {
 		state = nextState
 		currentValues = getSliderValues()
-		syncInputs(currentOptions.variance ? undefined : data.index)
+		syncInputs(currentOptions.mode === 'variance' ? undefined : data.index)
 		emit(nextState, data.index, data.value, data.event)
 	}
 
@@ -138,7 +142,7 @@ export function createSliderField(options: GooSliderFieldOptions = {}): GooSlide
 		const previousValues = currentValues
 		const values = previousValues.slice()
 		values[index] = value
-		currentValues = currentOptions.variance || currentOptions.mode === 'variance'
+		currentValues = currentOptions.mode === 'variance'
 			? getVarianceValues(previousValues, index, value, {
 				min: currentOptions.min ?? DEFAULT_MIN,
 				max: currentOptions.max ?? DEFAULT_MAX
@@ -154,19 +158,17 @@ export function createSliderField(options: GooSliderFieldOptions = {}): GooSlide
 		const data: GooSliderFieldEventData = {
 			element,
 			index,
-			originalEvent,
 			slider: sliderElement,
 			state: nextState,
 			value,
-			values: currentValues.slice()
+			values: currentValues.slice(),
+			...(originalEvent === undefined ? {} : { originalEvent })
 		}
 		const nextValue = formatValue(currentValues, valueMode)
 		if (nextState === 'input') {
 			currentOptions.oninput?.(nextValue, data)
-			currentOptions.onInput?.(nextValue, data)
 		} else {
 			currentOptions.onchange?.(nextValue, data)
-			currentOptions.onChange?.(nextValue, data)
 		}
 		element.dispatchEvent(new CustomEvent(nextState, {
 			bubbles: true,
@@ -269,7 +271,7 @@ function buildRootClass(options: GooSliderFieldOptions): string {
 }
 
 function shouldShowInputs(options: GooSliderFieldOptions): boolean {
-	return options.showInputs ?? options.input ?? true
+	return options.showInputs ?? true
 }
 
 function normalizeValues(value: GooSliderFieldValue | undefined, fallbackMin = DEFAULT_MIN): number[] {

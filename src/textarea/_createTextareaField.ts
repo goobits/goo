@@ -1,9 +1,9 @@
 import { mount, unmount } from 'svelte'
 
 import GooTextarea from './GooTextarea.svelte'
+import type { GooTextareaProps } from './types.ts'
 
 export type TextareaFieldOptions = {
-	class?: string
 	className?: string
 	cols?: number
 	disabled?: boolean
@@ -56,33 +56,32 @@ export function createTextareaField(options: TextareaFieldOptions = {}): Textare
 
 		unmountTextarea()
 
-		instance = mount(GooTextarea, {
-			target: field,
-			props: {
-				value: currentValue,
-				placeholder: options.placeholder,
-				name: options.name,
-				rows: options.rows,
-				cols: options.cols,
-				minLength: options.minLength,
-				maxLength: options.maxLength,
-				disabled: options.disabled,
-				readonly: options.readonly,
-				required: options.required,
-				class: options.class ?? options.className,
-				style: options.style,
-				tabIndex: options.tabIndex,
-				title: options.title,
-				oninput: (value: string, oldValue?: string) => {
-					currentValue = value
-					options.oninput?.(value, oldValue)
-				},
-				onchange: (value: string, oldValue?: string) => {
-					currentValue = value
-					options.onchange?.(value, oldValue)
-				}
+		const props: GooTextareaProps = {
+			value: currentValue,
+			oninput: (value: string, oldValue?: string) => {
+				currentValue = value
+				options.oninput?.(value, oldValue)
+			},
+			onchange: (value: string, oldValue?: string) => {
+				currentValue = value
+				options.onchange?.(value, oldValue)
 			}
-		})
+		}
+		if (options.placeholder !== undefined) props.placeholder = options.placeholder
+		if (options.name !== undefined) props.name = options.name
+		if (options.rows !== undefined) props.rows = options.rows
+		if (options.cols !== undefined) props.cols = options.cols
+		if (options.minLength !== undefined) props.minLength = options.minLength
+		if (options.maxLength !== undefined) props.maxLength = options.maxLength
+		if (options.disabled !== undefined) props.disabled = options.disabled
+		if (options.readonly !== undefined) props.readonly = options.readonly
+		if (options.required !== undefined) props.required = options.required
+		if (options.className !== undefined) props.class = options.className
+		if (options.style !== undefined) props.style = options.style
+		if (options.tabIndex !== undefined) props.tabIndex = options.tabIndex
+		if (options.title !== undefined) props.title = options.title
+
+		instance = mount(GooTextarea, { target: field, props })
 	}
 
 	Object.defineProperty(field, 'value', {

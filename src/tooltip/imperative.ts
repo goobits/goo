@@ -90,14 +90,14 @@ function attachTooltip(
 	const instance = createGooTooltip({
 		for: target,
 		content: typeof value === 'string' ? value : '',
-		contentElement: value instanceof HTMLElement ? value : undefined,
+		...(value instanceof HTMLElement ? { contentElement: value } : {}),
 		align: alignFromDirection(options.direction),
-		className: options.className,
-		chromeless: options.chromeless,
+		...(options.className === undefined ? {} : { className: options.className }),
+		...(options.chromeless === undefined ? {} : { chromeless: options.chromeless }),
 		offset: normalizeOffset(options.offset),
 		showDelay: options.showDelay ?? 0,
 		trigger: resolveTrigger(options),
-		interactive: options.interactive
+		...(options.interactive === undefined ? {} : { interactive: options.interactive })
 	})
 	const state: TooltipState = {
 		content,
@@ -192,11 +192,11 @@ function createShowState(content: TooltipContent, options: GooTooltipRuntimeOpti
 		for: target,
 		content: '',
 		align: alignFromDirection(options.direction),
-		className: options.className,
-		chromeless: options.chromeless,
+		...(options.className === undefined ? {} : { className: options.className }),
+		...(options.chromeless === undefined ? {} : { chromeless: options.chromeless }),
 		offset: normalizeOffset(options.offset),
 		trigger: 'manual',
-		interactive: options.interactive
+		...(options.interactive === undefined ? {} : { interactive: options.interactive })
 	})
 
 	return {
@@ -274,7 +274,7 @@ function resolvePoint(options: GooTooltipRuntimeOptions): { x: number; y: number
 
 function resolveElement(element: HTMLElement | string): HTMLElement | undefined {
 	if (typeof element !== 'string') return element
-	return document.querySelector(element) ?? undefined
+	return document.querySelector<HTMLElement>(element) ?? undefined
 }
 
 function resolveContent(content: TooltipContent): string | HTMLElement | undefined {

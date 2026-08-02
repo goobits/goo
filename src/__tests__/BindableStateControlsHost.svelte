@@ -18,7 +18,7 @@ let popoutInstance = $state<GooPopoutInstance | null>(null)
 <button data-testid="close-popout" type="button" onclick={() => { void popoutInstance?.close() }}>Close popout</button>
 <button data-testid="open-dialog" type="button" onclick={() => { dialogOpen = true }}>Open dialog</button>
 
-<GooButton bind:pressed={buttonPressed} toggle value="Toggle" />
+<GooButton bind:pressed={buttonPressed} toggle label="Toggle" />
 <GooDialog bind:open={dialogOpen} heading="Dialog">Dialog body</GooDialog>
 <GooFolder bind:open={folderOpen} title="Folder">Folder body</GooFolder>
 <GooPanel bind:open={panelOpen} title="Panel">Panel body</GooPanel>

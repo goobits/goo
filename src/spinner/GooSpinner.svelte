@@ -1,29 +1,35 @@
 <script lang="ts">
-import './GooSpinner.css'
-import { resolveSpinnerAttrs } from './_spinnerAttrs.ts'
-import type { GooSpinnerProps } from './types.ts'
+	import './GooSpinner.css'
+	import { resolveSpinnerAttrs } from './_spinnerAttrs.ts'
+	import type { GooSpinnerProps } from './types.ts'
 
-let {
-	size,
-	thickness,
-	variant,
-	label = 'Loading',
-	ariaHidden = false,
-	class: className = ''
-}: GooSpinnerProps = $props()
+	let {
+		size,
+		thickness,
+		variant,
+		label = 'Loading',
+		ariaHidden = false,
+		class: className = ''
+	}: GooSpinnerProps = $props()
 
-const resolved = $derived(resolveSpinnerAttrs({ size, thickness, variant }))
+	const resolved = $derived(
+		resolveSpinnerAttrs({
+			...(size === undefined ? {} : { size }),
+			...(thickness === undefined ? {} : { thickness }),
+			...(variant === undefined ? {} : { variant })
+		})
+	)
 
-// Custom presentation attributes (`size`, `variant`) drive CSS selectors; spread
-// so svelte-check does not reject them as unknown attributes on a <div>.
-const hostAttributes = $derived<Record<string, string | undefined>>({
-	size: resolved.sizeAttr,
-	variant: resolved.variantAttr
-})
+	// Custom presentation attributes (`size`, `variant`) drive CSS selectors; spread
+	// so svelte-check does not reject them as unknown attributes on a <div>.
+	const hostAttributes = $derived<Record<string, string | undefined>>({
+		size: resolved.sizeAttr,
+		variant: resolved.variantAttr
+	})
 </script>
 
 <div
-	class={[ 'goo-spinner', className ].filter(Boolean).join(' ')}
+	class={['goo-spinner', className].filter(Boolean).join(' ')}
 	role={ariaHidden ? undefined : 'status'}
 	aria-label={ariaHidden ? undefined : label}
 	aria-hidden={ariaHidden ? 'true' : undefined}

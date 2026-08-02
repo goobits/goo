@@ -8,7 +8,7 @@ describe('schemaFieldBuilder', () => {
 		const options = buildControllerOptions({
 			path: 'size',
 			type: 'slider-field',
-			input: true,
+			showInputs: true,
 			canCross: false,
 			canPush: true,
 			xy: false,
@@ -21,19 +21,19 @@ describe('schemaFieldBuilder', () => {
 			fullWidth: true,
 			modes: [ 'normal', 'multiply' ],
 			ariaLabel: 'Brush size',
-			class: 'brush-size',
+			className: 'brush-size',
 			dataParam: 'size',
 			id: 'brush-size',
 			items: [ { id: 'small' } ],
 			popoutClass: 'brush-size-popout',
 			tabIndex: 2,
-			valueFormat: 'integer',
+			format: 'integer',
 			controlOptions: { compact: true }
 		}, { size: 10 }, 'size', 10)
 
 		expect(options.controlOptions).toEqual({
 			compact: true,
-			input: true,
+			showInputs: true,
 			canCross: false,
 			canPush: true,
 			xy: false,
@@ -46,7 +46,7 @@ describe('schemaFieldBuilder', () => {
 			fullWidth: true,
 			modes: [ 'normal', 'multiply' ],
 			ariaLabel: 'Brush size',
-			class: 'brush-size',
+			className: 'brush-size',
 			dataParam: 'size',
 			id: 'brush-size',
 			items: [ { id: 'small' } ],
@@ -54,6 +54,15 @@ describe('schemaFieldBuilder', () => {
 			tabIndex: 2,
 			format: 'integer'
 		})
+	})
+
+	it('rejects field-owned settings inside controlOptions', () => {
+		expect(() => buildControllerOptions({
+			path: 'size',
+			controlOptions: { min: 1 }
+		}, { size: 10 }, 'size', 10)).toThrow(
+			'GooSchema field "size" must define "min" at the field root, not in controlOptions.'
+		)
 	})
 
 	it('localizes schema labels and keeps only choices whose conditions match', () => {
@@ -67,7 +76,7 @@ describe('schemaFieldBuilder', () => {
 				label: 'textAlign',
 				ariaLabel: 'textAlign',
 				options: [
-					{ id: 'left', label: 'left', tooltip: 'left' },
+					{ id: 'left', label: 'left', title: 'left' },
 					{ id: 'justify-center', label: 'justifyCenter', if: '__ui.advancedAlignment' }
 				]
 			}, { textAlign: 'left' }, 'textAlign', 'left', {
@@ -81,7 +90,7 @@ describe('schemaFieldBuilder', () => {
 				{
 					id: 'left',
 					label: 'translated:left',
-					tooltip: 'translated:left'
+					title: 'translated:left'
 				}
 			])
 		} finally {

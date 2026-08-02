@@ -12,7 +12,7 @@ describe('GooButton', () => {
 	it('renders a native button without a goo-button custom element', () => {
 		const { container } = render(GooButton, {
 			props: {
-				value: 'Save',
+				label: 'Save',
 				variant: 'primary'
 			}
 		})
@@ -29,7 +29,7 @@ describe('GooButton', () => {
 		const onchange = vi.fn()
 		const { container } = render(GooButton, {
 			props: {
-				value: 'Bold',
+				label: 'Bold',
 				toggle: true,
 				onclick,
 				onchange
@@ -48,8 +48,12 @@ describe('GooButton', () => {
 	it('renders an anchor when href is provided', () => {
 		const { container } = render(GooButton, {
 			props: {
+				'aria-label': 'Billing portal',
+				download: 'invoice.pdf',
 				href: '/billing',
-				value: 'Billing',
+				hreflang: 'en',
+				referrerpolicy: 'no-referrer',
+				label: 'Billing',
 				variant: 'secondary'
 			}
 		})
@@ -57,21 +61,47 @@ describe('GooButton', () => {
 		const link = container.querySelector('a.goo-button')
 
 		expect(container.querySelector('button')).toBeNull()
+		expect(link?.getAttribute('aria-label')).toBe('Billing portal')
+		expect(link?.getAttribute('download')).toBe('invoice.pdf')
 		expect(link?.getAttribute('href')).toBe('/billing')
+		expect(link?.getAttribute('hreflang')).toBe('en')
+		expect(link?.getAttribute('referrerpolicy')).toBe('no-referrer')
 		expect(link?.getAttribute('variant')).toBe('secondary')
 	})
 
-	it('maps block to the full-row button class', () => {
+	it('forwards native form attributes to button elements', () => {
 		const { container } = render(GooButton, {
 			props: {
-				block: true,
-				value: 'Continue'
+				autofocus: true,
+				form: 'profile',
+				formaction: '/profile',
+				formmethod: 'post',
+				formValue: 'save',
+				label: 'Save',
+				name: 'intent'
+			}
+		})
+
+		const button = container.querySelector('button.goo-button')
+
+		expect(button?.getAttribute('form')).toBe('profile')
+		expect(button?.getAttribute('formaction')).toBe('/profile')
+		expect(button?.getAttribute('formmethod')).toBe('post')
+		expect(button?.getAttribute('name')).toBe('intent')
+		expect(button?.getAttribute('value')).toBe('save')
+		expect(button?.hasAttribute('autofocus')).toBe(true)
+	})
+
+	it('maps fullRow to the full-row button class', () => {
+		const { container } = render(GooButton, {
+			props: {
+				fullRow: true,
+				label: 'Continue'
 			}
 		})
 
 		const button = container.querySelector('button.goo-button') as HTMLButtonElement
 
-		expect(button.classList.contains('goo-button--block')).toBe(true)
 		expect(button.classList.contains('goo-button--full-row')).toBe(true)
 	})
 
@@ -79,8 +109,8 @@ describe('GooButton', () => {
 		const { container } = render(GooButton, {
 			props: {
 				form: 'delete-form',
-				type: 'submit',
-				value: 'Delete'
+				label: 'Delete',
+				type: 'submit'
 			}
 		})
 
@@ -96,7 +126,7 @@ describe('GooButton', () => {
 		const onmouseleave = vi.fn()
 		render(GooButton, {
 			props: {
-				value: 'Preview',
+				label: 'Preview',
 				onmouseenter,
 				onmouseleave,
 				get element() {
@@ -119,8 +149,8 @@ describe('GooButton', () => {
 	it('keeps title native and renders tooltip as Goo chrome with an arrow', async() => {
 		const { container } = render(GooButton, {
 			props: {
-				tooltip: 'Save changes',
-				value: 'Save'
+				label: 'Save',
+				tooltip: 'Save changes'
 			}
 		})
 		const button = container.querySelector<HTMLButtonElement>('button.goo-button')!

@@ -197,17 +197,12 @@ export function parseAlignment(align: string | AlignmentConfig, rtl = false): Al
 
 	// Expand short form: 'left to right' -> ['left', 'center', 'right', 'center']
 	if (parts.length === 2) {
-		const [ first = 'left', second = 'right' ] = parts
-		parts = [ first, 'center', second, 'center' ]
+		const [ sourceEdge = 'left', targetEdge = 'right' ] = parts
+		parts = [ sourceEdge, 'center', targetEdge, 'center' ]
 	}
 
 	// Normalize edge/position pairs (handles both 'edge position' and 'position edge' formats)
-	const [
-		sourceEdge = 'left',
-		sourcePosition = 'center',
-		targetEdge = getOppositeEdge(sourceEdge),
-		targetPosition = 'center'
-	] = parts
+	const [ sourceEdge = 'left', sourcePosition = 'center', targetEdge = '', targetPosition = 'center' ] = parts
 	const source = normalizeEdgePosition(sourceEdge, sourcePosition)
 	const target = normalizeEdgePosition(targetEdge, targetPosition)
 

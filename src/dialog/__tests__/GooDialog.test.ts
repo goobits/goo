@@ -1,6 +1,8 @@
+import { fireEvent, render } from '@testing-library/svelte'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { createGooDialog, dialogManager, GooConfirm, GooSheet } from '../index.ts'
+import GooDialogActionsHost from './GooDialogActionsHost.svelte'
 
 const nextFrame = () => new Promise(resolve => requestAnimationFrame(resolve))
 
@@ -93,6 +95,47 @@ describe('GooDialog', () => {
 		await expect(resultPromise).resolves.toMatchObject({ ok: true })
 	})
 
+	it('renders reactive custom actions and restores opener focus', async() => {
+		const { getByTestId, queryByText } = render(GooDialogActionsHost)
+		const opener = getByTestId('opener')
+
+		expect(queryByText('Dialog body')).toBeNull()
+
+		opener.focus()
+		await fireEvent.click(opener)
+		await nextFrame()
+
+		const dialog = document.querySelector<HTMLElement>('.goo-dialog[open]')!
+		const footer = dialog.querySelector<HTMLElement>('.goo-dialog__footer--custom')!
+		const save = footer.querySelector<HTMLButtonElement>('button:last-child')!
+
+		expect(dialog.getAttribute('aria-labelledby')).toBeTruthy()
+		expect(footer).not.toBeNull()
+		expect(save.textContent?.trim()).toBe('Save')
+
+		await fireEvent.click(getByTestId('change-heading'))
+		const title = dialog.querySelector<HTMLElement>('.goo-dialog__title')
+		expect(title?.textContent).toBe('Updated actions')
+		expect(dialog.getAttribute('aria-labelledby')).toBe(title?.id)
+
+		await fireEvent.click(save)
+
+		expect(save.disabled).toBe(true)
+		expect(save.textContent?.trim()).toBe('Saving…')
+
+		dialog.dispatchEvent(new KeyboardEvent('keydown', {
+			bubbles: true,
+			cancelable: true,
+			key: 'Escape'
+		}))
+		expect(dialog.textContent).toContain('Dialog body')
+		await new Promise(resolve => setTimeout(resolve, 180))
+
+		expect(getByTestId('open-state').textContent).toBe('false')
+		expect(queryByText('Dialog body')).toBeNull()
+		expect(document.activeElement).toBe(opener)
+	})
+
 	it('treats string content as text instead of HTML', async() => {
 		const dialog = createGooDialog({
 			type: 'alert',
@@ -121,6 +164,37 @@ describe('GooDialog', () => {
 		const content = dialog.element.querySelector<HTMLElement>('.goo-dialog__content')
 		expect(content?.textContent).toBe('<button onclick=alert(1)>Run</button>')
 		expect(content?.querySelector('button')).toBeNull()
+	})
+
+	it('updates its heading and accessible name without rebuilding the dialog', () => {
+		const dialog = createGooDialog({
+			type: 'alert',
+			heading: 'First heading',
+			content: 'Hello'
+		})
+		const element = dialog.element
+		const originalTitleId =
+			element.querySelector<HTMLElement>('.goo-dialog__title')?.id
+
+		dialog.setHeading('Second heading')
+
+		const title = element.querySelector<HTMLElement>('.goo-dialog__title')
+		expect(dialog.element).toBe(element)
+		expect(title?.textContent).toBe('Second heading')
+		expect(title?.id).toBe(originalTitleId)
+		expect(element.getAttribute('aria-labelledby')).toBe(originalTitleId)
+
+		dialog.setHeading('')
+		expect(element.querySelector('.goo-dialog__title')).toBeNull()
+		expect(element.getAttribute('aria-labelledby')).toBeNull()
+		expect(element.getAttribute('aria-label')).toBe('Hello')
+
+		dialog.setHeading('Third heading')
+		const restoredTitle =
+			element.querySelector<HTMLElement>('.goo-dialog__title')
+		expect(restoredTitle?.textContent).toBe('Third heading')
+		expect(element.getAttribute('aria-labelledby')).toBe(restoredTitle?.id)
+		expect(element.getAttribute('aria-label')).toBeNull()
 	})
 
 	it('does not use rich DOM content as the dialog accessible name', () => {
@@ -172,9 +246,10 @@ describe('GooDialog', () => {
 			content: 'Name?',
 			fields: [ { type: 'text', name: 'name' } ],
 			onOk,
-			verify: () => new Promise<boolean>(resolve => {
-				resolveVerify = resolve
-			})
+			verify: () =>
+				new Promise<boolean>(resolve => {
+					resolveVerify = resolve
+				})
 		})
 		const resultPromise = dialog.open()
 		await nextFrame()
@@ -230,6 +305,24 @@ describe('GooDialog', () => {
 		}
 	})
 
+	it('leaves Enter available to custom alert content', async() => {
+		const input = document.createElement('input')
+		const dialog = createGooDialog({
+			type: 'alert',
+			content: input
+		})
+		const resultPromise = dialog.open()
+		await nextFrame()
+
+		const event = dispatchDialogKey(input, 'Enter')
+
+		expect(event.defaultPrevented).toBe(false)
+		expect(dialog.isOpen).toBe(true)
+
+		await dialog.close()
+		await expect(resultPromise).resolves.toEqual({ cancel: true })
+	})
+
 	it('wraps Tab inside the topmost dialog without sentinel elements', async() => {
 		const dialog = createGooDialog({
 			type: 'confirm',
@@ -254,6 +347,26 @@ describe('GooDialog', () => {
 		expect(shiftTabEvent.defaultPrevented).toBe(true)
 		expect(document.activeElement).toBe(ok)
 		expect(dialog.element.querySelector('.goo-dialog__focus-trap')).toBeNull()
+
+		await dialog.close()
+		await expect(resultPromise).resolves.toEqual({ cancel: true })
+	})
+
+	it('honors explicit autofocus content before built-in controls', async() => {
+		const content = document.createElement('section')
+		const input = document.createElement('input')
+		const trailingButton = document.createElement('button')
+		input.dataset['autofocus'] = 'true'
+		content.append(input, trailingButton)
+		const dialog = createGooDialog({
+			type: 'alert',
+			content
+		})
+
+		const resultPromise = dialog.open()
+		await nextFrame()
+
+		expect(document.activeElement).toBe(input)
 
 		await dialog.close()
 		await expect(resultPromise).resolves.toEqual({ cancel: true })
@@ -284,6 +397,40 @@ describe('GooDialog', () => {
 		expect(appRoot.getAttribute('aria-hidden')).toBeNull()
 		expect(document.activeElement).toBe(opener)
 		appRoot.remove()
+		await expect(resultPromise).resolves.toEqual({ cancel: true })
+	})
+
+	it('contains inferred dialogs and modal isolation inside the active app scope', async() => {
+		const scope = document.createElement('section')
+		const content = document.createElement('main')
+		const opener = document.createElement('button')
+		const host = document.createElement('div')
+		const outside = document.createElement('button')
+		scope.dataset.gooOverlayScope = ''
+		host.dataset.gooOverlayHost = ''
+		content.append(opener)
+		scope.append(content, host)
+		document.body.append(scope, outside)
+		opener.focus()
+
+		const dialog = createGooDialog({
+			type: 'alert',
+			content: 'Contained'
+		})
+		const resultPromise = dialog.open()
+		await nextFrame()
+
+		expect(host.contains(dialog.element)).toBe(true)
+		expect(host.querySelector('.goo-dialog-backdrop')).not.toBeNull()
+		expect(content.inert).toBe(true)
+		expect(outside.inert).not.toBe(true)
+
+		await dialog.close()
+
+		expect(content.inert).not.toBe(true)
+		expect(document.activeElement).toBe(opener)
+		scope.remove()
+		outside.remove()
 		await expect(resultPromise).resolves.toEqual({ cancel: true })
 	})
 

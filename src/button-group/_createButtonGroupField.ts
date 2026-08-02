@@ -1,12 +1,11 @@
 import { mount, unmount } from 'svelte'
 
 import GooButtonGroup from './GooButtonGroup.svelte'
-import type { ButtonGroupOptions, GooButtonGroupLayout } from './types.ts'
+import type { ButtonGroupOptions, GooButtonGroupLayout, GooButtonGroupProps } from './types.ts'
 
 export type ButtonGroupFieldOptions = {
 	allowMultiple?: boolean
 	allowToggle?: boolean
-	class?: string
 	className?: string
 	disabled?: boolean
 	layout?: GooButtonGroupLayout
@@ -54,25 +53,24 @@ export function createButtonGroupField(
 
 		unmountButtonGroup()
 
-		instance = mount(GooButtonGroup, {
-			target: field,
-			props: {
-				options: options.options,
-				value: selectedValue,
-				allowMultiple: options.allowMultiple,
-				allowToggle: options.allowToggle,
-				layout: options.layout,
-				disabled: options.disabled,
-				size: options.size,
-				style: options.style,
-				tabIndex: options.tabIndex,
-				class: options.class ?? options.className,
-				onchange: (value: string | string[] | null) => {
-					selectedValue = value
-					options.onchange?.(value)
-				}
+		const props: GooButtonGroupProps = {
+			value: selectedValue,
+			onchange: (value: string | string[] | null) => {
+				selectedValue = value
+				options.onchange?.(value)
 			}
-		})
+		}
+		if (options.options !== undefined) props.options = options.options
+		if (options.allowMultiple !== undefined) props.allowMultiple = options.allowMultiple
+		if (options.allowToggle !== undefined) props.allowToggle = options.allowToggle
+		if (options.layout !== undefined) props.layout = options.layout
+		if (options.disabled !== undefined) props.disabled = options.disabled
+		if (options.size !== undefined) props.size = options.size
+		if (options.style !== undefined) props.style = options.style
+		if (options.tabIndex !== undefined) props.tabIndex = options.tabIndex
+		if (options.className !== undefined) props.class = options.className
+
+		instance = mount(GooButtonGroup, { target: field, props })
 	}
 
 	Object.defineProperties(field, {

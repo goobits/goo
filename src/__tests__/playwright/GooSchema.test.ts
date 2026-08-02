@@ -91,9 +91,9 @@ test.describe('GooSchema', () => {
 					showLabel: false,
 					type: 'button-group',
 					options: [
-						{ icon: 'test-icon', label: 'Archimedean', value: 'archimedean' },
-						{ icon: 'test-icon', label: 'Logarithmic', value: 'logarithmic' },
-						{ icon: 'test-icon', label: 'Rosette', value: 'rosette' }
+						{ id: 'archimedean', icon: 'test-icon', label: 'Archimedean' },
+						{ id: 'logarithmic', icon: 'test-icon', label: 'Logarithmic' },
+						{ id: 'rosette', icon: 'test-icon', label: 'Rosette' }
 					]
 				} ],
 				data: { variant: 'archimedean' },
@@ -103,7 +103,7 @@ test.describe('GooSchema', () => {
 			document.getElementById('test-container')!.appendChild(host)
 		})
 
-		const title = page.locator('.goo-button[data-key="archimedean"] .goo-button__title')
+		const title = page.locator('.goo-button[data-id="archimedean"] .goo-button__title')
 		await expect(title).toBeVisible()
 		const state = await title.evaluate(element => {
 			const style = getComputedStyle(element)
@@ -124,7 +124,7 @@ test.describe('GooSchema', () => {
 			whiteSpace: 'nowrap'
 		})
 
-		const button = page.locator('.goo-button[data-key="archimedean"]')
+		const button = page.locator('.goo-button[data-id="archimedean"]')
 		await expect(button).not.toHaveAttribute('title')
 		const icon = button.locator('.goo-button__icon')
 		await icon.evaluate(element => {
@@ -152,8 +152,8 @@ test.describe('GooSchema', () => {
 		})
 
 		const group = page.locator('.goo-button-group')
-		const selectedButton = group.locator('.goo-button[data-key="Left"]')
-		const hoverButton = group.locator('.goo-button[data-key="Center"]')
+		const selectedButton = group.locator('.goo-button[data-id="Left"]')
+		const hoverButton = group.locator('.goo-button[data-id="Center"]')
 		await group.evaluate(element => {
 			const style = (element as HTMLElement).style
 			style.setProperty('--goo-button-group-indicator-inset-block', '2px')

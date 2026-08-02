@@ -10,6 +10,7 @@ describe('createGooContextMenu', () => {
 		GooContextMenu.get('unsafe-menu')?.destroy()
 		GooContextMenu.get('managed-destroy')?.destroy()
 		GooContextMenu.get('managed-set-value')?.destroy()
+		GooContextMenu.get('managed-open-state')?.destroy()
 		GooContextMenu.get('replace-menu')?.destroy()
 		GooContextMenu.get('reposition-menu')?.destroy()
 		document.querySelectorAll('.goo-popout').forEach(element => element.remove())
@@ -70,6 +71,48 @@ describe('createGooContextMenu', () => {
 		expect(document.querySelector('.goo-popout.goo-context-menu-popout')).not.toBeNull()
 
 		await menu.destroy()
+	})
+
+	it('synchronizes close state after choosing a submenu item', async() => {
+		const onclose = vi.fn()
+		const menu = createGooContextMenu({
+			onclose,
+			options: [
+				{
+					id: 'insert',
+					label: 'Insert',
+					type: 'submenu',
+					options: [
+						{ id: 'image', label: 'Image' }
+					]
+				}
+			]
+		})
+		const anchor = document.createElement('button')
+		document.body.append(menu, anchor)
+		await tick()
+
+		expect(menu.open({ at: anchor })).toBe(true)
+		await Promise.resolve()
+
+		const submenuOwner = document.querySelector<HTMLElement>(
+			'.goo-context-menu-popout .goo-select__option[data-id="insert"]'
+		)
+		submenuOwner?.dispatchEvent(new MouseEvent('pointerup', { button: 0 }))
+		await Promise.resolve()
+
+		const leaf = document.querySelector<HTMLElement>(
+			'.goo-select-submenu-popout .goo-select__option[data-id="image"]'
+		)
+		leaf?.dispatchEvent(new MouseEvent('pointerup', { button: 0 }))
+		await Promise.resolve()
+
+		expect(menu.isOpen()).toBe(false)
+		expect(onclose).toHaveBeenCalledOnce()
+		expect(menu.open({ at: anchor })).toBe(true)
+
+		await menu.destroy()
+		anchor.remove()
 	})
 
 	it('renders managed string labels as text instead of HTML', async() => {
@@ -403,6 +446,34 @@ describe('createGooContextMenu', () => {
 		host.remove()
 	})
 
+	it('restores an anchored menu button after Escape', async() => {
+		const menu = createGooContextMenu({
+			options: [
+				{ id: 'copy', label: 'Copy' }
+			]
+		})
+		const host = document.createElement('button')
+		document.body.append(menu, host)
+		host.focus()
+		await tick()
+
+		expect(menu.open({ at: host, autoFocus: true })).toBe(true)
+		await delay(550)
+		expect(document.activeElement).not.toBe(host)
+
+		document.dispatchEvent(new KeyboardEvent('keydown', {
+			bubbles: true,
+			cancelable: true,
+			key: 'Escape'
+		}))
+
+		expect(menu.isOpen()).toBe(false)
+		expect(document.activeElement).toBe(host)
+
+		await menu.destroy()
+		host.remove()
+	})
+
 	it('closes an open menu on an attached contextmenu event', async() => {
 		const onclose = vi.fn()
 		const menu = createGooContextMenu({
@@ -615,6 +686,23 @@ describe('createGooContextMenu', () => {
 
 		menu.element.dispatchEvent(new CustomEvent('open'))
 		expect(onOpen).not.toHaveBeenCalled()
+	})
+
+	it('arms managed close cleanup synchronously after opening', () => {
+		const onClose = vi.fn()
+		const onOpen = vi.fn()
+		const menu = GooContextMenu.register('managed-open-state', [
+			{ id: 'copy', label: 'Copy' }
+		], { onClose, onOpen })
+
+		expect(menu.open({ at: { x: 10, y: 10 } })).toBe(true)
+		expect(GooContextMenu.getCurrent()).toBe(menu)
+		expect(onOpen).toHaveBeenCalledOnce()
+		menu.close()
+
+		expect(onClose).toHaveBeenCalledOnce()
+		expect(GooContextMenu.getCurrent()).toBeUndefined()
+		menu.destroy()
 	})
 
 	it('binds managed setValue actions to the menu handle', () => {

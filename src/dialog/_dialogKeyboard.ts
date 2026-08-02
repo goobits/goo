@@ -10,13 +10,7 @@ export type DialogKeyboardOptions = {
 
 export function handleDialogKeyboardEvent(
 	event: KeyboardEvent,
-	{
-		closeOnEscape,
-		isTopDialog,
-		okButton,
-		onCancel,
-		onOk
-	}: DialogKeyboardOptions
+	{ closeOnEscape, isTopDialog, okButton, onCancel, onOk }: DialogKeyboardOptions
 ): boolean {
 	if (!isTopDialog()) {
 		return false
@@ -28,12 +22,12 @@ export function handleDialogKeyboardEvent(
 		return true
 	}
 
-	if (event.key !== 'Enter') {
+	if (event.key !== 'Enter' || !okButton) {
 		return false
 	}
 
-	const activeElement = document.activeElement
-	if (activeElement === okButton || !isDialogTextEntryElement(activeElement)) {
+	const targetElement = event.target instanceof Element ? event.target : document.activeElement
+	if (targetElement === okButton || !isDialogTextEntryElement(targetElement)) {
 		containKeyboardEvent(event)
 		onOk()
 		return true
@@ -52,7 +46,5 @@ function isDialogTextEntryElement(element: Element | null): boolean {
 	}
 
 	const tagName = element.tagName
-	return tagName === 'INPUT'
-		|| tagName === 'TEXTAREA'
-		|| tagName === 'SELECT'
+	return tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT'
 }

@@ -28,25 +28,71 @@ describe('GooPopout', () => {
 		target.remove()
 	})
 
-	it('inherits the nearest overlay root as its portal owner', async() => {
-		const overlayRoot = document.createElement('section')
+	it('dismisses on the first outside pointer press after opening', async() => {
+		const target = document.createElement('button')
+		const outside = document.createElement('button')
+		const content = document.createElement('div')
+		document.body.append(target, outside)
+		const instance = createGooPopout({ at: target, content, openImmediately: false })
+
+		try {
+			const openPromise = instance.open()
+			expect(instance.isOpen()).toBe(true)
+
+			outside.dispatchEvent(new PointerEvent('pointerdown', {
+				bubbles: true,
+				cancelable: true
+			}))
+
+			expect(instance.isOpen()).toBe(false)
+			await openPromise
+		} finally {
+			await instance.destroy()
+			target.remove()
+			outside.remove()
+		}
+	})
+
+	it('infers an app overlay host and applies coordinates within that host', async() => {
+		const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect
+		const scope = document.createElement('section')
+		const contentRoot = document.createElement('main')
+		const host = document.createElement('div')
 		const target = document.createElement('button')
 		const content = document.createElement('div')
-		overlayRoot.dataset.gooOverlayRoot = ''
-		overlayRoot.appendChild(target)
-		document.body.appendChild(overlayRoot)
+		scope.dataset.gooOverlayScope = ''
+		host.dataset.gooOverlayHost = ''
+		contentRoot.append(target)
+		scope.append(contentRoot, host)
+		document.body.append(scope)
+		HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
+			if (this === document.documentElement) return rect(0, 0, 800, 600)
+			if (this === scope || this === host) return rect(100, 50, 400, 300)
+			if (this === target) return rect(140, 90, 20, 20)
+			if (this.classList.contains('goo-popout')) return rect(0, 0, 80, 40)
+			return originalGetBoundingClientRect.call(this)
+		}
+
 		const instance = createGooPopout({
 			at: target,
 			content,
+			align: 'top left to bottom left',
+			offset: { x: 0, y: 0 },
 			openImmediately: false
 		})
 
-		await instance.open()
+		try {
+			await instance.open()
 
-		expect(instance.element?.parentElement).toBe(overlayRoot)
-
-		await instance.destroy()
-		overlayRoot.remove()
+			expect(instance.element?.parentElement).toBe(host)
+			expect(instance.position).toMatchObject({ x: 40, y: 60 })
+			expect(instance.element?.style.left).toBe('40px')
+			expect(instance.element?.style.top).toBe('60px')
+		} finally {
+			await instance.destroy()
+			scope.remove()
+			HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect
+		}
 	})
 
 	it('keeps every sibling child popout inside its parent click boundary', async() => {
@@ -159,6 +205,71 @@ describe('GooPopout', () => {
 			target.remove()
 			HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect
 		}
+	})
+
+	it('focuses the first content control after opening and restores its opener', async() => {
+		const target = document.createElement('button')
+		const content = document.createElement('div')
+		const firstControl = document.createElement('button')
+		content.appendChild(firstControl)
+		document.body.appendChild(target)
+		target.focus()
+		const instance = createGooPopout({
+			at: target,
+			content,
+			initialFocus: 'content',
+			openImmediately: false
+		})
+
+		await instance.open()
+		expect(document.activeElement).toBe(firstControl)
+
+		await instance.destroy()
+		expect(document.activeElement).toBe(target)
+		target.remove()
+	})
+
+	it('preserves focus moved by the user while the popout is opening', async() => {
+		const target = document.createElement('button')
+		const content = document.createElement('div')
+		const firstControl = document.createElement('button')
+		const userFocusedControl = document.createElement('button')
+		content.append(firstControl, userFocusedControl)
+		document.body.appendChild(target)
+		target.focus()
+		const instance = createGooPopout({
+			at: target,
+			content,
+			initialFocus: 'content',
+			openImmediately: false
+		})
+
+		const opening = instance.open()
+		userFocusedControl.focus()
+		await opening
+
+		expect(document.activeElement).toBe(userFocusedControl)
+
+		await instance.destroy()
+		target.remove()
+	})
+
+	it('skips hidden content controls when choosing initial focus', async() => {
+		const content = document.createElement('div')
+		const hiddenControl = document.createElement('button')
+		const visibleControl = document.createElement('button')
+		hiddenControl.style.visibility = 'hidden'
+		content.append(hiddenControl, visibleControl)
+		const instance = createGooPopout({
+			content,
+			initialFocus: 'content',
+			openImmediately: false
+		})
+
+		await instance.open()
+		expect(document.activeElement).toBe(visibleControl)
+
+		await instance.destroy()
 	})
 
 	it('reports the resolved arrow side after containment flips horizontally', async() => {

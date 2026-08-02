@@ -74,7 +74,6 @@ export class SubmenuPopoutController {
 		const textDirection = getElementTextDirection($item)
 		this.#popout = createGooPopout({
 			content: this.#createSubmenuFrame($nextSubmenu),
-			parentElement: document.body,
 			className: 'goo-menu-popout goo-select-submenu-popout goo-select-submenu-popout--morph',
 			clickToClose: false,
 			escapeToClose: false,
@@ -301,7 +300,7 @@ export class SubmenuPopoutController {
 		if (!this.#activeOwner || !side) return
 
 		this.#clearOwnerPlacement(this.#activeOwner)
-		this.#activeOwner.dataset.submenuSide = side
+		this.#activeOwner.dataset['submenuSide'] = side
 		this.#activeOwner.classList.add(`goo-select__option--submenu-open-${ side }`)
 	}
 

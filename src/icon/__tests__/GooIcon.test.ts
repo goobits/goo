@@ -58,7 +58,7 @@ describe('GooIcon', () => {
 	})
 
 	it('renders inert placeholders for raw HTML callers', () => {
-		const html = renderIconPlaceholderHtml({ value: 'save', size: 24 })
+		const html = renderIconPlaceholderHtml({ className: 'save-icon', value: 'save', size: 24 })
 		const container = document.createElement('div')
 		container.innerHTML = html
 
@@ -66,6 +66,7 @@ describe('GooIcon', () => {
 
 		expect(container.querySelector('goo-icon')).toBeNull()
 		expect(icon?.getAttribute('data-goo-icon')).toBe('save')
+		expect(icon?.classList.contains('save-icon')).toBe(true)
 		expect(icon?.getAttribute('data-value')).toBe('save')
 		expect(icon?.getAttribute('data-size')).toBe('24px')
 		expect((icon as HTMLElement | null)?.style.width).toBe('24px')

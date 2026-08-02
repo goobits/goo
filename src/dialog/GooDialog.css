@@ -32,6 +32,7 @@
 		(var(--goo-theme-space-sm) + var(--goo-theme-space-2xs)) * -1
 	);
 	--goo-dialog-alert-close-size: var(--goo-theme-control-height-sm);
+	--goo-dialog-boundary-inset: var(--goo-theme-space-lg);
 	--goo-dialog-content-line-height: 1.6;
 	--goo-dialog-max-height: 80vh;
 	--goo-dialog-max-width: min(calc(var(--goo-theme-control-height-lg) * 15), 90vw);
@@ -60,8 +61,14 @@
 	border-radius: var(--goo-dialog-border-radius, var(--goo-theme-radius-lg));
 	box-shadow: var(--goo-dialog-shadow, var(--goo-theme-shadow-md));
 	color: var(--goo-dialog-fg, var(--goo-theme-fg));
-	max-width: var(--goo-dialog-max-width);
-	max-height: var(--goo-dialog-max-height);
+	max-width: min(
+		var(--goo-dialog-max-width),
+		calc(100% - var(--goo-dialog-boundary-inset) - var(--goo-dialog-boundary-inset))
+	);
+	max-height: min(
+		var(--goo-dialog-max-height),
+		calc(100% - var(--goo-dialog-boundary-inset) - var(--goo-dialog-boundary-inset))
+	);
 	width: fit-content;
 	height: fit-content;
 	padding: 0;
@@ -111,10 +118,7 @@
 	align-items: center;
 	justify-content: space-between;
 	padding: var(--goo-theme-space-lg) var(--goo-theme-space-xl);
-	background: var(
-		--goo-dialog-header-bg,
-		var(--goo-theme-surface-raised)
-	);
+	background: var(--goo-dialog-header-bg, var(--goo-theme-surface-raised));
 	border-radius: var(--goo-dialog-border-radius, var(--goo-theme-radius-lg))
 		var(--goo-dialog-border-radius, var(--goo-theme-radius-lg)) 0 0;
 	border-bottom: 1px solid var(--goo-theme-border);
@@ -188,13 +192,18 @@
 	justify-content: center;
 	gap: var(--goo-theme-space-sm);
 	padding: var(--goo-theme-space-lg) var(--goo-theme-space-xl);
-	background: var(
-		--goo-dialog-footer-bg,
-		var(--goo-theme-surface-raised)
-	);
+	background: var(--goo-dialog-footer-bg, var(--goo-theme-surface-raised));
 	border-radius: 0 0 var(--goo-dialog-border-radius, var(--goo-theme-radius-lg))
 		var(--goo-dialog-border-radius, var(--goo-theme-radius-lg));
 	border-top: 1px solid var(--goo-theme-border);
+}
+
+.goo-dialog__footer--custom {
+	justify-content: flex-end;
+}
+
+.goo-dialog__actions {
+	display: contents;
 }
 
 /* Apply to all checkbox */
@@ -211,11 +220,7 @@
 .goo-dialog__ok-btn {
 	--goo-button-bg: var(--goo-theme-accent);
 	--goo-button-fg: var(--goo-theme-accent-fg);
-	--goo-button-bg-hover: color-mix(
-		in srgb,
-		var(--goo-theme-accent) 88%,
-		var(--goo-theme-fg)
-	);
+	--goo-button-bg-hover: color-mix(in srgb, var(--goo-theme-accent) 88%, var(--goo-theme-fg));
 }
 
 /* Alert type - simple message with close */
@@ -412,11 +417,7 @@
 }
 
 .goo-dialog.goo-dialog--overlay .goo-dialog__close:hover {
-	background: color-mix(
-		in srgb,
-		var(--goo-theme-accent) 88%,
-		var(--goo-theme-fg)
-	);
+	background: color-mix(in srgb, var(--goo-theme-accent) 88%, var(--goo-theme-fg));
 	transform: scale(1.1);
 	box-shadow:
 		0 0 0 var(--goo-dialog-overlay-close-ring-width)

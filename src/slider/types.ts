@@ -22,7 +22,7 @@ export type GooSliderThumb = {
 	value: number
 }
 
-/** Slider semantic mode. Existing value-shape inference is preserved when omitted. */
+/** Slider semantic mode. Value-shape inference is used when omitted. */
 export type GooSliderMode = 'range' | 'value' | 'variance'
 
 /** Slider scale mapping used to convert values to track percentages. */
@@ -101,7 +101,7 @@ export type GooSliderProps = GooForwardedAttributes & {
 	/** Slider direction. */
 	direction?: GooSliderDirection
 
-	/** Explicit slider mode. When omitted, the slider infers mode from `value` and `variance`. */
+	/** Explicit slider mode. When omitted, the slider infers mode from `value`. */
 	mode?: GooSliderMode
 
 	/** Preset track style. */
@@ -127,9 +127,6 @@ export type GooSliderProps = GooForwardedAttributes & {
 
 	/** Show coverage fill. */
 	coverage?: boolean
-
-	/** Keep a three-thumb range as `[low, base, high]` with low/high mirrored around base. */
-	variance?: boolean
 
 	/** Optional ticks on the slider track. `true` renders 10 intervals. */
 	ticks?: GooSliderTickConfig
