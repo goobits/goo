@@ -36,6 +36,30 @@ describe('GooTooltip', () => {
 		button.remove()
 	})
 
+	it('uses the nearest app-owned overlay host', () => {
+		const scope = document.createElement('section')
+		const content = document.createElement('main')
+		const host = document.createElement('div')
+		const button = document.createElement('button')
+		scope.dataset['gooOverlayScope'] = ''
+		host.dataset['gooOverlayHost'] = ''
+		content.append(button)
+		scope.append(content, host)
+		document.body.append(scope)
+		const instance = gooTooltip.createGooTooltip({
+			for: button,
+			content: 'Save',
+			trigger: 'manual'
+		})
+
+		instance.show()
+
+		expect(instance.element?.parentElement).toBe(host)
+
+		instance.destroy()
+		scope.remove()
+	})
+
 	it('dismisses a standalone tooltip on Escape without consuming the key', () => {
 		const button = document.createElement('button')
 		document.body.appendChild(button)
