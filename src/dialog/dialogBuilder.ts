@@ -134,7 +134,6 @@ export function buildStandardLayout(
 	$dialog: HTMLElement,
 	state: DialogState,
 	content: string | Node,
-	labels: DialogLabels,
 	fields: DialogField[],
 	actions?: Node
 ): DialogElements {
