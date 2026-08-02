@@ -1,8 +1,10 @@
 import { fireEvent, render } from '@testing-library/svelte'
+import { tick } from 'svelte'
 import { describe, expect, it, vi } from 'vitest'
 
 import { iconRegistry } from '../../icon/registry.ts'
 import GooButtonGroup from '../GooButtonGroup.svelte'
+import GooButtonGroupChildrenHost from './GooButtonGroupChildrenHost.svelte'
 
 describe('GooButtonGroup', () => {
 	it('renders registered icon names and keeps CSS icon classes as a fallback', () => {
@@ -10,14 +12,14 @@ describe('GooButtonGroup', () => {
 		const { container } = render(GooButtonGroup, {
 			props: {
 				options: [
-					{ key: 'registered', value: 'Registered', icon: 'button-group-test-icon' },
-					{ key: 'class', value: 'Class', icon: 'legacy-icon-class' }
+					{ id: 'registered', label: 'Registered', icon: 'button-group-test-icon' },
+					{ id: 'class', label: 'Class', icon: 'custom-icon-class' }
 				]
 			}
 		})
 
-		expect(container.querySelector('[data-key="registered"] .goo-icon svg')).not.toBeNull()
-		expect(container.querySelector('[data-key="class"] .legacy-icon-class')).not.toBeNull()
+		expect(container.querySelector('[data-id="registered"] .goo-icon svg')).not.toBeNull()
+		expect(container.querySelector('[data-id="class"] .custom-icon-class')).not.toBeNull()
 	})
 
 	it('renders option buttons without a custom element host', () => {
@@ -25,9 +27,9 @@ describe('GooButtonGroup', () => {
 			props: {
 				value: 'center',
 				options: [
-					{ key: 'left', value: 'Left' },
-					{ key: 'center', value: 'Center' },
-					{ key: 'right', value: 'Right' }
+					{ id: 'left', label: 'Left' },
+					{ id: 'center', label: 'Center' },
+					{ id: 'right', label: 'Right' }
 				]
 			}
 		})
@@ -37,29 +39,45 @@ describe('GooButtonGroup', () => {
 		expect(container.querySelector('goo-button-group')).toBeNull()
 		expect(group?.getAttribute('role')).toBe('group')
 		expect(group?.getAttribute('tabindex')).toBeNull()
-		expect(group?.querySelector('.goo-button[data-key="left"]')?.getAttribute('tabindex')).toBe('-1')
-		expect(group?.querySelector('.goo-button[data-key="center"]')?.getAttribute('tabindex')).toBe('0')
-		expect(group?.querySelector('.goo-button[data-key="center"]')?.classList.contains('goo-button--selected')).toBe(true)
+		expect(group?.querySelector('.goo-button[data-id="left"]')?.getAttribute('tabindex')).toBe('-1')
+		expect(group?.querySelector('.goo-button[data-id="center"]')?.getAttribute('tabindex')).toBe('0')
+		expect(group?.querySelector('.goo-button[data-id="center"]')?.classList.contains('goo-button--selected')).toBe(true)
 	})
 
-	it('emits the changed key and updates single selection', async() => {
+	it('emits the changed id and updates single selection', async() => {
 		const onchange = vi.fn()
 		const { container } = render(GooButtonGroup, {
 			props: {
 				value: 'left',
 				onchange,
 				options: [
-					{ key: 'left', value: 'Left' },
-					{ key: 'right', value: 'Right' }
+					{ id: 'left', label: 'Left' },
+					{ id: 'right', label: 'Right' }
 				]
 			}
 		})
 
-		await fireEvent.click(container.querySelector('.goo-button[data-key="right"]')!)
+		await fireEvent.click(container.querySelector('.goo-button[data-id="right"]')!)
 
 		expect(onchange).toHaveBeenCalledExactlyOnceWith('right')
-		expect(container.querySelector('.goo-button[data-key="left"]')?.classList.contains('goo-button--selected')).toBe(false)
-		expect(container.querySelector('.goo-button[data-key="right"]')?.classList.contains('goo-button--selected')).toBe(true)
+		expect(container.querySelector('.goo-button[data-id="left"]')?.classList.contains('goo-button--selected')).toBe(false)
+		expect(container.querySelector('.goo-button[data-id="right"]')?.classList.contains('goo-button--selected')).toBe(true)
+	})
+
+	it('uses direct child data ids as stable selection values', async() => {
+		const { container, getByTestId } = render(GooButtonGroupChildrenHost)
+		const tree = container.querySelector<HTMLButtonElement>('.goo-button[data-id="tree"]')!
+		const table = container.querySelector<HTMLButtonElement>('.goo-button[data-id="table"]')!
+		await tick()
+
+		expect(tree.getAttribute('aria-pressed')).toBe('true')
+		expect(table.getAttribute('aria-pressed')).toBe('false')
+
+		await fireEvent.click(table)
+
+		expect(getByTestId('button-group-child-value').textContent).toBe('table')
+		expect(tree.getAttribute('aria-pressed')).toBe('false')
+		expect(table.getAttribute('aria-pressed')).toBe('true')
 	})
 
 	it('keeps disabled options visible but unavailable', async() => {
@@ -68,13 +86,13 @@ describe('GooButtonGroup', () => {
 			props: {
 				onchange,
 				options: [
-					{ key: 'previous', value: 'Previous', disabled: true },
-					{ key: 'next', value: 'Next' }
+					{ id: 'previous', label: 'Previous', disabled: true },
+					{ id: 'next', label: 'Next' }
 				]
 			}
 		})
-		const previous = container.querySelector<HTMLButtonElement>('.goo-button[data-key="previous"]')!
-		const next = container.querySelector<HTMLButtonElement>('.goo-button[data-key="next"]')!
+		const previous = container.querySelector<HTMLButtonElement>('.goo-button[data-id="previous"]')!
+		const next = container.querySelector<HTMLButtonElement>('.goo-button[data-id="next"]')!
 
 		expect(previous.disabled).toBe(true)
 		expect(previous.classList.contains('goo-button--disabled')).toBe(true)
@@ -91,9 +109,9 @@ describe('GooButtonGroup', () => {
 			props: {
 				value: 'left',
 				options: [
-					{ key: 'left', value: 'Left' },
-					{ key: 'center', value: 'Center' },
-					{ key: 'right', value: 'Right' }
+					{ id: 'left', label: 'Left' },
+					{ id: 'center', label: 'Center' },
+					{ id: 'right', label: 'Right' }
 				]
 			}
 		})
@@ -103,7 +121,7 @@ describe('GooButtonGroup', () => {
 		expect(group.style.getPropertyValue('--goo-button-group-option-count').trim()).toBe('3')
 		expect(group.style.getPropertyValue('--goo-button-group-selected-index').trim()).toBe('0')
 
-		await fireEvent.click(container.querySelector('.goo-button[data-key="right"]')!)
+		await fireEvent.click(container.querySelector('.goo-button[data-id="right"]')!)
 
 		expect(group.style.getPropertyValue('--goo-button-group-selected-index').trim()).toBe('2')
 	})
@@ -117,18 +135,18 @@ describe('GooButtonGroup', () => {
 				allowToggle: true,
 				value: [ 'bold' ],
 				options: [
-					{ key: 'bold', value: 'Bold' },
-					{ key: 'italic', value: 'Italic' }
+					{ id: 'bold', label: 'Bold' },
+					{ id: 'italic', label: 'Italic' }
 				]
 			}
 		})
 
-		await fireEvent.click(container.querySelector('.goo-button[data-key="italic"]')!)
-		await fireEvent.click(container.querySelector('.goo-button[data-key="bold"]')!)
+		await fireEvent.click(container.querySelector('.goo-button[data-id="italic"]')!)
+		await fireEvent.click(container.querySelector('.goo-button[data-id="bold"]')!)
 
 		expect(onchange).toHaveBeenLastCalledWith([ 'italic' ])
-		expect(container.querySelector('.goo-button[data-key="bold"]')?.classList.contains('goo-button--selected')).toBe(false)
-		expect(container.querySelector('.goo-button[data-key="italic"]')?.classList.contains('goo-button--selected')).toBe(true)
+		expect(container.querySelector('.goo-button[data-id="bold"]')?.classList.contains('goo-button--selected')).toBe(false)
+		expect(container.querySelector('.goo-button[data-id="italic"]')?.classList.contains('goo-button--selected')).toBe(true)
 	})
 
 	it('emits full value changes for controller bindings', async() => {
@@ -138,13 +156,13 @@ describe('GooButtonGroup', () => {
 				value: 'left',
 				onchange,
 				options: [
-					{ key: 'left', value: 'Left' },
-					{ key: 'right', value: 'Right' }
+					{ id: 'left', label: 'Left' },
+					{ id: 'right', label: 'Right' }
 				]
 			}
 		})
 
-		await fireEvent.click(container.querySelector('.goo-button[data-key="right"]')!)
+		await fireEvent.click(container.querySelector('.goo-button[data-id="right"]')!)
 
 		expect(onchange).toHaveBeenCalledExactlyOnceWith('right')
 	})
@@ -156,13 +174,13 @@ describe('GooButtonGroup', () => {
 				value: 'left',
 				onchange,
 				options: [
-					{ key: 'left', value: 'Left' },
-					{ key: 'right', value: 'Right' }
+					{ id: 'left', label: 'Left' },
+					{ id: 'right', label: 'Right' }
 				]
 			}
 		})
-		const left = container.querySelector<HTMLButtonElement>('.goo-button[data-key="left"]')!
-		const right = container.querySelector<HTMLButtonElement>('.goo-button[data-key="right"]')!
+		const left = container.querySelector<HTMLButtonElement>('.goo-button[data-id="left"]')!
+		const right = container.querySelector<HTMLButtonElement>('.goo-button[data-id="right"]')!
 
 		left.focus()
 		await fireEvent.keyDown(left, { key: 'ArrowRight' })
@@ -182,14 +200,14 @@ describe('GooButtonGroup', () => {
 				value: 'right',
 				onchange,
 				options: [
-					{ key: 'left', value: 'Left' },
-					{ key: 'center', value: 'Center' },
-					{ key: 'right', value: 'Right' }
+					{ id: 'left', label: 'Left' },
+					{ id: 'center', label: 'Center' },
+					{ id: 'right', label: 'Right' }
 				]
 			}
 		})
-		const left = container.querySelector<HTMLButtonElement>('.goo-button[data-key="left"]')!
-		const right = container.querySelector<HTMLButtonElement>('.goo-button[data-key="right"]')!
+		const left = container.querySelector<HTMLButtonElement>('.goo-button[data-id="left"]')!
+		const right = container.querySelector<HTMLButtonElement>('.goo-button[data-id="right"]')!
 
 		right.focus()
 		await fireEvent.keyDown(right, { key: 'ArrowRight' })
@@ -214,14 +232,14 @@ describe('GooButtonGroup', () => {
 				value: 'center',
 				layout: 'vertical',
 				options: [
-					{ key: 'left', value: 'Left' },
-					{ key: 'center', value: 'Center' },
-					{ key: 'right', value: 'Right' }
+					{ id: 'left', label: 'Left' },
+					{ id: 'center', label: 'Center' },
+					{ id: 'right', label: 'Right' }
 				]
 			}
 		})
-		const left = container.querySelector<HTMLButtonElement>('.goo-button[data-key="left"]')!
-		const center = container.querySelector<HTMLButtonElement>('.goo-button[data-key="center"]')!
+		const left = container.querySelector<HTMLButtonElement>('.goo-button[data-id="left"]')!
+		const center = container.querySelector<HTMLButtonElement>('.goo-button[data-id="center"]')!
 		container.addEventListener('keydown', parentKeydown)
 
 		center.focus()
@@ -253,13 +271,13 @@ describe('GooButtonGroup', () => {
 				value: [ 'bold' ],
 				onchange,
 				options: [
-					{ key: 'bold', value: 'Bold' },
-					{ key: 'italic', value: 'Italic' }
+					{ id: 'bold', label: 'Bold' },
+					{ id: 'italic', label: 'Italic' }
 				]
 			}
 		})
-		const bold = container.querySelector<HTMLButtonElement>('.goo-button[data-key="bold"]')!
-		const italic = container.querySelector<HTMLButtonElement>('.goo-button[data-key="italic"]')!
+		const bold = container.querySelector<HTMLButtonElement>('.goo-button[data-id="bold"]')!
+		const italic = container.querySelector<HTMLButtonElement>('.goo-button[data-id="italic"]')!
 
 		bold.focus()
 		await fireEvent.keyDown(bold, { key: 'ArrowRight' })
@@ -273,7 +291,7 @@ describe('GooButtonGroup', () => {
 		expect(onchange).not.toHaveBeenCalled()
 	})
 
-	it('selects the focused button from activation aliases and contains handled keys', async() => {
+	it('selects the focused button from activation keys and contains handled events', async() => {
 		const onchange = vi.fn()
 		const { container } = render(GooButtonGroup, {
 			props: {
@@ -281,12 +299,12 @@ describe('GooButtonGroup', () => {
 				onchange,
 				allowMultiple: true,
 				options: [
-					{ key: 'left', value: 'Left' },
-					{ key: 'right', value: 'Right' }
+					{ id: 'left', label: 'Left' },
+					{ id: 'right', label: 'Right' }
 				]
 			}
 		})
-		const left = container.querySelector<HTMLButtonElement>('.goo-button[data-key="left"]')!
+		const left = container.querySelector<HTMLButtonElement>('.goo-button[data-id="left"]')!
 		const parentKeydown = vi.fn()
 		container.addEventListener('keydown', parentKeydown)
 
@@ -294,7 +312,7 @@ describe('GooButtonGroup', () => {
 		const event = new KeyboardEvent('keydown', {
 			bubbles: true,
 			cancelable: true,
-			key: 'Spacebar'
+			key: ' '
 		})
 		left.dispatchEvent(event)
 		await Promise.resolve()

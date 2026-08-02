@@ -3,24 +3,41 @@
  */
 
 .goo-textarea {
+	--goo-textarea-bg: var(--goo-theme-surface-sunken);
+	--goo-textarea-border: var(--goo-theme-border);
+	--goo-textarea-border-focus: var(--goo-theme-accent);
+	--goo-textarea-focus-ring: var(--goo-theme-focus-ring);
+	--goo-textarea-fg: var(--goo-theme-fg);
+	--goo-textarea-font-size: var(--goo-theme-font-size-sm);
+	--goo-textarea-line-height: 1.5;
+	--goo-textarea-min-block-size: calc(var(--goo-theme-control-height-lg) * 2);
 	--goo-textarea-min-inline-size: calc(var(--goo-theme-control-height-lg) * 5);
+	--goo-textarea-padding: var(--goo-theme-control-padding-lg);
+	--goo-textarea-radius: var(--goo-theme-radius-md);
+	--goo-textarea-resize: vertical;
 	--goo-textarea-transition: var(--goo-theme-transition-fast);
 
 	display: inline-block;
 	min-inline-size: var(--goo-textarea-min-inline-size);
 }
 
+.goo-textarea.goo-textarea--block {
+	display: block;
+	min-inline-size: 0;
+	width: 100%;
+}
+
 .goo-textarea__input {
-	background: var(--goo-theme-surface-sunken);
-	border: 1px solid var(--goo-theme-border);
-	border-radius: var(--goo-theme-radius-md);
-	color: var(--goo-theme-fg);
+	background: var(--goo-textarea-bg);
+	border: 1px solid var(--goo-textarea-border);
+	border-radius: var(--goo-textarea-radius);
+	color: var(--goo-textarea-fg);
 	font-family: inherit;
-	font-size: var(--goo-theme-font-size-sm);
-	line-height: 1.5;
-	padding: var(--goo-theme-control-padding-lg);
-	resize: vertical;
-	min-height: calc(var(--goo-theme-control-height-lg) * 2);
+	font-size: var(--goo-textarea-font-size);
+	line-height: var(--goo-textarea-line-height);
+	padding: var(--goo-textarea-padding);
+	resize: var(--goo-textarea-resize);
+	min-height: var(--goo-textarea-min-block-size);
 	width: 100%;
 	box-sizing: border-box;
 	transition:
@@ -34,8 +51,15 @@
 
 .goo-textarea__input:focus-visible {
 	outline: none;
-	border-color: var(--goo-theme-accent);
-	box-shadow: 0 0 0 2px var(--goo-theme-focus-ring);
+	border-color: var(--goo-textarea-border-focus);
+	box-shadow: 0 0 0 2px var(--goo-textarea-focus-ring);
+}
+
+.goo-textarea.goo-textarea--bare .goo-textarea__input,
+.goo-textarea.goo-textarea--bare .goo-textarea__input:focus-visible {
+	background: transparent;
+	border-color: transparent;
+	box-shadow: none;
 }
 
 .goo-textarea__input::placeholder {

@@ -13,7 +13,7 @@
 		'aria-labelledby': nativeAriaLabelledby,
 		children,
 		class: className = '',
-		onClick,
+		onclick,
 		onEscape,
 		role = 'dialog',
 		...rest
@@ -63,7 +63,7 @@
 	aria-label={resolvedAriaLabel}
 	aria-labelledby={resolvedAriaLabelledby}
 	tabindex="-1"
-	onclick={onClick}
+	{onclick}
 	onkeydowncapture={handleKeydown}
 >
 	{@render children()}

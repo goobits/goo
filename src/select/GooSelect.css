@@ -97,6 +97,11 @@
 	letter-spacing: 0;
 }
 
+.goo-select.goo-select--block {
+	display: block;
+	width: 100%;
+}
+
 .goo-select__field {
 	position: absolute;
 	width: 1px;

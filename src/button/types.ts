@@ -24,12 +24,18 @@ export type GooButtonVariant =
 	| 'selected'
 	| string
 
+/** Native element rendered by Goo button. */
+export type GooButtonElement = HTMLAnchorElement | HTMLButtonElement
+
 type GooButtonOwnProps = GooForwardedAttributes & {
 	/** Visual label rendered when no children are provided. */
-	value?: string | undefined
+	label?: string | undefined
 
 	/** Native button form value. */
 	formValue?: string | undefined
+
+	/** ID of the form submitted by a button rendered outside that form. */
+	form?: string | undefined
 
 	/** Native button type. */
 	type?: GooButtonType | undefined
@@ -47,15 +53,12 @@ type GooButtonOwnProps = GooForwardedAttributes & {
 	rel?: string | undefined
 
 	/** Render as a full-width row button. */
-	block?: boolean | undefined
-
-	/** Render as a full-width row button. */
 	fullRow?: boolean | undefined
 
-	/** Optional title/tooltip text. */
+	/** Optional native title text. */
 	title?: string | undefined
 
-	/** Additional tooltip text when title is not provided. */
+	/** Goo tooltip text, rendered with an arrow on hover and keyboard focus. */
 	tooltip?: string | undefined
 
 	/** Accessible label for icon-only buttons. */
@@ -94,8 +97,17 @@ type GooButtonOwnProps = GooForwardedAttributes & {
 	/** Button content. */
 	children?: Snippet | undefined
 
+	/** Native anchor or button element rendered by the component. */
+	element?: GooButtonElement | null | undefined
+
 	/** Native click callback. */
 	onclick?: ((event: MouseEvent) => void) | undefined
+
+	/** Native mouse-enter callback. */
+	onmouseenter?: ((event: MouseEvent) => void) | undefined
+
+	/** Native mouse-leave callback. */
+	onmouseleave?: ((event: MouseEvent) => void) | undefined
 
 	/** Activation callback fired after click/toggle handling. */
 	onactivate?: ((event: MouseEvent) => void) | undefined
@@ -106,11 +118,11 @@ type GooButtonOwnProps = GooForwardedAttributes & {
 
 /** Props for a native button-backed `GooButton`. */
 export type GooButtonButtonProps = GooButtonOwnProps &
-	Omit<HTMLButtonAttributes, keyof GooButtonOwnProps | 'href'> & { href?: undefined }
+	Omit<HTMLButtonAttributes, keyof GooButtonOwnProps | 'href' | 'tabindex'> & { href?: undefined }
 
 /** Props for a native anchor-backed `GooButton`. */
 export type GooButtonAnchorProps = GooButtonOwnProps &
-	Omit<HTMLAnchorAttributes, keyof GooButtonOwnProps | 'href'> & { href: string }
+	Omit<HTMLAnchorAttributes, keyof GooButtonOwnProps | 'href' | 'tabindex'> & { href: string }
 
 /**
  * Props accepted by the Svelte `GooButton` component.

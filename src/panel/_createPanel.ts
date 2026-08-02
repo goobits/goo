@@ -14,7 +14,6 @@ import GooPanelComponent from './GooPanel.svelte'
 export interface GooPanelOptions {
 	title?: string
 	open?: boolean
-	closed?: boolean
 	draggable?: boolean
 	collapsible?: boolean
 	showHeader?: boolean
@@ -22,7 +21,6 @@ export interface GooPanelOptions {
 	width?: number
 	position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left'
 	autoPlace?: boolean
-	class?: string
 	className?: string
 	style?: string
 	content?: string | HTMLElement | Node
@@ -39,7 +37,6 @@ export type GooPanelElement = HTMLDivElement & {
 	toggleElement: HTMLElement | null
 	contentElement: HTMLElement | null
 	open: boolean
-	closed: boolean
 	title: string
 	width: number
 	docked: boolean
@@ -70,11 +67,13 @@ export function createPanel(options: GooPanelOptions = {}): GooPanelElement {
 	const target = document.createElement('div')
 	let element: GooPanelElement | null = null
 	let instance: MountedPanel | null = null
+	const { className, ...componentOptions } = options
 
 	instance = mount(GooPanelComponent, {
 		target,
 		props: {
-			...options,
+			...componentOptions,
+			class: className,
 			onelement: (nextElement: GooPanelElement | null) => {
 				element = nextElement
 			},

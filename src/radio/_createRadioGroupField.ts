@@ -4,7 +4,6 @@ import GooRadioGroup from './GooRadioGroup.svelte'
 import type { GooRadioGroupLayout, GooRadioGroupProps, GooRadioOptions } from './types.ts'
 
 export type RadioGroupFieldOptions = {
-	class?: string
 	className?: string
 	disabled?: boolean
 	layout?: GooRadioGroupLayout
@@ -70,8 +69,7 @@ export function createRadioGroupField(
 		if (options.disabled !== undefined) props.disabled = options.disabled
 		if (options.required !== undefined) props.required = options.required
 		if (options.layout !== undefined) props.layout = options.layout
-		const className = options.class ?? options.className
-		if (className !== undefined) props.class = className
+		if (options.className !== undefined) props.class = options.className
 		if (options.style !== undefined) props.style = options.style
 		if (options.tabIndex !== undefined) props.tabIndex = options.tabIndex
 		if (options.title !== undefined) props.title = options.title

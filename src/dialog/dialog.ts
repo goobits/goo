@@ -7,7 +7,11 @@ import './GooDialog.css'
 
 import type { CheckboxFieldElement } from '../checkbox/_createCheckboxField.ts'
 import { resolveGooOverlayPlacement } from '../overlay-host/_overlayPlacement.ts'
-import { activateModalIsolation, handleFocusTrapKeyboardEvent } from '../support/keyboard/_focus.ts'
+import {
+	activateModalIsolation,
+	getFocusTrapItems,
+	handleFocusTrapKeyboardEvent
+} from '../support/keyboard/_focus.ts'
 import { createLifecycleBag, type GooLifecycleBag } from '../support/utils/lifecycleBag.ts'
 import { handleDialogKeyboardEvent } from './_dialogKeyboard.ts'
 import {
@@ -30,28 +34,27 @@ export type { DialogField, DialogLabels } from './dialogBuilder.ts'
 // ============================================================================
 
 /** Supported Goo dialog presentation types. */
-export type GooDialogType = 'alert' | 'confirm' | 'prompt' | 'notify' | 'overlay'
+export type GooDialogType = 'alert' | 'confirm' | 'prompt' | 'notify' | 'overlay' | 'sheet'
 
 /** Focus targets accepted by standard Goo dialogs. */
-export type GooDialogDefaultFocus = 'ok' | 'cancel' | 'disregard'
+export type GooDialogDefaultFocus = 'ok' | 'cancel' | 'disregard' | 'first' | 'dialog'
 
-/** Values collected from dialog fields. */
-export type DialogValues<TValues extends Record<string, unknown> = Record<string, unknown>> =
-	TValues
+/** Logical edge used by sheet dialogs. */
+export type GooDialogSide = 'start' | 'end'
 
 /** Field element map passed to dialog verification callbacks. */
 export type DialogFieldElements = Map<string, HTMLElement>
 
 /** Verification callback for prompt dialogs. */
-export type DialogVerifyHandler<TValues extends DialogValues = DialogValues> = (
-	values: TValues,
-	fieldElements: DialogFieldElements
-) => boolean | Promise<boolean>
+export type DialogVerifyHandler<TValues extends Record<string, unknown> = Record<string, unknown>> =
+	(values: TValues, fieldElements: DialogFieldElements) => boolean | Promise<boolean>
 
 /**
  * Dialog options for construction
  */
-export interface GooDialogOptions<TValues extends DialogValues = DialogValues> {
+export interface GooDialogOptions<
+	TValues extends Record<string, unknown> = Record<string, unknown>
+> {
 	type?: GooDialogType
 	ariaLabel?: string
 	heading?: string
@@ -67,6 +70,7 @@ export interface GooDialogOptions<TValues extends DialogValues = DialogValues> {
 	closeOnBackdrop?: boolean
 	closeOnEscape?: boolean
 	defaultFocus?: GooDialogDefaultFocus
+	side?: GooDialogSide
 	width?: string | number
 	height?: string | number
 	className?: string
@@ -85,7 +89,7 @@ export interface GooDialogOptions<TValues extends DialogValues = DialogValues> {
 /**
  * Dialog result
  */
-export interface DialogResult<TValues extends DialogValues = DialogValues> {
+export interface DialogResult<TValues extends Record<string, unknown> = Record<string, unknown>> {
 	ok?: boolean
 	cancel?: boolean
 	disregard?: boolean
@@ -105,7 +109,8 @@ export interface GooDialogState {
 	showClose: boolean
 	closeOnBackdrop: boolean
 	closeOnEscape: boolean
-	defaultFocus: string
+	defaultFocus: GooDialogDefaultFocus
+	side: GooDialogSide
 	width: string | number
 	height: string | number
 	autoDismiss: number
@@ -131,7 +136,9 @@ const DEFAULT_LABELS: DialogLabels = {
 // ============================================================================
 
 /** Public handle returned by `createGooDialog`. */
-export interface GooDialogController<TValues extends DialogValues = DialogValues> {
+export interface GooDialogController<
+	TValues extends Record<string, unknown> = Record<string, unknown>
+> {
 	/** Root dialog element. */
 	readonly element: HTMLElement
 	/** Whether the dialog is currently open. */
@@ -214,7 +221,10 @@ class GooDialogControllerRuntime {
 			showClose: options.showClose ?? true,
 			closeOnBackdrop: options.closeOnBackdrop ?? true,
 			closeOnEscape: options.closeOnEscape ?? true,
-			defaultFocus: options.defaultFocus ?? 'ok',
+			defaultFocus:
+				options.defaultFocus ??
+				(options.type === 'sheet' || options.type === 'overlay' ? 'first' : 'ok'),
+			side: options.side ?? 'end',
 			width: options.width ?? 'auto',
 			height: options.height ?? 'auto',
 			autoDismiss: options.autoDismiss ?? 0,
@@ -270,10 +280,12 @@ class GooDialogControllerRuntime {
 	 * Creates element.
 	 */
 	_createElement() {
-		const { type, width, height, heading, showClose } = this.state
+		const { type, width, height, heading, showClose, side } = this.state
 
 		// Apply type class
 		this.$element.classList.add(`goo-dialog--${ type }`)
+		if (type === 'sheet') this.$element.classList.add(`goo-dialog--sheet-${ side }`)
+		this.$element.dataset.gooOverlayRoot = ''
 		for (const name of this._classNames()) {
 			this.$element.classList.add(name)
 		}
@@ -300,7 +312,7 @@ class GooDialogControllerRuntime {
 			const notifyElements = buildNotifyLayout(this.$element, this._content, showClose)
 			this.$content = notifyElements.$content
 			this.$closeBtn = notifyElements.$closeBtn
-		} else if (type === 'overlay') {
+		} else if (type === 'overlay' || type === 'sheet') {
 			const overlayElements = buildOverlayLayout(
 				this.$element,
 				{ type, heading, showClose },
@@ -316,7 +328,6 @@ class GooDialogControllerRuntime {
 				this.$element,
 				{ type, heading, showClose },
 				this._content,
-				this._labels,
 				this._fields,
 				this._actions
 			)
@@ -545,8 +556,8 @@ class GooDialogControllerRuntime {
 	/**
 	 * Gets field values.
 	 */
-	_getFieldValues(): DialogValues {
-		const values: DialogValues = {}
+	_getFieldValues(): Record<string, unknown> {
+		const values: Record<string, unknown> = {}
 		for (const [ name, $el ] of this._fieldElements) {
 			const elWithValue = $el as unknown as {
 				value?: unknown
@@ -591,7 +602,14 @@ class GooDialogControllerRuntime {
 		const { defaultFocus } = this.state
 		let $focus: { focus: () => void } | null = null
 
-		if (defaultFocus === 'ok' && this.$okBtn) {
+		if (defaultFocus === 'first') {
+			$focus =
+				this.$element.querySelector<HTMLElement>('[autofocus]') ??
+				getFocusTrapItems(this.$element)[0] ??
+				null
+		} else if (defaultFocus === 'dialog') {
+			$focus = this.$element
+		} else if (defaultFocus === 'ok' && this.$okBtn) {
 			$focus = this.$okBtn as unknown as { focus: () => void }
 		} else if (defaultFocus === 'cancel' && this.$cancelBtn) {
 			$focus = this.$cancelBtn as unknown as { focus: () => void }
@@ -652,7 +670,7 @@ class GooDialogControllerRuntime {
 			this._previousActiveElement = document.activeElement as HTMLElement | null
 
 			// Register with manager
-			dialogManager.register(this)
+			dialogManager.register(this, { modal: this._isModalDialog() })
 
 			// Create backdrop
 			if (this.state.showBackdrop && this.state.type !== 'notify') {
@@ -872,17 +890,11 @@ function reflowNotifyStack(): void {
 // ============================================================================
 
 /**
- * Goo dialog instance.
- */
-export type GooDialogInstance<TValues extends DialogValues = DialogValues> =
-	GooDialogController<TValues>
-
-/**
  * Creates goo dialog.
  *
  * @param options - options.
  */
-export function createGooDialog<TValues extends DialogValues = DialogValues>(
+export function createGooDialog<TValues extends Record<string, unknown> = Record<string, unknown>>(
 	options: GooDialogOptions<TValues> = {}
 ): GooDialogController<TValues> {
 	return new GooDialogControllerRuntime(options as GooDialogOptions) as GooDialogController<TValues>

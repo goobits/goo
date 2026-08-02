@@ -1,3 +1,4 @@
+import { findFieldOwnedControlOption } from './_schemaControlOptions.ts'
 import type {
 	GooSchemaCondition,
 	GooSchemaNode,
@@ -5,11 +6,11 @@ import type {
 } from './types.ts'
 
 const FIELD_KEYS = new Set([
-	'path', 'type', 'label', 'min', 'max', 'step', 'input', 'canCross', 'canPush',
+	'path', 'type', 'label', 'min', 'max', 'step', 'showInputs', 'canCross', 'canPush',
 	'dual', 'xy', 'coverage', 'preset', 'presetColor', 'presetHue', 'shape', 'scale',
 	'mode', 'gradient', 'marks', 'snap', 'valueBubble', 'unit', 'displayUnit', 'format',
-	'valueFormat', 'showLabel', 'fullWidth', 'fullBleed', 'ticks', 'options', 'modes',
-	'ariaLabel', 'class', 'dataParam', 'id', 'items', 'popoutClass', 'tabIndex',
+	'showLabel', 'fullWidth', 'fullBleed', 'ticks', 'options', 'modes',
+	'ariaLabel', 'className', 'dataParam', 'id', 'items', 'popoutClass', 'tabIndex',
 	'controlOptions', 'if', 'unless', 'layout', 'dock', 'disabled', 'selfContained'
 ])
 const FOLDER_KEYS = new Set([
@@ -24,7 +25,7 @@ const WIDGET_KEYS = new Set([
 const PANEL_KEYS = new Set([ 'type', 'title', 'docked', 'width', 'showHeader', 'children' ])
 const CONDITION_KEYS = new Set([ 'path', 'equals', 'equalsAny', 'notEquals' ])
 const CHOICE_KEYS = new Set([
-	'type', 'id', 'key', 'value', 'label', 'icon', 'tooltip', 'ariaLabel', 'hideLabel', 'className',
+	'type', 'id', 'label', 'icon', 'title', 'ariaLabel', 'hideLabel', 'className',
 	'disabled', 'options', 'if', 'unless'
 ])
 const CHOICE_TYPES = new Set([ 'option', 'divider', 'optgroup', 'submenu' ])
@@ -181,14 +182,14 @@ function assertField(field: Record<string, unknown>, path: string): void {
 
 	for (const key of [
 		'type', 'label', 'preset', 'presetColor', 'shape', 'scale', 'mode',
-		'unit', 'displayUnit', 'format', 'valueFormat', 'ariaLabel', 'class', 'dataParam',
+		'unit', 'displayUnit', 'format', 'ariaLabel', 'className', 'dataParam',
 		'id', 'popoutClass', 'layout'
 	]) assertOptionalString(field, key, path)
 	for (const key of [ 'min', 'max', 'step', 'presetHue', 'tabIndex' ]) {
 		assertOptionalNumber(field, key, path)
 	}
 	for (const key of [
-		'input', 'canCross', 'canPush', 'dual', 'xy', 'coverage', 'showLabel', 'fullWidth',
+		'showInputs', 'canCross', 'canPush', 'dual', 'xy', 'coverage', 'showLabel', 'fullWidth',
 		'fullBleed', 'ticks', 'disabled', 'selfContained'
 	]) assertOptionalBoolean(field, key, path)
 
@@ -204,7 +205,16 @@ function assertField(field: Record<string, unknown>, path: string): void {
 	if (field.snap !== undefined && typeof field.snap !== 'boolean' && !Array.isArray(field.snap)) {
 		fail(`${ path }.snap`, 'must be a boolean or array')
 	}
-	if (field.controlOptions !== undefined) expectRecord(field.controlOptions, `${ path }.controlOptions`)
+	if (field.controlOptions !== undefined) {
+		const controlOptions = expectRecord(field.controlOptions, `${ path }.controlOptions`)
+		const duplicatedControlOption = findFieldOwnedControlOption(controlOptions)
+		if (duplicatedControlOption) {
+			fail(
+				`${ path }.controlOptions.${ duplicatedControlOption }`,
+				`must be declared as ${ path }.${ duplicatedControlOption }`
+			)
+		}
+	}
 	assertChoiceOptions(field.options, `${ path }.options`)
 	assertConditions(field, path)
 }
@@ -223,13 +233,13 @@ function assertChoiceOptions(value: unknown, path: string): void {
 		)) {
 			fail(`${ optionPath }.type`, 'must be option, divider, optgroup, or submenu')
 		}
-		for (const key of [ 'id', 'key', 'value', 'label' ]) {
+		for (const key of [ 'id', 'label' ]) {
 			const item = choice[key]
 			if (item !== undefined && typeof item !== 'string' && typeof item !== 'number') {
 				fail(`${ optionPath }.${ key }`, 'must be a string or number')
 			}
 		}
-		for (const key of [ 'icon', 'tooltip', 'ariaLabel', 'className' ]) {
+		for (const key of [ 'icon', 'title', 'ariaLabel', 'className' ]) {
 			assertOptionalString(choice, key, optionPath)
 		}
 		for (const key of [ 'hideLabel', 'disabled' ]) assertOptionalBoolean(choice, key, optionPath)

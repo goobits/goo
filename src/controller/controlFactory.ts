@@ -162,7 +162,10 @@ function createSvelteControl(
 			options.onchange,
 			options.oninput
 		)
-		: options.controllerOptions
+		: {
+			...options.controllerOptions,
+			...options.buildOptions(options.value, module.default as GooControlExport)
+		}
 	const controlOptions = buildSvelteGooControlOptions(controlType, controllerOptions)
 	const host = createSvelteControlHost({
 		component: module.default as Parameters<typeof createSvelteControlHost>[0]['component'],

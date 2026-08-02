@@ -10,6 +10,7 @@ export type ProgressRingRenderConfig = {
 	rotationSpeed?: number
 	showText?: boolean
 	spinnerDuration?: number
+	thickness?: number
 	transitionSpeed?: number
 	variant?: GooProgressRingVariant
 }
@@ -42,6 +43,7 @@ export class ProgressRingRenderer {
 	#spinnerDuration = 1000
 	#spinnerPreviousStep = 0
 	#spinnerStartTime = 0
+	#thickness: number | undefined
 	#transitionSpeed = 5
 	#variant: GooProgressRingVariant = 'basic'
 	#value: number | string = 0
@@ -117,7 +119,9 @@ export class ProgressRingRenderer {
 	 */
 	configure(options: ProgressRingRenderConfig): void {
 		this.#colorStops = options.colorStops ?? this.#colorStops
-		this.#fillStyle = options.fillStyle ?? this.#fillStyle
+		if ('fillStyle' in options) {
+			this.#fillStyle = options.fillStyle ?? ''
+		}
 		this.#indeterminate = options.indeterminate ?? this.#indeterminate
 		this.#rotationSpeed = Number.isFinite(options.rotationSpeed)
 			? Math.max(0, options.rotationSpeed as number)
@@ -126,6 +130,11 @@ export class ProgressRingRenderer {
 		this.#spinnerDuration = Number.isFinite(options.spinnerDuration)
 			? Math.max(1, options.spinnerDuration as number)
 			: this.#spinnerDuration
+		if ('thickness' in options) {
+			this.#thickness = Number.isFinite(options.thickness)
+				? Math.max(0, options.thickness as number)
+				: undefined
+		}
 		this.#transitionSpeed = options.transitionSpeed ?? this.#transitionSpeed
 		this.#variant = options.variant ?? this.#variant
 		this.#host.dataset['variant'] = this.#variant
@@ -190,7 +199,7 @@ export class ProgressRingRenderer {
 		}
 
 		if (this.#indeterminate) {
-			this.#paintSpinner(ctx, pixelSize, time || performance.now())
+			this.#paintSpinner(ctx, pixelSize, time || performance.now(), dpr)
 			return
 		}
 
@@ -212,9 +221,12 @@ export class ProgressRingRenderer {
 		}
 
 		const outerRadius = pixelSize / 2
-		const innerRadius = this.#variant === 'rainbow'
+		const defaultInnerRadius = this.#variant === 'rainbow'
 			? outerRadius * (this.#showText ? 0.6 : 0.3)
 			: outerRadius * 0.61
+		const innerRadius = this.#thickness === undefined
+			? defaultInnerRadius
+			: Math.max(0, outerRadius - Math.min(outerRadius, this.#thickness * dpr))
 		let startAngle = -Math.PI * 2
 		const endAngle = this.#currentProgress * Math.PI * 2
 
@@ -253,7 +265,7 @@ export class ProgressRingRenderer {
 		}
 	}
 
-	#paintSpinner(ctx: CanvasRenderingContext2D, pixelSize: number, time: number): void {
+	#paintSpinner(ctx: CanvasRenderingContext2D, pixelSize: number, time: number, dpr: number): void {
 		if (!this.#spinnerStartTime) {
 			this.#spinnerStartTime = time
 		}
@@ -271,7 +283,9 @@ export class ProgressRingRenderer {
 		this.#spinnerPreviousStep = currentStep
 
 		const center = pixelSize / 2
-		const lineWidth = center * 0.25
+		const lineWidth = this.#thickness === undefined
+			? center * 0.25
+			: Math.max(1, Math.min(center, this.#thickness * dpr))
 		const radius = 3 * lineWidth
 		const startAngle = ((Math.trunc(head - tail) % 360) * Math.PI) / 180
 		const endAngle = ((Math.trunc(head) % 360) * Math.PI) / 180
@@ -279,7 +293,7 @@ export class ProgressRingRenderer {
 		ctx.clearRect(0, 0, pixelSize, pixelSize)
 		ctx.beginPath()
 		ctx.arc(center, center, radius, startAngle, endAngle, false)
-		ctx.strokeStyle = this.#spinnerColor(currentStep, duration)
+		ctx.strokeStyle = this.#fillStyle || this.#spinnerColor(currentStep, duration)
 		ctx.lineCap = 'round'
 		ctx.lineWidth = lineWidth
 		ctx.stroke()
@@ -304,8 +318,11 @@ export class ProgressRingRenderer {
 			return stops[0]?.color ?? '#378cff'
 		}
 
-		const previous = stops[nextIndex - 1]!
-		const next = stops[nextIndex]!
+		const previous = stops[nextIndex - 1]
+		const next = stops[nextIndex]
+		if (!previous || !next) {
+			return next?.color ?? previous?.color ?? '#378cff'
+		}
 		const range = next.offset - previous.offset || 1
 		return mixColor(previous.color, next.color, (progress - previous.offset) / range)
 	}
@@ -403,6 +420,7 @@ export class ProgressRingRenderer {
 /** Clamp a value into the normalized 0..1 progress range.  * @param progress - progress.
  */
 export function clampProgress(progress: number): number {
+	if (!Number.isFinite(progress)) return 0
 	return Math.min(1, Math.max(0, progress))
 }
 

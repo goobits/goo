@@ -322,6 +322,45 @@
 	overflow: auto;
 }
 
+/* Sheet type - full-height panel on a logical viewport edge */
+.goo-dialog.goo-dialog--sheet {
+	inset-block: 0;
+	margin: 0;
+	max-height: none;
+	max-width: min(var(--goo-dialog-sheet-width, 28rem), 100vw);
+	width: min(var(--goo-dialog-sheet-width, 28rem), 100vw);
+	height: auto;
+	border-radius: 0;
+}
+
+.goo-dialog.goo-dialog--sheet-start {
+	inset-inline-start: 0;
+	inset-inline-end: auto;
+	--goo-dialog-enter-transform: translateX(-100%);
+}
+
+.goo-dialog.goo-dialog--sheet-end {
+	inset-inline-start: auto;
+	inset-inline-end: 0;
+	--goo-dialog-enter-transform: translateX(100%);
+}
+
+[dir='rtl'] .goo-dialog.goo-dialog--sheet-start {
+	--goo-dialog-enter-transform: translateX(100%);
+}
+
+[dir='rtl'] .goo-dialog.goo-dialog--sheet-end {
+	--goo-dialog-enter-transform: translateX(-100%);
+}
+
+.goo-dialog.goo-dialog--sheet .goo-dialog__content {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	padding: 0;
+	overflow: auto;
+}
+
 /* Overlay iframe support */
 .goo-dialog.goo-dialog--overlay iframe {
 	width: 100%;

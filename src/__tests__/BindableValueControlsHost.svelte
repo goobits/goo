@@ -14,8 +14,8 @@ let sliderValue = $state<number | number[]>(10)
 
 const buttonOptions = [ 'left', 'right' ]
 const radioOptions = [
-	{ value: 'one', label: 'One' },
-	{ value: 'two', label: 'Two' }
+	{ id: 'one', label: 'One' },
+	{ id: 'two', label: 'Two' }
 ]
 </script>
 

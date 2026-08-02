@@ -6,7 +6,10 @@
 
 type GooPopoutTarget = HTMLElement | string | GooPopoutAt | null | undefined
 
-type GooPopoutProps = Omit<GooPopoutOptions, 'content' | 'at' | 'onOpen' | 'onClose'> & {
+type GooPopoutProps = Omit<
+	GooPopoutOptions,
+	'content' | 'at' | 'openImmediately' | 'onOpen' | 'onClose'
+> & {
 	/** Target element, element id, or point configuration for the popout. */
 	for?: GooPopoutTarget
 
@@ -43,6 +46,7 @@ let {
 	align,
 	offset,
 	keepWithin,
+	parentElement,
 	className = '',
 	dataset,
 	attributes,
@@ -53,9 +57,16 @@ let {
 	dragToMove = false,
 	initialFocus = 'content',
 	fullScreen = false,
+	chromeless = false,
+	rtl,
 	ariaLabel = 'Popout',
+	ariaLabelledby,
+	ariaDescribedby,
+	role = 'dialog',
 	children,
 	instance = $bindable<GooPopoutInstance | null>(null),
+	onPosition,
+	onDestroy,
 	onopen,
 	onclose
 }: GooPopoutProps = $props()
@@ -82,6 +93,7 @@ function getKey(): string {
 		align,
 		offset,
 		keepWithin,
+		parentElement: parentElement?.id,
 		className,
 		dataset,
 		attributes,
@@ -92,7 +104,12 @@ function getKey(): string {
 		dragToMove,
 		initialFocus,
 		fullScreen,
-		ariaLabel
+		chromeless,
+		rtl,
+		ariaLabel,
+		ariaLabelledby,
+		ariaDescribedby,
+		role
 	})
 }
 
@@ -118,6 +135,7 @@ function mountPopout(): void {
 		...(align === undefined ? {} : { align }),
 		...(offset === undefined ? {} : { offset }),
 		...(keepWithin === undefined ? {} : { keepWithin }),
+		...(parentElement === undefined ? {} : { parentElement }),
 		className,
 		...(dataset === undefined ? {} : { dataset }),
 		attributes: {
@@ -131,8 +149,14 @@ function mountPopout(): void {
 		dragToMove,
 		initialFocus,
 		fullScreen,
+		chromeless,
+		rtl,
 		ariaLabel,
+		ariaLabelledby,
+		ariaDescribedby,
+		role,
 		openImmediately: false,
+		onPosition,
 		onOpen: data => {
 			open = true
 			onopen?.(data)
@@ -143,6 +167,7 @@ function mountPopout(): void {
 		},
 		onDestroy: () => {
 			if (contentElement) contentElement.hidden = true
+			onDestroy?.()
 		}
 	})
 	instance = currentPopout

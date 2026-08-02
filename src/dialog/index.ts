@@ -6,11 +6,11 @@ export {
 	type DialogFieldElements,
 	type DialogLabels,
 	type DialogResult,
-	type DialogValues,
 	type DialogVerifyHandler,
+	type GooDialogController,
 	type GooDialogDefaultFocus,
-	type GooDialogInstance,
 	type GooDialogOptions,
+	type GooDialogSide,
 	type GooDialogType } from './dialog.ts'
 export { createGooDialogTextContent, createTrustedGooDialogContent } from './dialogContent.ts'
 export {
@@ -24,7 +24,9 @@ export {
 	GooOverlay,
 	type GooOverlayOptions,
 	GooPrompt,
-	type GooPromptOptions
+	type GooPromptOptions,
+	GooSheet,
+	type GooSheetOptions
 } from './dialogs.ts'
 export { default as GooDialog } from './GooDialog.svelte'
 export { dialogManager, GooDialogManager } from './GooDialogManager.ts'

@@ -3,7 +3,7 @@ import { untrack } from 'svelte'
 import type { Snippet } from 'svelte'
 import { useGooOverlayHost } from '../overlay-host/overlayHost.ts'
 import { createGooDialog } from './dialog.ts'
-import type { GooDialogInstance, GooDialogOptions, DialogResult } from './dialog.ts'
+import type { DialogResult, GooDialogController, GooDialogOptions } from './dialog.ts'
 
 type GooDialogProps = Omit<
 	GooDialogOptions,
@@ -12,7 +12,7 @@ type GooDialogProps = Omit<
 	open?: boolean
 	actions?: Snippet
 	children?: Snippet
-	instance?: GooDialogInstance | null
+	instance?: GooDialogController | null
 	onok?: (result: DialogResult) => void
 	oncancel?: (result: DialogResult) => void
 	onclose?: () => void
@@ -20,7 +20,7 @@ type GooDialogProps = Omit<
 
 let contentElement: HTMLDivElement | undefined = $state()
 let actionsElement: HTMLDivElement | undefined = $state()
-let currentDialog: GooDialogInstance | null = null
+let currentDialog: GooDialogController | null = null
 let mounted = false
 const overlayHost = useGooOverlayHost()
 
@@ -38,7 +38,8 @@ let {
 	showClose = true,
 	closeOnBackdrop = true,
 	closeOnEscape = true,
-	defaultFocus = 'ok',
+	defaultFocus,
+	side = 'end',
 	width = 'auto',
 	height = 'auto',
 	className,
@@ -47,7 +48,7 @@ let {
 	parentElement,
 	isolationRoot,
 	children,
-	instance = $bindable<GooDialogInstance | null>(null),
+	instance = $bindable<GooDialogController | null>(null),
 	onok,
 	oncancel,
 	onclose
@@ -72,6 +73,7 @@ function createDialog(): void {
 		closeOnBackdrop,
 		closeOnEscape,
 		defaultFocus,
+		side,
 		width,
 		height,
 		autoDismiss,

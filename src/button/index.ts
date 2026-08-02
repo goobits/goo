@@ -10,6 +10,7 @@ export { default as GooButton } from './GooButton.svelte'
 export type {
 	GooButtonAnchorProps,
 	GooButtonButtonProps,
+	GooButtonElement,
 	GooButtonLayout,
 	GooButtonProps,
 	GooButtonTarget,

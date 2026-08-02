@@ -4,7 +4,6 @@ import GooTextarea from './GooTextarea.svelte'
 import type { GooTextareaProps } from './types.ts'
 
 export type TextareaFieldOptions = {
-	class?: string
 	className?: string
 	cols?: number
 	disabled?: boolean
@@ -77,8 +76,7 @@ export function createTextareaField(options: TextareaFieldOptions = {}): Textare
 		if (options.disabled !== undefined) props.disabled = options.disabled
 		if (options.readonly !== undefined) props.readonly = options.readonly
 		if (options.required !== undefined) props.required = options.required
-		const className = options.class ?? options.className
-		if (className !== undefined) props.class = className
+		if (options.className !== undefined) props.class = options.className
 		if (options.style !== undefined) props.style = options.style
 		if (options.tabIndex !== undefined) props.tabIndex = options.tabIndex
 		if (options.title !== undefined) props.title = options.title

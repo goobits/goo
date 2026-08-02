@@ -18,7 +18,7 @@ export default {
 	examples: [
 		{
 			title: 'Default',
-			props: { value: 'Default' }
+			props: { label: 'Default' }
 		},
 		{
 			title: 'With icon',
@@ -31,39 +31,39 @@ export default {
 		},
 		{
 			title: 'Primary',
-			props: { variant: 'primary', value: 'Primary' }
+			props: { variant: 'primary', label: 'Primary' }
 		},
 		{
 			title: 'Attention',
-			props: { variant: 'attention', value: 'Warning' }
+			props: { variant: 'attention', label: 'Warning' }
 		},
 		{
 			title: 'Danger',
-			props: { variant: 'danger', value: 'Danger' }
+			props: { variant: 'danger', label: 'Danger' }
 		},
 		{
 			title: 'Ghost',
-			props: { variant: 'ghost', value: 'Ghost' }
+			props: { variant: 'ghost', label: 'Ghost' }
 		},
 		{
 			title: 'Link',
-			props: { variant: 'link', value: 'Link Style' }
+			props: { variant: 'link', label: 'Link Style' }
 		},
 		{
 			title: 'Selected',
-			props: { variant: 'selected', value: 'Selected' }
+			props: { variant: 'selected', label: 'Selected' }
 		},
 		{
 			title: 'Toggle',
-			props: { toggle: true, value: 'Toggle me' }
+			props: { toggle: true, label: 'Toggle me' }
 		},
 		{
 			title: 'Disabled',
-			props: { disabled: true, value: 'Disabled' }
+			props: { disabled: true, label: 'Disabled' }
 		},
 		{
 			title: 'Disabled primary',
-			props: { variant: 'primary', disabled: true, value: 'Primary' }
+			props: { variant: 'primary', disabled: true, label: 'Primary' }
 		}
 	]
 }

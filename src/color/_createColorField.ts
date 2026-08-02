@@ -5,7 +5,6 @@ import type { GooColorElement, GooColorEventData, GooColorProps } from './types.
 
 export type ColorFieldOptions = {
 	alpha?: boolean
-	class?: string
 	className?: string
 	disabled?: boolean
 	id?: string
@@ -72,8 +71,7 @@ export function createColorField(options: ColorFieldOptions = {}): ColorFieldEle
 		if (options.id !== undefined) props.id = options.id
 		if (options.title !== undefined) props.title = options.title
 		if (options.disabled !== undefined) props.disabled = options.disabled
-		const className = options.class ?? options.className
-		if (className !== undefined) props.class = className
+		if (options.className !== undefined) props.class = options.className
 		if (options.style !== undefined) props.style = options.style
 		if (options.tabIndex !== undefined) props.tabIndex = options.tabIndex
 

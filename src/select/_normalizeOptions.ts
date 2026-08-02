@@ -40,7 +40,7 @@ export function normalizeOption(opt: unknown): GooSelectOption | null {
 	}
 
 	const optObj = opt as Record<string, unknown>
-	const label = (optObj['label'] ?? optObj['title'] ?? '') as NonNullable<GooSelectOption['label']>
+	const label = (optObj['label'] ?? '') as NonNullable<GooSelectOption['label']>
 
 	const normalized: GooSelectOption = {
 		type: (optObj['type'] as NonNullable<GooSelectOption['type']>) || 'option',
@@ -51,7 +51,7 @@ export function normalizeOption(opt: unknown): GooSelectOption | null {
 	if (optObj['className'] !== undefined) normalized.className = optObj['className'] as string
 	if (optObj['icon'] !== undefined) normalized.icon = optObj['icon'] as NonNullable<GooSelectOption['icon']>
 	if (optObj['shortcut'] !== undefined) normalized.shortcut = optObj['shortcut'] as NonNullable<GooSelectOption['shortcut']>
-	if (optObj['isDisabled'] !== undefined) normalized.isDisabled = optObj['isDisabled'] as NonNullable<GooSelectOption['isDisabled']>
+	if (optObj['disabled'] !== undefined) normalized.disabled = optObj['disabled'] as NonNullable<GooSelectOption['disabled']>
 	if (optObj['isSupported'] !== undefined) normalized.isSupported = optObj['isSupported'] as NonNullable<GooSelectOption['isSupported']>
 	if (optObj['onChoose'] !== undefined) normalized.onChoose = optObj['onChoose'] as NonNullable<GooSelectOption['onChoose']>
 	if (optObj['title'] !== undefined) normalized.title = optObj['title'] as string

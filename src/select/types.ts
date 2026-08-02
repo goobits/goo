@@ -32,10 +32,11 @@ export interface GooSelectOption {
 	className?: string
 	icon?: GooSelectRenderable
 	shortcut?: GooSelectShortcut
-	isDisabled?: boolean | (() => boolean)
+	disabled?: boolean | (() => boolean)
 	isSupported?: boolean | (() => boolean)
 	onChoose?: (id: string) => void
 	options?: GooSelectOption[]
+	/** Native title tooltip applied to the rendered option row. */
 	title?: string
 	/** Native anchor destination. Link options navigate without changing the select value. */
 	href?: string
@@ -155,6 +156,8 @@ export type GooSelectProps = GooForwardedAttributes & {
 
 	style?: string
 	id?: string
+	/** Backward-compatible id for the native trigger. Prefer `id`. */
+	inputId?: string
 	size?: string
 	name?: string
 	form?: string
@@ -162,8 +165,11 @@ export type GooSelectProps = GooForwardedAttributes & {
 	required?: boolean
 	autocomplete?: HTMLSelectAttributes['autocomplete']
 	ariaLabel?: string
-	tooltip?: string | (() => string)
 	title?: string
+	/** Fill the available inline width. */
+	block?: boolean
+	'aria-describedby'?: string
+	'aria-invalid'?: boolean | 'false' | 'grammar' | 'spelling' | 'true'
 	disabled?: boolean
 	actionContext?: GooSelectActionContext
 	triggerIcon?: string | HTMLElement | (() => HTMLElement)

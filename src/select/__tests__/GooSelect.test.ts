@@ -1,5 +1,6 @@
 import { render } from '@testing-library/svelte'
 import { tick } from 'svelte'
+import { render as renderSsr } from 'svelte/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { pointerEvent } from '../../__tests__/_pointerEvents.ts'
@@ -148,6 +149,49 @@ describe('GooSelect', () => {
 		expect(container.querySelector('.goo-select__trigger-label')?.textContent).toBe('Updated')
 	})
 
+	it('renders string options on the server without browser globals', () => {
+		const originalElement = globalThis.Element
+		vi.stubGlobal('Element', undefined)
+		try {
+			expect(() => renderSsr(GooSelect, {
+				props: {
+					value: 'a',
+					options: [ { id: 'a', label: 'A' } ]
+				}
+			})).not.toThrow()
+		} finally {
+			vi.stubGlobal('Element', originalElement)
+		}
+	})
+
+	it('forwards required and validation semantics to the combobox trigger', () => {
+		const { container } = render(GooSelect, {
+			props: {
+				block: true,
+				inputId: 'option-input',
+				name: 'option',
+				options: [ { id: 'a', label: 'A' } ],
+				required: true,
+				'aria-describedby': 'option-help',
+				'aria-invalid': 'true'
+			}
+		})
+
+		const root = container.querySelector<HTMLElement>('.goo-select')
+		const trigger = container.querySelector<HTMLButtonElement>('.goo-select__trigger')
+		const field = container.querySelector<HTMLSelectElement>('.goo-select__field')
+
+		expect(root?.classList.contains('goo-select--block')).toBe(true)
+		expect(trigger?.id).toBe('option-input')
+		expect(trigger?.getAttribute('aria-label')).toBeNull()
+		expect(trigger?.getAttribute('aria-required')).toBe('true')
+		expect(trigger?.getAttribute('aria-describedby')).toBe('option-help')
+		expect(trigger?.getAttribute('aria-invalid')).toBe('true')
+		expect(field?.name).toBe('option')
+		expect(field?.required).toBe(true)
+		expect(field?.checkValidity()).toBe(false)
+	})
+
 	it('binds the native root API for imperative updates', async() => {
 		let element: GooSelectElement | null = null
 		render(GooSelect, {
@@ -269,6 +313,38 @@ describe('GooSelect', () => {
 
 		expect(document.querySelector('.goo-popout.goo-select-popout')).not.toBeNull()
 		expect(document.querySelectorAll('.goo-select__option').length).toBe(2)
+	})
+
+	it('keeps dialog-owned menus inside the overlay root without stealing trigger focus', async() => {
+		const overlayScope = document.createElement('section')
+		const contentRoot = document.createElement('main')
+		const overlayRoot = document.createElement('div')
+		overlayScope.dataset.gooOverlayScope = ''
+		overlayRoot.dataset.gooOverlayHost = ''
+		overlayScope.append(contentRoot, overlayRoot)
+		document.body.appendChild(overlayScope)
+		const { container } = render(GooSelect, {
+			props: {
+				value: 'a',
+				options: [
+					{ id: 'a', label: 'A' },
+					{ id: 'b', label: 'B' }
+				]
+			}
+		})
+		contentRoot.appendChild(container)
+		const element = container.querySelector<GooSelectElement>('.goo-select')!
+		const trigger = container.querySelector<HTMLButtonElement>('.goo-select__trigger')!
+		trigger.focus()
+
+		expect(element.open({ autoFocus: false })).toBe(true)
+		await tick()
+
+		expect(overlayRoot.querySelector('.goo-popout.goo-select-popout')).not.toBeNull()
+		expect(document.activeElement).toBe(trigger)
+
+		element.close()
+		overlayScope.remove()
 	})
 
 	it('omits optgroup headers when supported contents collapse to dividers only', async() => {

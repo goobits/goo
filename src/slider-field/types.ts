@@ -29,16 +29,13 @@ export type GooSliderFieldEventData = {
 export type GooSliderFieldOptions = {
 	canCross?: boolean
 	canPush?: boolean
-	class?: string
 	className?: string
 	coverage?: boolean
-	variance?: boolean
 	direction?: GooSliderDirection
 	disabled?: boolean
 	easingFn?: (pct: number) => number
 	easingFnInvert?: (pct: number) => number
 	gradient?: string[]
-	input?: boolean
 	label?: string
 	marks?: GooSliderMark[]
 	max?: number
@@ -48,9 +45,7 @@ export type GooSliderFieldOptions = {
 	mode?: GooSliderMode
 	name?: string
 	onchange?: (value: GooSliderFieldValue, data: GooSliderFieldEventData) => void
-	onChange?: (value: GooSliderFieldValue, data: GooSliderFieldEventData) => void
 	oninput?: (value: GooSliderFieldValue, data: GooSliderFieldEventData) => void
-	onInput?: (value: GooSliderFieldValue, data: GooSliderFieldEventData) => void
 	preset?: GooSliderPreset
 	presetColor?: string
 	presetHue?: number

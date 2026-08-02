@@ -15,7 +15,6 @@ import type { SliderPrimitiveFieldOptions } from '../slider/_createSliderPrimiti
 import type { TextareaFieldOptions } from '../textarea/_createTextareaField.ts'
 
 type InputFieldType = 'text' | 'email' | 'password' | 'url'
-type RadioFieldType = 'radio' | 'radiogroup'
 
 /** Field configuration accepted by createGooField. */
 export type GooFieldConfig =
@@ -24,11 +23,11 @@ export type GooFieldConfig =
 	| ({ type: 'textarea' } & TextareaFieldOptions)
 	| ({ type: 'checkbox' } & CheckboxFieldOptions)
 	| ({ type: 'color' } & ColorFieldOptions)
-	| ({ type: RadioFieldType } & RadioGroupFieldOptions)
+	| ({ type: 'radio' } & RadioGroupFieldOptions)
 	| ({ type: 'select' } & SelectFieldOptions)
 	| ({ type: 'range' } & SliderPrimitiveFieldOptions)
 	| ({ type: 'angle' } & AngleInputFieldOptions)
-	| ({ type: 'buttongroup' } & ButtonGroupFieldOptions)
+	| ({ type: 'button-group' } & ButtonGroupFieldOptions)
 
 /**
  * Create a form field element using Goo components.

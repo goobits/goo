@@ -8,15 +8,13 @@ type FloatingToolbarViewApi = ReturnType<typeof mount> & {
 	getRootElement(): HTMLElement | undefined
 }
 
-export type FloatingToolbarElement = GooDisposableElement
-
 export type CreateFloatingToolbarViewOptions = {
 	toolGroups: FloatingToolbarGroups
 }
 
 export function createFloatingToolbarView({
 	toolGroups
-}: CreateFloatingToolbarViewOptions): FloatingToolbarElement {
+}: CreateFloatingToolbarViewOptions): GooDisposableElement {
 	const target = document.createElement('div')
 	const component = mount(FloatingToolbarView, {
 		target,
@@ -27,7 +25,7 @@ export function createFloatingToolbarView({
 	let destroyed = false
 
 	flushSync()
-	const toolbar = component.getRootElement() as FloatingToolbarElement | undefined
+	const toolbar = component.getRootElement() as GooDisposableElement | undefined
 	if (!toolbar) {
 		unmount(component)
 		throw new Error('FloatingToolbarView failed to mount.')

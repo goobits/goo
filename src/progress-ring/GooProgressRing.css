@@ -58,15 +58,15 @@
 	aspect-ratio: 1;
 	border-radius: 50%;
 	box-sizing: border-box;
-	color: var(--goo-progress-ring-text);
+	color: var(--goo-progress-ring-text, var(--goo-theme-fg));
 	display: inline-flex;
 	font-family: var(--goo-theme-font-sans);
-	height: var(--goo-progress-ring-size);
+	height: var(--goo-progress-ring-size, calc(var(--goo-theme-control-height-lg) * 3));
 	justify-content: center;
 	overflow: hidden;
-	padding: var(--goo-progress-ring-padding);
+	padding: var(--goo-progress-ring-padding, 0);
 	position: relative;
-	width: var(--goo-progress-ring-size);
+	width: var(--goo-progress-ring-size, calc(var(--goo-theme-control-height-lg) * 3));
 }
 
 .goo-progress-ring canvas {

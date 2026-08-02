@@ -6,6 +6,7 @@
 
 import type { GooControlOptionBag, GooControlTypeRegistry } from '../controller/controlRegistry.ts'
 import type { GooControllerOptions } from '../controller/GooController.ts'
+import { findFieldOwnedControlOption } from './_schemaControlOptions.ts'
 import { localizeSchemaText } from './_schemaText.ts'
 import { shouldRenderSchemaItem } from './fieldConditions.ts'
 import { getControllerFieldLayout } from './fieldLayout.ts'
@@ -23,12 +24,11 @@ export interface NormalizedSelectOption {
 	id?: string
 	label?: string
 	icon?: string
-	tooltip?: string
+	title?: string
 	ariaLabel?: string
 	hideLabel?: boolean
 	className?: string
 	disabled?: boolean
-	isDisabled?: boolean
 	options?: NormalizedSelectOption[]
 }
 
@@ -152,19 +152,18 @@ export function normalizeSelectOptions(
 		if (!shouldRenderSchemaItem(opt, data)) return []
 		if (opt.type === 'divider') return [ { type: 'divider' as const } ]
 
-		const id = opt.id ?? opt.key ?? opt.value ?? opt.label ?? ''
-		const label = opt.label ?? opt.value ?? opt.id ?? opt.key ?? ''
+		const id = opt.id ?? opt.label ?? ''
+		const label = opt.label ?? opt.id ?? ''
 		return [ {
 			type: opt.type,
 			id: String(id),
 			label: localizeSchemaText(String(label)) ?? String(label),
 			icon: opt.icon,
-			tooltip: localizeSchemaText(opt.tooltip),
+			title: localizeSchemaText(opt.title),
 			ariaLabel: localizeSchemaText(opt.ariaLabel),
 			hideLabel: opt.hideLabel,
 			className: opt.className,
 			disabled: opt.disabled,
-			isDisabled: opt.disabled,
 			options: opt.options ? normalizeSelectOptions(opt.options, data) : undefined
 		} ]
 	})
@@ -237,9 +236,15 @@ export function buildControllerOptions(
 	if (layout) options.layout = layout
 	if (node.disabled !== undefined) options.disabled = node.disabled
 
+	const duplicatedControlOption = findFieldOwnedControlOption(node.controlOptions)
+	if (duplicatedControlOption) {
+		throw new TypeError(
+			`GooSchema field "${ node.path }" must define "${ duplicatedControlOption }" at the field root, not in controlOptions.`
+		)
+	}
 	let controlOptions: GooControlOptionBag | undefined = node.controlOptions ? { ...node.controlOptions } : undefined
 	for (const [ key, value ] of [
-		[ 'input', node.input ],
+		[ 'showInputs', node.showInputs ],
 		[ 'canCross', node.canCross ],
 		[ 'canPush', node.canPush ],
 		[ 'xy', node.xy ],
@@ -252,7 +257,7 @@ export function buildControllerOptions(
 		[ 'fullWidth', node.fullWidth ],
 		[ 'modes', node.modes ],
 		[ 'ariaLabel', localizeSchemaText(node.ariaLabel) ],
-		[ 'class', node.class ],
+		[ 'className', node.className ],
 		[ 'dataParam', node.dataParam ],
 		[ 'id', node.id ],
 		[ 'items', node.items ],

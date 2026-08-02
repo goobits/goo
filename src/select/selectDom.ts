@@ -18,6 +18,11 @@ export function evaluate<T>(val: T | (() => T), ctx?: unknown): T {
 	return typeof val === 'function' ? (val as () => T).call(ctx) : val
 }
 
+/** Whether a value is a DOM Element in browser-capable runtimes. */
+export function isElementNode(value: unknown): value is Element {
+	return typeof Element !== 'undefined' && value instanceof Element
+}
+
 /**
  * Resolve the text direction that should be copied from a select root into
  * body-level popouts.
@@ -92,7 +97,7 @@ export function createIcon(
 	const evaluatedIcon = evaluate(icon)
 
 	// DOM node (HTML or SVG) - wrap in icon container and clone
-	if (evaluatedIcon instanceof Element) {
+	if (isElementNode(evaluatedIcon)) {
 		const $icon = document.createElement('span')
 		$icon.className = 'goo-select__icon'
 		$icon.appendChild(evaluatedIcon.cloneNode(true))

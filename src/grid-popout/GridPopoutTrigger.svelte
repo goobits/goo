@@ -18,8 +18,6 @@ interface TriggerValue {
 	iconSvg?: GridPopoutSvgIcon
 	kicker?: string
 	preview?: GridPopoutPreview
-	previewAlt?: string
-	previewUrl?: string
 	title?: string
 }
 
@@ -34,10 +32,8 @@ interface Props {
 	kicker?: string
 	opened?: boolean
 	preview?: GridPopoutPreview
-	previewAlt?: string
 	previewClass?: string
 	previewSize?: number
-	previewUrl?: string
 	nextPreviewClass?: string
 	nextPreviewVisible?: boolean
 	nextPreviewUrl?: string
@@ -63,10 +59,8 @@ let {
 	kicker = '',
 	opened = false,
 	preview,
-	previewAlt = '',
 	previewClass = '',
 	previewSize = 40,
-	previewUrl = '',
 	nextPreviewClass = '',
 	nextPreviewVisible = false,
 	nextPreviewUrl = '',
@@ -110,11 +104,9 @@ const currentAriaLabel = $derived(valueOverride.ariaLabel ?? ariaLabel)
 const currentIconClass = $derived(valueOverride.iconClass ?? iconClass)
 const currentIconSvg = $derived(valueOverride.iconSvg ?? iconSvg)
 const currentKicker = $derived(valueOverride.kicker ?? kicker)
-const currentPreview = $derived(valueOverride.preview ?? preview ?? getLegacyPreview(valueOverride.previewUrl ?? previewUrl, valueOverride.previewAlt ?? previewAlt))
-const currentPreviewAlt = $derived(valueOverride.previewAlt ?? previewAlt)
-const currentPreviewUrl = $derived(valueOverride.previewUrl ?? previewUrl)
+const currentPreview = $derived(valueOverride.preview ?? preview)
 const currentTitle = $derived(valueOverride.title ?? title)
-const contentFadeClassName = $derived(contentFadeActive && !currentPreview && !currentPreviewUrl
+const contentFadeClassName = $derived(contentFadeActive && !currentPreview
 	? 'goo-grid-popout-trigger__fade'
 	: '')
 const iconClassName = $derived([
@@ -156,7 +148,6 @@ $effect(() => {
 $effect(() => {
 	if (!tooltip || !rootElement) return
 	void currentPreview
-	void currentPreviewUrl
 	void currentIconSvg
 	void currentIconClass
 	const tile = rootElement.querySelector<HTMLElement>(
@@ -177,7 +168,7 @@ $effect(() => {
 	const contentSignature = [
 		currentIconClass,
 		currentIconSvg ? JSON.stringify(currentIconSvg) : '',
-		currentPreview ? JSON.stringify(currentPreview) : currentPreviewUrl,
+		currentPreview ? JSON.stringify(currentPreview) : '',
 		currentKicker,
 		currentTitle
 	].join('\0')
@@ -221,16 +212,6 @@ function clearContentFadeTimer(): void {
 	contentFadeTimer = undefined
 }
 
-function getLegacyPreview(src: string, alt: string): GridPopoutPreview | undefined {
-	if (!src) return undefined
-	return {
-		alt,
-		background: 'checker',
-		fit: 'contain',
-		size: 'sm',
-		src
-	}
-}
 </script>
 
 <goo-grid-popout-trigger
@@ -263,7 +244,7 @@ function getLegacyPreview(src: string, alt: string): GridPopoutPreview | undefin
 			<GooPreview
 				class={previewClassName}
 				src={currentPreview.src}
-				alt={currentPreview.alt ?? currentPreviewAlt}
+				alt={currentPreview.alt ?? ''}
 				background={currentPreview.background ?? 'checker'}
 				badge={currentPreview.badge}
 				fit={currentPreview.fit ?? 'contain'}
@@ -272,13 +253,22 @@ function getLegacyPreview(src: string, alt: string): GridPopoutPreview | undefin
 			/>
 		{:else if currentIconSvg}
 			<svg
+				{...currentIconSvg.attributes}
 				class={svgIconClassName}
 				viewBox={currentIconSvg.viewBox}
 				aria-hidden="true"
 				focusable="false"
 			>
-				{#each currentIconSvg.paths as path}
-					<path d={path.d} transform={path.transform} />
+				{#each currentIconSvg.elements as element}
+					{#if element.tag === 'circle'}
+						<circle {...element.attributes}></circle>
+					{:else if element.tag === 'line'}
+						<line {...element.attributes}></line>
+					{:else if element.tag === 'rect'}
+						<rect {...element.attributes}></rect>
+					{:else}
+						<path {...element.attributes}></path>
+					{/if}
 				{/each}
 			</svg>
 		{:else if currentIconClass}

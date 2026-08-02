@@ -8,12 +8,13 @@ describe('GooFolder', () => {
 	})
 
 	it('creates native folder elements without custom tags', () => {
-		const folder = createFolder({ title: 'Settings', open: true })
+		const folder = createFolder({ title: 'Settings', open: true, className: 'settings-folder' })
 		document.body.appendChild(folder)
 
 		expect(document.querySelector('goo-folder')).toBeNull()
 		expect(document.querySelector('.goo-folder[title="Settings"]')).toBe(folder)
 		expect(folder.open).toBe(true)
+		expect(folder.classList.contains('settings-folder')).toBe(true)
 
 		folder.toggle()
 		expect(folder.open).toBe(false)

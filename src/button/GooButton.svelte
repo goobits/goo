@@ -1,17 +1,33 @@
+<script module lang="ts">
+import type { SvelteControlSchema } from '../controller/SvelteControl.svelte.ts'
+
+/** GooController binding metadata for the Svelte button component. */
+export const controlSchema: SvelteControlSchema = {
+	valueKey: 'label',
+	transformValue: (_value, options) => options['label'],
+	propMapping: {
+		className: 'class',
+		fullRow: 'fullRow',
+		onclick: 'onclick'
+	}
+}
+</script>
+
 <script lang="ts">
 import './GooButton.css'
-import type { GooButtonProps } from './types.ts'
+import { createGooTooltip } from '../tooltip/tooltip.ts'
+import type { GooButtonElement, GooButtonProps } from './types.ts'
 
-let buttonElement: HTMLAnchorElement | HTMLButtonElement | undefined = $state()
+let buttonElement: GooButtonElement | undefined = $state()
 
 let {
-	value = '',
+	label = '',
 	formValue,
+	form,
 	type = 'button',
 	disabled = false,
 	target,
 	rel,
-	block = false,
 	fullRow = false,
 	title,
 	tooltip,
@@ -24,11 +40,15 @@ let {
 	toggle = false,
 	pressed = $bindable(false),
 	layout = 'inline',
+	tabIndex,
 	class: className = '',
 	style,
 	icon,
 	children,
+	element = $bindable<GooButtonElement | null>(null),
 	onclick,
+	onmouseenter,
+	onmouseleave,
 	onactivate,
 	onchange,
 	...rest
@@ -40,11 +60,28 @@ $effect(() => {
 	currentPressed = Boolean(pressed)
 })
 
+$effect(() => {
+	element = buttonElement ?? null
+})
+
+$effect(() => {
+	const target = buttonElement
+	if (!target || !tooltip) return
+
+	const instance = createGooTooltip({
+		for: target,
+		content: tooltip,
+		arrow: true
+	})
+
+	return () => instance.destroy()
+})
+
 const classes = $derived.by(() => {
 	const values = ['goo-button']
 	if (disabled) values.push('goo-button--disabled')
 	if (toggle && currentPressed) values.push('goo-button--selected')
-	if (block || fullRow) values.push('goo-button--full-row', 'goo-button--block')
+	if (fullRow) values.push('goo-button--full-row')
 	if (className) values.push(className)
 	return values.filter(Boolean).join(' ')
 })
@@ -80,19 +117,13 @@ function handleClick(event: MouseEvent): void {
 
 	onclick?.(event)
 	onactivate?.(event)
-	buttonElement?.dispatchEvent(new CustomEvent('activate', {
-		bubbles: true,
-		cancelable: true,
-		composed: true,
-		detail: { sourceEvent: event }
-	}))
 }
 
-const resolvedTitle = $derived(title || tooltip || undefined)
+const resolvedTitle = $derived(title || undefined)
 const resolvedAriaLabel = $derived(
 	ariaLabel
 		|| (typeof nativeAriaLabel === 'string' ? nativeAriaLabel : undefined)
-		|| (!children && !value ? resolvedTitle : undefined)
+		|| (!children && !label ? resolvedTitle || tooltip : undefined)
 )
 </script>
 
@@ -104,13 +135,15 @@ const resolvedAriaLabel = $derived(
 		href={disabled ? undefined : rest.href}
 		{target}
 		{rel}
-		title={resolvedTitle}
+		{title}
 		aria-label={resolvedAriaLabel}
 		{...hostAttributes}
 		aria-disabled={disabled ? 'true' : undefined}
-		tabindex={disabled ? -1 : rest.tabindex ?? rest.tabIndex}
+		tabindex={disabled ? -1 : tabIndex}
 		{style}
 		onclick={handleClick}
+		{onmouseenter}
+		{onmouseleave}
 	>
 		{#if icon}
 			<span class="goo-button__icon" aria-hidden="true">
@@ -119,8 +152,8 @@ const resolvedAriaLabel = $derived(
 		{/if}
 		{#if children}
 			{@render children()}
-		{:else if value}
-			<span class="goo-button__title" data-translate>{value}</span>
+		{:else if label}
+			<span class="goo-button__title" data-translate>{label}</span>
 		{/if}
 	</a>
 {:else}
@@ -129,15 +162,19 @@ const resolvedAriaLabel = $derived(
 		bind:this={buttonElement}
 		class={classes}
 		{type}
+		{form}
 		value={formValue}
 		{disabled}
-		title={resolvedTitle}
+		{title}
 		aria-label={resolvedAriaLabel}
 		{...hostAttributes}
 		aria-disabled={disabled ? 'true' : undefined}
 		aria-pressed={toggle ? currentPressed : ariaPressed}
+		tabindex={disabled ? -1 : tabIndex}
 		{style}
 		onclick={handleClick}
+		{onmouseenter}
+		{onmouseleave}
 	>
 		{#if icon}
 			<span class="goo-button__icon" aria-hidden="true">
@@ -146,8 +183,8 @@ const resolvedAriaLabel = $derived(
 		{/if}
 		{#if children}
 			{@render children()}
-		{:else if value}
-			<span class="goo-button__title" data-translate>{value}</span>
+		{:else if label}
+			<span class="goo-button__title" data-translate>{label}</span>
 		{/if}
 	</button>
 {/if}

@@ -33,7 +33,6 @@ describe('Goo bindable form controls', () => {
 		await fireEvent.click(checkbox)
 		await tick()
 		expect(screen.getByTestId('checkbox-checked').textContent).toBe('true')
-		expect(screen.getByTestId('checkbox-value').textContent).toBe('true')
 	})
 
 	it('includes GooSelect values in native FormData when named', async() => {

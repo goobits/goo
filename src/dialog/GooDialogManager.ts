@@ -18,12 +18,20 @@ export interface ManagedDialog {
  */
 class GooDialogManager {
 	#dialogs: ManagedDialog[] = []
+	#modalDialogs = new Set<ManagedDialog>()
+	#previousBodyOverflow: string | null = null
 
-	/** Register a dialog so it participates in stacking and close-top handling. 	 * @param dialog - dialog.
+	/** Register a dialog so it participates in stacking and close-top handling.
+	 * @param dialog - dialog.
+	 * @param options - registration options.
 	 */
-	register(dialog: ManagedDialog): void {
+	register(dialog: ManagedDialog, options: { modal?: boolean } = {}): void {
 		if (!this.#dialogs.includes(dialog)) {
 			this.#dialogs.push(dialog)
+		}
+		if (options.modal) {
+			this.#modalDialogs.add(dialog)
+			this.#lockBodyScroll()
 		}
 	}
 
@@ -34,6 +42,8 @@ class GooDialogManager {
 		if (index !== -1) {
 			this.#dialogs.splice(index, 1)
 		}
+		this.#modalDialogs.delete(dialog)
+		this.#restoreBodyScroll()
 	}
 
 	/** Compute the stacking z-index for a dialog based on its position in the stack. 	 * @param dialog - dialog.
@@ -67,6 +77,22 @@ class GooDialogManager {
 	/** Close the topmost dialog, if any. */
 	async closeTop(): Promise<void> {
 		await this.getTopDialog()?.close()
+	}
+
+	#lockBodyScroll(): void {
+		if (typeof document === 'undefined' || this.#previousBodyOverflow !== null) return
+		this.#previousBodyOverflow = document.body.style.overflow
+		document.body.style.overflow = 'hidden'
+	}
+
+	#restoreBodyScroll(): void {
+		if (
+			typeof document === 'undefined' ||
+			this.#modalDialogs.size > 0 ||
+			this.#previousBodyOverflow === null
+		) return
+		document.body.style.overflow = this.#previousBodyOverflow
+		this.#previousBodyOverflow = null
 	}
 }
 

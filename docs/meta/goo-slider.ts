@@ -44,19 +44,19 @@ export default {
 		},
 		{
 			title: 'Variance collapsed',
-			props: { title: 'Variance collapsed', value: [ 50, 50, 50 ], variance: true }
+			props: { title: 'Variance collapsed', value: [ 50, 50, 50 ], mode: 'variance' }
 		},
 		{
 			title: 'Variance near edge',
-			props: { title: 'Variance near edge', value: [ 0, 15, 30 ], variance: true }
+			props: { title: 'Variance near edge', value: [ 0, 15, 30 ], mode: 'variance' }
 		},
 		{
 			title: 'Variance edge compressed',
-			props: { title: 'Variance edge compressed', value: [ 80, 100, 100 ], variance: true }
+			props: { title: 'Variance edge compressed', value: [ 80, 100, 100 ], mode: 'variance' }
 		},
 		{
 			title: 'Vertical variance',
-			props: { title: 'Vertical variance', value: [ 25, 50, 75 ], variance: true, direction: 'vertical', style: 'height: 120px;' }
+			props: { title: 'Vertical variance', value: [ 25, 50, 75 ], mode: 'variance', direction: 'vertical', style: 'height: 120px;' }
 		},
 		{
 			title: 'Ticks and labels',

@@ -52,7 +52,7 @@ describe('GooRadio', () => {
 		const parentKeydown = vi.fn()
 		container.addEventListener('keydown', parentKeydown)
 
-		for (const key of [ 'Enter', ' ', 'Spacebar' ]) {
+		for (const key of [ 'Enter', ' ' ]) {
 			const event = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key })
 			radio.dispatchEvent(event)
 
@@ -85,8 +85,8 @@ describe('GooRadioGroup', () => {
 			props: {
 				value: 'b',
 				options: [
-					{ value: 'a', label: 'A' },
-					{ value: 'b', label: 'B' }
+					{ id: 'a', label: 'A' },
+					{ id: 'b', label: 'B' }
 				]
 			}
 		})
@@ -108,8 +108,8 @@ describe('GooRadioGroup', () => {
 				value: 'a',
 				onchange,
 				options: [
-					{ value: 'a', label: 'A' },
-					{ value: 'b', label: 'B' }
+					{ id: 'a', label: 'A' },
+					{ id: 'b', label: 'B' }
 				]
 			}
 		})
@@ -128,8 +128,8 @@ describe('GooRadioGroup', () => {
 				value: 'a',
 				onchange,
 				options: [
-					{ value: 'a', label: 'A' },
-					{ value: 'b', label: 'B' }
+					{ id: 'a', label: 'A' },
+					{ id: 'b', label: 'B' }
 				]
 			}
 		})

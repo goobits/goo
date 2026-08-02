@@ -64,10 +64,6 @@ const items: GridPopoutItem[] = [
 				},
 				tag: 'path'
 			} ],
-			paths: [ {
-				d: 'M1 2L3 4',
-				transform: 'translate(1 2)'
-			} ],
 			viewBox: '0 0 24 24'
 		},
 		id: 'warp',
@@ -299,29 +295,6 @@ describe('GridPopoutPicker', () => {
 			.querySelector<HTMLImageElement>('.goo-grid-picker__preview.goo-preview img')
 		expect(loadedOptionImage?.getAttribute('src')).toBe('data:image/png;base64,preview')
 		expect(loadedOptionImage?.getAttribute('alt')).toBe('Brush preview')
-	})
-
-	it('keeps legacy previewUrl items working', () => {
-		const { getByRole } = render(GridPopoutPicker, {
-			props: {
-				ariaLabel: 'Brush',
-				items: [
-					{
-						id: 'brush',
-						previewAlt: 'Brush preview',
-						previewUrl: 'data:image/png;base64,preview',
-						title: 'Brush'
-					}
-				],
-				selected: 'brush'
-			}
-		})
-
-		const triggerPreview = getByRole('button', { name: 'Brush' })
-			.querySelector('.goo-grid-popout-trigger__preview.goo-preview img')
-
-		expect(triggerPreview?.getAttribute('src')).toBe('data:image/png;base64,preview')
-		expect(triggerPreview?.getAttribute('alt')).toBe('Brush preview')
 	})
 
 	it('honors explicit icon-grid layout instead of forcing small lists to one column', async() => {

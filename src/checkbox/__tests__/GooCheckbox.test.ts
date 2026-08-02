@@ -90,7 +90,7 @@ describe('GooCheckbox', () => {
 		const parentKeydown = vi.fn()
 		container.addEventListener('keydown', parentKeydown)
 
-		for (const key of [ 'Enter', ' ', 'Spacebar', 'ArrowLeft', 'ArrowRight' ]) {
+		for (const key of [ 'Enter', ' ', 'ArrowLeft', 'ArrowRight' ]) {
 			const event = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key })
 			checkbox.dispatchEvent(event)
 

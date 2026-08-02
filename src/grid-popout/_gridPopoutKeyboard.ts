@@ -1,7 +1,4 @@
-import {
-	containKeyboardEvent,
-	isKeyboardActivationKey
-} from '../support/keyboard/_keyboardActivation.ts'
+import { containKeyboardEvent, isKeyboardActivationKey } from '../support/keyboard/_keyboardActivation.ts'
 
 export type GridPopoutTriggerKeyboardOptions = {
 	close: () => void
@@ -65,16 +62,12 @@ export function handleGridPopoutDocumentKeyboardEvent(
 
 export function handleGridPopoutListKeyboardEvent(
 	event: KeyboardEvent,
-	{
-		choose,
-		close,
-		focusSibling,
-		focusTrigger
-	}: GridPopoutListKeyboardOptions
+	{ choose, close, focusSibling, focusTrigger }: GridPopoutListKeyboardOptions
 ): boolean {
-	const option = event.target instanceof Element
-		? event.target.closest<HTMLElement>('.goo-grid-picker__item')
-		: null
+	const option =
+		event.target instanceof Element
+			? event.target.closest<HTMLElement>('.goo-grid-picker__item')
+			: null
 
 	switch (event.key) {
 		case 'Escape':
@@ -112,7 +105,5 @@ export function getGridPopoutKeyboardDelta(key: string): number {
 	if (key === 'ArrowUp') return -1
 	if (key === 'ArrowDown') return 1
 	const rtl = document.dir === 'rtl' || document.documentElement.dir === 'rtl'
-	return key === 'ArrowLeft'
-		? rtl ? 1 : -1
-		: rtl ? -1 : 1
+	return key === 'ArrowLeft' ? (rtl ? 1 : -1) : rtl ? -1 : 1
 }

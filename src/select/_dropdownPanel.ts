@@ -8,7 +8,7 @@ import { mount, unmount } from 'svelte'
 import { findOptionById } from './_normalizeOptions.ts'
 import SelectIcon from './_SelectIcon.svelte'
 import { SubmenuPopoutController } from './_submenuPopout.ts'
-import { createIcon, createShortcut, evaluate } from './selectDom.ts'
+import { createIcon, createShortcut, evaluate, isElementNode } from './selectDom.ts'
 import type { GooSelectDropdownSemantics, GooSelectOption } from './types.ts'
 
 // ============================================================================
@@ -526,7 +526,7 @@ export class DropdownPanel {
 		}
 
 		// Regular option or submenu
-		const isDisabled = evaluate(opt.isDisabled, this.#ctx.getContext())
+		const isDisabled = evaluate(opt.disabled, this.#ctx.getContext())
 		const isSelected = showSelectionIndicator && value === opt.id
 		const isSubmenu = opt.type === 'submenu'
 		if (isSubmenu && !this.#hasSupportedOptionRow(opt.options || [])) return null
@@ -580,7 +580,7 @@ export class DropdownPanel {
 		const $label = document.createElement('span')
 		$label.className = 'goo-select__label'
 		const labelVal = evaluate(opt.label)
-		if (labelVal instanceof Element) {
+		if (isElementNode(labelVal)) {
 			$label.appendChild(labelVal.cloneNode(true))
 		} else {
 			$label.textContent = labelVal as string

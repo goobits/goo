@@ -9,9 +9,10 @@ import {
 	type DialogLabels,
 	type DialogResult,
 	type DialogVerifyHandler,
+	type GooDialogController,
 	type GooDialogDefaultFocus,
-	type GooDialogInstance,
-	type GooDialogOptions
+	type GooDialogOptions,
+	type GooDialogSide
 } from './dialog.ts'
 
 type GooDialogPlacementOptions = Pick<GooDialogOptions, 'isolationRoot' | 'parentElement'>
@@ -19,7 +20,7 @@ type GooDialogPlacementOptions = Pick<GooDialogOptions, 'isolationRoot' | 'paren
 /** Task returned by dialog convenience helpers. */
 export type GooDialogTask = {
 	/** Public dialog controller. */
-	readonly dialog: GooDialogInstance
+	readonly dialog: GooDialogController
 	/** Resolves with the user's dialog action. */
 	readonly result: Promise<DialogResult>
 	/** Close the dialog. */
@@ -80,9 +81,18 @@ export interface GooOverlayOptions extends GooDialogPlacementOptions {
 	showClose?: boolean
 }
 
+/** Options accepted by `GooSheet`. */
+export interface GooSheetOptions extends GooOverlayOptions {
+	closeOnBackdrop?: boolean
+	closeOnEscape?: boolean
+	defaultFocus?: Extract<GooDialogDefaultFocus, 'first' | 'dialog'>
+	side?: GooDialogSide
+	width?: string | number
+}
+
 type ContentOptions = { content: string | Node }
 
-function createDialogTask(dialog: GooDialogInstance): GooDialogTask {
+function createDialogTask(dialog: GooDialogController): GooDialogTask {
 	const result = dialog.open()
 	return {
 		dialog,
@@ -195,6 +205,24 @@ export function GooOverlay(options: GooOverlayOptions | string | Node): GooDialo
 	const normalized = normalizeContentOptions<GooOverlayOptions>(options)
 	const dialog = createGooDialog({
 		type: 'overlay',
+		showClose: true,
+		...normalized
+	})
+
+	return createDialogTask(dialog)
+}
+
+/**
+ * Show a modal sheet from a logical viewport edge.
+ *
+ * @param options - Options, message, or node.
+ * @returns Dialog task containing the result promise and controller.
+ */
+export function GooSheet(options: GooSheetOptions | string | Node): GooDialogTask {
+	const normalized = normalizeContentOptions<GooSheetOptions>(options)
+	const dialog = createGooDialog({
+		type: 'sheet',
+		defaultFocus: 'first',
 		showClose: true,
 		...normalized
 	})

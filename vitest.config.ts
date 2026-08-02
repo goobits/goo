@@ -1,20 +1,22 @@
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import { defineConfig } from 'vitest/config'
+import { resolveViteCacheDirectory } from './scripts/testStorage.ts'
 
 export default defineConfig({
-	plugins: [ svelte() ],
+	cacheDir: resolveViteCacheDirectory(import.meta.dirname),
+	plugins: [svelte({ configFile: false })],
 	resolve: {
-		conditions: [ 'browser' ]
+		conditions: ['browser']
 	},
 	ssr: {
-		noExternal: [ '@lucide/svelte' ]
+		noExternal: ['@lucide/svelte']
 	},
 	test: {
 		environment: 'jsdom',
-		include: [ 'src/**/*.test.{js,ts}' ],
-		exclude: [ 'src/**/playwright/**' ],
+		include: ['src/**/*.test.{js,ts}'],
+		exclude: ['src/**/playwright/**'],
 		globals: true,
-		setupFiles: [ 'src/__tests__/setup.ts' ],
+		setupFiles: ['src/__tests__/setup.ts'],
 		deps: {
 			optimizer: {
 				enabled: false

@@ -25,22 +25,16 @@ const CONTEXT_MENU_SEMANTICS: GooSelectDropdownSemantics = {
 }
 
 /**
- * Goo context menu option.
- */
-export type GooContextMenuOption = GooSelectOption
-
-/**
  * Goo context menu options.
  */
 export interface GooContextMenuOptions {
-	options?: GooContextMenuOption[]
+	options?: GooSelectOption[]
 	enableKeyboard?: boolean
 	showSelectionIndicator?: boolean
 	menu?: GooSelectMenuOptions
 	className?: string
 	actionContext?: GooSelectActionContext
 	id?: string
-	selected?: string
 	value?: string
 	onopen?: () => void
 	onclose?: () => void
@@ -96,7 +90,6 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 		className = '',
 		actionContext,
 		id,
-		selected,
 		value,
 		onopen,
 		onclose
@@ -114,7 +107,7 @@ export function createGooContextMenu(options: GooContextMenuOptions = {}): GooCo
 		showSelectionIndicator,
 		showHeader: false,      // No trigger button
 		id,
-		value: value ?? selected,
+		value,
 		menu: {
 			arrow: true,
 			backdrop: false,
