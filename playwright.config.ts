@@ -1,9 +1,11 @@
 import { defineConfig, devices } from '@playwright/test'
+import { resolveTestArtifactDirectory } from './scripts/testStorage.ts'
 
 const port = Number(process.env.GOO_PLAYWRIGHT_PORT ?? 4177)
-const baseURL = `http://127.0.0.1:${ port }`
+const baseURL = `http://127.0.0.1:${port}`
 
 export default defineConfig({
+	outputDir: resolveTestArtifactDirectory(import.meta.dirname, 'playwright'),
 	testDir: './src/__tests__/playwright',
 	testMatch: '**/*.test.ts',
 	timeout: 30000,
@@ -14,7 +16,7 @@ export default defineConfig({
 	forbidOnly: !!process.env.CI,
 	retries: process.env.CI ? 2 : 0,
 	workers: process.env.CI ? 1 : 4,
-	reporter: [ [ 'list' ] ],
+	reporter: [['list']],
 	use: {
 		...devices['Desktop Chrome'],
 		baseURL,
@@ -23,8 +25,8 @@ export default defineConfig({
 		viewport: { width: 1280, height: 720 }
 	},
 	webServer: {
-		command: `pnpm exec vite --host 127.0.0.1 --port ${ port }`,
-		url: `${ baseURL }/src/__tests__/fixtures/test-harness.html`,
+		command: `pnpm exec vite --host 127.0.0.1 --port ${port}`,
+		url: `${baseURL}/src/__tests__/fixtures/test-harness.html`,
 		reuseExistingServer: !process.env.CI,
 		timeout: 120000
 	}
