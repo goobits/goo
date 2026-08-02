@@ -4,7 +4,7 @@ import './GooDataGrid.css'
 import ArrowDown from '@lucide/svelte/icons/arrow-down'
 import ArrowDownUp from '@lucide/svelte/icons/arrow-down-up'
 import ArrowUp from '@lucide/svelte/icons/arrow-up'
-import { tick, untrack } from 'svelte'
+import { tick, untrack, type Snippet } from 'svelte'
 
 import {
 	containKeyboardEvent,
@@ -13,8 +13,11 @@ import {
 import { calculateVirtualGridWindow, virtualGridSpacerHeight, virtualGridWindowsEqual } from '../virtualGrid/virtualWindow.ts'
 import type { VirtualGridWindow } from '../virtualGrid/types.ts'
 import type {
+	GooDataGridCellSlot,
 	GooDataGridCellValue,
+	GooDataGridHeaderSlot,
 	GooDataGridProps,
+	GooDataGridRenderer,
 	GooDataGridRowKey,
 	GooDataGridSortState,
 	GooDataGridSortValue
@@ -146,6 +149,10 @@ function cellText(row: T, rowIndex: number, columnIndex: number): string {
 	if (value === null || value === undefined) return ''
 	if (typeof value === 'boolean') return value ? 'Yes' : 'No'
 	return String(value)
+}
+
+function asSnippet<Slot>(renderer: GooDataGridRenderer<Slot> | undefined): Snippet<[Slot]> | undefined {
+	return renderer as Snippet<[Slot]> | undefined
 }
 
 function sortValue(row: T, rowIndex: number, columnIndex: number): GooDataGridSortValue {
@@ -328,6 +335,7 @@ $effect(() => {
 	<div class="goo-data-grid__header" role="rowgroup">
 		<div class="goo-data-grid__row goo-data-grid__row--header" role="row" aria-rowindex={1} style:grid-template-columns={templateColumns}>
 			{#each columns as column, columnIndex (column.key)}
+				{@const header = asSnippet<GooDataGridHeaderSlot<T>>(column.header)}
 				<div
 					class={cellClasses(columnIndex, 'goo-data-grid__header-cell')}
 					role="columnheader"
@@ -342,8 +350,8 @@ $effect(() => {
 							onclick={() => toggleColumnSort(columnIndex)}
 						>
 							<span>
-								{#if column.header}
-									{@render column.header({ column })}
+								{#if header}
+									{@render header({ column })}
 								{:else}
 									{column.label}
 								{/if}
@@ -358,8 +366,8 @@ $effect(() => {
 								{/if}
 							</span>
 						</button>
-					{:else if column.header}
-						{@render column.header({ column })}
+					{:else if header}
+						{@render header({ column })}
 					{:else}
 						{column.label}
 					{/if}
@@ -391,9 +399,10 @@ $effect(() => {
 					data-slot={slot}
 				>
 					{#each columns as column, columnIndex (column.key)}
+						{@const cell = asSnippet<GooDataGridCellSlot<T>>(column.cell)}
 						<div class={cellClasses(columnIndex, 'goo-data-grid__cell')} role="cell">
-							{#if column.cell}
-								{@render column.cell({ column, row: entry.row, rowIndex: entry.rowIndex })}
+							{#if cell}
+								{@render cell({ column, row: entry.row, rowIndex: entry.rowIndex })}
 							{:else}
 								{cellText(entry.row, entry.rowIndex, columnIndex)}
 							{/if}

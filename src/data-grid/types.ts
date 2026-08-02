@@ -1,5 +1,3 @@
-import type { Snippet } from 'svelte'
-
 /** Unique key used to identify a rendered data-grid row. */
 export type GooDataGridRowKey = number | string
 
@@ -14,6 +12,15 @@ export type GooDataGridSortDirection = 'asc' | 'desc'
 
 /** Plain value supported by data-grid sorting. */
 export type GooDataGridSortValue = boolean | Date | null | number | string | undefined
+
+/**
+ * Consumer-provided renderer for a data-grid slot.
+ *
+ * The return stays opaque so Svelte's compiler-private snippet brand does not
+ * escape across source-package symlink boundaries. Slot arguments remain fully
+ * typed, and `GooDataGrid` converts the renderer at its local Svelte boundary.
+ */
+export type GooDataGridRenderer<Slot> = (slot: Slot) => unknown
 
 /** Active sort state for a data grid. */
 export interface GooDataGridSortState {
@@ -79,10 +86,10 @@ export interface GooDataGridColumn<T> {
 	format?: (value: GooDataGridCellValue, row: T, rowIndex: number) => string
 
 	/** Custom Svelte snippet for the header cell. */
-	header?: Snippet<[GooDataGridHeaderSlot<T>]>
+	header?: GooDataGridRenderer<GooDataGridHeaderSlot<T>>
 
 	/** Custom Svelte snippet for the body cell. */
-	cell?: Snippet<[GooDataGridCellSlot<T>]>
+	cell?: GooDataGridRenderer<GooDataGridCellSlot<T>>
 }
 
 /** Plain value supported by the default data-grid cell renderer. */

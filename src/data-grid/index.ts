@@ -9,6 +9,7 @@ export type {
 	GooDataGridDensity,
 	GooDataGridHeaderSlot,
 	GooDataGridProps,
+	GooDataGridRenderer,
 	GooDataGridRowKey,
 	GooDataGridSortDirection,
 	GooDataGridSortState,
