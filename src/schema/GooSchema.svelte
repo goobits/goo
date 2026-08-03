@@ -2,6 +2,7 @@
 	import { untrack } from 'svelte'
 	import {
 		createGooSchema,
+		GOO_SCHEMA_RESET_EVENT,
 		type GooSchemaElement,
 		type GooSchemaChangeHandler,
 		type GooSchemaCommitEvent,
@@ -234,7 +235,7 @@
 		schemaElement?.removeEventListener('commit', handleCommit)
 		schemaElement?.removeEventListener('input', handleInput)
 		schemaElement?.removeEventListener('preset', handlePreset)
-		schemaElement?.removeEventListener('reset', handleReset)
+		schemaElement?.removeEventListener(GOO_SCHEMA_RESET_EVENT, handleReset)
 		schemaElement?.destroy()
 		schemaElement = null
 		instance = null
@@ -269,7 +270,7 @@
 		schemaElement.addEventListener('commit', handleCommit)
 		schemaElement.addEventListener('input', handleInput)
 		schemaElement.addEventListener('preset', handlePreset)
-		schemaElement.addEventListener('reset', handleReset)
+		schemaElement.addEventListener(GOO_SCHEMA_RESET_EVENT, handleReset)
 		target.replaceChildren(schemaElement)
 		instance = schemaElement
 		lastSchema = snapshot.schema

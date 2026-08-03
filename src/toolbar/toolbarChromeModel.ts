@@ -1,12 +1,6 @@
 export type ToolbarIconFactory = () => HTMLElement
 export type ToolbarChromeIcon = string | ToolbarIconFactory
 
-export type ToolbarToolButtonConfig = {
-	icon?: ToolbarChromeIcon
-	id: string
-	title?: string
-}
-
 export type FloatingToolbarToolConfig = {
 	affordanceId?: string
 	affordanceKind?: 'modifier' | 'quick-tool'

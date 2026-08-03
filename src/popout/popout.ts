@@ -68,7 +68,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		role = 'dialog',
 		at,
 		align: alignInput,
-		offset: offsetInput = { x: 15, y: 15 },
+		offset: offsetInput,
 		keepWithin: requestedKeepWithin,
 		className = '',
 		dataset,
@@ -112,7 +112,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 		rtl ?? (document.documentElement?.dir === 'rtl' || document.body?.dir === 'rtl')
 	const fallbackAlign = alignInput ?? (resolvedRtl ? 'right to left' : 'left to right')
 	let currentAlign = fallbackAlign
-	let currentOffset = { ...offsetInput }
+	let currentOffset = offsetInput ? { ...offsetInput } : undefined
 	const fullScreen = fullScreenOption || !!requestedKeepWithin?.fullScreen
 
 	// Parse target
@@ -201,6 +201,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 
 		// Index parent-child chain
 		indexParentChain()
+		ensureNestedStackOrder()
 
 		// Mark open before the first await so callers can synchronously observe the state.
 		opened = true
@@ -392,7 +393,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 			...(targetPoint?.x === undefined ? {} : { x: targetPoint.x }),
 			...(targetPoint?.y === undefined ? {} : { y: targetPoint.y }),
 			align: currentAlign,
-			offset: currentOffset,
+			...(currentOffset === undefined ? {} : { offset: currentOffset }),
 			keepWithin: { $element: keepWithinElement, margin: keepWithinMargin },
 			avoidMargin: currentAvoidMargin,
 			avoidRects: currentAvoidRects,
@@ -551,6 +552,27 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 				return
 			}
 			el = el.parentElement
+		}
+	}
+
+	/**
+	 * Keep a child popout above the parent surface that owns its trigger.
+	 *
+	 * App chrome can intentionally raise a parent above Goo's theme default.
+	 * Preserve an explicitly higher child layer, but repair inherited/default
+	 * child layers that would otherwise render behind that parent.
+	 */
+	function ensureNestedStackOrder() {
+		const parentElement = parentPopout?.element
+		if (!$element || !parentElement) return
+
+		const parentZIndex = Number.parseInt(getComputedStyle(parentElement).zIndex, 10)
+		const childZIndex = Number.parseInt(getComputedStyle($element).zIndex, 10)
+		if (
+			Number.isFinite(parentZIndex) &&
+			(!Number.isFinite(childZIndex) || childZIndex <= parentZIndex)
+		) {
+			$element.style.zIndex = String(parentZIndex + 1)
 		}
 	}
 

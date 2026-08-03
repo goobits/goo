@@ -1,21 +1,22 @@
 import type { ButtonGroupOption, ButtonGroupOptions, NormalizedButtonGroupOption } from './types.ts'
 
 export function normalizeButtonGroupOptions(options: ButtonGroupOptions = []): NormalizedButtonGroupOption[] {
-	if (Array.isArray(options)) {
-		return options.map(option => {
+	const normalizedOptions = Array.isArray(options)
+		? options.map((option, index) => {
 			if (typeof option === 'string') {
 				return { id: option, label: option }
 			}
-			return normalizeButtonGroupOption(option)
+			return normalizeButtonGroupOption(option, `at index ${ index }`)
 		})
-	}
+		: Object.entries(options).map(([ key, option ]) => {
+			if (typeof option === 'string') {
+				return { id: key, label: option }
+			}
+			return normalizeButtonGroupOption({ ...option, id: key }, `for key "${ key }"`)
+		})
 
-	return Object.entries(options).map(([ key, option ]) => {
-		if (typeof option === 'string') {
-			return { id: key, label: option }
-		}
-		return normalizeButtonGroupOption({ id: key, ...option })
-	})
+	assertUniqueButtonGroupOptionIds(normalizedOptions)
+	return normalizedOptions
 }
 
 export function normalizeButtonGroupValue(value?: string | string[] | null): Set<string> {
@@ -32,7 +33,20 @@ export function readButtonGroupValue(selectedIds: Set<string>, allowMultiple: bo
 	return selectedId ?? null
 }
 
-function normalizeButtonGroupOption(option: ButtonGroupOption): NormalizedButtonGroupOption {
+function normalizeButtonGroupOption(
+	option: ButtonGroupOption,
+	location: string
+): NormalizedButtonGroupOption {
+	if (
+		(typeof option.id !== 'string' && typeof option.id !== 'number')
+		|| String(option.id).trim() === ''
+	) {
+		throw new TypeError(`GooButtonGroup option ${ location } must define a non-empty string or number id.`)
+	}
+	if (typeof option.label !== 'string' && typeof option.label !== 'number') {
+		throw new TypeError(`GooButtonGroup option ${ location } must define a string or number label.`)
+	}
+
 	const normalizedOption: NormalizedButtonGroupOption = {
 		id: String(option.id),
 		label: String(option.label)
@@ -44,4 +58,17 @@ function normalizeButtonGroupOption(option: ButtonGroupOption): NormalizedButton
 	if (option.className !== undefined) normalizedOption.className = option.className
 	if (option.disabled !== undefined) normalizedOption.disabled = option.disabled
 	return normalizedOption
+}
+
+function assertUniqueButtonGroupOptionIds(options: NormalizedButtonGroupOption[]): void {
+	const firstIndexById = new Map<string, number>()
+	for (const [ index, option ] of options.entries()) {
+		const firstIndex = firstIndexById.get(option.id)
+		if (firstIndex !== undefined) {
+			throw new TypeError(
+				`GooButtonGroup options contain duplicate id "${ option.id }" at indexes ${ firstIndex } and ${ index }.`
+			)
+		}
+		firstIndexById.set(option.id, index)
+	}
 }

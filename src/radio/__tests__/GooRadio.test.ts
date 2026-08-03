@@ -2,6 +2,7 @@ import { fireEvent, render } from '@testing-library/svelte'
 import { tick } from 'svelte'
 import { describe, expect, it, vi } from 'vitest'
 
+import { normalizeRadioOptions } from '../_model.ts'
 import GooRadio from '../GooRadio.svelte'
 import GooRadioGroup from '../GooRadioGroup.svelte'
 
@@ -63,6 +64,16 @@ describe('GooRadio', () => {
 })
 
 describe('GooRadioGroup', () => {
+	it('rejects malformed and duplicate option ids at the component boundary', () => {
+		expect(() => normalizeRadioOptions([
+			{ value: 'left', label: 'Left' }
+		] as never)).toThrow('option at index 0 must define a non-empty string id')
+		expect(() => normalizeRadioOptions([
+			{ id: 'left', label: 'Left' },
+			{ id: 'left', label: 'Other left' }
+		])).toThrow('duplicate id "left" at indexes 0 and 1')
+	})
+
 	it('renders without options without self-triggering value sync', async() => {
 		const { container } = render(GooRadioGroup, {
 			props: {

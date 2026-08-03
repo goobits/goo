@@ -28,6 +28,47 @@ describe('GooPopout', () => {
 		target.remove()
 	})
 
+	it('keeps interactive descendants clickable while drag-to-move is enabled', async() => {
+		const target = document.createElement('button')
+		const content = document.createElement('div')
+		const passiveSurface = document.createElement('span')
+		const interactiveControl = document.createElement('button')
+		content.append(passiveSurface, interactiveControl)
+		document.body.appendChild(target)
+		const instance = createGooPopout({
+			at: target,
+			content,
+			dragToMove: true,
+			openImmediately: false
+		})
+		await instance.open()
+		const popout = document.querySelector<HTMLElement>('.goo-popout')!
+		const setPointerCapture = vi.fn()
+		Object.defineProperty(popout, 'setPointerCapture', {
+			configurable: true,
+			value: setPointerCapture
+		})
+
+		interactiveControl.dispatchEvent(new PointerEvent('pointerdown', {
+			bubbles: true,
+			button: 0,
+			pointerId: 1,
+			pointerType: 'mouse'
+		}))
+		expect(setPointerCapture).not.toHaveBeenCalled()
+
+		passiveSurface.dispatchEvent(new PointerEvent('pointerdown', {
+			bubbles: true,
+			button: 0,
+			pointerId: 2,
+			pointerType: 'mouse'
+		}))
+		expect(setPointerCapture).toHaveBeenCalledWith(2)
+
+		await instance.destroy()
+		target.remove()
+	})
+
 	it('dismisses on the first outside pointer press after opening', async() => {
 		const target = document.createElement('button')
 		const outside = document.createElement('button')
@@ -91,6 +132,36 @@ describe('GooPopout', () => {
 		} finally {
 			await instance.destroy()
 			scope.remove()
+			HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect
+		}
+	})
+
+	it('keeps the default gap on the placement axis without shifting centered anchors', async() => {
+		const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect
+		const target = document.createElement('button')
+		const content = document.createElement('div')
+		document.body.appendChild(target)
+		HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
+			if (this === document.documentElement) return rect(0, 0, 800, 600)
+			if (this === target) return rect(100, 100, 20, 20)
+			if (this.classList.contains('goo-popout')) return rect(0, 0, 80, 40)
+			return originalGetBoundingClientRect.call(this)
+		}
+
+		const instance = createGooPopout({
+			at: target,
+			content,
+			align: 'center bottom to center top',
+			openImmediately: false
+		})
+
+		try {
+			await instance.open()
+
+			expect(instance.position).toMatchObject({ x: 70, y: 45 })
+		} finally {
+			await instance.destroy()
+			target.remove()
 			HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect
 		}
 	})
@@ -193,6 +264,44 @@ describe('GooPopout', () => {
 			expect(picker.isOpen()).toBe(false)
 		} finally {
 			await Promise.all([ parent.destroy(), picker.destroy(), tooltip.destroy() ])
+			target.remove()
+		}
+	})
+
+	it('keeps nested popouts above raised parents without lowering higher child layers', async() => {
+		const target = document.createElement('button')
+		const parentContent = document.createElement('div')
+		const lowTarget = document.createElement('button')
+		const highTarget = document.createElement('button')
+		parentContent.append(lowTarget, highTarget)
+		document.body.appendChild(target)
+
+		const parent = createGooPopout({
+			at: target,
+			attributes: { style: 'z-index: 100' },
+			content: parentContent,
+			openImmediately: false
+		})
+		const lowChild = createGooPopout({
+			at: lowTarget,
+			attributes: { style: 'z-index: 10' },
+			openImmediately: false
+		})
+		const highChild = createGooPopout({
+			at: highTarget,
+			attributes: { style: 'z-index: 200' },
+			openImmediately: false
+		})
+
+		try {
+			await parent.open()
+			await lowChild.open()
+			await highChild.open()
+
+			expect(lowChild.element?.style.zIndex).toBe('101')
+			expect(highChild.element?.style.zIndex).toBe('200')
+		} finally {
+			await Promise.all([ parent.destroy(), lowChild.destroy(), highChild.destroy() ])
 			target.remove()
 		}
 	})
@@ -865,5 +974,5 @@ function nextAnimationFrame(): Promise<void> {
 }
 
 function delay(ms: number): Promise<void> {
-	return new Promise(resolve => setTimeout(resolve, ms)) // test-shape: timing-probe - waits for popout close animation.
+	return new Promise(resolve => setTimeout(resolve, ms)) // waits for popout close animation.
 }

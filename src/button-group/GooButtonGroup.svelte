@@ -277,7 +277,11 @@
 	}
 
 	function readButtonId(button: HTMLButtonElement): string {
-		return button.dataset['id'] || button.textContent?.trim() || ''
+		const id = button.dataset['id']
+		if (!id) {
+			throw new TypeError('GooButtonGroup child buttons must define a non-empty data-id.')
+		}
+		return id
 	}
 
 	function mountIcon(node: HTMLSpanElement, iconFactory: () => Element) {

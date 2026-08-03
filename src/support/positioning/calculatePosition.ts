@@ -16,6 +16,8 @@ const PERCENT_MAP: Record<string, number> = {
 	right: 1
 }
 
+const DEFAULT_GAP = 15
+
 // =============================================================================
 // Public API
 // =============================================================================
@@ -35,7 +37,7 @@ export function calculatePosition(
 		x: pointX,
 		y: pointY,
 		align: alignInput = 'left to right',
-		offset = { x: 15, y: 15 },
+		offset: offsetInput,
 		keepWithin,
 		avoidRects,
 		avoidMargin,
@@ -45,6 +47,9 @@ export function calculatePosition(
 	// Parse alignment
 	const align = parseAlignment(alignInput, rtl)
 	const direction = getDirection(align)
+	const offset = offsetInput ?? (direction === HORIZONTAL
+		? { x: DEFAULT_GAP, y: 0 }
+		: { x: 0, y: DEFAULT_GAP })
 
 	// Get measurements
 	const popoutRect = measureElement($popout)

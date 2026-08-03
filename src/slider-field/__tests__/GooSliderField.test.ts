@@ -18,7 +18,7 @@ describe('GooSliderField', () => {
 			value: 12
 		})
 		document.body.appendChild(field)
-		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
+		await new Promise(resolve => setTimeout(resolve, 0)) // documented test timing behavior.
 
 		expect(field.querySelector('.goo-slider')).not.toBeNull()
 		expect(field.querySelector('.goo-number')).not.toBeNull()
@@ -48,12 +48,12 @@ describe('GooSliderField', () => {
 			value: 0
 		})
 		document.body.appendChild(field)
-		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
+		await new Promise(resolve => setTimeout(resolve, 0)) // documented test timing behavior.
 
 		const input = field.querySelector<HTMLInputElement>('.goo-number__content')!
 		await fireEvent.input(input, { target: { value: '2.5' } })
 		await fireEvent.keyDown(input, { key: 'Enter' })
-		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
+		await new Promise(resolve => setTimeout(resolve, 0)) // documented test timing behavior.
 
 		expect(field.getValue()).toBe(2.5)
 		expect(field.getSlider().values).toEqual([ 2.5 ])
@@ -75,7 +75,7 @@ describe('GooSliderField', () => {
 			value: 0.935
 		})
 		document.body.appendChild(field)
-		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
+		await new Promise(resolve => setTimeout(resolve, 0)) // documented test timing behavior.
 
 		const slider = field.querySelector<HTMLElement>('.goo-slider')!
 		const thumb = field.querySelector<HTMLElement>('.goo-slider__thumb')!
@@ -92,7 +92,7 @@ describe('GooSliderField', () => {
 			value: { min: 10, max: 30 }
 		})
 		document.body.appendChild(field)
-		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
+		await new Promise(resolve => setTimeout(resolve, 0)) // documented test timing behavior.
 
 		expect(field.querySelectorAll('.goo-number')).toHaveLength(2)
 
@@ -112,7 +112,7 @@ describe('GooSliderField', () => {
 			value: { x: -4, y: 12 }
 		})
 		document.body.appendChild(field)
-		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
+		await new Promise(resolve => setTimeout(resolve, 0)) // documented test timing behavior.
 
 		expect(field.querySelectorAll('.goo-number')).toHaveLength(2)
 		expect(field.getSlider().values).toEqual([ -4, 12 ])
@@ -132,7 +132,7 @@ describe('GooSliderField', () => {
 			mode: 'variance'
 		})
 		document.body.appendChild(field)
-		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
+		await new Promise(resolve => setTimeout(resolve, 0)) // documented test timing behavior.
 
 		expect(field.querySelectorAll('.goo-number')).toHaveLength(3)
 		expect(field.querySelector('.goo-slider')?.getAttribute('mode')).toBe('variance')
@@ -153,11 +153,11 @@ describe('GooSliderField', () => {
 			mode: 'variance'
 		})
 		document.body.appendChild(field)
-		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
+		await new Promise(resolve => setTimeout(resolve, 0)) // documented test timing behavior.
 
 		const inputs = field.querySelectorAll<HTMLInputElement>('.goo-number__content')
 		await fireEvent.input(inputs[2]!, { target: { value: '60' } })
-		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
+		await new Promise(resolve => setTimeout(resolve, 0)) // documented test timing behavior.
 
 		expect(field.getValue()).toEqual([ 40, 50, 60 ])
 		expect(field.getSlider().values).toEqual([ 40, 50, 60 ])
@@ -174,11 +174,11 @@ describe('GooSliderField', () => {
 			mode: 'variance'
 		})
 		document.body.appendChild(field)
-		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
+		await new Promise(resolve => setTimeout(resolve, 0)) // documented test timing behavior.
 
 		const thumbs = field.querySelectorAll<HTMLElement>('.goo-slider__thumb')
 		await fireEvent.keyDown(thumbs[2]!, { key: 'ArrowRight' })
-		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
+		await new Promise(resolve => setTimeout(resolve, 0)) // documented test timing behavior.
 
 		expect(field.getSlider().values).toEqual([ 25, 50, 75 ])
 		expect([ ...field.querySelectorAll<HTMLInputElement>('.goo-number__content') ].map(input => input.value)).toEqual([ '25', '50', '75' ])
@@ -193,11 +193,11 @@ describe('GooSliderField', () => {
 			mode: 'variance'
 		})
 		document.body.appendChild(field)
-		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
+		await new Promise(resolve => setTimeout(resolve, 0)) // documented test timing behavior.
 
 		const inputs = field.querySelectorAll<HTMLInputElement>('.goo-number__content')
 		await fireEvent.input(inputs[1]!, { target: { value: '0' } })
-		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
+		await new Promise(resolve => setTimeout(resolve, 0)) // documented test timing behavior.
 
 		expect(field.getValue()).toEqual([ 0, 0, 10 ])
 		expect(field.getSlider().values).toEqual([ 0, 0, 10 ])
@@ -213,7 +213,7 @@ describe('GooSliderField', () => {
 			valueBubble: true
 		})
 		document.body.appendChild(field)
-		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
+		await new Promise(resolve => setTimeout(resolve, 0)) // documented test timing behavior.
 
 		expect(field.querySelector('.goo-slider')?.getAttribute('mode')).toBe('variance')
 		expect(field.querySelectorAll('.goo-slider__mark')).toHaveLength(3)
@@ -229,7 +229,7 @@ describe('GooSliderField', () => {
 			value: 25
 		})
 		document.body.appendChild(field)
-		await new Promise(resolve => setTimeout(resolve, 0)) // test-shape: timing-probe - documented test timing behavior.
+		await new Promise(resolve => setTimeout(resolve, 0)) // documented test timing behavior.
 
 		field.destroy()
 		field.destroy()

@@ -217,6 +217,10 @@
 			"types": "./src/schema/assertGooSchemaDescriptor.ts",
 			"import": "./src/schema/assertGooSchemaDescriptor.ts"
 		},
+		"./schema/conditions": {
+			"types": "./src/schema/fieldConditions.ts",
+			"import": "./src/schema/fieldConditions.ts"
+		},
 		"./schema/path": {
 			"types": "./src/schema/pathUtils.ts",
 			"import": "./src/schema/pathUtils.ts"
@@ -245,10 +249,15 @@
 			"types": "./src/toolbar/index.ts",
 			"svelte": "./src/toolbar/index.ts",
 			"import": "./src/toolbar/index.ts"
+		},
+		"./docs-meta": {
+			"types": "./docs/meta/index.ts",
+			"import": "./docs/meta/index.ts"
 		}
 	},
 	"files": [
 		"src",
+		"docs/meta",
 		"!src/**/__tests__/**",
 		"!src/**/*.test.ts"
 	],

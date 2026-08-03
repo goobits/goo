@@ -308,7 +308,7 @@ function createOption(item: GridPopoutItem): HTMLElement {
 		option.appendChild(createSvgIcon(item.iconSvg))
 	} else if (item.iconClass) {
 		const icon = document.createElement('span')
-		icon.className = `icon ${ item.iconClass }`
+		icon.className = `icon goo-grid-picker__icon ${ item.iconClass }`
 		option.appendChild(icon)
 	}
 
@@ -356,7 +356,7 @@ function createPreviewSurface(preview: GridPopoutPreview): HTMLElement {
 
 function createSvgIcon(icon: GridPopoutSvgIcon): HTMLElement {
 	const wrapper = document.createElement('span')
-	wrapper.className = 'icon'
+	wrapper.className = 'icon goo-grid-picker__icon'
 
 	const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
 	if (icon.class) {
@@ -538,6 +538,25 @@ function escapeSelectorValue(value: string): string {
 :global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) canvas.icon),
 :global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) img.icon) {
 	order: 1;
+}
+
+:global(goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .goo-grid-picker__icon),
+:global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .goo-grid-picker__icon) {
+	align-items: center;
+	display: inline-flex;
+	flex: 0 0 var(--goo-theme-control-height-lg);
+	font-size: calc(var(--goo-theme-icon-lg) * 1.35);
+	height: var(--goo-theme-control-height-lg);
+	justify-content: center;
+	line-height: 1;
+	margin: 0;
+	width: var(--goo-theme-control-height-lg);
+}
+
+:global(goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .goo-grid-picker__icon svg),
+:global(.goo-popout.goo-grid-popout:not(.goo-grid-popout--blend) .goo-grid-picker__icon svg) {
+	height: 1em;
+	width: 1em;
 }
 
 :global(goo-popout.goo-grid-popout--one-column),

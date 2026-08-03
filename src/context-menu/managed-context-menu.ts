@@ -187,7 +187,7 @@ function createRegisteredContextMenu(
 		Set<ManagedGooContextMenuEventHandler>
 	>()
 	const handleRef: { current?: ManagedGooContextMenu } = {}
-	const menuOptions = normalizeContextMenuItems(items, () => getManagedMenuHandle(handleRef))
+	const menuOptions: GooSelectOption[] = []
 	const contextMenu = createGooContextMenu({
 		actionContext: config.actionContext,
 		className: [ id, 'goo-managed-context-menu' ].join(' '),
@@ -272,6 +272,8 @@ function createRegisteredContextMenu(
 		}
 	}
 	handleRef.current = handle
+	menuOptions.push(...normalizeContextMenuItems(items, () => getManagedMenuHandle(handleRef)))
+	contextMenu.setOptions(menuOptions)
 
 	const handleChange = (event: Event) => {
 		const value =

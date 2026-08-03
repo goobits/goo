@@ -125,6 +125,7 @@ describe('GridPopoutPicker', () => {
 
 		const svgOption = getByRole('option', { name: 'Warp arc' })
 		const svg = svgOption.querySelector('svg.warp-icon')
+		expect(svg?.parentElement?.classList.contains('goo-grid-picker__icon')).toBe(true)
 		expect(svg?.getAttribute('viewBox')).toBe('0 0 24 24')
 		expect(svg?.getAttribute('fill')).toBe('none')
 		expect(svg?.getAttribute('stroke')).toBe('currentColor')
@@ -138,7 +139,10 @@ describe('GridPopoutPicker', () => {
 			expect(trigger.getAttribute('aria-expanded')).toBe('false')
 			expect(trigger.textContent).toContain('Warp arc')
 		})
-		expect(trigger.querySelector('svg.warp-icon path')?.getAttribute('transform')).toBe('translate(1 2)')
+		const triggerSvg = trigger.querySelector('svg.warp-icon')
+		expect(triggerSvg?.getAttribute('fill')).toBe('none')
+		expect(triggerSvg?.getAttribute('stroke')).toBe('currentColor')
+		expect(triggerSvg?.querySelector('path')?.getAttribute('transform')).toBe('translate(1 2)')
 		expect(document.body.querySelector('.goo-popout')).toBeNull()
 	})
 

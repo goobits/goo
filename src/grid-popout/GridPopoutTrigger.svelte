@@ -103,6 +103,7 @@ const currentOpened = $derived(openedOverride ?? opened)
 const currentAriaLabel = $derived(valueOverride.ariaLabel ?? ariaLabel)
 const currentIconClass = $derived(valueOverride.iconClass ?? iconClass)
 const currentIconSvg = $derived(valueOverride.iconSvg ?? iconSvg)
+const currentIconSvgAttributes = $derived(currentIconSvg?.attributes ?? {})
 const currentKicker = $derived(valueOverride.kicker ?? kicker)
 const currentPreview = $derived(valueOverride.preview ?? preview)
 const currentTitle = $derived(valueOverride.title ?? title)
@@ -253,7 +254,7 @@ function clearContentFadeTimer(): void {
 			/>
 		{:else if currentIconSvg}
 			<svg
-				{...currentIconSvg.attributes}
+				{...currentIconSvgAttributes}
 				class={svgIconClassName}
 				viewBox={currentIconSvg.viewBox}
 				aria-hidden="true"
