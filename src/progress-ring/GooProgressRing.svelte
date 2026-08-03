@@ -82,10 +82,10 @@ $effect(() => {
 	if (!r) return
 
 	r.configure({
-		fillStyle: color,
+		...(color === undefined ? {} : { fillStyle: color }),
 		indeterminate,
 		showText,
-		thickness: normalizedThickness,
+		...(normalizedThickness === undefined ? {} : { thickness: normalizedThickness }),
 		variant
 	})
 	r.setProgress(normalizedProgress)

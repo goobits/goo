@@ -285,7 +285,7 @@ class GooDialogControllerRuntime {
 		// Apply type class
 		this.$element.classList.add(`goo-dialog--${ type }`)
 		if (type === 'sheet') this.$element.classList.add(`goo-dialog--sheet-${ side }`)
-		this.$element.dataset.gooOverlayRoot = ''
+		this.$element.dataset['gooOverlayRoot'] = ''
 		for (const name of this._classNames()) {
 			this.$element.classList.add(name)
 		}
