@@ -141,34 +141,64 @@ type ContainmentRect = Pick<DOMRect, 'bottom' | 'height' | 'left' | 'right' | 't
 
 function getContainmentRect(container: HTMLElement): ContainmentRect {
 	const containerRect = container.getBoundingClientRect()
-	if (!isDocumentContainmentElement(container) || isUsableContainmentRect(containerRect)) {
-		return containerRect
+	const viewportRect = getViewportRect(container.ownerDocument)
+	if (isDocumentContainmentElement(container) && !isUsableContainmentRect(containerRect)) {
+		return viewportRect
 	}
 
-	const ownerDocument = container.ownerDocument
+	return intersectContainmentRects(containerRect, viewportRect)
+}
+
+function getViewportRect(ownerDocument: Document): ContainmentRect {
 	const viewport = ownerDocument.defaultView
+	const visualViewport = viewport?.visualViewport
 	const documentElement = ownerDocument.documentElement
 	const body = ownerDocument.body
-	const width = Math.max(
-		viewport?.innerWidth ?? 0,
-		documentElement.clientWidth,
-		body?.clientWidth ?? 0
-	)
-	const height = Math.max(
-		viewport?.innerHeight ?? 0,
-		documentElement.clientHeight,
-		body?.clientHeight ?? 0
-	)
+	const left = visualViewport?.offsetLeft ?? 0
+	const top = visualViewport?.offsetTop ?? 0
+	const width = visualViewport?.width
+		|| viewport?.innerWidth
+		|| documentElement.clientWidth
+		|| body?.clientWidth
+		|| 0
+	const height = visualViewport?.height
+		|| viewport?.innerHeight
+		|| documentElement.clientHeight
+		|| body?.clientHeight
+		|| 0
 
 	return {
-		bottom: height,
+		bottom: top + height,
 		height,
-		left: 0,
-		right: width,
-		top: 0,
+		left,
+		right: left + width,
+		top,
 		width,
-		x: 0,
-		y: 0
+		x: left,
+		y: top
+	}
+}
+
+function intersectContainmentRects(
+	containerRect: ContainmentRect,
+	viewportRect: ContainmentRect
+): ContainmentRect {
+	const left = Math.max(containerRect.left, viewportRect.left)
+	const right = Math.min(containerRect.right, viewportRect.right)
+	const top = Math.max(containerRect.top, viewportRect.top)
+	const bottom = Math.min(containerRect.bottom, viewportRect.bottom)
+	const width = Math.max(0, right - left)
+	const height = Math.max(0, bottom - top)
+
+	return {
+		bottom: top + height,
+		height,
+		left,
+		right: left + width,
+		top,
+		width,
+		x: left,
+		y: top
 	}
 }
 

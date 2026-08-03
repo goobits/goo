@@ -166,6 +166,70 @@ describe('GooPopout', () => {
 		}
 	})
 
+	it('keeps scoped overlays inside the visible viewport on a tall page', async() => {
+		const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect
+		const originalInnerWidthDescriptor = Object.getOwnPropertyDescriptor(window, 'innerWidth')
+		const originalInnerHeightDescriptor = Object.getOwnPropertyDescriptor(window, 'innerHeight')
+		const originalBodyClientHeightDescriptor = Object.getOwnPropertyDescriptor(
+			document.body,
+			'clientHeight'
+		)
+		const scope = document.createElement('section')
+		const contentRoot = document.createElement('main')
+		const host = document.createElement('div')
+		const target = document.createElement('button')
+		const content = document.createElement('div')
+		scope.dataset.gooOverlayScope = ''
+		host.dataset.gooOverlayHost = ''
+		contentRoot.append(target)
+		scope.append(contentRoot, host)
+		document.body.append(scope)
+		Object.defineProperty(window, 'innerWidth', { configurable: true, value: 390 })
+		Object.defineProperty(window, 'innerHeight', { configurable: true, value: 844 })
+		Object.defineProperty(document.body, 'clientHeight', { configurable: true, value: 3000 })
+		HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
+			if (this === scope) return rect(0, -1200, 390, 3000)
+			if (this === host) return rect(0, 0, 390, 844)
+			if (this === target) return rect(130, 780, 130, 44)
+			if (this.classList.contains('goo-popout')) return rect(0, 0, 200, 144)
+			return originalGetBoundingClientRect.call(this)
+		}
+
+		const instance = createGooPopout({
+			at: target,
+			content,
+			align: 'top left to bottom left',
+			offset: { x: 0, y: 0 },
+			openImmediately: false
+		})
+
+		try {
+			await instance.open()
+
+			expect(instance.element?.parentElement).toBe(host)
+			expect(instance.position).toMatchObject({ flippedY: true, x: 130, y: 636 })
+		} finally {
+			await instance.destroy()
+			scope.remove()
+			HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect
+			if (originalInnerWidthDescriptor) {
+				Object.defineProperty(window, 'innerWidth', originalInnerWidthDescriptor)
+			}
+			if (originalInnerHeightDescriptor) {
+				Object.defineProperty(window, 'innerHeight', originalInnerHeightDescriptor)
+			}
+			if (originalBodyClientHeightDescriptor) {
+				Object.defineProperty(
+					document.body,
+					'clientHeight',
+					originalBodyClientHeightDescriptor
+				)
+			} else {
+				delete (document.body as HTMLElement & { clientHeight?: number }).clientHeight
+			}
+		}
+	})
+
 	it('keeps every sibling child popout inside its parent click boundary', async() => {
 		const target = document.createElement('button')
 		const parentContent = document.createElement('div')
