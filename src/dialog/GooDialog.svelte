@@ -72,7 +72,7 @@ function createDialog(): void {
 		showClose,
 		closeOnBackdrop,
 		closeOnEscape,
-		defaultFocus,
+		...(defaultFocus === undefined ? {} : { defaultFocus }),
 		side,
 		width,
 		height,

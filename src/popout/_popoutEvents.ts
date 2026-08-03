@@ -148,6 +148,7 @@ function setupDragToMove(
 			element.style.top = `${ startTop + dy }px`
 
 			getArrowElement()?.classList.add('goo-popout__arrow--hidden')
+			return
 		},
 		{ ignoreTouch: true }
 	)

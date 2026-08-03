@@ -150,13 +150,13 @@ function mountPopout(): void {
 		initialFocus,
 		fullScreen,
 		chromeless,
-		rtl,
+		...(rtl === undefined ? {} : { rtl }),
 		ariaLabel,
-		ariaLabelledby,
-		ariaDescribedby,
+		...(ariaLabelledby === undefined ? {} : { ariaLabelledby }),
+		...(ariaDescribedby === undefined ? {} : { ariaDescribedby }),
 		role,
 		openImmediately: false,
-		onPosition,
+		...(onPosition === undefined ? {} : { onPosition }),
 		onOpen: data => {
 			open = true
 			onopen?.(data)
