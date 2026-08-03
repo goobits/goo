@@ -3,7 +3,7 @@ import { tick } from 'svelte'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import GooPopout from '../GooPopout.svelte'
-import { createGooPopout, type GooPopoutInstance } from '../index.ts'
+import { createGooPopout, type GooPopoutInstance, gooPopoutRuntime } from '../index.ts'
 
 describe('GooPopout', () => {
 	afterEach(() => {
@@ -92,6 +92,18 @@ describe('GooPopout', () => {
 			target.remove()
 			outside.remove()
 		}
+	})
+
+	it('waits for every registered popout to finish closing', async() => {
+		const first = createGooPopout({ content: document.createElement('div'), openImmediately: false })
+		const second = createGooPopout({ content: document.createElement('div'), openImmediately: false })
+		await first.open()
+		await second.open()
+
+		await gooPopoutRuntime.closeAll()
+
+		expect(first.element).toBeNull()
+		expect(second.element).toBeNull()
 	})
 
 	it('infers an app overlay host and applies coordinates within that host', async() => {
