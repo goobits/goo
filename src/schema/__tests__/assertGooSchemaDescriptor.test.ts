@@ -24,6 +24,10 @@ describe('assertGooSchemaDescriptor', () => {
 						controlOptions: { tone: { light: true } },
 						items: [ { id: 'small', size: 1 } ],
 						if: { path: 'enabled', equals: true }
+					}, {
+						path: 'offset',
+						type: 'xy-pad',
+						snap: 0.5
 					} ]
 				},
 				{ type: 'note', text: 'Choose a size.' },

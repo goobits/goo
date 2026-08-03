@@ -202,8 +202,13 @@ function assertField(field: Record<string, unknown>, path: string): void {
 		&& typeof field.valueBubble !== 'string'
 		&& typeof field.valueBubble !== 'boolean'
 	) fail(`${ path }.valueBubble`, 'must be a string or boolean')
-	if (field.snap !== undefined && typeof field.snap !== 'boolean' && !Array.isArray(field.snap)) {
-		fail(`${ path }.snap`, 'must be a boolean or array')
+	if (
+		field.snap !== undefined
+		&& typeof field.snap !== 'boolean'
+		&& typeof field.snap !== 'number'
+		&& !Array.isArray(field.snap)
+	) {
+		fail(`${ path }.snap`, 'must be a boolean, finite number, or array')
 	}
 	if (field.controlOptions !== undefined) {
 		const controlOptions = expectRecord(field.controlOptions, `${ path }.controlOptions`)

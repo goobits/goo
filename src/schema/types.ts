@@ -212,8 +212,8 @@ export interface GooSchemaField {
 	/** Explicit slider track marks. */
 	marks?: GooSliderMark[]
 
-	/** Snap to marks/ticks or explicit values. */
-	snap?: GooSliderSnap
+	/** Snap sliders to marks/values, or set the zero threshold for XY pads. */
+	snap?: GooSliderSnap | number
 
 	/** Slider value bubble visibility. */
 	valueBubble?: GooSliderValueBubble

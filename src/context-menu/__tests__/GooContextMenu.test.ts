@@ -9,6 +9,7 @@ describe('createGooContextMenu', () => {
 	afterEach(() => {
 		GooContextMenu.get('unsafe-menu')?.destroy()
 		GooContextMenu.get('managed-destroy')?.destroy()
+		GooContextMenu.get('managed-predicate')?.destroy()
 		GooContextMenu.get('managed-set-value')?.destroy()
 		GooContextMenu.get('managed-open-state')?.destroy()
 		GooContextMenu.get('replace-menu')?.destroy()
@@ -718,6 +719,21 @@ describe('createGooContextMenu', () => {
 
 		expect(action).toHaveBeenCalledWith('copy')
 		expect(actionContext).toBe(menu)
+	})
+
+	it('makes the managed handle available while evaluating item predicates', async() => {
+		let predicateContext: unknown
+		const disabled = vi.fn(function(this: unknown) {
+			predicateContext = this
+			return true
+		})
+		const menu = GooContextMenu.register('managed-predicate', [
+			{ id: 'copy', label: 'Copy', disabled }
+		])
+		await tick()
+
+		expect(disabled).toHaveBeenCalledWith('copy')
+		expect(predicateContext).toBe(menu)
 	})
 
 	it('destroys an existing managed menu before replacing its id', () => {
