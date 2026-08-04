@@ -5,7 +5,7 @@ export interface GooDocsMetadata {
 	readonly [key: string]: unknown
 }
 
-const modules = import.meta.glob<GooDocsMetadata>([ './*.ts', '!./index.ts' ], {
+const modules = import.meta.glob<GooDocsMetadata>('./goo-*.ts', {
 	eager: true,
 	import: 'default'
 })
