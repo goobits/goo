@@ -55,12 +55,20 @@
 
 .goo-progress-ring {
 	align-items: center;
+	color: var(--goo-progress-ring-text, var(--goo-theme-fg));
+	display: inline-grid;
+	font-family: var(--goo-theme-font-sans);
+	gap: var(--goo-progress-ring-caption-gap, 18px);
+	justify-items: center;
+	position: relative;
+}
+
+.goo-progress-ring__visual {
+	align-items: center;
 	aspect-ratio: 1;
 	border-radius: 50%;
 	box-sizing: border-box;
-	color: var(--goo-progress-ring-text, var(--goo-theme-fg));
 	display: inline-flex;
-	font-family: var(--goo-theme-font-sans);
 	height: var(--goo-progress-ring-size, calc(var(--goo-theme-control-height-lg) * 3));
 	justify-content: center;
 	overflow: hidden;
@@ -77,8 +85,42 @@
 	z-index: 1;
 }
 
+.goo-progress-ring__caption {
+	color: currentcolor;
+	font-family: var(--goo-progress-ring-caption-font-family, var(--goo-theme-font-sans));
+	font-size: 13px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	line-height: 1.35;
+	max-width: min(28rem, 80vw);
+	opacity: 0.78;
+	text-align: center;
+}
+
+.goo-progress-ring[data-fade-on-complete='true'][data-complete='true'] {
+	animation: goo-progress-ring-complete var(
+		--goo-progress-ring-transition,
+		var(--goo-theme-transition-slow, 300ms ease)
+	) forwards;
+	pointer-events: none;
+}
+
+@keyframes goo-progress-ring-complete {
+	from {
+		opacity: 1;
+	}
+
+	to {
+		opacity: 0;
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.goo-progress-ring-timer[data-backdrop='true'] {
 		transition-duration: 0.01ms;
+	}
+
+	.goo-progress-ring[data-fade-on-complete='true'][data-complete='true'] {
+		animation-duration: 0.01ms;
 	}
 }
