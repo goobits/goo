@@ -29,8 +29,20 @@ export type GooProgressRingProps = GooForwardedAttributes & {
 	/** Accessible name for the progress bar. */
 	label?: string
 
+	/** Visible status text rendered below the ring. */
+	caption?: string
+
+	/** Minimum time each visible caption remains before switching. Defaults to 500ms. */
+	minimumCaptionDurationMs?: number
+
 	/** Whether to render an indeterminate spinner. */
 	indeterminate?: boolean
+
+	/** Whether to fade after determinate progress reaches 100%. Defaults to true. */
+	fadeOnComplete?: boolean
+
+	/** Called after the completion fade finishes. */
+	onFadeComplete?: () => void
 
 	/** Visual ring variant. */
 	variant?: GooProgressRingVariant
