@@ -1,4 +1,4 @@
-import type { GooProgressRingVariant } from './types.ts'
+import type { GooProgressRingArcCap, GooProgressRingVariant } from './types.ts'
 
 const SPINNER_COLORS = [ '#35ad0e', '#d8ad44', '#d00324', '#dc00b8', '#017efc' ]
 const MAX_PROGRESS_FRAME_DELTA_SECONDS = 0.05
@@ -14,6 +14,7 @@ export const DEFAULT_PROGRESS_TRANSITION_SPEED = 5
 
 /** Visual configuration accepted by the renderer. */
 export type ProgressRingRenderConfig = {
+	arcCap?: GooProgressRingArcCap
 	colorStops?: Array<{ color: string; offset: number }>
 	fillStyle?: string
 	indeterminate?: boolean
@@ -32,6 +33,7 @@ export type ProgressRingRenderConfig = {
  * element that carries the CSS size var and ARIA attributes; `canvas` is drawn to.
  */
 export class ProgressRingRenderer {
+	#arcCap: GooProgressRingArcCap = 'round'
 	#host: HTMLElement
 	#canvas: HTMLCanvasElement
 	#colorStops: Array<{ color: string; offset: number }> = [
@@ -133,6 +135,7 @@ export class ProgressRingRenderer {
 	/** Configure visual rendering options for the progress ring. 	 * @param options - options.
 	 */
 	configure(options: ProgressRingRenderConfig): void {
+		this.#arcCap = options.arcCap ?? this.#arcCap
 		this.#colorStops = options.colorStops ?? this.#colorStops
 		if ('fillStyle' in options) {
 			this.#fillStyle = options.fillStyle ?? ''
@@ -281,7 +284,7 @@ export class ProgressRingRenderer {
 			ctx.beginPath()
 			ctx.arc(outerRadius, outerRadius, strokeRadius, startAngle, endAngle, false)
 			ctx.globalAlpha = 1
-			ctx.lineCap = 'round'
+			ctx.lineCap = this.#arcCap === 'flat' ? 'butt' : 'round'
 			ctx.lineWidth = strokeWidth
 			ctx.strokeStyle = this.#fillColor()
 			ctx.stroke()
@@ -331,7 +334,7 @@ export class ProgressRingRenderer {
 		ctx.beginPath()
 		ctx.arc(center, center, radius, startAngle, endAngle, false)
 		ctx.strokeStyle = this.#fillStyle || this.#spinnerColor(currentStep, duration)
-		ctx.lineCap = 'round'
+		ctx.lineCap = this.#arcCap === 'flat' ? 'butt' : 'round'
 		ctx.lineWidth = lineWidth
 		ctx.stroke()
 	}

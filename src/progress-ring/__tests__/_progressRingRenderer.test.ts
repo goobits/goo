@@ -1,6 +1,47 @@
 import { describe, expect, it } from 'vitest'
 
-import { smoothProgressToward } from '../_progressRingRenderer.ts'
+import { ProgressRingRenderer, smoothProgressToward } from '../_progressRingRenderer.ts'
+
+function createCanvasContextProbe(): {
+	canvas: HTMLCanvasElement
+	lineCaps: CanvasLineCap[]
+} {
+	const lineCaps: CanvasLineCap[] = []
+	const context = new Proxy({} as CanvasRenderingContext2D, {
+		get: () => () => {},
+		set: (_target, property, value) => {
+			if (property === 'lineCap') lineCaps.push(value as CanvasLineCap)
+			return true
+		}
+	})
+	const canvas = document.createElement('canvas')
+	Object.defineProperty(canvas, 'getContext', {
+		configurable: true,
+		value: () => context
+	})
+	return { canvas, lineCaps }
+}
+
+describe('progress ring arc caps', () => {
+	it('supports round and flat progress arc caps', () => {
+		const host = document.createElement('div')
+		const { canvas, lineCaps } = createCanvasContextProbe()
+		host.append(canvas)
+		document.body.append(host)
+		const renderer = new ProgressRingRenderer(host, canvas)
+
+		renderer.connect()
+		renderer.configure({ arcCap: 'flat' })
+		renderer.setProgress(0.5)
+		expect(lineCaps.at(-1)).toBe('butt')
+
+		renderer.configure({ arcCap: 'round' })
+		expect(lineCaps.at(-1)).toBe('round')
+
+		renderer.disconnect()
+		host.remove()
+	})
+})
 
 describe('progress ring smoothing', () => {
 	it('follows abrupt targets smoothly without overshooting', () => {

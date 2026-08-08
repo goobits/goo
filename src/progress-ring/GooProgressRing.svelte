@@ -20,6 +20,7 @@ let canvasEl: HTMLCanvasElement | undefined = $state()
 let renderer: ProgressRingRenderer | undefined
 
 let {
+	arcCap = 'round',
 	progress = 0,
 	size,
 	thickness,
@@ -133,6 +134,7 @@ $effect(() => {
 	if (!r) return
 
 	r.configure({
+		arcCap,
 		...(color === undefined ? {} : { fillStyle: color }),
 		indeterminate,
 		showText,
