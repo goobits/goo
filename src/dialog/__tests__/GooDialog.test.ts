@@ -1,7 +1,8 @@
 import { fireEvent, render } from '@testing-library/svelte'
+import { mount, unmount } from 'svelte'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { createGooDialog, dialogManager, GooConfirm, GooSheet } from '../index.ts'
+import { createGooDialog, dialogManager, GooConfirm, GooDialog, GooSheet } from '../index.ts'
 import GooDialogActionsHost from './GooDialogActionsHost.svelte'
 
 const nextFrame = () => new Promise(resolve => requestAnimationFrame(resolve))
@@ -134,6 +135,29 @@ describe('GooDialog', () => {
 		expect(getByTestId('open-state').textContent).toBe('false')
 		expect(queryByText('Dialog body')).toBeNull()
 		expect(document.activeElement).toBe(opener)
+	})
+
+	it('uses the nearest app-owned overlay placement without host context', async() => {
+		const scope = document.createElement('section')
+		const source = document.createElement('div')
+		const host = document.createElement('div')
+		scope.dataset.gooOverlayScope = ''
+		host.dataset.gooOverlayHost = ''
+		scope.append(source, host)
+		document.body.append(scope)
+		const component = mount(GooDialog, {
+			target: source,
+			props: {
+				ariaLabel: 'Scoped dialog',
+				open: true
+			}
+		})
+
+		await vi.waitFor(() => expect(host.querySelector('.goo-dialog[open]')).not.toBeNull())
+
+		expect(document.body.querySelector(':scope > .goo-dialog')).toBeNull()
+		expect(host.querySelector('.goo-dialog-backdrop')).not.toBeNull()
+		unmount(component)
 	})
 
 	it('treats string content as text instead of HTML', async() => {
