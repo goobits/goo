@@ -105,6 +105,24 @@ describe('GooButton', () => {
 		expect(button.classList.contains('goo-button--full-row')).toBe(true)
 	})
 
+	it('renders quiet compact square icon controls', () => {
+		const { container } = render(GooButton, {
+			props: {
+				ariaLabel: 'Close',
+				size: 'compact',
+				square: true,
+				variant: 'quiet'
+			}
+		})
+
+		const button = container.querySelector<HTMLButtonElement>('button.goo-button')!
+
+		expect(button.getAttribute('aria-label')).toBe('Close')
+		expect(button.getAttribute('size')).toBe('compact')
+		expect(button.getAttribute('variant')).toBe('quiet')
+		expect(button.hasAttribute('square')).toBe(true)
+	})
+
 	it('targets an external form', () => {
 		const { container } = render(GooButton, {
 			props: {

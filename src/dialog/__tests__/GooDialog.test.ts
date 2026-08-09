@@ -31,15 +31,27 @@ describe('GooDialog', () => {
 		await expect(resultPromise).resolves.toEqual({ cancel: true })
 	})
 
-	it('renders one close control for simple alerts', () => {
-		const dialog = createGooDialog({
-			type: 'alert',
-			content: 'Hello'
-		})
+	it.each([ 'alert', 'notify', 'overlay', 'sheet' ] as const)(
+		'renders one shared quiet close control for %s dialogs',
+		type => {
+			const dialog = createGooDialog({
+				type,
+				content: 'Hello'
+			})
+			const close = dialog.element.querySelector<HTMLButtonElement>('[aria-label="Close"]')
 
-		expect(dialog.element.querySelector('.goo-dialog__close')).toBeNull()
-		expect(dialog.element.querySelectorAll('.goo-dialog__close-badge')).toHaveLength(1)
-	})
+			expect(close).not.toBeNull()
+			expect(close?.classList.contains('goo-button')).toBe(true)
+			expect(close?.getAttribute('size')).toBe('compact')
+			expect(close?.getAttribute('variant')).toBe('quiet')
+			expect(close?.hasAttribute('square')).toBe(true)
+			expect(close?.querySelector('.goo-button__icon svg')).not.toBeNull()
+			expect(dialog.element.querySelectorAll('[aria-label="Close"]')).toHaveLength(1)
+			if (type === 'alert') {
+				expect(close?.classList.contains('goo-dialog__close-badge')).toBe(true)
+			}
+		}
+	)
 
 	it('renders logical-edge sheets with overlay ownership and content focus', async() => {
 		const content = document.createElement('section')

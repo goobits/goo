@@ -27,29 +27,20 @@
 
 /* Dialog */
 .goo-dialog {
-	--goo-dialog-close-icon-size: var(--goo-theme-icon-md);
 	--goo-dialog-alert-close-offset: calc(
 		(var(--goo-theme-space-sm) + var(--goo-theme-space-2xs)) * -1
 	);
-	--goo-dialog-alert-close-size: var(--goo-theme-control-height-sm);
 	--goo-dialog-boundary-inset: var(--goo-theme-space-lg);
 	--goo-dialog-content-line-height: 1.6;
 	--goo-dialog-max-height: 80vh;
 	--goo-dialog-max-width: min(calc(var(--goo-theme-control-height-lg) * 15), 90vw);
-	--goo-dialog-overlay-close-ring-outer-width: var(--goo-theme-space-xs);
-	--goo-dialog-overlay-close-ring-width: calc(
-		var(--goo-theme-space-2xs) + var(--goo-theme-space-2xs) * 0.5
-	);
-	--goo-dialog-overlay-close-size: var(--goo-theme-control-height-sm);
 	--goo-dialog-overlay-control-z-index: 1;
 	--goo-dialog-overlay-header-height: var(--goo-theme-control-height-lg);
-	--goo-dialog-touch-close-size: var(--goo-theme-control-height-touch);
 	--goo-dialog-touch-header-height: calc(
 		var(--goo-theme-control-height-touch) + var(--goo-theme-space-xs)
 	);
 	--goo-dialog-touch-overlay-close-inset: var(--goo-theme-space-sm);
 	--goo-dialog-touch-overlay-close-top: var(--goo-theme-space-2xs);
-	--goo-dialog-transition: var(--goo-theme-transition-normal);
 
 	position: fixed;
 	inset: 0;
@@ -131,32 +122,6 @@
 	color: var(--goo-dialog-fg, var(--goo-theme-fg));
 }
 
-.goo-dialog__close {
-	appearance: none;
-	background: transparent;
-	border: none;
-	color: var(--goo-theme-muted);
-	cursor: pointer;
-	padding: var(--goo-theme-space-xs);
-	border-radius: var(--goo-theme-radius-sm);
-	transition:
-		background var(--goo-dialog-transition),
-		color var(--goo-dialog-transition);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
-.goo-dialog__close svg {
-	width: var(--goo-dialog-close-icon-size);
-	height: var(--goo-dialog-close-icon-size);
-}
-
-.goo-dialog__close:hover {
-	background: color-mix(in srgb, var(--goo-theme-fg) 10%, transparent);
-	color: var(--goo-theme-fg);
-}
-
 /* Content */
 .goo-dialog__content {
 	flex: 1;
@@ -228,22 +193,12 @@
 	position: absolute;
 	top: var(--goo-dialog-alert-close-offset);
 	right: var(--goo-dialog-alert-close-offset);
-	width: var(--goo-dialog-alert-close-size);
-	height: var(--goo-dialog-alert-close-size);
-	background: var(--goo-theme-accent);
-	border-radius: var(--goo-theme-radius-full);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	color: var(--goo-theme-accent-fg);
-	font-size: var(--goo-theme-font-size-md);
-	cursor: pointer;
-	box-shadow: var(--goo-theme-shadow-md);
-	transition: transform var(--goo-dialog-transition);
+	z-index: var(--goo-dialog-overlay-control-z-index);
 }
 
-.goo-dialog.goo-dialog--alert .goo-dialog__close-badge:hover {
-	transform: scale(1.1);
+[dir='rtl'] .goo-dialog.goo-dialog--alert .goo-dialog__close-badge {
+	right: auto;
+	left: var(--goo-dialog-alert-close-offset);
 }
 
 /* Notify type - top banner. Stacked banners offset below one another via
@@ -283,16 +238,14 @@
 }
 
 .goo-dialog.goo-dialog--notify .goo-dialog__close {
+	--goo-button-bg-hover: color-mix(in srgb, var(--goo-theme-accent-fg) 20%, transparent);
+	--goo-button-fg: color-mix(in srgb, var(--goo-theme-accent-fg) 80%, transparent);
+	--goo-button-fg-hover: var(--goo-theme-accent-fg);
+
 	position: absolute;
 	right: var(--goo-theme-space-md);
 	top: 50%;
-	transform: translateY(-50%);
-	color: color-mix(in srgb, var(--goo-theme-accent-fg) 80%, transparent);
-}
-
-.goo-dialog.goo-dialog--notify .goo-dialog__close:hover {
-	color: var(--goo-theme-accent-fg);
-	background: color-mix(in srgb, var(--goo-theme-accent-fg) 20%, transparent);
+	translate: 0 -50%;
 }
 
 /* Overlay type - full screen */
@@ -390,44 +343,12 @@
 	line-height: var(--goo-dialog-overlay-header-height);
 }
 
-/* Overlay close button - circular badge styling matching old Alertify */
+/* Overlay close button placement */
 .goo-dialog.goo-dialog--overlay .goo-dialog__close {
 	position: absolute;
 	top: var(--goo-theme-space-md);
 	right: var(--goo-theme-space-md);
 	z-index: var(--goo-dialog-overlay-control-z-index);
-	width: var(--goo-dialog-overlay-close-size);
-	height: var(--goo-dialog-overlay-close-size);
-	padding: 0;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	background: var(--goo-theme-accent);
-	color: var(--goo-theme-accent-fg);
-	border-radius: var(--goo-theme-radius-full);
-	font-size: var(--goo-theme-icon-md);
-	line-height: 1;
-	box-shadow:
-		0 0 0 var(--goo-dialog-overlay-close-ring-width) var(--goo-theme-accent),
-		0 0 0 var(--goo-dialog-overlay-close-ring-outer-width)
-			color-mix(in srgb, var(--goo-theme-accent) 50%, transparent);
-	transition:
-		transform var(--goo-dialog-transition),
-		box-shadow var(--goo-dialog-transition);
-}
-
-.goo-dialog.goo-dialog--overlay .goo-dialog__close:hover {
-	background: color-mix(in srgb, var(--goo-theme-accent) 88%, var(--goo-theme-fg));
-	transform: scale(1.1);
-	box-shadow:
-		0 0 0 var(--goo-dialog-overlay-close-ring-width)
-			color-mix(in srgb, var(--goo-theme-accent) 88%, var(--goo-theme-fg)),
-		0 0 0 var(--goo-dialog-overlay-close-ring-outer-width)
-			color-mix(
-				in srgb,
-				color-mix(in srgb, var(--goo-theme-accent) 88%, var(--goo-theme-fg)) 50%,
-				transparent
-			);
 }
 
 [dir='rtl'] .goo-dialog.goo-dialog--overlay .goo-dialog__close {
@@ -436,16 +357,14 @@
 }
 
 @media (hover: none) and (pointer: coarse) {
-	.goo-dialog__close {
-		min-height: var(--goo-dialog-touch-close-size);
-		min-width: var(--goo-dialog-touch-close-size);
+	.goo-dialog.goo-dialog--alert .goo-dialog__close-badge {
+		right: calc((var(--goo-theme-control-height-touch) - var(--goo-theme-space-sm)) * -0.5);
+		top: calc((var(--goo-theme-control-height-touch) - var(--goo-theme-space-sm)) * -0.5);
 	}
 
-	.goo-dialog.goo-dialog--alert .goo-dialog__close-badge {
-		height: var(--goo-dialog-touch-close-size);
-		right: calc((var(--goo-dialog-touch-close-size) - var(--goo-theme-space-sm)) * -0.5);
-		top: calc((var(--goo-dialog-touch-close-size) - var(--goo-theme-space-sm)) * -0.5);
-		width: var(--goo-dialog-touch-close-size);
+	[dir='rtl'] .goo-dialog.goo-dialog--alert .goo-dialog__close-badge {
+		right: auto;
+		left: calc((var(--goo-theme-control-height-touch) - var(--goo-theme-space-sm)) * -0.5);
 	}
 
 	.goo-dialog.goo-dialog--overlay .goo-dialog__header {
@@ -458,12 +377,8 @@
 	}
 
 	.goo-dialog.goo-dialog--overlay .goo-dialog__close {
-		height: var(--goo-dialog-touch-close-size);
-		min-height: var(--goo-dialog-touch-close-size);
-		min-width: var(--goo-dialog-touch-close-size);
 		right: var(--goo-dialog-touch-overlay-close-inset);
 		top: var(--goo-dialog-touch-overlay-close-top);
-		width: var(--goo-dialog-touch-close-size);
 	}
 
 	[dir='rtl'] .goo-dialog.goo-dialog--overlay .goo-dialog__close {

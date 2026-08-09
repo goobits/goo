@@ -85,6 +85,24 @@ export function createCloseIcon(): SVGSVGElement {
 	return svg
 }
 
+function createCloseButton(className: string): HTMLButtonElement {
+	const button = document.createElement('button')
+	button.className = `goo-button ${ className }`
+	button.type = 'button'
+	button.setAttribute('aria-label', 'Close')
+	button.setAttribute('size', 'compact')
+	button.setAttribute('square', '')
+	button.setAttribute('variant', 'quiet')
+
+	const icon = document.createElement('span')
+	icon.className = 'goo-button__icon'
+	icon.setAttribute('aria-hidden', 'true')
+	icon.appendChild(createCloseIcon())
+	button.appendChild(icon)
+
+	return button
+}
+
 function createFooterButton(value: string, variant: 'primary' | 'secondary'): HTMLButtonElement {
 	const button = document.createElement('button')
 	button.className = 'goo-button'
@@ -169,10 +187,7 @@ export function buildStandardLayout(
 		}
 
 		if (needsHeaderClose) {
-			elements.$closeBtn = document.createElement('button')
-			elements.$closeBtn.className = 'goo-dialog__close'
-			elements.$closeBtn.appendChild(createCloseIcon())
-			elements.$closeBtn.setAttribute('aria-label', 'Close')
+			elements.$closeBtn = createCloseButton('goo-dialog__close')
 			elements.$header.appendChild(elements.$closeBtn)
 		}
 
@@ -202,10 +217,7 @@ export function buildStandardLayout(
 
 	// Alert close badge
 	if (type === 'alert' && showClose) {
-		elements.$closeBadge = document.createElement('button')
-		elements.$closeBadge.className = 'goo-dialog__close-badge'
-		elements.$closeBadge.appendChild(createCloseIcon())
-		elements.$closeBadge.setAttribute('aria-label', 'Close')
+		elements.$closeBadge = createCloseButton('goo-dialog__close-badge')
 		$dialog.appendChild(elements.$closeBadge)
 	}
 
@@ -236,10 +248,7 @@ export function buildNotifyLayout(
 
 	// Close button
 	if (showClose) {
-		elements.$closeBtn = document.createElement('button')
-		elements.$closeBtn.className = 'goo-dialog__close'
-		elements.$closeBtn.appendChild(createCloseIcon())
-		elements.$closeBtn.setAttribute('aria-label', 'Close')
+		elements.$closeBtn = createCloseButton('goo-dialog__close')
 		$dialog.appendChild(elements.$closeBtn)
 	}
 
@@ -279,10 +288,7 @@ export function buildOverlayLayout(
 		}
 
 		if (showClose) {
-			elements.$closeBtn = document.createElement('button')
-			elements.$closeBtn.className = 'goo-dialog__close'
-			elements.$closeBtn.appendChild(createCloseIcon())
-			elements.$closeBtn.setAttribute('aria-label', 'Close')
+			elements.$closeBtn = createCloseButton('goo-dialog__close')
 			elements.$header.appendChild(elements.$closeBtn)
 		}
 

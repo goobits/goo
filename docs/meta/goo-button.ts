@@ -45,6 +45,11 @@ export default {
 			props: { variant: 'ghost', label: 'Ghost' }
 		},
 		{
+			title: 'Quiet icon',
+			props: { variant: 'quiet', size: 'compact', square: true, ariaLabel: 'Close' },
+			content: icon('x')
+		},
+		{
 			title: 'Link',
 			props: { variant: 'link', label: 'Link Style' }
 		},
