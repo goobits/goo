@@ -1,4 +1,4 @@
-import { render } from '@testing-library/svelte'
+import { render, waitFor } from '@testing-library/svelte'
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
 import { pointerEvent } from '../../__tests__/_pointerEvents.ts'
@@ -79,6 +79,41 @@ describe('VirtualGrid', () => {
 		scrollRoot.remove()
 	})
 
+	it('preserves DOM identity by logical slot while the virtual window moves', async() => {
+		const scrollRoot = document.createElement('div')
+		Object.defineProperty(scrollRoot, 'clientHeight', { configurable: true, value: 360 })
+		document.body.appendChild(scrollRoot)
+		const { container, unmount } = render(Harness, {
+			props: {
+				defaultRowGap: 0,
+				items: Array.from({ length: 100 }, (_, index) => index),
+				overscanRows: 0,
+				scrollRoot
+			}
+		})
+		const grid = container.querySelector<HTMLElement>('.goo-virtual-grid')!
+		grid.style.gridTemplateColumns = '10px'
+		grid.style.rowGap = '0px'
+
+		try {
+			await waitFor(() => {
+				expect(slotLabels(container)).toEqual([ '0', '1', '2' ])
+			})
+			const slotOne = container.querySelector('[data-slot="1"]')
+
+			scrollRoot.scrollTop = 180
+			scrollRoot.dispatchEvent(new Event('scroll'))
+
+			await waitFor(() => {
+				expect(slotLabels(container)).toEqual([ '1', '2', '3' ])
+			})
+			expect(container.querySelector('[data-slot="1"]')).toBe(slotOne)
+		} finally {
+			unmount()
+			scrollRoot.remove()
+		}
+	})
+
 	it('tears down marquee tracking and click-block work when destroyed', () => {
 		vi.useFakeTimers()
 		const node = document.createElement('div')
@@ -105,3 +140,7 @@ describe('VirtualGrid', () => {
 		node.remove()
 	})
 })
+
+function slotLabels(container: HTMLElement): string[] {
+	return Array.from(container.querySelectorAll('[data-slot]'), node => node.textContent ?? '')
+}

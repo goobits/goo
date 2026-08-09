@@ -85,6 +85,7 @@ export class DropdownPanel {
 	#typeaheadTimer: ReturnType<typeof setTimeout> | null = null
 	#selectionAnimationCleanup: (() => void) | null = null
 	#selectionAnimationToken = 0
+	#destroyed = false
 	#mountedIcons = new Map<HTMLElement, ReturnType<typeof mount>>()
 	#handleContainerMouseEnter = () => this.#cancelSubmenuTimer()
 	#handleContainerMouseLeave = (event: MouseEvent) =>
@@ -436,6 +437,8 @@ export class DropdownPanel {
 	 * Clean up resources.
 	 */
 	destroy() {
+		if (this.#destroyed) return
+		this.#destroyed = true
 		this.#cancelSelectionAnimation()
 		this.#clearIcons()
 		this.closeSubmenu()
@@ -665,6 +668,7 @@ export class DropdownPanel {
 	}
 
 	#chooseOption($item: HTMLElement, opt: GooSelectOption): void {
+		if (this.#destroyed) return
 		if (opt.type === 'submenu') {
 			this.#openSubmenuOption($item, opt)
 			return

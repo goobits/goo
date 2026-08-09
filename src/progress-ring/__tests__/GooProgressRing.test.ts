@@ -75,6 +75,66 @@ describe('GooProgressRing', () => {
 		expect(ring.hasAttribute('aria-valuetext')).toBe(false)
 	})
 
+	it('fades on completion by default and allows opting out', async() => {
+		const onFadeComplete = vi.fn()
+		const { container, rerender } = render(GooProgressRing, {
+			props: { progress: 0.5, onFadeComplete }
+		})
+		const ring = container.querySelector<HTMLElement>('.goo-progress-ring')!
+
+		expect(ring.dataset.fadeOnComplete).toBe('true')
+		expect(ring.dataset.complete).toBe('false')
+
+		await rerender({ progress: 1, onFadeComplete })
+		expect(ring.dataset.complete).toBe('true')
+
+		const animationEnd = new Event('animationend', { bubbles: true })
+		Object.defineProperty(animationEnd, 'animationName', { value: 'goo-progress-ring-complete' })
+		ring.dispatchEvent(animationEnd)
+		expect(onFadeComplete).toHaveBeenCalledOnce()
+
+		await rerender({ progress: 1, fadeOnComplete: false, onFadeComplete })
+		expect(ring.dataset.fadeOnComplete).toBe('false')
+		ring.dispatchEvent(animationEnd)
+		expect(onFadeComplete).toHaveBeenCalledOnce()
+	})
+
+	it('renders a caption without letting its dwell delay completion', async() => {
+		vi.useFakeTimers()
+		vi.setSystemTime(0)
+		const { container, rerender } = render(GooProgressRing, {
+			props: {
+				caption: 'Loading showcase',
+				minimumCaptionDurationMs: 500,
+				progress: 0.5
+			}
+		})
+		await tick()
+		const ring = container.querySelector<HTMLElement>('.goo-progress-ring')!
+		const captionText = (): string | null =>
+			container.querySelector('.goo-progress-ring__caption')?.textContent ?? null
+
+		expect(captionText()).toBe('Loading showcase')
+		vi.advanceTimersByTime(200)
+		await tick()
+
+		await rerender({
+			caption: 'Showcase ready',
+			minimumCaptionDurationMs: 500,
+			progress: 1
+		})
+		expect(captionText()).toBe('Showcase ready')
+		expect(ring.dataset.complete).toBe('true')
+
+		vi.advanceTimersByTime(499)
+		await tick()
+		expect(ring.dataset.complete).toBe('true')
+
+		vi.advanceTimersByTime(1)
+		await tick()
+		expect(ring.dataset.complete).toBe('true')
+	})
+
 	it('normalizes non-finite declarative values', () => {
 		const { container } = render(GooProgressRing, {
 			props: {

@@ -15,6 +15,7 @@ import type {
 
 export { default as GooProgressRing } from './GooProgressRing.svelte'
 export type {
+	GooProgressRingArcCap,
 	GooProgressRingProps,
 	GooProgressRingSteps,
 	GooProgressRingTimer,
@@ -69,6 +70,7 @@ export function createGooProgressRingTimer(options: GooProgressRingTimerOptions 
 
 	const variant = resolveVariant(options, shell)
 	ring.configure({
+		arcCap: options.arcCap,
 		colorStops: options.colorStops,
 		fillStyle: options.fillStyle,
 		indeterminate,

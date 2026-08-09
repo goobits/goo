@@ -1,9 +1,20 @@
-import type { GooProgressRingVariant } from './types.ts'
+import type { GooProgressRingArcCap, GooProgressRingVariant } from './types.ts'
 
 const SPINNER_COLORS = [ '#35ad0e', '#d8ad44', '#d00324', '#dc00b8', '#017efc' ]
+const MAX_PROGRESS_FRAME_DELTA_SECONDS = 0.05
+const MAX_INCOMPLETE_PROGRESS_FRAME_STEP = 0.02
+const MAX_COMPLETE_PROGRESS_FRAME_STEP = 0.02
+const EARLY_PROGRESS_SPEED_PER_SECOND = 0.25
+const ACTIVE_PROGRESS_THRESHOLD = 0.2
+const MIN_ACTIVE_PROGRESS_SPEED_PER_SECOND = 0.8
+const MAX_ACTIVE_PROGRESS_SPEED_PER_SECOND = 1.5
+const MAX_COMPLETE_PROGRESS_SPEED_PER_SECOND = 2
+const MIN_PROGRESS_CRUISE_RATIO = 0.8
+export const DEFAULT_PROGRESS_TRANSITION_SPEED = 5
 
 /** Visual configuration accepted by the renderer. */
 export type ProgressRingRenderConfig = {
+	arcCap?: GooProgressRingArcCap
 	colorStops?: Array<{ color: string; offset: number }>
 	fillStyle?: string
 	indeterminate?: boolean
@@ -22,6 +33,7 @@ export type ProgressRingRenderConfig = {
  * element that carries the CSS size var and ARIA attributes; `canvas` is drawn to.
  */
 export class ProgressRingRenderer {
+	#arcCap: GooProgressRingArcCap = 'round'
 	#host: HTMLElement
 	#canvas: HTMLCanvasElement
 	#colorStops: Array<{ color: string; offset: number }> = [
@@ -34,6 +46,7 @@ export class ProgressRingRenderer {
 	#indeterminate = false
 	#lastFrameTime = 0
 	#progress = 0
+	#progressVelocity = 0
 	#rainbowCanvas?: HTMLCanvasElement
 	#rainbowCanvasSize = 0
 	#rotation = 0
@@ -44,7 +57,7 @@ export class ProgressRingRenderer {
 	#spinnerPreviousStep = 0
 	#spinnerStartTime = 0
 	#thickness: number | undefined
-	#transitionSpeed = 5
+	#transitionSpeed = DEFAULT_PROGRESS_TRANSITION_SPEED
 	#variant: GooProgressRingVariant = 'basic'
 	#value: number | string = 0
 	#format = 'PERCENT'
@@ -73,6 +86,7 @@ export class ProgressRingRenderer {
 		}
 
 		this.#currentProgress = this.#progress
+		this.#progressVelocity = 0
 		this.#syncAttributes()
 		this.#paint()
 		this.#startAnimation()
@@ -94,6 +108,9 @@ export class ProgressRingRenderer {
 	}
 
 	set indeterminate(indeterminate: boolean) {
+		if (this.#indeterminate !== indeterminate) {
+			this.#progressVelocity = 0
+		}
 		this.#indeterminate = indeterminate
 		this.#syncAttributes()
 		this.#paint()
@@ -118,11 +135,16 @@ export class ProgressRingRenderer {
 	/** Configure visual rendering options for the progress ring. 	 * @param options - options.
 	 */
 	configure(options: ProgressRingRenderConfig): void {
+		this.#arcCap = options.arcCap ?? this.#arcCap
 		this.#colorStops = options.colorStops ?? this.#colorStops
 		if ('fillStyle' in options) {
 			this.#fillStyle = options.fillStyle ?? ''
 		}
-		this.#indeterminate = options.indeterminate ?? this.#indeterminate
+		const nextIndeterminate = options.indeterminate ?? this.#indeterminate
+		if (this.#indeterminate !== nextIndeterminate) {
+			this.#progressVelocity = 0
+		}
+		this.#indeterminate = nextIndeterminate
 		this.#rotationSpeed = Number.isFinite(options.rotationSpeed)
 			? Math.max(0, options.rotationSpeed as number)
 			: this.#rotationSpeed
@@ -135,7 +157,9 @@ export class ProgressRingRenderer {
 				? Math.max(0, options.thickness as number)
 				: undefined
 		}
-		this.#transitionSpeed = options.transitionSpeed ?? this.#transitionSpeed
+		if (Number.isFinite(options.transitionSpeed)) {
+			this.#transitionSpeed = Math.max(0, options.transitionSpeed as number)
+		}
 		this.#variant = options.variant ?? this.#variant
 		this.#host.dataset['variant'] = this.#variant
 		this.#syncAttributes()
@@ -147,9 +171,14 @@ export class ProgressRingRenderer {
 	 * @param display - display.
 	 */
 	setProgress(progress: number, display?: { format?: string; value?: number | string }): void {
-		this.#progress = clampProgress(progress)
+		const nextProgress = clampProgress(progress)
+		this.#progress = nextProgress
 		this.#value = display?.value ?? Math.ceil(this.#progress * 100)
 		this.#format = display?.format ?? 'PERCENT'
+		if (!this.#indeterminate && this.#variant !== 'rainbow') {
+			this.#currentProgress = this.#progress
+			this.#progressVelocity = 0
+		}
 		const degrees = this.#progress * 360
 		this.#host.style.setProperty('--goo-progress-ring-progress', `${ degrees }deg`)
 		this.#syncAttributes()
@@ -203,21 +232,29 @@ export class ProgressRingRenderer {
 			return
 		}
 
-		const delta = this.#lastFrameTime && time
-			? (time - this.#lastFrameTime) / 1000
+		const delta = time
+			? this.#lastFrameTime
+				? (time - this.#lastFrameTime) / 1000
+				: 1 / 60
 			: 0
 		this.#lastFrameTime = time || this.#lastFrameTime
 
 		if (this.#variant === 'rainbow') {
-			const distance = this.#progress - this.#currentProgress
-			const step = Math.min(1, this.#transitionSpeed * (delta || 1 / 60))
-			this.#currentProgress += distance * step
-			if (Math.abs(this.#progress - this.#currentProgress) < 0.001) {
-				this.#currentProgress = this.#progress
+			if (delta > 0) {
+				const smoothed = smoothProgressToward(
+					this.#currentProgress,
+					this.#progress,
+					this.#progressVelocity,
+					delta,
+					this.#transitionSpeed
+				)
+				this.#currentProgress = smoothed.value
+				this.#progressVelocity = smoothed.velocity
+				this.#rotation = (this.#rotation + this.#rotationSpeed * delta) % 360
 			}
-			this.#rotation = (this.#rotation + this.#rotationSpeed * (delta || 1 / 60)) % 360
 		} else {
 			this.#currentProgress = this.#progress
+			this.#progressVelocity = 0
 		}
 
 		const outerRadius = pixelSize / 2
@@ -242,12 +279,15 @@ export class ProgressRingRenderer {
 
 		if (this.#currentProgress > 0) {
 			startAngle += Math.PI * 2
+			const strokeWidth = outerRadius - innerRadius
+			const strokeRadius = innerRadius + strokeWidth / 2
 			ctx.beginPath()
-			ctx.arc(outerRadius, outerRadius, outerRadius, startAngle, endAngle, false)
-			ctx.arc(outerRadius, outerRadius, innerRadius, endAngle, startAngle, true)
+			ctx.arc(outerRadius, outerRadius, strokeRadius, startAngle, endAngle, false)
 			ctx.globalAlpha = 1
-			ctx.fillStyle = this.#fillColor()
-			ctx.fill()
+			ctx.lineCap = this.#arcCap === 'flat' ? 'butt' : 'round'
+			ctx.lineWidth = strokeWidth
+			ctx.strokeStyle = this.#fillColor()
+			ctx.stroke()
 
 			if (this.#variant === 'rainbow') {
 				ctx.translate(outerRadius, outerRadius)
@@ -294,7 +334,7 @@ export class ProgressRingRenderer {
 		ctx.beginPath()
 		ctx.arc(center, center, radius, startAngle, endAngle, false)
 		ctx.strokeStyle = this.#fillStyle || this.#spinnerColor(currentStep, duration)
-		ctx.lineCap = 'round'
+		ctx.lineCap = this.#arcCap === 'flat' ? 'butt' : 'round'
 		ctx.lineWidth = lineWidth
 		ctx.stroke()
 	}
@@ -422,6 +462,79 @@ export class ProgressRingRenderer {
 export function clampProgress(progress: number): number {
 	if (!Number.isFinite(progress)) return 0
 	return Math.min(1, Math.max(0, progress))
+}
+
+export function smoothProgressToward(
+	current: number,
+	target: number,
+	velocity: number,
+	deltaSeconds: number,
+	transitionSpeed: number
+): { value: number; velocity: number } {
+	if (transitionSpeed <= 0) {
+		return { value: target, velocity: 0 }
+	}
+
+	const delta = Math.min(
+		MAX_PROGRESS_FRAME_DELTA_SECONDS,
+		Math.max(0, deltaSeconds)
+	)
+	if (delta === 0 || current === target) {
+		return { value: current, velocity: current === target ? 0 : velocity }
+	}
+
+	const smoothTime = 1 / transitionSpeed
+	const omega = 2 / smoothTime
+	const scaledDelta = omega * delta
+	const decay = 1 / (
+		1 + scaledDelta + 0.48 * scaledDelta ** 2 + 0.235 * scaledDelta ** 3
+	)
+	let change = current - target
+	const completing = target >= 1
+	const maximumSpeed = completing
+		? MAX_COMPLETE_PROGRESS_SPEED_PER_SECOND
+		: target < ACTIVE_PROGRESS_THRESHOLD
+			? EARLY_PROGRESS_SPEED_PER_SECOND
+			: MIN_ACTIVE_PROGRESS_SPEED_PER_SECOND
+				+ (MAX_ACTIVE_PROGRESS_SPEED_PER_SECOND
+					- MIN_ACTIVE_PROGRESS_SPEED_PER_SECOND)
+					* ((target - ACTIVE_PROGRESS_THRESHOLD) / (1 - ACTIVE_PROGRESS_THRESHOLD))
+	const direction = Math.sign(target - current)
+	const cruiseVelocity = maximumSpeed * MIN_PROGRESS_CRUISE_RATIO * direction
+	const effectiveVelocity = direction > 0
+		? Math.max(velocity, cruiseVelocity)
+		: Math.min(velocity, cruiseVelocity)
+	const maximumChange = maximumSpeed * smoothTime
+	change = Math.max(-maximumChange, Math.min(maximumChange, change))
+	const adjustedTarget = current - change
+	const temporaryVelocity = (effectiveVelocity + omega * change) * delta
+	let nextVelocity = (effectiveVelocity - omega * temporaryVelocity) * decay
+	let nextValue = adjustedTarget + (change + temporaryVelocity) * decay
+	const maximumFrameChange = Math.min(
+		completing
+			? MAX_COMPLETE_PROGRESS_FRAME_STEP
+			: MAX_INCOMPLETE_PROGRESS_FRAME_STEP,
+		maximumSpeed * delta
+	)
+	const boundedValue = Math.max(
+		current - maximumFrameChange,
+		Math.min(current + maximumFrameChange, nextValue)
+	)
+	if (boundedValue !== nextValue) {
+		nextValue = boundedValue
+		nextVelocity = (nextValue - current) / delta
+	}
+
+	if ((target - current > 0) === (nextValue > target)) {
+		nextValue = target
+		nextVelocity = 0
+	}
+	if (Math.abs(target - nextValue) < 0.0005 && Math.abs(nextVelocity) < 0.005) {
+		nextValue = target
+		nextVelocity = 0
+	}
+
+	return { value: nextValue, velocity: nextVelocity }
 }
 
 function getCanvasContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D | null {

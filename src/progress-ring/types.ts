@@ -3,6 +3,9 @@ import type { GooForwardedAttributes } from '../support/types/forwardedAttribute
 /** Visual progress ring variant. */
 export type GooProgressRingVariant = 'basic' | 'rainbow'
 
+/** Shape of the visible progress arc's two endpoints. */
+export type GooProgressRingArcCap = 'flat' | 'round'
+
 /** Progress ring timer mode. */
 export type GooProgressRingTimerType = 'progress' | 'time'
 
@@ -11,6 +14,9 @@ export type GooProgressRingSteps = number | number[]
 
 /** Declarative props accepted by the Svelte progress ring component. */
 export type GooProgressRingProps = GooForwardedAttributes & {
+	/** Shape of the progress arc endpoints. Defaults to `round`. */
+	arcCap?: GooProgressRingArcCap
+
 	/** Normalized progress from 0 to 1. */
 	progress?: number
 
@@ -29,8 +35,20 @@ export type GooProgressRingProps = GooForwardedAttributes & {
 	/** Accessible name for the progress bar. */
 	label?: string
 
+	/** Visible status text rendered below the ring. */
+	caption?: string
+
+	/** Minimum time each visible caption remains before switching. Defaults to 500ms. */
+	minimumCaptionDurationMs?: number
+
 	/** Whether to render an indeterminate spinner. */
 	indeterminate?: boolean
+
+	/** Whether to fade after determinate progress reaches 100%. Defaults to true. */
+	fadeOnComplete?: boolean
+
+	/** Called after the completion fade finishes. */
+	onFadeComplete?: () => void
 
 	/** Visual ring variant. */
 	variant?: GooProgressRingVariant
@@ -42,6 +60,7 @@ export type GooProgressRingProps = GooForwardedAttributes & {
 /** Imperative handle exposed internally by a mounted `GooProgressRing` component. */
 export type GooProgressRingComponentHandle = {
 	configure(options: {
+		arcCap?: GooProgressRingArcCap
 		colorStops?: Array<{ color: string; offset: number }>
 		fillStyle?: string
 		indeterminate?: boolean
@@ -59,6 +78,7 @@ export type GooProgressRingComponentHandle = {
 
 /** Progress ring timer options. */
 export type GooProgressRingTimerOptions = {
+	arcCap?: GooProgressRingArcCap
 	colorStops?: Array<{ color: string; offset: number }>
 	fillStyle?: string
 	format?: string

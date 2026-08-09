@@ -116,6 +116,7 @@ let pendingSelection = $state<string | null>(null)
 let triggerPointerId: number | null = null
 let selectLifecycleToken = 0
 let focusFrame = 0
+let isDestroyed = false
 
 const selectedOption = $derived(findOptionById(normalizedOptions, selectedValue))
 const selectMenu = $derived(normalizeSelectMenu(menu))
@@ -224,6 +225,7 @@ $effect(() => {
 })
 
 $effect(() => () => {
+	isDestroyed = true
 	selectLifecycleToken += 1
 	clearFocusFrame()
 	stopTriggerPointerSelection()
@@ -382,6 +384,7 @@ function focusInitialPanelOption(): void {
 }
 
 export function close({ quiet = false, fromPopout = false }: { quiet?: boolean; fromPopout?: boolean } = {}): void {
+	if (isDestroyed) return
 	if (!selectElement || (!opened && !popout?.isOpen())) return
 
 	stopTriggerPointerSelection()
@@ -650,15 +653,19 @@ function finishSelection(option: GooSelectOption, oldValue: string): void {
 }
 
 function emitChange(oldValue: string): void {
-	if (!selectElement) return
+	const lifecycleToken = selectLifecycleToken
+	const select = selectElement
+	const nextValue = selectedValue
+	if (!select) return
 
 	const data: GooSelectEventData = {
-		select: selectElement,
-		value: selectedValue,
+		select,
+		value: nextValue,
 		oldValue
 	}
-	onchange?.(selectedValue, data)
-	selectElement.dispatchEvent(new CustomEvent('change', { detail: data, bubbles: true }))
+	onchange?.(nextValue, data)
+	if (lifecycleToken !== selectLifecycleToken) return
+	select.dispatchEvent(new CustomEvent('change', { detail: data, bubbles: true }))
 }
 
 function emitHoverChange(id: string | null): void {
