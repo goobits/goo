@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Add one SSR-compatible SVG waveform primitive for measured color bars, progress emphasis, and honest unavailable states.
 - Type and forward native button and anchor attributes through `GooButton`, including standard accessible labels.
 - Normalize button-backed link decoration.
 - Isolate nested modal branches and forward root attributes through `GooFocusTrap`.

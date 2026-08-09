@@ -30,6 +30,8 @@ import GooToaster from '../toast/GooToaster.svelte'
 import { GooToast as ExportedGooToast, GooToaster as ExportedGooToaster } from '../toast/index.ts'
 import GooTurnstileField from '../turnstile/GooTurnstileField.svelte'
 import { GooTurnstileField as ExportedGooTurnstileField } from '../turnstile/index.ts'
+import GooWaveform from '../waveform/GooWaveform.svelte'
+import { GooWaveform as ExportedGooWaveform } from '../waveform/index.ts'
 
 describe('Goo component exports', () => {
 	it('exports Svelte components from their package subpaths', () => {
@@ -49,6 +51,7 @@ describe('Goo component exports', () => {
 		expect(ExportedGooToast).toBe(GooToast)
 		expect(ExportedGooToaster).toBe(GooToaster)
 		expect(ExportedGooTurnstileField).toBe(GooTurnstileField)
+		expect(ExportedGooWaveform).toBe(GooWaveform)
 	})
 
 	it('keeps the root aggregate explicit and stable-only', () => {
