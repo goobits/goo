@@ -44,7 +44,7 @@
 	}
 </script>
 
-<div
+<span
 	{...rest}
 	class={classes}
 	style={rootStyle || undefined}
@@ -80,4 +80,4 @@
 			{/each}
 		</svg>
 	{/if}
-</div>
+</span>
