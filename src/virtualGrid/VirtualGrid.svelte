@@ -221,7 +221,7 @@
 	{#if topSpacerHeight > 0}
 		<div class="goo-virtual-grid-spacer" style:height={`${ topSpacerHeight }px`}></div>
 	{/if}
-	{#each visibleSlots as slot, poolIndex (poolIndex)}
+	{#each visibleSlots as slot (slot)}
 		{@render children({
 			slot,
 			item: itemForSlot(slot),

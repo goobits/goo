@@ -110,6 +110,7 @@ Use package subpaths in apps and shared packages so each caller names the surfac
 | `@goobits/goo/tooltip`                 | `GooTooltip`, `tooltip`, `createGooTooltip`, `gooTooltipRuntime`   | Tooltip component and action/helper         |
 | `@goobits/goo/toolbar`                 | `createFloatingToolbarView`, toolbar types                         | Transitional toolbar view helpers           |
 | `@goobits/goo/turnstile`               | `GooTurnstileField`                                                | Cloudflare Turnstile field wrapper          |
+| `@goobits/goo/waveform`                | `GooWaveform`                                                      | Measured waveform presentation              |
 | `@goobits/goo/virtualGrid`             | `VirtualGrid`, component types                                     | Virtualized grid primitive                  |
 | `@goobits/goo/virtualGrid/model`       | selection, item, marquee, and windowing helpers                    | Virtual grid model utilities                |
 | `@goobits/goo/vortex`                  | `createGooVortex`, `GooVortexManager`                              | Temporary positioned activity indicators    |
@@ -567,6 +568,20 @@ timer.show()
 timer.setProgress(0.5)
 timer.element.dataset.loading = 'true'
 timer.hide()
+```
+
+### Waveform
+
+`GooWaveform` renders caller-provided measurements without generating fallback
+samples. Its detail, compact, and mini presets share the same centered SVG
+geometry, measured colors, and honest unavailable state.
+
+```svelte
+<script lang="ts">
+	import { GooWaveform } from '@goobits/goo/waveform'
+</script>
+
+<GooWaveform bars={measuredBars} progress={0.42} variant="detail" />
 ```
 
 ### Error Boundary

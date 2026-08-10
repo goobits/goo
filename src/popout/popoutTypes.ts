@@ -6,7 +6,7 @@ import type {
 /** Runtime controls for the shared Goo popout registry. */
 export interface GooPopoutManager {
 	/** Close all active popouts. */
-	closeAll(): void
+	closeAll(): Promise<void>
 	/** Close active popouts that do not contain the provided element. */
 	closeOutside(target: HTMLElement): void
 	/** Return the most recently opened popout. */

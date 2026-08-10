@@ -191,6 +191,11 @@
 			"svelte": "./src/grid-popout/index.ts",
 			"import": "./src/grid-popout/index.ts"
 		},
+		"./waveform": {
+			"types": "./src/waveform/index.ts",
+			"svelte": "./src/waveform/index.ts",
+			"import": "./src/waveform/index.ts"
+		},
 		"./virtualGrid": {
 			"types": "./src/virtualGrid/index.ts",
 			"svelte": "./src/virtualGrid/index.ts",

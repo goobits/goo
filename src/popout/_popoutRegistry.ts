@@ -30,10 +30,10 @@ export const gooPopoutRuntime = {
 	getActive: getActivePopout
 }
 
-function closeAllPopouts(): void {
-	for (const popout of Array.from(activePopouts.keys())) {
-		void popout.close()
-	}
+async function closeAllPopouts(): Promise<void> {
+	const popouts = Array.from(activePopouts.keys())
+	const roots = popouts.filter(popout => !popout.parent || !activePopouts.has(popout.parent))
+	await Promise.all(roots.map(popout => popout.close()))
 }
 
 function closePopoutsOutside(target: HTMLElement): void {
