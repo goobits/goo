@@ -27,6 +27,9 @@ export type GooInputProps<T = string> = GooForwardedAttributes & {
 	/** Native form field name. */
 	name?: string
 
+	/** ID of a native datalist providing suggestions. */
+	list?: string
+
 	/** Native input id. */
 	inputId?: string
 

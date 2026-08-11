@@ -35,6 +35,7 @@
 		type = 'text',
 		multiline = false,
 		name = '',
+		list,
 		inputId,
 		ariaLabel,
 		autocomplete,
@@ -297,6 +298,7 @@
 			id={inputId}
 			{type}
 			{name}
+			{list}
 			{placeholder}
 			aria-label={ariaLabel}
 			{autocomplete}
