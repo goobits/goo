@@ -1,8 +1,12 @@
 <script lang="ts" generics="T">
 	import './VirtualGrid.css'
 
-	import type { VirtualGridProps, VirtualGridSlot, VirtualGridWindow } from './types.ts'
-	import { calculateVirtualGridWindow, virtualGridSpacerHeight, virtualGridWindowsEqual } from './virtualWindow.ts'
+	import type { VirtualGridProps, VirtualGridWindow } from './types.ts'
+	import {
+		calculateVirtualGridWindow,
+		virtualGridSpacerHeight,
+		virtualGridWindowsEqual
+	} from './virtualWindow.ts'
 
 	const DEFAULT_OVERSCAN_ROWS = 8
 	const MOBILE_OVERSCAN_ROWS = 4
@@ -49,10 +53,11 @@
 	let measureFrame: number | null = null
 	let deferContentTimer: ReturnType<typeof setTimeout> | null = null
 
-	let effectiveOverscanRows = $derived(constrainedDevice ? mobileOverscanRows : configuredOverscanRows)
+	let effectiveOverscanRows = $derived(
+		constrainedDevice ? mobileOverscanRows : configuredOverscanRows
+	)
 	let totalItems = $derived(items.length + (includeLeadingSlot ? 1 : 0))
 	let rowStride = $derived(tileHeight + rowGap)
-	let totalRows = $derived(Math.ceil(totalItems / columns))
 	let virtual = $derived(totalItems > columns * 8)
 
 	function readConstrainedDevice(): boolean {
@@ -91,7 +96,9 @@
 	})
 
 	let topSpacerHeight = $derived(virtualGridSpacerHeight(windowState.topRows, tileHeight, rowGap))
-	let bottomSpacerHeight = $derived(virtualGridSpacerHeight(windowState.bottomRows, tileHeight, rowGap))
+	let bottomSpacerHeight = $derived(
+		virtualGridSpacerHeight(windowState.bottomRows, tileHeight, rowGap)
+	)
 
 	function itemForSlot(slot: number): T | null {
 		const idx = slot - (includeLeadingSlot ? 1 : 0)
@@ -103,9 +110,7 @@
 		if (!itemsEl || !scrollRoot) return
 		constrainedDevice = readConstrainedDevice()
 		const style = getComputedStyle(itemsEl)
-		const tracks = style.gridTemplateColumns
-			.split(' ')
-			.filter(track => track && track !== 'none')
+		const tracks = style.gridTemplateColumns.split(' ').filter((track) => track && track !== 'none')
 		columns = Math.max(1, tracks.length)
 		rowGap = parseFloat(style.rowGap) || defaultRowGap
 
@@ -180,9 +185,8 @@
 		scheduleMeasure()
 		currentItemsEl?.addEventListener('virtualgridnavigate', handleVirtualNavigate)
 		root.addEventListener('scroll', handleScroll, { passive: true })
-		const resizeObserver = typeof ResizeObserver === 'function'
-			? new ResizeObserver(scheduleMeasure)
-			: null
+		const resizeObserver =
+			typeof ResizeObserver === 'function' ? new ResizeObserver(scheduleMeasure) : null
 		if (currentItemsEl) resizeObserver?.observe(currentItemsEl)
 		resizeObserver?.observe(root)
 		return () => {
@@ -205,12 +209,12 @@
 </script>
 
 <div
-	class={`goo-virtual-grid ${ className }`}
+	class={`goo-virtual-grid ${className}`}
 	bind:this={itemsEl}
-	onclick={onclick}
-	onkeydown={onkeydown}
-	ondblclick={ondblclick}
-	oncontextmenu={oncontextmenu}
+	{onclick}
+	{onkeydown}
+	{ondblclick}
+	{oncontextmenu}
 	{role}
 	aria-label={ariaLabel}
 	aria-rowcount={ariaRowCount}
@@ -219,7 +223,7 @@
 	data-columns={columns}
 >
 	{#if topSpacerHeight > 0}
-		<div class="goo-virtual-grid-spacer" style:height={`${ topSpacerHeight }px`}></div>
+		<div class="goo-virtual-grid-spacer" style:height={`${topSpacerHeight}px`}></div>
 	{/if}
 	{#each visibleSlots as slot (slot)}
 		{@render children({
@@ -230,6 +234,6 @@
 		})}
 	{/each}
 	{#if bottomSpacerHeight > 0}
-		<div class="goo-virtual-grid-spacer" style:height={`${ bottomSpacerHeight }px`}></div>
+		<div class="goo-virtual-grid-spacer" style:height={`${bottomSpacerHeight}px`}></div>
 	{/if}
 </div>
