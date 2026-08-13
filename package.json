@@ -172,6 +172,10 @@
 			"svelte": "./src/label/index.ts",
 			"import": "./src/label/index.ts"
 		},
+		"./keyboard": {
+			"types": "./src/support/keyboard/index.ts",
+			"import": "./src/support/keyboard/index.ts"
+		},
 		"./number": {
 			"types": "./src/support/number/index.ts",
 			"import": "./src/support/number/index.ts"
