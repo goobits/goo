@@ -203,6 +203,7 @@ describe('GooSelect', () => {
 		const field = container.querySelector<HTMLSelectElement>('.goo-select__field')
 
 		expect(root?.classList.contains('goo-select--block')).toBe(true)
+		expect(root?.hasAttribute('aria-required')).toBe(false)
 		expect(trigger?.id).toBe('option-input')
 		expect(trigger?.getAttribute('aria-label')).toBeNull()
 		expect(trigger?.getAttribute('aria-required')).toBe('true')
