@@ -116,7 +116,10 @@ describe('Goo field factories', () => {
 	})
 
 	it('creates framework-free field compositions around imperative controls', () => {
-		const checkbox = createCheckboxField({ checked: true })
+		const checkbox = createCheckboxField({
+			ariaLabel: 'Paint into layer',
+			checked: true
+		})
 		const field = createLabeledField({
 			control: checkbox,
 			label: 'Paint into layer',
@@ -129,6 +132,7 @@ describe('Goo field factories', () => {
 		expect(field.querySelector('.goo-field__label')?.textContent).toBe('Paint into layer')
 		expect(field.control).toBe(checkbox)
 		expect(field.dataset.gooFieldType).toBe('checkbox')
+		expect(checkbox.querySelector('.goo-checkbox')?.getAttribute('aria-label')).toBe('Paint into layer')
 
 		group.destroy()
 		expect(group.isConnected).toBe(false)

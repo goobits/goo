@@ -4,6 +4,7 @@ import GooCheckbox from './GooCheckbox.svelte'
 import type { GooCheckboxProps } from './types.ts'
 
 export type CheckboxFieldOptions = {
+	ariaLabel?: string
 	checked?: boolean
 	className?: string
 	disabled?: boolean
@@ -63,6 +64,7 @@ export function createCheckboxField(options: CheckboxFieldOptions = {}): Checkbo
 				options.onchange?.(value, oldValue)
 			}
 		}
+		if (options.ariaLabel !== undefined) props.ariaLabel = options.ariaLabel
 		if (options.disabled !== undefined) props.disabled = options.disabled
 		if (options.formValue !== undefined) props.formValue = options.formValue
 		if (options.label !== undefined) props.label = options.label
