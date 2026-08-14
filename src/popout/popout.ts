@@ -400,17 +400,7 @@ export function createGooPopout(options: GooPopoutOptions = {}): GooPopoutInstan
 			rtl: resolvedRtl
 		}
 
-		const viewportPosition = calculatePosition($element, positionOptions)
-		if (parentElement === document.body || parentElement === document.documentElement) {
-			currentPosition = viewportPosition
-		} else {
-			const parentBounds = parentElement.getBoundingClientRect()
-			currentPosition = {
-				...viewportPosition,
-				x: viewportPosition.x - parentBounds.left,
-				y: viewportPosition.y - parentBounds.top
-			}
-		}
+		currentPosition = calculatePosition($element, positionOptions)
 		applyPosition($element, currentPosition)
 		if (currentPosition.maxHeight !== undefined) {
 			$element.style.setProperty('--goo-popout-available-height', `${ currentPosition.maxHeight }px`)

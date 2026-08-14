@@ -106,7 +106,7 @@ describe('GooPopout', () => {
 		expect(second.element).toBeNull()
 	})
 
-	it('infers an app overlay host and applies coordinates within that host', async() => {
+	it('infers an app overlay host without changing viewport coordinates', async() => {
 		const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect
 		const scope = document.createElement('section')
 		const contentRoot = document.createElement('main')
@@ -138,9 +138,9 @@ describe('GooPopout', () => {
 			await instance.open()
 
 			expect(instance.element?.parentElement).toBe(host)
-			expect(instance.position).toMatchObject({ x: 40, y: 60 })
-			expect(instance.element?.style.left).toBe('40px')
-			expect(instance.element?.style.top).toBe('60px')
+			expect(instance.position).toMatchObject({ x: 140, y: 110 })
+			expect(instance.element?.style.left).toBe('140px')
+			expect(instance.element?.style.top).toBe('110px')
 		} finally {
 			await instance.destroy()
 			scope.remove()

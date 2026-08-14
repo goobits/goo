@@ -322,7 +322,7 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 	panel.render(normalizedOptions)
 	listboxId = panel.listboxId
 	syncPanelTypography()
-	if (autoFocus) focusInitialPanelOption()
+	const initialFocusId = autoFocus ? focusInitialPanelOption() : undefined
 
 	const currentMenu = selectMenu
 	const positionAt = getPositionTarget(at)
@@ -355,6 +355,7 @@ export function open(options: GooSelectOpenOptions = {}): boolean {
 			clearFocusFrame()
 			focusFrame = requestAnimationFrame(() => {
 				focusFrame = 0
+				if (!panel || !opened || panel.hoveredId !== initialFocusId) return
 				focusInitialPanelOption()
 			})
 		}
@@ -376,11 +377,12 @@ function syncPanelTypography(): void {
 	)
 }
 
-function focusInitialPanelOption(): void {
+function focusInitialPanelOption(): string | undefined {
 	if (!panel) return
 
 	const toFocus = selectedValue || panel.getNavigableOptions()[0]?.dataset['id']
 	if (toFocus) panel.setHovered(toFocus)
+	return toFocus
 }
 
 export function close({ quiet = false, fromPopout = false }: { quiet?: boolean; fromPopout?: boolean } = {}): void {
