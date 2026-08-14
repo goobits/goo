@@ -24,6 +24,36 @@ describe('compare', () => {
 		expect(result.maxDiff).toBe(510)
 		expect(result.matchPercent).toBe(0)
 	})
+
+	test('reads canvas pixels without reconfiguring the consumer-owned context', () => {
+		const pixels = createImageData([ 255, 0, 0, 255 ])
+		const context = {
+			clearRect: vi.fn(),
+			drawImage: vi.fn(),
+			getImageData: vi.fn(() => pixels)
+		}
+		const readbackCanvas = {
+			width: 0,
+			height: 0,
+			getContext: vi.fn(() => context)
+		}
+		const sourceCanvas = {
+			width: 1,
+			height: 1,
+			getContext: vi.fn(),
+			ownerDocument: {
+				createElement: vi.fn(() => readbackCanvas)
+			}
+		} as unknown as HTMLCanvasElement
+
+		const result = compare(sourceCanvas, pixels)
+
+		expect(sourceCanvas.getContext).not.toHaveBeenCalled()
+		expect(readbackCanvas.getContext).toHaveBeenCalledWith('2d', { willReadFrequently: true })
+		expect(context.clearRect).toHaveBeenCalledWith(0, 0, 1, 1)
+		expect(context.drawImage).toHaveBeenCalledWith(sourceCanvas, 0, 0)
+		expect(result.diffCount).toBe(0)
+	})
 })
 
 function createImageData(values: number[]) {

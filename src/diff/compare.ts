@@ -48,6 +48,28 @@ const DEFAULT_OPTIONS: Required<DiffOptions> = {
 	alphaThreshold: 20
 }
 
+interface CanvasReadback {
+	canvas: HTMLCanvasElement
+	context: CanvasRenderingContext2D
+}
+
+const canvasReadbacks = new WeakMap<HTMLCanvasElement, CanvasReadback>()
+
+function getCanvasReadback(input: HTMLCanvasElement): CanvasReadback {
+	const existing = canvasReadbacks.get(input)
+	if (existing) return existing
+
+	const canvas = input.ownerDocument.createElement('canvas')
+	const context = canvas.getContext('2d', { willReadFrequently: true })
+	if (!context) {
+		throw new Error('Unable to create a canvas readback context.')
+	}
+
+	const readback = { canvas, context }
+	canvasReadbacks.set(input, readback)
+	return readback
+}
+
 /**
 	 * Extract ImageData from input (handles both ImageData and HTMLCanvasElement)
 	 *
@@ -60,8 +82,13 @@ function toImageData(input: ImageData | HTMLCanvasElement): ImageData {
 	if ('data' in input && 'width' in input && 'height' in input) {
 		return input
 	}
-	const ctx = input.getContext('2d', { willReadFrequently: true })!
-	return ctx.getImageData(0, 0, input.width, input.height)
+
+	const { canvas, context } = getCanvasReadback(input)
+	if (canvas.width !== input.width) canvas.width = input.width
+	if (canvas.height !== input.height) canvas.height = input.height
+	context.clearRect(0, 0, input.width, input.height)
+	context.drawImage(input, 0, 0)
+	return context.getImageData(0, 0, input.width, input.height)
 }
 
 /**
