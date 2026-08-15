@@ -37,7 +37,7 @@
 	font-weight: normal;
 	font-size: var(--goo-theme-font-size-sm);
 	height: var(--goo-input-height);
-	line-height: var(--goo-input-height);
+	line-height: var(--goo-theme-line-height-base);
 	width: var(--goo-input-inline-size);
 	transition:
 		background-color var(--goo-input-motion-fast),
@@ -119,6 +119,11 @@
 	&::placeholder {
 		color: var(--goo-input-fg-placeholder);
 	}
+}
+
+.goo-input:not(.goo-input--multiline) .goo-input__content {
+	height: 100%;
+	min-height: 0;
 }
 
 @keyframes goo-input-value-pulse {
