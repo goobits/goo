@@ -105,6 +105,7 @@
 	font: inherit;
 	border-radius: inherit;
 	outline: none;
+	margin: 0;
 	padding: var(--goo-input-padding);
 	overflow: hidden;
 	white-space: nowrap;
