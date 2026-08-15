@@ -6,7 +6,7 @@
 	"imports": {
 		"#src/*": "./src/*"
 	},
-	"packageManager": "pnpm@11.18.0",
+	"packageManager": "pnpm@11.21.0",
 	"publishConfig": {
 		"access": "public"
 	},
@@ -293,6 +293,7 @@
 		"jsdom": "^30.0.1",
 		"svelte": "^5.56.9",
 		"svelte-check": "4.7.6",
+		"tsx": "^4.23.12",
 		"typescript": "^6.0.3",
 		"typescript-eslint": "^8.67.0",
 		"vite": "^8.2.1",
