@@ -1,7 +1,8 @@
 import { fireEvent, render } from '@testing-library/svelte'
+import { mount, unmount } from 'svelte'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { createGooDialog, dialogManager, GooConfirm, GooSheet } from '../index.ts'
+import { createGooDialog, dialogManager, GooConfirm, GooDialog, GooSheet } from '../index.ts'
 import GooDialogActionsHost from './GooDialogActionsHost.svelte'
 
 const nextFrame = () => new Promise(resolve => requestAnimationFrame(resolve))
@@ -30,15 +31,27 @@ describe('GooDialog', () => {
 		await expect(resultPromise).resolves.toEqual({ cancel: true })
 	})
 
-	it('renders one close control for simple alerts', () => {
-		const dialog = createGooDialog({
-			type: 'alert',
-			content: 'Hello'
-		})
+	it.each([ 'alert', 'notify', 'overlay', 'sheet' ] as const)(
+		'renders one shared quiet close control for %s dialogs',
+		type => {
+			const dialog = createGooDialog({
+				type,
+				content: 'Hello'
+			})
+			const close = dialog.element.querySelector<HTMLButtonElement>('[aria-label="Close"]')
 
-		expect(dialog.element.querySelector('.goo-dialog__close')).toBeNull()
-		expect(dialog.element.querySelectorAll('.goo-dialog__close-badge')).toHaveLength(1)
-	})
+			expect(close).not.toBeNull()
+			expect(close?.classList.contains('goo-button')).toBe(true)
+			expect(close?.getAttribute('size')).toBe('compact')
+			expect(close?.getAttribute('variant')).toBe('quiet')
+			expect(close?.hasAttribute('square')).toBe(true)
+			expect(close?.querySelector('.goo-button__icon svg')).not.toBeNull()
+			expect(dialog.element.querySelectorAll('[aria-label="Close"]')).toHaveLength(1)
+			if (type === 'alert') {
+				expect(close?.classList.contains('goo-dialog__close-badge')).toBe(true)
+			}
+		}
+	)
 
 	it('renders logical-edge sheets with overlay ownership and content focus', async() => {
 		const content = document.createElement('section')
@@ -134,6 +147,29 @@ describe('GooDialog', () => {
 		expect(getByTestId('open-state').textContent).toBe('false')
 		expect(queryByText('Dialog body')).toBeNull()
 		expect(document.activeElement).toBe(opener)
+	})
+
+	it('uses the nearest app-owned overlay placement without host context', async() => {
+		const scope = document.createElement('section')
+		const source = document.createElement('div')
+		const host = document.createElement('div')
+		scope.dataset.gooOverlayScope = ''
+		host.dataset.gooOverlayHost = ''
+		scope.append(source, host)
+		document.body.append(scope)
+		const component = mount(GooDialog, {
+			target: source,
+			props: {
+				ariaLabel: 'Scoped dialog',
+				open: true
+			}
+		})
+
+		await vi.waitFor(() => expect(host.querySelector('.goo-dialog[open]')).not.toBeNull())
+
+		expect(document.body.querySelector(':scope > .goo-dialog')).toBeNull()
+		expect(host.querySelector('.goo-dialog-backdrop')).not.toBeNull()
+		unmount(component)
 	})
 
 	it('treats string content as text instead of HTML', async() => {

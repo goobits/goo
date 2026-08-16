@@ -156,7 +156,6 @@ const hostAttributes = $derived<Record<string, string | undefined>>({
 	placeholder,
 	disabled: effectiveDisabled ? '' : undefined,
 	'aria-invalid': invalid ? 'true' : undefined,
-	'aria-required': required ? 'true' : undefined,
 	'show-header': showHeader ? undefined : 'false',
 	'enable-keyboard': enableKeyboard ? undefined : 'false',
 	'show-selection-indicator': showSelectionIndicator ? undefined : 'false'

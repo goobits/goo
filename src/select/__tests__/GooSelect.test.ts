@@ -38,6 +38,27 @@ describe('GooSelect', () => {
 		expect(container.querySelector('.goo-select__trigger-arrow .lucide-chevron-down')).not.toBeNull()
 	})
 
+	it('rerenders options without HTML injection', () => {
+		const panel = new DropdownPanel({
+			showSelectionIndicator: false,
+			value: 'a',
+			getContext: () => null,
+			onSelect: vi.fn(),
+			onHoverChange: vi.fn()
+		})
+		panel.render([ { id: 'a', label: 'Alpha' } ])
+		Object.defineProperty(panel.$container, 'innerHTML', {
+			configurable: true,
+			set: () => {
+				throw new TypeError('Trusted Types rejected raw HTML')
+			}
+		})
+
+		expect(() => panel.render([ { id: 'b', label: 'Beta' } ])).not.toThrow()
+		expect(panel.$container.textContent).toBe('Beta')
+		panel.destroy()
+	})
+
 	it('renders app-owned custom trigger content without default chrome', () => {
 		const { container } = render(SelectCustomTriggerHost)
 
@@ -182,6 +203,7 @@ describe('GooSelect', () => {
 		const field = container.querySelector<HTMLSelectElement>('.goo-select__field')
 
 		expect(root?.classList.contains('goo-select--block')).toBe(true)
+		expect(root?.hasAttribute('aria-required')).toBe(false)
 		expect(trigger?.id).toBe('option-input')
 		expect(trigger?.getAttribute('aria-label')).toBeNull()
 		expect(trigger?.getAttribute('aria-required')).toBe('true')

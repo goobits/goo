@@ -20,6 +20,7 @@ export type GooButtonVariant =
 	| 'attention'
 	| 'danger'
 	| 'ghost'
+	| 'quiet'
 	| 'link'
 	| 'selected'
 	| string

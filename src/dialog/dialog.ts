@@ -3,6 +3,7 @@
  * @module goobits/dialog/GooDialog
  */
 
+import '../button/GooButton.css'
 import './GooDialog.css'
 
 import type { CheckboxFieldElement } from '../checkbox/_createCheckboxField.ts'

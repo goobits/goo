@@ -1,7 +1,7 @@
 <script lang="ts">
-import { untrack } from 'svelte'
+import { onDestroy, untrack } from 'svelte'
 import type { Snippet } from 'svelte'
-import { useGooOverlayHost } from '../overlay-host/overlayHost.ts'
+import { resolveGooOverlayPlacement, useGooOverlayHost } from '../overlay-host/overlayHost.ts'
 import { createGooDialog } from './dialog.ts'
 import type { DialogResult, GooDialogController, GooDialogOptions } from './dialog.ts'
 
@@ -56,7 +56,10 @@ let {
 
 let rendered = $state(Boolean(open))
 
-function createDialog(): void {
+function createDialog(
+	resolvedParentElement: HTMLElement | undefined,
+	resolvedIsolationRoot: HTMLElement | undefined
+): void {
 	if (!contentElement) return
 	if (actions && !actionsElement) return
 	if (currentDialog) return
@@ -89,9 +92,7 @@ function createDialog(): void {
 	if (fields !== undefined) dialogOptions.fields = fields
 	if (verify !== undefined) dialogOptions.verify = verify
 	if (className !== undefined) dialogOptions.className = className
-	const resolvedParentElement = parentElement ?? overlayHost?.element() ?? undefined
 	if (resolvedParentElement !== undefined) dialogOptions.parentElement = resolvedParentElement
-	const resolvedIsolationRoot = isolationRoot ?? overlayHost?.scope() ?? undefined
 	if (resolvedIsolationRoot !== undefined) dialogOptions.isolationRoot = resolvedIsolationRoot
 	if (onok !== undefined) dialogOptions.onOk = onok
 	if (oncancel !== undefined) dialogOptions.onCancel = oncancel
@@ -100,20 +101,24 @@ function createDialog(): void {
 	if (open) void currentDialog.open()
 }
 
-let mountedContent: HTMLDivElement | undefined
-
 $effect(() => {
 	const element = contentElement
-	if (!element || mountedContent === element) return
-	mountedContent = element
-	untrack(createDialog)
+	const contextualParent = overlayHost?.element()
+	const contextualScope = overlayHost?.scope()
+	if (!element || (actions && !actionsElement)) return
+	const placement = resolveGooOverlayPlacement(element)
+	const resolvedParentElement = parentElement ?? contextualParent ?? placement?.host
+	const resolvedIsolationRoot = isolationRoot ?? contextualScope ?? placement?.scope
+	if (overlayHost && !resolvedParentElement) return
+	if (currentDialog) return
+	untrack(() => createDialog(resolvedParentElement, resolvedIsolationRoot))
 	mounted = true
-	return () => {
-		void currentDialog?.destroy()
-		currentDialog = null
-		instance = null
-		if (mountedContent === element) mountedContent = undefined
-	}
+})
+
+onDestroy(() => {
+	void currentDialog?.destroy()
+	currentDialog = null
+	instance = null
 })
 
 $effect(() => {

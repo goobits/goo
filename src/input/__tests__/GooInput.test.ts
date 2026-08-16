@@ -51,6 +51,7 @@ describe('GooInput', () => {
 				autofocus: true,
 				block: true,
 				inputmode: 'search',
+				list: 'recent-pages',
 				maxLength: 120,
 				minLength: 2,
 				'aria-describedby': 'name-help',
@@ -64,6 +65,7 @@ describe('GooInput', () => {
 		expect(root?.classList.contains('goo-input--block')).toBe(true)
 		expect(input?.autofocus).toBe(true)
 		expect(input?.inputMode).toBe('search')
+		expect(input?.getAttribute('list')).toBe('recent-pages')
 		expect(input?.maxLength).toBe(120)
 		expect(input?.minLength).toBe(2)
 		expect(input?.getAttribute('aria-describedby')).toBe('name-help')

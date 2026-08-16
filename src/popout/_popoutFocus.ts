@@ -52,7 +52,13 @@ export function restorePopoutFocus(
 	removedElement: HTMLElement,
 	previousActiveElement: HTMLElement | null
 ): HTMLElement | null {
-	if (!previousActiveElement) return null
+	if (
+		!previousActiveElement ||
+		typeof document === 'undefined' ||
+		typeof HTMLElement === 'undefined'
+	) {
+		return null
+	}
 	const activeElement = document.activeElement
 	if (
 		activeElement instanceof HTMLElement &&

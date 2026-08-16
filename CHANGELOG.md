@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Publish the existing activation, containment, composite navigation, focus-trap, and modal-isolation helpers through `@goobits/goo/keyboard`.
 - Add one SSR-compatible SVG waveform primitive for measured color bars, progress emphasis, and honest unavailable states.
 - Type and forward native button and anchor attributes through `GooButton`, including standard accessible labels.
 - Normalize button-backed link decoration.

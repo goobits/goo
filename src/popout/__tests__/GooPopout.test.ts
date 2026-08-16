@@ -2,6 +2,7 @@ import { render } from '@testing-library/svelte'
 import { tick } from 'svelte'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { restorePopoutFocus } from '../_popoutFocus.ts'
 import GooPopout from '../GooPopout.svelte'
 import { createGooPopout, type GooPopoutInstance, gooPopoutRuntime } from '../index.ts'
 
@@ -412,6 +413,18 @@ describe('GooPopout', () => {
 		await instance.destroy()
 		expect(document.activeElement).toBe(target)
 		target.remove()
+	})
+
+	it('skips focus restoration after the DOM environment is released', () => {
+		const removedElement = document.createElement('div')
+		const previousActiveElement = document.createElement('button')
+		vi.stubGlobal('document', undefined)
+
+		try {
+			expect(restorePopoutFocus(removedElement, previousActiveElement)).toBeNull()
+		} finally {
+			vi.unstubAllGlobals()
+		}
 	})
 
 	it('preserves focus moved by the user while the popout is opening', async() => {

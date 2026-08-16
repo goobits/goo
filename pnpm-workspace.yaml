@@ -4,6 +4,23 @@ packages:
 blockExoticSubdeps: true
 engineStrict: true
 minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  - svelte@5.56.9
+  - '@lucide/svelte@1.31.0'
+  - '@sveltejs/load-config@0.2.3'
+  - '@sveltejs/vite-plugin-svelte@7.3.0'
+  - '@typescript-eslint/eslint-plugin@8.67.0'
+  - '@typescript-eslint/parser@8.67.0'
+  - '@typescript-eslint/project-service@8.67.0'
+  - '@typescript-eslint/scope-manager@8.67.0'
+  - '@typescript-eslint/tsconfig-utils@8.67.0'
+  - '@typescript-eslint/type-utils@8.67.0'
+  - '@typescript-eslint/types@8.67.0'
+  - '@typescript-eslint/typescript-estree@8.67.0'
+  - '@typescript-eslint/utils@8.67.0'
+  - '@typescript-eslint/visitor-keys@8.67.0'
+  - svelte-check@4.7.6
+  - typescript-eslint@8.67.0
 minimumReleaseAgeIgnoreMissingTime: false
 minimumReleaseAgeStrict: true
 

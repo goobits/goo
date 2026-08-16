@@ -25,6 +25,7 @@
 	--goo-chevron-tabs-focus-ring-width: var(--goo-theme-focus-ring-width);
 	--goo-chevron-tabs-activity-size: var(--goo-theme-icon-sm);
 	--goo-chevron-tabs-close-size: calc(var(--goo-theme-icon-sm) + var(--goo-theme-space-2xs) * 0.5);
+	--goo-chevron-tabs-close-hit-size: var(--goo-theme-control-height-sm);
 	--goo-chevron-tabs-close-offset: var(--goo-theme-space-md);
 	--goo-chevron-tabs-tip-offset: calc(var(--goo-theme-space-sm) + var(--goo-theme-space-2xs) * 0.5);
 	--goo-chevron-tabs-tip-min-width: calc(var(--goo-theme-control-height-lg) * 3.8);
@@ -291,8 +292,8 @@
 	top: 50%;
 	display: grid;
 	place-content: center;
-	width: var(--goo-chevron-tabs-close-size);
-	height: var(--goo-chevron-tabs-close-size);
+	width: var(--goo-chevron-tabs-close-hit-size);
+	height: var(--goo-chevron-tabs-close-hit-size);
 	padding: 0;
 	border: 0;
 	border-radius: var(--goo-theme-radius-full);
