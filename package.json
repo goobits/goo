@@ -279,8 +279,8 @@
 		"check:types": "tsc --noEmit",
 		"lint": "eslint src/ --fix",
 		"lint:check": "eslint src/",
-		"test:e2e": "env -u NO_COLOR xvfb-run -a playwright test",
-		"test:all": "vitest run --maxWorkers=2 && env -u NO_COLOR xvfb-run -a playwright test"
+		"test:e2e": "PLAYWRIGHT_BROWSERS_PATH=\"${PLAYWRIGHT_BROWSERS_PATH:-/temp/frontdesk/cache/playwright}\" env -u NO_COLOR xvfb-run -a playwright test",
+		"test:all": "vitest run --maxWorkers=2 && PLAYWRIGHT_BROWSERS_PATH=\"${PLAYWRIGHT_BROWSERS_PATH:-/temp/frontdesk/cache/playwright}\" env -u NO_COLOR xvfb-run -a playwright test"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",

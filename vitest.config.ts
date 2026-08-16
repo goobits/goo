@@ -1,7 +1,7 @@
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import { transformWithOxc, type Plugin } from 'vite'
 import { defineConfig } from 'vitest/config'
-import { resolveViteCacheDirectory } from './scripts/testStorage.ts'
+import { resolveTestArtifactDirectory, resolveViteCacheDirectory } from './scripts/testStorage.ts'
 
 const TEST_SOURCE_RE = /(?:\/__tests__\/.*|\.test)\.ts(?:\?.*)?$/
 
@@ -49,6 +49,9 @@ export default defineConfig({
 				client: { enabled: false },
 				ssr: { enabled: false }
 			}
+		},
+		coverage: {
+			reportsDirectory: resolveTestArtifactDirectory(import.meta.dirname, 'coverage')
 		}
 	}
 })
