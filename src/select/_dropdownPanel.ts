@@ -134,7 +134,7 @@ export class DropdownPanel {
 		this.#optionSeq = 0
 		this.$container.removeAttribute('aria-activedescendant')
 		this.#clearIcons()
-		this.$container.innerHTML = ''
+		this.$container.replaceChildren()
 		this.#renderOptionsList(options, this.$container)
 	}
 
