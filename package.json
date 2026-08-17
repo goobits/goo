@@ -6,7 +6,7 @@
 	"imports": {
 		"#src/*": "./src/*"
 	},
-	"packageManager": "pnpm@11.21.0",
+	"packageManager": "pnpm@11.22.0",
 	"publishConfig": {
 		"access": "public"
 	},
