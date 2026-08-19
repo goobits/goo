@@ -4,7 +4,7 @@
  */
 
 import { type CheckboxFieldElement, createCheckboxField } from '../checkbox/_createCheckboxField.ts'
-import { createGooField, type GooFieldConfig } from './createGooField.ts'
+import type { GooFieldConfig } from './createGooField.ts'
 
 // ============================================================================
 // Types
@@ -302,47 +302,6 @@ export function buildOverlayLayout(
 	$dialog.appendChild(elements.$content)
 
 	return elements
-}
-
-/**
- * Build dialog fields.
- * Returns a map of field name to field element.
- * @param fields - fields.
- * @param $fieldsContainer - fields container.
- */
-export function buildFields(
-	$fieldsContainer: HTMLElement,
-	fields: DialogField[]
-): Map<string, HTMLElement> {
-	const fieldElements = new Map<string, HTMLElement>()
-
-	for (const fieldConfig of fields) {
-		const $field = document.createElement('div')
-		$field.className = 'goo-dialog__field'
-
-		// Create field element using Goo components
-		const $element = createGooField(fieldConfig)
-		if ($element) {
-			// Add label if not built into the component
-			const hasBuiltInLabel = ($element as HTMLElement).querySelector?.('label')
-			if (fieldConfig.label && !hasBuiltInLabel) {
-				const $label = document.createElement('label')
-				$label.className = 'goo-dialog__field-label'
-				$label.textContent = fieldConfig.label
-				$field.appendChild($label)
-			}
-
-			$field.appendChild($element as Node)
-			$fieldsContainer.appendChild($field)
-
-			// Store reference by name
-			if (fieldConfig.name) {
-				fieldElements.set(fieldConfig.name, $element as HTMLElement)
-			}
-		}
-	}
-
-	return fieldElements
 }
 
 /**

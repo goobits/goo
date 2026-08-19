@@ -17,7 +17,6 @@ import { createLifecycleBag, type GooLifecycleBag } from '../support/utils/lifec
 import { handleDialogKeyboardEvent } from './_dialogKeyboard.ts'
 import {
 	appendContent,
-	buildFields,
 	buildFooter,
 	buildNotifyLayout,
 	buildOverlayLayout,
@@ -195,6 +194,7 @@ class GooDialogControllerRuntime {
 	declare _elementLifecycle: GooLifecycleBag
 	declare _openLifecycle: GooLifecycleBag
 	declare _closePromise: Promise<void> | null
+	declare _fieldsReadyPromise: Promise<void> | null
 	declare _parentElement: HTMLElement
 	declare _isolationRoot: HTMLElement
 
@@ -255,6 +255,7 @@ class GooDialogControllerRuntime {
 		this._elementLifecycle = createLifecycleBag()
 		this._openLifecycle = createLifecycleBag()
 		this._closePromise = null
+		this._fieldsReadyPromise = null
 		this._parentElement = options.parentElement ?? placement?.host ?? document.body
 		this._isolationRoot =
 			options.isolationRoot ??
@@ -339,11 +340,6 @@ class GooDialogControllerRuntime {
 			this.$footer = standardElements.$footer
 			this.$closeBtn = standardElements.$closeBtn
 			this.$closeBadge = standardElements.$closeBadge
-
-			// Build fields if we have a fields container
-			if (this.$fields) {
-				this._fieldElements = buildFields(this.$fields, this._fields)
-			}
 
 			// Build footer buttons if we have a footer
 			if (this.$footer) {
@@ -666,58 +662,89 @@ class GooDialogControllerRuntime {
 			this._cleanupOpenResources()
 			this._resolve = resolve
 			this._isOpen = true
-
-			// Store previous focus
-			this._previousActiveElement = document.activeElement as HTMLElement | null
-
-			// Register with manager
-			dialogManager.register(this, { modal: this._isModalDialog() })
-
-			// Create backdrop
-			if (this.state.showBackdrop && this.state.type !== 'notify') {
-				this._$backdrop = document.createElement('div')
-				this._$backdrop.className = 'goo-dialog-backdrop'
-				for (const name of this._classNames()) {
-					this._$backdrop.classList.add(name)
-				}
-				this._$backdrop.style.setProperty(
-					'--goo-dialog-z-index',
-					String(dialogManager.getZIndex(this))
-				)
-
-				if (this.state.closeOnBackdrop) {
-					this._listenOpen(this._$backdrop, 'click', () => this._handleCancel())
-				}
-
-				this._parentElement.appendChild(this._$backdrop)
-
-				// Animate backdrop in
-				this._requestOpenFrame(() => this._$backdrop?.classList.add('goo-dialog-backdrop--visible'))
-			}
-
-			// Set z-index
-			this.$element.style.setProperty('--goo-dialog-z-index', String(dialogManager.getZIndex(this)))
-
-			this._parentElement.appendChild(this.$element)
-			if (this._isModalDialog()) {
-				this._openLifecycle.add(
-					activateModalIsolation({
-						modal: this.$element,
-						preserve: [ this._$backdrop ],
-						root: this._isolationRoot
-					})
-				)
-			}
-
-			// Animate in
-			this._requestOpenFrame(() => {
-				if (!this._parentElement.contains(this.$element)) return
-				reflowNotifyStack()
-				this.$element.setAttribute('open', '')
-				this._setInitialFocus()
-				this._startAutoDismiss()
-			})
+			const fieldsReady = this._prepareFields()
+			if (fieldsReady) void this._openWhenReady(fieldsReady)
+			else this._finishOpen()
 		})
+	}
+
+	async _openWhenReady(fieldsReady: Promise<void>): Promise<void> {
+		try {
+			await fieldsReady
+		} catch {
+			if (!this._isOpen) return
+			this._isOpen = false
+			this._resolve?.({ cancel: true })
+			this._resolve = null
+			return
+		}
+		this._finishOpen()
+	}
+
+	_finishOpen(): void {
+		if (this._destroyed || !this._isOpen) return
+
+		// Store previous focus
+		this._previousActiveElement = document.activeElement as HTMLElement | null
+
+		// Register with manager
+		dialogManager.register(this, { modal: this._isModalDialog() })
+
+		// Create backdrop
+		if (this.state.showBackdrop && this.state.type !== 'notify') {
+			this._$backdrop = document.createElement('div')
+			this._$backdrop.className = 'goo-dialog-backdrop'
+			for (const name of this._classNames()) {
+				this._$backdrop.classList.add(name)
+			}
+			this._$backdrop.style.setProperty(
+				'--goo-dialog-z-index',
+				String(dialogManager.getZIndex(this))
+			)
+
+			if (this.state.closeOnBackdrop) {
+				this._listenOpen(this._$backdrop, 'click', () => this._handleCancel())
+			}
+
+			this._parentElement.appendChild(this._$backdrop)
+
+			// Animate backdrop in
+			this._requestOpenFrame(() => this._$backdrop?.classList.add('goo-dialog-backdrop--visible'))
+		}
+
+		// Set z-index
+		this.$element.style.setProperty('--goo-dialog-z-index', String(dialogManager.getZIndex(this)))
+
+		this._parentElement.appendChild(this.$element)
+		if (this._isModalDialog()) {
+			this._openLifecycle.add(
+				activateModalIsolation({
+					modal: this.$element,
+					preserve: [ this._$backdrop ],
+					root: this._isolationRoot
+				})
+			)
+		}
+
+		// Animate in
+		this._requestOpenFrame(() => {
+			if (!this._parentElement.contains(this.$element)) return
+			reflowNotifyStack()
+			this.$element.setAttribute('open', '')
+			this._setInitialFocus()
+			this._startAutoDismiss()
+		})
+	}
+
+	_prepareFields(): Promise<void> | null {
+		if (!this.$fields || this._fieldElements.size > 0) return null
+		const fieldsContainer = this.$fields
+		return (this._fieldsReadyPromise ??= import('./_dialogFields.ts').then(
+			({ buildDialogFields }) => {
+				if (this._destroyed || this.$fields !== fieldsContainer) return
+				this._fieldElements = buildDialogFields(fieldsContainer, this._fields)
+			}
+		))
 	}
 
 	/**
