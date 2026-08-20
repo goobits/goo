@@ -354,7 +354,7 @@ goo-grid-popout-trigger:focus::after {
 
 goo-grid-popout-trigger[aria-disabled="true"] {
 	cursor: default;
-	opacity: 0.5;
+	opacity: var(--goo-theme-disabled-opacity);
 	pointer-events: none;
 }
 

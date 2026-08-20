@@ -30,6 +30,6 @@
 /* Disabled state */
 .goo-icon[data-disabled='true'],
 .goo-icon.goo-icon--disabled {
-	opacity: 0.5;
+	opacity: var(--goo-theme-disabled-opacity);
 	pointer-events: none;
 }

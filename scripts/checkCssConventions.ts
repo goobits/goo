@@ -12,6 +12,10 @@
  *    var(--goo-theme-transition-normal) ease-out` parses as two easings and
  *    the browser drops the transition (this killed the dialog fades and the
  *    submenu cross-fade). Compose bare durations instead.
+ *
+ * 3. Disabled selectors that copy the theme's default opacity as a literal.
+ *    Use `--goo-theme-disabled-opacity` so theme changes remain consistent
+ *    across every control. Deliberately different opacity values remain valid.
  */
 import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -32,6 +36,7 @@ for (const filePath of await collectStyleFiles(sourceRoot)) {
 	const relativePath = filePath.replace(packageRoot.pathname, '')
 	checkUnitlessZeroTokens(relativePath, styles)
 	checkBundledTransitionTokens(relativePath, styles)
+	checkHardcodedDisabledOpacity(relativePath, styles)
 }
 
 if (failures.length > 0) {
@@ -65,6 +70,18 @@ function checkBundledTransitionTokens(relativePath: string, styles: string): voi
 	for (const match of flattened.matchAll(pattern)) {
 		failures.push(
 			`${ relativePath }: "${ match[0] }" composes a bundled transition token with an easing; use a bare duration.`
+		)
+	}
+}
+
+function checkHardcodedDisabledOpacity(relativePath: string, styles: string): void {
+	for (const match of styles.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+		const selector = match[1]?.trim() ?? ''
+		const declarations = match[2] ?? ''
+		if (!selector.includes('disabled')) continue
+		if (!/\bopacity\s*:\s*0?\.50*\s*;/.test(declarations)) continue
+		failures.push(
+			`${ relativePath }: "${ selector }" copies the default disabled opacity; use var(--goo-theme-disabled-opacity).`
 		)
 	}
 }

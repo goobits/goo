@@ -176,7 +176,7 @@
 
 /* Disabled state */
 .goo-panel.goo-panel--disabled {
-	opacity: 0.5;
+	opacity: var(--goo-theme-disabled-opacity);
 	pointer-events: none;
 }
 

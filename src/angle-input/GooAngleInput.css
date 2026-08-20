@@ -140,7 +140,7 @@
 
 /* Disabled state */
 .goo-angle-input.goo-angle-input--disabled {
-	opacity: 0.5;
+	opacity: var(--goo-theme-disabled-opacity);
 	pointer-events: none;
 }
 

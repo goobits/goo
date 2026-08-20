@@ -142,7 +142,7 @@
 
 /* Disabled state */
 .goo-color.goo-color--disabled {
-	opacity: 0.5;
+	opacity: var(--goo-theme-disabled-opacity);
 	pointer-events: none;
 }
 

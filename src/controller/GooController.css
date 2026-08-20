@@ -172,7 +172,7 @@
 
 /* Disabled state */
 .goo-controller.goo-controller--disabled {
-	opacity: 0.5;
+	opacity: var(--goo-theme-disabled-opacity);
 	pointer-events: none;
 }
 
