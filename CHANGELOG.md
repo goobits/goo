@@ -8,7 +8,7 @@
 - Normalize button-backed link decoration.
 - Isolate nested modal branches and forward root attributes through `GooFocusTrap`.
 - Compile component factories and primitives cleanly under exact-optional host settings.
-- Store Vite, coverage, and Playwright artifacts beneath `/temp/frontdesk/goobits` instead of the source checkout.
+- Store Vite, coverage, and Playwright artifacts under the configured external cache instead of the source checkout.
 
 ## 0.1.0
 

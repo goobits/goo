@@ -40,7 +40,7 @@ export default defineConfig({
 	},
 	test: {
 		environment: 'jsdom',
-		include: ['src/**/*.test.{js,ts}'],
+		include: ['src/**/*.test.{js,ts}', 'scripts/**/*.test.ts'],
 		exclude: ['src/**/playwright/**'],
 		globals: true,
 		setupFiles: ['src/__tests__/setup.ts'],
