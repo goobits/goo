@@ -6,7 +6,7 @@ import {
 	createNumberField,
 	type NumberInputFieldElement,
 	type NumberInputFieldOptions
-} from '../input/_createInputField.ts'
+} from '../input/_createNumberField.ts'
 import { getSliderProps } from '../slider/_sliderProps.ts'
 import GooSlider from '../slider/GooSlider.svelte'
 import { getVarianceValues } from '../slider/sliderUtils.ts'
